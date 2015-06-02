@@ -69,8 +69,7 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
 
 PY2EXE_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests', 'encodings.ascii','encodings.mbcs','encodings.latin_1','encodings.utf_8','encodings.utf_16','encodings.cp437' ],
-                  #'ascii': True,	# suppress other encodings
+                  'packages': [ 'requests' ],
               }
 
 if sys.platform=='win32':
@@ -87,7 +86,6 @@ setup(
     windows = [ {'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
                  'copyright': u'© 2015 Jonathan Harris',
-                 #XXX 'other_resources': [(24, 1, manifest)],
              } ],
     data_files = DATA_FILES,
     options = { 'py2app': PY2APP_OPTIONS,
@@ -97,10 +95,11 @@ setup(
 
 
 if sys.platform == 'darwin':
-    if macdeveloperid:
-        os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
-    # Make zip for distribution, preserving signature
-    os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s_mac_%s.zip; cd ..' % (dist_dir, APPNAME, APPNAME, VERSION))
+    if isdir('%s/%s.app' % (dist_dir, APPNAME)):
+        if macdeveloperid:
+            os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
+        # Make zip for distribution, preserving signature
+        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s_mac_%s.zip; cd ..' % (dist_dir, APPNAME, APPNAME, VERSION))
 else:
     # Manually trim the tcl/tk folders
     os.unlink(join(dist_dir, 'w9xpopen.exe'))

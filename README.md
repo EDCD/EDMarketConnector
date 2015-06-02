@@ -4,9 +4,9 @@ Elite: Dangerous Market Connector
 This app downloads commodity market data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
 * transmits the data to the Elite Dangerous Data Network ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/).
-* saves the data to files on your disk which you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=53037).
+* saves the data to files on your disk which you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
 
-The user-interface is deliberately minimal - just press the "Update" button to download and automatically transmit/save the commodity market data from the station where you're currently docked in-game:
+The user-interface is deliberately minimal - just press the "Update" button to download and automatically transmit/save the commodity market data for the station where you're currently docked in-game:
 
 ![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
 
@@ -17,16 +17,16 @@ Installation
 Mac:
 
 * Requires Mac OS 10.9 or later.
-* Download the `.zip` file of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+* Download the `.zip` archive of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
 * The zip archive contains the **EDMarketConnector** app - move this app to **Applications** or wherever you want it.
 * Double-click on the app to run it.
 
 Windows:
 
 * Requires Windows 7 or later.
-* Download the `.msi` file of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+* Download the `.msi` package of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
 * Double-click on it.
-* The Installer will walk you through the installation process.
+* Windows Installer will walk you through the installation process.
 * Run **EDMarketConnector** from the Start menu.
 
 
