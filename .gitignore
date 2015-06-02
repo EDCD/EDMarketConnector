@@ -1,6 +1,9 @@
 .DS_Store
 build
-dist
+dist.*
 *.bak
 *.pyc
 *.pyo
+*.msi
+*.wixobj
+*.zip
