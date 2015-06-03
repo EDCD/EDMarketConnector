@@ -24,7 +24,7 @@ def export(data, callback):
                'uploaderID': data['commander']['name'].strip() }
     systemName = data['lastSystem']['name'].strip()
     stationName = data['lastStarport']['name'].strip()
-    timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.gmtime(querytime))
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(querytime))
 
     # route all requests through a session in the hope of using keep-alive
     session = requests.Session()

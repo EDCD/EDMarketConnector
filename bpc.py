@@ -14,7 +14,7 @@ def export(data):
 
     filename = join(config.read('outdir'), '%s.%s.%s.bpc' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
 
-    timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.gmtime(querytime))
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(querytime))
     rowheader = '%s;%s;%s' % (data['commander']['name'].replace(';',':').strip(), data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip())
 
     h = codecs.open(filename, 'w', 'utf-8')
