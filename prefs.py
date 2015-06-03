@@ -60,15 +60,18 @@ class PreferencesDialog(tk.Toplevel):
         outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         outframe.columnconfigure(0, weight=1)
 
-        self.outvar = tk.IntVar()
-        self.outvar.set(config.read('output') or config.OUT_EDDN)
+        output = config.read('output') or config.OUT_EDDN
         ttk.Label(outframe, text="Please choose where you want the market data saved").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.outvar, value=config.OUT_EDDN, command=self.outvarchanged).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Offline in Slopey's BPC format", variable=self.outvar, value=config.OUT_BPC, command=self.outvarchanged).grid(row=2, columnspan=2, padx=5, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Offline in Trade Dangerous format", variable=self.outvar, value=config.OUT_TD, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Offline in CSV format", variable=self.outvar, value=config.OUT_CSV, command=self.outvarchanged).grid(row=4, columnspan=2, padx=5, sticky=tk.W)
+        self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1 or 0)
+        ttk.Checkbutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.out_eddn).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
+        self.out_bpc = tk.IntVar(value = (output & config.OUT_BPC ) and 1 or 0)
+        ttk.Checkbutton(outframe, text="Offline in Slopey's BPC format", variable=self.out_bpc, command=self.outvarchanged).grid(row=2, columnspan=2, padx=5, sticky=tk.W)
+        self.out_td  = tk.IntVar(value = (output & config.OUT_TD  ) and 1 or 0)
+        ttk.Checkbutton(outframe, text="Offline in Trade Dangerous format", variable=self.out_td, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
+        self.out_csv = tk.IntVar(value = (output & config.OUT_CSV ) and 1 or 0)
+        ttk.Checkbutton(outframe, text="Offline in CSV format", variable=self.out_csv, command=self.outvarchanged).grid(row=4, columnspan=2, padx=5, sticky=tk.W)
         ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=5, padx=5, pady=(5,0), sticky=tk.NSEW)
-        self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Browse...' or 'Choose...'), command=self.outbrowse)
+        self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Change...' or 'Browse...'), command=self.outbrowse)
         self.outbutton.grid(row=5, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
         self.outdir.insert(0, config.read('outdir'))
@@ -90,8 +93,9 @@ class PreferencesDialog(tk.Toplevel):
         #self.wait_window(self)	# causes duplicate events on OSX
 
     def outvarchanged(self):
-        self.outbutton['state'] = self.outvar.get()>config.OUT_EDDN and tk.NORMAL or tk.DISABLED
-        self.outdir['state']    = self.outvar.get()>config.OUT_EDDN and 'readonly' or tk.DISABLED
+        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get()
+        self.outbutton['state'] = local and tk.NORMAL or tk.DISABLED
+        self.outdir['state']    = local and 'readonly' or tk.DISABLED
 
     def outbrowse(self):
         d = tkFileDialog.askdirectory(parent=self, initialdir=self.outdir.get(), title='Output folder', mustexist=tk.TRUE)
@@ -105,7 +109,7 @@ class PreferencesDialog(tk.Toplevel):
         credentials = (config.read('username'), config.read('password'))
         config.write('username', self.username.get().strip())
         config.write('password', self.password.get().strip())
-        config.write('output', self.outvar.get())
+        config.write('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0))
         config.write('outdir', self.outdir.get().strip())
         self.destroy()
         if credentials != (config.read('username'), config.read('password')) and self.callback:
