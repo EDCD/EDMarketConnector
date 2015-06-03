@@ -66,12 +66,13 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Radiobutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.outvar, value=config.OUT_EDDN, command=self.outvarchanged).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
         ttk.Radiobutton(outframe, text="Offline in Slopey's BPC format", variable=self.outvar, value=config.OUT_BPC, command=self.outvarchanged).grid(row=2, columnspan=2, padx=5, sticky=tk.W)
         ttk.Radiobutton(outframe, text="Offline in Trade Dangerous format", variable=self.outvar, value=config.OUT_TD, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
-        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=4, padx=5, pady=(5,0), sticky=tk.NSEW)
+        ttk.Radiobutton(outframe, text="Offline in CSV format", variable=self.outvar, value=config.OUT_CSV, command=self.outvarchanged).grid(row=4, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=5, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Browse...' or 'Choose...'), command=self.outbrowse)
-        self.outbutton.grid(row=4, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
+        self.outbutton.grid(row=5, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
         self.outdir.insert(0, config.read('outdir'))
-        self.outdir.grid(row=5, columnspan=2, padx=5, pady=5, sticky=tk.EW)
+        self.outdir.grid(row=6, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
 
         if platform=='darwin':

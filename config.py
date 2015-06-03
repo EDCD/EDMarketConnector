@@ -18,6 +18,7 @@ class Config:
     OUT_EDDN = 1
     OUT_BPC  = 2
     OUT_TD   = 4
+    OUT_CSV  = 8
 
     if platform=='darwin':
 

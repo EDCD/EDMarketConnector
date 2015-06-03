@@ -147,11 +147,14 @@ class AppWindow:
             elif not data.get('lastStarport') or not data['lastStarport'].get('commodities'):
                 raise Exception("Station doesn't have a market!")
 
+            if config.read('output') & config.OUT_CSV:
+                bpc.export(data, True)
+
             if config.read('output') & config.OUT_TD:
                 td.export(data)
 
             if config.read('output') & config.OUT_BPC:
-                bpc.export(data)
+                bpc.export(data, False)
 
             if config.read('output') & config.OUT_EDDN:
                 eddn.export(data, self.setstatus)
