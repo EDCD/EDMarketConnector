@@ -62,12 +62,10 @@ class Config:
                 mkdir(self.app_dir)
             
             self.handle = _winreg.CreateKey(_winreg.HKEY_CURRENT_USER, r'Software\%s' % appname)
-            try:
-                if not isdir(_winreg.QueryValue(self.handle, 'outdir')):
-                    raise Exception()
-            except:
+
+            if not self.read('outdir') or not isdir(self.read('outdir')):
                 ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
-                _winreg.SetValueEx(self.handle, 'outdir', 0, _winreg.REG_SZ, buf.value)
+                self.write('outdir', buf.value)
 
         def read(self, key):
             try:
