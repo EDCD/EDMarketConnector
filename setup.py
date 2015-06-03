@@ -49,6 +49,7 @@ APP = 'EDMarketConnector.py'
 APPNAME = re.search(r"^appname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 APPLONGNAME = re.search(r"^applongname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
+SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
 PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
@@ -99,7 +100,7 @@ if sys.platform == 'darwin':
         if macdeveloperid:
             os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
         # Make zip for distribution, preserving signature
-        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s_mac_%s.zip; cd ..' % (dist_dir, APPNAME, APPNAME, VERSION))
+        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s_mac_%s.zip; cd ..' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
 else:
     # Manually trim the tcl/tk folders
     os.unlink(join(dist_dir, 'w9xpopen.exe'))
@@ -111,8 +112,6 @@ else:
                r'tcl\tk8.5\images',
                r'tcl\tk8.5\msgs', ]:
         shutil.rmtree(join(dist_dir, d))
-    if exists('%s.wixobj' % APPNAME):
-        os.unlink('%s.wixobj' % APPNAME)
-    os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -ext WixUIExtension -ext WixUtilExtension %s.wxs' % APPNAME)
-    if exists('%s.wixobj' % APPNAME):
-        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -ext WixUIExtension -ext WixUtilExtension -b %s -sacl -spdb %s.wixobj -out %s_win_%s.msi' % (dist_dir, APPNAME, APPNAME, VERSION))
+    os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -out %s\ %s.wxs' % (dist_dir, APPNAME))
+    if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
+        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb %s\%s.wixobj -out %s_win_%s.msi' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
