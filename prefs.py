@@ -41,7 +41,7 @@ class PreferencesDialog(tk.Toplevel):
         credframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         credframe.columnconfigure(1, weight=1)
 
-        ttk.Label(credframe, text="Please log in with your Elite:Dangerous account details.").grid(row=0, columnspan=2, sticky=tk.W)
+        ttk.Label(credframe, text="Please log in with your Elite:Dangerous account details").grid(row=0, columnspan=2, sticky=tk.W)
         ttk.Label(credframe, text="Username (Email)").grid(row=1, sticky=tk.W)
         ttk.Label(credframe, text="Password").grid(row=2, sticky=tk.W)
 
@@ -53,25 +53,26 @@ class PreferencesDialog(tk.Toplevel):
         self.password.insert(0, config.read('password') or '')
         self.password.grid(row=2, column=1, sticky=tk.NSEW)
 
+        for child in credframe.winfo_children():
+            child.grid_configure(padx=5, pady=3)
+
         outframe = ttk.LabelFrame(frame, text='Output')
         outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
-        outframe.columnconfigure(1, weight=1)
+        outframe.columnconfigure(0, weight=1)
 
         self.outvar = tk.IntVar()
         self.outvar.set(config.read('output') or config.OUT_EDDN)
-        ttk.Label(outframe, text="Please choose where you want the market data saved.").grid(row=0, columnspan=3, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.outvar, value=config.OUT_EDDN, command=self.outvarchanged).grid(row=1, columnspan=3, sticky=tk.W)
-        ttk.Radiobutton(outframe, text="Offline to Slopey's BPC files in folder:", variable=self.outvar, value=config.OUT_BPC, command=self.outvarchanged).grid(row=2, columnspan=3, sticky=tk.W)
-        ttk.Label(outframe, width=-1).grid(row=3, column=0)
+        ttk.Label(outframe, text="Please choose where you want the market data saved").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
+        ttk.Radiobutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.outvar, value=config.OUT_EDDN, command=self.outvarchanged).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Radiobutton(outframe, text="Offline in Slopey's BPC format", variable=self.outvar, value=config.OUT_BPC, command=self.outvarchanged).grid(row=2, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Radiobutton(outframe, text="Offline in Trade Dangerous format", variable=self.outvar, value=config.OUT_TD, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=4, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Browse...' or 'Choose...'), command=self.outbrowse)
-        self.outbutton.grid(row=2, column=2, sticky=tk.E)
+        self.outbutton.grid(row=4, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
         self.outdir.insert(0, config.read('outdir'))
-        self.outdir.grid(row=3, column=1, columnspan=2, sticky=tk.NSEW)
+        self.outdir.grid(row=5, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
-
-        for child in credframe.winfo_children() + outframe.winfo_children():
-            child.grid_configure(padx=5, pady=3)
 
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
@@ -149,7 +150,7 @@ class AuthenticationDialog(tk.Toplevel):
         self.button.grid(row=1, column=3, sticky=tk.E)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=3)
+            child.grid_configure(padx=5, pady=5)
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()

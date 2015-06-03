@@ -19,6 +19,27 @@ from config import config
 holdoff = 120	# be nice
 
 
+# Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
+
+categorymap = { 'Narcotics': 'Legal Drugs',
+                'Slaves': 'Slavery', }
+
+commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
+                'Atmospheric Extractors': 'Atmospheric Processors',
+                'Auto Fabricators': 'Auto-Fabricators',
+                'Basic Narcotics': 'Narcotics',
+                'Bio Reducing Lichen': 'Bioreducing Lichen',
+                'Hazardous Environment Suits': 'H.E. Suits',
+                'Heliostatic Furnaces': 'Microbial Furnaces',
+                'Marine Supplies': 'Marine Equipment',
+                'Non Lethal Weapons': 'Non-Lethal Weapons',
+                'Terrain Enrichment Systems': 'Land Enrichment Systems', }
+
+bracketmap = { 1: 'Low',
+               2: 'Med',
+               3: 'High', }
+
+
 class CredentialsError(Exception):
     def __str__(self):
         return 'Error: Invalid Credentials'

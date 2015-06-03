@@ -16,7 +16,8 @@ appversion = '1.0.0.0'
 class Config:
 
     OUT_EDDN = 1
-    OUT_BPC = 2
+    OUT_BPC  = 2
+    OUT_TD   = 4
 
     if platform=='darwin':
 

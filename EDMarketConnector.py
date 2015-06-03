@@ -15,6 +15,7 @@ if __debug__:
 
 import companion
 import bpc
+import td
 import eddn
 import prefs
 from config import appname, applongname, config
@@ -136,10 +137,18 @@ class AppWindow:
             config.write('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
 
-            if not data.get('commander') or not data.get('commander').get('docked'):
+            # Validation
+            if not data.get('commander') or not data['commander'].get('name','').strip():
+                raise Exception("Who are you?!")	# Shouldn't happen
+            elif not data['commander'].get('docked'):
                 raise Exception("You're not docked at a station!")
-            elif not data.get('lastStarport') or not data.get('lastStarport').get('commodities'):
+            elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip():
+                raise Exception("Where are you?!")	# Shouldn't happen
+            elif not data.get('lastStarport') or not data['lastStarport'].get('commodities'):
                 raise Exception("Station doesn't have a market!")
+
+            if config.read('output') & config.OUT_TD:
+                td.export(data)
 
             if config.read('output') & config.OUT_BPC:
                 bpc.export(data)
