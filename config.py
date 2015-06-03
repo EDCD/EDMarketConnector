@@ -10,7 +10,7 @@ if platform=='win32':
 
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
-appversion = '1.1.0.0'
+appversion = '1.2.0.0'
 
 
 class Config:
