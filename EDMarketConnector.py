@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
 from sys import platform
 from os import mkdir
 from os.path import expanduser, isdir, join
@@ -16,7 +17,7 @@ import companion
 import bpc
 import eddn
 import prefs
-from config import applongname, config
+from config import appname, applongname, config
 
 
 class AppWindow:
@@ -179,6 +180,11 @@ class AppWindow:
 
 
 if __name__ == "__main__":
+
+    if platform=='win32' and getattr(sys, 'frozen', False):
+        # By deault py2exe tries to write log to dirname(sys.executable) which fails when installed
+        import tempfile
+        sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
 
     # Run the app
     root = tk.Tk()
