@@ -17,7 +17,7 @@ def export(data, callback):
 
     callback('Sending data to EDDN...')
 
-    querytime = config.read('querytime') or int(time.time())
+    querytime = config.getint('querytime') or int(time.time())
 
     header = { 'softwareName': '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
                'softwareVersion': appversion,

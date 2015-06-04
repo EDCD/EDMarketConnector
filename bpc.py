@@ -10,9 +10,9 @@ from companion import commoditymap, bracketmap
 
 def export(data, csv=False):
 
-    querytime = config.read('querytime') or int(time.time())
+    querytime = config.getint('querytime') or int(time.time())
 
-    filename = join(config.read('outdir'), '%s.%s.%s.%s' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)), csv and 'csv' or 'bpc'))
+    filename = join(config.get('outdir'), '%s.%s.%s.%s' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)), csv and 'csv' or 'bpc'))
 
     timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(querytime))
     if csv:

@@ -25,13 +25,20 @@ class AppWindow:
 
     def __init__(self, master):
 
-        self.holdofftime = (config.read('querytime') or 0) + companion.holdoff
+        self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
 
         self.w = master
         self.w.title(applongname)
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
+
+        if platform == 'win32':
+            self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+        elif platform == 'linux2':
+            from PIL import Image, ImageTk
+            icon = ImageTk.PhotoImage(Image.open("EDMarketConnector.png"))
+            root.tk.call('wm', 'iconphoto', root, '-default', icon)
 
         frame = ttk.Frame(self.w)
         frame.grid(sticky=tk.NSEW)
@@ -74,20 +81,18 @@ class AppWindow:
             menubar.add_cascade(label="File", menu=file_menu)
             root.protocol("WM_DELETE_WINDOW", self.onexit)
 
-        if platform=='win32':
-            self.w.wm_iconbitmap(default='EDMarketConnector.ico')
-
         # update geometry
-        if config.read('geometry'):
-            self.w.geometry(config.read('geometry'))
+        if config.get('geometry'):
+            self.w.geometry(config.get('geometry'))
         self.w.update_idletasks()
         self.w.wait_visibility()
         (w, h) = (self.w.winfo_width(), self.w.winfo_height())
-        self.w.minsize(w, h)	# Minimum size = initial size
-        self.w.maxsize(-1, h)	# Maximum height = initial height
+        self.w.minsize(w, h)		# Minimum size = initial size
+        if platform != 'linux2':	# update_idletasks() doesn't allow for the menubar on Linux
+            self.w.maxsize(-1, h)	# Maximum height = initial height
 
         # First run
-        if not config.read('username') or not config.read('password'):
+        if not config.get('username') or not config.get('password'):
             prefs.PreferencesDialog(self.w, self.login)
         else:
             self.login()
@@ -98,7 +103,7 @@ class AppWindow:
         self.button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            self.session.login(config.read('username'), config.read('password'))
+            self.session.login(config.get('username'), config.get('password'))
             self.status['text'] = ''
         except companion.VerificationRequired:
             # don't worry about authentication now
@@ -134,7 +139,7 @@ class AppWindow:
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
             self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or '-'
 
-            config.write('querytime', querytime)
+            config.set('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
 
             # Validation
@@ -147,16 +152,16 @@ class AppWindow:
             elif not data.get('lastStarport') or not data['lastStarport'].get('commodities'):
                 raise Exception("Station doesn't have a market!")
 
-            if config.read('output') & config.OUT_CSV:
+            if config.getint('output') & config.OUT_CSV:
                 bpc.export(data, True)
 
-            if config.read('output') & config.OUT_TD:
+            if config.getint('output') & config.OUT_TD:
                 td.export(data)
 
-            if config.read('output') & config.OUT_BPC:
+            if config.getint('output') & config.OUT_BPC:
                 bpc.export(data, False)
 
-            if config.read('output') & config.OUT_EDDN:
+            if config.getint('output') & config.OUT_EDDN:
                 eddn.export(data, self.setstatus)
 
         except companion.VerificationRequired:
@@ -185,7 +190,7 @@ class AppWindow:
         self.w.update_idletasks()
 
     def onexit(self):
-        config.write('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
+        config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
         self.session.close()
         self.w.destroy()

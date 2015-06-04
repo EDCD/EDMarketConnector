@@ -46,11 +46,11 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Label(credframe, text="Password").grid(row=2, sticky=tk.W)
 
         self.username = ttk.Entry(credframe)
-        self.username.insert(0, config.read('username') or '')
+        self.username.insert(0, config.get('username') or '')
         self.username.grid(row=1, column=1, sticky=tk.NSEW)
         self.username.focus_set()
         self.password = ttk.Entry(credframe, show=u'•')
-        self.password.insert(0, config.read('password') or '')
+        self.password.insert(0, config.get('password') or '')
         self.password.grid(row=2, column=1, sticky=tk.NSEW)
 
         for child in credframe.winfo_children():
@@ -60,7 +60,7 @@ class PreferencesDialog(tk.Toplevel):
         outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.read('output') or config.OUT_EDDN
+        output = config.getint('output') or config.OUT_EDDN
         ttk.Label(outframe, text="Please choose where you want the market data saved").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
         self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1 or 0)
         ttk.Checkbutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.out_eddn).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
@@ -74,7 +74,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Change...' or 'Browse...'), command=self.outbrowse)
         self.outbutton.grid(row=5, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
-        self.outdir.insert(0, config.read('outdir'))
+        self.outdir.insert(0, config.get('outdir'))
         self.outdir.grid(row=6, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
 
@@ -106,13 +106,13 @@ class PreferencesDialog(tk.Toplevel):
             self.outdir['state'] = 'readonly'
 
     def apply(self):
-        credentials = (config.read('username'), config.read('password'))
-        config.write('username', self.username.get().strip())
-        config.write('password', self.password.get().strip())
-        config.write('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0))
-        config.write('outdir', self.outdir.get().strip())
+        credentials = (config.get('username'), config.get('password'))
+        config.set('username', self.username.get().strip())
+        config.set('password', self.password.get().strip())
+        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0))
+        config.set('outdir', self.outdir.get().strip())
         self.destroy()
-        if credentials != (config.read('username'), config.read('password')) and self.callback:
+        if credentials != (config.get('username'), config.get('password')) and self.callback:
             self.callback()
 
 

@@ -54,6 +54,7 @@ SHORTVERSION = ''.join(VERSION.split('.')[:3])
 PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
+                  'excludes': [ 'PIL' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'semi_standalone': True,
                   'site_packages': False,
@@ -71,6 +72,7 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
 PY2EXE_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
+                  'excludes': [ 'PIL' ],
               }
 
 if sys.platform=='win32':

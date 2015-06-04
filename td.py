@@ -13,9 +13,9 @@ from companion import categorymap, commoditymap, bracketmap
 
 def export(data):
 
-    querytime = config.read('querytime') or int(time.time())
+    querytime = config.getint('querytime') or int(time.time())
 
-    filename = join(config.read('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
 
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(querytime))
 

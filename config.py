@@ -1,11 +1,18 @@
 import sys
-from os import mkdir
-from os.path import basename, isdir, join
+from os import getenv, makedirs, mkdir
+from os.path import expanduser, dirname, isdir, join
 from sys import platform
 
-if platform=='win32':
+if platform=='darwin':
+    from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
+elif platform=='win32':
+    import ctypes.wintypes
     import numbers
     import _winreg
+elif platform=='linux2':
+    import codecs
+    # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
+    from iniparse import RawConfigParser
 
 
 appname = 'EDMarketConnector'
@@ -23,8 +30,6 @@ class Config:
     if platform=='darwin':
 
         def __init__(self):
-            from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
-
             self.app_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
@@ -35,13 +40,19 @@ class Config:
             self.settings = dict(settings)
 
             # Check out_dir exists
-            if not self.read('outdir') or not isdir(self.read('outdir')):
-                self.write('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
+            if not self.get('outdir') or not isdir(self.get('outdir')):
+                self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-        def read(self, key):
+        def get(self, key):
             return self.settings.get(key)
 
-        def write(self, key, val):
+        def getint(self, key):
+            try:
+                return int(self.settings.get(key, 0))	# should already be int, but check by casting
+            except:
+                return 0
+
+        def set(self, key, val):
             self.settings[key] = val
 
         def close(self):
@@ -52,7 +63,6 @@ class Config:
     elif platform=='win32':
 
         def __init__(self):
-            import ctypes.wintypes
             CSIDL_PERSONAL = 0x0005
             CSIDL_LOCAL_APPDATA = 0x001C
             buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
@@ -63,17 +73,23 @@ class Config:
             
             self.handle = _winreg.CreateKey(_winreg.HKEY_CURRENT_USER, r'Software\%s' % appname)
 
-            if not self.read('outdir') or not isdir(self.read('outdir')):
+            if not self.get('outdir') or not isdir(self.get('outdir')):
                 ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
-                self.write('outdir', buf.value)
+                self.set('outdir', buf.value)
 
-        def read(self, key):
+        def get(self, key):
             try:
                 return _winreg.QueryValueEx(self.handle, key)[0]
             except:
                 return None
 
-        def write(self, key, val):
+        def getint(self, key):
+            try:
+                return int(_winreg.QueryValueEx(self.handle, key)[0])	# should already be int, but check by casting
+            except:
+                return 0
+
+        def set(self, key, val):
             if isinstance(val, basestring):
                 _winreg.SetValueEx(self.handle, key, 0, _winreg.REG_SZ, val)
             elif isinstance(val, numbers.Integral):
@@ -85,7 +101,51 @@ class Config:
             _winreg.CloseKey(self.handle)
             self.handle = None
 
-    else:	# unix
+    elif platform=='linux2':
+
+        def __init__(self):
+            # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
+
+            self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
+            if not isdir(self.app_dir):
+                makedirs(self.app_dir)
+
+            self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, '%s.ini' % appname)
+            if not isdir(dirname(self.filename)):
+                makedirs(dirname(self.filename))
+
+            self.config = RawConfigParser()
+            try:
+                self.config.readfp(codecs.open(self.filename, 'r', 'utf-8'))
+                # XXX handle missing?
+            except:
+                self.config.add_section('DEFAULT')
+
+            if not self.get('outdir') or not isdir(self.get('outdir')):
+                self.set('outdir', expanduser('~'))
+
+        def set(self, key, val):
+            self.config.set('DEFAULT', key, val)
+
+        def get(self, key):
+            try:
+                return self.config.get('DEFAULT', key)	# all values are stored as strings
+            except:
+                return None
+
+        def getint(self, key):
+            try:
+                return int(self.config.get('DEFAULT', key))	# all values are stored as strings
+            except:
+                return 0
+
+        def close(self):
+            h = codecs.open(self.filename, 'w', 'utf-8')
+            h.write(unicode(self.config.data))
+            h.close()
+            self.config = None
+
+    else:	# ???
 
         def __init__(self):
             raise NotImplementedError('Implement me')
