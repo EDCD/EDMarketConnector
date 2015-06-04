@@ -116,4 +116,4 @@ else:
         shutil.rmtree(join(dist_dir, d))
     os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -out %s\ %s.wxs' % (dist_dir, APPNAME))
     if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
-        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb %s\%s.wixobj -out %s_win_%s.msi' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
+        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s_win_%s.msi' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
