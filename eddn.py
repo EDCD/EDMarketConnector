@@ -54,6 +54,7 @@ def export(data, callback):
             if commodity.get('demandBracket'):
                 msg['message']['demandLevel'] = bracketmap.get(commodity['demandBracket'])
 
-            r = requests.post(upload, data=json.dumps(msg))
+            r = session.post(upload, data=json.dumps(msg))
+            r.raise_for_status()
 
     session.close()
