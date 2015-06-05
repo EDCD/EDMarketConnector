@@ -1,5 +1,4 @@
 # Export to EDDN
-# -*- coding: utf-8 -*-
 
 import hashlib
 import json
@@ -12,54 +11,16 @@ import time
 from config import applongname, appversion, config
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
-schema = 'http://schemas.elite-markets.net/eddn/commodity/1'
+schema = 'http://schemas.elite-markets.net/eddn/commodity/2'
 
 bracketmap = { 1: 'Low',
                2: 'Med',
                3: 'High', }
 
-def export(data, callback):
+def export(data):
 
-    callback('Sending data to EDDN...')
-
-    querytime = config.getint('querytime') or int(time.time())
-
-    header = { 'softwareName': '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
-               'softwareVersion': appversion,
-               'uploaderID': config.getint('anonymous') and hashlib.md5(data['commander']['name'].strip().encode('utf-8')).hexdigest() or data['commander']['name'].strip(),
-    }
-    systemName = data['lastSystem']['name'].strip()
-    stationName = data['lastStarport']['name'].strip()
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
-
-    # route all requests through a session in the hope of using keep-alive
-    session = requests.Session()
-    session.headers['connection'] = 'keep-alive'	# can help through a proxy?
-
-    commodities = data['lastStarport']['commodities']
-    i=0
-    for commodity in commodities:
-        i = i+1
-        callback('Sending %d/%d' % (i, len(commodities)))
-        data = { '$schemaRef': schema,
-                 'header': header,
-                 'message': {
-                     'systemName': systemName,
-                     'stationName': stationName,
-                     'itemName': commodity['name'],
-                     'buyPrice': commodity['buyPrice'],
-                     'stationStock': int(commodity['stock']),
-                     'sellPrice': commodity['sellPrice'],
-                     'demand': int(commodity['demand']),
-                     'timestamp': timestamp,
-                 }
-             }
-        if commodity['stockBracket']:
-            data['message']['supplyLevel'] = bracketmap[commodity['stockBracket']]
-        if commodity['demandBracket']:
-            data['message']['demandLevel'] = bracketmap[commodity['demandBracket']]
-
-        r = session.post(upload, data=json.dumps(data))
+    def send(msg):
+        r = requests.post(upload, data=json.dumps(msg))
         if __debug__ and r.status_code != requests.codes.ok:
             print 'Status\t%s'  % r.status_code
             print 'URL\t%s'  % r.url
@@ -67,4 +28,35 @@ def export(data, callback):
             print ('Content:\n%s' % r.text).encode('utf-8')
         r.raise_for_status()
 
-    session.close()
+    querytime = config.getint('querytime') or int(time.time())
+
+    header = {
+        'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
+        'softwareVersion' : appversion,
+        'uploaderID'      : config.getint('anonymous') and hashlib.md5(data['commander']['name'].strip().encode('utf-8')).hexdigest() or data['commander']['name'].strip(),
+    }
+
+    commodities = []
+    for commodity in data['lastStarport']['commodities']:
+        commodities.append({
+            'name'      : commodity['name'],
+            'buyPrice'  : commodity['buyPrice'],
+            'supply'    : int(commodity['stock']),
+            'sellPrice' : commodity['sellPrice'],
+            'demand'    : int(commodity['demand']),
+        })
+        if commodity['stockBracket']:
+            commodities[-1]['supplyLevel'] = bracketmap[commodity['stockBracket']]
+        if commodity['demandBracket']:
+            commodities[-1]['demandLevel'] = bracketmap[commodity['demandBracket']]
+
+    send({
+        '$schemaRef' : schema,
+        'header'     : header,
+        'message'    : {
+            'systemName'  : data['lastSystem']['name'].strip(),
+            'stationName' : data['lastStarport']['name'].strip(),
+            'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
+            'commodities' : commodities,
+            }
+    })
