@@ -177,7 +177,7 @@ class AppWindow:
                 if config.getint('output') & config.OUT_BPC:
                     bpc.export(data, False)
                 if config.getint('output') & config.OUT_EDDN:
-                    eddn.export(data, self.setstatus)
+                    eddn.export(data)
                 self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
         except companion.VerificationRequired:
