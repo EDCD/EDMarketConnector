@@ -22,7 +22,9 @@ holdoff = 120	# be nice
 # Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
 
 categorymap = { 'Narcotics': 'Legal Drugs',
-                'Slaves': 'Slavery', }
+                'Slaves': 'Slavery',
+                'NonMarketable': False,
+                'Salvage': False, }
 
 commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
                 'Atmospheric Extractors': 'Atmospheric Processors',

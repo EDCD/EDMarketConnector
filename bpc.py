@@ -6,7 +6,7 @@ import codecs
 import time
 
 from config import config
-from companion import commoditymap, bracketmap
+from companion import categorymap, commoditymap, bracketmap
 
 def export(data, csv=False):
 
@@ -25,15 +25,15 @@ def export(data, csv=False):
     h.write(header)
 
     for commodity in data['lastStarport']['commodities']:
-        if commodity.get('categoryname') and commodity['categoryname'] != 'NonMarketable':
+        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             h.write(('%s;%s;%s;%s;%s;%s;%s;%s;%s;\n' % (
                 rowheader,
                 commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
                 commodity.get('sellPrice') and int(commodity['sellPrice']) or '',
                 commodity.get('buyPrice') and int(commodity['buyPrice']) or '',
-                int(commodity['demand']) if commodity.get('demandBracket') else '',
+                int(commodity.get('demand', 0)) if commodity.get('demandBracket') else '',
                 bracketmap.get(commodity.get('demandBracket'), ''),
-                int(commodity['stock']) if commodity.get('stockBracket') else '',
+                int(commodity.get('stock', 0)) if commodity.get('stockBracket') else '',
                 bracketmap.get(commodity.get('stockBracket'), ''),
                 timestamp)).encode('utf-8'))
 

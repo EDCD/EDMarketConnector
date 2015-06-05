@@ -8,7 +8,7 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import commoditymap, bracketmap
+from companion import categorymap, commoditymap, bracketmap
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 schema = 'http://schemas.elite-markets.net/eddn/commodity/1'
@@ -35,7 +35,7 @@ def export(data, callback):
     for commodity in commodities:
         i = i+1
         callback('Sending %d/%d' % (i, len(commodities)))
-        if commodity.get('categoryname') and commodity['categoryname'] != 'NonMarketable':
+        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             msg = { '$schemaRef': schema,
                     'header': header,
                     'message': {
@@ -43,9 +43,9 @@ def export(data, callback):
                         'stationName': stationName,
                         'itemName': commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
                         'buyPrice': int(commodity.get('buyPrice', 0)),
-                        'stationStock': int(commodity.get('stock', 0)),
+                        'stationStock': commodity.get('stockBracket') and int(commodity.get('stock', 0)),
                         'sellPrice': int(commodity.get('sellPrice', 0)),
-                        'demand': int(commodity.get('demand', 0)),
+                        'demand': commodity.get('demandBracket') and int(commodity.get('demand', 0)),
                         'timestamp': timestamp,
                     }
                 }

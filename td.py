@@ -26,7 +26,7 @@ def export(data):
     # sort commodities by category
     bycategory = defaultdict(list)
     for commodity in data['lastStarport']['commodities']:
-        if commodity.get('categoryname') and commodity.get('categoryname') != 'NonMarketable':
+        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             bycategory[categorymap.get(commodity['categoryname'], commodity['categoryname'])].append(commodity)
 
     for category in sorted(bycategory):
@@ -37,9 +37,9 @@ def export(data):
                 commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
                 commodity.get('sellPrice', 0),
                 commodity.get('buyPrice', 0),
-                int(commodity.get('demand')) if commodity.get('demandBracket') else '',
+                int(commodity.get('demand', 0)) if commodity.get('demandBracket') else '',
                 bracketmap.get(commodity.get('demandBracket'), '?')[0],
-                int(commodity.get('stock')) if commodity.get('stockBracket') else '',
+                int(commodity.get('stock', 0)) if commodity.get('stockBracket') else '',
                 bracketmap.get(commodity.get('stockBracket'), '-')[0],
                 timestamp))
 
