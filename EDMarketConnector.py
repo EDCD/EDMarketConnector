@@ -106,9 +106,12 @@ class AppWindow:
             self.session.login(config.get('username'), config.get('password'))
             self.status['text'] = ''
         except companion.VerificationRequired:
-            # don't worry about authentication now
+            # don't worry about authentication now - prompt on query
             self.status['text'] = ''
+        except companion.ServerError as e:
+            self.status['text'] = str(e)
         except Exception as e:
+            if __debug__: print_exc()
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -144,35 +147,33 @@ class AppWindow:
 
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
-                raise Exception("Who are you?!")	# Shouldn't happen
+                self.status['text'] = "Who are you?!"	# Shouldn't happen
             elif not data['commander'].get('docked'):
-                raise Exception("You're not docked at a station!")
+                self.status['text'] = "You're not docked at a station!"
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip():
-                raise Exception("Where are you?!")	# Shouldn't happen
+                self.status['text'] = "Where are you?!"	# Shouldn't happen
             elif not data.get('lastStarport') or not data['lastStarport'].get('commodities'):
-                raise Exception("Station doesn't have a market!")
-
-            if config.getint('output') & config.OUT_CSV:
-                bpc.export(data, True)
-
-            if config.getint('output') & config.OUT_TD:
-                td.export(data)
-
-            if config.getint('output') & config.OUT_BPC:
-                bpc.export(data, False)
-
-            if config.getint('output') & config.OUT_EDDN:
-                eddn.export(data, self.setstatus)
+                self.status['text'] = "Station doesn't have a market!"
+            else:
+                if config.getint('output') & config.OUT_CSV:
+                    bpc.export(data, True)
+                if config.getint('output') & config.OUT_TD:
+                    td.export(data)
+                if config.getint('output') & config.OUT_BPC:
+                    bpc.export(data, False)
+                if config.getint('output') & config.OUT_EDDN:
+                    eddn.export(data, self.setstatus)
+                self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
 
+        except companion.ServerError as e:
+            self.status['text'] = str(e)
+
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = str(e)
-
-        else:
-            self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
         self.cooldown()
 

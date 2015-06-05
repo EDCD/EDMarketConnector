@@ -40,6 +40,10 @@ bracketmap = { 1: 'Low',
                3: 'High', }
 
 
+class ServerError(Exception):
+    def __str__(self):
+        return 'Error: Server is down'
+
 class CredentialsError(Exception):
     def __str__(self):
         return 'Error: Invalid Credentials'
@@ -79,9 +83,15 @@ class Session:
         else:
             self.credentials = { 'email' : username, 'password' : password }
         r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials)
+        if r.status_code != requests.codes.ok:
+            self.dump(r)
         r.raise_for_status()
 
-        if 'Password' in r.text:
+        if 'server error' in r.text:
+            self.dump(r)
+            raise ServerError()
+        elif 'Password' in r.text:
+            self.dump(r)
             raise CredentialsError()
         elif 'Verification Code' in r.text:
             self.state = Session.STATE_AUTH
@@ -104,18 +114,24 @@ class Session:
         if self.state == Session.STATE_NONE:
             raise Exception('General error')	# Shouldn't happen
         elif self.state == Session.STATE_INIT:
-            raise CredentialsError()
+            self.login()
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
         r = self.session.get('https://companion.orerve.net/profile')
 
+        if r.status_code != requests.codes.ok:
+            self.dump(r)
         if r.status_code == requests.codes.forbidden:
-            # Maybe our session cookie expired?
+            # Start again - maybe our session cookie expired?
             self.login()
-            r = self.session.get('https://companion.orerve.net/profile')
+            self.query()
 
         r.raise_for_status()
-        return json.loads(r.text)
+        try:
+            return json.loads(r.text)
+        except:
+            self.dump(r)
+            raise ServerError()
 
     def close(self):
         self.state = Session.STATE_NONE
@@ -125,3 +141,9 @@ class Session:
         except:
             pass
         self.session = None
+
+    def dump(self, r):
+        if __debug__:
+            print 'Status\t%s'  % r.status_code
+            print 'Headers\t%s' % r.headers
+            print ('Content:\n%s' % r.text).encode('utf-8')
