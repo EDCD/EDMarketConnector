@@ -24,7 +24,7 @@ def export(data, callback):
                'uploaderID': data['commander']['name'].strip() }
     systemName = data['lastSystem']['name'].strip()
     stationName = data['lastStarport']['name'].strip()
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(querytime))
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
 
     # route all requests through a session in the hope of using keep-alive
     session = requests.Session()
@@ -43,9 +43,9 @@ def export(data, callback):
                         'stationName': stationName,
                         'itemName': commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
                         'buyPrice': int(commodity.get('buyPrice', 0)),
-                        'stationStock': commodity.get('stockBracket') and int(commodity.get('stock', 0)),
+                        'stationStock': commodity.get('stockBracket') and int(commodity.get('stock', 0)) or 0,
                         'sellPrice': int(commodity.get('sellPrice', 0)),
-                        'demand': commodity.get('demandBracket') and int(commodity.get('demand', 0)),
+                        'demand': commodity.get('demandBracket') and int(commodity.get('demand', 0)) or 0,
                         'timestamp': timestamp,
                     }
                 }

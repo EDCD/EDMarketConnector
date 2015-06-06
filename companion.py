@@ -23,8 +23,7 @@ holdoff = 120	# be nice
 
 categorymap = { 'Narcotics': 'Legal Drugs',
                 'Slaves': 'Slavery',
-                'NonMarketable': False,
-                'Salvage': False, }
+                'NonMarketable': False, }
 
 commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
                 'Atmospheric Extractors': 'Atmospheric Processors',
