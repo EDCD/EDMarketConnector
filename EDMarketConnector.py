@@ -150,9 +150,9 @@ class AppWindow:
                 self.status['text'] = "Who are you?!"	# Shouldn't happen
             elif not data['commander'].get('docked'):
                 self.status['text'] = "You're not docked at a station!"
-            elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip():
+            elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
                 self.status['text'] = "Where are you?!"	# Shouldn't happen
-            elif not data.get('lastStarport') or not data['lastStarport'].get('commodities'):
+            elif not data['lastStarport'].get('commodities'):
                 self.status['text'] = "Station doesn't have a market!"
             else:
                 if config.getint('output') & config.OUT_CSV:
