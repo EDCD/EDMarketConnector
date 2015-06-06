@@ -17,7 +17,7 @@ elif platform=='linux2':
 
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
-appversion = '1.3.3.0'
+appversion = '1.3.3.1'
 
 
 class Config:
