@@ -3,6 +3,7 @@
 
 from os.path import join
 import codecs
+import numbers
 import time
 
 from config import config
@@ -25,7 +26,7 @@ def export(data, csv=False):
     h.write(header)
 
     for commodity in data['lastStarport']['commodities']:
-        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
+        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             h.write(('%s;%s;%s;%s;%s;%s;%s;%s;%s;\n' % (
                 rowheader,
                 commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),

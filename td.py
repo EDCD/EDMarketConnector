@@ -3,6 +3,7 @@
 from os.path import join
 from collections import defaultdict
 import codecs
+import numbers
 from platform import system
 from sys import platform
 import time
@@ -26,7 +27,7 @@ def export(data):
     # sort commodities by category
     bycategory = defaultdict(list)
     for commodity in data['lastStarport']['commodities']:
-        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
+        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             bycategory[categorymap.get(commodity['categoryname'], commodity['categoryname'])].append(commodity)
 
     for category in sorted(bycategory):

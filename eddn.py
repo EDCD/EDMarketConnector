@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import numbers
 import requests
 from platform import system
 from sys import platform
@@ -35,7 +36,7 @@ def export(data, callback):
     for commodity in commodities:
         i = i+1
         callback('Sending %d/%d' % (i, len(commodities)))
-        if commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
+        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
             msg = { '$schemaRef': schema,
                     'header': header,
                     'message': {
