@@ -11,6 +11,22 @@ import tkFileDialog
 from config import config
 
 
+if platform=='win32':
+    # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
+    import ctypes
+    from ctypes.wintypes import *
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
+    BIF_RETURNONLYFSDIRS   = 0x00000001
+    BIF_USENEWUI           = 0x00000050
+    BFFM_INITIALIZED       = 1
+    BFFM_SETSELECTION      = 0x00000467
+    BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
+
+    class BROWSEINFO(ctypes.Structure):
+        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
+
+
 class PreferencesDialog(tk.Toplevel):
 
     def __init__(self, parent, callback):
@@ -98,7 +114,30 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir['state']    = local and 'readonly' or tk.DISABLED
 
     def outbrowse(self):
-        d = tkFileDialog.askdirectory(parent=self, initialdir=self.outdir.get(), title='Output folder', mustexist=tk.TRUE)
+        if platform != 'win32':
+            d = tkFileDialog.askdirectory(parent=self, initialdir=self.outdir.get(), title='Output folder', mustexist=tk.TRUE)
+        else:
+            def browsecallback(hwnd, uMsg, lParam, lpData):
+                # set initial folder
+                if uMsg==BFFM_INITIALIZED and lpData:
+                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData);
+                return 0
+
+            browseInfo = BROWSEINFO()
+            browseInfo.lpszTitle = 'Output folder'
+            browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
+            browseInfo.lpfn = BrowseCallbackProc(browsecallback)
+            browseInfo.lParam = self.outdir.get()
+            ctypes.windll.ole32.CoInitialize(None)
+            pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
+            if pidl:
+                path = ctypes.create_unicode_buffer(MAX_PATH)
+                ctypes.windll.shell32.SHGetPathFromIDListW(pidl, path)
+                ctypes.windll.ole32.CoTaskMemFree(pidl)
+                d = path.value
+            else:
+                d = None
+
         if d:
             self.outdir['state'] = tk.NORMAL	# must be writable to update
             self.outdir.delete(0, tk.END)

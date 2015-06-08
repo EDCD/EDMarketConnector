@@ -3,12 +3,55 @@ from os import getenv, makedirs, mkdir
 from os.path import expanduser, dirname, isdir, join
 from sys import platform
 
+
 if platform=='darwin':
     from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
+
 elif platform=='win32':
-    import ctypes.wintypes
+    import ctypes
     import numbers
-    import _winreg
+
+    CSIDL_PERSONAL = 0x0005
+    CSIDL_LOCAL_APPDATA = 0x001C
+
+    # _winreg that ships with Python 2 doesn't support unicode, so do this instead
+    from ctypes.wintypes import *
+
+    HKEY_CURRENT_USER       = 0x80000001
+    KEY_ALL_ACCESS          = 0x000F003F
+    REG_CREATED_NEW_KEY     = 0x00000001
+    REG_OPENED_EXISTING_KEY = 0x00000002
+    REG_SZ    = 1
+    REG_DWORD = 4
+
+    RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
+    RegCreateKeyEx.restype = LONG
+    RegCreateKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, LPCVOID, DWORD, DWORD, LPCVOID, ctypes.POINTER(HKEY), ctypes.POINTER(DWORD)]
+
+    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
+    RegOpenKeyEx.restype = LONG
+    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
+
+    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
+    RegCloseKey.restype = LONG
+    RegCloseKey.argtypes = [HKEY]
+
+    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
+    RegQueryValueEx.restype = LONG
+    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
+
+    RegSetValueEx = ctypes.windll.advapi32.RegSetValueExW
+    RegSetValueEx.restype = LONG
+    RegSetValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, DWORD, LPCVOID, DWORD]
+
+    SHCopyKey = ctypes.windll.shlwapi.SHCopyKeyW
+    SHCopyKey.restype = LONG
+    SHCopyKey.argtypes = [HKEY, LPCWSTR, HKEY, DWORD]
+
+    SHDeleteKey = ctypes.windll.shlwapi.SHDeleteKeyW
+    SHDeleteKey.restype = LONG
+    SHDeleteKey.argtypes = [HKEY, LPCWSTR]
+
 elif platform=='linux2':
     import codecs
     # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
@@ -34,7 +77,11 @@ class Config:
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
-            self.bundle = getattr(sys, 'frozen', False) and NSBundle.mainBundle().bundleIdentifier() or 'uk.org.marginal.%s' % appname.lower()	# Don't use Python's settings if interactive
+            if not getattr(sys, 'frozen', False):
+                # Don't use Python's settings if interactive
+                self.bundle = 'uk.org.marginal.%s' % appname.lower()
+                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.bundle
+            self.bundle = NSBundle.mainBundle().bundleIdentifier()
             self.defaults = NSUserDefaults.standardUserDefaults()
             settings = self.defaults.persistentDomainForName_(self.bundle) or {}
             self.settings = dict(settings)
@@ -63,49 +110,69 @@ class Config:
     elif platform=='win32':
 
         def __init__(self):
-            CSIDL_PERSONAL = 0x0005
-            CSIDL_LOCAL_APPDATA = 0x001C
-            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+
+            buf = ctypes.create_unicode_buffer(MAX_PATH)
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_LOCAL_APPDATA, 0)
             self.app_dir = join(buf.value, appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
             
-            self.handle = _winreg.CreateKey(_winreg.HKEY_CURRENT_USER, r'Software\%s' % appname)
+            self.hkey = HKEY()
+            disposition = DWORD()
+            if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\Marginal\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(self.hkey), ctypes.byref(disposition)):
+                raise Exception()
+
+            if disposition.value == REG_CREATED_NEW_KEY:
+
+                # Migrate pre-1.3.4 registry location
+                oldkey = HKEY()
+                if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\EDMarketConnector', 0, KEY_ALL_ACCESS, ctypes.byref(oldkey)):
+                    SHCopyKey(oldkey, None, self.hkey, 0)
+                    SHDeleteKey(oldkey, '')
+                    RegCloseKey(oldkey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
                 self.set('outdir', buf.value)
 
         def get(self, key):
-            try:
-                return _winreg.QueryValueEx(self.handle, key)[0]
-            except:
+            typ  = DWORD()
+            size = DWORD()
+            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value != REG_SZ:
                 return None
+            buf = ctypes.create_unicode_buffer(size.value / 2)
+            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
+                return None
+            else:
+                return buf.value
 
         def getint(self, key):
-            try:
-                return int(_winreg.QueryValueEx(self.handle, key)[0])	# should already be int, but check by casting
-            except:
+            typ  = DWORD()
+            size = DWORD(4)
+            val  = DWORD()
+            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), ctypes.byref(val), ctypes.byref(size)) or typ.value != REG_DWORD:
                 return 0
+            else:
+                return val.value
 
         def set(self, key, val):
             if isinstance(val, basestring):
-                _winreg.SetValueEx(self.handle, key, 0, _winreg.REG_SZ, val)
+                buf = ctypes.create_unicode_buffer(val)
+                RegSetValueEx(self.hkey, key, 0, REG_SZ, buf, len(buf)*2)
             elif isinstance(val, numbers.Integral):
-                _winreg.SetValueEx(self.handle, key, 0, _winreg.REG_DWORD, val)
+                RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
             else:
                 raise NotImplementedError()
 
         def close(self):
-            _winreg.CloseKey(self.handle)
-            self.handle = None
+            RegCloseKey(self.hkey)
+            self.hkey = None
 
     elif platform=='linux2':
 
         def __init__(self):
-            # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
 
+            # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
             self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
             if not isdir(self.app_dir):
                 makedirs(self.app_dir)
@@ -117,7 +184,6 @@ class Config:
             self.config = RawConfigParser()
             try:
                 self.config.readfp(codecs.open(self.filename, 'r', 'utf-8'))
-                # XXX handle missing?
             except:
                 self.config.add_section('DEFAULT')
 
