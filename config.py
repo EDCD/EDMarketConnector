@@ -4,6 +4,11 @@ from os.path import expanduser, dirname, isdir, join
 from sys import platform
 
 
+appname = 'EDMarketConnector'
+applongname = 'E:D Market Connector'
+appversion = '1.3.4.0'
+
+
 if platform=='darwin':
     from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
 
@@ -56,11 +61,6 @@ elif platform=='linux2':
     import codecs
     # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
     from iniparse import RawConfigParser
-
-
-appname = 'EDMarketConnector'
-applongname = 'E:D Market Connector'
-appversion = '1.3.3.1'
 
 
 class Config:
