@@ -66,8 +66,15 @@ class AppWindow:
             child.grid_configure(padx=5, pady=(platform=='darwin' and 3 or 2))
 
         menubar = tk.Menu()
-        self.w['menu'] = menubar
         if platform=='darwin':
+            from Foundation import NSBundle
+            # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
+            apple_menu = tk.Menu(menubar, name='apple')
+            apple_menu.add_command(label="About %s" % applongname, command=lambda:root.call('tk::mac::standardAboutPanel'))
+            apple_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
+            menubar.add_cascade(menu=apple_menu)
+            window_menu = tk.Menu(menubar, name='window')
+            menubar.add_cascade(menu=window_menu)
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
             root.createcommand('tkAboutDialog', lambda:root.call('tk::mac::standardAboutPanel'))
             root.createcommand("::tk::mac::Quit", self.onexit)
@@ -76,10 +83,12 @@ class AppWindow:
             root.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label="Settings", command=lambda:prefs.PreferencesDialog(self.w, self.login))
             file_menu.add_command(label="Exit", command=self.onexit)
             menubar.add_cascade(label="File", menu=file_menu)
             root.protocol("WM_DELETE_WINDOW", self.onexit)
+        self.w['menu'] = menubar
 
         # update geometry
         if config.get('geometry'):
@@ -96,6 +105,12 @@ class AppWindow:
             prefs.PreferencesDialog(self.w, self.login)
         else:
             self.login()
+
+        # Load updater after UI creation (for WinSparkle)
+        import update
+        self.updater = update.Updater(master)
+        master.bind_all('<<Quit>>', self.onexit)	# user-generated
+
 
     # call after credentials have changed
     def login(self):
@@ -190,7 +205,7 @@ class AppWindow:
         self.status['text'] = status
         self.w.update_idletasks()
 
-    def onexit(self):
+    def onexit(self, event=None):
         config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
         self.session.close()

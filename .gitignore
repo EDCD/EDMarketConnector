@@ -2,8 +2,12 @@
 build
 dist.*
 *.bak
+*.json
 *.pyc
 *.pyo
+*.dll
+*.pdb
 *.msi
 *.wixobj
+*.xml
 *.zip

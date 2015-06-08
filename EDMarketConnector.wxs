@@ -17,6 +17,9 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes" />
 
+		<!-- Always reinstall since patching is problematic -->
+		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
 		<Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
 
 		<Icon Id="EDMarketConnector.exe" SourceFile="EDMarketConnector.ico"/>
@@ -86,6 +89,9 @@
 					</Component>
 					<Component Id="cmpF53EFD7F16A85DF32B289806E475CEC1" Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
 						<File Id="filEB07038D0C43A2635802F5F0874B19F4" KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
+					</Component>
+					<Component Id="cmp775D0CC23474B987B407951838E0DCC3" Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
+						<File Id="fil293C8E7AF8C6F689C7E50983C257DD68" KeyPath="yes" Source="SourceDir\WinSparkle.dll" />
 					</Component>
 					<Directory Id="dirBEE0D5863824B80A537E14FE56402A0C" Name="tcl">
 						<Directory Id="dir9FADF4954D330D96E48B9D59CBE9A964" Name="tcl8.5">
@@ -314,6 +320,7 @@
 			<ComponentRef Id="cmp47BC2E37E918091103765A3E7BD81D06" />
 			<ComponentRef Id="cmp4854ADD13616F64F327353F410CEDC44" />
 			<ComponentRef Id="cmpF53EFD7F16A85DF32B289806E475CEC1" />
+			<ComponentRef Id="cmp775D0CC23474B987B407951838E0DCC3" />
 			<ComponentRef Id="cmpE60B2042B4B6A6FC78D8B97E5C31EFE2" />
 			<ComponentRef Id="cmp89797FC50D96847B20F83F5F004B305D" />
 			<ComponentRef Id="cmp46F96A08F279F9A56AA11B7A48864E3B" />

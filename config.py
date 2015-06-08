@@ -131,6 +131,16 @@ class Config:
                     SHDeleteKey(oldkey, '')
                     RegCloseKey(oldkey)
 
+                # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
+                sparklekey = HKEY()
+                if not RegCreateKeyEx(self.hkey, 'WinSparkle', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(sparklekey), ctypes.byref(disposition)):
+                    if disposition.value == REG_CREATED_NEW_KEY:
+                        buf = ctypes.create_unicode_buffer('1')
+                        RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
+                        buf = ctypes.create_unicode_buffer(unicode(47*60*60))
+                        RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
+                    RegCloseKey(sparklekey)
+
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
                 self.set('outdir', buf.value)

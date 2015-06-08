@@ -54,17 +54,23 @@ SHORTVERSION = ''.join(VERSION.split('.')[:3])
 PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
+                  'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'PIL' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
-                      'CFBundleName': APPNAME,
+                      'CFBundleName': APPLONGNAME,
                       'CFBundleIdentifier': 'uk.org.marginal.%s' % APPNAME.lower(),
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
                       'LSMinimumSystemVersion': '.'.join(platform.mac_ver()[0].split('.')[:2]),	# minimum version = build version
                       'NSHumanReadableCopyright': u'© 2015 Jonathan Harris',
+                      'SUEnableAutomaticChecks': True,
+                      'SUShowReleaseNotes': True,
+                      'SUAllowsAutomaticUpdates': False,
+                      'SUFeedURL': 'http://marginal.org.uk/edmarketconnector.xml',
+                      'SUScheduledCheckInterval': 47*60*60,
                   },
                   'graph': True,	# output dependency graph in dist
               }
@@ -78,6 +84,7 @@ PY2EXE_OPTIONS = {'dist_dir': dist_dir,
 if sys.platform=='win32':
     import requests
     DATA_FILES = [ ('', [requests.certs.where(),
+                         'WinSparkle.dll',
                          '%s.ico' % APPNAME ] ) ]
 else:
     DATA_FILES = [ ]
@@ -89,6 +96,9 @@ setup(
     windows = [ {'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
                  'copyright': u'© 2015 Jonathan Harris',
+                 'name': APPNAME,		# WinSparkle
+                 'company_name': 'Marginal',	# WinSparkle
+                 'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     data_files = DATA_FILES,
     options = { 'py2app': PY2APP_OPTIONS,
@@ -98,22 +108,39 @@ setup(
 
 
 if sys.platform == 'darwin':
-    if isdir('%s/%s.app' % (dist_dir, APPNAME)):
+    if isdir('%s/%s.app' % (dist_dir, APPLONGNAME)):	# from CFBundleName
+        os.rename('%s/%s.app' % (dist_dir, APPLONGNAME), '%s/%s.app' % (dist_dir, APPNAME))
         if macdeveloperid:
             os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
         # Make zip for distribution, preserving signature
-        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s_mac_%s.zip; cd ..' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
+        PKG = '%s_mac_%s.zip' % (APPNAME, SHORTVERSION)
+        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, APPNAME, PKG))
 else:
-    # Manually trim the tcl/tk folders
-    os.unlink(join(dist_dir, 'w9xpopen.exe'))
-    for d in [ r'tcl\tcl8.5\encoding',
-               r'tcl\tcl8.5\http1.0',
-               r'tcl\tcl8.5\msgs',
-               r'tcl\tcl8.5\tzdata',
-               r'tcl\tk8.5\demos',
-               r'tcl\tk8.5\images',
-               r'tcl\tk8.5\msgs', ]:
-        shutil.rmtree(join(dist_dir, d))
+    shutil.copy('WinSparkle.pdb', dist_dir)	# For debugging - not included in package
     os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -out %s\ %s.wxs' % (dist_dir, APPNAME))
     if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
-        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s_win_%s.msi' % (dist_dir, APPNAME, APPNAME, SHORTVERSION))
+        PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)
+        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (dist_dir, APPNAME, PKG))
+
+# Make appcast entry
+appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
+appcast.write('''
+\t\t<item>
+\t\t\t<title>Release {0}</title>
+\t\t\t<description>
+\t\t\t\t<![CDATA[
+<h2>Release {0}</h2>
+<ul>
+
+</ul>
+\t\t\t\t]]>
+\t\t\t</description>
+\t\t\t<enclosure
+\t\t\t\turl="https://github.com/Marginal/EDMarketConnector/releases/download/rel-{1}/{2}"
+\t\t\t\tsparkle:os="{3}"
+\t\t\t\tsparkle:version="{4}"
+\t\t\t\tlength="{5}"
+\t\t\t\ttype="application/octet-stream"
+\t\t\t/>
+\t\t</item>
+'''.format(float(SHORTVERSION)/100, SHORTVERSION, PKG, sys.platform=='darwin' and 'osx' or 'windows"\n\t\t\t\tsparkle:installerArguments="/passive', VERSION, os.stat(PKG).st_size))

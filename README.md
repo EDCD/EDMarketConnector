@@ -59,7 +59,20 @@ Running from source & packaging
 --------
 The application requires Python 2.7, plus the "requests" module. Run with `python EDMarketConnector.py`.
 
-To package up for distribution requires py2app 0.9.x on Mac, and py2exe 0.6.x plus the [WiX Toolset](http://wixtoolset.org/) on Windows. Run `setup.py py2app` or `setup.py py2exe`.
+To package up for distribution:
+
+Mac:
+
+* requires py2app 0.9.x
+* [Sparkle.framework](https://github.com/sparkle-project/Sparkle) installed in /Library/Frameworks
+* Run `setup.py py2app`
+
+Windows:
+
+* requires py2exe 0.6.x
+* winsparkle.dll & .pdb from [WinSparkle](https://github.com/vslavik/winsparkle) copied to the current directory
+* [WiX Toolset](http://wixtoolset.org/)
+* Run `setup.py py2exe`
 
 
 Acknowledgements
