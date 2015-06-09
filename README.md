@@ -3,7 +3,7 @@ Elite: Dangerous Market Connector
 
 This app downloads commodity market data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* transmits the data to the Elite Dangerous Data Network ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/).
+* transmits the data to the [Elite Dangerous Data Network](http://eddn.ed-td.space/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/).
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home) and [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
 
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button to automatically download and transmit and/or save the station's commodity market data:
@@ -78,6 +78,7 @@ Windows:
 Acknowledgements
 --------
 * "Elite: Dangerous" is © 1984 - 2014 Frontier Developments plc.
+* Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [AnthorNet](https://github.com/AnthorNet) for the [stats](http://eddn.ed-td.space/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the "Companion" interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
