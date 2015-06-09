@@ -9,10 +9,13 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import categorymap, commoditymap, bracketmap
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 schema = 'http://schemas.elite-markets.net/eddn/commodity/1'
+
+bracketmap = { 1: 'Low',
+               2: 'Med',
+               3: 'High', }
 
 def export(data, callback):
 
@@ -36,26 +39,30 @@ def export(data, callback):
     for commodity in commodities:
         i = i+1
         callback('Sending %d/%d' % (i, len(commodities)))
-        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
-            msg = { '$schemaRef': schema,
-                    'header': header,
-                    'message': {
-                        'systemName': systemName,
-                        'stationName': stationName,
-                        'itemName': commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
-                        'buyPrice': int(commodity.get('buyPrice', 0)),
-                        'stationStock': commodity.get('stockBracket') and int(commodity.get('stock', 0)) or 0,
-                        'sellPrice': int(commodity.get('sellPrice', 0)),
-                        'demand': commodity.get('demandBracket') and int(commodity.get('demand', 0)) or 0,
-                        'timestamp': timestamp,
-                    }
-                }
-            if commodity.get('stockBracket'):
-                msg['message']['supplyLevel'] = bracketmap.get(commodity['stockBracket'])
-            if commodity.get('demandBracket'):
-                msg['message']['demandLevel'] = bracketmap.get(commodity['demandBracket'])
+        data = { '$schemaRef': schema,
+                 'header': header,
+                 'message': {
+                     'systemName': systemName,
+                     'stationName': stationName,
+                     'itemName': commodity['name'],
+                     'buyPrice': commodity['buyPrice'],
+                     'stationStock': int(commodity['stock']),
+                     'sellPrice': commodity['sellPrice'],
+                     'demand': int(commodity['demand']),
+                     'timestamp': timestamp,
+                 }
+             }
+        if commodity['stockBracket']:
+            data['message']['supplyLevel'] = bracketmap[commodity['stockBracket']]
+        if commodity['demandBracket']:
+            data['message']['demandLevel'] = bracketmap[commodity['demandBracket']]
 
-            r = session.post(upload, data=json.dumps(msg))
-            r.raise_for_status()
+        r = session.post(upload, data=json.dumps(data))
+        if __debug__ and r.status_code != requests.codes.ok:
+            print 'Status\t%s'  % r.status_code
+            print 'URL\t%s'  % r.url
+            print 'Headers\t%s' % r.headers
+            print ('Content:\n%s' % r.text).encode('utf-8')
+        r.raise_for_status()
 
     session.close()

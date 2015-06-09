@@ -5,6 +5,7 @@ import json
 import requests
 from collections import defaultdict
 from cookielib import LWPCookieJar
+import numbers
 import os
 from os.path import dirname, join
 from requests.packages import urllib3
@@ -36,10 +37,6 @@ commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
                 'Non Lethal Weapons': 'Non-Lethal Weapons',
                 'S A P8 Core Container': 'SAP 8 Core Container',
                 'Terrain Enrichment Systems': 'Land Enrichment Systems', }
-
-bracketmap = { 1: 'Low',
-               2: 'Med',
-               3: 'High', }
 
 
 class ServerError(Exception):
@@ -130,10 +127,11 @@ class Session:
 
         r.raise_for_status()
         try:
-            return json.loads(r.text)
+            data = json.loads(r.text)
         except:
             self.dump(r)
             raise ServerError()
+        return self.fixup(data)
 
     def close(self):
         self.state = Session.STATE_NONE
@@ -144,8 +142,57 @@ class Session:
             pass
         self.session = None
 
+
+    # Fixup anomalies in the recieved commodity data
+    def fixup(self, data):
+        commodities = data['lastStarport']['commodities']
+        i=0
+        while i<len(commodities):
+            commodity = commodities[i]
+
+            # Check all required numeric fields are present and are numeric
+            # Catches "demandBracket": "" for some phantom commodites in ED 1.3
+            for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
+                if not isinstance(commodity.get(thing), numbers.Number):
+                    if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
+                    break
+            else:
+                if not categorymap.get(commodity['categoryname'], True):	# Check marketable
+                    pass
+                elif not commodity.get('categoryname', '').strip():
+                    if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
+                elif not commodity.get('name', '').strip():
+                    if __debug__: print 'Missing "name" for a commodity in "%s"' % commodity.get('categoryname', '')
+                elif not commodity['demandBracket'] in range(4):
+                    if __debug__: print 'Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name'])
+                elif not commodity['stockBracket'] in range(4):
+                    if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
+                else:
+                    # Rewrite text fields
+                    commodity['categoryname'] = categorymap.get(commodity['categoryname'].strip(),
+                                                                commodity['categoryname'].strip())
+                    commodity['name'] = commoditymap.get(commodity['name'].strip(),
+                                                         commodity['name'].strip())
+
+                    # Force demand and stock to zero if their corresponding bracket is zero
+                    # Fixes spurious "demand": 1 in ED 1.3
+                    if not commodity['demandBracket']:
+                        commodity['demand'] = 0
+                    if not commodity['stockBracket']:
+                        commodity['stock'] = 0
+
+                    # We're good
+                    i+=1
+                    continue
+
+            # Skip the commodity
+            commodities.pop(i)
+
+        return data
+
     def dump(self, r):
         if __debug__:
             print 'Status\t%s'  % r.status_code
+            print 'URL\t%s' % r.url
             print 'Headers\t%s' % r.headers
             print ('Content:\n%s' % r.text).encode('utf-8')

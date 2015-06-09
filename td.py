@@ -4,13 +4,21 @@ from os.path import join
 from collections import defaultdict
 import codecs
 import numbers
+from operator import itemgetter
 from platform import system
 from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import categorymap, commoditymap, bracketmap
 
+demandbracketmap = { 0: '?',
+                     1: 'L',
+                     2: 'M',
+                     3: 'H', }
+stockbracketmap =  { 0: '-',
+                     1: 'L',
+                     2: 'M',
+                     3: 'H', }
 
 def export(data):
 
@@ -27,21 +35,20 @@ def export(data):
     # sort commodities by category
     bycategory = defaultdict(list)
     for commodity in data['lastStarport']['commodities']:
-        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
-            bycategory[categorymap.get(commodity['categoryname'], commodity['categoryname'])].append(commodity)
+        bycategory[commodity['categoryname']].append(commodity)
 
     for category in sorted(bycategory):
         h.write('   + %s\n' % category)
         # corrections to commodity names can change the sort order
-        for commodity in sorted(bycategory[category], key=lambda x:commoditymap.get(x['name'].strip(),x['name'])):
+        for commodity in sorted(bycategory[category], key=itemgetter('name')):
             h.write('      %-23s %7d %7d %9s%c %8s%c  %s\n' % (
-                commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
-                commodity.get('sellPrice', 0),
-                commodity.get('buyPrice', 0),
-                int(commodity.get('demand', 0)) if commodity.get('demandBracket') else '',
-                bracketmap.get(commodity.get('demandBracket'), '?')[0],
-                int(commodity.get('stock', 0)) if commodity.get('stockBracket') else '',
-                bracketmap.get(commodity.get('stockBracket'), '-')[0],
+                commodity['name'],
+                commodity['sellPrice'],
+                commodity['buyPrice'],
+                int(commodity['demand']) if commodity['demandBracket'] else '',
+                demandbracketmap[commodity['demandBracket']],
+                int(commodity['stock']) if commodity['stockBracket'] else '',
+                stockbracketmap[commodity['stockBracket']],
                 timestamp))
 
     h.close()

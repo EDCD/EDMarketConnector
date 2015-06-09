@@ -7,7 +7,11 @@ import numbers
 import time
 
 from config import config
-from companion import categorymap, commoditymap, bracketmap
+
+bracketmap = { 0: '',
+               1: 'Low',
+               2: 'Med',
+               3: 'High', }
 
 def export(data, csv=False):
 
@@ -26,16 +30,15 @@ def export(data, csv=False):
     h.write(header)
 
     for commodity in data['lastStarport']['commodities']:
-        if isinstance(commodity.get('demandBracket'), numbers.Integral) and commodity.get('categoryname') and categorymap.get(commodity['categoryname'], True):
-            h.write(('%s;%s;%s;%s;%s;%s;%s;%s;%s;\n' % (
-                rowheader,
-                commoditymap.get(commodity['name'].strip(), commodity['name'].strip()),
-                commodity.get('sellPrice') and int(commodity['sellPrice']) or '',
-                commodity.get('buyPrice') and int(commodity['buyPrice']) or '',
-                int(commodity.get('demand', 0)) if commodity.get('demandBracket') else '',
-                bracketmap.get(commodity.get('demandBracket'), ''),
-                int(commodity.get('stock', 0)) if commodity.get('stockBracket') else '',
-                bracketmap.get(commodity.get('stockBracket'), ''),
-                timestamp)).encode('utf-8'))
+        h.write(('%s;%s;%s;%s;%s;%s;%s;%s;%s;\n' % (
+            rowheader,
+            commodity['name'],
+            commodity['sellPrice'] or '',
+            commodity['buyPrice'] or '',
+            int(commodity['demand']) if commodity['demandBracket'] else '',
+            bracketmap[commodity['demandBracket']],
+            int(commodity['stock']) if commodity['stockBracket'] else '',
+            bracketmap[commodity['stockBracket']],
+            timestamp)).encode('utf-8'))
 
     h.close()
