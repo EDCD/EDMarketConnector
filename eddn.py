@@ -1,6 +1,7 @@
 # Export to EDDN
 # -*- coding: utf-8 -*-
 
+import hashlib
 import json
 import numbers
 import requests
@@ -25,7 +26,8 @@ def export(data, callback):
 
     header = { 'softwareName': '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
                'softwareVersion': appversion,
-               'uploaderID': data['commander']['name'].strip() }
+               'uploaderID': config.getint('anonymous') and hashlib.md5(data['commander']['name'].strip().encode('utf-8')).hexdigest() or data['commander']['name'].strip(),
+    }
     systemName = data['lastSystem']['name'].strip()
     stationName = data['lastStarport']['name'].strip()
     timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))

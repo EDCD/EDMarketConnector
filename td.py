@@ -30,7 +30,7 @@ def export(data):
 
     # Format described here: https://bitbucket.org/kfsone/tradedangerous/wiki/Price%20Data
     h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required
-    h.write(('#! trade.py import -\n# Created by %s %s on %s for Cmdr %s.\n#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n@ %s/%s\n' % (applongname, appversion, platform=='darwin' and "Mac OS" or system(), data['commander']['name'].strip(), data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip())).encode('utf-8'))
+    h.write(('#! trade.py import -\n# Created by %s %s on %s%s.\n#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n@ %s/%s\n' % (applongname, appversion, platform=='darwin' and "Mac OS" or system(), not config.getint('anonymous') and ' for Cmdr '+data['commander']['name'].strip() or '', data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip())).encode('utf-8'))
 
     # sort commodities by category
     bycategory = defaultdict(list)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from os.path import join
+import hashlib
 import codecs
 import numbers
 import time
@@ -24,7 +25,8 @@ def export(data, csv=False):
     rowheader = '%s;%s' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip())
     if not csv:	# bpc
         header = 'userID;' + header
-        rowheader = '%s;%s' % (data['commander']['name'].replace(';',':').strip(), rowheader)
+        cmdr = data['commander']['name'].strip()
+        rowheader = '%s;%s' % (config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr.replace(';',':'), rowheader)
 
     h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required
     h.write(header)

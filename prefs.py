@@ -94,6 +94,15 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir.grid(row=6, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
 
+        privacyframe = ttk.LabelFrame(frame, text='Privacy')
+        privacyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        privacyframe.columnconfigure(0, weight=1)
+
+        self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
+        ttk.Label(privacyframe, text="How do you want to be identified in the saved data").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
+        ttk.Radiobutton(privacyframe, text="Cmdr name", variable=self.out_anon, value=0).grid(padx=5, sticky=tk.W)
+        ttk.Radiobutton(privacyframe, text="Pseudo-anonymized ID", variable=self.out_anon, value=1).grid(padx=5, pady=3, sticky=tk.W)
+
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
         else:
@@ -150,6 +159,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('password', self.password.get().strip())
         config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0))
         config.set('outdir', self.outdir.get().strip())
+        config.set('anonymous', self.out_anon.get())
         self.destroy()
         if credentials != (config.get('username'), config.get('password')) and self.callback:
             self.callback()
