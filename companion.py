@@ -145,7 +145,7 @@ class Session:
 
     # Fixup anomalies in the recieved commodity data
     def fixup(self, data):
-        commodities = data['lastStarport']['commodities']
+        commodities = data.get('lastStarport') and data['lastStarport'].get('commodities') or []
         i=0
         while i<len(commodities):
             commodity = commodities[i]
