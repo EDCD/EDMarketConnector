@@ -11,6 +11,7 @@ from os.path import dirname, join
 from requests.packages import urllib3
 import sys
 from sys import platform
+import time
 
 if __debug__:
     from traceback import print_exc
@@ -131,6 +132,12 @@ class Session:
         except:
             self.dump(r)
             raise ServerError()
+
+        # Recording
+        if __debug__:
+            with open('%s.%s.%s.json' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())), 'wt') as h:
+                h.write(json.dumps(data, indent=2))
+
         return self.fixup(data)
 
     def close(self):
