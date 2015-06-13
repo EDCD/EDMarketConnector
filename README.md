@@ -68,12 +68,12 @@ Mac:
 
 Windows:
 
-* Requires the Python "requests" module.
+* Requires Python2.7 and the Python "requests" module.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
-* Requires the Python "iniparse" and "requests" modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests` .
+* Requires the Python "imaging-tk", "iniparse" and "requests" modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
 * Run with `./EDMarketConnector.py` .
 
 Packaging for distribution
