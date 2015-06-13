@@ -56,11 +56,28 @@ Windows:
 * Uninstall **EDMarketConnector** from Control Panel → Programs.
 
 
-Running from source & packaging
+Running from source
 --------
-The application requires Python 2.7, plus the "requests" module. Run with `python EDMarketConnector.py`.
 
-To package up for distribution:
+Download and extract the source code of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+
+Mac:
+
+* Requires the Python "requests" module - install this with `easy_install requests` .
+* Run with `./EDMarketConnector.py` .
+
+Windows:
+
+* Requires the Python "requests" module.
+* Run with `EDMarketConnector.py` .
+
+Linux:
+
+* Requires the Python "iniparse" and "requests" modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests` .
+* Run with `./EDMarketConnector.py` .
+
+Packaging for distribution
+--------
 
 Mac:
 
