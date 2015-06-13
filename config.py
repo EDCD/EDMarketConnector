@@ -195,23 +195,23 @@ class Config:
             try:
                 self.config.readfp(codecs.open(self.filename, 'r', 'utf-8'))
             except:
-                self.config.add_section('DEFAULT')
+                self.config.add_section('config')
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', expanduser('~'))
 
         def set(self, key, val):
-            self.config.set('DEFAULT', key, val)
+            self.config.set('config', key, val)
 
         def get(self, key):
             try:
-                return self.config.get('DEFAULT', key)	# all values are stored as strings
+                return self.config.get('config', key)	# all values are stored as strings
             except:
                 return None
 
         def getint(self, key):
             try:
-                return int(self.config.get('DEFAULT', key))	# all values are stored as strings
+                return int(self.config.get('config', key))	# all values are stored as strings
             except:
                 return 0
 
