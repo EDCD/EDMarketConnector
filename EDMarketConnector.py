@@ -39,6 +39,8 @@ class AppWindow:
             from PIL import Image, ImageTk
             icon = ImageTk.PhotoImage(Image.open("EDMarketConnector.png"))
             root.tk.call('wm', 'iconphoto', root, '-default', icon)
+            style = ttk.Style()
+            style.theme_use('clam')
 
         frame = ttk.Frame(self.w)
         frame.grid(sticky=tk.NSEW)
@@ -88,6 +90,14 @@ class AppWindow:
             file_menu.add_command(label="Exit", command=self.onexit)
             menubar.add_cascade(label="File", menu=file_menu)
             root.protocol("WM_DELETE_WINDOW", self.onexit)
+        if platform == 'linux2':
+            # Fix up menu to use same styling as everything else
+            (fg, bg, afg, abg) = (style.lookup('TLabel.label', 'foreground'),
+                                  style.lookup('TLabel.label', 'background'),
+                                  style.lookup('TButton.label', 'foreground', ['active']),
+                                  style.lookup('TButton.label', 'background', ['active']))
+            menubar.configure(  fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
+            file_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
         self.w['menu'] = menubar
 
         # update geometry
