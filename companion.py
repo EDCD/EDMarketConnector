@@ -136,7 +136,7 @@ class Session:
         # Recording
         if __debug__:
             with open('%s.%s.%s.json' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())), 'wt') as h:
-                h.write(json.dumps(data, indent=2))
+                h.write(json.dumps(data, indent=2, sort_keys=True))
 
         return self.fixup(data)
 
