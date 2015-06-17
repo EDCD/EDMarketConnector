@@ -57,6 +57,7 @@ class AppWindow:
         self.button = ttk.Button(frame, text='Update', command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
+        self.w.bind('<KP_Enter>', self.getandsend)
 
         self.cmdr.grid(row=0, column=1, sticky=tk.W)
         self.system.grid(row=1, column=1, sticky=tk.W)

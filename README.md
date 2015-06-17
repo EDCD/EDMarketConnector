@@ -6,7 +6,7 @@ This app downloads commodity market data from the game [Elite: Dangerous](https:
 * transmits the data to the [Elite Dangerous Data Network](http://eddn.ed-td.space/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/).
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home) and [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
 
-The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button to automatically download and transmit and/or save the station's commodity market data:
+The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save the station's commodity market data:
 
 ![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
 
