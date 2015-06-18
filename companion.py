@@ -28,6 +28,7 @@ categorymap = { 'Narcotics': 'Legal Drugs',
                 'NonMarketable': False, }
 
 commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
+                'Ai Relics' : 'AI Relics',
                 'Atmospheric Extractors': 'Atmospheric Processors',
                 'Auto Fabricators': 'Auto-Fabricators',
                 'Basic Narcotics': 'Narcotics',
