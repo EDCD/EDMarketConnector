@@ -9,9 +9,9 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
+import outfitting
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
-schema = 'http://schemas.elite-markets.net/eddn/commodity/2'
 
 bracketmap = { 1: 'Low',
                2: 'Med',
@@ -37,7 +37,7 @@ def export(data):
     }
 
     commodities = []
-    for commodity in data['lastStarport']['commodities']:
+    for commodity in data['lastStarport'].get('commodities', []):
         commodities.append({
             'name'      : commodity['name'],
             'buyPrice'  : commodity['buyPrice'],
@@ -50,13 +50,50 @@ def export(data):
         if commodity['demandBracket']:
             commodities[-1]['demandLevel'] = bracketmap[commodity['demandBracket']]
 
-    send({
-        '$schemaRef' : schema,
-        'header'     : header,
-        'message'    : {
-            'systemName'  : data['lastSystem']['name'].strip(),
-            'stationName' : data['lastStarport']['name'].strip(),
-            'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
-            'commodities' : commodities,
+    if data['lastStarport'].get('commodities'):
+        send({
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/2',
+            'header'     : header,
+            'message'    : {
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
+                'commodities' : commodities,
             }
-    })
+        })
+
+    modules = []
+    for v in data['lastStarport'].get('modules', {}).itervalues():
+        try:
+            module = outfitting.lookup(v)
+            if module:
+                modules.append(module)
+        except AssertionError as e:
+            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+        except:
+            if __debug__: raise
+
+    if data['lastStarport'].get('modules'):
+        send({
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
+            'header'     : header,
+            'message'    : {
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
+                'modules'     : modules,
+            }
+        })
+
+    # Shipyard data is only guaranteed present if user has visited the shipyard. Only send if present.
+    if data['lastStarport'].get('ships'):
+        send({
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/1',
+            'header'     : header,
+            'message'    : {
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
+                'ships'       : [ship['name'] for ship in data['lastStarport']['ships'].get('shipyard_list', {}).values() + data['lastStarport']['ships'].get('unavailable_list', [])],
+            }
+        })

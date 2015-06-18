@@ -180,7 +180,7 @@ class Session:
         self.session = None
 
 
-    # Fixup anomalies in the recieved commodity data
+    # Fixup anomalies in the recieved commodity and shipyard data
     def fixup(self, data):
         commodities = data.get('lastStarport') and data['lastStarport'].get('commodities') or []
         i=0
@@ -224,6 +224,11 @@ class Session:
 
             # Skip the commodity
             commodities.pop(i)
+
+        if data['lastStarport'].get('ships'):
+            for ship in data['lastStarport']['ships'].get('shipyard_list', {}).values() + data['lastStarport']['ships'].get('unavailable_list', []):
+                if ship_map.get(ship['name']):
+                    ship['name'] = ship_map[ship['name']]
 
         return data
 
