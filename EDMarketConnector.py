@@ -17,6 +17,7 @@ import companion
 import bpc
 import td
 import eddn
+import loadout
 import prefs
 from config import appname, applongname, config
 
@@ -174,13 +175,19 @@ class AppWindow:
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
                 self.status['text'] = "Who are you?!"	# Shouldn't happen
-            elif not data['commander'].get('docked'):
-                self.status['text'] = "You're not docked at a station!"
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
                 self.status['text'] = "Where are you?!"	# Shouldn't happen
+            elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
+                self.status['text'] = "What are you flying?!"	# Shouldn't happen
+            elif not data['commander'].get('docked'):
+                if config.getint('output') & config.OUT_SHIP:
+                    loadout.export(data)	# do loadout even if not docked
+                self.status['text'] = "You're not docked at a station!"
             elif not data['lastStarport'].get('commodities'):
                 self.status['text'] = "Station doesn't have a market!"
             else:
+                if config.getint('output') & config.OUT_SHIP:
+                    loadout.export(data)
                 if config.getint('output') & config.OUT_CSV:
                     bpc.export(data, True)
                 if config.getint('output') & config.OUT_TD:

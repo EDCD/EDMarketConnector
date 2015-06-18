@@ -76,8 +76,8 @@ class PreferencesDialog(tk.Toplevel):
         outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or config.OUT_EDDN
-        ttk.Label(outframe, text="Please choose where you want the market data saved").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
+        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP)
+        ttk.Label(outframe, text="Please choose where you want the data saved").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
         self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1 or 0)
         ttk.Checkbutton(outframe, text="Online to the Elite Dangerous Data Network (EDDN)", variable=self.out_eddn).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
         self.out_bpc = tk.IntVar(value = (output & config.OUT_BPC ) and 1 or 0)
@@ -86,12 +86,14 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Checkbutton(outframe, text="Offline in Trade Dangerous format", variable=self.out_td, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_CSV ) and 1 or 0)
         ttk.Checkbutton(outframe, text="Offline in CSV format", variable=self.out_csv, command=self.outvarchanged).grid(row=4, columnspan=2, padx=5, sticky=tk.W)
-        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=5, padx=5, pady=(5,0), sticky=tk.NSEW)
+        self.out_ship= tk.IntVar(value = (output & config.OUT_SHIP) and 1 or 0)
+        ttk.Checkbutton(outframe, text="Offline loadout in E:D Shipyard format", variable=self.out_ship, command=self.outvarchanged).grid(row=5, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=6, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Change...' or 'Browse...'), command=self.outbrowse)
-        self.outbutton.grid(row=5, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
+        self.outbutton.grid(row=6, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
         self.outdir.insert(0, config.get('outdir'))
-        self.outdir.grid(row=6, columnspan=2, padx=5, pady=5, sticky=tk.EW)
+        self.outdir.grid(row=7, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
 
         privacyframe = ttk.LabelFrame(frame, text='Privacy')
@@ -118,7 +120,7 @@ class PreferencesDialog(tk.Toplevel):
         #self.wait_window(self)	# causes duplicate events on OSX
 
     def outvarchanged(self):
-        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get()
+        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship.get()
         self.outbutton['state'] = local and tk.NORMAL or tk.DISABLED
         self.outdir['state']    = local and 'readonly' or tk.DISABLED
 
@@ -157,7 +159,7 @@ class PreferencesDialog(tk.Toplevel):
         credentials = (config.get('username'), config.get('password'))
         config.set('username', self.username.get().strip())
         config.set('password', self.password.get().strip())
-        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0))
+        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship.get() and config.OUT_SHIP or 0))
         config.set('outdir', self.outdir.get().strip())
         config.set('anonymous', self.out_anon.get())
         self.destroy()

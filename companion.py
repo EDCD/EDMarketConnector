@@ -23,22 +23,51 @@ holdoff = 120	# be nice
 
 # Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
 
-categorymap = { 'Narcotics': 'Legal Drugs',
-                'Slaves': 'Slavery',
-                'NonMarketable': False, }
+category_map = {
+    'Narcotics'     : 'Legal Drugs',
+    'Slaves'        : 'Slavery',
+    'NonMarketable' : False,
+}
 
-commoditymap= { 'Agricultural Medicines': 'Agri-Medicines',
-                'Ai Relics' : 'AI Relics',
-                'Atmospheric Extractors': 'Atmospheric Processors',
-                'Auto Fabricators': 'Auto-Fabricators',
-                'Basic Narcotics': 'Narcotics',
-                'Bio Reducing Lichen': 'Bioreducing Lichen',
-                'Hazardous Environment Suits': 'H.E. Suits',
-                'Heliostatic Furnaces': 'Microbial Furnaces',
-                'Marine Supplies': 'Marine Equipment',
-                'Non Lethal Weapons': 'Non-Lethal Weapons',
-                'S A P8 Core Container': 'SAP 8 Core Container',
-                'Terrain Enrichment Systems': 'Land Enrichment Systems', }
+commodity_map= {
+    'Agricultural Medicines'      : 'Agri-Medicines',
+    'Ai Relics'                   : 'AI Relics',
+    'Atmospheric Extractors'      : 'Atmospheric Processors',
+    'Auto Fabricators'            : 'Auto-Fabricators',
+    'Basic Narcotics'             : 'Narcotics',
+    'Bio Reducing Lichen'         : 'Bioreducing Lichen',
+    'Hazardous Environment Suits' : 'H.E. Suits',
+    'Heliostatic Furnaces'        : 'Microbial Furnaces',
+    'Marine Supplies'             : 'Marine Equipment',
+    'Non Lethal Weapons'          : 'Non-Lethal Weapons',
+    'S A P8 Core Container'       : 'SAP 8 Core Container',
+    'Terrain Enrichment Systems'  : 'Land Enrichment Systems',
+}
+
+ship_map = {
+    'Adder'               : 'Adder',
+    'Anaconda'            : 'Anaconda',
+    'Asp'                 : 'Asp',
+    'CobraMkIII'          : 'Cobra Mk III',
+    'DiamondBack'         : 'Diamondback Scout',
+    'DiamondBackXL'       : 'Diamondback Explorer',
+    'Eagle'               : 'Eagle',
+    'Empire_Courier'      : 'Imperial Courier',
+    'Empire_Fighter'      : 'Imperial Fighter',
+    'Empire_Trader'       : 'Imperial Clipper',
+    'Federation_Dropship' : 'Federal Dropship',
+    'Federation_Fighter'  : 'F63 Condor',
+    'FerDeLance'          : 'Fer-de-Lance',
+    'Hauler'              : 'Hauler',
+    'Orca'                : 'Orca',
+    'Python'              : 'Python',
+    'SideWinder'          : 'Sidewinder',
+    'Type6'               : 'Type-6 Transporter',
+    'Type7'               : 'Type-7 Transporter',
+    'Type9'               : 'Type-9 Heavy',
+    'Viper'               : 'Viper',
+    'Vulture'             : 'Vulture',
+}
 
 
 class ServerError(Exception):
@@ -165,7 +194,7 @@ class Session:
                     if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
                     break
             else:
-                if not categorymap.get(commodity['categoryname'], True):	# Check marketable
+                if not category_map.get(commodity['categoryname'], True):	# Check marketable
                     pass
                 elif not commodity.get('categoryname', '').strip():
                     if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
@@ -177,10 +206,10 @@ class Session:
                     if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
                 else:
                     # Rewrite text fields
-                    commodity['categoryname'] = categorymap.get(commodity['categoryname'].strip(),
-                                                                commodity['categoryname'].strip())
-                    commodity['name'] = commoditymap.get(commodity['name'].strip(),
-                                                         commodity['name'].strip())
+                    commodity['categoryname'] = category_map.get(commodity['categoryname'].strip(),
+                                                                 commodity['categoryname'].strip())
+                    commodity['name'] = commodity_map.get(commodity['name'].strip(),
+                                                          commodity['name'].strip())
 
                     # Force demand and stock to zero if their corresponding bracket is zero
                     # Fixes spurious "demand": 1 in ED 1.3
