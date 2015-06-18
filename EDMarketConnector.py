@@ -188,6 +188,8 @@ class AppWindow:
                 if config.getint('output') & config.OUT_BPC:
                     bpc.export(data, False)
                 if config.getint('output') & config.OUT_EDDN:
+                    self.status['text'] = 'Sending data to EDDN...'
+                    self.w.update_idletasks()
                     eddn.export(data)
                 self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
