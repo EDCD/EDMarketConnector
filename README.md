@@ -34,7 +34,9 @@ Setup
 The first time that you run the app you are prompted for your username and password. This is the same username and password
 combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app the market data for the station that *you* are docked at.
 
-You can also choose here whether to send the market data that you download to EDDN or to save it locally, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
+You can also choose here whether to send the market data that you download to EDDN or to save it locally,
+whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data,
+and whether to save a record of your ship loadout in a form that you can import into [E:D Shipyard](http://www.edshipyard.com) after every outfitting change.
 
 You are next prompted to authenticate with a "verification code", which you will shortly receive by email from Frontier.
 Note that each "verification code" is one-time only - if you enter the code incorrectly or quit the app before
