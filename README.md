@@ -25,9 +25,8 @@ Windows:
 
 * Requires Windows 7 or later.
 * Download the `.msi` package of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
-* Double-click on it.
-* Windows Installer will walk you through the installation process.
-* Run **EDMarketConnector** from the Start menu.
+* Double-click on it to install.
+* Run **Elite Dangerous Market Connector** from the Start Menu or Start Screen.
 
 
 Setup
@@ -53,7 +52,7 @@ Mac:
 
 Windows:
 
-* Uninstall **EDMarketConnector** from Control Panel → Programs.
+* Uninstall **Elite Dangerous Market Connector** from Control Panel → Programs.
 
 
 Running from source

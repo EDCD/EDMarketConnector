@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <?define PRODUCTNAME = "EDMarketConnector"?>
-<?define PRODUCTLONGNAME = "E:D Market Connector"?>
+<?define PRODUCTLONGNAME = "Elite Dangerous Market Connector"?>
 <?define PRODUCTVERSION = "!(bind.fileVersion.MainExecutable.exe)" ?>
 <?define UPGRADECODE = "9df571ae-d56d-46e6-af79-4e72ad54efe6" ?>
 
@@ -43,7 +43,7 @@
 				<Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
 					<Component Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
 						<File Id="MainExecutable.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
-						<Shortcut Id="EDMarketConnector.lnk" Directory="ProgramMenuFolder" Name="$(var.PRODUCTNAME)" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
+						<Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)" Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
 					</Component>
 					<Component Id="cmpE57080DEA0B187988FD2BD076FB01324" Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
 						<File Id="fil49284CA06286B42CDCAFA97CAF917044" KeyPath="yes" Source="SourceDir\_ctypes.pyd" />
