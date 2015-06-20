@@ -199,6 +199,8 @@ class AppWindow:
                 self.w.after(2000, lambda:self.getandsend(retrying=True))
                 return
             else:
+                if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
+
                 # stuff we can do when not docked
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
