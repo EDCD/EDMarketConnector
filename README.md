@@ -45,6 +45,11 @@ authenticating you will need to wait for Frontier to send you a new code.
 If you are not prompted to authenticate, but instead see the message "Error: Invalid Credentials" then choose the menu
 option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
 
+Statistics
+--------
+Choose the "Statistics" item from the menu to view your Cmdrs's statistics. The statistics shown are largely the same
+as those available ftrom the right-hand panel in-game, plus a few additions.
+
 Uninstall
 --------
 

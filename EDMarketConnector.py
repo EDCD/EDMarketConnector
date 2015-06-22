@@ -18,6 +18,7 @@ import bpc
 import td
 import eddn
 import loadout
+import stats
 import prefs
 from config import appname, applongname, config
 
@@ -75,6 +76,7 @@ class AppWindow:
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             apple_menu = tk.Menu(menubar, name='apple')
             apple_menu.add_command(label="About %s" % applongname, command=lambda:root.call('tk::mac::standardAboutPanel'))
+            apple_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
             apple_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
             window_menu = tk.Menu(menubar, name='window')
@@ -87,8 +89,10 @@ class AppWindow:
             root.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
             file_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label="Settings", command=lambda:prefs.PreferencesDialog(self.w, self.login))
+            file_menu.add_separator()
             file_menu.add_command(label="Exit", command=self.onexit)
             menubar.add_cascade(label="File", menu=file_menu)
             root.protocol("WM_DELETE_WINDOW", self.onexit)
@@ -219,11 +223,6 @@ class AppWindow:
         else:
             self.button['text'] = 'Update'
             self.button['state'] = tk.NORMAL
-
-    # callback to update status text
-    def setstatus(self, status):
-        self.status['text'] = status
-        self.w.update_idletasks()
 
     def onexit(self, event=None):
         config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
