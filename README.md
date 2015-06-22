@@ -3,10 +3,11 @@ Elite: Dangerous Market Connector
 
 This app downloads commodity market data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* transmits the data to the [Elite Dangerous Data Network](http://eddn.ed-td.space/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/).
+* sends the data to the [Elite Dangerous Data Network](http://eddn.ed-td.space/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home) and [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
+* saves a record of your ship loadout and/or flight log.
 
-The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save the station's commodity market data:
+The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save your choice of data.
 
 ![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
 
@@ -32,11 +33,9 @@ Windows:
 Setup
 --------
 The first time that you run the app you are prompted for your username and password. This is the same username and password
-combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app the market data for the station that *you* are docked at.
+combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the market data for the station that *you* are docked at.
 
-You can also choose here whether to send the market data that you download to EDDN or to save it locally,
-whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data,
-and whether to save a record of your ship loadout in a form that you can import into [E:D Shipyard](http://www.edshipyard.com) after every outfitting change.
+You can also choose here what data to save (refer to the next section for details) and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
 You are next prompted to authenticate with a "verification code", which you will shortly receive by email from Frontier.
 Note that each "verification code" is one-time only - if you enter the code incorrectly or quit the app before
@@ -44,6 +43,24 @@ authenticating you will need to wait for Frontier to send you a new code.
 
 If you are not prompted to authenticate, but instead see the message "Error: Invalid Credentials" then choose the menu
 option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
+
+Output
+--------
+This app can save a variety of data in a variety of formats:
+
+* Market data
+  * Elite Dangerous Data Network - sends the market data to the "[EDDN](http://eddn.ed-td.space/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
+  * Slopey's BPC format - saves the market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
+  * Trade Dangerous format - saves the market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
+  * CSV format - saves the market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
+
+* Ship loadout
+  * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com).
+
+* Flight log
+  * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel.
+
+By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
 Statistics
 --------
@@ -61,6 +78,7 @@ Windows:
 
 * Uninstall **Elite Dangerous Market Connector** from Control Panel → Programs.
 
+Note: Uninstalling the app does not delete any output files that it has previously written.
 
 Running from source
 --------

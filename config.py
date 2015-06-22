@@ -70,6 +70,7 @@ class Config:
     OUT_TD   = 4
     OUT_CSV  = 8
     OUT_SHIP = 16
+    OUT_LOG  = 32
 
     if platform=='darwin':
 

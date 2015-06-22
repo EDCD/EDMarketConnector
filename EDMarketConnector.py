@@ -18,6 +18,7 @@ import bpc
 import td
 import eddn
 import loadout
+import flightlog
 import stats
 import prefs
 from config import appname, applongname, config
@@ -136,6 +137,15 @@ class AppWindow:
         try:
             self.session.login(config.get('username'), config.get('password'))
             self.status['text'] = ''
+
+            # Try to obtain exclusive lock on flight log ASAP
+            if config.getint('output') & config.OUT_LOG:
+                try:
+                    flightlog.openlog()
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = str(e)
+
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
             self.status['text'] = ''
@@ -178,31 +188,38 @@ class AppWindow:
 
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
-                self.status['text'] = "Who are you?!"	# Shouldn't happen
+                self.status['text'] = "Who are you?!"		# Shouldn't happen
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
-                self.status['text'] = "Where are you?!"	# Shouldn't happen
+                self.status['text'] = "Where are you?!"		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
-            elif not data['commander'].get('docked'):
-                if config.getint('output') & config.OUT_SHIP:
-                    loadout.export(data)	# do loadout even if not docked
-                self.status['text'] = "You're not docked at a station!"
-            elif not data['lastStarport'].get('commodities'):
-                self.status['text'] = "Station doesn't have a market!"
             else:
+                # stuff we can do when not docked
+                if config.getint('output') & config.OUT_LOG:
+                    flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
-                if config.getint('output') & config.OUT_CSV:
-                    bpc.export(data, True)
-                if config.getint('output') & config.OUT_TD:
-                    td.export(data)
-                if config.getint('output') & config.OUT_BPC:
-                    bpc.export(data, False)
-                if config.getint('output') & config.OUT_EDDN:
-                    self.status['text'] = 'Sending data to EDDN...'
-                    self.w.update_idletasks()
-                    eddn.export(data)
-                self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+
+                if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
+                    # no further output requested
+                    self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+
+                elif not data['commander'].get('docked'):
+                    self.status['text'] = "You're not docked at a station!"
+                elif not data['lastStarport'].get('commodities'):
+                    self.status['text'] = "Station doesn't have a market!"
+                else:
+                    if config.getint('output') & config.OUT_CSV:
+                        bpc.export(data, True)
+                    if config.getint('output') & config.OUT_TD:
+                        td.export(data)
+                    if config.getint('output') & config.OUT_BPC:
+                        bpc.export(data, False)
+                    if config.getint('output') & config.OUT_EDDN:
+                        self.status['text'] = 'Sending data to EDDN...'
+                        self.w.update_idletasks()
+                        eddn.export(data)
+                    self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
