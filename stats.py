@@ -108,6 +108,7 @@ class StatsDialog(tk.Toplevel):
 
         self.title('Cmdr ' + data['commander']['name'])
         self.status.grid_forget()
+        CR = 'CR'
 
         notebook = ttk.Notebook(self.frame)
         notebook.grid(padx=10, pady=10, sticky=tk.NSEW)
@@ -115,154 +116,154 @@ class StatsDialog(tk.Toplevel):
         page = self.addpage(notebook)
         self.addranking(page, data, 'combat')
         self.addpagespacer(page)
-        try:
-            self.addpageheader(page, ['Statistics'])
-            for thing, value in [
-                    ('Bounties claimed',         str(data['stats']['combat']['bounty']['qty'])),
-                    ('Profit from bounties',         data['stats']['combat']['bounty']['value']),
-                    ('Combat bonds',             str(data['stats']['combat']['bond']['qty'])),
-                    ('Profit from combat bonds',     data['stats']['combat']['bond']['value']),
-                    ('Assassinations',           str(data['stats']['missions']['assassin']['missionsCompleted'])),
-                    ('Profit from assassinations',   data['stats']['missions']['assassin']['creditsEarned']),
-                    ('Highest single assassination', data['stats']['missions']['assassin']['highestEarnings']['value']),
-                    ('Bounty hunting',           str(data['stats']['missions']['bountyHunter']['missionsCompleted'])),
-                    ('Profit from bounty hunting',   data['stats']['missions']['bountyHunter']['creditsEarned']),
-                    ('Highest single bounty',        data['stats']['missions']['bountyHunter']['highestEarnings']['value']),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
-        except:
-            if __debug__: print_exc()
+        self.addpageheader(page, ['Statistics'])
+        for thing in [
+                ('Bounties claimed',              ['stats', 'combat', 'bounty', 'qty']),
+                ('Profit from bounties',          ['stats', 'combat', 'bounty', 'value'], CR),
+                ('Combat bonds',                  ['stats', 'combat', 'bond', 'qty']),
+                ('Profit from combat bonds',      ['stats', 'combat', 'bond', 'value'], CR),
+                ('Assassinations',                ['stats', 'missions', 'assassin', 'missionsCompleted']),
+                ('Profit from assassinations',    ['stats', 'missions', 'assassin', 'creditsEarned'], CR),
+                ('Highest single assassination',  ['stats', 'missions', 'assassin', 'highestEarnings', 'value'], CR),
+                ('Bounty hunting',                ['stats', 'missions', 'bountyHunter', 'missionsCompleted']),
+                ('Profit from bounty hunting',    ['stats', 'missions', 'bountyHunter', 'creditsEarned'], CR),
+                ('Highest single bounty',         ['stats', 'missions', 'bountyHunter', 'highestEarnings', 'value'], CR),
+        ]:
+            self.addstat(page, data, *thing)
         notebook.add(page, text='Combat')
 
         page = self.addpage(notebook)
         self.addranking(page, data, 'trade')
         self.addpagespacer(page)
-        try:
-            self.addpageheader(page, ['Trading'])
-            for thing, value in [
-                    ('Market network',       str(len(data['stats']['trade']['marketIds']))),
-                    ('Trading profit',               data['stats']['trade']['profit']),
-                    ('Commodities traded',       str(data['stats']['trade']['qty'])),
-                    ('Average profit',               data['stats']['trade']['profit'] / data['stats']['trade']['count']),
-                    ('Highest single transaction',   data['stats']['trade']['largestProfit']['value']),
-                    ('',                             data['stats']['trade']['largestProfit']['qty'] and '%d %s' % (data['stats']['trade']['largestProfit']['qty'], companion.commodity_map.get(data['stats']['trade']['largestProfit']['commodity'], data['stats']['trade']['largestProfit']['commodity'])) or ''),
+        for thing in [
+                ('Market network',                ['stats', 'trade', 'marketIds'], len),
+                ('Trading profit',                ['stats', 'trade', 'profit'], CR),
+                ('Commodities traded',            ['stats', 'trade', 'qty']),
+                ('Average profit',               (['stats', 'trade', 'profit'], ['stats', 'trade', 'count']), CR),
+                ('Highest single transaction',    ['stats', 'trade', 'largestProfit', 'value'], CR),
                 ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
-        except:
-            if __debug__: print_exc()
+            self.addstat(page, data, *thing)
         try:
-            self.addpageheader(page, ['Smuggling'])
-            for thing, value in [
-                    ('Black Market network', str(len(data['stats']['blackMarket']['marketIds']))),
-                    ('Black Market profit',          data['stats']['blackMarket']['profit']),
-                    ('Commodities smuggled',     str(data['stats']['blackMarket']['qty'])),
-                    ('Average profit',               data['stats']['blackMarket']['profit'] / data['stats']['blackMarket']['count']),
-                    ('Highest single transaction',   data['stats']['blackMarket']['largestProfit']['value']),
-                    ('',                             data['stats']['blackMarket']['largestProfit']['qty'] and '%d %s' % (data['stats']['blackMarket']['largestProfit']['qty'], companion.commodity_map.get(data['stats']['blackMarket']['largestProfit']['commodity'], data['stats']['blackMarket']['largestProfit']['commodity'])) or ''),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
+            if not data['stats']['trade']['largestProfit']['qty']: raise Exception()
+            self.addpagerow(page, ['', '%d %s' % (data['stats']['trade']['largestProfit']['qty'], companion.commodity_map.get(data['stats']['trade']['largestProfit']['commodity'], data['stats']['trade']['largestProfit']['commodity']))])
         except:
-            if __debug__: print_exc()
+            self.addpagespacer(page)
+
+        self.addpageheader(page, ['Smuggling'])
+        for thing in [
+                ('Black Market network',          ['stats', 'blackMarket', 'marketIds'], len),
+                ('Black Market profit',           ['stats', 'blackMarket', 'profit'], CR),
+                ('Commodities smuggled',          ['stats', 'blackMarket', 'qty']),
+                ('Average profit',               (['stats', 'blackMarket', 'profit'], ['stats', 'blackMarket', 'count']), CR),
+                ('Highest single transaction',    ['stats', 'blackMarket', 'largestProfit', 'value'], CR),
+        ]:
+            self.addstat(page, data, *thing)
         try:
-            self.addpageheader(page, ['Mining'])
-            for thing, value in [
-                    ('Profit from mining',           data['stats']['mining']['profit']),
-                    ('Fragments mined',          str(data['stats']['mining']['qty'])),
-                    ('Converted',                str(data['stats']['mining']['converted']['qty'])),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
+            if not data['stats']['blackMarket']['largestProfit']['qty']: raise Exception()
+            self.addpagerow(page, ['', '%d %s' % (data['stats']['blackMarket']['largestProfit']['qty'], companion.commodity_map.get(data['stats']['blackMarket']['largestProfit']['commodity'], data['stats']['blackMarket']['largestProfit']['commodity']))])
         except:
-            if __debug__: print_exc()
+            self.addpagespacer(page)
+
+        self.addpageheader(page, ['Mining'])
+        for thing in [
+                ('Profit from mining',            ['stats', 'mining', 'profit'], CR),
+                ('Fragments mined',               ['stats', 'mining', 'qty']),
+                ('Converted',                     ['stats', 'mining', 'converted', 'qty']),
+        ]:
+            self.addstat(page, data, *thing)
         notebook.add(page, text='Trade')
 
         page = self.addpage(notebook)
         self.addranking(page, data, 'explore')
         self.addpagespacer(page)
-        try:
-            self.addpageheader(page, ['Statistics'])
-            for thing, value in [
-                    ('Systems visited',      str(len(data['stats']['explore']['visited']['starsystem']))),
-                    ('Profits from exploration',     data['stats']['explore']['creditsEarned']),
-                    ('Discovery scans',          str(data['stats']['explore']['scanSoldLevels']['lev_0'])),
-                    ('Level 2 detailed scans',   str(data['stats']['explore']['scanSoldLevels']['lev_1'])),
-                    ('Level 3 detailed scans',   str(data['stats']['explore']['scanSoldLevels']['lev_2'])),
-                    ('Bodies first discovered',  str(data['stats']['explore']['bodiesFirstDiscovered'])),
-                    ('Highest single transaction',   data['stats']['explore']['highestPayout']),
-                    ('Hyperspace jumps',         str(data['stats']['explore']['hyperspaceJumps'])),
-                    ('Distance travelled',          '{:,} Ly'.format(int(data['stats']['explore']['totalHyperspaceDistance']))),
-                    ('Farthest distance from home', '{:,} Ly'.format(int(data['stats']['explore']['greatestDistanceFromStart']))),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
-        except:
-            if __debug__: print_exc()
+        self.addpageheader(page, ['Statistics'])
+        for thing in [
+                ('Systems visited',               ['stats', 'explore', 'visited', 'starsystem'], len),
+                ('Profits from exploration',      ['stats', 'explore', 'creditsEarned'], CR),
+                ('Discovery scans',               ['stats', 'explore', 'scanSoldLevels', 'lev_0']),
+                ('Level 2 detailed scans',        ['stats', 'explore', 'scanSoldLevels', 'lev_1']),
+                ('Level 3 detailed scans',        ['stats', 'explore', 'scanSoldLevels', 'lev_2']),
+                ('Bodies first discovered',       ['stats', 'explore', 'bodiesFirstDiscovered']),
+                ('Highest single transaction',    ['stats', 'explore', 'highestPayout'], CR),
+                ('Hyperspace jumps',              ['stats', 'explore', 'hyperspaceJumps']),
+                ('Distance travelled',            ['stats', 'explore', 'totalHyperspaceDistance'], 'Ly'),
+                ('Farthest distance from home',   ['stats', 'explore', 'greatestDistanceFromStart'], 'Ly'),
+        ]:
+            self.addstat(page, data, *thing)
         notebook.add(page, text='Explorer')
 
         page = self.addpage(notebook, ['Faction', 'Rank'], align=tk.W)
-        for category in ['federation', 'empire', 'power']:
-            self.addpagerow(page, [category.capitalize(), self.ranktitle(category, data['commander']['rank'].get(category))], align=tk.W)
-        self.addpagespacer(page)
         try:
-            self.addpageheader(page, ['Crime'])
-            for thing, value in [
-                    ('Fines issued',             str(data['stats']['crime']['fine']['qty'])),
-                    ('Lifetime fines value',         data['stats']['crime']['fine']['value']),
-                    ('Bounties claimed',         str(data['stats']['crime']['bounty']['qty'])),
-                    ('Lifetime bounty value',        data['stats']['crime']['bounty']['value']),
-                    ('Highest bounty issued',        data['stats']['crime']['bounty']['highest']['value']),
-                    ('Commodities stolen',       str(data['stats']['crime']['stolenCargo']['qty'])),
-                    ('Profit from stolen commodities', data['stats']['crime']['stolenCargo']['value']),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
+            for category in ['federation', 'empire', 'power']:
+                self.addpagerow(page, [category.capitalize(), self.ranktitle(category, data['commander']['rank'][category])], align=tk.W)
         except:
             if __debug__: print_exc()
+        self.addpagespacer(page)
+        self.addpageheader(page, ['Crime'])
+        for thing in [
+                ('Fines issued',                  ['stats', 'crime', 'fine', 'qty']),
+                ('Lifetime fines value',          ['stats', 'crime', 'fine', 'value'], CR),
+                ('Bounties claimed',              ['stats', 'crime', 'bounty', 'qty']),
+                ('Lifetime bounty value',         ['stats', 'crime', 'bounty', 'value'], CR),
+                ('Highest bounty issued',         ['stats', 'crime', 'bounty', 'highest', 'value'], CR),
+                ('Commodities stolen',            ['stats', 'crime', 'stolenCargo', 'qty']),
+                ('Profit from stolen commodities',['stats', 'crime', 'stolenCargo', 'value'], CR),
+        ]:
+            self.addstat(page, data, *thing)
         notebook.add(page, text='Rep')
 
+        page = self.addpage(notebook, ['Ship', 'System', 'Station'], align=tk.W)
         try:
-            page = self.addpage(notebook, ['Ship', 'System', 'Station'], align=tk.W)
-            current = data['commander'].get('currentShipId')
-            for key in sorted(data['ships'].keys(), key=int):
-                ship = data['ships'][key]
-                self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (int(key)==current and ' *' or ''),
-                                       ship['starsystem']['name'], ship['station']['name']], align=tk.W)
-            notebook.add(page, text='Ships')
+            if isinstance(data['ships'], list):
+                for ship in data['ships']:
+                    self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']),
+                                           ship['starsystem']['name'], ship['station']['name']], align=tk.W)
+            else:
+                current = data['commander'].get('currentShipId')
+                for key in sorted(data['ships'].keys(), key=int):
+                    ship = data['ships'][key]
+                    self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (int(key)==current and ' *' or ''),
+                                           ship['starsystem']['name'], ship['station']['name']], align=tk.W)
         except:
             if __debug__: print_exc()
+        notebook.add(page, text='Ships')
 
+        page = self.addpage(notebook, ['Rank', 'NPC', 'PVP'])
         try:
-            page = self.addpage(notebook, ['Rank', 'NPC', 'PVP'])
             npc = data['stats']['NPC']['kills']['ranks']
             pvp = data['stats']['PVP']['kills']['ranks']
             self.addpagerow(page, ['Capital', npc.get('rArray', 0), pvp.get('rArray', 0)])
             for rank in range(len(self.RANKS['combat'])-1, -1, -1):
                 self.addpagerow(page, [self.RANKS['combat'][rank], npc.get('r%d' % rank, 0), pvp.get('r%d' % rank, 0)])
-            notebook.add(page, text='Kills')
         except:
             if __debug__: print_exc()
+        notebook.add(page, text='Kills')
 
+        page = self.addpage(notebook, ['Finance'])
+        for thing in [
+                ('Highest balance',               ['stats', 'wealth', 'maxCredits'], CR),
+                ('Current balance',               ['commander', 'credits'], CR),
+                ('Current loan',                  ['commander', 'debt'], CR),
+        ]:
+            self.addstat(page, data, *thing)
+
+        self.addpagespacer(page)
+        self.addpageheader(page, ['Statistics'])
         try:
-            page = self.addpage(notebook, ['Finance'])
-            for thing, value in [
-                    ('Highest balance',             data['stats']['wealth']['maxCredits']),
-                    ('Current balance',             data['commander']['credits']),
-                    ('Current loan',                data['commander']['debt']),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
-            self.addpagespacer(page)
-            self.addpageheader(page, ['Statistics'])
-            for thing, value in [
-                    ('Current assets',              data['commander']['credits'] + data['ship']['value']['total']),
-                    ('Credits spent on ships',      data['stats']['ship']['spend']['ships']),
-                    ('Credits spent on outfitting', data['stats']['ship']['spend']['modules']),
-                    ('Credits spent on repairs',    data['stats']['ship']['spend']['repair']),
-                    ('Credits spent on fuel',       data['stats']['ship']['spend']['fuel']),
-                    ('Credits spent on munitions',  data['stats']['ship']['spend']['ammo']),
-                    ('Insurance claims',            str(data['stats']['ship']['insurance']['claims'])),
-                    ('Total claim costs',           data['stats']['ship']['insurance']['value']),
-                ]:
-                self.addpagerow(page, [thing, isinstance(value, numbers.Number) and '{:,} CR'.format(value) or value])
-            notebook.add(page, text='Balance')
+            self.addpagerow(page, ['Current assets', '{:,} CR'.format(int(data['commander']['credits'] + data['ship']['value']['total']))])
         except:
             if __debug__: print_exc()
+        for thing in [
+                ('Credits spent on ships',        ['stats', 'ship', 'spend', 'ships'], CR),
+                ('Credits spent on outfitting',   ['stats', 'ship', 'spend', 'modules'], CR),
+                ('Credits spent on repairs',      ['stats', 'ship', 'spend', 'repair'], CR),
+                ('Credits spent on fuel',         ['stats', 'ship', 'spend', 'fuel'], CR),
+                ('Credits spent on munitions',    ['stats', 'ship', 'spend', 'ammo'], CR),
+                ('Insurance claims',              ['stats', 'ship', 'insurance', 'claims']),
+                ('Total claim costs',             ['stats', 'ship', 'insurance', 'value'], CR),
+        ]:
+            self.addstat(page, data, *thing)
+        notebook.add(page, text='Balance')
 
         if platform!='darwin':
             buttonframe = ttk.Frame(self.frame)
@@ -273,21 +274,52 @@ class StatsDialog(tk.Toplevel):
 
 
     def addranking(self, parent, data, category):
-        rank = data['commander']['rank'].get(category)
-        progress = list(data['stats']['ranks'].get(category, []))	# shallow copy
-        if not rank or not progress:
-            self.addpageheader(parent, ['Rank'])
-            self.addpagerow(parent, [self.ranktitle(category, rank)])
-        else:
-            self.addpageheader(parent, ['Rank', 'Achieved', 'Elapsed'])
-            while rank > 0:
-                if rank>=len(progress) or not progress[rank]['ts']:
-                    self.addpagerow(parent, [self.ranktitle(category, rank)])
-                else:
-                    self.addpagerow(parent, [self.ranktitle(category, rank),
-                                             time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(progress[rank]['ts'])),
-                                             self.elapsed(progress[rank]['gt'])])
-                rank -= 1
+        try:
+            rank = data['commander']['rank'].get(category)
+            progress = list(data['stats']['ranks'].get(category, []))	# shallow copy
+            if not rank or not progress:
+                self.addpageheader(parent, ['Rank'])
+                self.addpagerow(parent, [self.ranktitle(category, rank)])
+            else:
+                self.addpageheader(parent, ['Rank', 'Achieved', 'Elapsed'])
+                while rank > 0:
+                    if rank>=len(progress) or not progress[rank]['ts']:
+                        self.addpagerow(parent, [self.ranktitle(category, rank)])
+                    else:
+                        self.addpagerow(parent, [self.ranktitle(category, rank),
+                                                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(progress[rank]['ts'])),
+                                                 self.elapsed(progress[rank]['gt'])])
+                    rank -= 1
+        except:
+            if __debug__: print_exc()
+
+    def addstat(self, parent, data, category, content, transform=None):
+        # category can be a simple type, a list of keys into data, or a (dividend,divsior) pair of lists of keys
+        try:
+            if isinstance(content, list):
+                value = data
+                for key in content:
+                    value = value[key]
+            elif isinstance(content, tuple):
+                dividend = data
+                divisor  = data
+                for key in content[0]:
+                    dividend = dividend[key]
+                for key in content[1]:
+                    divisor  = divisor[key]
+                value = dividend / divisor
+            else:
+                value = content
+            if transform is None:
+                value = '{:,}'.format(value)
+            elif isinstance(transform, basestring):
+                value = '{:,}'.format(value) + ' ' + transform
+            else:
+                value = '{:,}'.format(int(transform(value)))
+        except:
+            assert False, content
+            value = isinstance(transform, basestring) and '0 '+transform or '0'
+        self.addpagerow(parent, [category, value])
 
     def addpage(self, parent, content=[], align=tk.E):
         if platform in ['darwin', 'win32']:
