@@ -24,18 +24,6 @@ elif platform == 'win32':
 
 class StatsDialog(tk.Toplevel):
 
-    RANKS = {
-        # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
-        'federation' : ['None', 'Recruit', 'Cadet', 'Midshipman', 'Petty Officer', 'Chief Petty Officer', 'Warrant Officer', 'Ensign', 'Lieutenant', 'Lieutenant Commander', 'Post Commander', 'Post Captain', 'Rear Admiral', 'Vice Admiral', 'Admiral'],
-        # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
-        'empire'     : ['None', 'Outsider', 'Serf', 'Master', 'Squire', 'Knight', 'Lord', 'Baron', 'Viscount', 'Count', 'Earl', 'Marquis', 'Duke', 'Prince', 'King'],
-        # http://elite-dangerous.wikia.com/wiki/Pilots_Federation
-        'combat'     : ['Harmless', 'Mostly Harmless', 'Novice', 'Competent', 'Expert', 'Master', 'Dangerous', 'Deadly', 'Elite'],
-        'trade'      : ['Penniless', 'Mostly Penniless', 'Pedlar', 'Dealer', 'Merchant', 'Broker', 'Entrepreneur', 'Tycoon', 'Elite'],
-        'explore'    : ['Aimless', 'Mostly Aimless', 'Scout', 'Surveyor', 'Trailblazer', 'Pathfinder', 'Ranger', 'Pioneer', 'Elite'],
-        'power'      : ['None', 'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5'],
-    }
-
     def __init__(self, parent, session):
         tk.Toplevel.__init__(self, parent)
 
@@ -56,21 +44,17 @@ class StatsDialog(tk.Toplevel):
         elif platform=='darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
-            if map(int, mac_ver()[0].split('.')) >= [10,10]:
-                # Hack for tab appearance with 8.5 on Yosemite. For proper fix see
-                # https://github.com/tcltk/tk/commit/55c4dfca9353bbd69bbcec5d63bf1c8dfb461e25
-                style = ttk.Style().configure('TNotebook.Tab', padding=(12,10,12,2))
 
-        self.frame = ttk.Frame(self)
-        self.frame.grid(sticky=tk.NSEW)
+        frame = ttk.Frame(self)
+        frame.grid(sticky=tk.NSEW)
 
-        self.status = ttk.Label(self.frame, text='Fetching data...')
+        self.status = ttk.Label(frame, text='Fetching data...')
         self.status.grid(padx=10, pady=10)
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
         self.grab_set()
-        self.update_idletasks()
+        self.update()	# update_idletasks() isn't cutting it
 
         self.showstats()
 
@@ -82,7 +66,7 @@ class StatsDialog(tk.Toplevel):
             if __debug__: print_exc()
             self.status['text'] = str(e)
         else:
-            return self.showstats()
+            self.showstats()
 
     def showstats(self):
         try:
@@ -99,18 +83,59 @@ class StatsDialog(tk.Toplevel):
 
         if not data.get('commander') or not data['commander'].get('name','').strip():
             self.status['text'] = "Who are you?!"		# Shouldn't happen
-            return
         elif not data.get('ship') or not data['ship'].get('name','').strip():
             self.status['text'] = "What are you flying?!"	# Shouldn't happen
         elif not data.get('stats'):
             self.status['text'] = "No stats available?!"	# Shouldn't happen
-            return
+        else:
+            StatsResults(self.parent, data)
+            self.destroy()
 
+
+class StatsResults(tk.Toplevel):
+
+    RANKS = {
+        # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
+        'federation' : ['None', 'Recruit', 'Cadet', 'Midshipman', 'Petty Officer', 'Chief Petty Officer', 'Warrant Officer', 'Ensign', 'Lieutenant', 'Lieutenant Commander', 'Post Commander', 'Post Captain', 'Rear Admiral', 'Vice Admiral', 'Admiral'],
+        # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
+        'empire'     : ['None', 'Outsider', 'Serf', 'Master', 'Squire', 'Knight', 'Lord', 'Baron', 'Viscount', 'Count', 'Earl', 'Marquis', 'Duke', 'Prince', 'King'],
+        # http://elite-dangerous.wikia.com/wiki/Pilots_Federation
+        'combat'     : ['Harmless', 'Mostly Harmless', 'Novice', 'Competent', 'Expert', 'Master', 'Dangerous', 'Deadly', 'Elite'],
+        'trade'      : ['Penniless', 'Mostly Penniless', 'Pedlar', 'Dealer', 'Merchant', 'Broker', 'Entrepreneur', 'Tycoon', 'Elite'],
+        'explore'    : ['Aimless', 'Mostly Aimless', 'Scout', 'Surveyor', 'Trailblazer', 'Pathfinder', 'Ranger', 'Pioneer', 'Elite'],
+        'power'      : ['None', 'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5'],
+    }
+
+    def __init__(self, parent, data):
+        tk.Toplevel.__init__(self, parent)
+
+        self.parent = parent
         self.title('Cmdr ' + data['commander']['name'])
-        self.status.grid_forget()
+
+        if parent.winfo_viewable():
+            self.transient(parent)
+
+        # position over parent
+        self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+
+        # remove decoration
+        self.resizable(tk.FALSE, tk.FALSE)
+        if platform=='win32':
+            self.attributes('-toolwindow', tk.TRUE)
+        elif platform=='darwin':
+            # http://wiki.tcl.tk/13428
+            parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
+            if map(int, mac_ver()[0].split('.')) >= [10,10]:
+                # Hack for tab appearance with 8.5 on Yosemite. For proper fix see
+                # https://github.com/tcltk/tk/commit/55c4dfca9353bbd69bbcec5d63bf1c8dfb461e25
+                style = ttk.Style().configure('TNotebook.Tab', padding=(12,10,12,2))
+
+        frame = ttk.Frame(self)
+        frame.grid(sticky=tk.NSEW)
+
         CR = 'CR'
 
-        notebook = ttk.Notebook(self.frame)
+        notebook = ttk.Notebook(frame)
         notebook.grid(padx=10, pady=10, sticky=tk.NSEW)
 
         page = self.addpage(notebook)
@@ -266,11 +291,15 @@ class StatsDialog(tk.Toplevel):
         notebook.add(page, text='Balance')
 
         if platform!='darwin':
-            buttonframe = ttk.Frame(self.frame)
+            buttonframe = ttk.Frame(frame)
             buttonframe.grid(padx=10, pady=(0,10), sticky=tk.NSEW)
             buttonframe.columnconfigure(0, weight=1)
             ttk.Label(buttonframe).grid(row=0, column=0)	# spacer
             ttk.Button(buttonframe, text='OK', command=self.destroy).grid(row=0, column=1, sticky=tk.E)
+
+        # wait for window to appear on screen before calling grab_set
+        self.wait_visibility()
+        self.grab_set()
 
 
     def addranking(self, parent, data, category):
