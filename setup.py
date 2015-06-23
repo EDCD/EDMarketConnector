@@ -85,6 +85,8 @@ if sys.platform=='win32':
     import requests
     DATA_FILES = [ ('', [requests.certs.where(),
                          'WinSparkle.dll',
+                         'WinSparkle.pdb',	# For debugging - don't include in package
+                         '%s.VisualElementsManifest.xml' % APPNAME,
                          '%s.ico' % APPNAME ] ) ]
 else:
     DATA_FILES = [ ]
@@ -116,7 +118,6 @@ if sys.platform == 'darwin':
         PKG = '%s_mac_%s.zip' % (APPNAME, SHORTVERSION)
         os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, APPNAME, PKG))
 else:
-    shutil.copy('WinSparkle.pdb', dist_dir)	# For debugging - not included in package
     os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -out %s\ %s.wxs' % (dist_dir, APPNAME))
     if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
         PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)

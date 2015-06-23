@@ -69,6 +69,9 @@
 					<Component Id="cmp3A226BE5169ADACD24C4558730F36DE0" Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
 						<File Id="filDD25890A36252ED1E8C500155136F68E" KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
 					</Component>
+					<Component Id="cmp58A3B51756464557E96B4443B71440FF" Guid="{9A0CB8A2-7167-492F-A185-0BDF7E9F5C01}">
+						<File Id="fil764EB4B533F33433CEC5508ECBDDAD88" KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
+					</Component>
 					<Component Id="cmp6C00F72E54E2F111E00372FB0FBB0FE2" Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File Id="fil2B50DE12C46865F8BA5A62E95387F676" KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
@@ -313,6 +316,7 @@
 			<ComponentRef Id="cmpC8B55AE9807D860809769FEEC0698D4D" />
 			<ComponentRef Id="cmp4E4667BF45EB1B750652361A525491D8" />
 			<ComponentRef Id="cmp3A226BE5169ADACD24C4558730F36DE0" />
+			<ComponentRef Id="cmp58A3B51756464557E96B4443B71440FF" />
 			<ComponentRef Id="cmp6C00F72E54E2F111E00372FB0FBB0FE2" />
 			<ComponentRef Id="cmpCFF82FAF0C08DC3A2167B0390C62C086" />
 			<ComponentRef Id="cmp86F09398BBC9CD7D4B57EAAE1A948C70" />
