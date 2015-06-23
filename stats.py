@@ -160,6 +160,7 @@ class StatsResults(tk.Toplevel):
         page = self.addpage(notebook)
         self.addranking(page, data, 'trade')
         self.addpagespacer(page)
+        self.addpageheader(page, ['Trading'])
         for thing in [
                 ('Market network',                ['stats', 'trade', 'marketIds'], len),
                 ('Trading profit',                ['stats', 'trade', 'profit'], CR),
@@ -346,7 +347,7 @@ class StatsResults(tk.Toplevel):
             else:
                 value = '{:,}'.format(int(transform(value)))
         except:
-            assert False, content
+            if __debug__: print_exc()
             value = isinstance(transform, basestring) and '0 '+transform or '0'
         self.addpagerow(parent, [category, value])
 
