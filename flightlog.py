@@ -18,7 +18,7 @@ def openlog():
     if logfile: return
 
     try:
-        logfile = open(join(config.get('outdir'), 'Flight Log.csv'), 'a+')
+        logfile = open(join(config.get('outdir'), 'Flight Log.csv'), 'a+b')
         if platform != 'win32':	# open for writing is automatically exclusive on Windows
             from fcntl import lockf, LOCK_SH, LOCK_NB
             lockf(logfile, LOCK_SH|LOCK_NB)
@@ -50,6 +50,6 @@ def export(data):
         time.strftime('%H:%M:%S', time.localtime(querytime)),
         data['lastSystem']['name'],
         data['commander']['docked'] and data['lastStarport']['name'] or '',
-        data['ship']['name'],
+        ship_map.get(data['ship']['name'], data['ship']['name']),
         ','.join([('%d %s' % (x['qty'], commodity_map.get(x['commodity'],x['commodity']))) for x in data['ship']['cargo']['items'] if x['commodity']!='drones'])))
     logfile.flush()
