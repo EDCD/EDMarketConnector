@@ -232,24 +232,38 @@ class StatsResults(tk.Toplevel):
                 ('Bounties claimed',              ['stats', 'crime', 'bounty', 'qty']),
                 ('Lifetime bounty value',         ['stats', 'crime', 'bounty', 'value'], CR),
                 ('Highest bounty issued',         ['stats', 'crime', 'bounty', 'highest', 'value'], CR),
-                ('Commodities stolen',            ['stats', 'crime', 'stolenCargo', 'qty']),
-                ('Profit from stolen commodities',['stats', 'crime', 'stolenCargo', 'value'], CR),
         ]:
             self.addstat(page, data, *thing)
+        self.addpagespacer(page)
+        self.addpageheader(page, ['Piracy'])
+        if data['stats'].get('crime',{}).get('stolenCargo'):
+            for thing in [
+                    ('Profit from stolen cargo',  ['stats', 'crime', 'stolenCargo', 'value'], CR),
+                    ('Cargo stolen',              ['stats', 'crime', 'stolenCargo', 'qty']),
+            ]:
+                self.addstat(page, data, *thing)
+        for thing in [
+                ('Profit from stolen goods',      ['stats', 'stolenGoods', 'profit'], CR),
+                ('Goods stolen',                  ['stats', 'stolenGoods', 'qty']),
+                ('Average profit',               (['stats', 'stolenGoods', 'profit'], ['stats', 'stolenGoods', 'count']), CR),
+                ('Highest single transaction',    ['stats', 'stolenGoods', 'largestProfit', 'value'], CR),
+        ]:
+            self.addstat(page, data, *thing)
+        try:
+            if not data['stats']['stolenGoods']['largestProfit']['qty']: raise Exception()
+            self.addpagerow(page, ['', '%d %s' % (data['stats']['stolenGoods']['largestProfit']['qty'], companion.commodity_map.get(data['stats']['stolenGoods']['largestProfit']['commodity'], data['stats']['stolenGoods']['largestProfit']['commodity']))])
+        except:
+            pass
         notebook.add(page, text='Rep')
 
         page = self.addpage(notebook, ['Ship', 'System', 'Station'], align=tk.W)
         try:
-            if isinstance(data['ships'], list):
-                for ship in data['ships']:
-                    self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']),
-                                           ship['starsystem']['name'], ship['station']['name']], align=tk.W)
-            else:
-                current = data['commander'].get('currentShipId')
-                for key in sorted(data['ships'].keys(), key=int):
-                    ship = data['ships'][key]
-                    self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (int(key)==current and ' *' or ''),
-                                           ship['starsystem']['name'], ship['station']['name']], align=tk.W)
+            current = data['commander'].get('currentShipId')
+            # 'ships' can be an array or a dict indexed by str(int). Perhaps the latter if you've sold ships?
+            for key in (isinstance(data['ships'], list) and range(len(data['ships'])) or sorted(data['ships'].keys(), key=int)):
+                ship = data['ships'][key]
+                self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (int(key)==current and ' *' or ''),
+                                       ship['starsystem']['name'], ship['station']['name']], align=tk.W)
         except:
             if __debug__: print_exc()
         notebook.add(page, text='Ships')
@@ -331,19 +345,22 @@ class StatsResults(tk.Toplevel):
                 for key in content:
                     value = value[key]
             elif isinstance(content, tuple):
-                dividend = data
                 divisor  = data
-                for key in content[0]:
-                    dividend = dividend[key]
                 for key in content[1]:
                     divisor  = divisor[key]
-                value = dividend / divisor
+                if divisor:
+                    dividend = data
+                    for key in content[0]:
+                        dividend = dividend[key]
+                    value = dividend / divisor
+                else:
+                    value = 0
             else:
                 value = content
             if transform is None:
-                value = '{:,}'.format(value)
+                value = '{:,}'.format(int(value))
             elif isinstance(transform, basestring):
-                value = '{:,}'.format(value) + ' ' + transform
+                value = '{:,}'.format(int(value)) + ' ' + transform
             else:
                 value = '{:,}'.format(int(transform(value)))
         except:
