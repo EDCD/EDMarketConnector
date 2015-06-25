@@ -1,5 +1,6 @@
 # Export poor man's flight log
 
+from collections import defaultdict
 import errno
 import os
 from os.path import join
@@ -45,11 +46,17 @@ def export(data):
 
     openlog()
 
+    commodities = defaultdict(int)
+    for item in data['ship'].get('cargo',{}).get('items',[]):
+        if item['commodity'] != 'drones':
+            commodities[commodity_map.get(item['commodity'], item['commodity'])] += item['qty']
+
     logfile.write('%s,%s,%s,%s,%s,%s\r\n' % (
         time.strftime('%Y-%m-%d', time.localtime(querytime)),
         time.strftime('%H:%M:%S', time.localtime(querytime)),
         data['lastSystem']['name'],
         data['commander']['docked'] and data['lastStarport']['name'] or '',
         ship_map.get(data['ship']['name'], data['ship']['name']),
-        ','.join([('%d %s' % (x['qty'], commodity_map.get(x['commodity'],x['commodity']))) for x in data['ship']['cargo']['items'] if x['commodity']!='drones'])))
+        ','.join([('%d %s' % (commodities[k], k)) for k in sorted(commodities)])))
+
     logfile.flush()
