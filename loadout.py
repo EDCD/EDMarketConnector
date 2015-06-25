@@ -82,7 +82,7 @@ def export(data):
         elif slot in loadout:
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
-    string += '---\nCargo : %d T\nFuel  : %d T\nPrice : %s CR\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['capacity'], '{:,}'.format(data['ship']['value']['total']))
+    string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['capacity'])
 
     # Look for last ship of this type
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
