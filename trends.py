@@ -134,10 +134,22 @@ dataseries = [
         'keys':    [('Harmless', 'r0'), ('Mostly Harmless', 'r1'), ('Novice', 'r2'), ('Competent', 'r3'), ('Expert', 'r4'), ('Master', 'r5'), ('Dangerous', 'r6'), ('Deadly', 'r7'), ('Elite', 'r8'), ('Capital', 'rArray')],
     },
     {
-        'name':    'Vanish',
-        'prefix':  ['stats', 'vanishCounters'],
-        'keys':    ['amongPeers', 'inDanger', 'inDangerWithPeers', 'isNotDying', 'noPeers', 'notInDanger'],
+        'name':    'Balance',
+        'axes':    ['qty', 'CR'],
+        'keys':    [
+            ('Current balance',       ['commander', 'credits'], True),
+            ('Spent on ships',        ['stats', 'ship', 'spend', 'ships'], True),
+            ('Spent on outfitting',   ['stats', 'ship', 'spend', 'modules'], True),
+            ('Spent on repairs',      ['stats', 'ship', 'spend', 'repair'], True),
+            ('Insurance claims',      ['stats', 'ship', 'insurance', 'claims']),
+            ('Total claim costs',     ['stats', 'ship', 'insurance', 'value'], True),
+        ],
     },
+    # {
+    #     'name':    'Vanish',
+    #     'prefix':  ['stats', 'vanishCounters'],
+    #     'keys':    ['amongPeers', 'inDanger', 'inDangerWithPeers', 'isNotDying', 'noPeers', 'notInDanger'],
+    # },
 ]
 
 
