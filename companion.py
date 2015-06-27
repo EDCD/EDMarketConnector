@@ -19,6 +19,7 @@ if __debug__:
 from config import config
 
 holdoff = 120	# be nice
+timeout = 10	# requests timeout
 
 
 # Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
@@ -112,7 +113,7 @@ class Session:
                 raise CredentialsError()
         else:
             self.credentials = { 'email' : username, 'password' : password }
-        r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials)
+        r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials, timeout=timeout)
         if r.status_code != requests.codes.ok:
             self.dump(r)
         r.raise_for_status()
@@ -131,8 +132,7 @@ class Session:
             return r.status_code
 
     def verify(self, code):
-        r = self.session.post('https://companion.orerve.net/user/confirm',
-                              data = { 'code' : code })
+        r = self.session.post('https://companion.orerve.net/user/confirm', data = {'code' : code}, timeout=timeout)
         r.raise_for_status()
         # verification doesn't actually return a yes/no, so log in again to determine state
         try:
@@ -147,7 +147,7 @@ class Session:
             self.login()
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
-        r = self.session.get('https://companion.orerve.net/profile')
+        r = self.session.get('https://companion.orerve.net/profile', timeout=timeout)
 
         if r.status_code != requests.codes.ok:
             self.dump(r)

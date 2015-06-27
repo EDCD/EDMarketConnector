@@ -13,6 +13,8 @@ from config import applongname, appversion, config
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 schema = 'http://schemas.elite-markets.net/eddn/commodity/2'
 
+timeout= 10	# requests timeout
+
 bracketmap = { 1: 'Low',
                2: 'Med',
                3: 'High', }
@@ -20,7 +22,7 @@ bracketmap = { 1: 'Low',
 def export(data):
 
     def send(msg):
-        r = requests.post(upload, data=json.dumps(msg))
+        r = requests.post(upload, data=json.dumps(msg), timeout=timeout)
         if __debug__ and r.status_code != requests.codes.ok:
             print 'Status\t%s'  % r.status_code
             print 'URL\t%s'  % r.url
