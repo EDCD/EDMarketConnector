@@ -113,7 +113,12 @@ class Session:
                 raise CredentialsError()
         else:
             self.credentials = { 'email' : username, 'password' : password }
-        r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials, timeout=timeout)
+        try:
+            r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials, timeout=timeout)
+        except:
+            if __debug__: print_exc()
+            raise ServerError()
+
         if r.status_code != requests.codes.ok:
             self.dump(r)
         r.raise_for_status()
@@ -147,7 +152,11 @@ class Session:
             self.login()
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
-        r = self.session.get('https://companion.orerve.net/profile', timeout=timeout)
+        try:
+            r = self.session.get('https://companion.orerve.net/profile', timeout=timeout)
+        except:
+            if __debug__: print_exc()
+            raise ServerError()
 
         if r.status_code != requests.codes.ok:
             self.dump(r)

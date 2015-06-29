@@ -5,6 +5,7 @@ import sys
 from sys import platform
 from os import mkdir
 from os.path import expanduser, isdir, join
+import requests
 from time import time, localtime, strftime
 
 import Tkinter as tk
@@ -224,8 +225,17 @@ class AppWindow:
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
 
+        # Companion API problem
         except companion.ServerError as e:
             self.status['text'] = str(e)
+
+        except requests.exceptions.ConnectionError as e:
+            if __debug__: print_exc()
+            self.status['text'] = "Error: Can't connect to EDDN"
+
+        except requests.exceptions.Timeout as e:
+            if __debug__: print_exc()
+            self.status['text'] = "Error: Connection to EDDN timed out"
 
         except Exception as e:
             if __debug__: print_exc()
