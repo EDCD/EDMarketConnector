@@ -172,12 +172,7 @@ class Session:
             self.dump(r)
             raise ServerError()
 
-        # Recording
-        if __debug__:
-            with open('%s.%s.%s.json' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())), 'wt') as h:
-                h.write(json.dumps(data, indent=2, sort_keys=True))
-
-        return self.fixup(data)
+        return data
 
     def close(self):
         self.state = Session.STATE_NONE
@@ -188,10 +183,8 @@ class Session:
             pass
         self.session = None
 
-
-    # Fixup anomalies in the recieved commodity data
-    def fixup(self, data):
-        commodities = data.get('lastStarport') and data['lastStarport'].get('commodities') or []
+    # Fixup in-place anomalies in the recieved commodity data
+    def fixup(self, commodities):
         i=0
         while i<len(commodities):
             commodity = commodities[i]
@@ -234,7 +227,7 @@ class Session:
             # Skip the commodity
             commodities.pop(i)
 
-        return data
+        return commodities
 
     def dump(self, r):
         if __debug__:

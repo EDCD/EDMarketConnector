@@ -3,6 +3,7 @@
 
 import sys
 from sys import platform
+import json
 from os import mkdir
 from os.path import expanduser, isdir, join
 import requests
@@ -196,6 +197,9 @@ class AppWindow:
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
             else:
                 # stuff we can do when not docked
+                if __debug__:	# Recording
+                    with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
+                        h.write(json.dumps(data, indent=2, sort_keys=True))
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP:
@@ -210,6 +214,9 @@ class AppWindow:
                 elif not data['lastStarport'].get('commodities'):
                     self.status['text'] = "Station doesn't have a market!"
                 else:
+                    # Fixup anomalies in the commodity data
+                    self.session.fixup(data['lastStarport']['commodities'])
+
                     if config.getint('output') & config.OUT_CSV:
                         bpc.export(data, True)
                     if config.getint('output') & config.OUT_TD:
