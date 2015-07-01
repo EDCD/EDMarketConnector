@@ -1,9 +1,9 @@
 Elite: Dangerous Market Connector
 ========
 
-This app downloads commodity market data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
+This app downloads commodity market and other data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the data to the [Elite Dangerous Data Network](http://eddn.ed-td.space/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
+* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home) and [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
 * saves a record of your ship loadout and/or flight log.
 
@@ -49,16 +49,16 @@ Output
 This app can save a variety of data in a variety of formats:
 
 * Market data
-  * Elite Dangerous Data Network - sends the market data to the "[EDDN](http://eddn.ed-td.space/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
-  * Slopey's BPC format - saves the market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
-  * Trade Dangerous format - saves the market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
-  * CSV format - saves the market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
+  * Elite Dangerous Data Network - sends commodity market and shipyard data to "[EDDN](http://eddn-gateway.elite-markets.net/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
+  * Slopey's BPC format - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
+  * Trade Dangerous format - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
+  * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
 
 * Ship loadout
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com).
 
 * Flight log
-  * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel.
+  * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
@@ -120,7 +120,7 @@ Windows:
 Acknowledgements
 --------
 * "Elite: Dangerous" is © 1984 - 2014 Frontier Developments plc.
-* Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [AnthorNet](https://github.com/AnthorNet) for the [stats](http://eddn.ed-td.space/).
+* Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [AnthorNet](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the "Companion" interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
