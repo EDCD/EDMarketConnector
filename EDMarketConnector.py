@@ -6,6 +6,7 @@ from sys import platform
 import json
 from os import mkdir
 from os.path import expanduser, isdir, join
+import re
 import requests
 from time import time, localtime, strftime
 
@@ -111,7 +112,9 @@ class AppWindow:
 
         # update geometry
         if config.get('geometry'):
-            self.w.geometry(config.get('geometry'))
+            match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
+            if match and (platform!='darwin' or int(match.group(2))>0):	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+                self.w.geometry(config.get('geometry'))
         self.w.update_idletasks()
         self.w.wait_visibility()
         (w, h) = (self.w.winfo_width(), self.w.winfo_height())
@@ -259,7 +262,8 @@ class AppWindow:
             self.button['state'] = tk.NORMAL
 
     def onexit(self, event=None):
-        config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
+        if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
         self.session.close()
         self.w.destroy()

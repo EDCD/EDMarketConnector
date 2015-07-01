@@ -40,7 +40,8 @@ class PreferencesDialog(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+        if platform!='darwin' or parent.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
@@ -182,7 +183,8 @@ class AuthenticationDialog(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+        if platform!='darwin' or parent.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
