@@ -65,27 +65,28 @@ def export(data):
             }
         })
 
-    # *Do* send empty modules list - implies station has no outfitting
-    modules = []
-    for v in data['lastStarport'].get('modules', {}).itervalues():
-        try:
-            module = outfitting.lookup(v)
-            if module:
-                modules.append(module)
-        except AssertionError as e:
-            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
-        except:
-            if __debug__: raise
-    send({
-        '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
-        'header'     : header,
-        'message'    : {
-            'systemName'  : data['lastSystem']['name'].strip(),
-            'stationName' : data['lastStarport']['name'].strip(),
-            'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
-            'modules'     : modules,
-        }
-    })
+    # EDDN doesn't yet accept an outfitting schema
+    # # *Do* send empty modules list - implies station has no outfitting
+    # modules = []
+    # for v in data['lastStarport'].get('modules', {}).itervalues():
+    #     try:
+    #         module = outfitting.lookup(v)
+    #         if module:
+    #             modules.append(module)
+    #     except AssertionError as e:
+    #         if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+    #     except:
+    #         if __debug__: raise
+    # send({
+    #     '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
+    #     'header'     : header,
+    #     'message'    : {
+    #         'systemName'  : data['lastSystem']['name'].strip(),
+    #         'stationName' : data['lastStarport']['name'].strip(),
+    #         'timestamp'   : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime)),
+    #         'modules'     : modules,
+    #     }
+    # })
 
     # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
     if data['lastStarport'].get('ships'):
