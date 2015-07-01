@@ -171,13 +171,14 @@ class AppWindow:
         else:
             return self.getandsend()	# try again
 
-    def getandsend(self, event=None):
-        if time() < self.holdofftime: return	# Was invoked by Return key while in cooldown
+    def getandsend(self, event=None, retrying=False):
 
-        self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
-        self.status['text'] = 'Fetching market data...'
-        self.button['state'] = tk.DISABLED
-        self.w.update_idletasks()
+        if not retrying:
+            if time() < self.holdofftime: return	# Was invoked by Return key while in cooldown
+            self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
+            self.status['text'] = 'Fetching station data...'
+            self.button['state'] = tk.DISABLED
+            self.w.update_idletasks()
 
         try:
             querytime = int(time())
@@ -198,7 +199,13 @@ class AppWindow:
                 self.status['text'] = "Where are you?!"		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
+            elif (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('ships') and not retrying:
+                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 2.5s for margin).
+                self.w.after(2500, lambda:self.getandsend(retrying=True))
+                return
             else:
+                if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
+
                 # stuff we can do when not docked
                 if __debug__:	# Recording
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
@@ -214,23 +221,30 @@ class AppWindow:
 
                 elif not data['commander'].get('docked'):
                     self.status['text'] = "You're not docked at a station!"
-                elif not data['lastStarport'].get('commodities'):
-                    self.status['text'] = "Station doesn't have a market!"
                 else:
-                    # Fixup anomalies in the commodity data
-                    self.session.fixup(data['lastStarport']['commodities'])
+                    if data['lastStarport'].get('commodities'):
+                        # Fixup anomalies in the commodity data
+                        self.session.fixup(data['lastStarport']['commodities'])
 
-                    if config.getint('output') & config.OUT_CSV:
-                        bpc.export(data, True)
-                    if config.getint('output') & config.OUT_TD:
-                        td.export(data)
-                    if config.getint('output') & config.OUT_BPC:
-                        bpc.export(data, False)
+                        if config.getint('output') & config.OUT_CSV:
+                            bpc.export(data, True)
+                        if config.getint('output') & config.OUT_TD:
+                            td.export(data)
+                        if config.getint('output') & config.OUT_BPC:
+                            bpc.export(data, False)
+
                     if config.getint('output') & config.OUT_EDDN:
-                        self.status['text'] = 'Sending data to EDDN...'
-                        self.w.update_idletasks()
-                        eddn.export(data)
-                    self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+                        if data['lastStarport'].get('commodities') or data['lastStarport'].get('modules') or data['lastStarport'].get('ships'):
+                            self.status['text'] = 'Sending data to EDDN...'
+                            self.w.update_idletasks()
+                            eddn.export(data)
+                            self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+                        else:
+                            self.status['text'] = "Station doesn't have anything!"
+                    elif not data['lastStarport'].get('commodities'):
+                        self.status['text'] = "Station doesn't have a market!"
+                    else:
+                        self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
