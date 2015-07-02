@@ -43,7 +43,7 @@ class AppWindow:
         elif platform == 'linux2':
             from PIL import Image, ImageTk
             icon = ImageTk.PhotoImage(Image.open("EDMarketConnector.png"))
-            root.tk.call('wm', 'iconphoto', root, '-default', icon)
+            self.w.tk.call('wm', 'iconphoto', self.w, '-default', icon)
             style = ttk.Style()
             style.theme_use('clam')
 
@@ -78,18 +78,18 @@ class AppWindow:
             from Foundation import NSBundle
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             apple_menu = tk.Menu(menubar, name='apple')
-            apple_menu.add_command(label="About %s" % applongname, command=lambda:root.call('tk::mac::standardAboutPanel'))
+            apple_menu.add_command(label="About %s" % applongname, command=lambda:self.w.call('tk::mac::standardAboutPanel'))
             apple_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
             apple_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(menu=window_menu)
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
-            root.createcommand('tkAboutDialog', lambda:root.call('tk::mac::standardAboutPanel'))
-            root.createcommand("::tk::mac::Quit", self.onexit)
-            root.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.login))
-            root.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
-            root.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
+            self.w.createcommand('tkAboutDialog', lambda:self.w.call('tk::mac::standardAboutPanel'))
+            self.w.createcommand("::tk::mac::Quit", self.onexit)
+            self.w.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.login))
+            self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
+            self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
             file_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
@@ -98,7 +98,7 @@ class AppWindow:
             file_menu.add_separator()
             file_menu.add_command(label="Exit", command=self.onexit)
             menubar.add_cascade(label="File", menu=file_menu)
-            root.protocol("WM_DELETE_WINDOW", self.onexit)
+            self.w.protocol("WM_DELETE_WINDOW", self.onexit)
         if platform == 'linux2':
             # Fix up menu to use same styling as everything else
             (fg, bg, afg, abg) = (style.lookup('TLabel.label', 'foreground'),
@@ -127,8 +127,8 @@ class AppWindow:
 
         # Load updater after UI creation (for WinSparkle)
         import update
-        self.updater = update.Updater(master)
-        master.bind_all('<<Quit>>', self.onexit)	# user-generated
+        self.updater = update.Updater(self.w)
+        self.w.bind_all('<<Quit>>', self.onexit)	# user-generated
 
 
     # call after credentials have changed
@@ -265,14 +265,8 @@ class AppWindow:
         self.w.destroy()
 
 
+# Run the app
 if __name__ == "__main__":
-
-    if platform=='win32' and getattr(sys, 'frozen', False):
-        # By deault py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
-        sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
-
-    # Run the app
     root = tk.Tk()
     app = AppWindow(root)
     root.mainloop()
