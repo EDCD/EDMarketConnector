@@ -280,6 +280,9 @@
 								<Component Id="cmpB252953A880253445EC0750D45BA4D2C" Guid="{54AD42EB-7305-45AA-953C-574921E90BAD}">
 									<File Id="fil5AA8155AC7EEAAB8D968EBD6C1D3DC74" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\sizegrip.tcl" />
 								</Component>
+								<Component Id="cmp9096943773180E24A57FAD7CA2663824" Guid="{F4A91FAD-5F8D-4007-B38E-2C706E87770B}">
+									<File Id="fil3E357787A95782E83591AD92D55452ED" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\spinbox.tcl" />
+								</Component>
 								<Component Id="cmpB298804A0993E19DC88246355CE928A1" Guid="{FC12F75C-6EF1-4AD5-BF60-55FC5E825605}">
 									<File Id="fil0AB9EE0CDCE3DE7BED31362ACB334CBA" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\treeview.tcl" />
 								</Component>
@@ -288,6 +291,9 @@
 								</Component>
 								<Component Id="cmp624ACFB58835F0C5EE70B6105D4A8C56" Guid="{D5534AC6-9A1B-4CE3-90E1-6B65D4FF86D6}">
 									<File Id="fil7057BBCBE2529C32CB6C0FF7A6A7B0EA" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\utils.tcl" />
+								</Component>
+								<Component Id="cmpD0643360E94197D8971CA1D6A7B81B5C" Guid="{198ADB32-56DD-4F29-B862-817DD6E92ECA}">
+									<File Id="filC1C9FD16B862068CBEEA8FE8C06864C7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\vistaTheme.tcl" />
 								</Component>
 								<Component Id="cmpE2DB8F0A511E57F996B803AF1589A0D4" Guid="{92589FA4-E08B-4E45-856E-F266D6290E2A}">
 									<File Id="fil5D32585BD4F73F8D01539B1B8CEFEFB7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\winTheme.tcl" />
@@ -384,9 +390,11 @@
 			<ComponentRef Id="cmp6F0C4A275C34B4CBF470061C49F48A62" />
 			<ComponentRef Id="cmp04E5FE0E0D39B434CD72E5668C8EA233" />
 			<ComponentRef Id="cmpB252953A880253445EC0750D45BA4D2C" />
+			<ComponentRef Id="cmp9096943773180E24A57FAD7CA2663824" />
 			<ComponentRef Id="cmpB298804A0993E19DC88246355CE928A1" />
 			<ComponentRef Id="cmp57DB57AE30ADD8A61D4FFFE148B291D7" />
 			<ComponentRef Id="cmp624ACFB58835F0C5EE70B6105D4A8C56" />
+			<ComponentRef Id="cmpD0643360E94197D8971CA1D6A7B81B5C" />
 			<ComponentRef Id="cmpE2DB8F0A511E57F996B803AF1589A0D4" />
 			<ComponentRef Id="cmp34D56605EFC92708697DA79019DC398C" />
 		</Feature>
