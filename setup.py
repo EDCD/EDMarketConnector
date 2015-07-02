@@ -95,7 +95,8 @@ setup(
     name = APPLONGNAME,
     version = VERSION,
     app = [APP],
-    windows = [ {'script': APP,
+    windows = [ {'dest_base': APPNAME,
+                 'script': 'winlauncher.py',
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
                  'copyright': u'© 2015 Jonathan Harris',
                  'name': APPNAME,		# WinSparkle
