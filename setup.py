@@ -130,8 +130,8 @@ appcast.write('''
 \t\t<item>
 \t\t\t<title>Release {0}</title>
 \t\t\t<description>
-\t\t\t\t<![CDATA[
-<h{6}>Release {0:.2f}</h{6}>
+\t\t\t\t<![CDATA[{6}
+<h2>Release {0:.2f}</h2>
 <ul>
 
 </ul>
@@ -145,4 +145,10 @@ appcast.write('''
 \t\t\t\ttype="application/octet-stream"
 \t\t\t/>
 \t\t</item>
-'''.format(float(SHORTVERSION)/100, SHORTVERSION, PKG, sys.platform=='darwin' and 'osx' or 'windows"\n\t\t\t\tsparkle:installerArguments="/passive', VERSION, os.stat(PKG).st_size, sys.platform=='darwin' and 2 or 3))
+'''.format(float(SHORTVERSION)/100,
+           SHORTVERSION,
+           PKG,
+           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive' or 'osx',
+           VERSION,
+           os.stat(PKG).st_size,
+           sys.platform=='win32' and '\n<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>' or ''))
