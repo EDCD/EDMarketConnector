@@ -217,6 +217,8 @@ def lookup(module):
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
     elif name[0]=='Hpt' and name[1] in weapon_map:
+        # Skip PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
+        if len(name)>4: raise AssertionError('%s: Skipping weapon variant "%s"' % (module['id'], name[4]))
         if name[2] not in weaponmount_map: raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
         if name[3] not in weaponclass_map: raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
         # if module['name'] not in weaponrating_map: raise AssertionError('%s: Unknown rating for this weapon' % module['id'])
@@ -230,6 +232,8 @@ def lookup(module):
 
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
     elif name[0]=='Hpt' and name[1] in utility_map:
+        # Skip PP faction-specific modules (none atm)
+        if len(name)>4: raise AssertionError('%s: Skipping utility variant "%s"' % (module['id'], name[4]))
         new['category'] = 'utility'
         new['name'] = utility_map[name[1]]
         if name[-1] in weaponclass_map:	# e.g. Hpt_PlasmaPointDefence_Turret_Tiny
@@ -263,6 +267,9 @@ def lookup(module):
 
         if name[1] == 'DroneControl':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
+
+        # Skip PP faction-specific modules e.g. Int_ShieldGenerator_Size1_Class5_Strong
+        if len(name)>4: raise AssertionError('%s: Skipping module variant "%s"' % (module['id'], name[4]))
 
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1
             new['category'] = 'standard'
