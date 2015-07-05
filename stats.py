@@ -262,10 +262,10 @@ class StatsResults(tk.Toplevel):
         try:
             current = data['commander'].get('currentShipId')
             # 'ships' can be an array or a dict indexed by str(int). Perhaps the latter if you've sold ships?
-            for key in (isinstance(data['ships'], list) and range(len(data['ships'])) or sorted(data['ships'].keys(), key=int)):
-                ship = data['ships'][key]
-                self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (int(key)==current and ' *' or ''),
-                                       ship['starsystem']['name'], ship['station']['name']], align=tk.W)
+            for key, ship in enumerate(companion.listify(data.get('ships'))):
+                if ship:
+                    self.addpagerow(page, [companion.ship_map.get(ship['name'], ship['name']) + (key==current and ' *' or ''),
+                                           ship['starsystem']['name'], ship['station']['name']], align=tk.W)
         except:
             if __debug__: print_exc()
         notebook.add(page, text='Ships')
@@ -322,14 +322,14 @@ class StatsResults(tk.Toplevel):
     def addranking(self, parent, data, category):
         try:
             rank = data['commander']['rank'].get(category)
-            progress = list(data['stats']['ranks'].get(category, []))	# shallow copy
+            progress = companion.listify(data['stats']['ranks'].get(category))
             if not rank or not progress:
                 self.addpageheader(parent, ['Rank'])
                 self.addpagerow(parent, [self.ranktitle(category, rank)])
             else:
                 self.addpageheader(parent, ['Rank', 'Achieved', 'Elapsed'])
                 while rank > 0:
-                    if rank>=len(progress) or not progress[rank]['ts']:
+                    if rank>=len(progress) or not progress[rank] or not progress[rank]['ts']:
                         self.addpagerow(parent, [self.ranktitle(category, rank)])
                     else:
                         self.addpagerow(parent, [self.ranktitle(category, rank),

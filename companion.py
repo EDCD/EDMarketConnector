@@ -71,6 +71,29 @@ ship_map = {
 }
 
 
+# Companion API sometimes returns an array as a json array, sometimes as a json object indexed by "int".
+# This seems to depend on whether the there are 'gaps' in the Cmdr's data - i.e. whether the array is sparse.
+# In practice these arrays aren't very sparse so just convert them to lists with any 'gaps' holding None.
+def listify(thing):
+    if thing is None:
+        return []	# data is not present
+    elif isinstance(thing, list):
+        return thing	# array is not sparse
+    elif isinstance(thing, dict):
+        retval = []
+        for k,v in thing.iteritems():
+            idx = int(k)
+            if idx >= len(retval):
+                retval.extend([None] * (idx - len(retval)))
+                retval.append(v)
+            else:
+                retval[idx] = v
+        return retval
+    else:
+        assert False, thing	# we expect an array or a sparse array
+        return list(thing)	# hope for the best
+
+
 class ServerError(Exception):
     def __str__(self):
         return 'Error: Server is down'
