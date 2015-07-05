@@ -322,19 +322,19 @@ class StatsResults(tk.Toplevel):
     def addranking(self, parent, data, category):
         try:
             rank = data['commander']['rank'].get(category)
-            progress = list(data['stats']['ranks'].get(category, []))	# shallow copy
+            progress = data['stats']['ranks'].get(category,[])	# shallow copy
             if not rank or not progress:
                 self.addpageheader(parent, ['Rank'])
                 self.addpagerow(parent, [self.ranktitle(category, rank)])
             else:
                 self.addpageheader(parent, ['Rank', 'Achieved', 'Elapsed'])
                 while rank > 0:
-                    if rank>=len(progress) or not progress[rank]['ts']:
+                    if rank>=len(progress) or not progress[unicode(rank)]['ts']:
                         self.addpagerow(parent, [self.ranktitle(category, rank)])
                     else:
                         self.addpagerow(parent, [self.ranktitle(category, rank),
-                                                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(progress[rank]['ts'])),
-                                                 self.elapsed(progress[rank]['gt'])])
+                                                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(progress[unicode(rank)]['ts'])),
+                                                 self.elapsed(progress[unicode(rank)]['gt'])])
                     rank -= 1
         except:
             if __debug__: print_exc()
