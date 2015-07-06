@@ -24,19 +24,28 @@ armour_map = {
 }
 
 weapon_map = {
-    'AdvancedTorpPylon'   : 'Torpedo Pylon',
-    'BasicMissileRack'    : 'Missile Rack',
-    'BeamLaser'           : 'Beam Laser',
-    'Cannon'              : 'Cannon',
-    'DumbfireMissileRack' : 'Missile Rack',
-    'MineLauncher'        : 'Mine Launcher',
-    'MiningLaser'         : 'Mining Laser',
-    'MultiCannon'         : 'Multi-Cannon',
-    'PlasmaAccelerator'   : 'Plasma Accelerator',
-    'PulseLaser'          : 'Pulse Laser',
-    'PulseLaserBurst'     : 'Burst Laser',
-    'Railgun'             : 'Rail Gun',
-    'Slugshot'            : 'Fragment Cannon',
+    'AdvancedTorpPylon'              : 'Torpedo Pylon',
+    'BasicMissileRack'               : 'Missile Rack',
+    'BeamLaser'                      : 'Beam Laser',
+    ('BeamLaser','Heat')             : 'Retributor Beam Laser',
+    'Cannon'                         : 'Cannon',
+    'DumbfireMissileRack'            : 'Missile Rack',
+    'MineLauncher'                   : 'Mine Launcher',
+    ('MineLauncher','Impulse')       : 'Pack-hound Missile Rack',
+    'MiningLaser'                    : 'Mining Laser',
+    ('MiningLaser','Advanced')       : 'Mining Lance Beam Laser',
+    'MultiCannon'                    : 'Multi-Cannon',
+    ('MultiCannon','Strong')         : 'Enforcer Cannon',
+    'PlasmaAccelerator'              : 'Plasma Accelerator',
+    ('PlasmaAccelerator','Advanced') : 'Advanced Plasma Accelerator',
+    'PulseLaser'                     : 'Pulse Laser',
+    ('PulseLaser','Disruptor')       : 'Pulse Disruptor Laser',
+    'PulseLaserBurst'                : 'Burst Laser',
+    ('PulseLaserBurst','Scatter')    : 'Cytoscrambler Burst Laser',
+    'Railgun'                        : 'Rail Gun',
+    ('Railgun','Burst')              : 'Imperial Hammer Rail Gun',
+    'Slugshot'                       : 'Fragment Cannon',
+    ('Slugshot','Range')             : 'Pacifier Frag-Cannon',
 }
 
 missiletype_map = {
@@ -131,6 +140,15 @@ weaponrating_map = {
     'Hpt_Slugshot_Turret_Large': 'C',
 }
 
+# Old standard weapon variants
+weaponoldvariant_map = {
+    'F'  : 'Focussed',
+    'HI' : 'High Impact',
+    'LH' : 'Low Heat',
+    'OC' : 'Overcharged',
+    'SS' : 'Scatter Spray',
+}
+
 utility_map = {
     'CargoScanner'             : 'Cargo Scanner',
     'ChaffLauncher'            : 'Chaff Launcher',
@@ -161,7 +179,6 @@ standard_map = {
     'Sensors'          : 'Sensors',
 }
 
-
 stellar_map = {
     'Standard'     : ('Basic Discovery Scanner', 'E'),
     'Intermediate' : ('Intermediate Discovery Scanner', 'D'),
@@ -182,6 +199,7 @@ internal_map = {
     'ResourceSiphon'    : 'Hatch Breaker Limpet Controller',
     'ShieldCellBank'    : 'Shield Cell Bank',
     'ShieldGenerator'   : 'Shield Generator',
+    ('ShieldGenerator','Strong') : 'Prismatic Shield Generator',
 }
 
 
@@ -211,31 +229,38 @@ def lookup(module):
     elif name[0].lower() in ['decal', 'paintjob']:	# Have seen "paintjob" and "PaintJob"
         return None
 
+    # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
+    elif module.get('category') == 'powerplay':
+        return None
+
     # Shouldn't be listing player-specific paid stuff
     elif module.get('sku'):
         raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
     elif name[0]=='Hpt' and name[1] in weapon_map:
-        # Skip PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
-        if len(name)>4: raise AssertionError('%s: Skipping weapon variant "%s"' % (module['id'], name[4]))
         if name[2] not in weaponmount_map: raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
         if name[3] not in weaponclass_map: raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
-        # if module['name'] not in weaponrating_map: raise AssertionError('%s: Unknown rating for this weapon' % module['id'])
         new['category'] = 'hardpoint'
-        new['name'] =  weapon_map[name[1]]
+        if len(name)>4:
+            if name[4] in weaponoldvariant_map:		# Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
+                new['name'] =  weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
+                new['rating'] = '?'
+            else:			# PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
+                new['name'] =  weapon_map[(name[1],name[4])]
+                new['rating'] = weaponrating_map.get(('_').join(name[:4]), '?')	# assumes same rating as base weapon
+        else:
+            new['name'] =  weapon_map[name[1]]
+            new['rating'] = weaponrating_map.get(module['name'], '?')		# no obvious rule - needs lookup table
         new['mount'] = weaponmount_map[name[2]]
         if name[1] in missiletype_map:	# e.g. Hpt_DumbfireMissileRack_Fixed_Small
             new['guidance'] = missiletype_map[name[1]]
         new['class'] = weaponclass_map[name[3]]
-        new['rating'] = weaponrating_map.get(module['name'], '?')	# no obvious rule - needs lookup table
 
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
     elif name[0]=='Hpt' and name[1] in utility_map:
-        # Skip PP faction-specific modules (none atm)
-        if len(name)>4: raise AssertionError('%s: Skipping utility variant "%s"' % (module['id'], name[4]))
         new['category'] = 'utility'
-        new['name'] = utility_map[name[1]]
+        new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
         if name[-1] in weaponclass_map:	# e.g. Hpt_PlasmaPointDefence_Turret_Tiny
             new['class'] = weaponclass_map[name[-1]]
             new['rating'] = 'I'
@@ -268,15 +293,12 @@ def lookup(module):
         if name[1] == 'DroneControl':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
 
-        # Skip PP faction-specific modules e.g. Int_ShieldGenerator_Size1_Class5_Strong
-        if len(name)>4: raise AssertionError('%s: Skipping module variant "%s"' % (module['id'], name[4]))
-
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1
             new['category'] = 'standard'
-            new['name'] = standard_map[name[1]]
+            new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1
             new['category'] = 'internal'
-            new['name'] = internal_map[name[1]]
+            new['name'] = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
         else:
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
