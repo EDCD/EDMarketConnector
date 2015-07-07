@@ -1,4 +1,4 @@
-Elite: Dangerous Market Connector
+Elite: Dangerous Market Connector (EDMC)
 ========
 
 This app downloads commodity market and other data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
