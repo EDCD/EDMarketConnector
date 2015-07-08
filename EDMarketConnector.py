@@ -200,8 +200,8 @@ class AppWindow:
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
             elif (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('ships') and not retrying:
-                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 2.5s for margin).
-                self.w.after(2500, lambda:self.getandsend(retrying=True))
+                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 4s for margin).
+                self.w.after(4000, lambda:self.getandsend(retrying=True))
                 return
             else:
                 if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
