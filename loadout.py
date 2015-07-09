@@ -13,6 +13,7 @@ from companion import ship_map
 
 # API slot names to E:D Shipyard slot names
 slot_map = {
+    'HugeHardpoint'    : 'H',
     'LargeHardpoint'   : 'L',
     'MediumHardpoint'  : 'M',
     'SmallHardpoint'   : 'S',
@@ -76,7 +77,7 @@ def export(data):
 
     # Construct description
     string = '[%s]\n' % ship
-    for slot in ['L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
+    for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
         elif slot in loadout:
