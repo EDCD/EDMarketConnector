@@ -3,8 +3,8 @@ Elite: Dangerous Market Connector (EDMC)
 
 This app downloads commodity market and other data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
-* saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home) and [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
+* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
+* saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), etc.
 * saves a record of your ship loadout and/or flight log.
 
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save your choice of data.
@@ -49,10 +49,10 @@ Output
 This app can save a variety of data in a variety of formats:
 
 * Market data
-  * Elite Dangerous Data Network - sends commodity market and shipyard data to "[EDDN](http://eddn-gateway.elite-markets.net/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/) or [Elite Trade Net](http://etn.io/).
+  * Elite Dangerous Data Network - sends commodity market and shipyard data to "[EDDN](http://eddn-gateway.elite-markets.net/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
   * Slopey's BPC format - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
   * Trade Dangerous format - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
-  * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/).
+  * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/) or [Inara](http://inara.cz).
 
 * Ship loadout
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com).
