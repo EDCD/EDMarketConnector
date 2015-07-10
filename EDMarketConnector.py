@@ -27,6 +27,9 @@ import prefs
 from config import appname, applongname, config
 
 
+shipyard_retry = 5	# retry pause for shipyard data [s]
+
+
 class AppWindow:
 
     def __init__(self, master):
@@ -199,9 +202,9 @@ class AppWindow:
                 self.status['text'] = "Where are you?!"		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
-            elif (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('ships') and not retrying:
+            elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
                 # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 4s for margin).
-                self.w.after(4000, lambda:self.getandsend(retrying=True))
+                self.w.after(shipyard_retry * 1000, lambda:self.getandsend(retrying=True))
                 return
             else:
                 if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
