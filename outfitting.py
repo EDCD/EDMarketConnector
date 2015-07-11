@@ -29,9 +29,10 @@ weapon_map = {
     'BeamLaser'                      : 'Beam Laser',
     ('BeamLaser','Heat')             : 'Retributor Beam Laser',
     'Cannon'                         : 'Cannon',
+    'DrunkMissileRack'               : 'Pack-hound Missile Rack',
     'DumbfireMissileRack'            : 'Missile Rack',
     'MineLauncher'                   : 'Mine Launcher',
-    ('MineLauncher','Impulse')       : 'Pack-hound Missile Rack',
+    ('MineLauncher','Impulse')       : 'Impulse Mine Launcher',	# Not seen in game?
     'MiningLaser'                    : 'Mining Laser',
     ('MiningLaser','Advanced')       : 'Mining Lance Beam Laser',
     'MultiCannon'                    : 'Multi-Cannon',
@@ -51,6 +52,7 @@ weapon_map = {
 missiletype_map = {
     'AdvancedTorpPylon'   : 'Seeker',
     'BasicMissileRack'    : 'Seeker',
+    'DrunkMissileRack'    : 'Swarm',
     'DumbfireMissileRack' : 'Dumbfire',
 }
 
@@ -94,6 +96,7 @@ weaponrating_map = {
     'Hpt_Cannon_Turret_Small': 'F',
     'Hpt_Cannon_Turret_Medium': 'E',
     'Hpt_Cannon_Turret_Large': 'D',
+    'Hpt_DrunkMissileRack_Fixed_Medium': 'B',
     'Hpt_DumbfireMissileRack_Fixed_Small': 'B',
     'Hpt_DumbfireMissileRack_Fixed_Medium': 'B',
     'Hpt_MineLauncher_Fixed_Small': 'I',
