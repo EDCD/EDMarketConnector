@@ -5,11 +5,13 @@ This app downloads commodity market and other data from the game [Elite: Dangero
 
 * sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), etc.
-* saves a record of your ship loadout and/or flight log.
+* saves a record of your ship loadout, flight log and/or statistics.
 
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save your choice of data.
 
 ![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
+
+![Balance screenshot](img/Balance.png)
 
 
 Installation
@@ -60,6 +62,9 @@ This app can save a variety of data in a variety of formats:
 * Flight log
   * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
 
+* Cmdr statstics
+  * Generates a number of charts of your progress in an Excel file. Note: Don't edit, rename or move this file.
+
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
 Statistics
@@ -99,6 +104,8 @@ Linux:
 
 * Requires the Python "imaging-tk", "iniparse" and "requests" modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
 * Run with `./EDMarketConnector.py` .
+
+On all platforms charting Cmdr statistics additionally requires verison 2.3.0 or later of the [openpyxl](https://pypi.python.org/pypi/openpyxl) module.
 
 Packaging for distribution
 --------

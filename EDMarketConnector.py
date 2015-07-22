@@ -23,6 +23,7 @@ import eddn
 import loadout
 import flightlog
 import stats
+import chart
 import prefs
 from config import appname, applongname, config
 
@@ -202,10 +203,20 @@ class AppWindow:
                 self.status['text'] = "Where are you?!"		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = "What are you flying?!"	# Shouldn't happen
+
             elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
-                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 4s for margin).
+                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
                 self.w.after(shipyard_retry * 1000, lambda:self.getandsend(retrying=True))
+
+                # Stuff we can do while waiting for retry
+                if config.getint('output') & config.OUT_STAT:
+                    chart.export(data)
+                if config.getint('output') & config.OUT_LOG:
+                    flightlog.export(data)
+                if config.getint('output') & config.OUT_SHIP:
+                    loadout.export(data)
                 return
+
             else:
                 if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
 
@@ -213,10 +224,14 @@ class AppWindow:
                 if __debug__:	# Recording
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
-                if config.getint('output') & config.OUT_LOG:
-                    flightlog.export(data)
-                if config.getint('output') & config.OUT_SHIP:
-                    loadout.export(data)
+
+                if not retrying:
+                    if config.getint('output') & config.OUT_STAT:
+                        chart.export(data)
+                    if config.getint('output') & config.OUT_LOG:
+                        flightlog.export(data)
+                    if config.getint('output') & config.OUT_SHIP:
+                        loadout.export(data)
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested

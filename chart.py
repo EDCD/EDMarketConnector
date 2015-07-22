@@ -1,92 +1,45 @@
 #!/usr/bin/python
 #
-# Creates an Excel spreadsheet graphing player stats using data from .json dumps created by
-# EDMarketconnector in interactive mode.
+# Creates an Excel spreadsheet graphing player stats
 #
-# Requires XlsxWriter
+# Requires openpyxl >= 2.3
 #
 
-import json
-import os
-import re
+try:
+    import lxml._elementpath	# Explicit dependency for py2exe
+    import openpyxl
+    if map(int, openpyxl.__version__.split('.')[:2]) < [2,3]:
+        raise ImportError()
+    have_openpyxl = True
+except:
+    have_openpyxl = False
+
 import datetime
-import xlsxwriter
+import time
+import re
 
-
-workbook = xlsxwriter.Workbook('trends.xlsx')
-
-F_TITLE  = workbook.add_format({'align': 'center', 'bold':True})
-F_SUB    = workbook.add_format({'align': 'right',  'bold':True})
-F_DATE   = workbook.add_format({'num_format': 'yy-mm-dd hh:mm:ss'})
-
-def makesheet(workbook, name, titles):
-    worksheet = workbook.add_worksheet(name)
-    worksheet.write(0, 0, 'Date', F_SUB)
-    if isinstance(titles[0], tuple):
-        start = end = 1
-        for (head, subtitles) in titles:
-            for i in range(len(subtitles)):
-                worksheet.write(1, end, subtitles[i], F_SUB)
-                end += 1
-            worksheet.merge_range(0, start, 0, end-1, head, F_TITLE)
-            start = end
-        worksheet.set_column(0, end, 15)
-    else:
-        worksheet.set_column(0, len(titles), 15)
-        for i in range(len(titles)):
-            worksheet.write(0, i+1, titles[i], F_SUB)
-    return worksheet
-
-def addrow(worksheet, row, dt, items):
-    worksheet.write_datetime(row, 0, dt, F_DATE)
-    for i in range(len(items)):
-        worksheet.write(row, i+1, items[i])
-
-def makechart(workbook, worksheet, title, axes=None):
-    chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
-    chart.set_title({'name': title})
-    chart.set_size({'width': 2400, 'height': 1600})
-    chart.set_x_axis({'date_axis': True, 'num_format': 'yyyy-mm-dd'})
-    if axes:
-        if isinstance(axes, list) or isinstance(axes, tuple):
-            chart.set_y_axis( {'name': axes[0]})
-            chart.set_y2_axis({'name': axes[1]})
-        else:
-            chart.set_y_axis( {'name': axes})
-    worksheet.insert_chart('B2', chart)
-    return chart
-
-
-
-inputs = {}
-regexp = re.compile('.+\.(\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d)\.json$')
-for f in os.listdir('.'):
-    match = regexp.match(f)
-    if match:
-        inputs[datetime.datetime.strptime(match.group(1), '%Y-%m-%dT%H.%M.%S')] = json.loads(open(f).read())
-if not inputs:
-    print "No data!"
-    exit()
+from os.path import isfile, join
+from config import config
 
 
 dataseries = [
     {
         'name':    'Combat',
-        'axes':    ['qty', 'CR'],
+        'axes':    ['Quantity', 'Profit [CR]'],
         'keys':    [
             ('Bounties',              ['stats', 'combat', 'bounty', 'qty']),
             ('Profit from bounties',  ['stats', 'combat', 'bounty', 'value'], True),
             ('Bonds',                 ['stats', 'combat', 'bond', 'qty']),
             ('Profit from bonds',     ['stats', 'combat', 'bond', 'value'], True),
-            ('Assassin',              ['stats', 'missions', 'assassin', 'missionsCompleted']),
+            ('Assassinations',        ['stats', 'missions', 'assassin', 'missionsCompleted']),
             ('Profit from assassin',  ['stats', 'missions', 'assassin', 'creditsEarned'], True),
             ('Hunting',               ['stats', 'missions', 'bountyHunter', 'missionsCompleted']),
             ('Profit from hunting',   ['stats', 'missions', 'bountyHunter', 'creditsEarned'], True),
-                ],
+        ],
     },
     {
         'name':    'Trade',
-        'axes':    ['qty', 'CR'],
+        'axes':    ['Quantity', 'Profit [CR]'],
         'keys':    [
             ('Profit from trading',   ['stats', 'trade', 'profit'], True),
             ('Commodities traded',    ['stats', 'trade', 'qty']),
@@ -98,8 +51,8 @@ dataseries = [
         ],
     },
     {
-        'name':    'Explore',
-        'axes':    ['qty', 'CR'],
+        'name':    'Explorer',
+        'axes':    ['Quantity', 'Profit [CR]'],
         'keys':    [
             ('Profits from exploration',      ['stats', 'explore', 'creditsEarned'], True),
             ('Discovery scans',               ['stats', 'explore', 'scanSoldLevels', 'lev_0']),
@@ -111,7 +64,7 @@ dataseries = [
     },
     {
         'name':    'Crime',
-        'axes':    ['qty', 'CR'],
+        'axes':    ['Quantity', 'Profit [CR]'],
         'keys':    [
             ('Fines',                 ['stats', 'crime', 'fine', 'qty']),
             ('Lifetime fine value',   ['stats', 'crime', 'fine', 'value'], True),
@@ -125,17 +78,19 @@ dataseries = [
     },
     {
         'name':    'NPC',
+        'axes':    'Quantity',
         'prefix':  ['stats', 'NPC', 'kills', 'ranks'],
         'keys':    [('Harmless', 'r0'), ('Mostly Harmless', 'r1'), ('Novice', 'r2'), ('Competent', 'r3'), ('Expert', 'r4'), ('Master', 'r5'), ('Dangerous', 'r6'), ('Deadly', 'r7'), ('Elite', 'r8'), ('Capital', 'rArray')],
     },
     {
         'name':    'PVP',
+        'axes':    'Quantity',
         'prefix':  ['stats', 'PVP', 'kills', 'ranks'],
         'keys':    [('Harmless', 'r0'), ('Mostly Harmless', 'r1'), ('Novice', 'r2'), ('Competent', 'r3'), ('Expert', 'r4'), ('Master', 'r5'), ('Dangerous', 'r6'), ('Deadly', 'r7'), ('Elite', 'r8'), ('Capital', 'rArray')],
     },
     {
         'name':    'Balance',
-        'axes':    ['qty', 'CR'],
+        'axes':    ['Quantity', '[CR]'],
         'keys':    [
             ('Current balance',       ['commander', 'credits'], True),
             ('Spent on ships',        ['stats', 'ship', 'spend', 'ships'], True),
@@ -153,63 +108,99 @@ dataseries = [
 ]
 
 
-for thing in dataseries:
-    if isinstance(thing['keys'][0], tuple):
+def export(data, csv=False):
+
+    if not have_openpyxl: return False
+
+    TITLE_F = openpyxl.styles.Font(bold=True)
+    TITLE_A = openpyxl.styles.Alignment(horizontal='right')
+
+    querytime = config.getint('querytime') or int(time.time())
+
+    filename = join(config.get('outdir'), 'Cmdr %s.xlsx' % re.sub(r'[\\/:*?"<>|]', '_', data['commander']['name']))
+    if not isfile(filename):
+        wb = openpyxl.Workbook()
+        try:
+            wb.active.title = 'Combat'	# Workbook is created with one sheet - rename it
+        except:
+            pass			# except that it isn't under 2.30b1
+    else:
+        wb = openpyxl.load_workbook(filename)
+
+    for thing in dataseries:
         legends = [x[0] for x in thing['keys']]
         keys    = [x[1] for x in thing['keys']]
-        if thing.get('axes') and (isinstance(thing['axes'], list) or isinstance(thing['axes'], tuple)):
+        if thing.get('axes') and isinstance(thing['axes'], (list, tuple)):
             y2_axis = [len(x)>2 and x[2] for x in thing['keys']]
         else:
-            y2_axis = [False] * len(keys)
-    else:
-        legends = keys = thing['keys']
-        y2_axis = [False] * len(keys)
+            y2_axis = None
 
-    sheet = makesheet(workbook, thing['name'], legends)
+        if thing['name'] in wb:
+            ws = wb[thing['name']]
+        else:
+            ws = wb.create_sheet(title=thing['name'])
 
-    timeseries = sorted(inputs)
-    for i in range(len(inputs)):
-        row = i+1
-        dt = timeseries[i]
-        data = inputs[dt]
+        # Add header row
+        if ws.max_row <= 1:	# Returns 1 for empty sheet
+            ws.append(['Date'] + legends)
+            for i in range(ws.max_column):
+                ws.column_dimensions[openpyxl.utils.get_column_letter(i+1)].width = 17
+            for row in ws.get_squared_range(1, 1, ws.max_column, 1):
+                for cell in row:
+                    cell.font = TITLE_F
+                    cell.alignment = TITLE_A
+
+        # Add data row
+        vals = [datetime.datetime.fromtimestamp(querytime)]
+        mydata = data
         if thing.get('prefix'):
             for key in thing['prefix']:
-                data = data[key]
-        vals = []
+                mydata = mydata[key]
         for key2 in keys:
             if isinstance(key2, basestring):
-                vals.append(data.get(key2, 0))
+                vals.append(mydata.get(key2, 0))
             else:
-                value = data
+                value = mydata
                 for key in key2:
                     value = value.get(key, 0)
                     if not value: break
                 vals.append(value)
+        ws.append(vals)
+        ws.cell(row=ws.max_row, column=1).number_format = 'yyyy-mm-dd hh:mm:ss'	# just a string, not a style
 
-        addrow(sheet, row, dt, vals)
+        dates = openpyxl.chart.Reference(ws, 1, 2, 1, ws.max_row)
 
-    chart = makechart(workbook, sheet, thing['name'], thing.get('axes'))
-    for i in range(len(thing['keys'])):
-        chart.add_series({'categories':  [thing['name'], 1, 0, row, 0],
-                          'values':      [thing['name'], 1, 1+i, row, 1+i],
-                          'name':        legends[i],
-                          'marker':      {'type': 'diamond'},
-                          'y2_axis':     y2_axis[i],
-                          })
-        # Label each line
-        if y2_axis[i]:
-            chart.add_series({'categories':  [thing['name'], row, 0, row, 0],	# last row
-                              'values':      [thing['name'], row, 1+i, row, 1+i],
-                              'name':        legends[i],
-                              'data_labels': {'series_name': True, 'position': 'right'},
-                              'y2_axis':     True,
-                          })
-        else:
-            chart.add_series({'categories':  [thing['name'], 1, 0, 1, 0],	# first row
-                              'values':      [thing['name'], 1, 1+i, 1, 1+i],
-                              'name':        legends[i],
-                              'data_labels': {'series_name': True, 'position': 'left'},
-                          })
-        chart.set_legend({'delete_series': range(1, 2*len(thing['keys']), 2)})
+        chart = openpyxl.chart.ScatterChart()
+        chart.title = thing['name']
+        chart.width, chart.height = 60, 30	# in cm!
+        chart.scatterStyle = 'lineMarker'
+        chart.set_categories(dates)
+        chart.x_axis.number_format = ('yyyy-mm-dd')	# date only
+        chart.x_axis.majorGridlines = None
 
-workbook.close()
+        if y2_axis:
+            chart.y_axis.majorGridlines = None		# prefer grid lines on secondary axis
+            chart2 = openpyxl.chart.ScatterChart()
+            chart2.scatterStyle = 'lineMarker'
+            # Hack - second chart must have different axis ID
+            chart2.y_axis = openpyxl.chart.axis.NumericAxis(axId=30, crossAx=10, axPos='r', crosses='max')
+
+        for i in range(len(keys)):
+            series = openpyxl.chart.Series(openpyxl.chart.Reference(ws, i+2, 1, i+2, ws.max_row), dates, title_from_data=True)
+            series.marker.symbol = 'diamond'
+            if y2_axis and y2_axis[i]:
+                series.dLbls = openpyxl.chart.label.DataLabels([openpyxl.chart.label.DataLabel(idx=ws.max_row-2, dLblPos='r', showSerName=True)])
+                chart2.series.append(series)
+            else:
+                series.dLbls = openpyxl.chart.label.DataLabels([openpyxl.chart.label.DataLabel(idx=0, dLblPos='l', showSerName=True)])
+                chart.series.append(series)
+        if y2_axis:
+            chart.y_axis.title  = thing['axes'][0]
+            chart2.y_axis.title = thing['axes'][1]
+            chart.z_axis = chart2.y_axis
+            chart += chart2
+        elif thing['axes']:
+            chart.y_axis.title = thing['axes']
+        ws.add_chart(chart, 'B2')
+
+    wb.save(filename)
