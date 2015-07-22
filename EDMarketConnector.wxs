@@ -39,267 +39,270 @@
 
 		<Directory Id="TARGETDIR" Name="SourceDir">
 
+			<!-- Generate with `heat.exe dir dist.win32 -gg -sfrag -suid -out foo.wxs` -->
+			<!-- Sadly too late for auto-generated Component UUIDs -->
+
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
 					<Component Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
 						<File Id="MainExecutable.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
 						<Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)" Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
 					</Component>
-					<Component Id="cmpE57080DEA0B187988FD2BD076FB01324" Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
-						<File Id="fil49284CA06286B42CDCAFA97CAF917044" KeyPath="yes" Source="SourceDir\_ctypes.pyd" />
+					<Component Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
+						<File KeyPath="yes" Source="SourceDir\_ctypes.pyd" />
 					</Component>
-					<Component Id="cmp055944010F8A239D46D29B39AFFAFB8C" Guid="{45803711-A2A6-4DA8-8219-F625DE6DB33E}">
-						<File Id="fil7A58B27A89BD1D20D9CCC2BD20CB0E24" KeyPath="yes" Source="SourceDir\_hashlib.pyd" />
+					<Component Guid="{45803711-A2A6-4DA8-8219-F625DE6DB33E}">
+						<File KeyPath="yes" Source="SourceDir\_hashlib.pyd" />
 					</Component>
-					<Component Id="cmpA6CD3F0230AF14109E0A64CED6EF5980" Guid="{52019FB5-952D-4BA4-A6E0-F3E214F14923}">
-						<File Id="fil8F06EEEF538E6E466195B7A9A690AE61" KeyPath="yes" Source="SourceDir\_socket.pyd" />
+					<Component Guid="{52019FB5-952D-4BA4-A6E0-F3E214F14923}">
+						<File KeyPath="yes" Source="SourceDir\_socket.pyd" />
 					</Component>
-					<Component Id="cmp795E5CB8A50C188ADB80F30BEA5B6934" Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
-						<File Id="fil8DD1AB4331DA85D7A03BB237DC4402EF" KeyPath="yes" Source="SourceDir\_ssl.pyd" />
+					<Component Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
+						<File KeyPath="yes" Source="SourceDir\_ssl.pyd" />
 					</Component>
-					<Component Id="cmpB12CF493F1D531F63A1E42FF520621ED" Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
-						<File Id="filEFD7515879DB1CBF30F42592FDCB06B8" KeyPath="yes" Source="SourceDir\_tkinter.pyd" />
+					<Component Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
+						<File KeyPath="yes" Source="SourceDir\_tkinter.pyd" />
 					</Component>
-					<Component Id="cmpC8B55AE9807D860809769FEEC0698D4D" Guid="{842DC919-EC3D-48EF-A6B3-9A81608E0FB9}">
-						<File Id="filE88438389ABEC150F952DF1242087309" KeyPath="yes" Source="SourceDir\bz2.pyd" />
+					<Component Guid="{842DC919-EC3D-48EF-A6B3-9A81608E0FB9}">
+						<File KeyPath="yes" Source="SourceDir\bz2.pyd" />
 					</Component>
-					<Component Id="cmp4E4667BF45EB1B750652361A525491D8" Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
-						<File Id="filFAD545345D9EF904B3E02E71622C5590" KeyPath="yes" Source="SourceDir\cacert.pem" />
+					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
+						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
 					</Component>
-					<Component Id="cmp3A226BE5169ADACD24C4558730F36DE0" Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
-						<File Id="filDD25890A36252ED1E8C500155136F68E" KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
+					<Component Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
+						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
 					</Component>
-					<Component Id="cmp58A3B51756464557E96B4443B71440FF" Guid="{9A0CB8A2-7167-492F-A185-0BDF7E9F5C01}">
-						<File Id="fil764EB4B533F33433CEC5508ECBDDAD88" KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
+					<Component Guid="{9A0CB8A2-7167-492F-A185-0BDF7E9F5C01}">
+						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
 					</Component>
-					<Component Id="cmp6C00F72E54E2F111E00372FB0FBB0FE2" Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
-						<File Id="fil2B50DE12C46865F8BA5A62E95387F676" KeyPath="yes" Source="SourceDir\library.zip" />
+					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
+						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
-					<Component Id="cmpCFF82FAF0C08DC3A2167B0390C62C086" Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
-						<File Id="filA4A48D5DD6EC3CE929D9053B27EFEA2C" KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
+					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
+						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
-					<Component Id="cmp86F09398BBC9CD7D4B57EAAE1A948C70" Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
-						<File Id="fil46D2CE5BFF4C3CC176A6FED37C1EEA39" KeyPath="yes" Source="SourceDir\python27.dll" />
+					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
+						<File KeyPath="yes" Source="SourceDir\python27.dll" />
 					</Component>
-					<Component Id="cmpDD33425F04785DD7D65BF3D29B337B38" Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
-						<File Id="fil3B2873E093CF9BBDF5CA6FFBF3E34259" KeyPath="yes" Source="SourceDir\select.pyd" />
+					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
+						<File KeyPath="yes" Source="SourceDir\select.pyd" />
 					</Component>
-					<Component Id="cmp47BC2E37E918091103765A3E7BD81D06" Guid="{30EEAD30-A43B-4A31-A209-450A8AD17AC2}">
-						<File Id="fil2F2BA6FA4A7DD044EEAA77A8174320FA" KeyPath="yes" Source="SourceDir\tcl85.dll" />
+					<Component Guid="{30EEAD30-A43B-4A31-A209-450A8AD17AC2}">
+						<File KeyPath="yes" Source="SourceDir\tcl85.dll" />
 					</Component>
-					<Component Id="cmp4854ADD13616F64F327353F410CEDC44" Guid="{CE5A6F3A-8F6B-4C16-BCDC-F1BB89C9F1AF}">
-						<File Id="filFF8C121021B488CD485E0CD4FCFF5A2E" KeyPath="yes" Source="SourceDir\tk85.dll" />
+					<Component Guid="{CE5A6F3A-8F6B-4C16-BCDC-F1BB89C9F1AF}">
+						<File KeyPath="yes" Source="SourceDir\tk85.dll" />
 					</Component>
-					<Component Id="cmpF53EFD7F16A85DF32B289806E475CEC1" Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
-						<File Id="filEB07038D0C43A2635802F5F0874B19F4" KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
+					<Component Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
+						<File KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
 					</Component>
-					<Component Id="cmp775D0CC23474B987B407951838E0DCC3" Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
-						<File Id="fil293C8E7AF8C6F689C7E50983C257DD68" KeyPath="yes" Source="SourceDir\WinSparkle.dll" />
+					<Component Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
+						<File KeyPath="yes" Source="SourceDir\WinSparkle.dll" />
 					</Component>
-					<Directory Id="dirBEE0D5863824B80A537E14FE56402A0C" Name="tcl">
-						<Directory Id="dir9FADF4954D330D96E48B9D59CBE9A964" Name="tcl8.5">
-							<Component Id="cmpE60B2042B4B6A6FC78D8B97E5C31EFE2" Guid="{C085794D-6644-4915-B1C3-3060BE9E3F3B}">
-								<File Id="fil76A2305BF323FF53F9F1255C51C90DFB" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\auto.tcl" />
+					<Directory Id="tcl" Name="tcl">
+						<Directory Id="tcl8.5" Name="tcl8.5">
+							<Component Guid="{C085794D-6644-4915-B1C3-3060BE9E3F3B}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\auto.tcl" />
 							</Component>
-							<Component Id="cmp89797FC50D96847B20F83F5F004B305D" Guid="{E7EF4423-9B28-4267-A6C9-1C5F5F732054}">
-								<File Id="fil144CA4FE0258F7EDE006D1832737355C" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\clock.tcl" />
+							<Component Guid="{E7EF4423-9B28-4267-A6C9-1C5F5F732054}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\clock.tcl" />
 							</Component>
-							<Component Id="cmp46F96A08F279F9A56AA11B7A48864E3B" Guid="{28C0596D-8D38-4E62-BE6E-E3986E1EB854}">
-								<File Id="fil47EC70AB7E65E347A8B347B6C80F85BF" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\history.tcl" />
+							<Component Guid="{28C0596D-8D38-4E62-BE6E-E3986E1EB854}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\history.tcl" />
 							</Component>
-							<Component Id="cmpD27194A0318B37EE8C689E9932019055" Guid="{3E20540F-0017-40FA-94EC-A4407C0A9B3B}">
-								<File Id="fil33337ADD3B7A70A4C31183938ADBE1BC" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\init.tcl" />
+							<Component Guid="{3E20540F-0017-40FA-94EC-A4407C0A9B3B}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\init.tcl" />
 							</Component>
-							<Component Id="cmp1F0608724556615D66BB7CD33643A12E" Guid="{D3750297-0753-433F-A20F-FCB309050DCE}">
-								<File Id="filB21A2D69178E5777F7E8BFDA769A4EC5" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\package.tcl" />
+							<Component Guid="{D3750297-0753-433F-A20F-FCB309050DCE}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\package.tcl" />
 							</Component>
-							<Component Id="cmpB36AD9D4FB52D7BAF3D2D1D77A4AE403" Guid="{8686095A-7B3D-4352-B30C-497E3DAABD57}">
-								<File Id="filE1BE7D19193E79C1EF4F7184ED980AFE" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\parray.tcl" />
+							<Component Guid="{8686095A-7B3D-4352-B30C-497E3DAABD57}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\parray.tcl" />
 							</Component>
-							<Component Id="cmpC8085E34520D4949C606CCCC032CD5A6" Guid="{DAAAF7FC-8255-4564-B4F9-42865C1D1B74}">
-								<File Id="fil80D065373758686CFC5FDB8FFFDFBD11" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\safe.tcl" />
+							<Component Guid="{DAAAF7FC-8255-4564-B4F9-42865C1D1B74}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\safe.tcl" />
 							</Component>
-							<Component Id="cmpA436ECBD7A7CFB786673EDE13EA39DCF" Guid="{52C48E34-AE8C-4461-BB3D-817EF66E859A}">
-								<File Id="filFDC5242D84FFCBDC2A4F36D36B9DB3F4" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\tclIndex" />
+							<Component Id="tclIndex_1" Guid="{52C48E34-AE8C-4461-BB3D-817EF66E859A}">
+								<File Id="tclIndex_1" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\tclIndex" />
 							</Component>
-							<Component Id="cmpFF37E685F5FDC0893F117A448FB98405" Guid="{84CAEEAD-0290-4895-BEDB-6CB10B8BEECE}">
-								<File Id="fil93EE68C40C39371CA18522B34922F542" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\tm.tcl" />
+							<Component Guid="{84CAEEAD-0290-4895-BEDB-6CB10B8BEECE}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\tm.tcl" />
 							</Component>
-							<Component Id="cmp8A99CBBB19CB127EE2A949CCF71886B4" Guid="{3D7917B8-E131-448F-9F2C-18705BB37313}">
-								<File Id="fil43996D52118A177DD02193FFD27A3C16" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\word.tcl" />
+							<Component Guid="{3D7917B8-E131-448F-9F2C-18705BB37313}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\word.tcl" />
 							</Component>
-							<Directory Id="dirDFC22AD9E5943D15E53E684A8EA35F4E" Name="opt0.4">
-								<Component Id="cmp27BAF2EDF03B231C19369F449C80C719" Guid="{D8E99FE8-AD1E-4E73-A566-6D88B7E5F07E}">
-									<File Id="filF12380B8FAF965A59DBBE5B3362FBD3E" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\opt0.4\optparse.tcl" />
+							<Directory Id="opt0.4" Name="opt0.4">
+								<Component Guid="{D8E99FE8-AD1E-4E73-A566-6D88B7E5F07E}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tcl8.5\opt0.4\optparse.tcl" />
 								</Component>
-								<Component Id="cmpBBC9EA178985D6ADBACB8932D6665866" Guid="{9618212A-46A6-4982-AB85-599CEB0711EB}">
-									<File Id="fil79108CC4DE22DDC6AF45D7ADDB248EBA" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\opt0.4\pkgIndex.tcl" />
+								<Component Id="pkgIndex.tcl_1" Guid="{9618212A-46A6-4982-AB85-599CEB0711EB}">
+									<File Id="pkgIndex.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tcl8.5\opt0.4\pkgIndex.tcl" />
 								</Component>
 							</Directory>
 						</Directory>
-						<Directory Id="dirE6569A5D2E91F4A3ECF68A926C11E2F3" Name="tk8.5">
-							<Component Id="cmp67C3AD1465774F1000715AAD1A683102" Guid="{FCB37425-AD3A-45DA-91D7-053AF7970C28}">
-								<File Id="fil2279DAFAFC4FE8226C9A9F46EE326B4B" KeyPath="yes" Source="SourceDir\tcl\tk8.5\bgerror.tcl" />
+						<Directory Id="tk8.5" Name="tk8.5">
+							<Component Guid="{FCB37425-AD3A-45DA-91D7-053AF7970C28}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\bgerror.tcl" />
 							</Component>
-							<Component Id="cmp9D249A64D9E4B23FD8A16A9EC35BFB51" Guid="{149136E1-0EAE-42B2-8509-5B6A686B023B}">
-								<File Id="fil576922A0702BA9CF1C048034971A9A2C" KeyPath="yes" Source="SourceDir\tcl\tk8.5\button.tcl" />
+							<Component Id="button.tcl_1" Guid="{149136E1-0EAE-42B2-8509-5B6A686B023B}">
+								<File Id="button.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\button.tcl" />
 							</Component>
-							<Component Id="cmp5BDDE40FD160C0346FF68FCD0E8D63EC" Guid="{EAC4BD6C-40E9-4C64-A5F5-258D083D07C0}">
-								<File Id="filFAB22572DD90EDD5A460391FEDA42BD4" KeyPath="yes" Source="SourceDir\tcl\tk8.5\choosedir.tcl" />
+							<Component Guid="{EAC4BD6C-40E9-4C64-A5F5-258D083D07C0}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\choosedir.tcl" />
 							</Component>
-							<Component Id="cmp61EECEEF8CB2711F4E81A264B03811B8" Guid="{0E8924C5-7EA5-43AC-9C81-6F3029B462C8}">
-								<File Id="fil5A78467A8ED12A16EE3DD51DDB89D585" KeyPath="yes" Source="SourceDir\tcl\tk8.5\clrpick.tcl" />
+							<Component Guid="{0E8924C5-7EA5-43AC-9C81-6F3029B462C8}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\clrpick.tcl" />
 							</Component>
-							<Component Id="cmpC998BEE2DCA05F096574D95F82AC6028" Guid="{7B5F5CA4-893A-480F-B6AF-C3E3A544DB8B}">
-								<File Id="filF5DE81CE843D35A5DCCA4587E4CAAC02" KeyPath="yes" Source="SourceDir\tcl\tk8.5\comdlg.tcl" />
+							<Component Guid="{7B5F5CA4-893A-480F-B6AF-C3E3A544DB8B}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\comdlg.tcl" />
 							</Component>
-							<Component Id="cmp2B05DFB334087E9D65C19E74F30480E5" Guid="{A8F00EE2-4094-4DFF-86BD-FE969D4D362A}">
-								<File Id="fil666BEC7F9238F401211917C5FAB04D92" KeyPath="yes" Source="SourceDir\tcl\tk8.5\console.tcl" />
+							<Component Guid="{A8F00EE2-4094-4DFF-86BD-FE969D4D362A}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\console.tcl" />
 							</Component>
-							<Component Id="cmp55AF16DDC2C2AE975F3BE60099EDF405" Guid="{DFFA82C4-0949-41A3-868A-1BC4CF04CC76}">
-								<File Id="fil3D2172B04CF9600ACDAE88221B226588" KeyPath="yes" Source="SourceDir\tcl\tk8.5\dialog.tcl" />
+							<Component Guid="{DFFA82C4-0949-41A3-868A-1BC4CF04CC76}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\dialog.tcl" />
 							</Component>
-							<Component Id="cmp133E58DD092E0C9C54381109122B91CF" Guid="{D3BD7C0B-06D7-4619-977B-F30908EF20ED}">
-								<File Id="filC45E48059B187A420ADEDE58B1B395B2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\entry.tcl" />
+							<Component Id="entry.tcl_1" Guid="{D3BD7C0B-06D7-4619-977B-F30908EF20ED}">
+								<File Id="entry.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\entry.tcl" />
 							</Component>
-							<Component Id="cmpB521430E8F699763F8862D3BA1E3C1B2" Guid="{DF8A00BF-91F1-44D8-B1D4-AB1104BFD1C9}">
-								<File Id="fil3065EE89DC0139F2E0036F17F5C50253" KeyPath="yes" Source="SourceDir\tcl\tk8.5\focus.tcl" />
+							<Component Guid="{DF8A00BF-91F1-44D8-B1D4-AB1104BFD1C9}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\focus.tcl" />
 							</Component>
-							<Component Id="cmpBDF46B1C58BD36945BDBC1C991A25C1B" Guid="{A545EB30-9E1A-4C89-866B-974C99004065}">
-								<File Id="filCEE70E72FD620066D0D9CC4724CA996C" KeyPath="yes" Source="SourceDir\tcl\tk8.5\license.terms" />
+							<Component Guid="{A545EB30-9E1A-4C89-866B-974C99004065}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\license.terms" />
 							</Component>
-							<Component Id="cmp856D15D3BED074A33F9B3EFD6D1AF353" Guid="{A8F779C3-8947-4C8D-9611-83F1D05482A7}">
-								<File Id="filE4CCB923CC58A8C6754346AB5DF9ED5F" KeyPath="yes" Source="SourceDir\tcl\tk8.5\listbox.tcl" />
+							<Component Guid="{A8F779C3-8947-4C8D-9611-83F1D05482A7}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\listbox.tcl" />
 							</Component>
-							<Component Id="cmpFA55012AD06441E3DC22BB7EE15BFDDC" Guid="{E492B863-5AAA-4A2A-AC0B-10F2B3A90D89}">
-								<File Id="fil91A8EA5CCB23016214E5B10AA06E3637" KeyPath="yes" Source="SourceDir\tcl\tk8.5\menu.tcl" />
+							<Component Guid="{E492B863-5AAA-4A2A-AC0B-10F2B3A90D89}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\menu.tcl" />
 							</Component>
-							<Component Id="cmp0556EDDBB814671B26AFFAE622190018" Guid="{9BBAC909-602C-443B-9EFE-6896D468BE3F}">
-								<File Id="fil6B7010EBF326A98A4DA88FA6BA872186" KeyPath="yes" Source="SourceDir\tcl\tk8.5\mkpsenc.tcl" />
+							<Component Guid="{9BBAC909-602C-443B-9EFE-6896D468BE3F}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\mkpsenc.tcl" />
 							</Component>
-							<Component Id="cmpFF813636A68D4E734CB0E966ADFFA6A5" Guid="{0F1A63FD-16BA-4603-8E9D-744BC4CD5C25}">
-								<File Id="fil7549078C276A162B622EB0A6D2A2DABC" KeyPath="yes" Source="SourceDir\tcl\tk8.5\msgbox.tcl" />
+							<Component Guid="{0F1A63FD-16BA-4603-8E9D-744BC4CD5C25}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\msgbox.tcl" />
 							</Component>
-							<Component Id="cmp5E4F4C22B976FF8D6A1C0F55F2EB6F24" Guid="{4EDE9077-0998-42D9-8510-E60440003628}">
-								<File Id="fil72FF658AC3B74F61D5E0C3F8B3ADDE32" KeyPath="yes" Source="SourceDir\tcl\tk8.5\obsolete.tcl" />
+							<Component Guid="{4EDE9077-0998-42D9-8510-E60440003628}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\obsolete.tcl" />
 							</Component>
-							<Component Id="cmp5A60D07F77FB606C7F05B24729F7E31B" Guid="{10D09DFC-4B7D-4869-ACBC-53C864C54CD0}">
-								<File Id="fil43D3FBAF328542E496B07B27ADD0E93A" KeyPath="yes" Source="SourceDir\tcl\tk8.5\optMenu.tcl" />
+							<Component Guid="{10D09DFC-4B7D-4869-ACBC-53C864C54CD0}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\optMenu.tcl" />
 							</Component>
-							<Component Id="cmpFBD2CEEDED12AFD33B2AA2C205C7B35B" Guid="{EA101ACF-9743-495F-B514-A28F78F23068}">
-								<File Id="fil5276D661D9EA7730F0DD2C8750481250" KeyPath="yes" Source="SourceDir\tcl\tk8.5\palette.tcl" />
+							<Component Guid="{EA101ACF-9743-495F-B514-A28F78F23068}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\palette.tcl" />
 							</Component>
-							<Component Id="cmp98B3514B29077FD91D8D485DE88FA344" Guid="{7060F5A9-BAB5-4D15-A65E-04A71AE00A15}">
-								<File Id="fil77084024E5BF1E93FC082CD931711D36" KeyPath="yes" Source="SourceDir\tcl\tk8.5\panedwindow.tcl" />
+							<Component Id="panedwindow.tcl_1" Guid="{7060F5A9-BAB5-4D15-A65E-04A71AE00A15}">
+								<File Id="panedwindow.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\panedwindow.tcl" />
 							</Component>
-							<Component Id="cmpEC99633F2342C62CDA489D80980342CA" Guid="{5E2762E6-F8DE-43A9-A809-32AE03522482}">
-								<File Id="filCF78C70CC5045EFEFE1D23A36DCD72EB" KeyPath="yes" Source="SourceDir\tcl\tk8.5\pkgIndex.tcl" />
+							<Component Id="pkgIndex.tcl_2" Guid="{5E2762E6-F8DE-43A9-A809-32AE03522482}">
+								<File Id="pkgIndex.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\pkgIndex.tcl" />
 							</Component>
-							<Component Id="cmp693E17BFC6CA2B38AAAD07DF037F0A36" Guid="{DE3DA121-B02A-43AA-9D36-99A89F26B3B4}">
-								<File Id="fil06A1F5CC5E64E73AF359235E4F0EF500" KeyPath="yes" Source="SourceDir\tcl\tk8.5\safetk.tcl" />
+							<Component Guid="{DE3DA121-B02A-43AA-9D36-99A89F26B3B4}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\safetk.tcl" />
 							</Component>
-							<Component Id="cmp097021AE93805CB82724CB4AA06B9E76" Guid="{7E371EB8-CBE1-4360-A1B8-08A54DEEFAE5}">
-								<File Id="fil354D4B874C8B73D860914C26B5A53504" KeyPath="yes" Source="SourceDir\tcl\tk8.5\scale.tcl" />
+							<Component Id="scale.tcl_1" Guid="{7E371EB8-CBE1-4360-A1B8-08A54DEEFAE5}">
+								<File Id="scale.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\scale.tcl" />
 							</Component>
-							<Component Id="cmp9048F339336BE1B5294B06B4E04B467F" Guid="{AADDC754-698D-4439-82A1-4F47FE97FA94}">
-								<File Id="fil63CCF53441AB2D371EB97182539B6E49" KeyPath="yes" Source="SourceDir\tcl\tk8.5\scrlbar.tcl" />
+							<Component Guid="{AADDC754-698D-4439-82A1-4F47FE97FA94}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\scrlbar.tcl" />
 							</Component>
-							<Component Id="cmp6774B45D663B83EAE999E321664CC1DE" Guid="{448FB04F-1719-4BE0-8192-9DB3551FF1CA}">
-								<File Id="fil98F54ABF4DD06D60EF62E6C78D4B1BA0" KeyPath="yes" Source="SourceDir\tcl\tk8.5\spinbox.tcl" />
+							<Component Id="spinbox.tcl_1" Guid="{448FB04F-1719-4BE0-8192-9DB3551FF1CA}">
+								<File Id="spinbox.tcl_1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\spinbox.tcl" />
 							</Component>
-							<Component Id="cmpFD4C4950967592C942F17C46A1E0F7D7" Guid="{CC6A73B5-7CBF-43F5-BA1D-67216081B7CD}">
-								<File Id="filC6E6669662D87F64830999441C690CAB" KeyPath="yes" Source="SourceDir\tcl\tk8.5\tclIndex" />
+							<Component Id="tclIndex_2" Guid="{CC6A73B5-7CBF-43F5-BA1D-67216081B7CD}">
+								<File Id="tclIndex_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\tclIndex" />
 							</Component>
-							<Component Id="cmpEF72D7C810B0FC6A2C93DC054D394BD9" Guid="{AEAAB0BF-64DA-4729-8AA3-A964758524F2}">
-								<File Id="fil3F401636DE1FF2A145586359FC327E1D" KeyPath="yes" Source="SourceDir\tcl\tk8.5\tearoff.tcl" />
+							<Component Guid="{AEAAB0BF-64DA-4729-8AA3-A964758524F2}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\tearoff.tcl" />
 							</Component>
-							<Component Id="cmp9964E91AFBBC75F6A78D1A6431EEAAA7" Guid="{DFCA1825-61D8-4613-A0DF-7FAFC9E8D0B7}">
-								<File Id="filCD0CA1E772D5F256E006F817E1596A0C" KeyPath="yes" Source="SourceDir\tcl\tk8.5\text.tcl" />
+							<Component Guid="{DFCA1825-61D8-4613-A0DF-7FAFC9E8D0B7}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\text.tcl" />
 							</Component>
-							<Component Id="cmp849D6D832C2D7F5D4603FD0FDE29200E" Guid="{80245D25-A889-4EB2-9C9C-488AB3C32A32}">
-								<File Id="filB7BD2EEB7D2091B35B4A2D233D74D9AD" KeyPath="yes" Source="SourceDir\tcl\tk8.5\tk.tcl" />
+							<Component Guid="{80245D25-A889-4EB2-9C9C-488AB3C32A32}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\tk.tcl" />
 							</Component>
-							<Component Id="cmpF6A0CD72D2406DF8A9E94683FCD89AF6" Guid="{50929058-A5C7-43E3-B5FE-B848A419CF93}">
-								<File Id="filD68FD68DC4214C855DF87D386A61AD16" KeyPath="yes" Source="SourceDir\tcl\tk8.5\tkfbox.tcl" />
+							<Component Guid="{50929058-A5C7-43E3-B5FE-B848A419CF93}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\tkfbox.tcl" />
 							</Component>
-							<Component Id="cmp3144B208CE125E12449A0E87CC211134" Guid="{2B892993-9862-466F-A79B-F54246A9E7F2}">
-								<File Id="filE47EC4842AD2F02ABA50F1DC2B8D9ABE" KeyPath="yes" Source="SourceDir\tcl\tk8.5\unsupported.tcl" />
+							<Component Guid="{2B892993-9862-466F-A79B-F54246A9E7F2}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\unsupported.tcl" />
 							</Component>
-							<Component Id="cmpFF278DBC70B3A7502CB3AD1782CB8BC1" Guid="{F7B0AE86-0EA3-436D-83A0-61FB4AEBBDF8}">
-								<File Id="filFA1563815EA2CA37A04A7A8F006DC98B" KeyPath="yes" Source="SourceDir\tcl\tk8.5\xmfbox.tcl" />
+							<Component Guid="{F7B0AE86-0EA3-436D-83A0-61FB4AEBBDF8}">
+								<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\xmfbox.tcl" />
 							</Component>
-							<Directory Id="dir3E11E0D6357198C4A08032B03E1A1599" Name="ttk">
-								<Component Id="cmpB0F3FC7F12EF963D0892EF2ACB2F54FE" Guid="{153EA00B-70D3-45D5-B6C7-F900D15AF3C7}">
-									<File Id="fil807876D53480863A0E0A75A7C40DF0A5" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\altTheme.tcl" />
+							<Directory Id="ttk" Name="ttk">
+								<Component Guid="{153EA00B-70D3-45D5-B6C7-F900D15AF3C7}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\altTheme.tcl" />
 								</Component>
-								<Component Id="cmpF076828E0B16B9BB7DC709FF78A1E7F5" Guid="{F97CA810-C233-4088-87FB-5DE062166893}">
-									<File Id="filACD3723F3D03AE0C1F1D15CADFCD297F" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\aquaTheme.tcl" />
+								<Component Guid="{F97CA810-C233-4088-87FB-5DE062166893}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\aquaTheme.tcl" />
 								</Component>
-								<Component Id="cmpEDD08A04FA74028970670AF282053264" Guid="{2C2F700C-7C62-4F5A-908C-A35B122A577B}">
-									<File Id="fil81035A18BC460994AD72100D6CC84E66" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\button.tcl" />
+								<Component Id="button.tcl_2" Guid="{2C2F700C-7C62-4F5A-908C-A35B122A577B}">
+									<File Id="button.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\button.tcl" />
 								</Component>
-								<Component Id="cmp226D9227B824FD5D00190FAC30335757" Guid="{9137EAD5-A5ED-4280-AB41-5B42CB76BE25}">
-									<File Id="fil658510562676C1AE16A0BA994E990ED2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\clamTheme.tcl" />
+								<Component Guid="{9137EAD5-A5ED-4280-AB41-5B42CB76BE25}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\clamTheme.tcl" />
 								</Component>
-								<Component Id="cmpB0491A85FEEE360B461075367FF7D4F3" Guid="{B9D2363E-CBE6-4D6A-8AEC-8763FCF41309}">
-									<File Id="filBE980D632B68019ABD645822D19A0C3E" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\classicTheme.tcl" />
+								<Component Guid="{B9D2363E-CBE6-4D6A-8AEC-8763FCF41309}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\classicTheme.tcl" />
 								</Component>
-								<Component Id="cmpCF878E0C55E535E22900C672FC4BB02A" Guid="{BB9DC352-388A-4424-B3A7-D0CC0799B0E8}">
-									<File Id="fil571C45F938FC1A8278AEDD0D25CFB7B7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\combobox.tcl" />
+								<Component Guid="{BB9DC352-388A-4424-B3A7-D0CC0799B0E8}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\combobox.tcl" />
 								</Component>
-								<Component Id="cmp354CB1774E4A23385CDF5A38BE2A3769" Guid="{D5B1A052-87F1-44C9-A8D6-6FF78EC6453A}">
-									<File Id="fil3365A9E917AFB625D4A5AB4E36DC534D" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\cursors.tcl" />
+								<Component Guid="{D5B1A052-87F1-44C9-A8D6-6FF78EC6453A}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\cursors.tcl" />
 								</Component>
-								<Component Id="cmp870ED457724743C23239DEB41EEA30A0" Guid="{2D4A6C0F-16CC-458F-936E-68F39BB51DC5}">
-									<File Id="filA022384C2448F7469616FF1C86EDE1E3" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\defaults.tcl" />
+								<Component Guid="{2D4A6C0F-16CC-458F-936E-68F39BB51DC5}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\defaults.tcl" />
 								</Component>
-								<Component Id="cmpF2DE6EBBDC7DEA796CB96845F3A84327" Guid="{5BBDDCE5-3165-431C-8A5F-88C090EB98DA}">
-									<File Id="fil10EBDDB88732F1EF7F19E72BD5B58F30" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\entry.tcl" />
+								<Component Id="entry.tcl_2" Guid="{5BBDDCE5-3165-431C-8A5F-88C090EB98DA}">
+									<File Id="entry.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\entry.tcl" />
 								</Component>
-								<Component Id="cmp8335EC98852872134A66B21C89DA15E3" Guid="{D0DACDE6-4F3A-4BC2-AE09-7BBF8C76ED74}">
-									<File Id="fil6203E4FB232CAAF0FF794E6EF22EDE66" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\fonts.tcl" />
+								<Component Guid="{D0DACDE6-4F3A-4BC2-AE09-7BBF8C76ED74}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\fonts.tcl" />
 								</Component>
-								<Component Id="cmp0E9DF39364F68587F90EAAAB95D535C9" Guid="{133F83FA-ACE2-44FF-B175-42F2E0A917A9}">
-									<File Id="filB7E7BD69CA4123A2FF0709E0BD5E70E6" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\menubutton.tcl" />
+								<Component Guid="{133F83FA-ACE2-44FF-B175-42F2E0A917A9}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\menubutton.tcl" />
 								</Component>
-								<Component Id="cmp40A7AB9AFC7EB5FC2B4F3CFA01A908C4" Guid="{641B8DCD-E718-4757-84AB-6425D3CFDCD6}">
-									<File Id="fil00CD4FD3DA68F2B8B0E75AD30FF4DA2E" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\notebook.tcl" />
+								<Component Guid="{641B8DCD-E718-4757-84AB-6425D3CFDCD6}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\notebook.tcl" />
 								</Component>
-								<Component Id="cmpE5A297A3CD627BA0693C062DFD45B742" Guid="{AF0A3619-F409-479B-A71E-1D2C08A5F510}">
-									<File Id="fil751CFF318D5F82FFD7D5B7B09CA8DECE" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\panedwindow.tcl" />
+								<Component Id="panedwindow.tcl_2" Guid="{AF0A3619-F409-479B-A71E-1D2C08A5F510}">
+									<File Id="panedwindow.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\panedwindow.tcl" />
 								</Component>
-								<Component Id="cmpDB1161884EDA291ECA6A30FF514756B0" Guid="{3E9DE75A-FD32-4F7E-A3E7-59ABFBCBC9DF}">
-									<File Id="fil3DDABB4F2363EE4A89E22166D2EB6CE7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\progress.tcl" />
+								<Component Guid="{3E9DE75A-FD32-4F7E-A3E7-59ABFBCBC9DF}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\progress.tcl" />
 								</Component>
-								<Component Id="cmp6F0C4A275C34B4CBF470061C49F48A62" Guid="{165FED9E-A3F0-4005-8DA8-D25E4E144DD8}">
-									<File Id="filF4692C79C873AD554F5B6AF8B26E662E" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\scale.tcl" />
+								<Component Id="scale.tcl_2" Guid="{165FED9E-A3F0-4005-8DA8-D25E4E144DD8}">
+									<File Id="scale.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\scale.tcl" />
 								</Component>
-								<Component Id="cmp04E5FE0E0D39B434CD72E5668C8EA233" Guid="{735AFCC5-A597-4292-B144-4DF8865B4200}">
-									<File Id="fil9D17A4FC3792A7A6644C1C6D422EF7B1" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\scrollbar.tcl" />
+								<Component Guid="{735AFCC5-A597-4292-B144-4DF8865B4200}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\scrollbar.tcl" />
 								</Component>
-								<Component Id="cmpB252953A880253445EC0750D45BA4D2C" Guid="{54AD42EB-7305-45AA-953C-574921E90BAD}">
-									<File Id="fil5AA8155AC7EEAAB8D968EBD6C1D3DC74" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\sizegrip.tcl" />
+								<Component Guid="{54AD42EB-7305-45AA-953C-574921E90BAD}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\sizegrip.tcl" />
 								</Component>
-								<Component Id="cmp9096943773180E24A57FAD7CA2663824" Guid="{F4A91FAD-5F8D-4007-B38E-2C706E87770B}">
-									<File Id="fil3E357787A95782E83591AD92D55452ED" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\spinbox.tcl" />
+								<Component Id="spinbox.tcl_2" Guid="{F4A91FAD-5F8D-4007-B38E-2C706E87770B}">
+									<File Id="spinbox.tcl_2" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\spinbox.tcl" />
 								</Component>
-								<Component Id="cmpB298804A0993E19DC88246355CE928A1" Guid="{FC12F75C-6EF1-4AD5-BF60-55FC5E825605}">
-									<File Id="fil0AB9EE0CDCE3DE7BED31362ACB334CBA" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\treeview.tcl" />
+								<Component Guid="{FC12F75C-6EF1-4AD5-BF60-55FC5E825605}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\treeview.tcl" />
 								</Component>
-								<Component Id="cmp57DB57AE30ADD8A61D4FFFE148B291D7" Guid="{947E3D83-15D1-44E5-B8D3-5EEBDD18B343}">
-									<File Id="fil850DAF91F051D19E4E8C40F784B9D128" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\ttk.tcl" />
+								<Component Guid="{947E3D83-15D1-44E5-B8D3-5EEBDD18B343}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\ttk.tcl" />
 								</Component>
-								<Component Id="cmp624ACFB58835F0C5EE70B6105D4A8C56" Guid="{D5534AC6-9A1B-4CE3-90E1-6B65D4FF86D6}">
-									<File Id="fil7057BBCBE2529C32CB6C0FF7A6A7B0EA" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\utils.tcl" />
+								<Component Guid="{D5534AC6-9A1B-4CE3-90E1-6B65D4FF86D6}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\utils.tcl" />
 								</Component>
-								<Component Id="cmpD0643360E94197D8971CA1D6A7B81B5C" Guid="{198ADB32-56DD-4F29-B862-817DD6E92ECA}">
-									<File Id="filC1C9FD16B862068CBEEA8FE8C06864C7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\vistaTheme.tcl" />
+								<Component Guid="{198ADB32-56DD-4F29-B862-817DD6E92ECA}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\vistaTheme.tcl" />
 								</Component>
-								<Component Id="cmpE2DB8F0A511E57F996B803AF1589A0D4" Guid="{92589FA4-E08B-4E45-856E-F266D6290E2A}">
-									<File Id="fil5D32585BD4F73F8D01539B1B8CEFEFB7" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\winTheme.tcl" />
+								<Component Guid="{92589FA4-E08B-4E45-856E-F266D6290E2A}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\winTheme.tcl" />
 								</Component>
-								<Component Id="cmp34D56605EFC92708697DA79019DC398C" Guid="{78CB3D2B-5032-445B-82C5-CFD32584A238}">
-									<File Id="fil5CEF518E45DB03A4776C59A7C721E92F" KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\xpTheme.tcl" />
+								<Component Guid="{78CB3D2B-5032-445B-82C5-CFD32584A238}">
+									<File KeyPath="yes" Source="SourceDir\tcl\tk8.5\ttk\xpTheme.tcl" />
 								</Component>
 							</Directory>
 						</Directory>
@@ -314,90 +317,94 @@
 
 		<Feature Id='Complete' Level='1'>
 			<ComponentRef Id="MainExecutable" />
-			<ComponentRef Id="cmpE57080DEA0B187988FD2BD076FB01324" />
-			<ComponentRef Id="cmp055944010F8A239D46D29B39AFFAFB8C" />
-			<ComponentRef Id="cmpA6CD3F0230AF14109E0A64CED6EF5980" />
-			<ComponentRef Id="cmp795E5CB8A50C188ADB80F30BEA5B6934" />
-			<ComponentRef Id="cmpB12CF493F1D531F63A1E42FF520621ED" />
-			<ComponentRef Id="cmpC8B55AE9807D860809769FEEC0698D4D" />
-			<ComponentRef Id="cmp4E4667BF45EB1B750652361A525491D8" />
-			<ComponentRef Id="cmp3A226BE5169ADACD24C4558730F36DE0" />
-			<ComponentRef Id="cmp58A3B51756464557E96B4443B71440FF" />
-			<ComponentRef Id="cmp6C00F72E54E2F111E00372FB0FBB0FE2" />
-			<ComponentRef Id="cmpCFF82FAF0C08DC3A2167B0390C62C086" />
-			<ComponentRef Id="cmp86F09398BBC9CD7D4B57EAAE1A948C70" />
-			<ComponentRef Id="cmpDD33425F04785DD7D65BF3D29B337B38" />
-			<ComponentRef Id="cmp47BC2E37E918091103765A3E7BD81D06" />
-			<ComponentRef Id="cmp4854ADD13616F64F327353F410CEDC44" />
-			<ComponentRef Id="cmpF53EFD7F16A85DF32B289806E475CEC1" />
-			<ComponentRef Id="cmp775D0CC23474B987B407951838E0DCC3" />
-			<ComponentRef Id="cmpE60B2042B4B6A6FC78D8B97E5C31EFE2" />
-			<ComponentRef Id="cmp89797FC50D96847B20F83F5F004B305D" />
-			<ComponentRef Id="cmp46F96A08F279F9A56AA11B7A48864E3B" />
-			<ComponentRef Id="cmpD27194A0318B37EE8C689E9932019055" />
-			<ComponentRef Id="cmp1F0608724556615D66BB7CD33643A12E" />
-			<ComponentRef Id="cmpB36AD9D4FB52D7BAF3D2D1D77A4AE403" />
-			<ComponentRef Id="cmpC8085E34520D4949C606CCCC032CD5A6" />
-			<ComponentRef Id="cmpA436ECBD7A7CFB786673EDE13EA39DCF" />
-			<ComponentRef Id="cmpFF37E685F5FDC0893F117A448FB98405" />
-			<ComponentRef Id="cmp8A99CBBB19CB127EE2A949CCF71886B4" />
-			<ComponentRef Id="cmp27BAF2EDF03B231C19369F449C80C719" />
-			<ComponentRef Id="cmpBBC9EA178985D6ADBACB8932D6665866" />
-			<ComponentRef Id="cmp67C3AD1465774F1000715AAD1A683102" />
-			<ComponentRef Id="cmp9D249A64D9E4B23FD8A16A9EC35BFB51" />
-			<ComponentRef Id="cmp5BDDE40FD160C0346FF68FCD0E8D63EC" />
-			<ComponentRef Id="cmp61EECEEF8CB2711F4E81A264B03811B8" />
-			<ComponentRef Id="cmpC998BEE2DCA05F096574D95F82AC6028" />
-			<ComponentRef Id="cmp2B05DFB334087E9D65C19E74F30480E5" />
-			<ComponentRef Id="cmp55AF16DDC2C2AE975F3BE60099EDF405" />
-			<ComponentRef Id="cmp133E58DD092E0C9C54381109122B91CF" />
-			<ComponentRef Id="cmpB521430E8F699763F8862D3BA1E3C1B2" />
-			<ComponentRef Id="cmpBDF46B1C58BD36945BDBC1C991A25C1B" />
-			<ComponentRef Id="cmp856D15D3BED074A33F9B3EFD6D1AF353" />
-			<ComponentRef Id="cmpFA55012AD06441E3DC22BB7EE15BFDDC" />
-			<ComponentRef Id="cmp0556EDDBB814671B26AFFAE622190018" />
-			<ComponentRef Id="cmpFF813636A68D4E734CB0E966ADFFA6A5" />
-			<ComponentRef Id="cmp5E4F4C22B976FF8D6A1C0F55F2EB6F24" />
-			<ComponentRef Id="cmp5A60D07F77FB606C7F05B24729F7E31B" />
-			<ComponentRef Id="cmpFBD2CEEDED12AFD33B2AA2C205C7B35B" />
-			<ComponentRef Id="cmp98B3514B29077FD91D8D485DE88FA344" />
-			<ComponentRef Id="cmpEC99633F2342C62CDA489D80980342CA" />
-			<ComponentRef Id="cmp693E17BFC6CA2B38AAAD07DF037F0A36" />
-			<ComponentRef Id="cmp097021AE93805CB82724CB4AA06B9E76" />
-			<ComponentRef Id="cmp9048F339336BE1B5294B06B4E04B467F" />
-			<ComponentRef Id="cmp6774B45D663B83EAE999E321664CC1DE" />
-			<ComponentRef Id="cmpFD4C4950967592C942F17C46A1E0F7D7" />
-			<ComponentRef Id="cmpEF72D7C810B0FC6A2C93DC054D394BD9" />
-			<ComponentRef Id="cmp9964E91AFBBC75F6A78D1A6431EEAAA7" />
-			<ComponentRef Id="cmp849D6D832C2D7F5D4603FD0FDE29200E" />
-			<ComponentRef Id="cmpF6A0CD72D2406DF8A9E94683FCD89AF6" />
-			<ComponentRef Id="cmp3144B208CE125E12449A0E87CC211134" />
-			<ComponentRef Id="cmpFF278DBC70B3A7502CB3AD1782CB8BC1" />
-			<ComponentRef Id="cmpB0F3FC7F12EF963D0892EF2ACB2F54FE" />
-			<ComponentRef Id="cmpF076828E0B16B9BB7DC709FF78A1E7F5" />
-			<ComponentRef Id="cmpEDD08A04FA74028970670AF282053264" />
-			<ComponentRef Id="cmp226D9227B824FD5D00190FAC30335757" />
-			<ComponentRef Id="cmpB0491A85FEEE360B461075367FF7D4F3" />
-			<ComponentRef Id="cmpCF878E0C55E535E22900C672FC4BB02A" />
-			<ComponentRef Id="cmp354CB1774E4A23385CDF5A38BE2A3769" />
-			<ComponentRef Id="cmp870ED457724743C23239DEB41EEA30A0" />
-			<ComponentRef Id="cmpF2DE6EBBDC7DEA796CB96845F3A84327" />
-			<ComponentRef Id="cmp8335EC98852872134A66B21C89DA15E3" />
-			<ComponentRef Id="cmp0E9DF39364F68587F90EAAAB95D535C9" />
-			<ComponentRef Id="cmp40A7AB9AFC7EB5FC2B4F3CFA01A908C4" />
-			<ComponentRef Id="cmpE5A297A3CD627BA0693C062DFD45B742" />
-			<ComponentRef Id="cmpDB1161884EDA291ECA6A30FF514756B0" />
-			<ComponentRef Id="cmp6F0C4A275C34B4CBF470061C49F48A62" />
-			<ComponentRef Id="cmp04E5FE0E0D39B434CD72E5668C8EA233" />
-			<ComponentRef Id="cmpB252953A880253445EC0750D45BA4D2C" />
-			<ComponentRef Id="cmp9096943773180E24A57FAD7CA2663824" />
-			<ComponentRef Id="cmpB298804A0993E19DC88246355CE928A1" />
-			<ComponentRef Id="cmp57DB57AE30ADD8A61D4FFFE148B291D7" />
-			<ComponentRef Id="cmp624ACFB58835F0C5EE70B6105D4A8C56" />
-			<ComponentRef Id="cmpD0643360E94197D8971CA1D6A7B81B5C" />
-			<ComponentRef Id="cmpE2DB8F0A511E57F996B803AF1589A0D4" />
-			<ComponentRef Id="cmp34D56605EFC92708697DA79019DC398C" />
+			<ComponentRef Id="_ctypes.pyd" />
+			<ComponentRef Id="_hashlib.pyd" />
+			<ComponentRef Id="_socket.pyd" />
+			<ComponentRef Id="_ssl.pyd" />
+			<ComponentRef Id="_tkinter.pyd" />
+			<ComponentRef Id="bz2.pyd" />
+			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="EDMarketConnector.ico" />
+			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
+			<ComponentRef Id="library.zip" />
+			<ComponentRef Id="pyexpat.pyd" />
+			<ComponentRef Id="python27.dll" />
+			<ComponentRef Id="select.pyd" />
+			<ComponentRef Id="tcl85.dll" />
+			<ComponentRef Id="tk85.dll" />
+			<ComponentRef Id="unicodedata.pyd" />
+			<ComponentRef Id="WinSparkle.dll" />
+			<ComponentRef Id="auto.tcl" />
+			<ComponentRef Id="clock.tcl" />
+			<ComponentRef Id="history.tcl" />
+			<ComponentRef Id="init.tcl" />
+			<ComponentRef Id="package.tcl" />
+			<ComponentRef Id="parray.tcl" />
+			<ComponentRef Id="safe.tcl" />
+			<ComponentRef Id="tclIndex_1" />
+			<ComponentRef Id="tm.tcl" />
+			<ComponentRef Id="word.tcl" />
+			<ComponentRef Id="optparse.tcl" />
+			<ComponentRef Id="pkgIndex.tcl_1" />
+			<ComponentRef Id="bgerror.tcl" />
+			<ComponentRef Id="button.tcl_1" />
+			<ComponentRef Id="choosedir.tcl" />
+			<ComponentRef Id="clrpick.tcl" />
+			<ComponentRef Id="comdlg.tcl" />
+			<ComponentRef Id="console.tcl" />
+			<ComponentRef Id="dialog.tcl" />
+			<ComponentRef Id="entry.tcl_1" />
+			<ComponentRef Id="focus.tcl" />
+			<ComponentRef Id="license.terms" />
+			<ComponentRef Id="listbox.tcl" />
+			<ComponentRef Id="menu.tcl" />
+			<ComponentRef Id="mkpsenc.tcl" />
+			<ComponentRef Id="msgbox.tcl" />
+			<ComponentRef Id="obsolete.tcl" />
+			<ComponentRef Id="optMenu.tcl" />
+			<ComponentRef Id="palette.tcl" />
+			<ComponentRef Id="panedwindow.tcl_1" />
+			<ComponentRef Id="pkgIndex.tcl_2" />
+			<ComponentRef Id="safetk.tcl" />
+			<ComponentRef Id="scale.tcl_1" />
+			<ComponentRef Id="scrlbar.tcl" />
+			<ComponentRef Id="spinbox.tcl_1" />
+			<ComponentRef Id="tclIndex_2" />
+			<ComponentRef Id="tearoff.tcl" />
+			<ComponentRef Id="text.tcl" />
+			<ComponentRef Id="tk.tcl" />
+			<ComponentRef Id="tkfbox.tcl" />
+			<ComponentRef Id="unsupported.tcl" />
+			<ComponentRef Id="xmfbox.tcl" />
+			<ComponentRef Id="altTheme.tcl" />
+			<ComponentRef Id="aquaTheme.tcl" />
+			<ComponentRef Id="button.tcl_2" />
+			<ComponentRef Id="clamTheme.tcl" />
+			<ComponentRef Id="classicTheme.tcl" />
+			<ComponentRef Id="combobox.tcl" />
+			<ComponentRef Id="cursors.tcl" />
+			<ComponentRef Id="defaults.tcl" />
+			<ComponentRef Id="entry.tcl_2" />
+			<ComponentRef Id="fonts.tcl" />
+			<ComponentRef Id="menubutton.tcl" />
+			<ComponentRef Id="notebook.tcl" />
+			<ComponentRef Id="panedwindow.tcl_2" />
+			<ComponentRef Id="progress.tcl" />
+			<ComponentRef Id="scale.tcl_2" />
+			<ComponentRef Id="scrollbar.tcl" />
+			<ComponentRef Id="sizegrip.tcl" />
+			<ComponentRef Id="spinbox.tcl_2" />
+			<ComponentRef Id="treeview.tcl" />
+			<ComponentRef Id="ttk.tcl" />
+			<ComponentRef Id="utils.tcl" />
+			<ComponentRef Id="vistaTheme.tcl" />
+			<ComponentRef Id="winTheme.tcl" />
+			<ComponentRef Id="xpTheme.tcl" />
 		</Feature>
 
 	</Product>
 </Wix>
+
+<!-- Local Variables: -->
+<!-- tab-width: 4     -->
+<!-- End:             -->
