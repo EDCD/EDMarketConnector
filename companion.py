@@ -21,6 +21,10 @@ from config import config
 holdoff = 120	# be nice
 timeout = 10	# requests timeout
 
+URL_LOGIN   = 'https://companion.orerve.net/user/login'
+URL_CONFIRM = 'https://companion.orerve.net/user/confirm'
+URL_QUERY   = 'https://companion.orerve.net/profile'
+
 
 # Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
 
@@ -137,7 +141,7 @@ class Session:
         else:
             self.credentials = { 'email' : username, 'password' : password }
         try:
-            r = self.session.post('https://companion.orerve.net/user/login', data = self.credentials, timeout=timeout)
+            r = self.session.post(URL_LOGIN, data = self.credentials, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
@@ -160,7 +164,7 @@ class Session:
             return r.status_code
 
     def verify(self, code):
-        r = self.session.post('https://companion.orerve.net/user/confirm', data = {'code' : code}, timeout=timeout)
+        r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
         r.raise_for_status()
         # verification doesn't actually return a yes/no, so log in again to determine state
         try:
@@ -176,17 +180,17 @@ class Session:
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
         try:
-            r = self.session.get('https://companion.orerve.net/profile', timeout=timeout)
+            r = self.session.get(URL_QUERY, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
 
         if r.status_code != requests.codes.ok:
             self.dump(r)
-        if r.status_code == requests.codes.forbidden:
+        if r.status_code == requests.codes.forbidden or (r.history and r.url == URL_LOGIN):
             # Start again - maybe our session cookie expired?
             self.login()
-            self.query()
+            return self.query()
 
         r.raise_for_status()
         try:
