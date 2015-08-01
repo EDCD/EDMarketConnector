@@ -57,7 +57,7 @@ This app can save a variety of data in a variety of formats:
   * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/) or [Inara](http://inara.cz).
 
 * Ship loadout
-  * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com).
+  * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com) or [Coriolis](http://coriolis.io).
 
 * Flight log
   * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.

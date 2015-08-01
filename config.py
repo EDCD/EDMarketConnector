@@ -69,9 +69,10 @@ class Config:
     OUT_BPC  = 2
     OUT_TD   = 4
     OUT_CSV  = 8
-    OUT_SHIP = 16
+    OUT_SHIP_EDS = 16
     OUT_LOG  = 32
     OUT_STAT = 64
+    OUT_SHIP_CORIOLIS = 128
 
     if platform=='darwin':
 

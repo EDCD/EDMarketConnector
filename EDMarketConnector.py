@@ -21,6 +21,7 @@ import bpc
 import td
 import eddn
 import loadout
+import coriolis
 import flightlog
 import stats
 import chart
@@ -213,8 +214,10 @@ class AppWindow:
                     chart.export(data)
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
-                if config.getint('output') & config.OUT_SHIP:
+                if config.getint('output') & config.OUT_SHIP_EDS:
                     loadout.export(data)
+                if config.getint('output') & config.OUT_SHIP_CORIOLIS:
+                    coriolis.export(data)
                 return
 
             else:
@@ -230,8 +233,10 @@ class AppWindow:
                         chart.export(data)
                     if config.getint('output') & config.OUT_LOG:
                         flightlog.export(data)
-                    if config.getint('output') & config.OUT_SHIP:
+                    if config.getint('output') & config.OUT_SHIP_EDS:
                         loadout.export(data)
+                    if config.getint('output') & config.OUT_SHIP_CORIOLIS:
+                        coriolis.export(data)
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested
