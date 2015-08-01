@@ -128,7 +128,7 @@ else:
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
 appcast.write('''
 \t\t<item>
-\t\t\t<title>Release {0}</title>
+\t\t\t<title>Release {0:.2f}</title>
 \t\t\t<description>
 \t\t\t\t<![CDATA[{6}
 <h2>Release {0:.2f}</h2>
