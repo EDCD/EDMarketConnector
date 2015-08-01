@@ -1,4 +1,4 @@
-# Export ship loadout
+# Export ship loadout in E:D Shipyard format
 
 from collections import defaultdict
 import os
@@ -47,33 +47,34 @@ def export(data):
     for slot in sorted(data['ship']['modules']):
 
         v = data['ship']['modules'][slot]
-        if not v or not v.get('module'):
-            continue
         try:
+            if not v: continue
+
             module = outfitting.lookup(v['module'])
             if not module: continue
+
+            cr = class_rating(module)
+
+            # Specials
+            if module['name'] in ['Fuel Tank', 'Cargo Rack']:
+                name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+            else:
+                name = module['name']
+
+            for s in slot_map:
+                if slot.startswith(s):
+                    loadout[slot_map[s]].append(cr + name)
+                    break
+            else:
+                if slot.startswith('Slot'):
+                    loadout[slot[-1]].append(cr + name)
+                elif __debug__: print 'Loadout: Unknown slot %s' % slot
+
         except AssertionError as e:
             if __debug__: print 'Loadout: %s' % e
             continue	# Silently skip unrecognized modules
         except:
             if __debug__: raise
-
-        cr = class_rating(module)
-
-        # Specials
-        if module['name'] in ['Fuel Tank', 'Cargo Rack']:
-            name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
-        else:
-            name = module['name']
-
-        for s in slot_map:
-            if slot.startswith(s):
-                loadout[slot_map[s]].append(cr + name)
-                break
-        else:
-            if slot.startswith('Slot'):
-                loadout[slot[-1]].append(cr + name)
-            elif __debug__: print 'Loadout: Unknown slot %s' % slot
 
     # Construct description
     string = '[%s]\n' % ship

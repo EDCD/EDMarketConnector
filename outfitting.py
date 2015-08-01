@@ -29,7 +29,7 @@ weapon_map = {
     'BeamLaser'                      : 'Beam Laser',
     ('BeamLaser','Heat')             : 'Retributor Beam Laser',
     'Cannon'                         : 'Cannon',
-    'DrunkMissileRack'               : 'Pack-hound Missile Rack',
+    'DrunkMissileRack'               : 'Pack-Hound Missile Rack',
     'DumbfireMissileRack'            : 'Missile Rack',
     'MineLauncher'                   : 'Mine Launcher',
     ('MineLauncher','Impulse')       : 'Impulse Mine Launcher',	# Not seen in game?
@@ -152,14 +152,17 @@ weaponoldvariant_map = {
     'SS' : 'Scatter Spray',
 }
 
+countermeasure_map = {
+    'ChaffLauncher'            : ('Chaff Launcher', 'I'),
+    'ElectronicCountermeasure' : ('Electronic Countermeasure', 'F'),
+    'HeatSinkLauncher'         : ('Heat Sink Launcher', 'I'),
+    'PlasmaPointDefence'       : ('Point Defence', 'I'),
+}
+
 utility_map = {
     'CargoScanner'             : 'Cargo Scanner',
-    'ChaffLauncher'            : 'Chaff Launcher',
     'CloudScanner'             : 'Frame Shift Wake Scanner',
     'CrimeScanner'             : 'Kill Warrant Scanner',
-    'ElectronicCountermeasure' : 'Electronic Countermeasure',
-    'HeatSinkLauncher'         : 'Heat Sink Launcher',
-    'PlasmaPointDefence'       : 'Point Defence',
     'ShieldBooster'            : 'Shield Booster',
 }
 
@@ -172,7 +175,7 @@ rating_map = {
 }
 
 standard_map = {
-    'Armour'           : 'Bulkheads',
+    # 'Armour'         : handled separately
     'Engine'           : 'Thrusters',
     'FuelTank'         : 'Fuel Tank',
     'Hyperdrive'       : 'Frame Shift Drive',
@@ -260,17 +263,19 @@ def lookup(module):
             new['guidance'] = missiletype_map[name[1]]
         new['class'] = weaponclass_map[name[3]]
 
+    # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
+    elif name[0]=='Hpt' and name[1] in countermeasure_map:
+        new['category'] = 'utility'
+        new['name'], new['rating'] = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
+        new['class'] = weaponclass_map[name[-1]]
+
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
     elif name[0]=='Hpt' and name[1] in utility_map:
         new['category'] = 'utility'
         new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        if name[-1] in weaponclass_map:	# e.g. Hpt_PlasmaPointDefence_Turret_Tiny
-            new['class'] = weaponclass_map[name[-1]]
-            new['rating'] = 'I'
-        else:
-            if not name[2].startswith('Size') or not name[3].startswith('Class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-            new['class'] = name[2][4:]
-            new['rating'] = rating_map[name[3][5:]]
+        if not name[2].startswith('Size') or not name[3].startswith('Class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        new['class'] = name[2][4:]
+        new['rating'] = rating_map[name[3][5:]]
 
     elif name[0]=='Hpt':
         raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
