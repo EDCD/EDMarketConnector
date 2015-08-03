@@ -3,11 +3,11 @@ Elite: Dangerous Market Connector (EDMC)
 
 This app downloads commodity market and other data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) ("EDDN") from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
+* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) (“EDDN”) from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), etc.
 * saves a record of your ship loadout, flight log and/or statistics.
 
-The user-interface is deliberately minimal - when you land at a station just switch to the app and press the "Update" button or press Enter to automatically download and transmit and/or save your choice of data.
+The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to automatically download and transmit and/or save your choice of data.
 
 ![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
 
@@ -39,11 +39,11 @@ combination that you use to log into the Elite: Dangerous launcher, and is requi
 
 You can also choose here what data to save (refer to the next section for details) and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
-You are next prompted to authenticate with a "verification code", which you will shortly receive by email from Frontier.
-Note that each "verification code" is one-time only - if you enter the code incorrectly or quit the app before
+You are next prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
+Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before
 authenticating you will need to wait for Frontier to send you a new code.
 
-If you are not prompted to authenticate, but instead see the message "Error: Invalid Credentials" then choose the menu
+If you are not prompted to authenticate, but instead see the message “Error: Invalid Credentials” then choose the menu
 option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
 
 Output
@@ -51,7 +51,7 @@ Output
 This app can save a variety of data in a variety of formats:
 
 * Market data
-  * Elite Dangerous Data Network - sends commodity market and shipyard data to "[EDDN](http://eddn-gateway.elite-markets.net/)" from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/) etc.
+  * Elite Dangerous Data Network - sends commodity market and shipyard data to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/) etc.
   * Slopey's BPC format - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
   * Trade Dangerous format - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
   * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/) or [Inara](http://inara.cz).
@@ -69,7 +69,7 @@ By default these files will be placed in your Documents folder. Since this app w
 
 Statistics
 --------
-Choose the "Statistics" item from the menu to view your Cmdrs's statistics. The statistics shown are largely the same
+Choose the “Statistics” item from the menu to view your Cmdrs's statistics. The statistics shown are largely the same
 as those available from the right-hand panel in-game, plus a few additions.
 
 Uninstall
@@ -92,17 +92,17 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python "requests" module - install this with `easy_install requests` .
+* Requires the Python “requests” module - install this with `easy_install requests` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python "requests" module.
+* Requires Python2.7 and the Python “requests” module.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
-* Requires the Python "imaging-tk", "iniparse" and "requests" modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
+* Requires the Python “imaging-tk”, “iniparse” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
 * Run with `./EDMarketConnector.py` .
 
 On all platforms charting Cmdr statistics additionally requires verison 2.3.0 or later of the [openpyxl](https://pypi.python.org/pypi/openpyxl) module.
@@ -124,11 +124,16 @@ Windows:
 * Run `setup.py py2exe`
 
 
+Disclaimer
+--------
+This app uses the “Companion” web API that Frontier supplies to support their Elite Dangerous iOS app. This API isn't officially supported for third-party use, so could go away at some time in the future - in which case this app will cease to work.
+
+
 Acknowledgements
 --------
-* "Elite: Dangerous" is © 1984 - 2014 Frontier Developments plc.
+* “Elite: Dangerous” is © 1984 - 2014 Frontier Developments plc.
 * Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [AnthorNet](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
-* Thanks to [Andargor](https://github.com/Andargor) for the idea of using the "Companion" interface in [edce-client](https://github.com/Andargor/edce-client).
+* Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
 
