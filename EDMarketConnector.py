@@ -23,8 +23,6 @@ import eddn
 import loadout
 import coriolis
 import flightlog
-import stats
-import chart
 import prefs
 from config import appname, applongname, config
 
@@ -85,7 +83,6 @@ class AppWindow:
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             apple_menu = tk.Menu(menubar, name='apple')
             apple_menu.add_command(label="About %s" % applongname, command=lambda:self.w.call('tk::mac::standardAboutPanel'))
-            apple_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
             apple_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
             window_menu = tk.Menu(menubar, name='window')
@@ -98,7 +95,6 @@ class AppWindow:
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
-            file_menu.add_command(label="Statistics", command=lambda:stats.StatsDialog(self.w, self.session))
             file_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label="Settings", command=lambda:prefs.PreferencesDialog(self.w, self.login))
             file_menu.add_separator()
@@ -210,8 +206,6 @@ class AppWindow:
                 self.w.after(shipyard_retry * 1000, lambda:self.getandsend(retrying=True))
 
                 # Stuff we can do while waiting for retry
-                if config.getint('output') & config.OUT_STAT:
-                    chart.export(data)
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
@@ -229,8 +223,6 @@ class AppWindow:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 if not retrying:
-                    if config.getint('output') & config.OUT_STAT:
-                        chart.export(data)
                     if config.getint('output') & config.OUT_LOG:
                         flightlog.export(data)
                     if config.getint('output') & config.OUT_SHIP_EDS:

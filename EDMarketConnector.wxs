@@ -51,9 +51,6 @@
 					<Component Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
 						<File KeyPath="yes" Source="SourceDir\_ctypes.pyd" />
 					</Component>
-					<Component Guid="{BFF92B3F-2F13-4892-87A0-49F8DDF54A60}">
-						<File KeyPath="yes" Source="SourceDir\_elementtree.pyd" />
-					</Component>
 					<Component Guid="{45803711-A2A6-4DA8-8219-F625DE6DB33E}">
 						<File KeyPath="yes" Source="SourceDir\_hashlib.pyd" />
 					</Component>
@@ -80,9 +77,6 @@
 					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
-					</Component>
-					<Component Guid="{017F51FB-BC1F-43C9-8089-6E60005F6989}">
-						<File KeyPath="yes" Source="SourceDir\lxml.etree.pyd" />
 					</Component>
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
@@ -324,7 +318,6 @@
 		<Feature Id='Complete' Level='1'>
 			<ComponentRef Id="MainExecutable" />
 			<ComponentRef Id="_ctypes.pyd" />
-			<ComponentRef Id="_elementtree.pyd" />
 			<ComponentRef Id="_hashlib.pyd" />
 			<ComponentRef Id="_socket.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
@@ -334,7 +327,6 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="library.zip" />
-			<ComponentRef Id="lxml.etree.pyd" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
 			<ComponentRef Id="select.pyd" />

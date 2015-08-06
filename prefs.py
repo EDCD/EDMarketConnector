@@ -9,7 +9,6 @@ import ttk
 import tkFileDialog
 
 from config import config
-from chart import have_openpyxl
 
 
 if platform=='win32':
@@ -78,7 +77,7 @@ class PreferencesDialog(tk.Toplevel):
         outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS | config.OUT_STAT)
+        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS)
         ttk.Label(outframe, text="Please choose what data to save").grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
         self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1 or 0)
         ttk.Checkbutton(outframe, text="Send station data to the Elite Dangerous Data Network", variable=self.out_eddn).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
@@ -94,15 +93,13 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Checkbutton(outframe, text="Ship loadout in Coriolis format", variable=self.out_ship_coriolis, command=self.outvarchanged).grid(row=6, columnspan=2, padx=5, sticky=tk.W)
         self.out_log = tk.IntVar(value = (output & config.OUT_LOG ) and 1 or 0)
         ttk.Checkbutton(outframe, text="Flight log", variable=self.out_log, command=self.outvarchanged).grid(row=7, columnspan=2, padx=5, sticky=tk.W)
-        self.out_stat= tk.IntVar(value = have_openpyxl and (output & config.OUT_STAT) and 1 or 0)
-        ttk.Checkbutton(outframe, text="Cmdr statistics", variable=self.out_stat, command=self.outvarchanged, state=have_openpyxl and tk.NORMAL or tk.DISABLED).grid(row=8, columnspan=2, padx=5, sticky=tk.W)
 
-        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=9, padx=5, pady=(5,0), sticky=tk.NSEW)
+        ttk.Label(outframe, text=(platform=='darwin' and 'Where:' or 'File location:')).grid(row=8, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and 'Change...' or 'Browse...'), command=self.outbrowse)
-        self.outbutton.grid(row=9, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
+        self.outbutton.grid(row=8, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
         self.outdir = ttk.Entry(outframe)
         self.outdir.insert(0, config.get('outdir'))
-        self.outdir.grid(row=10, columnspan=2, padx=5, pady=5, sticky=tk.EW)
+        self.outdir.grid(row=9, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
 
         privacyframe = ttk.LabelFrame(frame, text='Privacy')
@@ -129,7 +126,7 @@ class PreferencesDialog(tk.Toplevel):
         #self.wait_window(self)	# causes duplicate events on OSX
 
     def outvarchanged(self):
-        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get() or self.out_log.get() or self.out_stat.get()
+        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get() or self.out_log.get()
         self.outbutton['state'] = local and tk.NORMAL or tk.DISABLED
         self.outdir['state']    = local and 'readonly' or tk.DISABLED
 
@@ -168,7 +165,7 @@ class PreferencesDialog(tk.Toplevel):
         credentials = (config.get('username'), config.get('password'))
         config.set('username', self.username.get().strip())
         config.set('password', self.password.get().strip())
-        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS or 0) + (self.out_log.get() and config.OUT_LOG or 0) + (self.out_stat.get() and config.OUT_STAT or 0) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS or 0))
+        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS or 0) + (self.out_log.get() and config.OUT_LOG or 0) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS or 0))
         config.set('outdir', self.outdir.get().strip())
         config.set('anonymous', self.out_anon.get())
         self.destroy()
