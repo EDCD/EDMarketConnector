@@ -3,7 +3,7 @@ Elite: Dangerous Market Connector (EDMC)
 
 This app downloads commodity market and other data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) (“EDDN”) from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), etc.
+* sends the data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) (“EDDN”) from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), etc.
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), etc.
 * saves a record of your ship loadout and/or flight log.
 
