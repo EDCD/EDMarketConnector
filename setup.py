@@ -55,7 +55,7 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'PIL' ],
+                  'excludes': [ 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'semi_standalone': True,
                   'site_packages': False,
@@ -78,7 +78,7 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
 PY2EXE_OPTIONS = {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
-                  'excludes': [ 'PIL' ],
+                  'excludes': [ 'PIL', 'simplejson' ],
               }
 
 if sys.platform=='win32':
