@@ -12,7 +12,7 @@ from config import applongname, appversion, config
 from companion import ship_map
 import outfitting
 
-upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
+upload = 'http://eddn-gateway.ed-td.space:8080/upload/'
 
 timeout= 10	# requests timeout
 
