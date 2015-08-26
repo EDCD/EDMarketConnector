@@ -12,6 +12,7 @@ from time import time, localtime, strftime
 
 import Tkinter as tk
 import ttk
+import tkFont
 
 if __debug__:
     from traceback import print_exc
@@ -50,6 +51,16 @@ class AppWindow:
             self.w.tk.call('wm', 'iconphoto', self.w, '-default', icon)
             style = ttk.Style()
             style.theme_use('clam')
+        elif platform=='darwin':
+            # Default ttk font choice looks bad on El Capitan
+            font = tkFont.Font(family='TkDefaultFont', size=13, weight=tkFont.NORMAL)
+            style = ttk.Style()
+            style.configure('TLabel', font=font)
+            style.configure('TButton', font=font)
+            style.configure('TLabelframe.Label', font=font)
+            style.configure('TCheckbutton', font=font)
+            style.configure('TRadiobutton', font=font)
+            style.configure('TEntry', font=font)
 
         frame = ttk.Frame(self.w)
         frame.grid(sticky=tk.NSEW)
