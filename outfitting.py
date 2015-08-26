@@ -320,7 +320,9 @@ def lookup(module):
 
     # check we've filled out mandatory fields
     for thing in ['category', 'name', 'class', 'rating']:
-        if not new.get('name'): raise AssertionError('%s: failed to set %s' % (module['id'], thing))
+        if not new.get(thing): raise AssertionError('%s: failed to set %s' % (module['id'], thing))
+    if new['category'] == 'hardpoint' and not new.get('mount'):
+        raise AssertionError('%s: failed to set %s' % (module['id'], 'mount'))
 
     return new
 
