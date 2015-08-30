@@ -211,7 +211,7 @@ internal_map = {
 
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
-# English langauge game.
+# English langauge game. For fitted modules, dict also includes { enabled, priority }.
 # Or returns None if the module is user-specific (i.e. decal, paintjob).
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
 def lookup(module):
@@ -313,6 +313,10 @@ def lookup(module):
         if not name[2].startswith('Size') or not name[3].startswith('Class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = name[2][4:]
         new['rating'] = rating_map[name[3][5:]]
+
+    # Disposition of fitted modules
+    if 'on' in module and 'priority' in module:
+        new['enabled'], new['priority'] = module['on'], module['priority']	# priority is zero-based
 
     # check we've filled out mandatory fields
     for thing in ['category', 'name', 'class', 'rating']:

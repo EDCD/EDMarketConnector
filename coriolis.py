@@ -12,6 +12,15 @@ import outfitting
 import companion
 
 
+slot_map = {
+    'HugeHardpoint'    : 'hardpoints',
+    'LargeHardpoint'   : 'hardpoints',
+    'MediumHardpoint'  : 'hardpoints',
+    'SmallHardpoint'   : 'hardpoints',
+    'TinyHardpoint'    : 'utility',
+    'Slot'             : 'internal',
+}
+
 # Map draft EDDN outfitting to Coriolis
 # https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0-draft.json
 # http://cdn.coriolis.io/schemas/ship-loadout/1.json
@@ -24,15 +33,6 @@ category_map = {
     'internal'  : 'internal',
     'hardpoint' : 'hardpoints',
     'utility'   : 'utility',
-}
-
-slot_map = {
-    'HugeHardpoint'    : 'hardpoints',
-    'LargeHardpoint'   : 'hardpoints',
-    'MediumHardpoint'  : 'hardpoints',
-    'SmallHardpoint'   : 'hardpoints',
-    'TinyHardpoint'    : 'utility',
-    'Slot'             : 'internal',
 }
 
 standard_map = OrderedDict([	# in output order
@@ -80,7 +80,7 @@ def export(data):
     ship = companion.ship_map.get(data['ship']['name'], data['ship']['name'])
 
     loadout = OrderedDict([	# Mimic Coriolis export ordering
-        ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/1.json#'),
+        ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/2.json#'),
         ('name',       ship_map.get(data['ship']['name'], data['ship']['name'])),
         ('ship',       ship_map.get(data['ship']['name'], data['ship']['name'])),
         ('components', OrderedDict([
@@ -110,8 +110,10 @@ def export(data):
 
             category = loadout['components'][category_map[module['category']]]
             thing = OrderedDict([
-                ('class',  module['class']),
-                ('rating', module['rating']),
+                ('class',    module['class']),
+                ('rating',   module['rating']),
+                ('enabled',  module['enabled']),
+                ('priority', module['priority']+1),	# make 1-based
             ])
 
             if module['name'] in bulkheads:
