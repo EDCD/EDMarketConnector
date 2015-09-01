@@ -51,7 +51,9 @@ APPLONGNAME = re.search(r"^applongname\s*=\s*'(.+)'", file('config.py').read(), 
 VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
-PY2APP_OPTIONS = {'dist_dir': dist_dir,
+if sys.platform=='darwin':
+    OPTIONS =   { 'py2app':
+                  {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
                   'frameworks': [ 'Sparkle.framework' ],
@@ -62,9 +64,10 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   'plist': {
                       'CFBundleName': APPLONGNAME,
                       'CFBundleIdentifier': 'uk.org.marginal.%s' % APPNAME.lower(),
+                      'CFBundleLocalizations': [x[:-len('.lproj')] for x in os.listdir('/Library/Frameworks/Sparkle.framework/Resources') if x.endswith('.lproj')],	# https://github.com/sparkle-project/Sparkle/issues/238
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
-                      'LSMinimumSystemVersion': '.'.join(platform.mac_ver()[0].split('.')[:2]),	# minimum version = build version
+                      'LSMinimumSystemVersion': '10.9',
                       'NSHumanReadableCopyright': u'© 2015 Jonathan Harris',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
@@ -74,22 +77,24 @@ PY2APP_OPTIONS = {'dist_dir': dist_dir,
                   },
                   'graph': True,	# output dependency graph in dist
               }
+    }
+    DATA_FILES = []
 
-PY2EXE_OPTIONS = {'dist_dir': dist_dir,
+elif sys.platform=='win32':
+    OPTIONS =  { 'py2exe':
+                 {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
                   'excludes': [ 'PIL', 'simplejson' ],
               }
+    }
 
-if sys.platform=='win32':
     import requests
     DATA_FILES = [ ('', [requests.certs.where(),
                          'WinSparkle.dll',
                          'WinSparkle.pdb',	# For debugging - don't include in package
                          '%s.VisualElementsManifest.xml' % APPNAME,
                          '%s.ico' % APPNAME ] ) ]
-else:
-    DATA_FILES = [ ]
 
 setup(
     name = APPLONGNAME,
@@ -104,8 +109,7 @@ setup(
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     data_files = DATA_FILES,
-    options = { 'py2app': PY2APP_OPTIONS,
-                'py2exe': PY2EXE_OPTIONS },
+    options = OPTIONS,
     setup_requires = [sys.platform=='darwin' and 'py2app' or 'py2exe'],
 )
 
