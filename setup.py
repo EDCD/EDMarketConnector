@@ -8,6 +8,7 @@ Usage:
 """
 
 from setuptools import setup
+import codecs
 import os
 from os.path import exists, isdir, join
 import platform
@@ -94,7 +95,8 @@ elif sys.platform=='win32':
                          'WinSparkle.dll',
                          'WinSparkle.pdb',	# For debugging - don't include in package
                          '%s.VisualElementsManifest.xml' % APPNAME,
-                         '%s.ico' % APPNAME ] ) ]
+                         '%s.ico' % APPNAME ] +
+                    [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')] ) ]
 
 setup(
     name = APPLONGNAME,
@@ -117,6 +119,15 @@ setup(
 if sys.platform == 'darwin':
     if isdir('%s/%s.app' % (dist_dir, APPLONGNAME)):	# from CFBundleName
         os.rename('%s/%s.app' % (dist_dir, APPLONGNAME), '%s/%s.app' % (dist_dir, APPNAME))
+
+        # Generate OSX-style localization files
+        for x in os.listdir('L10n'):
+            if x.endswith('.strings'):
+                lang = x[:-len('.strings')]
+                path = '%s/%s.app/Contents/Resources/%s.lproj' % (dist_dir, APPNAME, lang)
+                os.mkdir(path)
+                codecs.open('%s/Localizable.strings' % path, 'w', 'utf-16').write(codecs.open('L10n/%s' % x, 'r', 'utf-8').read())
+
         if macdeveloperid:
             os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
         # Make zip for distribution, preserving signature

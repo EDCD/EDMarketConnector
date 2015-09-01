@@ -74,6 +74,15 @@ elif sys.platform=='win32':
                 self.callback_fn = self.callback_t(shutdown_request)
                 self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
 
+                # Translations require winsparkle 0.5
+                try:
+                    import l10n
+                    langs = l10n.Translations().preferred()
+                    if langs:
+                        self.updater.win_sparkle_set_lang(langs[0])
+                except:
+                    pass
+
                 self.updater.win_sparkle_init()
 
             except:

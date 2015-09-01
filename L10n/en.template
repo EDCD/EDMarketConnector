@@ -1,0 +1,150 @@
+/* Use same text as E:D Launcher's verification dialog. [prefs.py:208] */
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "A verification code has now been sent to the{CR}email address associated with your Elite account.";
+
+/* App menu entry on OSX. [EDMarketConnector.py:97] */
+"About {APP}" = "About {APP}";
+
+/* Folder selection button on Windows. [prefs.py:101] */
+"Browse..." = "Browse...";
+
+/* Folder selection button on OSX. [prefs.py:100] */
+"Change..." = "Change...";
+
+/* [EDMarketConnector.py:98] */
+"Check for Updates..." = "Check for Updates...";
+
+/* Privacy setting. [prefs.py:114] */
+"Cmdr name" = "Cmdr name";
+
+/* Main window. [EDMarketConnector.py:71] */
+"Cmdr:" = "Cmdr:";
+
+/* Update button in main window. [EDMarketConnector.py:300] */
+"cooldown {SS}s" = "cooldown {SS}s";
+
+/* Section heading in settings. [prefs.py:58] */
+"Credentials" = "Credentials";
+
+/* [EDMarketConnector.py:286] */
+"Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
+
+/* [EDMarketConnector.py:290] */
+"Error: Connection to EDDN timed out" = "Error: Connection to EDDN timed out";
+
+/* [companion.py:107] */
+"Error: Invalid Credentials" = "Error: Invalid Credentials";
+
+/* [companion.py:103] */
+"Error: Server is down" = "Error: Server is down";
+
+/* Menu item. [EDMarketConnector.py:114] */
+"Exit" = "Exit";
+
+/* [EDMarketConnector.py:193] */
+"Fetching station data..." = "Fetching station data...";
+
+/* Top-level menu on Windows. [EDMarketConnector.py:115] */
+"File" = "File";
+
+/* Output folder prompt on Windows. [prefs.py:99] */
+"File location:" = "File location:";
+
+/* [prefs.py:96] */
+"Flight log" = "Flight log";
+
+/* Shouldn't happen. [companion.py:176] */
+"General error" = "General error";
+
+/* [prefs.py:113] */
+"How do you want to be identified in the saved data" = "How do you want to be identified in the saved data";
+
+/* [EDMarketConnector.py:248] */
+"Last updated at {HH}:{MM}:{SS}" = "Last updated at {HH}:{MM}:{SS}";
+
+/* [EDMarketConnector.py:153] */
+"Logging in..." = "Logging in...";
+
+/* [prefs.py:90] */
+"Market data in CSV format" = "Market data in CSV format";
+
+/* [prefs.py:86] */
+"Market data in Slopey's BPC format" = "Market data in Slopey's BPC format";
+
+/* [prefs.py:88] */
+"Market data in Trade Dangerous format" = "Market data in Trade Dangerous format";
+
+/* [prefs.py:124] */
+"OK" = "OK";
+
+/* Section heading in settings. [prefs.py:77] */
+"Output" = "Output";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py:64] */
+"Password" = "Password";
+
+/* [prefs.py:82] */
+"Please choose what data to save" = "Please choose what data to save";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py:211] */
+"Please enter the code into the box below." = "Please enter the code into the box below.";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py:62] */
+"Please log in with your Elite: Dangerous account details" = "Please log in with your Elite: Dangerous account details";
+
+/* [prefs.py:37] */
+"Preferences" = "Preferences";
+
+/* Section heading in settings. [prefs.py:108] */
+"Privacy" = "Privacy";
+
+/* Privacy setting. [prefs.py:115] */
+"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
+
+/* [prefs.py:84] */
+"Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
+
+/* [EDMarketConnector.py:266] */
+"Sending data to EDDN..." = "Sending data to EDDN...";
+
+/* Menu item. [EDMarketConnector.py:112] */
+"Settings" = "Settings";
+
+/* [prefs.py:94] */
+"Ship loadout in Coriolis format" = "Ship loadout in Coriolis format";
+
+/* [prefs.py:92] */
+"Ship loadout in E:D Shipyard format" = "Ship loadout in E:D Shipyard format";
+
+/* [EDMarketConnector.py:273] */
+"Station doesn't have a market!" = "Station doesn't have a market!";
+
+/* [EDMarketConnector.py:271] */
+"Station doesn't have anything!" = "Station doesn't have anything!";
+
+/* Main window. [EDMarketConnector.py:73] */
+"Station:" = "Station:";
+
+/* Main window. [EDMarketConnector.py:72] */
+"System:" = "System:";
+
+/* Update button in main window. [EDMarketConnector.py:78] */
+"Update" = "Update";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py:63] */
+"Username (Email)" = "Username (Email)";
+
+/* Shouldn't happen. [EDMarketConnector.py:215] */
+"What are you flying?!" = "What are you flying?!";
+
+/* Shouldn't happen. [EDMarketConnector.py:213] */
+"Where are you?!" = "Where are you?!";
+
+/* Output folder prompt on OSX. [prefs.py:98] */
+"Where:" = "Where:";
+
+/* Shouldn't happen. [EDMarketConnector.py:211] */
+"Who are you?!" = "Who are you?!";
+
+/* [EDMarketConnector.py:251] */
+"You're not docked at a station!" = "You're not docked at a station!";
+

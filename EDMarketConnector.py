@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
 from sys import platform
 import json
 from os import mkdir
@@ -17,6 +16,7 @@ import tkFont
 if __debug__:
     from traceback import print_exc
 
+import l10n
 import companion
 import bpc
 import td
@@ -27,8 +27,9 @@ import flightlog
 import prefs
 from config import appname, applongname, config
 
+l10n.Translations().install()
 
-shipyard_retry = 5	# retry pause for shipyard data [s]
+SHIPYARD_RETRY = 5	# retry pause for shipyard data [s]
 
 
 class AppWindow:
@@ -67,14 +68,14 @@ class AppWindow:
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
 
-        ttk.Label(frame, text="Cmdr:").grid(row=0, column=0, sticky=tk.W)
-        ttk.Label(frame, text="System:").grid(row=1, column=0, sticky=tk.W)
-        ttk.Label(frame, text="Station:").grid(row=2, column=0, sticky=tk.W)
+        ttk.Label(frame, text=_('Cmdr:')).grid(row=0, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('System:')).grid(row=1, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-20)
         self.system = ttk.Label(frame, width=-20)
         self.station = ttk.Label(frame, width=-20)
-        self.button = ttk.Button(frame, text='Update', command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)
+        self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
@@ -93,12 +94,13 @@ class AppWindow:
             from Foundation import NSBundle
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             apple_menu = tk.Menu(menubar, name='apple')
-            apple_menu.add_command(label="About %s" % applongname, command=lambda:self.w.call('tk::mac::standardAboutPanel'))
-            apple_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
+            apple_menu.add_command(label=_("About {APP}").format(APP=applongname), command=lambda:self.w.call('tk::mac::standardAboutPanel'))	# App menu entry on OSX
+            apple_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(menu=window_menu)
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
+            self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
             self.w.createcommand('tkAboutDialog', lambda:self.w.call('tk::mac::standardAboutPanel'))
             self.w.createcommand("::tk::mac::Quit", self.onexit)
             self.w.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.login))
@@ -106,11 +108,11 @@ class AppWindow:
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
-            file_menu.add_command(label="Check for Update", command=lambda:self.updater.checkForUpdates())
-            file_menu.add_command(label="Settings", command=lambda:prefs.PreferencesDialog(self.w, self.login))
+            file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
+            file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Menu item
             file_menu.add_separator()
-            file_menu.add_command(label="Exit", command=self.onexit)
-            menubar.add_cascade(label="File", menu=file_menu)
+            file_menu.add_command(label=_("Exit"), command=self.onexit)	# Menu item
+            menubar.add_cascade(label=_("File"), menu=file_menu)	# Top-level menu on Windows
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
         if platform == 'linux2':
             # Fix up menu to use same styling as everything else
@@ -148,7 +150,7 @@ class AppWindow:
 
     # call after credentials have changed
     def login(self):
-        self.status['text'] = 'Logging in...'
+        self.status['text'] = _('Logging in...')
         self.button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
@@ -188,7 +190,7 @@ class AppWindow:
         if not retrying:
             if time() < self.holdofftime: return	# Was invoked by Return key while in cooldown
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
-            self.status['text'] = 'Fetching station data...'
+            self.status['text'] = _('Fetching station data...')
             self.button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
@@ -206,15 +208,15 @@ class AppWindow:
 
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
-                self.status['text'] = "Who are you?!"		# Shouldn't happen
+                self.status['text'] = _("Who are you?!")		# Shouldn't happen
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
-                self.status['text'] = "Where are you?!"		# Shouldn't happen
+                self.status['text'] = _("Where are you?!")		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
-                self.status['text'] = "What are you flying?!"	# Shouldn't happen
+                self.status['text'] = _("What are you flying?!")	# Shouldn't happen
 
             elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
                 # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                self.w.after(shipyard_retry * 1000, lambda:self.getandsend(retrying=True))
+                self.w.after(SHIPYARD_RETRY * 1000, lambda:self.getandsend(retrying=True))
 
                 # Stuff we can do while waiting for retry
                 if config.getint('output') & config.OUT_LOG:
@@ -243,10 +245,10 @@ class AppWindow:
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested
-                    self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
                 elif not data['commander'].get('docked'):
-                    self.status['text'] = "You're not docked at a station!"
+                    self.status['text'] = _("You're not docked at a station!")
                 else:
                     if data['lastStarport'].get('commodities'):
                         # Fixup anomalies in the commodity data
@@ -261,16 +263,16 @@ class AppWindow:
 
                     if config.getint('output') & config.OUT_EDDN:
                         if data['lastStarport'].get('commodities') or data['lastStarport'].get('modules') or data['lastStarport'].get('ships'):
-                            self.status['text'] = 'Sending data to EDDN...'
+                            self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export(data)
-                            self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+                            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
                         else:
-                            self.status['text'] = "Station doesn't have anything!"
+                            self.status['text'] = _("Station doesn't have anything!")
                     elif not data['lastStarport'].get('commodities'):
-                        self.status['text'] = "Station doesn't have a market!"
+                        self.status['text'] = _("Station doesn't have a market!")
                     else:
-                        self.status['text'] = strftime('Last updated at %H:%M:%S', localtime(querytime))
+                        self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
@@ -281,11 +283,11 @@ class AppWindow:
 
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
-            self.status['text'] = "Error: Can't connect to EDDN"
+            self.status['text'] = _("Error: Can't connect to EDDN")
 
         except requests.exceptions.Timeout as e:
             if __debug__: print_exc()
-            self.status['text'] = "Error: Connection to EDDN timed out"
+            self.status['text'] = _("Error: Connection to EDDN timed out")
 
         except Exception as e:
             if __debug__: print_exc()
@@ -295,10 +297,10 @@ class AppWindow:
 
     def cooldown(self):
         if time() < self.holdofftime:
-            self.button['text'] = 'cool down %ds' % (self.holdofftime - time())
+            self.button['text'] = _('cooldown {SS}s').format(SS = int(self.holdofftime - time()))	# Update button in main window
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = 'Update'
+            self.button['text'] = _('Update')	# Update button in main window
             self.button['state'] = tk.NORMAL
 
     def onexit(self, event=None):

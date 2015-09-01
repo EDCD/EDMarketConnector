@@ -100,15 +100,14 @@ def listify(thing):
 
 class ServerError(Exception):
     def __str__(self):
-        return 'Error: Server is down'
+        return _('Error: Server is down')
 
 class CredentialsError(Exception):
     def __str__(self):
-        return 'Error: Invalid Credentials'
+        return _('Error: Invalid Credentials')
 
 class VerificationRequired(Exception):
-    def __str__(self):
-        return 'Authentication required'
+    pass
 
 # Server companion.orerve.net uses a session cookie ("CompanionApp") to tie together login, verification
 # and query. So route all requests through a single Session object which holds this state.
@@ -174,7 +173,7 @@ class Session:
 
     def query(self):
         if self.state == Session.STATE_NONE:
-            raise Exception('General error')	# Shouldn't happen
+            raise Exception(_('General error'))	# Shouldn't happen
         elif self.state == Session.STATE_INIT:
             self.login()
         elif self.state == Session.STATE_AUTH:
