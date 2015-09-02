@@ -78,6 +78,9 @@
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\pl.strings" />
+					</Component>
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
@@ -327,6 +330,7 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="library.zip" />
+			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
 			<ComponentRef Id="select.pyd" />
