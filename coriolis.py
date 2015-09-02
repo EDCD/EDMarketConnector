@@ -21,9 +21,9 @@ slot_map = {
     'Slot'             : 'internal',
 }
 
-# Map draft EDDN outfitting to Coriolis
+# Map draft E:D Shipyard & EDDN outfitting to Coriolis
 # https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0-draft.json
-# http://cdn.coriolis.io/schemas/ship-loadout/1.json
+# http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
 ship_map = dict(companion.ship_map)
 ship_map['Asp'] = 'Asp Explorer'
@@ -37,6 +37,7 @@ category_map = {
 
 standard_map = OrderedDict([	# in output order
     ('Armour',            'bulkheads'),
+    (None,                'cargoHatch'),	# not available in the Companion API data
     ('Power Plant',       'powerPlant'),
     ('Thrusters',         'thrusters'),
     ('Frame Shift Drive', 'frameShiftDrive'),
@@ -90,6 +91,7 @@ def export(data):
             ('internal',   []),
         ])),
     ])
+    maxpri = 0
 
     # Correct module ordering relies on the fact that "Slots" in the data  are correctly ordered alphabetically.
     # Correct hardpoint ordering additionally relies on the fact that "Huge" < "Large" < "Medium" < "Small"
@@ -115,6 +117,7 @@ def export(data):
                 ('enabled',  module['enabled']),
                 ('priority', module['priority']+1),	# make 1-based
             ])
+            maxpri = max(maxpri, thing['priority'])
 
             if module['name'] in bulkheads:
                 # Bulkheads are just strings
@@ -148,6 +151,12 @@ def export(data):
             continue	# Silently skip unrecognized modules
         except:
             if __debug__: raise
+
+    # Cargo Hatch status is not available in the data - fake something up
+    loadout['components']['standard']['cargoHatch'] = OrderedDict([
+        ('enabled',  True),
+        ('priority', maxpri),
+    ])
 
     # Construct description
     string = json.dumps(loadout, indent=2)
