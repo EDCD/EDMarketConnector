@@ -75,6 +75,9 @@
 					<Component Guid="{9A0CB8A2-7167-492F-A185-0BDF7E9F5C01}">
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\fr.strings" />
+					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
@@ -329,6 +332,7 @@
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
+			<ComponentRef Id="fr.strings" />
 			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
