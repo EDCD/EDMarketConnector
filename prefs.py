@@ -135,7 +135,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def outbrowse(self):
         if platform != 'win32':
-            d = tkFileDialog.askdirectory(parent=self, initialdir=self.outdir.get(), title='Output folder', mustexist=tk.TRUE)
+            d = tkFileDialog.askdirectory(parent=self, initialdir=self.outdir.get(), title=_('File location:'), mustexist=tk.TRUE)
         else:
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
@@ -144,7 +144,7 @@ class PreferencesDialog(tk.Toplevel):
                 return 0
 
             browseInfo = BROWSEINFO()
-            browseInfo.lpszTitle = 'Output folder'
+            browseInfo.lpszTitle = _('File location:')
             browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
             browseInfo.lpfn = BrowseCallbackProc(browsecallback)
             browseInfo.lParam = self.outdir.get()
