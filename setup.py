@@ -15,6 +15,7 @@ import platform
 import re
 import shutil
 import sys
+from tempfile import gettempdir
 
 if sys.platform=='win32':
     assert platform.architecture()[0]=='32bit', 'Assumes a Python built for 32bit'
@@ -31,6 +32,9 @@ if dist_dir and len(dist_dir)>1 and isdir(dist_dir):
 # "Developer ID Application" name for signing
 macdeveloperid = None
 
+# Windows paths
+WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.9\bin'
+SDKPATH = r'C:\Program Files\Microsoft SDKs\Windows\v7.0'
 
 # Patch py2app recipe enumerator to skip the sip recipe since it's too enthusiastic - we'll list additional Qt modules explicitly
 if sys.platform=='darwin':
@@ -134,10 +138,21 @@ if sys.platform == 'darwin':
         PKG = '%s_mac_%s.zip' % (APPNAME, SHORTVERSION)
         os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, APPNAME, PKG))
 else:
-    os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\candle.exe" -out %s\ %s.wxs' % (dist_dir, APPNAME))
+    os.system(r'"%s\candle.exe" -out %s\ %s.wxs' % (WIXPATH, dist_dir, APPNAME))
     if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
         PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)
-        os.system(r'"C:\Program Files (x86)\WiX Toolset v3.9\bin\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (dist_dir, APPNAME, PKG))
+        os.system(r'"%s\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (WIXPATH, dist_dir, APPNAME, PKG))
+
+        # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
+        # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
+        lcids = [int(x) for x in re.search(r'Languages\s*=\s*"(.+?)"', open('%s.wxs' % APPNAME).read()).group(1).split(',')]
+        assert lcids[0]==1033, 'Default language is %d, should be 1033 (en_US)' % lcids[0]
+        shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
+        for lcid in lcids[1:]:
+            shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
+            os.system(r'cscript "%s\Samples\sysmgmt\msi\scripts\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
+            os.system(r'"%s\Bin\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
+            os.system(r'cscript "%s\Samples\sysmgmt\msi\scripts\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
 
 # Make appcast entry
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
