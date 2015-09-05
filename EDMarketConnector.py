@@ -8,6 +8,8 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
+import urllib
+import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -24,12 +26,47 @@ import eddn
 import loadout
 import coriolis
 import flightlog
+import eddb
 import prefs
 from config import appname, applongname, config
 
 l10n.Translations().install()
+EDDB = eddb.EDDB()
 
 SHIPYARD_RETRY = 5	# retry pause for shipyard data [s]
+
+
+class HyperlinkLabel(ttk.Label):
+
+    def __init__(self, master=None, **kw):
+        self.urlfn = kw.pop('urlfn', None)
+        ttk.Label.__init__(self, master, **kw)
+        self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
+        self.font_u = tkFont.Font(self, self.font_n)
+        self.font_u.configure(underline = True)
+        self.bind('<Enter>', self._enter)
+        self.bind('<Leave>', self._leave)
+        self.bind('<Button-1>', self._click)
+
+    # Make blue and clickable if setting non-empty text
+    def __setitem__(self, key, value):
+        if key=='text':
+            if self.urlfn and value:
+                self.configure({key: value}, foreground = 'blue', cursor = platform=='darwin' and 'pointinghand' or 'hand2')
+            else:
+                self.configure({key: value}, foreground = '', cursor = 'arrow')
+        else:
+            self.configure({key: value})
+
+    def _enter(self, event):
+        self.configure(font = self.font_u)
+
+    def _leave(self, event):
+        self.configure(font = self.font_n)
+
+    def _click(self, event):
+        if self.urlfn and self['text']:
+            webbrowser.open(self.urlfn(self['text']))
 
 
 class AppWindow:
@@ -73,8 +110,8 @@ class AppWindow:
         ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-20)
-        self.system = ttk.Label(frame, width=-20)
-        self.station = ttk.Label(frame, width=-20)
+        self.system =  HyperlinkLabel(frame, width=-20, urlfn = self.system_url)
+        self.station = HyperlinkLabel(frame, width=-20, urlfn = self.station_url)
         self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
@@ -201,7 +238,7 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or '-'
+            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text'] and '-' or ''))
 
             config.set('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
@@ -294,6 +331,21 @@ class AppWindow:
             self.status['text'] = str(e)
 
         self.cooldown()
+
+    def system_url(self, text):
+        return text and 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(text)
+
+    def station_url(self, text):
+        if text:
+            station_id = EDDB.station(self.system['text'], self.station['text'])
+            if station_id:
+                return 'http://eddb.io/station/%d' % station_id
+
+            system_id = EDDB.system(self.system['text'])
+            if system_id:
+                return 'http://eddb.io/system/%d' % system_id
+
+        return None
 
     def cooldown(self):
         if time() < self.holdofftime:

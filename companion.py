@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import json
 import requests
 from collections import defaultdict
 from cookielib import LWPCookieJar
@@ -193,7 +192,7 @@ class Session:
 
         r.raise_for_status()
         try:
-            data = json.loads(r.text)
+            data = r.json()
         except:
             self.dump(r)
             raise ServerError()
