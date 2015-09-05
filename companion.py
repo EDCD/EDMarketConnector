@@ -173,7 +173,7 @@ class Session:
 
     def query(self):
         if self.state == Session.STATE_NONE:
-            raise Exception(_('General error'))	# Shouldn't happen
+            raise Exception('General error')	# Shouldn't happen - don't bother localizing
         elif self.state == Session.STATE_INIT:
             self.login()
         elif self.state == Session.STATE_AUTH:

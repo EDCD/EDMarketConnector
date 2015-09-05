@@ -52,9 +52,6 @@
 /* [prefs.py:96] */
 "Flight log" = "Dziennik lotu";
 
-/* Shouldn't happen. [companion.py:176] */
-"General error" = "Błąd ogólny";
-
 /* [prefs.py:113] */
 "How do you want to be identified in the saved data" = "Twój identyfikator w zapisanych danych";
 
@@ -68,7 +65,7 @@
 "Market data in CSV format" = "Dane rynkowe w formacie CSV";
 
 /* [prefs.py:86] */
-"Market data in Slopey's BPC format" = "Dane rynkowe fo formacie Slopey's BPC";
+"Market data in Slopey's BPC format" = "Dane rynkowe w formacie Slopey's BPC";
 
 /* [prefs.py:88] */
 "Market data in Trade Dangerous format" = "Dane rynkowe w formacie Trade Dangerous";

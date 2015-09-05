@@ -52,9 +52,6 @@
 /* [prefs.py:96] */
 "Flight log" = "Journal de vol";
 
-/* Shouldn't happen. [companion.py:176] */
-"General error" = "Erreur générale";
-
 /* [prefs.py:113] */
 "How do you want to be identified in the saved data" = "Comment voulez-vous être identifié dans les données sauvegardées ?";
 
@@ -83,7 +80,7 @@
 "Password" = "Mot de passe";
 
 /* [prefs.py:82] */
-"Please choose what data to save" = "Please choose what data to save";
+"Please choose what data to save" = "Veuillez choisir les données à sauvegarder";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py:211] */
 "Please enter the code into the box below." = "Veuillez entrer ce code dans le champ ci-dessus.";
