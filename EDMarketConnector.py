@@ -23,6 +23,7 @@ import companion
 import bpc
 import td
 import eddn
+import edsm
 import loadout
 import coriolis
 import flightlog
@@ -34,6 +35,7 @@ l10n.Translations().install()
 EDDB = eddb.EDDB()
 
 SHIPYARD_RETRY = 5	# retry pause for shipyard data [s]
+EDSM_POLL = 0.1
 
 
 class HyperlinkLabel(ttk.Label):
@@ -75,6 +77,7 @@ class AppWindow:
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
+        self.edsm = edsm.EDSM()
 
         self.w = master
         self.w.title(applongname)
@@ -110,7 +113,7 @@ class AppWindow:
         ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-20)
-        self.system =  HyperlinkLabel(frame, width=-20, urlfn = self.system_url)
+        self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, urlfn = self.system_url)
         self.station = HyperlinkLabel(frame, width=-20, urlfn = self.station_url)
         self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
@@ -238,6 +241,7 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
+            self.system['image'] = None
             self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text'] and '-' or ''))
 
             config.set('querytime', querytime)
@@ -253,9 +257,14 @@ class AppWindow:
 
             elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
                 # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                self.w.after(SHIPYARD_RETRY * 1000, lambda:self.getandsend(retrying=True))
+                self.w.after(int(SHIPYARD_RETRY * 1000), lambda:self.getandsend(retrying=True))
 
                 # Stuff we can do while waiting for retry
+
+                self.edsm.start_lookup(self.system['text'])
+                self.system['image'] = self.edsm.result['img']
+                self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
@@ -273,6 +282,10 @@ class AppWindow:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 if not retrying:
+                    self.edsm.start_lookup(self.system['text'])
+                    self.system['image'] = self.edsm.result['img']
+                    self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
                     if config.getint('output') & config.OUT_LOG:
                         flightlog.export(data)
                     if config.getint('output') & config.OUT_SHIP_EDS:
@@ -332,8 +345,15 @@ class AppWindow:
 
         self.cooldown()
 
+    def edsmpoll(self):
+        result = self.edsm.result
+        if result['done']:
+            self.system['image'] = result['img']
+        else:
+            self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
     def system_url(self, text):
-        return text and 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(text)
+        return text and self.edsm.result['url']
 
     def station_url(self, text):
         if text:

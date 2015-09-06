@@ -13,7 +13,7 @@ Click on the system name to go to its [Elite: Dangerous Star Map](http://www.eds
 
 Click on the station name to go to its [Elite: Dangerous Database](http://eddb.io/) (“eddb”) entry in your web broswer.
 
-![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
+![Windows screenshot](img/win.png) &nbsp; ![Mac screenshot](img/mac.png)
 
 
 Installation
