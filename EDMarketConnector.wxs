@@ -17,7 +17,7 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1036,1045,0" />	<!-- en_US, fr_FR, pl, neutral -->
+				 Languages="1033,1036,1040,1045,0" />	<!-- en-US, fr-FR, it-IT, pl, neutral -->
 
 		<!-- Always reinstall since patching is problematic -->
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -79,6 +79,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\fr.strings" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\it.strings" />
 					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
@@ -335,6 +338,7 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="fr.strings" />
+			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
