@@ -112,9 +112,9 @@ class AppWindow:
         ttk.Label(frame, text=_('System:')).grid(row=1, column=0, sticky=tk.W)	# Main window
         ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
-        self.cmdr = ttk.Label(frame, width=-20)
+        self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, urlfn = self.system_url)
-        self.station = HyperlinkLabel(frame, width=-20, urlfn = self.station_url)
+        self.station = HyperlinkLabel(frame, urlfn = self.station_url)
         self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
