@@ -37,13 +37,13 @@
 /* [companion.py:103] */
 "Error: Server is down" = "Erreur : Le serveur est indisponible";
 
-/* Menu item. [EDMarketConnector.py:114] */
+/* Item in the File menu on Windows. [EDMarketConnector.py:115] */
 "Exit" = "Quitter";
 
 /* [EDMarketConnector.py:193] */
 "Fetching station data..." = "Récupération des données de la station...";
 
-/* Top-level menu on Windows. [EDMarketConnector.py:115] */
+/* Menu title on Windows. [EDMarketConnector.py:116] */
 "File" = "Fichier";
 
 /* Output folder prompt on Windows. [prefs.py:99] */
@@ -103,7 +103,7 @@
 /* [EDMarketConnector.py:266] */
 "Sending data to EDDN..." = "Envoi des données à EDDN...";
 
-/* Menu item. [EDMarketConnector.py:112] */
+/* Item in the File menu on Windows. [EDMarketConnector.py:113] */
 "Settings" = "Paramètres";
 
 /* [prefs.py:94] */
@@ -144,3 +144,27 @@
 
 /* [EDMarketConnector.py:251] */
 "You're not docked at a station!" = "Vous n'êtes pas amarré à une station !";
+
+/* Section heading in settings on Windows. [prefs.py:125] */
+"Hotkey" = "";
+
+/* No hotkey/shortcut currently defined. [prefs.py:136] */
+"none" = "aucun";
+
+/* Shortcut settings button on OSX. [prefs.py:133] */
+"Open System Preferences" = "Ouvrir Préférences Système";
+
+/* Hotkey/Shortcut setting. [prefs.py:140] */
+"Play sound" = "";
+
+/* Shortcut settings prompt on OSX. [prefs.py:130] */
+"Re-start {APP} to use shortcuts" = "";
+
+/* Section heading in settings on OSX. [prefs.py:124] */
+"Keyboard shortcut" = "Raccourci clavier";
+
+/* Menu title on OSX. [EDMarketConnector.py:102] */
+"Window" = "Fenêtre";
+
+/* Shortcut settings prompt on OSX. [prefs.py:132] */
+"{APP} needs permission to use shortcuts" = "";

@@ -26,6 +26,7 @@ import coriolis
 import flightlog
 import prefs
 from config import appname, applongname, config
+from hotkey import hotkeymgr
 
 l10n.Translations().install()
 
@@ -98,7 +99,7 @@ class AppWindow:
             apple_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
             window_menu = tk.Menu(menubar, name='window')
-            menubar.add_cascade(menu=window_menu)
+            menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
             self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
             self.w.createcommand('tkAboutDialog', lambda:self.w.call('tk::mac::standardAboutPanel'))
@@ -109,10 +110,10 @@ class AppWindow:
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
             file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
-            file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Menu item
+            file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
             file_menu.add_separator()
-            file_menu.add_command(label=_("Exit"), command=self.onexit)	# Menu item
-            menubar.add_cascade(label=_("File"), menu=file_menu)	# Top-level menu on Windows
+            file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
+            menubar.add_cascade(label=_("File"), menu=file_menu)	# Menu title on Windows
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
         if platform == 'linux2':
             # Fix up menu to use same styling as everything else
@@ -147,6 +148,10 @@ class AppWindow:
         self.updater = update.Updater(self.w)
         self.w.bind_all('<<Quit>>', self.onexit)	# user-generated
 
+        # Install hotkey monitoring
+        self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
+        print config.getint('hotkey_code'), config.getint('hotkey_mods')
+        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
     # call after credentials have changed
     def login(self):
@@ -187,8 +192,13 @@ class AppWindow:
 
     def getandsend(self, event=None, retrying=False):
 
+        play_sound = event and event.type=='35' and not config.getint('hotkey_mute')
+
         if not retrying:
-            if time() < self.holdofftime: return	# Was invoked by Return key while in cooldown
+            if time() < self.holdofftime:	# Was invoked by key while in cooldown
+                if play_sound and (self.holdofftime-time()) < companion.holdoff*0.75:
+                    hotkeymgr.play_bad()	# Don't play sound in first few seconds to prevent repeats
+                return
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.status['text'] = _('Fetching station data...')
             self.button['state'] = tk.DISABLED
@@ -209,14 +219,17 @@ class AppWindow:
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
                 self.status['text'] = _("Who are you?!")		# Shouldn't happen
+                if play_sound: hotkeymgr.play_bad()
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
+                if play_sound: hotkeymgr.play_bad()
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+                if play_sound: hotkeymgr.play_bad()
 
             elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
                 # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                self.w.after(SHIPYARD_RETRY * 1000, lambda:self.getandsend(retrying=True))
+                self.w.after(SHIPYARD_RETRY * 1000, lambda:self.getandsend(event, retrying=True))
 
                 # Stuff we can do while waiting for retry
                 if config.getint('output') & config.OUT_LOG:
@@ -246,9 +259,11 @@ class AppWindow:
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                    if play_sound: hotkeymgr.play_good()
 
                 elif not data['commander'].get('docked'):
                     self.status['text'] = _("You're not docked at a station!")
+                    if play_sound: hotkeymgr.play_bad()
                 else:
                     if data['lastStarport'].get('commodities'):
                         # Fixup anomalies in the commodity data
@@ -267,12 +282,16 @@ class AppWindow:
                             self.w.update_idletasks()
                             eddn.export(data)
                             self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                            if play_sound: hotkeymgr.play_good()
                         else:
                             self.status['text'] = _("Station doesn't have anything!")
+                            if play_sound: hotkeymgr.play_good()	# not really an error
                     elif not data['lastStarport'].get('commodities'):
                         self.status['text'] = _("Station doesn't have a market!")
+                        if play_sound: hotkeymgr.play_good()	# not really an error
                     else:
                         self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                        if play_sound: hotkeymgr.play_good()
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
@@ -280,18 +299,22 @@ class AppWindow:
         # Companion API problem
         except companion.ServerError as e:
             self.status['text'] = str(e)
+            if play_sound: hotkeymgr.play_bad()
 
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
+            if play_sound: hotkeymgr.play_bad()
 
         except requests.exceptions.Timeout as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Connection to EDDN timed out")
+            if play_sound: hotkeymgr.play_bad()
 
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = str(e)
+            if play_sound: hotkeymgr.play_bad()
 
         self.cooldown()
 

@@ -8,10 +8,22 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 
-from config import config
+from config import applongname, config
+from hotkey import hotkeymgr
 
 
-if platform=='win32':
+if platform == 'darwin':
+    import objc
+    try:
+        from ApplicationServices import AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
+    except:
+        HIServices = objc.loadBundle('HIServices', globals(), '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework')
+        objc.loadBundleFunctions(HIServices, globals(), [('AXIsProcessTrusted', 'B'),
+                                                         ('AXIsProcessTrustedWithOptions', 'B@')])
+        objc.loadBundleVariables(HIServices, globals(), [('kAXTrustedCheckOptionPrompt', '@^{__CFString=}')])
+    was_accessible_at_launch = AXIsProcessTrusted()
+
+elif platform=='win32':
     # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
     import ctypes
     from ctypes.wintypes import *
@@ -100,10 +112,33 @@ class PreferencesDialog(tk.Toplevel):
         self.outbutton = ttk.Button(outframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                     _('Browse...')), command=self.outbrowse)	# Folder selection button on Windows
         self.outbutton.grid(row=8, column=1, padx=5, pady=(5,0), sticky=tk.NSEW)
-        self.outdir = ttk.Entry(outframe)
+        self.outdir = ttk.Entry(outframe, takefocus=False)
         self.outdir.insert(0, config.get('outdir'))
         self.outdir.grid(row=9, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         self.outvarchanged()
+
+        if platform in ['darwin','win32']:
+            self.hotkey_code = config.getint('hotkey_code')
+            self.hotkey_mods = config.getint('hotkey_mods')
+            self.hotkey_play = tk.IntVar(value = not config.getint('hotkey_mute'))
+            hotkeyframe = ttk.LabelFrame(frame, text=platform == 'darwin' and _('Keyboard shortcut') or	# Section heading in settings on OSX
+                                         _('Hotkey'))	# Section heading in settings on Windows
+            hotkeyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+            hotkeyframe.columnconfigure(1, weight=1)
+            if platform == 'darwin' and not was_accessible_at_launch:
+                if AXIsProcessTrusted():
+                    ttk.Label(hotkeyframe, text = _('Re-start {APP} to use shortcuts').format(APP=applongname)).grid(row=0, padx=5, pady=5, sticky=tk.NSEW)	# Shortcut settings prompt on OSX
+                else:
+                    ttk.Label(hotkeyframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname)).grid(row=0, columnspan=2, padx=5, pady=5, sticky=tk.W)		# Shortcut settings prompt on OSX
+                    ttk.Button(hotkeyframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(row=1, column=1, padx=5, pady=(0,5), sticky=tk.E)		# Shortcut settings button on OSX
+            else:
+                self.hotkey_text = ttk.Entry(hotkeyframe, width=30, justify=tk.CENTER)
+                self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('none'))	# No hotkey/shortcut currently defined
+                self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
+                self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
+                self.hotkey_text.grid(row=0, padx=5, pady=5, sticky=tk.NSEW)
+                self.hotkey_play_btn = ttk.Checkbutton(hotkeyframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
+                self.hotkey_play_btn.grid(row=0, column=1, padx=(10,0), pady=5, sticky=tk.NSEW)
 
         privacyframe = ttk.LabelFrame(frame, text=_('Privacy'))	# Section heading in settings
         privacyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
@@ -122,6 +157,10 @@ class PreferencesDialog(tk.Toplevel):
             buttonframe.columnconfigure(0, weight=1)
             ttk.Label(buttonframe).grid(row=0, column=0)	# spacer
             ttk.Button(buttonframe, text=_('OK'), command=self.apply).grid(row=0, column=1, sticky=tk.E)
+            self.protocol("WM_DELETE_WINDOW", self._destroy)
+
+        # disable hotkey for the duration
+        hotkeymgr.unregister()
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
@@ -164,16 +203,80 @@ class PreferencesDialog(tk.Toplevel):
             self.outdir.insert(0, d.replace('/', sep))
             self.outdir['state'] = 'readonly'
 
+    def hotkeystart(self, event):
+        event.widget.bind('<KeyPress>', self.hotkeylisten)
+        event.widget.bind('<KeyRelease>', self.hotkeylisten)
+        event.widget.delete(0, tk.END)
+        hotkeymgr.acquire_start()
+
+    def hotkeyend(self, event):
+        event.widget.unbind('<KeyPress>')
+        event.widget.unbind('<KeyRelease>')
+        hotkeymgr.acquire_stop()	# in case focus was lost while in the middle of acquiring
+        event.widget.delete(0, tk.END)
+        self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('none'))	# No hotkey/shortcut currently defined
+
+    def hotkeylisten(self, event):
+        good = hotkeymgr.fromevent(event)
+        if good:
+            (hotkey_code, hotkey_mods) = good
+            event.widget.delete(0, tk.END)
+            event.widget.insert(0, hotkeymgr.display(hotkey_code, hotkey_mods))
+            if hotkey_code:
+                # done
+                (self.hotkey_code, self.hotkey_mods) = (hotkey_code, hotkey_mods)
+                self.hotkey_play_btn['state'] = tk.NORMAL
+                self.hotkey_play_btn.focus()	# move to next widget - calls hotkeyend() implicitly
+        else:
+            if good is None: 	# clear
+                (self.hotkey_code, self.hotkey_mods) = (0, 0)
+            event.widget.delete(0, tk.END)
+            if self.hotkey_code:
+                event.widget.insert(0, hotkeymgr.display(self.hotkey_code, self.hotkey_mods))
+                self.hotkey_play_btn['state'] = tk.NORMAL
+            else:
+                event.widget.insert(0, _('none'))	# No hotkey/shortcut currently defined
+                self.hotkey_play_btn['state'] = tk.DISABLED
+            self.hotkey_play_btn.focus()	# move to next widget - calls hotkeyend() implicitly
+        return('break')	# stops further processing - insertion, Tab traversal etc
+
+
     def apply(self):
         credentials = (config.get('username'), config.get('password'))
         config.set('username', self.username.get().strip())
         config.set('password', self.password.get().strip())
         config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS or 0) + (self.out_log.get() and config.OUT_LOG or 0) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS or 0))
         config.set('outdir', self.outdir.get().strip())
+        config.set('hotkey_code', self.hotkey_code)
+        config.set('hotkey_mods', self.hotkey_mods)
+        config.set('hotkey_mute', int(not self.hotkey_play.get()))
         config.set('anonymous', self.out_anon.get())
-        self.destroy()
+        self._destroy()
         if credentials != (config.get('username'), config.get('password')) and self.callback:
             self.callback()
+
+    def _destroy(self):
+        # Re-enable hotkey monitoring before exit
+        hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+        self.destroy()
+
+    if platform == 'darwin':
+        def enableshortcuts(self):
+            self.apply()
+            # popup System Preferences dialog
+            try:
+                # http://stackoverflow.com/questions/6652598/cocoa-button-opens-a-system-preference-page/6658201
+                from ScriptingBridge import SBApplication
+                sysprefs = 'com.apple.systempreferences'
+                prefs = SBApplication.applicationWithBundleIdentifier_(sysprefs)
+                pane = [x for x in prefs.panes() if x.id() == 'com.apple.preference.security'][0]
+                prefs.setCurrentPane_(pane)
+                anchor = [x for x in pane.anchors() if x.name() == 'Privacy_Accessibility'][0]
+                anchor.reveal()
+                prefs.activate()
+            except:
+                AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
+            self.parent.event_generate('<<Quit>>', when="tail")
 
 
 class AuthenticationDialog(tk.Toplevel):

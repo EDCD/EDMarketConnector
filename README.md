@@ -35,7 +35,7 @@ Setup
 The first time that you run the app you are prompted for your username and password. This is the same username and password
 combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the market data for the station that *you* are docked at.
 
-You can also choose here what data to save (refer to the next section for details) and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
+You can also choose here what data to save (refer to the next section for details), whether to set up a hotkey so you don't have to switch to the app in order to “Update”, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
 You are next prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
 Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before

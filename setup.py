@@ -57,13 +57,14 @@ VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MU
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
 if sys.platform=='darwin':
-    OPTIONS =   { 'py2app':
-                  {'dist_dir': dist_dir,
+    OPTIONS =  { 'py2app':
+                 {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests' ],
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
+                  'resources': ['snd_good.wav', 'snd_bad.wav'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -98,6 +99,8 @@ elif sys.platform=='win32':
     DATA_FILES = [ ('', [requests.certs.where(),
                          'WinSparkle.dll',
                          'WinSparkle.pdb',	# For debugging - don't include in package
+                         'snd_good.wav',
+                         'snd_bad.wav',
                          '%s.VisualElementsManifest.xml' % APPNAME,
                          '%s.ico' % APPNAME ] +
                     [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')] ) ]
