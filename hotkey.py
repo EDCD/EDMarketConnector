@@ -142,7 +142,7 @@ if platform == 'darwin':
                 if keycode == 0x1b:			# Esc = retain previous
                     self.acquire_state = HotkeyMgr.ACQUIRE_INACTIVE
                     return False
-                elif keycode in [0x7f, NSDeleteFunctionKey, NSClearLineFunctionKey]:	# BkSp, Del, Clear = clear hotkey
+                elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:	# BkSp, Del, Clear = clear hotkey
                     self.acquire_state = HotkeyMgr.ACQUIRE_INACTIVE
                     return None
                 elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:	# don't allow keys needed for typing in System Map
@@ -161,8 +161,8 @@ if platform == 'darwin':
             if (modifiers & NSNumericPadKeyMask) and keycode <= 0x7f: text += u'№'
             if not keycode:
                 pass
-            elif NSF1FunctionKey <= keycode <= NSF35FunctionKey:
-                text += 'F%d' % (keycode + 1 - NSF1FunctionKey)
+            elif ord(NSF1FunctionKey) <= keycode <= ord(NSF35FunctionKey):
+                text += 'F%d' % (keycode + 1 - ord(NSF1FunctionKey))
             elif keycode in HotkeyMgr.DISPLAY:	# specials
                 text += HotkeyMgr.DISPLAY[keycode]
             elif keycode < 0x20:		# control keys

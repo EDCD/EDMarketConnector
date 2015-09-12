@@ -132,7 +132,7 @@ class PreferencesDialog(tk.Toplevel):
                     ttk.Label(hotkeyframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname)).grid(row=0, columnspan=2, padx=5, pady=5, sticky=tk.W)		# Shortcut settings prompt on OSX
                     ttk.Button(hotkeyframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(row=1, column=1, padx=5, pady=(0,5), sticky=tk.E)		# Shortcut settings button on OSX
             else:
-                self.hotkey_text = ttk.Entry(hotkeyframe, width=30, justify=tk.CENTER)
+                self.hotkey_text = ttk.Entry(hotkeyframe, width = (platform == 'darwin' and 20 or 30), justify=tk.CENTER)
                 self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('none'))	# No hotkey/shortcut currently defined
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
