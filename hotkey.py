@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from os.path import dirname, join, normpath
 import sys
 from sys import platform
