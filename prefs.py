@@ -120,6 +120,7 @@ class PreferencesDialog(tk.Toplevel):
         if platform in ['darwin','win32']:
             self.hotkey_code = config.getint('hotkey_code')
             self.hotkey_mods = config.getint('hotkey_mods')
+            self.hotkey_only = tk.IntVar(value = not config.getint('hotkey_always'))
             self.hotkey_play = tk.IntVar(value = not config.getint('hotkey_mute'))
             hotkeyframe = ttk.LabelFrame(frame, text=platform == 'darwin' and _('Keyboard shortcut') or	# Section heading in settings on OSX
                                          _('Hotkey'))	# Section heading in settings on Windows
@@ -137,17 +138,19 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=0, padx=5, pady=5, sticky=tk.NSEW)
+                self.hotkey_only_btn = ttk.Checkbutton(hotkeyframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
+                self.hotkey_only_btn.grid(row=1, columnspan=2, padx=5, sticky=tk.W)
                 self.hotkey_play_btn = ttk.Checkbutton(hotkeyframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
-                self.hotkey_play_btn.grid(row=0, column=1, padx=(10,0), pady=5, sticky=tk.NSEW)
+                self.hotkey_play_btn.grid(row=2, columnspan=2, padx=5, sticky=tk.W)
 
         privacyframe = ttk.LabelFrame(frame, text=_('Privacy'))	# Section heading in settings
         privacyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
         privacyframe.columnconfigure(0, weight=1)
 
         self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
-        ttk.Label(privacyframe, text=_('How do you want to be identified in the saved data')).grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
+        ttk.Label(privacyframe, text=_('How do you want to be identified in the saved data')).grid(row=0, columnspan=2, padx=5, sticky=tk.W)
         ttk.Radiobutton(privacyframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(padx=5, sticky=tk.W)	# Privacy setting
-        ttk.Radiobutton(privacyframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(padx=5, pady=3, sticky=tk.W)	# Privacy setting
+        ttk.Radiobutton(privacyframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(padx=5, sticky=tk.W)	# Privacy setting
 
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
@@ -225,19 +228,22 @@ class PreferencesDialog(tk.Toplevel):
             if hotkey_code:
                 # done
                 (self.hotkey_code, self.hotkey_mods) = (hotkey_code, hotkey_mods)
+                self.hotkey_only_btn['state'] = tk.NORMAL
                 self.hotkey_play_btn['state'] = tk.NORMAL
-                self.hotkey_play_btn.focus()	# move to next widget - calls hotkeyend() implicitly
+                self.hotkey_only_btn.focus()	# move to next widget - calls hotkeyend() implicitly
         else:
             if good is None: 	# clear
                 (self.hotkey_code, self.hotkey_mods) = (0, 0)
             event.widget.delete(0, tk.END)
             if self.hotkey_code:
                 event.widget.insert(0, hotkeymgr.display(self.hotkey_code, self.hotkey_mods))
+                self.hotkey_only_btn['state'] = tk.NORMAL
                 self.hotkey_play_btn['state'] = tk.NORMAL
             else:
                 event.widget.insert(0, _('none'))	# No hotkey/shortcut currently defined
+                self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
-            self.hotkey_play_btn.focus()	# move to next widget - calls hotkeyend() implicitly
+            self.hotkey_only_btn.focus()	# move to next widget - calls hotkeyend() implicitly
         return('break')	# stops further processing - insertion, Tab traversal etc
 
 
@@ -250,6 +256,7 @@ class PreferencesDialog(tk.Toplevel):
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)
+            config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
         config.set('anonymous', self.out_anon.get())
         self._destroy()

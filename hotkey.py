@@ -5,6 +5,8 @@ from os.path import dirname, join, normpath
 import sys
 from sys import platform
 
+from config import config
+
 if platform == 'darwin':
 
     import threading
@@ -113,10 +115,12 @@ if platform == 'darwin':
         def _handler(self, event):
             # use event.charactersIgnoringModifiers to handle composing characters like Alt-e
             if (event.modifierFlags() & HotkeyMgr.MODIFIERMASK) == self.modifiers and ord(event.charactersIgnoringModifiers()[0]) == self.keycode:
-                # Only trigger if game client is front process
-                active = [x for x in NSWorkspace.sharedWorkspace().runningApplications() if x.isActive()]
-                if active and active[0] and active[0].bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                if config.getint('hotkey_always'):
                     self.activated = True
+                else:	# Only trigger if game client is front process
+                    active = [x for x in NSWorkspace.sharedWorkspace().runningApplications() if x.isActive()]
+                    if active and active[0] and active[0].bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                        self.activated = True
 
         def acquire_start(self):
             self.acquire_state = HotkeyMgr.ACQUIRE_ACTIVE
@@ -286,12 +290,15 @@ elif platform == 'win32':
             msg = MSG()
             while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
                 if msg.message == WM_HOTKEY:
-                    h = GetForegroundWindow()
-                    if h:
-                        l = GetWindowTextLength(h) + 1
-                        buf = ctypes.create_unicode_buffer(l)
-                        if GetWindowText(h, buf, l) and buf.value.startswith('Elite - Dangerous'):
-                            self.root.event_generate('<<Invoke>>', when="tail")
+                    if config.getint('hotkey_always'):
+                        self.root.event_generate('<<Invoke>>', when="tail")
+                    else:	# Only trigger if game client is front process
+                        h = GetForegroundWindow()
+                        if h:
+                            l = GetWindowTextLength(h) + 1
+                            buf = ctypes.create_unicode_buffer(l)
+                            if GetWindowText(h, buf, l) and buf.value.startswith('Elite - Dangerous'):
+                                self.root.event_generate('<<Invoke>>', when="tail")
                 elif msg.message == WM_SND_GOOD:
                     winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)	# synchronous
                 elif msg.message == WM_SND_BAD:

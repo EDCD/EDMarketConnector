@@ -82,6 +82,9 @@
 /* [prefs.py:159] */
 "OK" = "OK";
 
+/* Hotkey/Shortcut setting. [prefs.py:141] */
+"Only when Elite: Dangerous is the active app" = "Only when Elite: Dangerous is the active app";
+
 /* Shortcut settings button on OSX. [prefs.py:133] */
 "Open System Preferences" = "Open System Preferences";
 
