@@ -49,7 +49,7 @@ class Translations:
                         if match:
                             self.translations[match.group(1)] = match.group(2)
                         elif not comment.match(line):
-                            assert match, 'Bad translation: %s' % line
+                            print 'Bad translation: %s' % line.strip()
             __builtin__.__dict__['_'] = self.translate
 
     if __debug__:

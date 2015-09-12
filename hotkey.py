@@ -371,7 +371,7 @@ else:	# Linux
 
     class HotkeyMgr:
 
-        def register(self, keycode, modifiers):
+        def register(self, root, keycode, modifiers):
             pass
 
         def unregister(self):

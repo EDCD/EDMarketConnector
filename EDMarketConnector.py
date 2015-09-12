@@ -149,7 +149,8 @@ class AppWindow:
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
-            file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
+            if platform == 'win32':
+                file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
             file_menu.add_separator()
             file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
@@ -190,7 +191,6 @@ class AppWindow:
 
         # Install hotkey monitoring
         self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
-        print config.getint('hotkey_code'), config.getint('hotkey_mods')
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
     # call after credentials have changed

@@ -247,9 +247,10 @@ class PreferencesDialog(tk.Toplevel):
         config.set('password', self.password.get().strip())
         config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS or 0) + (self.out_log.get() and config.OUT_LOG or 0) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS or 0))
         config.set('outdir', self.outdir.get().strip())
-        config.set('hotkey_code', self.hotkey_code)
-        config.set('hotkey_mods', self.hotkey_mods)
-        config.set('hotkey_mute', int(not self.hotkey_play.get()))
+        if platform in ['darwin','win32']:
+            config.set('hotkey_code', self.hotkey_code)
+            config.set('hotkey_mods', self.hotkey_mods)
+            config.set('hotkey_mute', int(not self.hotkey_play.get()))
         config.set('anonymous', self.out_anon.get())
         self._destroy()
         if credentials != (config.get('username'), config.get('password')) and self.callback:
