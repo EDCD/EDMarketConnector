@@ -54,13 +54,14 @@ class Translations:
 
     if __debug__:
         def translate(self, x):
-            if x in self.translations:
-                return self.translations[x]
-            else:
+            if not self.translations.get(x):
                 print 'Missing translation: "%s"' % x
+                return x
+            else:
+                return self.translations.get(x) or x
     else:
         def translate(self, x):
-            return self.translations.get(x, x)
+            return self.translations.get(x, x) or x
 
     # Returns list of available language codes
     def available(self):

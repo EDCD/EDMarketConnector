@@ -168,16 +168,16 @@ class AppWindow:
                     flightlog.openlog()
                 except Exception as e:
                     if __debug__: print_exc()
-                    self.status['text'] = str(e)
+                    self.status['text'] = unicode(e)
 
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
             self.status['text'] = ''
         except companion.ServerError as e:
-            self.status['text'] = str(e)
+            self.status['text'] = unicode(e)
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = str(e)
+            self.status['text'] = unicode(e)
         self.cooldown()
 
     # callback after verification code
@@ -186,7 +186,7 @@ class AppWindow:
             self.session.verify(code)
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = str(e)
+            self.status['text'] = unicode(e)
         else:
             return self.getandsend()	# try again
 
@@ -298,7 +298,7 @@ class AppWindow:
 
         # Companion API problem
         except companion.ServerError as e:
-            self.status['text'] = str(e)
+            self.status['text'] = unicode(e)
             if play_sound: hotkeymgr.play_bad()
 
         except requests.exceptions.ConnectionError as e:
@@ -313,7 +313,7 @@ class AppWindow:
 
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = str(e)
+            self.status['text'] = unicode(e)
             if play_sound: hotkeymgr.play_bad()
 
         self.cooldown()

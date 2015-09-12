@@ -99,12 +99,16 @@ def listify(thing):
 
 
 class ServerError(Exception):
-    def __str__(self):
+    def __unicode__(self):
         return _('Error: Server is down')
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
 class CredentialsError(Exception):
-    def __str__(self):
+    def __unicode__(self):
         return _('Error: Invalid Credentials')
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
 class VerificationRequired(Exception):
     pass
