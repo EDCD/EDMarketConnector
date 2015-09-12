@@ -9,7 +9,11 @@ This app downloads commodity market and other data from the game [Elite: Dangero
 
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to automatically download and transmit and/or save your choice of data.
 
-![Windows screenshot](img/win.png) ![Mac screenshot](img/mac.png)
+Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web broswer.
+
+Click on the station name to go to its [Elite: Dangerous Database](http://eddb.io/) (“eddb”) entry in your web broswer.
+
+![Windows screenshot](img/win.png) &nbsp; ![Mac screenshot](img/mac.png)
 
 
 Installation

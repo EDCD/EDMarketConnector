@@ -65,6 +65,7 @@ if sys.platform=='darwin':
                   'excludes': [ 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'resources': ['snd_good.wav', 'snd_bad.wav'],
+                  'resources': ['stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -101,6 +102,8 @@ elif sys.platform=='win32':
                          'WinSparkle.pdb',	# For debugging - don't include in package
                          'snd_good.wav',
                          'snd_bad.wav',
+                         'stations.p',
+                         'systems.p',
                          '%s.VisualElementsManifest.xml' % APPNAME,
                          '%s.ico' % APPNAME ] +
                     [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')] ) ]

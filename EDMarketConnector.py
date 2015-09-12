@@ -8,6 +8,8 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
+import urllib
+import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -21,16 +23,53 @@ import companion
 import bpc
 import td
 import eddn
+import edsm
 import loadout
 import coriolis
 import flightlog
+import eddb
 import prefs
 from config import appname, applongname, config
 from hotkey import hotkeymgr
 
 l10n.Translations().install()
+EDDB = eddb.EDDB()
 
 SHIPYARD_RETRY = 5	# retry pause for shipyard data [s]
+EDSM_POLL = 0.1
+
+
+class HyperlinkLabel(ttk.Label):
+
+    def __init__(self, master=None, **kw):
+        self.urlfn = kw.pop('urlfn', None)
+        ttk.Label.__init__(self, master, **kw)
+        self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
+        self.font_u = tkFont.Font(self, self.font_n)
+        self.font_u.configure(underline = True)
+        self.bind('<Enter>', self._enter)
+        self.bind('<Leave>', self._leave)
+        self.bind('<Button-1>', self._click)
+
+    # Make blue and clickable if setting non-empty text
+    def __setitem__(self, key, value):
+        if key=='text':
+            if self.urlfn and value:
+                self.configure({key: value}, foreground = 'blue', cursor = platform=='darwin' and 'pointinghand' or 'hand2')
+            else:
+                self.configure({key: value}, foreground = '', cursor = 'arrow')
+        else:
+            self.configure({key: value})
+
+    def _enter(self, event):
+        self.configure(font = self.font_u)
+
+    def _leave(self, event):
+        self.configure(font = self.font_n)
+
+    def _click(self, event):
+        if self.urlfn and self['text']:
+            webbrowser.open(self.urlfn(self['text']))
 
 
 class AppWindow:
@@ -39,6 +78,7 @@ class AppWindow:
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
+        self.edsm = edsm.EDSM()
 
         self.w = master
         self.w.title(applongname)
@@ -73,9 +113,9 @@ class AppWindow:
         ttk.Label(frame, text=_('System:')).grid(row=1, column=0, sticky=tk.W)	# Main window
         ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
-        self.cmdr = ttk.Label(frame, width=-20)
-        self.system = ttk.Label(frame, width=-20)
-        self.station = ttk.Label(frame, width=-20)
+        self.cmdr = ttk.Label(frame, width=-21)
+        self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, urlfn = self.system_url)
+        self.station = HyperlinkLabel(frame, urlfn = self.station_url)
         self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
@@ -211,7 +251,8 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or '-'
+            self.system['image'] = None
+            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text'] and '-' or ''))
 
             config.set('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
@@ -229,9 +270,14 @@ class AppWindow:
 
             elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
                 # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                self.w.after(SHIPYARD_RETRY * 1000, lambda:self.getandsend(event, retrying=True))
+                self.w.after(int(SHIPYARD_RETRY * 1000), lambda:self.getandsend(event, retrying=True))
 
                 # Stuff we can do while waiting for retry
+
+                self.edsm.start_lookup(self.system['text'])
+                self.system['image'] = self.edsm.result['img']
+                self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
@@ -249,6 +295,10 @@ class AppWindow:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 if not retrying:
+                    self.edsm.start_lookup(self.system['text'])
+                    self.system['image'] = self.edsm.result['img']
+                    self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
                     if config.getint('output') & config.OUT_LOG:
                         flightlog.export(data)
                     if config.getint('output') & config.OUT_SHIP_EDS:
@@ -317,6 +367,28 @@ class AppWindow:
             if play_sound: hotkeymgr.play_bad()
 
         self.cooldown()
+
+    def edsmpoll(self):
+        result = self.edsm.result
+        if result['done']:
+            self.system['image'] = result['img']
+        else:
+            self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
+    def system_url(self, text):
+        return text and self.edsm.result['url']
+
+    def station_url(self, text):
+        if text:
+            station_id = EDDB.station(self.system['text'], self.station['text'])
+            if station_id:
+                return 'http://eddb.io/station/%d' % station_id
+
+            system_id = EDDB.system(self.system['text'])
+            if system_id:
+                return 'http://eddb.io/system/%d' % system_id
+
+        return None
 
     def cooldown(self):
         if time() < self.holdofftime:
