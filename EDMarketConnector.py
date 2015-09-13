@@ -239,6 +239,8 @@ class AppWindow:
                 if play_sound and (self.holdofftime-time()) < companion.holdoff*0.75:
                     hotkeymgr.play_bad()	# Don't play sound in first few seconds to prevent repeats
                 return
+            elif play_sound:
+                hotkeymgr.play_good()
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.status['text'] = _('Fetching station data...')
             self.button['state'] = tk.DISABLED
@@ -309,10 +311,10 @@ class AppWindow:
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
-                    if play_sound: hotkeymgr.play_good()
 
                 elif not data['commander'].get('docked'):
                     self.status['text'] = _("You're not docked at a station!")
+                    # signal as error becuase sometimes the server hosting the Companion API hasn't caught up
                     if play_sound: hotkeymgr.play_bad()
                 else:
                     if data['lastStarport'].get('commodities'):
@@ -332,16 +334,12 @@ class AppWindow:
                             self.w.update_idletasks()
                             eddn.export(data)
                             self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
-                            if play_sound: hotkeymgr.play_good()
                         else:
                             self.status['text'] = _("Station doesn't have anything!")
-                            if play_sound: hotkeymgr.play_good()	# not really an error
                     elif not data['lastStarport'].get('commodities'):
                         self.status['text'] = _("Station doesn't have a market!")
-                        if play_sound: hotkeymgr.play_good()	# not really an error
                     else:
                         self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
-                        if play_sound: hotkeymgr.play_good()
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
