@@ -7,6 +7,8 @@ This app downloads commodity market and other data from the game [Elite: Dangero
 * saves the data to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), etc.
 * saves a record of your ship loadout and/or flight log.
 
+Usage
+--------
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to automatically download and transmit and/or save your choice of data.
 
 Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web broswer.
