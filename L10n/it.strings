@@ -147,7 +147,7 @@
 "You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
 
 /* Section heading in settings on Windows. [prefs.py:125] */
-"Hotkey" = "";
+"Hotkey" = "Hotkey";
 
 /* No hotkey/shortcut currently defined. [prefs.py:136] */
 "none" = "nessuna";
@@ -156,10 +156,10 @@
 "Open System Preferences" = "Apri Preferenze di Systema";
 
 /* Hotkey/Shortcut setting. [prefs.py:140] */
-"Play sound" = "";
+"Play sound" = "Notifica sonora";
 
 /* Shortcut settings prompt on OSX. [prefs.py:130] */
-"Re-start {APP} to use shortcuts" = "";
+"Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
 
 /* Section heading in settings on OSX. [prefs.py:124] */
 "Keyboard shortcut" = "Abbreviazione da tastiera";
@@ -168,4 +168,7 @@
 "Window" = "Finestra";
 
 /* Shortcut settings prompt on OSX. [prefs.py:132] */
-"{APP} needs permission to use shortcuts" = "";
+"{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
+
+/* Hotkey/Shortcut setting. [prefs.py:141] */
+"Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è avviato";

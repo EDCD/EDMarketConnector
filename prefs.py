@@ -316,7 +316,7 @@ class AuthenticationDialog(tk.Toplevel):
         frame.columnconfigure(0, weight=3)
         frame.columnconfigure(2, weight=1)
 
-        ttk.Label(frame, text=_('A verification code has now been sent to the{CR}email address associated with your Elite account.').format(CR='\n') +	# Use same text as E:D Launcher's verification dialog
+        ttk.Label(frame, text=_('A verification code has now been sent to the{CR}email address associated with your Elite account.') +	# Use same text as E:D Launcher's verification dialog
 
                   '\n' +
                   _('Please enter the code into the box below.'), anchor=tk.W, justify=tk.LEFT).grid(columnspan=4, sticky=tk.NSEW)	# Use same text as E:D Launcher's verification dialog

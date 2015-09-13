@@ -38,7 +38,7 @@ class Translations:
                 lang = Translations.FALLBACK
 
         if lang not in self.available():
-            __builtin__.__dict__['_'] = lambda x: x
+            __builtin__.__dict__['_'] = lambda x: unicode(x)	# Promote strings to Unicode for consistency
         else:
             regexp = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
             comment= re.compile(r'\s*/\*.*\*/\s*$')
@@ -47,7 +47,7 @@ class Translations:
                     if line.strip():
                         match = regexp.match(line)
                         if match:
-                            self.translations[match.group(1)] = match.group(2)
+                            self.translations[match.group(1)] = match.group(2).replace(u'{CR}', u'\n')
                         elif not comment.match(line):
                             print 'Bad translation: %s' % line.strip()
             __builtin__.__dict__['_'] = self.translate
@@ -56,12 +56,12 @@ class Translations:
         def translate(self, x):
             if not self.translations.get(x):
                 print 'Missing translation: "%s"' % x
-                return x
+                return unicode(x)
             else:
-                return self.translations.get(x) or x
+                return self.translations.get(x) or unicode(x)
     else:
         def translate(self, x):
-            return self.translations.get(x, x) or x
+            return self.translations.get(x) or unicode(x)
 
     # Returns list of available language codes
     def available(self):
