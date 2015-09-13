@@ -254,7 +254,7 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text'] and '-' or ''))
+            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and '-' or '')
 
             config.set('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
