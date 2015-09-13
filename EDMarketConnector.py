@@ -121,11 +121,11 @@ class AppWindow:
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
 
-        self.cmdr.grid(row=0, column=1, sticky=tk.W)
-        self.system.grid(row=1, column=1, sticky=tk.W)
-        self.station.grid(row=2, column=1, sticky=tk.W)
+        self.cmdr.grid(row=0, column=1, sticky=tk.EW)
+        self.system.grid(row=1, column=1, sticky=tk.EW)
+        self.station.grid(row=2, column=1, sticky=tk.EW)
         self.button.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
-        self.status.grid(row=4, column=0, columnspan=2, sticky=tk.SW)
+        self.status.grid(row=4, column=0, columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='darwin' and 3 or 2))
@@ -242,6 +242,7 @@ class AppWindow:
             elif play_sound:
                 hotkeymgr.play_good()
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
+            self.system['image'] = ''
             self.status['text'] = _('Fetching station data...')
             self.button['state'] = tk.DISABLED
             self.w.update_idletasks()
@@ -253,7 +254,6 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.system['image'] = None
             self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text'] and '-' or ''))
 
             config.set('querytime', querytime)
