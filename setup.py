@@ -64,8 +64,7 @@ if sys.platform=='darwin':
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
-                  'resources': ['snd_good.wav', 'snd_bad.wav'],
-                  'resources': ['stations.p', 'systems.p'],
+                  'resources': ['snd_good.wav', 'snd_bad.wav', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
