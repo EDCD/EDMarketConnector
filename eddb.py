@@ -44,6 +44,11 @@ if __name__ == "__main__":
 
     stations = json.loads(open('stations_lite.json').read())
 
+    # check that all populated systems have known coordinates
+    coords = dict([(x['id'], x['x'] or x['y'] or x['z']) for x in json.loads(open('systems.json').read())])
+    for x in stations:
+        assert x['system_id'] == 17072 or coords[x['system_id']], (x['system_id'], systems[x['system_id']])
+
     # system_id by system_name - populated systems only
     system_ids = dict([(systems[x['system_id']], x['system_id']) for x in stations])
     cPickle.dump(system_ids,  open('systems.p',  'wb'), protocol = cPickle.HIGHEST_PROTOCOL)

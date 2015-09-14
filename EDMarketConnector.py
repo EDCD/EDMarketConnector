@@ -276,7 +276,7 @@ class AppWindow:
 
                 # Stuff we can do while waiting for retry
 
-                self.edsm.start_lookup(self.system['text'])
+                self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                 self.system['image'] = self.edsm.result['img']
                 self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
@@ -297,7 +297,7 @@ class AppWindow:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 if not retrying:
-                    self.edsm.start_lookup(self.system['text'])
+                    self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                     self.system['image'] = self.edsm.result['img']
                     self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
