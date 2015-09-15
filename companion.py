@@ -7,7 +7,6 @@ from cookielib import LWPCookieJar
 import numbers
 import os
 from os.path import dirname, join
-from requests.packages import urllib3
 import sys
 from sys import platform
 import time
@@ -123,7 +122,13 @@ class Session:
         self.state = Session.STATE_INIT
         self.credentials = None
 
-        urllib3.disable_warnings()	# yuck suppress InsecurePlatformWarning
+        # yuck suppress InsecurePlatformWarning
+        try:
+            from requests.packages import urllib3
+            urllib3.disable_warnings()
+        except:
+            pass
+
         if platform=='win32' and getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
 
