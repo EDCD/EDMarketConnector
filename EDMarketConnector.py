@@ -226,6 +226,7 @@ class AppWindow:
             self.session.verify(code)
         except Exception as e:
             if __debug__: print_exc()
+            self.button['state'] = tk.NORMAL
             self.status['text'] = unicode(e)
         else:
             return self.getandsend()	# try again

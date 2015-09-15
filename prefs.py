@@ -331,6 +331,8 @@ class AuthenticationDialog(tk.Toplevel):
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
+        self.protocol("WM_DELETE_WINDOW", self._destroy)
+
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
         self.grab_set()
@@ -344,3 +346,7 @@ class AuthenticationDialog(tk.Toplevel):
         code = self.code.get().strip()
         self.destroy()
         if self.callback: self.callback(code)
+
+    def _destroy(self):
+        self.destroy()
+        if self.callback: self.callback(None)

@@ -166,6 +166,8 @@ class Session:
             return r.status_code
 
     def verify(self, code):
+        if not code:
+            raise VerificationRequired()
         r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
         r.raise_for_status()
         # verification doesn't actually return a yes/no, so log in again to determine state
