@@ -14,6 +14,8 @@ class EDSM:
 
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
+        self.syscache = {}
+
         EDSM._IMG_WAIT_MAC = tk.PhotoImage(data = 'R0lGODlhDgAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAOABAAAAIrlAWpx6jZzoPRvQqC3qBlzjGfNnbSFpQmQibcOqKpKIe0vIpTZS3Y/rscCgA7')	# wristwatch
         EDSM._IMG_WAIT_WIN = tk.PhotoImage(data = 'R0lGODlhDgAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAOABAAAAIuFI4JwurcgpxhQUOnhUD2Xl1R5YmcZl5fqoYsVqYgKs527ZHu+ZGb4UhwgghGAQA7')	# hourglass
         EDSM._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhDgAOAMIEAFWjVVWkVWS/ZGfFZwAAAAAAAAAAAAAAACH5BAEKAAQALAAAAAAOAA4AAAMsSLrcHEIEp8C4GDSLu15dOCyB2E2EYGKCoq5DS5QwSsDjwomfzlOziA0ITAAAOw==')	# green circle
@@ -24,6 +26,12 @@ class EDSM:
 
     def start_lookup(self, system_name, known=0):
         self.cancel_lookup()
+
+        # Cache URLs of systems with known coordinates
+        if system_name in self.syscache:
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': self.syscache[system_name], 'done': True }
+            return
+
         self.result = { 'img': '', 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': False }	# default URL
         self.thread = threading.Thread(target = known and self.known or self.worker, name = 'EDSM worker', args = (system_name, self.result))
         self.thread.daemon = True
@@ -31,7 +39,7 @@ class EDSM:
 
     def cancel_lookup(self):
         self.thread = None	# orphan any existing thread
-        self.result = { 'img': None, 'url': None, 'done': True }	# orphan existing thread's results
+        self.result = { 'img': '', 'url': None, 'done': True }	# orphan existing thread's results
 
     def worker(self, system_name, result):
         try:
@@ -62,6 +70,6 @@ class EDSM:
             r = requests.get('http://www.edsm.net/api-v1/url?sysname=%s' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
-            result['url'] = data['url']['show-system'].replace('\\','')
+            result['url'] = self.syscache[system_name] = data['url']['show-system']
         except:
             if __debug__: print_exc()
