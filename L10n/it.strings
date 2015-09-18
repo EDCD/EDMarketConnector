@@ -172,3 +172,6 @@
 
 /* Hotkey/Shortcut setting. [prefs.py:141] */
 "Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è avviato";
+
+/* As in Copy and Paste. [EDMarketConnector.py:51] */
+"Copy" = "Copia";

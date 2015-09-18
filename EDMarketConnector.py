@@ -47,9 +47,12 @@ class HyperlinkLabel(ttk.Label):
         self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
         self.font_u = tkFont.Font(self, self.font_n)
         self.font_u.configure(underline = True)
+        self.menu = tk.Menu(None, tearoff=tk.FALSE)
+        self.menu.add_command(label=_('Copy'), command = self.copy)	# As in Copy and Paste
         self.bind('<Enter>', self._enter)
         self.bind('<Leave>', self._leave)
         self.bind('<Button-1>', self._click)
+        self.bind(platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
 
     # Make blue and clickable if setting non-empty text
     def __setitem__(self, key, value):
@@ -70,6 +73,14 @@ class HyperlinkLabel(ttk.Label):
     def _click(self, event):
         if self.urlfn and self['text']:
             webbrowser.open(self.urlfn(self['text']))
+
+    def _contextmenu(self, event):
+        if self['text'] and self['text'] != '-':
+            self.menu.post(platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
+
+    def copy(self):
+        self.clipboard_clear()
+        self.clipboard_append(self['text'])
 
 
 class AppWindow:
