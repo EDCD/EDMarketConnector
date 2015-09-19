@@ -175,3 +175,6 @@
 
 /* As in Copy and Paste. [EDMarketConnector.py:51] */
 "Copy" = "Copia";
+
+/* Menu title. [EDMarketConnector.py:156] */
+"Edit" = "Composizione";

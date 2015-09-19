@@ -1,7 +1,7 @@
 /* Use same text as E:D Launcher's verification dialog. [prefs.py:319] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "A verification code has now been sent to the{CR}email address associated with your Elite account.";
 
-/* App menu entry on OSX. [EDMarketConnector.py:149] */
+/* App menu entry on OSX. [EDMarketConnector.py:151] */
 "About {APP}" = "About {APP}";
 
 /* Folder selection button on Windows. [prefs.py:113] */
@@ -10,16 +10,16 @@
 /* Folder selection button on OSX. [prefs.py:112] */
 "Change..." = "Change...";
 
-/* [EDMarketConnector.py:150] */
+/* [EDMarketConnector.py:152] */
 "Check for Updates..." = "Check for Updates...";
 
 /* Privacy setting. [prefs.py:152] */
 "Cmdr name" = "Cmdr name";
 
-/* Main window. [EDMarketConnector.py:123] */
+/* Main window. [EDMarketConnector.py:125] */
 "Cmdr:" = "Cmdr:";
 
-/* Update button in main window. [EDMarketConnector.py:406] */
+/* Update button in main window. [EDMarketConnector.py:419] */
 "cooldown {SS}s" = "cooldown {SS}s";
 
 /* As in Copy and Paste. [EDMarketConnector.py:51] */
@@ -28,10 +28,13 @@
 /* Section heading in settings. [prefs.py:70] */
 "Credentials" = "Credentials";
 
-/* [EDMarketConnector.py:367] */
+/* Menu title. [EDMarketConnector.py:156] */
+"Edit" = "Edit";
+
+/* [EDMarketConnector.py:380] */
 "Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
 
-/* [EDMarketConnector.py:372] */
+/* [EDMarketConnector.py:385] */
 "Error: Connection to EDDN timed out" = "Error: Connection to EDDN timed out";
 
 /* [companion.py:110] */
@@ -40,13 +43,13 @@
 /* [companion.py:104] */
 "Error: Server is down" = "Error: Server is down";
 
-/* Item in the File menu on Windows. [EDMarketConnector.py:167] */
+/* Item in the File menu on Windows. [EDMarketConnector.py:173] */
 "Exit" = "Exit";
 
-/* [EDMarketConnector.py:259] */
+/* [EDMarketConnector.py:269] */
 "Fetching station data..." = "Fetching station data...";
 
-/* Menu title on Windows. [EDMarketConnector.py:168] */
+/* Menu title on Windows. [EDMarketConnector.py:174] */
 "File" = "File";
 
 /* Output folder prompt on Windows. [prefs.py:111] */
@@ -64,10 +67,10 @@
 /* Section heading in settings on OSX. [prefs.py:125] */
 "Keyboard shortcut" = "Keyboard shortcut";
 
-/* [EDMarketConnector.py:326] */
+/* [EDMarketConnector.py:339] */
 "Last updated at {HH}:{MM}:{SS}" = "Last updated at {HH}:{MM}:{SS}";
 
-/* [EDMarketConnector.py:209] */
+/* [EDMarketConnector.py:219] */
 "Logging in..." = "Logging in...";
 
 /* [prefs.py:102] */
@@ -124,10 +127,10 @@
 /* [prefs.py:96] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py:346] */
+/* [EDMarketConnector.py:359] */
 "Sending data to EDDN..." = "Sending data to EDDN...";
 
-/* Item in the File menu on Windows. [EDMarketConnector.py:165] */
+/* Item in the File menu on Windows. [EDMarketConnector.py:171] */
 "Settings" = "Settings";
 
 /* [prefs.py:106] */
@@ -136,40 +139,40 @@
 /* [prefs.py:104] */
 "Ship loadout in E:D Shipyard format" = "Ship loadout in E:D Shipyard format";
 
-/* [EDMarketConnector.py:353] */
+/* [EDMarketConnector.py:366] */
 "Station doesn't have a market!" = "Station doesn't have a market!";
 
-/* [EDMarketConnector.py:351] */
+/* [EDMarketConnector.py:364] */
 "Station doesn't have anything!" = "Station doesn't have anything!";
 
-/* Main window. [EDMarketConnector.py:125] */
+/* Main window. [EDMarketConnector.py:127] */
 "Station:" = "Station:";
 
-/* Main window. [EDMarketConnector.py:124] */
+/* Main window. [EDMarketConnector.py:126] */
 "System:" = "System:";
 
-/* Update button in main window. [EDMarketConnector.py:130] */
+/* Update button in main window. [EDMarketConnector.py:132] */
 "Update" = "Update";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py:75] */
 "Username (Email)" = "Username (Email)";
 
-/* Shouldn't happen. [EDMarketConnector.py:283] */
+/* Shouldn't happen. [EDMarketConnector.py:294] */
 "What are you flying?!" = "What are you flying?!";
 
-/* Shouldn't happen. [EDMarketConnector.py:280] */
+/* Shouldn't happen. [EDMarketConnector.py:291] */
 "Where are you?!" = "Where are you?!";
 
 /* Output folder prompt on OSX. [prefs.py:110] */
 "Where:" = "Where:";
 
-/* Shouldn't happen. [EDMarketConnector.py:277] */
+/* Shouldn't happen. [EDMarketConnector.py:288] */
 "Who are you?!" = "Who are you?!";
 
-/* Menu title on OSX. [EDMarketConnector.py:153] */
+/* Menu title on OSX. [EDMarketConnector.py:159] */
 "Window" = "Window";
 
-/* [EDMarketConnector.py:329] */
+/* [EDMarketConnector.py:342] */
 "You're not docked at a station!" = "You're not docked at a station!";
 
 /* Shortcut settings prompt on OSX. [prefs.py:133] */

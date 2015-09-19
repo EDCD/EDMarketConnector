@@ -75,7 +75,7 @@ class HyperlinkLabel(ttk.Label):
             webbrowser.open(self.urlfn(self['text']))
 
     def _contextmenu(self, event):
-        if self['text'] and self['text'] != '-':
+        if self['text'] and self['text'] != AppWindow.STATION_UNDOCKED:
             self.menu.post(platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
 
     def copy(self):
@@ -84,6 +84,8 @@ class HyperlinkLabel(ttk.Label):
 
 
 class AppWindow:
+
+    STATION_UNDOCKED = '-'	# "Station" name to display when not docked
 
     def __init__(self, master):
 
@@ -149,6 +151,10 @@ class AppWindow:
             apple_menu.add_command(label=_("About {APP}").format(APP=applongname), command=lambda:self.w.call('tk::mac::standardAboutPanel'))	# App menu entry on OSX
             apple_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             menubar.add_cascade(menu=apple_menu)
+            self.edit_menu = tk.Menu(menubar, name='edit')
+            self.edit_menu.add_command(label=_('Copy'), accelerator='Command-c', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
+            menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
+            self.w.bind('<Command-c>', self.copy)
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
@@ -166,6 +172,10 @@ class AppWindow:
             file_menu.add_separator()
             file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
             menubar.add_cascade(label=_("File"), menu=file_menu)	# Menu title on Windows
+            self.edit_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            self.edit_menu.add_command(label=_('Copy'), accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
+            menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
+            self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
         if platform == 'linux2':
             # Fix up menu to use same styling as everything else
@@ -258,6 +268,7 @@ class AppWindow:
             self.system['image'] = ''
             self.status['text'] = _('Fetching station data...')
             self.button['state'] = tk.DISABLED
+            self.edit_menu.entryconfigure(_('Copy'), state=tk.DISABLED)
             self.w.update_idletasks()
 
         try:
@@ -267,7 +278,7 @@ class AppWindow:
 
             self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and '-' or '')
+            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
 
             config.set('querytime', querytime)
             self.holdofftime = querytime + companion.holdoff
@@ -289,6 +300,7 @@ class AppWindow:
 
                 # Stuff we can do while waiting for retry
 
+                self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                 self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                 self.system['image'] = self.edsm.result['img']
                 self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
@@ -310,6 +322,7 @@ class AppWindow:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 if not retrying:
+                    self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                     self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                     self.system['image'] = self.edsm.result['img']
                     self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
@@ -408,6 +421,11 @@ class AppWindow:
         else:
             self.button['text'] = _('Update')	# Update button in main window
             self.button['state'] = tk.NORMAL
+
+    def copy(self, event=None):
+        if self.system['text']:
+            self.w.clipboard_clear()
+            self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
 
     def onexit(self, event=None):
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
