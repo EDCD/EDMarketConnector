@@ -252,11 +252,11 @@ class AppWindow:
         else:
             return self.getandsend()	# try again
 
-    def getandsend(self, event=None, retrying=False):
+    def getandsend(self, event=None, retrying_for_shipyard=False):
 
         play_sound = event and event.type=='35' and not config.getint('hotkey_mute')
 
-        if not retrying:
+        if not retrying_for_shipyard:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
                 self.status['text'] = ''
                 if play_sound and (self.holdofftime-time()) < companion.holdoff*0.75:
@@ -294,45 +294,29 @@ class AppWindow:
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
                 if play_sound: hotkeymgr.play_bad()
 
-            elif (config.getint('output') & config.OUT_EDDN) and data['commander'].get('docked') and not data['lastStarport'].get('ships') and not retrying:
-                # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                self.w.after(int(SHIPYARD_RETRY * 1000), lambda:self.getandsend(event, retrying=True))
+            elif retrying_for_shipyard:
+                if __debug__:
+                    print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
+                eddn.export_shipyard(data)
+                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
-                # Stuff we can do while waiting for retry
+            else:
+                if __debug__:	# Recording
+                    with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
+                        h.write(json.dumps(data, indent=2, sort_keys=True))
 
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                 self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                 self.system['image'] = self.edsm.result['img']
                 self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
+                # stuff we can do when not docked
                 if config.getint('output') & config.OUT_LOG:
                     flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
-                return
-
-            else:
-                if __debug__ and retrying: print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
-
-                # stuff we can do when not docked
-                if __debug__:	# Recording
-                    with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
-                        h.write(json.dumps(data, indent=2, sort_keys=True))
-
-                if not retrying:
-                    self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
-                    self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
-                    self.system['image'] = self.edsm.result['img']
-                    self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
-
-                    if config.getint('output') & config.OUT_LOG:
-                        flightlog.export(data)
-                    if config.getint('output') & config.OUT_SHIP_EDS:
-                        loadout.export(data)
-                    if config.getint('output') & config.OUT_SHIP_CORIOLIS:
-                        coriolis.export(data)
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no further output requested
@@ -342,29 +326,48 @@ class AppWindow:
                     self.status['text'] = _("You're not docked at a station!")
                     # signal as error becuase sometimes the server hosting the Companion API hasn't caught up
                     if play_sound: hotkeymgr.play_bad()
+
                 else:
-                    if data['lastStarport'].get('commodities'):
+                    # Finally - the data looks sane and we're docked at a station
+
+                    station = EDDB.station(self.system['text'], self.station['text'])
+                    has_shipyard = station and station[1]
+
+                    if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not data['lastStarport'].get('modules') and not has_shipyard:
+                        self.status['text'] = _("Station doesn't have anything!")
+
+                    elif not data['lastStarport'].get('commodities'):
+                        self.status['text'] = _("Station doesn't have a market!")
+
+                    else:
                         # Fixup anomalies in the commodity data
                         self.session.fixup(data['lastStarport']['commodities'])
 
-                        if config.getint('output') & config.OUT_CSV:
-                            bpc.export(data, True)
-                        if config.getint('output') & config.OUT_TD:
-                            td.export(data)
-                        if config.getint('output') & config.OUT_BPC:
-                            bpc.export(data, False)
+                        if data['lastStarport'].get('commodities'):
+                            if config.getint('output') & config.OUT_CSV:
+                                bpc.export(data, True)
+                            if config.getint('output') & config.OUT_TD:
+                                td.export(data)
+                            if config.getint('output') & config.OUT_BPC:
+                                bpc.export(data, False)
 
-                    if config.getint('output') & config.OUT_EDDN:
-                        if data['lastStarport'].get('commodities') or data['lastStarport'].get('modules') or data['lastStarport'].get('ships'):
+                        if config.getint('output') & config.OUT_EDDN:
                             self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
-                            eddn.export(data)
-                            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
-                        else:
-                            self.status['text'] = _("Station doesn't have anything!")
-                    elif not data['lastStarport'].get('commodities'):
-                        self.status['text'] = _("Station doesn't have a market!")
-                    else:
+                            eddn.export_commodities(data)
+                            ### eddn.export_outfitting(data)	# EDDN doesn't yet accept an outfitting schema
+                            if has_shipyard:
+                                # Only send if eddb says that the station has a shipyard -
+                                # https://github.com/Marginal/EDMarketConnector/issues/16
+                                if data['lastStarport'].get('ships'):
+                                    eddn.export_shipyard(data)
+                                else:
+                                    # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
+                                    self.w.after(int(SHIPYARD_RETRY * 1000), lambda:self.getandsend(event, retrying_for_shipyard=True))
+                                    return	# early exit to avoid starting cooldown count
+                            elif __debug__ and data['lastStarport'].get('ships'):
+                                print 'Spurious shipyard!'
+
                         self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
         except companion.VerificationRequired:
@@ -404,9 +407,9 @@ class AppWindow:
 
     def station_url(self, text):
         if text:
-            station_id = EDDB.station(self.system['text'], self.station['text'])
-            if station_id:
-                return 'http://eddb.io/station/%d' % station_id
+            station = EDDB.station(self.system['text'], self.station['text'])
+            if station:
+                return 'http://eddb.io/station/%d' % station[0]
 
             system_id = EDDB.system(self.system['text'])
             if system_id:

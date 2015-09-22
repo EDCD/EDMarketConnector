@@ -15,13 +15,13 @@ class EDDB:
         self.system_ids  = cPickle.load(open(join(self.respath(), 'systems.p'),  'rb'))
         self.station_ids = cPickle.load(open(join(self.respath(), 'stations.p'), 'rb'))
 
-    # system_name -> system_id
+    # system_name -> system_id or 0
     def system(self, system_name):
         return self.system_ids.get(system_name, 0)	# return 0 on failure (0 is not a valid id)
 
-    # (system_name, station_name) -> station_id
+    # (system_name, station_name) -> (station_id, has_shipyard) or None
     def station(self, system_name, station_name):
-        return self.station_ids.get((self.system_ids.get(system_name), station_name), 0)	# return 0 on failure (0 is not a valid id)
+        return self.station_ids.get((self.system_ids.get(system_name), station_name))
 
     def respath(self):
         if getattr(sys, 'frozen', False):
@@ -54,6 +54,6 @@ if __name__ == "__main__":
     cPickle.dump(system_ids,  open('systems.p',  'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
     # station_id by (system_id, station_name)
-    station_ids = dict([((x['system_id'], str(x['name'])), x['id']) for x in stations])
+    station_ids = dict([((x['system_id'], str(x['name'])), (x['id'],bool(x['has_shipyard']))) for x in stations])
     cPickle.dump(station_ids, open('stations.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
