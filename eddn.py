@@ -93,6 +93,6 @@ def export_shipyard(data):
             'message'    : {
                 'systemName'  : data['lastSystem']['name'].strip(),
                 'stationName' : data['lastStarport']['name'].strip(),
-                'ships'       : [ship_map[ship['name']] for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list') if ship['name'] in ship_map],
+                'ships'       : [ship_map[ship['name'].lower()] for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list') if ship['name'].lower() in ship_map],
             }
         })

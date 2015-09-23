@@ -16,154 +16,154 @@ outfile = 'outfitting.csv'
 outfitting = {}
 
 armour_map = {
-    'Grade1'   : 'Lightweight Alloy',
-    'Grade2'   : 'Reinforced Alloy',
-    'Grade3'   : 'Military Grade Composite',
-    'Mirrored' : 'Mirrored Surface Composite',
-    'Reactive' : 'Reactive Surface Composite',
+    'grade1'   : 'Lightweight Alloy',
+    'grade2'   : 'Reinforced Alloy',
+    'grade3'   : 'Military Grade Composite',
+    'mirrored' : 'Mirrored Surface Composite',
+    'reactive' : 'Reactive Surface Composite',
 }
 
 weapon_map = {
-    'AdvancedTorpPylon'              : 'Torpedo Pylon',
-    'BasicMissileRack'               : 'Missile Rack',
-    'BeamLaser'                      : 'Beam Laser',
-    ('BeamLaser','Heat')             : 'Retributor Beam Laser',
-    'Cannon'                         : 'Cannon',
-    'DrunkMissileRack'               : 'Pack-Hound Missile Rack',
-    'DumbfireMissileRack'            : 'Missile Rack',
-    'MineLauncher'                   : 'Mine Launcher',
-    ('MineLauncher','Impulse')       : 'Impulse Mine Launcher',	# Not seen in game?
-    'MiningLaser'                    : 'Mining Laser',
-    ('MiningLaser','Advanced')       : 'Mining Lance Beam Laser',
-    'MultiCannon'                    : 'Multi-Cannon',
-    ('MultiCannon','Strong')         : 'Enforcer Cannon',
-    'PlasmaAccelerator'              : 'Plasma Accelerator',
-    ('PlasmaAccelerator','Advanced') : 'Advanced Plasma Accelerator',
-    'PulseLaser'                     : 'Pulse Laser',
-    ('PulseLaser','Disruptor')       : 'Pulse Disruptor Laser',
-    'PulseLaserBurst'                : 'Burst Laser',
-    ('PulseLaserBurst','Scatter')    : 'Cytoscrambler Burst Laser',
-    'Railgun'                        : 'Rail Gun',
-    ('Railgun','Burst')              : 'Imperial Hammer Rail Gun',
-    'Slugshot'                       : 'Fragment Cannon',
-    ('Slugshot','Range')             : 'Pacifier Frag-Cannon',
+    'advancedtorppylon'              : 'Torpedo Pylon',
+    'basicmissilerack'               : 'Missile Rack',
+    'beamlaser'                      : 'Beam Laser',
+    ('beamlaser','heat')             : 'Retributor Beam Laser',
+    'cannon'                         : 'Cannon',
+    'drunkmissilerack'               : 'Pack-Hound Missile Rack',
+    'dumbfiremissilerack'            : 'Missile Rack',
+    'minelauncher'                   : 'Mine Launcher',
+    ('minelauncher','impulse')       : 'Impulse Mine Launcher',	# Not seen in game?
+    'mininglaser'                    : 'Mining Laser',
+    ('mininglaser','advanced')       : 'Mining Lance Beam Laser',
+    'multicannon'                    : 'Multi-Cannon',
+    ('multicannon','strong')         : 'Enforcer Cannon',
+    'plasmaaccelerator'              : 'Plasma Accelerator',
+    ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
+    'pulselaser'                     : 'Pulse Laser',
+    ('pulselaser','disruptor')       : 'Pulse Disruptor Laser',
+    'pulselaserburst'                : 'Burst Laser',
+    ('pulselaserburst','scatter')    : 'Cytoscrambler Burst Laser',
+    'railgun'                        : 'Rail Gun',
+    ('railgun','burst')              : 'Imperial Hammer Rail Gun',
+    'slugshot'                       : 'Fragment Cannon',
+    ('slugshot','range')             : 'Pacifier Frag-Cannon',
 }
 
 missiletype_map = {
-    'AdvancedTorpPylon'   : 'Seeker',
-    'BasicMissileRack'    : 'Seeker',
-    'DrunkMissileRack'    : 'Swarm',
-    'DumbfireMissileRack' : 'Dumbfire',
+    'advancedtorppylon'   : 'Seeker',
+    'basicmissilerack'    : 'Seeker',
+    'drunkmissilerack'    : 'Swarm',
+    'dumbfiremissilerack' : 'Dumbfire',
 }
 
 weaponmount_map = {
-    'Fixed'  : 'Fixed',
-    'Gimbal' : 'Gimballed',
-    'Turret' : 'Turreted',
+    'fixed'  : 'Fixed',
+    'gimbal' : 'Gimballed',
+    'turret' : 'Turreted',
 }
 
 weaponclass_map = {
-    'Tiny'   : '0',
-    'Small'  : '1',
-    'Medium' : '2',
-    'Large'  : '3',
-    'Huge'   : '4',
+    'tiny'   : '0',
+    'small'  : '1',
+    'medium' : '2',
+    'large'  : '3',
+    'huge'   : '4',
 }
 
 # There's no discernable pattern for weapon ratings, so here's a lookup table
 weaponrating_map = {
-    'Hpt_AdvancedTorpPylon_Fixed_Small': 'I',
-    'Hpt_AdvancedTorpPylon_Fixed_Medium': 'I',
-    'Hpt_BasicMissileRack_Fixed_Small': 'B',
-    'Hpt_BasicMissileRack_Fixed_Medium': 'B',
-    'Hpt_BeamLaser_Fixed_Small': 'E',
-    'Hpt_BeamLaser_Fixed_Medium': 'D',
-    'Hpt_BeamLaser_Fixed_Large': 'C',
-    'Hpt_BeamLaser_Gimbal_Small': 'E',
-    'Hpt_BeamLaser_Gimbal_Medium': 'D',
-    'Hpt_BeamLaser_Gimbal_Large': 'C',
-    'Hpt_BeamLaser_Turret_Small': 'F',
-    'Hpt_BeamLaser_Turret_Medium': 'E',
-    'Hpt_BeamLaser_Turret_Large': 'D',
-    'Hpt_Cannon_Fixed_Small': 'D',
-    'Hpt_Cannon_Fixed_Medium': 'D',
-    'Hpt_Cannon_Fixed_Large': 'C',
-    'Hpt_Cannon_Fixed_Huge': 'B',
-    'Hpt_Cannon_Gimbal_Small': 'E',
-    'Hpt_Cannon_Gimbal_Medium': 'D',
-    'Hpt_Cannon_Gimbal_Large': 'C',
-    'Hpt_Cannon_Gimbal_Huge': 'B',
-    'Hpt_Cannon_Turret_Small': 'F',
-    'Hpt_Cannon_Turret_Medium': 'E',
-    'Hpt_Cannon_Turret_Large': 'D',
-    'Hpt_DrunkMissileRack_Fixed_Medium': 'B',
-    'Hpt_DumbfireMissileRack_Fixed_Small': 'B',
-    'Hpt_DumbfireMissileRack_Fixed_Medium': 'B',
-    'Hpt_MineLauncher_Fixed_Small': 'I',
-    'Hpt_MineLauncher_Fixed_Medium': 'I',
-    'Hpt_MiningLaser_Fixed_Small': 'D',
-    'Hpt_MiningLaser_Fixed_Medium': 'D',
-    'Hpt_MultiCannon_Fixed_Small': 'F',
-    'Hpt_MultiCannon_Fixed_Medium': 'E',
-    'Hpt_MultiCannon_Gimbal_Small': 'G',
-    'Hpt_MultiCannon_Gimbal_Medium': 'F',
-    'Hpt_MultiCannon_Turret_Small': 'G',
-    'Hpt_MultiCannon_Turret_Medium': 'F',
-    'Hpt_PlasmaAccelerator_Fixed_Medium': 'C',
-    'Hpt_PlasmaAccelerator_Fixed_Large': 'B',
-    'Hpt_PlasmaAccelerator_Fixed_Huge': 'A',
-    'Hpt_PulseLaser_Fixed_Small': 'F',
-    'Hpt_PulseLaser_Fixed_Medium': 'E',
-    'Hpt_PulseLaser_Fixed_Large': 'D',
-    'Hpt_PulseLaser_Gimbal_Small': 'G',
-    'Hpt_PulseLaser_Gimbal_Medium': 'F',
-    'Hpt_PulseLaser_Gimbal_Large': 'E',
-    'Hpt_PulseLaser_Turret_Small': 'G',
-    'Hpt_PulseLaser_Turret_Medium': 'F',
-    'Hpt_PulseLaser_Turret_Large': 'F',
-    'Hpt_PulseLaserBurst_Fixed_Small': 'F',
-    'Hpt_PulseLaserBurst_Fixed_Medium': 'E',
-    'Hpt_PulseLaserBurst_Fixed_Large': 'D',
-    'Hpt_PulseLaserBurst_Gimbal_Small': 'G',
-    'Hpt_PulseLaserBurst_Gimbal_Medium': 'F',
-    'Hpt_PulseLaserBurst_Gimbal_Large': 'E',
-    'Hpt_PulseLaserBurst_Turret_Small': 'G',
-    'Hpt_PulseLaserBurst_Turret_Medium': 'F',
-    'Hpt_PulseLaserBurst_Turret_Large': 'E',
-    'Hpt_Railgun_Fixed_Small': 'D',
-    'Hpt_Railgun_Fixed_Medium': 'B',
-    'Hpt_Slugshot_Fixed_Small': 'E',
-    'Hpt_Slugshot_Fixed_Medium': 'A',
-    'Hpt_Slugshot_Fixed_Large': 'C',
-    'Hpt_Slugshot_Gimbal_Small': 'E',
-    'Hpt_Slugshot_Gimbal_Medium': 'D',
-    'Hpt_Slugshot_Gimbal_Large': 'C',
-    'Hpt_Slugshot_Turret_Small': 'E',
-    'Hpt_Slugshot_Turret_Medium': 'D',
-    'Hpt_Slugshot_Turret_Large': 'C',
+    'hpt_advancedtorppylon_fixed_small' : 'I',
+    'hpt_advancedtorppylon_fixed_medium': 'I',
+    'hpt_basicmissilerack_fixed_small'  : 'B',
+    'hpt_basicmissilerack_fixed_medium' : 'B',
+    'hpt_beamlaser_fixed_small'         : 'E',
+    'hpt_beamlaser_fixed_medium'        : 'D',
+    'hpt_beamlaser_fixed_large': 'C',
+    'hpt_beamlaser_gimbal_small': 'E',
+    'hpt_beamlaser_gimbal_medium': 'D',
+    'hpt_beamlaser_gimbal_large': 'C',
+    'hpt_beamlaser_turret_small': 'F',
+    'hpt_beamlaser_turret_medium': 'E',
+    'hpt_beamlaser_turret_large': 'D',
+    'hpt_cannon_fixed_small': 'D',
+    'hpt_cannon_fixed_medium': 'D',
+    'hpt_cannon_fixed_large': 'C',
+    'hpt_cannon_fixed_huge': 'B',
+    'hpt_cannon_gimbal_small': 'E',
+    'hpt_cannon_gimbal_medium': 'D',
+    'hpt_cannon_gimbal_large': 'C',
+    'hpt_cannon_gimbal_huge': 'B',
+    'hpt_cannon_turret_small': 'F',
+    'hpt_cannon_turret_medium': 'E',
+    'hpt_cannon_turret_large': 'D',
+    'hpt_drunkmissilerack_fixed_medium': 'B',
+    'hpt_dumbfiremissilerack_fixed_small': 'B',
+    'hpt_dumbfiremissilerack_fixed_medium': 'B',
+    'hpt_minelauncher_fixed_small': 'I',
+    'hpt_minelauncher_fixed_medium': 'I',
+    'hpt_mininglaser_fixed_small': 'D',
+    'hpt_mininglaser_fixed_medium': 'D',
+    'hpt_multicannon_fixed_small': 'F',
+    'hpt_multicannon_fixed_medium': 'E',
+    'hpt_multicannon_gimbal_small': 'G',
+    'hpt_multicannon_gimbal_medium': 'F',
+    'hpt_multicannon_turret_small': 'G',
+    'hpt_multicannon_turret_medium': 'F',
+    'hpt_plasmaaccelerator_fixed_medium': 'C',
+    'hpt_plasmaaccelerator_fixed_large': 'B',
+    'hpt_plasmaaccelerator_fixed_huge': 'A',
+    'hpt_pulselaser_fixed_small': 'F',
+    'hpt_pulselaser_fixed_medium': 'E',
+    'hpt_pulselaser_fixed_large': 'D',
+    'hpt_pulselaser_gimbal_small': 'G',
+    'hpt_pulselaser_gimbal_medium': 'F',
+    'hpt_pulselaser_gimbal_large': 'E',
+    'hpt_pulselaser_turret_small': 'G',
+    'hpt_pulselaser_turret_medium': 'F',
+    'hpt_pulselaser_turret_large': 'F',
+    'hpt_pulselaserburst_fixed_small': 'F',
+    'hpt_pulselaserburst_fixed_medium': 'E',
+    'hpt_pulselaserburst_fixed_large': 'D',
+    'hpt_pulselaserburst_gimbal_small': 'G',
+    'hpt_pulselaserburst_gimbal_medium': 'F',
+    'hpt_pulselaserburst_gimbal_large': 'E',
+    'hpt_pulselaserburst_turret_small': 'G',
+    'hpt_pulselaserburst_turret_medium': 'F',
+    'hpt_pulselaserburst_turret_large': 'E',
+    'hpt_railgun_fixed_small': 'D',
+    'hpt_railgun_fixed_medium': 'B',
+    'hpt_slugshot_fixed_small': 'E',
+    'hpt_slugshot_fixed_medium': 'A',
+    'hpt_slugshot_fixed_large': 'C',
+    'hpt_slugshot_gimbal_small': 'E',
+    'hpt_slugshot_gimbal_medium': 'D',
+    'hpt_slugshot_gimbal_large': 'C',
+    'hpt_slugshot_turret_small': 'E',
+    'hpt_slugshot_turret_medium': 'D',
+    'hpt_slugshot_turret_large': 'C',
 }
 
 # Old standard weapon variants
 weaponoldvariant_map = {
-    'F'  : 'Focussed',
-    'HI' : 'High Impact',
-    'LH' : 'Low Heat',
-    'OC' : 'Overcharged',
-    'SS' : 'Scatter Spray',
+    'f'  : 'Focussed',
+    'hi' : 'High Impact',
+    'lh' : 'Low Heat',
+    'oc' : 'Overcharged',
+    'ss' : 'Scatter Spray',
 }
 
 countermeasure_map = {
-    'ChaffLauncher'            : ('Chaff Launcher', 'I'),
-    'ElectronicCountermeasure' : ('Electronic Countermeasure', 'F'),
-    'HeatSinkLauncher'         : ('Heat Sink Launcher', 'I'),
-    'PlasmaPointDefence'       : ('Point Defence', 'I'),
+    'chafflauncher'            : ('Chaff Launcher', 'I'),
+    'electroniccountermeasure' : ('Electronic Countermeasure', 'F'),
+    'heatsinklauncher'         : ('Heat Sink Launcher', 'I'),
+    'plasmapointdefence'       : ('Point Defence', 'I'),
 }
 
 utility_map = {
-    'CargoScanner'             : 'Cargo Scanner',
-    'CloudScanner'             : 'Frame Shift Wake Scanner',
-    'CrimeScanner'             : 'Kill Warrant Scanner',
-    'ShieldBooster'            : 'Shield Booster',
+    'cargoscanner'             : 'Cargo Scanner',
+    'cloudscanner'             : 'Frame Shift Wake Scanner',
+    'crimescanner'             : 'Kill Warrant Scanner',
+    'shieldbooster'            : 'Shield Booster',
 }
 
 rating_map = {
@@ -175,37 +175,37 @@ rating_map = {
 }
 
 standard_map = {
-    # 'Armour'         : handled separately
-    'Engine'           : 'Thrusters',
-    'FuelTank'         : 'Fuel Tank',
-    'Hyperdrive'       : 'Frame Shift Drive',
-    'LifeSupport'      : 'Life Support',
-    'PowerDistributor' : 'Power Distributor',
-    'Powerplant'       : 'Power Plant',
-    'Sensors'          : 'Sensors',
+    # 'armour'         : handled separately
+    'engine'           : 'Thrusters',
+    'fueltank'         : 'Fuel Tank',
+    'hyperdrive'       : 'Frame Shift Drive',
+    'lifesupport'      : 'Life Support',
+    'powerdistributor' : 'Power Distributor',
+    'powerplant'       : 'Power Plant',
+    'sensors'          : 'Sensors',
 }
 
 stellar_map = {
-    'Standard'     : ('Basic Discovery Scanner', 'E'),
-    'Intermediate' : ('Intermediate Discovery Scanner', 'D'),
-    'Advanced'     : ('Advanced Discovery Scanner', 'C'),
-    'Tiny'         : ('Detailed Surface Scanner', 'C'),
+    'standard'     : ('Basic Discovery Scanner', 'E'),
+    'intermediate' : ('Intermediate Discovery Scanner', 'D'),
+    'advanced'     : ('Advanced Discovery Scanner', 'C'),
+    'tiny'         : ('Detailed Surface Scanner', 'C'),
 }
 
 internal_map = {
-    'CargoRack'         : 'Cargo Rack',
-    'Collection'        : 'Collector Limpet Controller',
-    'FSDInterdictor'    : 'Frame Shift Drive Interdictor',
-    'FuelScoop'         : 'Fuel Scoop',
-    'FuelTransfer'      : 'Fuel Transfer Limpet Controller',
-    'HullReinforcement' : 'Hull Reinforcement Package',
-    'Prospector'        : 'Prospector Limpet Controller',
-    'Refinery'          : 'Refinery',
-    'Repairer'          : 'Auto Field-Maintenance Unit',
-    'ResourceSiphon'    : 'Hatch Breaker Limpet Controller',
-    'ShieldCellBank'    : 'Shield Cell Bank',
-    'ShieldGenerator'   : 'Shield Generator',
-    ('ShieldGenerator','Strong') : 'Prismatic Shield Generator',
+    'cargorack'         : 'Cargo Rack',
+    'collection'        : 'Collector Limpet Controller',
+    'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
+    'fuelscoop'         : 'Fuel Scoop',
+    'fueltransfer'      : 'Fuel Transfer Limpet Controller',
+    'hullreinforcement' : 'Hull Reinforcement Package',
+    'prospector'        : 'Prospector Limpet Controller',
+    'refinery'          : 'Refinery',
+    'repairer'          : 'Auto Field-Maintenance Unit',
+    'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
+    'shieldcellbank'    : 'Shield Cell Bank',
+    'shieldgenerator'   : 'Shield Generator',
+    ('shieldgenerator','strong') : 'Prismatic Shield Generator',
 }
 
 
@@ -219,12 +219,12 @@ def lookup(module):
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
 
-    name = module['name'].split('_')
+    name = module['name'].lower().split('_')
     new = {}
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
-    if name[-2] == 'Armour':
-        name = module['name'].rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
+    if name[-2] == 'armour':
+        name = module['name'].lower().rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
         new['category'] = 'standard'
         new['name'] = armour_map[name[2]]
         new['ship'] = ship_map.get(name[0], name[0])
@@ -232,11 +232,11 @@ def lookup(module):
         new['rating'] = 'I'
 
     # Skip uninteresting stuff
-    elif name[0].lower() in ['decal', 'paintjob']:	# Have seen "paintjob" and "PaintJob"
+    elif name[0] in ['decal', 'paintjob']:
         return None
 
     # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
-    elif module.get('category') == 'powerplay':
+    elif 'category' in module and module['category'].lower() == 'powerplay':
         return None
 
     # Shouldn't be listing player-specific paid stuff
@@ -244,7 +244,7 @@ def lookup(module):
         raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
-    elif name[0]=='Hpt' and name[1] in weapon_map:
+    elif name[0]=='hpt' and name[1] in weapon_map:
         if name[2] not in weaponmount_map: raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
         if name[3] not in weaponclass_map: raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
         new['category'] = 'hardpoint'
@@ -257,37 +257,37 @@ def lookup(module):
                 new['rating'] = weaponrating_map.get(('_').join(name[:4]), '?')	# assumes same rating as base weapon
         else:
             new['name'] =  weapon_map[name[1]]
-            new['rating'] = weaponrating_map.get(module['name'], '?')		# no obvious rule - needs lookup table
+            new['rating'] = weaponrating_map.get(module['name'].lower(), '?')		# no obvious rule - needs lookup table
         new['mount'] = weaponmount_map[name[2]]
         if name[1] in missiletype_map:	# e.g. Hpt_DumbfireMissileRack_Fixed_Small
             new['guidance'] = missiletype_map[name[1]]
         new['class'] = weaponclass_map[name[3]]
 
     # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
-    elif name[0]=='Hpt' and name[1] in countermeasure_map:
+    elif name[0]=='hpt' and name[1] in countermeasure_map:
         new['category'] = 'utility'
         new['name'], new['rating'] = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
         new['class'] = weaponclass_map[name[-1]]
 
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
-    elif name[0]=='Hpt' and name[1] in utility_map:
+    elif name[0]=='hpt' and name[1] in utility_map:
         new['category'] = 'utility'
         new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        if not name[2].startswith('Size') or not name[3].startswith('Class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = name[2][4:]
         new['rating'] = rating_map[name[3][5:]]
 
-    elif name[0]=='Hpt':
+    elif name[0]=='hpt':
         raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
 
     # Stellar scanners - e.g. Int_StellarBodyDiscoveryScanner_Standard
-    elif name[1] in ['StellarBodyDiscoveryScanner', 'DetailedSurfaceScanner']:
+    elif name[1] in ['stellarbodydiscoveryscanner', 'detailedsurfacescanner']:
         new['category'] = 'internal'
         new['name'], new['rating'] = stellar_map[name[2]]
         new['class'] = '1'
 
     # Docking Computer - e.g. Int_DockingComputer_Standard
-    elif name[1] == 'DockingComputer' and name[2] == 'Standard':
+    elif name[1] == 'dockingcomputer' and name[2] == 'standard':
         new['category'] = 'internal'
         new['name'] = 'Standard Docking Computer'
         new['class'] = '1'
@@ -296,9 +296,9 @@ def lookup(module):
     # Standard & Internal
     else:
         # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
-        if name[0] != 'Int': raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
+        if name[0] != 'int': raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-        if name[1] == 'DroneControl':	# e.g. Int_DroneControl_Collection_Size1_Class1
+        if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
 
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1
@@ -310,7 +310,7 @@ def lookup(module):
         else:
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
-        if not name[2].startswith('Size') or not name[3].startswith('Class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = name[2][4:]
         new['rating'] = rating_map[name[3][5:]]
 

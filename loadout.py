@@ -13,19 +13,19 @@ from companion import ship_map
 
 # API slot names to E:D Shipyard slot names
 slot_map = {
-    'HugeHardpoint'    : 'H',
-    'LargeHardpoint'   : 'L',
-    'MediumHardpoint'  : 'M',
-    'SmallHardpoint'   : 'S',
-    'TinyHardpoint'    : 'U',
-    'Armour'           : 'BH',
-    'PowerPlant'       : 'RB',
-    'MainEngines'      : 'TM',
-    'FrameShiftDrive'  : 'FH',
-    'LifeSupport'      : 'EC',
-    'PowerDistributor' : 'PC',
-    'Radar'            : 'SS',
-    'FuelTank'         : 'FS',
+    'hugehardpoint'    : 'H',
+    'largehardpoint'   : 'L',
+    'mediumhardpoint'  : 'M',
+    'smallhardpoint'   : 'S',
+    'tinyhardpoint'    : 'U',
+    'armour'           : 'BH',
+    'powerplant'       : 'RB',
+    'mainengines'      : 'TM',
+    'frameshiftdrive'  : 'FH',
+    'lifesupport'      : 'EC',
+    'powerdistributor' : 'PC',
+    'radar'            : 'SS',
+    'fueltank'         : 'FS',
 }
 
 def export(data):
@@ -40,7 +40,7 @@ def export(data):
 
     querytime = config.getint('querytime') or int(time.time())
 
-    ship = ship_map.get(data['ship']['name'], data['ship']['name'])
+    ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
 
     loadout = defaultdict(list)
 
@@ -62,11 +62,11 @@ def export(data):
                 name = module['name']
 
             for s in slot_map:
-                if slot.startswith(s):
+                if slot.lower().startswith(s):
                     loadout[slot_map[s]].append(cr + name)
                     break
             else:
-                if slot.startswith('Slot'):
+                if slot.lower().startswith('slot'):
                     loadout[slot[-1]].append(cr + name)
                 elif __debug__: print 'Loadout: Unknown slot %s' % slot
 

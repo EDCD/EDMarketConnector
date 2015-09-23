@@ -13,12 +13,12 @@ import companion
 
 
 slot_map = {
-    'HugeHardpoint'    : 'hardpoints',
-    'LargeHardpoint'   : 'hardpoints',
-    'MediumHardpoint'  : 'hardpoints',
-    'SmallHardpoint'   : 'hardpoints',
-    'TinyHardpoint'    : 'utility',
-    'Slot'             : 'internal',
+    'hugehardpoint'    : 'hardpoints',
+    'largehardpoint'   : 'hardpoints',
+    'mediumhardpoint'  : 'hardpoints',
+    'smallhardpoint'   : 'hardpoints',
+    'tinyhardpoint'    : 'utility',
+    'slot'             : 'internal',
 }
 
 # Map draft E:D Shipyard & EDDN outfitting to Coriolis
@@ -26,7 +26,7 @@ slot_map = {
 # http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
 ship_map = dict(companion.ship_map)
-ship_map['Asp'] = 'Asp Explorer'
+ship_map['asp'] = 'Asp Explorer'
 
 category_map = {
     'standard'  : 'standard',
@@ -77,12 +77,12 @@ def export(data):
 
     querytime = config.getint('querytime') or int(time.time())
 
-    ship = companion.ship_map.get(data['ship']['name'], data['ship']['name'])
+    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
 
     loadout = OrderedDict([	# Mimic Coriolis export ordering
         ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/2.json#'),
-        ('name',       ship_map.get(data['ship']['name'], data['ship']['name'])),
-        ('ship',       ship_map.get(data['ship']['name'], data['ship']['name'])),
+        ('name',       ship_map.get(data['ship']['name'].lower(), data['ship']['name'])),
+        ('ship',       ship_map.get(data['ship']['name'].lower(), data['ship']['name'])),
         ('components', OrderedDict([
             ('standard',   OrderedDict([(x,None) for x in standard_map.values()])),
             ('hardpoints', []),
@@ -101,7 +101,7 @@ def export(data):
             if not v:
                 # Need to add nulls for empty slots. Assumes that standard slots can't be empty.
                 for s in slot_map:
-                    if slot.startswith(s):
+                    if slot.lower().startswith(s):
                         loadout['components'][slot_map[s]].append(None)
                         break
                 continue
