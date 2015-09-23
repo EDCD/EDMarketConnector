@@ -59,10 +59,9 @@ bulkheads       = outfitting.armour_map.values()
 scanners        = [x[0] for x in outfitting.stellar_map.values()]
 countermeasures = [x[0] for x in outfitting.countermeasure_map.values()]
 fixup_map = {
-    'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced'),
+    'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
     'Cytoscrambler Burst Laser'     : ('Burst Laser', 'Cytoscrambler'),
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
-    'Frame Shift Drive Interdictor' : ('FSD Interdictor', None),
     'Imperial Hammer Rail Gun'      : ('Rail Gun', 'Imperial Hammer'),
     'Impulse Mine Launcher'         : ('Mine Launcher', 'Impulse'),
     'Mining Lance Beam Laser'       : ('Mining Laser', 'Mining Lance'),
@@ -112,7 +111,7 @@ def export(data):
 
             category = loadout['components'][category_map[module['category']]]
             thing = OrderedDict([
-                ('class',    module['class']),
+                ('class',int(module['class'])),
                 ('rating',   module['rating']),
                 ('enabled',  module['enabled']),
                 ('priority', module['priority']+1),	# make 1-based
