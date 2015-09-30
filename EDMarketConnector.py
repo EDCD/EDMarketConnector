@@ -273,15 +273,8 @@ class AppWindow:
 
         try:
             querytime = int(time())
-
             data = self.session.query()
-
-            self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
-            self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-            self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
-
             config.set('querytime', querytime)
-            self.holdofftime = querytime + companion.holdoff
 
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
@@ -296,8 +289,9 @@ class AppWindow:
 
             elif retrying_for_shipyard:
                 if __debug__:
-                    print data['lastStarport'].get('ships') and 'Retry for shipyard - Success' or 'Retry for shipyard - Fail'
-                eddn.export_shipyard(data)
+                    print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
+                if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
+                    eddn.export_shipyard(data)
                 self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
             else:
@@ -305,6 +299,9 @@ class AppWindow:
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, indent=2, sort_keys=True))
 
+                self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
+                self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
+                self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                 self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                 self.system['image'] = self.edsm.result['img']
@@ -393,6 +390,7 @@ class AppWindow:
             self.status['text'] = unicode(e)
             if play_sound: hotkeymgr.play_bad()
 
+        self.holdofftime = querytime + companion.holdoff
         self.cooldown()
 
     def edsmpoll(self):
