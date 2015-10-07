@@ -345,7 +345,7 @@ class AppWindow:
                             self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
-                            ### eddn.export_outfitting(data)	# EDDN doesn't yet accept an outfitting schema
+                            eddn.export_outfitting(data)
                             if has_shipyard:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
