@@ -35,7 +35,7 @@ from hotkey import hotkeymgr
 l10n.Translations().install()
 EDDB = eddb.EDDB()
 
-SHIPYARD_RETRY = 5	# retry pause for shipyard data [s]
+SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EDSM_POLL = 0.1
 
 
@@ -252,11 +252,11 @@ class AppWindow:
         else:
             return self.getandsend()	# try again
 
-    def getandsend(self, event=None, retrying_for_shipyard=False):
+    def getandsend(self, event=None, retrying=False):
 
         play_sound = event and event.type=='35' and not config.getint('hotkey_mute')
 
-        if not retrying_for_shipyard:
+        if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
                 self.status['text'] = ''
                 if play_sound and (self.holdofftime-time()) < companion.holdoff*0.75:
@@ -286,13 +286,6 @@ class AppWindow:
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
                 if play_sound: hotkeymgr.play_bad()
-
-            elif retrying_for_shipyard:
-                if __debug__:
-                    print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
-                if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
-                    eddn.export_shipyard(data)
-                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
             else:
                 if __debug__:	# Recording
@@ -359,9 +352,8 @@ class AppWindow:
                                 if data['lastStarport'].get('ships'):
                                     eddn.export_shipyard(data)
                                 else:
-                                    # API is flakey about shipyard info - retry if missing (<1s is usually sufficient - 5s for margin).
-                                    self.w.after(int(SHIPYARD_RETRY * 1000), lambda:self.getandsend(event, retrying_for_shipyard=True))
-                                    return	# early exit to avoid starting cooldown count
+                                    # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
+                                    self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             elif __debug__ and data['lastStarport'].get('ships'):
                                 print 'Spurious shipyard!'
 
@@ -372,8 +364,13 @@ class AppWindow:
 
         # Companion API problem
         except companion.ServerError as e:
-            self.status['text'] = unicode(e)
-            if play_sound: hotkeymgr.play_bad()
+            if retrying:
+                self.status['text'] = unicode(e)
+                if play_sound: hotkeymgr.play_bad()
+            else:
+                # Retry once if Companion server is unresponsive
+                self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
+                return	# early exit to avoid starting cooldown count
 
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
@@ -392,6 +389,17 @@ class AppWindow:
 
         self.holdofftime = querytime + companion.holdoff
         self.cooldown()
+
+    def retry_for_shipyard(self):
+        # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
+        try:
+            data = self.session.query()
+            if __debug__:
+                print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
+            if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
+                eddn.export_shipyard(data)
+        except:
+            pass
 
     def edsmpoll(self):
         result = self.edsm.result
