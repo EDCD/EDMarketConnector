@@ -227,7 +227,7 @@ def lookup(module):
         name = module['name'].lower().rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
         new['category'] = 'standard'
         new['name'] = armour_map[name[2]]
-        new['ship'] = ship_map.get(name[0], name[0])
+        new['ship'] = ship_map[name[0]]		# Generate error on unknown ship
         new['class'] = '1'
         new['rating'] = 'I'
 

@@ -56,7 +56,7 @@ def export(data):
         time.strftime('%H:%M:%S', time.localtime(querytime)),
         data['lastSystem']['name'],
         data['commander']['docked'] and data['lastStarport']['name'] or '',
-        ship_map.get(data['ship']['name'], data['ship']['name']),
+        ship_map.get(data['ship']['name'].lower(), data['ship']['name']),
         ','.join([('%d %s' % (commodities[k], k)) for k in sorted(commodities)])))
 
     logfile.flush()
