@@ -85,7 +85,7 @@ class HyperlinkLabel(ttk.Label):
 
 class AppWindow:
 
-    STATION_UNDOCKED = '-'	# "Station" name to display when not docked
+    STATION_UNDOCKED = '×'	# "Station" name to display when not docked = U+00D7
 
     def __init__(self, master):
 
@@ -319,11 +319,9 @@ class AppWindow:
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
+                    (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
 
-                    station = EDDB.station(self.system['text'], self.station['text'])
-                    has_shipyard = station and station[1]
-
-                    if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not data['lastStarport'].get('modules') and not has_shipyard:
+                    if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
                         self.status['text'] = _("Station doesn't have anything!")
 
                     elif not data['lastStarport'].get('commodities'):
@@ -345,7 +343,9 @@ class AppWindow:
                             self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
-                            eddn.export_outfitting(data)
+                            if has_outfitting:
+                                # Only send if eddb says that the station provides outfitting
+                                eddn.export_outfitting(data)
                             if has_shipyard:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
@@ -413,9 +413,9 @@ class AppWindow:
 
     def station_url(self, text):
         if text:
-            station = EDDB.station(self.system['text'], self.station['text'])
-            if station:
-                return 'http://eddb.io/station/%d' % station[0]
+            (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
+            if station_id:
+                return 'http://eddb.io/station/%d' % station_id
 
             system_id = EDDB.system(self.system['text'])
             if system_id:
