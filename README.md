@@ -43,7 +43,7 @@ combination that you use to log into the Elite: Dangerous launcher, and is requi
 
 You can also choose here what data to save (refer to the next section for details), whether to set up a hotkey so you don't have to switch to the app in order to “Update”, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
-You are next prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
+The first time that you hit “Update” you will be prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
 Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before
 authenticating you will need to wait for Frontier to send you a new code.
 
@@ -56,15 +56,16 @@ This app can save a variety of data in a variety of formats:
 
 * Market data
   * Elite Dangerous Data Network - sends commodity market, outfitting and shipyard data to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
-  * Slopey's BPC format - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
-  * Trade Dangerous format - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
-  * CSV format - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
+  * Slopey's BPC format file - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
+  * Trade Dangerous format file - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
+  * CSV format file - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
 
 * Ship loadout
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D Shipyard](http://www.edshipyard.com) or [Coriolis](http://coriolis.io).
 
 * Flight log
-  * Adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
+  * Elite Dangerous Star Map - sends a record of your location to “[EDSM](http://www.edsm.net/)” where you can view your logs under My&nbsp;account &rarr; Exploration&nbsp;Logs, and optionally add private comments about a system.
+  * CSV format file - adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 

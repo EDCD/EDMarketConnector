@@ -70,9 +70,10 @@ class Config:
     OUT_TD   = 4
     OUT_CSV  = 8
     OUT_SHIP_EDS = 16
-    OUT_LOG  = 32
+    OUT_LOG_FILE  = 32
     #OUT_STAT = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
+    OUT_LOG_EDSM = 256
 
     if platform=='darwin':
 

@@ -179,7 +179,7 @@ class AppWindow:
             self.status['text'] = ''
 
             # Try to obtain exclusive lock on flight log ASAP
-            if config.getint('output') & config.OUT_LOG:
+            if config.getint('output') & config.OUT_LOG_FILE:
                 try:
                     flightlog.openlog()
                 except Exception as e:
@@ -251,25 +251,29 @@ class AppWindow:
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
-                self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
-                self.system['image'] = self.edsm.result['img']
-                self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
                 # stuff we can do when not docked
-                if config.getint('output') & config.OUT_LOG:
-                    flightlog.export(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
+                if config.getint('output') & config.OUT_LOG_FILE:
+                    flightlog.export(data)
+                if config.getint('output') & config.OUT_LOG_EDSM:
+                    self.status['text'] = _('Sending data to EDSM...')
+                    self.w.update_idletasks()
+                    edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
+                else:
+                    self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
+                self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
-                    # no further output requested
+                    # no station data requested - we're done
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
 
                 elif not data['commander'].get('docked'):
                     self.status['text'] = _("You're not docked at a station!")
-                    # signal as error becuase sometimes the server hosting the Companion API hasn't caught up
+                    # signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
                     if play_sound: hotkeymgr.play_bad()
 
                 else:

@@ -39,9 +39,6 @@ def openlog():
 
 def export(data):
 
-    def elapsed(game_time):
-        return '%3d:%02d:%02d' % ((game_time // 3600) % 3600, (game_time // 60) % 60, game_time % 60)
-
     querytime = config.getint('querytime') or int(time.time())
 
     openlog()
@@ -60,3 +57,16 @@ def export(data):
         ','.join([('%d %s' % (commodities[k], k)) for k in sorted(commodities)])))
 
     logfile.flush()
+
+
+# return log as list of (timestamp, system_name)
+def logs():
+    entries = []
+    with open(join(config.get('outdir'), 'Flight Log.csv'), 'rU') as f:
+        f.readline()	# Assume header
+        for line in f:
+            if not line.strip(): continue
+            cols = line.split(',')
+            assert len(cols) >= 3, cols
+            entries.append((time.mktime(time.strptime('%sT%s' % (cols[0], cols[1]), '%Y-%m-%dT%H:%M:%S')), cols[2]))	# Convert from local time to UTC
+    return entries
