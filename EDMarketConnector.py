@@ -85,7 +85,7 @@ class HyperlinkLabel(ttk.Label):
 
 class AppWindow:
 
-    STATION_UNDOCKED = '×'	# "Station" name to display when not docked = U+00D7
+    STATION_UNDOCKED = u'×'	# "Station" name to display when not docked = U+00D7
 
     def __init__(self, master):
 
@@ -346,6 +346,8 @@ class AppWindow:
                             if has_outfitting:
                                 # Only send if eddb says that the station provides outfitting
                                 eddn.export_outfitting(data)
+                            elif __debug__ and data['lastStarport'].get('modules'):
+                                print 'Spurious outfitting!'
                             if has_shipyard:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
