@@ -324,7 +324,7 @@ class AppWindow:
                     if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
                         self.status['text'] = _("Station doesn't have anything!")
 
-                    elif not data['lastStarport'].get('commodities'):
+                    elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
                         self.status['text'] = _("Station doesn't have a market!")
 
                     else:
