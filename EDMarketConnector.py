@@ -8,12 +8,11 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
-import urllib
-import webbrowser
 
 import Tkinter as tk
 import ttk
 import tkFont
+from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
     from traceback import print_exc
@@ -37,50 +36,6 @@ EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EDSM_POLL = 0.1
-
-
-class HyperlinkLabel(ttk.Label):
-
-    def __init__(self, master=None, **kw):
-        self.urlfn = kw.pop('urlfn', None)
-        ttk.Label.__init__(self, master, **kw)
-        self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
-        self.font_u = tkFont.Font(self, self.font_n)
-        self.font_u.configure(underline = True)
-        self.menu = tk.Menu(None, tearoff=tk.FALSE)
-        self.menu.add_command(label=_('Copy'), command = self.copy)	# As in Copy and Paste
-        self.bind('<Enter>', self._enter)
-        self.bind('<Leave>', self._leave)
-        self.bind('<Button-1>', self._click)
-        self.bind(platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
-
-    # Make blue and clickable if setting non-empty text
-    def __setitem__(self, key, value):
-        if key=='text':
-            if self.urlfn and value:
-                self.configure({key: value}, foreground = 'blue', cursor = platform=='darwin' and 'pointinghand' or 'hand2')
-            else:
-                self.configure({key: value}, foreground = '', cursor = 'arrow')
-        else:
-            self.configure({key: value})
-
-    def _enter(self, event):
-        self.configure(font = self.font_u)
-
-    def _leave(self, event):
-        self.configure(font = self.font_n)
-
-    def _click(self, event):
-        if self.urlfn and self['text']:
-            webbrowser.open(self.urlfn(self['text']))
-
-    def _contextmenu(self, event):
-        if self['text'] and self['text'] != AppWindow.STATION_UNDOCKED:
-            self.menu.post(platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
-
-    def copy(self):
-        self.clipboard_clear()
-        self.clipboard_append(self['text'])
 
 
 class AppWindow:
@@ -127,8 +82,8 @@ class AppWindow:
         ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-21)
-        self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, urlfn = self.system_url)
-        self.station = HyperlinkLabel(frame, urlfn = self.station_url)
+        self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
+        self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
         self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.status = ttk.Label(frame, width=-25)
         self.w.bind('<Return>', self.getandsend)
