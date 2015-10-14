@@ -142,8 +142,8 @@ if __name__ == "__main__":
             for line in h:
                 lineno += 1
                 match = regexp.search(line)
-                if match and not match.group(2) in seen:	# only record first instance of a string
-                    seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s:%d]' % (f,lineno)
+                if match and not seen.get(match.group(2)):	# only record first commented instance of a string
+                    seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % f
     if seen:
         template = codecs.open('L10n/en.template', 'w', 'utf-8')
         for thing in sorted(seen, key=unicode.lower):
