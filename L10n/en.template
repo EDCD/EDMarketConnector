@@ -1,180 +1,195 @@
-/* Use same text as E:D Launcher's verification dialog. [prefs.py:319] */
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "A verification code has now been sent to the{CR}email address associated with your Elite account.";
 
-/* App menu entry on OSX. [EDMarketConnector.py:151] */
+/* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "About {APP}";
 
-/* Folder selection button on Windows. [prefs.py:113] */
+/* EDSM setting. [prefs.py] */
+"API Key" = "API Key";
+
+/* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Browse...";
 
-/* Folder selection button on OSX. [prefs.py:112] */
+/* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Change...";
 
-/* [EDMarketConnector.py:152] */
+/* [EDMarketConnector.py] */
 "Check for Updates..." = "Check for Updates...";
 
-/* Privacy setting. [prefs.py:152] */
+/* EDSM & privacy setting. [prefs.py] */
 "Cmdr name" = "Cmdr name";
 
-/* Main window. [EDMarketConnector.py:125] */
+/* Main window. [EDMarketConnector.py] */
 "Cmdr:" = "Cmdr:";
 
-/* Update button in main window. [EDMarketConnector.py:419] */
+/* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "cooldown {SS}s";
 
-/* As in Copy and Paste. [EDMarketConnector.py:51] */
+/* As in Copy and Paste. [EDMarketConnector.py] */
 "Copy" = "Copy";
 
-/* Section heading in settings. [prefs.py:70] */
+/* Section heading in settings. [prefs.py] */
 "Credentials" = "Credentials";
 
-/* Menu title. [EDMarketConnector.py:156] */
+/* Menu title. [EDMarketConnector.py] */
 "Edit" = "Edit";
 
-/* [EDMarketConnector.py:380] */
+/* Section heading in settings. [prefs.py] */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map credentials";
+
+/* [EDMarketConnector.py] */
 "Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
 
-/* [EDMarketConnector.py:385] */
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Error: Can't connect to EDSM";
+
+/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Error: Connection to EDDN timed out";
 
-/* [companion.py:110] */
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Error: EDSM {MSG}";
+
+/* [companion.py] */
 "Error: Invalid Credentials" = "Error: Invalid Credentials";
 
-/* [companion.py:104] */
+/* [companion.py] */
 "Error: Server is down" = "Error: Server is down";
 
-/* Item in the File menu on Windows. [EDMarketConnector.py:173] */
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Exit";
 
-/* [EDMarketConnector.py:269] */
+/* [EDMarketConnector.py] */
 "Fetching station data..." = "Fetching station data...";
 
-/* Menu title on Windows. [EDMarketConnector.py:174] */
+/* Menu title on Windows. [EDMarketConnector.py] */
 "File" = "File";
 
-/* Output folder prompt on Windows. [prefs.py:111] */
-"File location:" = "File location:";
+/* Section heading in settings. [prefs.py] */
+"File location" = "File location";
 
-/* [prefs.py:108] */
-"Flight log" = "Flight log";
+/* [prefs.py] */
+"Flight log in CSV format file" = "Flight log in CSV format file";
 
-/* Section heading in settings on Windows. [prefs.py:126] */
+/* Section heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
-/* [prefs.py:151] */
+/* [prefs.py] */
 "How do you want to be identified in the saved data" = "How do you want to be identified in the saved data";
 
-/* Section heading in settings on OSX. [prefs.py:125] */
+/* Section heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
 
-/* [EDMarketConnector.py:339] */
+/* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Last updated at {HH}:{MM}:{SS}";
 
-/* [EDMarketConnector.py:219] */
+/* [EDMarketConnector.py] */
 "Logging in..." = "Logging in...";
 
-/* [prefs.py:102] */
-"Market data in CSV format" = "Market data in CSV format";
+/* [prefs.py] */
+"Market data in CSV format file" = "Market data in CSV format file";
 
-/* [prefs.py:98] */
-"Market data in Slopey's BPC format" = "Market data in Slopey's BPC format";
+/* [prefs.py] */
+"Market data in Slopey's BPC format file" = "Market data in Slopey's BPC format file";
 
-/* [prefs.py:100] */
-"Market data in Trade Dangerous format" = "Market data in Trade Dangerous format";
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Market data in Trade Dangerous format file";
 
-/* No hotkey/shortcut currently defined. [prefs.py:137] */
+/* No hotkey/shortcut currently defined. [prefs.py] */
 "none" = "none";
 
-/* [prefs.py:162] */
+/* [prefs.py] */
 "OK" = "OK";
 
-/* Hotkey/Shortcut setting. [prefs.py:141] */
+/* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Only when Elite: Dangerous is the active app";
 
-/* Shortcut settings button on OSX. [prefs.py:134] */
+/* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Open System Preferences";
 
-/* Section heading in settings. [prefs.py:89] */
+/* Section heading in settings. [prefs.py] */
 "Output" = "Output";
 
-/* Use same text as E:D Launcher's login dialog. [prefs.py:76] */
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Password" = "Password";
 
-/* Hotkey/Shortcut setting. [prefs.py:143] */
+/* Hotkey/Shortcut setting. [prefs.py] */
 "Play sound" = "Play sound";
 
-/* [prefs.py:94] */
+/* [prefs.py] */
 "Please choose what data to save" = "Please choose what data to save";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py:322] */
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "Please enter the code into the box below." = "Please enter the code into the box below.";
 
-/* Use same text as E:D Launcher's login dialog. [prefs.py:74] */
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Please log in with your Elite: Dangerous account details";
 
-/* [prefs.py:49] */
+/* [prefs.py] */
 "Preferences" = "Preferences";
 
-/* Section heading in settings. [prefs.py:146] */
+/* Section heading in settings. [prefs.py] */
 "Privacy" = "Privacy";
 
-/* Privacy setting. [prefs.py:153] */
+/* Privacy setting. [prefs.py] */
 "Pseudo-anonymized ID" = "Pseudo-anonymized ID";
 
-/* Shortcut settings prompt on OSX. [prefs.py:131] */
+/* Shortcut settings prompt on OSX. [prefs.py] */
 "Re-start {APP} to use shortcuts" = "Re-start {APP} to use shortcuts";
 
-/* [prefs.py:96] */
+/* [prefs.py] */
+"Send flight log to Elite Dangerous Star Map" = "Send flight log to Elite Dangerous Star Map";
+
+/* [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py:359] */
+/* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sending data to EDDN...";
 
-/* Item in the File menu on Windows. [EDMarketConnector.py:171] */
+/* [EDMarketConnector.py] */
+"Sending data to EDSM..." = "Sending data to EDSM...";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Settings";
 
-/* [prefs.py:106] */
-"Ship loadout in Coriolis format" = "Ship loadout in Coriolis format";
+/* [prefs.py] */
+"Ship loadout in Coriolis format file" = "Ship loadout in Coriolis format file";
 
-/* [prefs.py:104] */
-"Ship loadout in E:D Shipyard format" = "Ship loadout in E:D Shipyard format";
+/* [prefs.py] */
+"Ship loadout in E:D Shipyard format file" = "Ship loadout in E:D Shipyard format file";
 
-/* [EDMarketConnector.py:366] */
+/* [EDMarketConnector.py] */
 "Station doesn't have a market!" = "Station doesn't have a market!";
 
-/* [EDMarketConnector.py:364] */
+/* [EDMarketConnector.py] */
 "Station doesn't have anything!" = "Station doesn't have anything!";
 
-/* Main window. [EDMarketConnector.py:127] */
+/* Main window. [EDMarketConnector.py] */
 "Station:" = "Station:";
 
-/* Main window. [EDMarketConnector.py:126] */
+/* Main window. [EDMarketConnector.py] */
 "System:" = "System:";
 
-/* Update button in main window. [EDMarketConnector.py:132] */
+/* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Update";
 
-/* Use same text as E:D Launcher's login dialog. [prefs.py:75] */
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Username (Email)";
 
-/* Shouldn't happen. [EDMarketConnector.py:294] */
+/* Shouldn't happen. [EDMarketConnector.py] */
 "What are you flying?!" = "What are you flying?!";
 
-/* Shouldn't happen. [EDMarketConnector.py:291] */
+/* Shouldn't happen. [EDMarketConnector.py] */
 "Where are you?!" = "Where are you?!";
 
-/* Output folder prompt on OSX. [prefs.py:110] */
-"Where:" = "Where:";
-
-/* Shouldn't happen. [EDMarketConnector.py:288] */
+/* Shouldn't happen. [EDMarketConnector.py] */
 "Who are you?!" = "Who are you?!";
 
-/* Menu title on OSX. [EDMarketConnector.py:159] */
+/* Menu title on OSX. [EDMarketConnector.py] */
 "Window" = "Window";
 
-/* [EDMarketConnector.py:342] */
+/* [EDMarketConnector.py] */
 "You're not docked at a station!" = "You're not docked at a station!";
 
-/* Shortcut settings prompt on OSX. [prefs.py:133] */
+/* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} needs permission to use shortcuts";
 
