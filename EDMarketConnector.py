@@ -287,10 +287,10 @@ class AppWindow:
                         self.status['text'] = _("Station doesn't have a market!")
 
                     else:
-                        # Fixup anomalies in the commodity data
-                        self.session.fixup(data['lastStarport']['commodities'])
-
                         if data['lastStarport'].get('commodities'):
+                            # Fixup anomalies in the commodity data
+                            self.session.fixup(data['lastStarport']['commodities'])
+
                             if config.getint('output') & config.OUT_CSV:
                                 bpc.export(data, True)
                             if config.getint('output') & config.OUT_TD:
