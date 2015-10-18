@@ -18,6 +18,14 @@ slot_map = {
     'mediumhardpoint'  : 'hardpoints',
     'smallhardpoint'   : 'hardpoints',
     'tinyhardpoint'    : 'utility',
+    'armour'           : 'standard',
+    'powerplant'       : 'standard',
+    'mainengines'      : 'standard',
+    'frameshiftdrive'  : 'standard',
+    'lifesupport'      : 'standard',
+    'powerdistributor' : 'standard',
+    'radar'            : 'standard',
+    'fueltank'         : 'standard',
     'slot'             : 'internal',
 }
 
@@ -27,13 +35,6 @@ slot_map = {
 
 ship_map = dict(companion.ship_map)
 ship_map['asp'] = 'Asp Explorer'
-
-category_map = {
-    'standard'  : 'standard',
-    'internal'  : 'internal',
-    'hardpoint' : 'hardpoints',
-    'utility'   : 'utility',
-}
 
 standard_map = OrderedDict([	# in output order
     ('Armour',            'bulkheads'),
@@ -98,18 +99,25 @@ def export(data):
 
         v = data['ship']['modules'][slot]
         try:
+            for s in slot_map:
+                if slot.lower().startswith(s):
+                    category = slot_map[s]
+                    break
+            else:
+                # Uninteresting slot - e.g. DecalX or PaintJob
+                if __debug__ and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob'):
+                    print 'Coriolis: Unknown slot %s' % slot
+                continue
+
             if not v:
                 # Need to add nulls for empty slots. Assumes that standard slots can't be empty.
-                for s in slot_map:
-                    if slot.lower().startswith(s):
-                        loadout['components'][slot_map[s]].append(None)
-                        break
+                loadout['components'][category].append(None)
                 continue
 
             module = outfitting.lookup(v['module'])
-            if not module: continue
+            if not module:
+                raise AssertionError('Unknown module %s' % v)	# Shouldn't happen
 
-            category = loadout['components'][category_map[module['category']]]
             thing = OrderedDict([
                 ('class',int(module['class'])),
                 ('rating',   module['rating']),
@@ -118,12 +126,12 @@ def export(data):
             ])
             maxpri = max(maxpri, thing['priority'])
 
-            if module['name'] in bulkheads:
-                # Bulkheads are just strings
-                category['bulkheads'] = module['name']
-            elif module['category'] == 'standard':
+            if category == 'standard':
                 # Standard items are indexed by "group" rather than containing a "group" member
-                category[standard_map[module['name']]] = thing
+                if module['name'] in bulkheads:
+                    loadout['components'][category]['bulkheads'] = module['name']	# Bulkheads are just strings
+                else:
+                    loadout['components'][category][standard_map[module['name']]] = thing
             else:
                 # All other items have a "group" member, some also have a "name"
                 if module['name'] in scanners:
@@ -143,11 +151,13 @@ def export(data):
                 if 'guidance' in module:
                     thing['missile'] = module['guidance'][0]	# not mentioned in schema
 
-                category.append(thing)
+                loadout['components'][category].append(thing)
 
         except AssertionError as e:
-            if __debug__: print 'Loadout: %s' % e
-            continue	# Silently skip unrecognized modules
+            # Silently skip unrecognized modules
+            if __debug__: print 'Coriolis: %s' % e
+            if category != 'standard':
+                loadout['components'][category].append(None)
         except:
             if __debug__: raise
 
