@@ -44,12 +44,12 @@ class EDSM:
 
             if data == -1:
                 # System not present - but don't create it on the assumption that the caller will
-                result['img'] = EDSM._IMG_NEW
+                self.result['img'] = EDSM._IMG_NEW
             elif data.get('coords'):
-                result['img'] = EDSM._IMG_KNOWN
+                self.result['img'] = EDSM._IMG_KNOWN
                 self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
             else:
-                result['img'] = EDSM._IMG_UNKNOWN
+                self.result['img'] = EDSM._IMG_UNKNOWN
 
     # Asynchronous version of the above
     def start_lookup(self, system_name, known=0):
