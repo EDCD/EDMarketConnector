@@ -174,6 +174,14 @@ rating_map = {
     '5': 'A',
 }
 
+misc_internal_map = {
+    ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
+    ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
+    ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
+    ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
+    ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
+}
+
 standard_map = {
     # 'armour'         : handled separately
     'engine'           : 'Thrusters',
@@ -183,13 +191,6 @@ standard_map = {
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
     'sensors'          : 'Sensors',
-}
-
-stellar_map = {
-    'standard'     : ('Basic Discovery Scanner', 'E'),
-    'intermediate' : ('Intermediate Discovery Scanner', 'D'),
-    'advanced'     : ('Advanced Discovery Scanner', 'C'),
-    'tiny'         : ('Detailed Surface Scanner', 'C'),
 }
 
 internal_map = {
@@ -280,28 +281,22 @@ def lookup(module):
     elif name[0]=='hpt':
         raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
 
-    # Stellar scanners - e.g. Int_StellarBodyDiscoveryScanner_Standard
-    elif name[1] in ['stellarbodydiscoveryscanner', 'detailedsurfacescanner']:
-        new['category'] = 'internal'
-        new['name'], new['rating'] = stellar_map[name[2]]
-        new['class'] = '1'
+    elif name[0]!='int':
+        raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-    # Docking Computer - e.g. Int_DockingComputer_Standard
-    elif name[1] == 'dockingcomputer' and name[2] == 'standard':
+    # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
+    elif (name[1],name[2]) in misc_internal_map:
+        # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
         new['category'] = 'internal'
-        new['name'] = 'Standard Docking Computer'
+        new['name'], new['rating'] = misc_internal_map[(name[1],name[2])]
         new['class'] = '1'
-        new['rating'] = 'E'
 
     # Standard & Internal
     else:
-        # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
-        if name[0] != 'int': raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
-
         if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
 
-        if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1
+        if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
             new['category'] = 'standard'
             new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1

@@ -57,7 +57,7 @@ weaponmount_map = {
 
 # Modules that have a name as well as a group
 bulkheads       = outfitting.armour_map.values()
-scanners        = [x[0] for x in outfitting.stellar_map.values()]
+scanners        = [x[0] for x in outfitting.misc_internal_map.values()]
 countermeasures = [x[0] for x in outfitting.countermeasure_map.values()]
 fixup_map = {
     'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
@@ -134,15 +134,15 @@ def export(data):
                     loadout['components'][category][standard_map[module['name']]] = thing
             else:
                 # All other items have a "group" member, some also have a "name"
-                if module['name'] in scanners:
+                if module['name'] in fixup_map:
+                    thing['group'], name = fixup_map[module['name']]
+                    if name: thing['name'] = name
+                elif module['name'] in scanners:
                     thing['group'] = 'Scanner'
                     thing['name'] = module['name']
                 elif module['name'] in countermeasures:
                     thing['group'] = 'Countermeasure'
                     thing['name'] = module['name']
-                elif module['name'] in fixup_map:
-                    thing['group'], name = fixup_map[module['name']]
-                    if name: thing['name'] = name
                 else:
                     thing['group'] = module['name']
 
