@@ -35,14 +35,14 @@ class EDDB:
             return '.'
 
 
-# build system & station database from files systems.json and stations_lite.json from http://eddb.io/api
+# build system & station database from files systems.json and stations.json from http://eddb.io/api
 if __name__ == "__main__":
     import json
 
     # system_name by system_id
     systems  = dict([(x['id'], str(x['name'])) for x in json.loads(open('systems.json').read())])
 
-    stations = json.loads(open('stations_lite.json').read())
+    stations = json.loads(open('stations.json').read())
 
     # check that all populated systems have known coordinates
     coords = dict([(x['id'], x['x'] or x['y'] or x['z']) for x in json.loads(open('systems.json').read())])
