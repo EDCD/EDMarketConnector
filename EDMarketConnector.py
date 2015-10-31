@@ -30,6 +30,7 @@ import eddb
 import prefs
 from config import appname, applongname, config
 from hotkey import hotkeymgr
+from monitor import monitor
 
 l10n.Translations().install()
 EDDB = eddb.EDDB()
@@ -168,6 +169,12 @@ class AppWindow:
         # Install hotkey monitoring
         self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # Install log monitoring
+        monitor.set_callback(self.system_change)
+        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
+            monitor.enable_logging()
+            monitor.start()
 
     # call after credentials have changed
     def login(self):
@@ -361,6 +368,13 @@ class AppWindow:
                 eddn.export_shipyard(data)
         except:
             pass
+
+    def system_change(self, system, timestamp):
+        if self.system['text'] != system:
+            # TODO: EDSM lookup and csv and/or EDSM log
+            self.system['text'] = system
+            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
 
     def edsmpoll(self):
         result = self.edsm.result

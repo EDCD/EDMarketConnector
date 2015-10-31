@@ -11,6 +11,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 
 from config import applongname, config
 from hotkey import hotkeymgr
+from monitor import monitor
 
 
 if platform == 'darwin':
@@ -71,7 +72,7 @@ class PreferencesDialog(tk.Toplevel):
         frame.grid(sticky=tk.NSEW)
 
         credframe = ttk.LabelFrame(frame, text=_('Credentials'))	# Section heading in settings
-        credframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        credframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         credframe.columnconfigure(1, weight=1)
 
         ttk.Label(credframe, text=_('Please log in with your Elite: Dangerous account details')).grid(row=0, columnspan=2, sticky=tk.W)	# Use same text as E:D Launcher's login dialog
@@ -90,30 +91,35 @@ class PreferencesDialog(tk.Toplevel):
             child.grid_configure(padx=5, pady=3)
 
         outframe = ttk.LabelFrame(frame, text=_('Output'))		# Section heading in settings
-        outframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        outframe.grid(padx=10, pady=5, sticky=tk.NSEW)
 
         output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS)
-        ttk.Label(outframe, text=_('Please choose what data to save')).grid(row=0, columnspan=2, padx=5, pady=3, sticky=tk.W)
-        self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.out_eddn, command=self.outvarchanged).grid(row=1, columnspan=2, padx=5, sticky=tk.W)
-        self.out_csv = tk.IntVar(value = (output & config.OUT_CSV ) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(row=2, columnspan=2, padx=5, sticky=tk.W)
-        self.out_bpc = tk.IntVar(value = (output & config.OUT_BPC ) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(row=3, columnspan=2, padx=5, sticky=tk.W)
-        self.out_td  = tk.IntVar(value = (output & config.OUT_TD  ) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(row=4, columnspan=2, padx=5, sticky=tk.W)
-        self.out_ship_eds= tk.IntVar(value = (output & config.OUT_SHIP_EDS) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(row=5, columnspan=2, padx=5, pady=(5,0), sticky=tk.W)
-        self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Ship loadout in Coriolis format file'), variable=self.out_ship_coriolis, command=self.outvarchanged).grid(row=6, columnspan=2, padx=5, sticky=tk.W)
-        self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM ) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(row=7, columnspan=2, padx=5, pady=(5,0), sticky=tk.W)
-        self.out_log_file = tk.IntVar(value = (output & config.OUT_LOG_FILE ) and 1 or 0)
-        ttk.Checkbutton(outframe, text=_('Flight log in CSV format file'), variable=self.out_log_file, command=self.outvarchanged).grid(row=8, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Label(outframe, text=_('Please choose what data to save')).grid(row=0, padx=5, pady=3, sticky=tk.W)
+        self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1)
+        ttk.Checkbutton(outframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.out_eddn, command=self.outvarchanged).grid(row=1, padx=5, sticky=tk.W)
+        self.out_csv = tk.IntVar(value = (output & config.OUT_CSV ) and 1)
+        ttk.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(row=2, padx=5, sticky=tk.W)
+        self.out_bpc = tk.IntVar(value = (output & config.OUT_BPC ) and 1)
+        ttk.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(row=3, padx=5, sticky=tk.W)
+        self.out_td  = tk.IntVar(value = (output & config.OUT_TD  ) and 1)
+        ttk.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(row=4, padx=5, sticky=tk.W)
+        self.out_ship_eds= tk.IntVar(value = (output & config.OUT_SHIP_EDS) and 1)
+        ttk.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(row=5, padx=5, pady=(5,0), sticky=tk.W)
+        self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1)
+        ttk.Checkbutton(outframe, text=_('Ship loadout in Coriolis format file'), variable=self.out_ship_coriolis, command=self.outvarchanged).grid(row=6, padx=5, sticky=tk.W)
+        self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
+        ttk.Checkbutton(outframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(row=7, padx=5, pady=(5,0), sticky=tk.W)
+        self.out_log_file = tk.IntVar(value = (output & config.OUT_LOG_FILE) and 1)
+        ttk.Checkbutton(outframe, text=_('Flight log in CSV format file'), variable=self.out_log_file, command=self.outvarchanged).grid(row=8, padx=5, sticky=tk.W)
+        self.out_log_auto = tk.IntVar(value = monitor.logdir and (output & config.OUT_LOG_AUTO) and 1 or 0)
+        if monitor.logdir:
+            self.out_log_auto_button = ttk.Checkbutton(outframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
+            self.out_log_auto_button.grid(row=9, padx=5, sticky=tk.W)
+            self.out_log_auto_text = ttk.Label(outframe)
 
         self.dir_label = ttk.Label(frame, text=_('File location'), foreground=style.lookup('TLabelframe.Label', 'foreground'))	# Section heading in settings
         dirframe = ttk.LabelFrame(frame, labelwidget = self.dir_label)
-        dirframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        dirframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         dirframe.columnconfigure(0, weight=1)
 
         self.outdir = ttk.Entry(dirframe, takefocus=False)
@@ -128,7 +134,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.edsm_label = HyperlinkLabel(frame, text=_('Elite Dangerous Star Map credentials'), disabledforeground=style.lookup('TLabelframe.Label', 'foreground'), url='http://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         edsmframe = ttk.LabelFrame(frame, labelwidget = self.edsm_label)
-        edsmframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        edsmframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         edsmframe.columnconfigure(1, weight=1)
 
         ttk.Label(edsmframe, text=_('Cmdr name')).grid(row=0, sticky=tk.W)	# EDSM & privacy setting
@@ -151,7 +157,7 @@ class PreferencesDialog(tk.Toplevel):
             self.hotkey_play = tk.IntVar(value = not config.getint('hotkey_mute'))
             hotkeyframe = ttk.LabelFrame(frame, text=platform == 'darwin' and _('Keyboard shortcut') or	# Section heading in settings on OSX
                                          _('Hotkey'))	# Section heading in settings on Windows
-            hotkeyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+            hotkeyframe.grid(padx=10, pady=5, sticky=tk.NSEW)
             hotkeyframe.columnconfigure(1, weight=1)
             if platform == 'darwin' and not was_accessible_at_launch:
                 if AXIsProcessTrusted():
@@ -171,10 +177,10 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn.grid(row=2, columnspan=2, padx=5, sticky=tk.W)
 
         privacyframe = ttk.LabelFrame(frame, text=_('Privacy'))	# Section heading in settings
-        privacyframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+        privacyframe.grid(padx=10, pady=5, sticky=tk.NSEW)
 
         self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
-        ttk.Label(privacyframe, text=_('How do you want to be identified in the saved data')).grid(row=0, columnspan=2, padx=5, sticky=tk.W)
+        ttk.Label(privacyframe, text=_('How do you want to be identified in the saved data')).grid(row=0, padx=5, sticky=tk.W)
         ttk.Radiobutton(privacyframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(padx=5, sticky=tk.W)	# Privacy setting
         ttk.Radiobutton(privacyframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(padx=5, sticky=tk.W)	# Privacy setting
 
@@ -182,17 +188,20 @@ class PreferencesDialog(tk.Toplevel):
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
         else:
             buttonframe = ttk.Frame(frame)
-            buttonframe.grid(padx=10, pady=10, sticky=tk.NSEW)
+            buttonframe.grid(padx=10, pady=5, sticky=tk.NSEW)
             buttonframe.columnconfigure(0, weight=1)
             ttk.Label(buttonframe).grid(row=0, column=0)	# spacer
-            ttk.Button(buttonframe, text=_('OK'), command=self.apply).grid(row=0, column=1, sticky=tk.E)
+            button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
+            button.grid(row=0, column=1, sticky=tk.E)
+            button.bind("<Return>", lambda event:self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         # Selectively disable buttons depending on output settings
         self.outvarchanged()
 
-        # disable hotkey for the duration
+        # disable hotkey and log monitoring for the duration
         hotkeymgr.unregister()
+        monitor.stop()
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
@@ -204,6 +213,20 @@ class PreferencesDialog(tk.Toplevel):
         self.dir_label['state'] = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state'] = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']    = local and 'readonly' or tk.DISABLED
+
+        if monitor.logdir:
+            log = self.out_log_edsm.get() or self.out_log_file.get()
+            self.out_log_auto_button['state']  = log and tk.NORMAL or tk.DISABLED
+
+            self.out_log_auto_text['text'] = ''
+            if log and self.out_log_auto.get():
+                if not monitor.enable_logging():
+                    self.out_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
+                    self.out_log_auto_text.grid(row=10, padx=(25,5), sticky=tk.EW)
+                elif monitor.restart_required():
+                    self.out_log_auto_text['text'] = _('Re-start Elite: Dangerous for automatic logging')	# Output settings prompt
+                    self.out_log_auto_text.grid(row=10, padx=(25,5), sticky=tk.EW)
+
 
         edsm = self.out_log_edsm.get()
         self.edsm_label['state']  = edsm and tk.NORMAL or tk.DISABLED
@@ -290,7 +313,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('username', self.username.get().strip())
         config.set('password', self.password.get().strip())
 
-        config.set('output', (self.out_eddn.get() and config.OUT_EDDN or 0) + (self.out_bpc.get() and config.OUT_BPC or 0) + (self.out_td.get() and config.OUT_TD or 0) + (self.out_csv.get() and config.OUT_CSV or 0) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS or 0) + (self.out_log_file.get() and config.OUT_LOG_FILE or 0) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS or 0) + (self.out_log_edsm.get() and config.OUT_LOG_EDSM or 0))
+        config.set('output', (self.out_eddn.get() and config.OUT_EDDN) + (self.out_bpc.get() and config.OUT_BPC) + (self.out_td.get() and config.OUT_TD) + (self.out_csv.get() and config.OUT_CSV) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS) + (self.out_log_file.get() and config.OUT_LOG_FILE) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) + (self.out_log_edsm.get() and config.OUT_LOG_EDSM) + (self.out_log_auto.get() and config.OUT_LOG_AUTO))
         config.set('outdir', expanduser(self.outdir.get()))
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
@@ -309,8 +332,11 @@ class PreferencesDialog(tk.Toplevel):
             self.callback()
 
     def _destroy(self):
-        # Re-enable hotkey monitoring before exit
+        # Re-enable hotkey and log monitoring before exit
         hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
+            monitor.enable_logging()
+            monitor.start()
         self.destroy()
 
     if platform == 'darwin':
@@ -371,6 +397,7 @@ class AuthenticationDialog(tk.Toplevel):
         self.code.focus_set()
         ttk.Label(frame).grid(row=1, column=2)	# spacer
         self.button = ttk.Button(frame, text=_('OK'), command=self.apply, state=tk.DISABLED)
+        self.button.bind("<Return>", lambda event:self.apply())
         self.button.grid(row=1, column=3, sticky=tk.E)
 
         for child in frame.winfo_children():
