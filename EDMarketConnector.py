@@ -369,12 +369,28 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, system, timestamp):
+    def system_change(self, timestamp, system):
         if self.system['text'] != system:
-            # TODO: EDSM lookup and csv and/or EDSM log
-            self.system['text'] = system
-            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            try:
+                self.system['text'] = system
+                self.system['image'] = ''
+                self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+                if config.getint('output') & config.OUT_LOG_FILE:
+                    flightlog.writelog(timestamp, system)
+                if config.getint('output') & config.OUT_LOG_EDSM:
+                    self.status['text'] = _('Sending data to EDSM...')
+                    self.w.update_idletasks()
+                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                else:
+                    self.edsm.start_lookup(system, EDDB.system(system))
+                self.edsmpoll()
+                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            except Exception as e:
+                if __debug__: print_exc()
+                self.status['text'] = unicode(e)
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
 
     def edsmpoll(self):
         result = self.edsm.result
@@ -412,6 +428,7 @@ class AppWindow:
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
 
     def onexit(self, event=None):
+        flightlog.close()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()

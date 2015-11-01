@@ -133,17 +133,21 @@ class EDLogs:
             return False
 
     def start(self):
-        self.stop()
         if not self.logdir or not self.callback:
+            self.stop()
             return False
+        if self.running():
+            return True
         self.observer = threading.Thread(target = self.worker, name = 'netLog worker')
         self.observer.daemon = True
         self.observer.start()
+        return True
 
     def stop(self):
-        if self.observer:
-            self.observer.stop()
-        self.observer = None
+        self.observer = None	# Orphan the worker thread
+
+    def running(self):
+        return self.observer and self.observer.is_alive()
 
     def worker(self):
         regexp = re.compile('{(.+)} System:[^\(]*\(([^\)]+)')
@@ -158,6 +162,10 @@ class EDLogs:
             loghandle = None
 
         while True:
+            # Check whether we're still supposed to be running
+            if threading.current_thread() != self.observer:
+                return	# Terminate
+
             # Check whether new log file started, e.g. client restarted. Assumes logs sort alphabetically.
             logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
             newlogfile = logfiles and logfiles[-1] or None
@@ -183,9 +191,9 @@ class EDLogs:
                     now = localtime()
                     if now.tm_hour == 0 and visited_struct.tm_hour == 23:
                         # Crossed midnight between timestamp and poll
-                        now = localtime(time()-60)
-                    datetime_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
-                    self.callback(system, mktime(datetime_struct))
+                        now = localtime(time()-12*60%60)	# yesterday
+                    time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
+                    self.callback(mktime(time_struct), system)
 
             sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often
 

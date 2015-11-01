@@ -199,9 +199,8 @@ class PreferencesDialog(tk.Toplevel):
         # Selectively disable buttons depending on output settings
         self.outvarchanged()
 
-        # disable hotkey and log monitoring for the duration
+        # disable hotkey for the duration
         hotkeymgr.unregister()
-        monitor.stop()
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
@@ -224,7 +223,7 @@ class PreferencesDialog(tk.Toplevel):
                     self.out_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
                     self.out_log_auto_text.grid(row=10, padx=(25,5), sticky=tk.EW)
                 elif monitor.restart_required():
-                    self.out_log_auto_text['text'] = _('Re-start Elite: Dangerous for automatic logging')	# Output settings prompt
+                    self.out_log_auto_text['text'] = _('Re-start Elite: Dangerous to use this feature')	# Output settings prompt
                     self.out_log_auto_text.grid(row=10, padx=(25,5), sticky=tk.EW)
 
 
@@ -337,6 +336,8 @@ class PreferencesDialog(tk.Toplevel):
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
             monitor.enable_logging()
             monitor.start()
+        else:
+            monitor.stop()
         self.destroy()
 
     if platform == 'darwin':
