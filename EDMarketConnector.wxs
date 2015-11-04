@@ -30,6 +30,13 @@
 		<Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
 		<!-- <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />	 Remove repair -->
 		<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />	<!-- Remove modify - also set by WixUI_Minimal -->
+		<Property Id="ARPHELPLINK" Value="https://github.com/Marginal/EDMarketConnector/wiki" />
+
+		<!-- http://blogs.technet.com/b/alexshev/archive/2008/02/09/from-msi-to-wix-part-2.aspx -->
+		<CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+		<InstallExecuteSequence>
+			<Custom Action="SetARPINSTALLLOCATION" After="InstallValidate"></Custom>
+		</InstallExecuteSequence>
 
 		<!-- Merge in C runtime -->
 		<DirectoryRef Id="TARGETDIR">
