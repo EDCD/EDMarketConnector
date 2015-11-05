@@ -16,7 +16,7 @@ if __debug__:
 
 from config import config
 
-holdoff = 120	# be nice
+holdoff = 60	# be nice
 timeout = 10	# requests timeout
 
 URL_LOGIN   = 'https://companion.orerve.net/user/login'
@@ -229,7 +229,7 @@ class Session:
             commodity = commodities[i]
 
             # Check all required numeric fields are present and are numeric
-            # Catches "demandBracket": "" for some phantom commodites in ED 1.3
+            # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
             for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
                 if not isinstance(commodity.get(thing), numbers.Number):
                     if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
