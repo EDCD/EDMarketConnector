@@ -7,6 +7,9 @@
 /* EDSM setting. [prefs.py] */
 "API Key" = "API Key";
 
+/* Output setting. [prefs.py] */
+"Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
+
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Browse...";
 
@@ -132,6 +135,9 @@
 
 /* Privacy setting. [prefs.py] */
 "Pseudo-anonymized ID" = "Pseudo-anonymized ID";
+
+/* Output settings prompt. [prefs.py] */
+"Re-start Elite: Dangerous to use this feature" = "Re-start Elite: Dangerous to use this feature";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "Re-start {APP} to use shortcuts" = "Re-start {APP} to use shortcuts";

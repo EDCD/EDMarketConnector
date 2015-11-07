@@ -192,3 +192,9 @@
 
 /* [EDMarketConnector.py] */
 "Sending data to EDSM..." = "Envoi des données à EDSM...";
+
+/* Output setting. [prefs.py] */
+"Automatically make a log entry on entering a system" = "Ajouter automatiquement une entrée au journal en entrant dans un système";
+
+/* Output settings prompt. [prefs.py] */
+"Re-start Elite: Dangerous to use this feature" = "Redémarrer Elite: Dangerous pour utiliser cette fonctionnalité";
