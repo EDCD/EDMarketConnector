@@ -30,6 +30,7 @@ import eddb
 import prefs
 from config import appname, applongname, config
 from hotkey import hotkeymgr
+from monitor import monitor
 
 l10n.Translations().install()
 EDDB = eddb.EDDB()
@@ -168,6 +169,12 @@ class AppWindow:
         # Install hotkey monitoring
         self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # Install log monitoring
+        monitor.set_callback(self.system_change)
+        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
+            monitor.enable_logging()
+            monitor.start()
 
     # call after credentials have changed
     def login(self):
@@ -362,6 +369,29 @@ class AppWindow:
         except:
             pass
 
+    def system_change(self, timestamp, system):
+        if self.system['text'] != system:
+            try:
+                self.system['text'] = system
+                self.system['image'] = ''
+                self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+                if config.getint('output') & config.OUT_LOG_FILE:
+                    flightlog.writelog(timestamp, system)
+                if config.getint('output') & config.OUT_LOG_EDSM:
+                    self.status['text'] = _('Sending data to EDSM...')
+                    self.w.update_idletasks()
+                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                else:
+                    self.edsm.start_lookup(system, EDDB.system(system))
+                self.edsmpoll()
+                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            except Exception as e:
+                if __debug__: print_exc()
+                self.status['text'] = unicode(e)
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
+
     def edsmpoll(self):
         result = self.edsm.result
         if result['done']:
@@ -398,6 +428,7 @@ class AppWindow:
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
 
     def onexit(self, event=None):
+        flightlog.close()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()

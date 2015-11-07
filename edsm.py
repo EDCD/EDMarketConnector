@@ -109,11 +109,16 @@ def export(data, edsmlookupfn):
 
     querytime = config.getint('querytime') or int(time.time())
 
+    writelog(querytime, data['lastSystem']['name'], edsmlookupfn)
+
+
+def writelog(timestamp, system, edsmlookupfn):
+
     try:
         # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
         edsmlookupfn()
 
-        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(data['lastSystem']['name']), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(querytime)))), timeout=EDSM._TIMEOUT)
+        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp)))), timeout=EDSM._TIMEOUT)
         r.raise_for_status()
         reply = r.json()
         (msgnum, msg) = reply['msgnum'], reply['msg']

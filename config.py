@@ -75,6 +75,7 @@ class Config:
     #OUT_STAT = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
     OUT_LOG_EDSM = 256
+    OUT_LOG_AUTO = 512
 
     if platform=='darwin':
 
