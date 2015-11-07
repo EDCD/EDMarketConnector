@@ -19,6 +19,10 @@ class Translations:
     def __init__(self):
         self.translations = {}
 
+    def install_dummy(self):
+        # For when translation is not desired or not available
+        __builtin__.__dict__['_'] = lambda x: unicode(x).replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
+
     def install(self):
         path = join(self.respath(), 'L10n')
         available = self.available()
@@ -38,7 +42,7 @@ class Translations:
                 lang = Translations.FALLBACK
 
         if lang not in self.available():
-            __builtin__.__dict__['_'] = lambda x: unicode(x).replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
+            self.install_dummy()
         else:
             regexp = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
             comment= re.compile(r'\s*/\*.*\*/\s*$')

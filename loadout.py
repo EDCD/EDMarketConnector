@@ -8,7 +8,7 @@ import time
 
 from config import config
 import outfitting
-from companion import ship_map
+from shipyard import ship_map
 
 
 # API slot names to E:D Shipyard slot names
@@ -28,7 +28,7 @@ slot_map = {
     'fueltank'         : 'FS',
 }
 
-def export(data):
+def export(data, filename=None):
 
     def class_rating(module):
         if 'guidance' in module:
@@ -85,6 +85,11 @@ def export(data):
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
     string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['capacity'])
+
+    if filename:
+        with open(filename, 'wt') as h:
+            h.write(string)
+        return
 
     # Look for last ship of this type
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')

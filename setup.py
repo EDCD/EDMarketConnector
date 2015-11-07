@@ -51,8 +51,10 @@ if sys.platform=='darwin':
 
 
 APP = 'EDMarketConnector.py'
+APPCMD = 'EDMC.py'
 APPNAME = re.search(r"^appname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 APPLONGNAME = re.search(r"^applongname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
+APPCMDNAME = re.search(r"^appcmdname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
@@ -118,6 +120,12 @@ setup(
                  'name': APPNAME,		# WinSparkle
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
+             } ],
+    console = [ {'dest_base': APPCMDNAME,
+                 'script': APPCMD,
+                 'copyright': u'© 2015 Jonathan Harris',
+                 'name': APPNAME,
+                 'company_name': 'Marginal',
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,

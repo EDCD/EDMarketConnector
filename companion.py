@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import requests
 from collections import defaultdict
 from cookielib import LWPCookieJar
@@ -14,6 +11,7 @@ import time
 if __debug__:
     from traceback import print_exc
 
+from shipyard import ship_map
 from config import config
 
 holdoff = 60	# be nice
@@ -45,34 +43,6 @@ commodity_map= {
     'Non Lethal Weapons'          : 'Non-Lethal Weapons',
     'S A P8 Core Container'       : 'SAP 8 Core Container',
     'Terrain Enrichment Systems'  : 'Land Enrichment Systems',
-}
-
-ship_map = {
-    'adder'                       : 'Adder',
-    'anaconda'                    : 'Anaconda',
-    'asp'                         : 'Asp',
-    'cobramkiii'                  : 'Cobra Mk III',
-    'diamondback'                 : 'Diamondback Scout',
-    'diamondbackxl'               : 'Diamondback Explorer',
-    'eagle'                       : 'Eagle',
-    'empire_courier'              : 'Imperial Courier',
-    'empire_eagle'                : 'Imperial Eagle',
-    'empire_fighter'              : 'Imperial Fighter',
-    'empire_trader'               : 'Imperial Clipper',
-    'federation_dropship'         : 'Federal Dropship',
-    'federation_dropship_mkii'    : 'Federal Assault Ship',
-    'federation_gunship'          : 'Federal Gunship',
-    'federation_fighter'          : 'F63 Condor',
-    'ferdelance'                  : 'Fer-de-Lance',
-    'hauler'                      : 'Hauler',
-    'orca'                        : 'Orca',
-    'python'                      : 'Python',
-    'sidewinder'                  : 'Sidewinder',
-    'type6'                       : 'Type-6 Transporter',
-    'type7'                       : 'Type-7 Transporter',
-    'type9'                       : 'Type-9 Heavy',
-    'viper'                       : 'Viper',
-    'vulture'                     : 'Vulture',
 }
 
 

@@ -8,8 +8,10 @@ import json
 import os
 from os.path import exists, isfile
 import sys
+import time
 
-from companion import ship_map
+from shipyard import ship_map
+from config import config
 
 
 outfile = 'outfitting.csv'
@@ -320,6 +322,31 @@ def lookup(module):
         raise AssertionError('%s: failed to set %s' % (module['id'], 'mount'))
 
     return new
+
+
+def export(data, filename):
+
+    querytime = config.getint('querytime') or int(time.time())
+
+    assert data['lastSystem'].get('name')
+    assert data['lastStarport'].get('name')
+
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
+    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,Date\n'
+    rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
+
+    h = open(filename, 'wt')
+    h.write(header)
+    for v in data['lastStarport'].get('modules', {}).itervalues():
+        try:
+            m = lookup(v)
+            if m:
+                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], timestamp))
+        except AssertionError as e:
+            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+        except:
+            if __debug__: raise
+    h.close()
 
 
 # add all the modules

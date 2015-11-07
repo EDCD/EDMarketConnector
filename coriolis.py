@@ -9,7 +9,7 @@ import time
 
 from config import config
 import outfitting
-import companion
+import shipyard
 
 
 slot_map = {
@@ -33,7 +33,7 @@ slot_map = {
 # https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0-draft.json
 # http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
-ship_map = dict(companion.ship_map)
+ship_map = dict(shipyard.ship_map)
 ship_map['asp'] = 'Asp Explorer'
 
 standard_map = OrderedDict([	# in output order
@@ -74,11 +74,11 @@ fixup_map = {
 }
 
 
-def export(data):
+def export(data, filename=None):
 
     querytime = config.getint('querytime') or int(time.time())
 
-    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+    ship = shipyard.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
 
     loadout = OrderedDict([	# Mimic Coriolis export ordering
         ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/2.json#'),
@@ -169,6 +169,11 @@ def export(data):
 
     # Construct description
     string = json.dumps(loadout, indent=2)
+
+    if filename:
+        with open(filename, 'wt') as h:
+            h.write(string)
+        return
 
     # Look for last ship of this type
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.json')

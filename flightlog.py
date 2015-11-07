@@ -8,7 +8,8 @@ from sys import platform
 import time
 
 from config import config
-from companion import ship_map, commodity_map
+from companion import commodity_map
+from shipyard import ship_map
 
 
 logfile = None

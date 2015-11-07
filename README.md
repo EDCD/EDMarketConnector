@@ -103,6 +103,34 @@ Linux:
 * Requires the Python “imaging-tk”, “iniparse” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
 * Run with `./EDMarketConnector.py` .
 
+Command-line
+--------
+
+The command-line program `EDMC.py` writes the current system and station (if docked) to stdout and optionally
+writes ship loadout and/or station data to file. This program requires that the user has performed [setup](#setup) and verification through the app.
+
+Arguments:
+
+```
+ -h, --help     show this help message and exit
+ -v, --version  print program version and exit
+ -c FILE        write ship loadout to FILE in Coriolis json format
+ -e FILE        write ship loadout to FILE in E:D Shipyard format
+ -m FILE        write station commodity market data to FILE in CSV format
+ -o FILE        write station outfitting data to FILE in CSV format
+ -s FILE        write station shipyard data to FILE in CSV format
+```
+
+The program returns one of the following exit codes. Further information may be written to stderr.
+<ol start="0">
+  <li>Success. Note that this doesn't necesssarily mean that any requested output files have been produced - for example if the current station doesn't support the facilities for which data was requested.</li>
+  <li>Server is down.</li>
+  <li>Invalid Credentials.</li>
+  <li>Verification Required.</li>
+  <li>Not docked. You have requested station data but the user is not docked at a station.</li>
+  <li>I/O or other OS error.</li>
+</ol>
+
 
 Packaging for distribution
 --------

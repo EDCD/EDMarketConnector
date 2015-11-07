@@ -9,7 +9,7 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import ship_map
+from shipyard import ship_map
 import outfitting
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'

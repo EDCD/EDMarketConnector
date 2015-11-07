@@ -85,6 +85,9 @@
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
 					</Component>
 					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
+					</Component>
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\fr.strings" />
 					</Component>
 					<Component Guid="*">
@@ -359,6 +362,7 @@
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
+			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="fr.strings" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="library.zip" />

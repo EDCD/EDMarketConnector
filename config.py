@@ -7,6 +7,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appversion = '1.8.3.0'
+appcmdname = 'EDMC'
 
 
 if platform=='darwin':
