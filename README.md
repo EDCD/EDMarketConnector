@@ -123,7 +123,7 @@ Arguments:
 
 The program returns one of the following exit codes. Further information may be written to stderr.
 <ol start="0">
-  <li>Success. Note that this doesn't necesssarily mean that any requested output files have been produced - for example if the current station doesn't support the facilities for which data was requested.</li>
+  <li>Success. Note that this doesn't necessarily mean that any requested output files have been produced - for example if the current station doesn't support the facilities for which data was requested.</li>
   <li>Server is down.</li>
   <li>Invalid Credentials.</li>
   <li>Verification Required.</li>
