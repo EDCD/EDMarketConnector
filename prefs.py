@@ -335,7 +335,7 @@ class PreferencesDialog(tk.Toplevel):
         hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
             monitor.enable_logging()
-            monitor.start()
+            monitor.start(self.parent)
         else:
             monitor.stop()
         self.destroy()
