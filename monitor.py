@@ -63,14 +63,12 @@ elif platform=='win32':
 class EDLogs:
 
     def __init__(self):
+        self.root = None
         self.logdir = self._logdir()
         self.logging_enabled = self._logging_enabled
         self._restart_required = False
         self.observer = None
-        self.callback = None
-
-    def set_callback(self, callback):
-        self.callback = callback
+        self.last_event = None
 
     def enable_logging(self):
         if self.logging_enabled():
@@ -132,8 +130,9 @@ class EDLogs:
             if __debug__: print_exc()
             return False
 
-    def start(self):
-        if not self.logdir or not self.callback:
+    def start(self, root):
+        self.root = root
+        if not self.logdir:
             self.stop()
             return False
         if self.running():
@@ -145,6 +144,7 @@ class EDLogs:
 
     def stop(self):
         self.observer = None	# Orphan the worker thread
+        self.last_event = None
 
     def running(self):
         return self.observer and self.observer.is_alive()
@@ -193,7 +193,9 @@ class EDLogs:
                         # Crossed midnight between timestamp and poll
                         now = localtime(time()-12*60%60)	# yesterday
                     time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
-                    self.callback(mktime(time_struct), system)
+                    # Tk on Windows doesn't like to be called outside of an event handler, so generate an event
+                    self.last_event = (mktime(time_struct), system)
+                    self.root.event_generate('<<Jump>>', when="tail")
 
             sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often
 

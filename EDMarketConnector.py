@@ -171,10 +171,10 @@ class AppWindow:
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
         # Install log monitoring
-        monitor.set_callback(self.system_change)
+        self.w.bind_all('<<Jump>>', self.system_change)	# user-generated
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
             monitor.enable_logging()
-            monitor.start()
+            monitor.start(self.w)
 
     # call after credentials have changed
     def login(self):
@@ -369,7 +369,14 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, timestamp, system):
+    def system_change(self, event):
+
+        if not monitor.last_event:
+            if __debug__: print 'spurious system_change', event	# eh?
+            return
+
+        timestamp, system = monitor.last_event	# would like to use event user_data to carry this, but not accessible in Tkinter
+
         if self.system['text'] != system:
             try:
                 self.system['text'] = system
