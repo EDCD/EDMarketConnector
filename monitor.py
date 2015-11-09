@@ -150,7 +150,9 @@ class EDLogs:
         return self.observer and self.observer.is_alive()
 
     def worker(self):
-        regexp = re.compile('{(.+)} System:[^\(]*\(([^\)]+)')
+        # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n".
+        # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
+        regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:')
 
         # Seek to the end of the latest log file
         logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
