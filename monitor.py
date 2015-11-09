@@ -193,7 +193,7 @@ class EDLogs:
                     now = localtime()
                     if now.tm_hour == 0 and visited_struct.tm_hour == 23:
                         # Crossed midnight between timestamp and poll
-                        now = localtime(time()-12*60%60)	# yesterday
+                        now = localtime(time()-12*60*60)	# yesterday
                     time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
                     # Tk on Windows doesn't like to be called outside of an event handler, so generate an event
                     self.last_event = (mktime(time_struct), system)
