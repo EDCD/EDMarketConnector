@@ -241,13 +241,10 @@ class AppWindow:
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
                 self.status['text'] = _("Who are you?!")		# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
 
             else:
                 if __debug__:	# Recording
@@ -257,6 +254,7 @@ class AppWindow:
                 self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
+                self.status['text'] = ''
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
 
                 # stuff we can do when not docked
@@ -266,32 +264,40 @@ class AppWindow:
                     coriolis.export(data)
                 if config.getint('output') & config.OUT_LOG_FILE:
                     flightlog.export(data)
-                if config.getint('output') & config.OUT_LOG_EDSM:
-                    self.status['text'] = _('Sending data to EDSM...')
-                    self.w.update_idletasks()
-                    edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                else:
-                    self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
-                self.edsmpoll()
+                try:
+                    # Catch any EDSM errors here so that they don't prevent station update
+                    if config.getint('output') & config.OUT_LOG_EDSM:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
+                    else:
+                        self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
+                    self.status['text'] = ''
+                    self.edsmpoll()
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
-                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                    pass
 
                 elif not data['commander'].get('docked'):
-                    self.status['text'] = _("You're not docked at a station!")
                     # signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                    if play_sound: hotkeymgr.play_bad()
+                    if not self.status['text']:
+                        self.status['text'] = _("You're not docked at a station!")
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
                     (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
 
                     if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
-                        self.status['text'] = _("Station doesn't have anything!")
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have anything!")
 
                     elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
-                        self.status['text'] = _("Station doesn't have a market!")
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have a market!")
 
                     else:
                         if data['lastStarport'].get('commodities'):
@@ -306,7 +312,9 @@ class AppWindow:
                                 bpc.export(data, False)
 
                         if config.getint('output') & config.OUT_EDDN:
-                            self.status['text'] = _('Sending data to EDDN...')
+                            old_status = self.status['text']
+                            if not old_status:
+                                self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
                             if has_outfitting:
@@ -324,8 +332,8 @@ class AppWindow:
                                     self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             elif __debug__ and data['lastStarport'].get('ships'):
                                 print 'Spurious shipyard!'
-
-                        self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                            if not old_status:
+                                self.status['text'] = ''
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
@@ -334,7 +342,6 @@ class AppWindow:
         except companion.ServerError as e:
             if retrying:
                 self.status['text'] = unicode(e)
-                if play_sound: hotkeymgr.play_bad()
             else:
                 # Retry once if Companion server is unresponsive
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
@@ -343,17 +350,19 @@ class AppWindow:
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
-            if play_sound: hotkeymgr.play_bad()
 
         except requests.exceptions.Timeout as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Connection to EDDN timed out")
-            if play_sound: hotkeymgr.play_bad()
 
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
-            if play_sound: hotkeymgr.play_bad()
+
+        if not self.status['text']:	# no errors
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+        elif play_sound:
+            hotkeymgr.play_bad()
 
         self.holdofftime = querytime + companion.holdoff
         self.cooldown()
