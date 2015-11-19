@@ -118,8 +118,8 @@ if platform == 'darwin':
                 if config.getint('hotkey_always'):
                     self.activated = True
                 else:	# Only trigger if game client is front process
-                    active = [x for x in NSWorkspace.sharedWorkspace().runningApplications() if x.isActive()]
-                    if active and active[0] and active[0].bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                    front = NSWorkspace.sharedWorkspace().frontmostApplication()
+                    if front and front.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
                         self.activated = True
 
         def acquire_start(self):
