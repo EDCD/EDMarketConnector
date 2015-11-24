@@ -56,10 +56,6 @@ try:
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
         sys.stderr.write('What are you flying?!\n')	# Shouldn't happen
         sys.exit(EXIT_SERVER)
-    elif (args.m or args.o or args.s) and not data['commander'].get('docked'):
-        print data['lastSystem']['name']
-        sys.stderr.write("You're not docked at a station!\n")
-        sys.exit(EXIT_NOT_DOCKED)
 
     # stuff we can do when not docked
     if args.c:
@@ -67,11 +63,19 @@ try:
     if args.e:
         loadout.export(data, args.e)
 
+    if not data['commander'].get('docked'):
+        print data['lastSystem']['name']
+        if (args.m or args.o or args.s):
+            sys.stderr.write("You're not docked at a station!\n")
+            sys.exit(EXIT_NOT_DOCKED)
+        else:
+            sys.exit(EXIT_SUCCESS)
+
     # Finally - the data looks sane and we're docked at a station
     print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
-    (station_id, has_shipyard, has_outfitting) = EDDB.station(data['lastSystem']['name'], data['lastStarport']['name'])
+    (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(data['lastSystem']['name'], data['lastStarport']['name'])
 
-    if not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
+    if not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
         sys.stderr.write("Station doesn't have anything!\n")
         sys.exit(EXIT_SUCCESS)
 
@@ -80,6 +84,8 @@ try:
             # Fixup anomalies in the commodity data
             session.fixup(data['lastStarport']['commodities'])
             bpc.export(data, True, args.m)
+        elif has_market:
+            sys.stderr.write("Error: Can't get market data!\n")
         else:
             sys.stderr.write("Station doesn't have a market\n")
 
@@ -94,7 +100,7 @@ try:
             if not data['lastStarport'].get('ships'):
                 sleep(SERVER_RETRY)
                 data = session.query()
-            if data['lastStarport'].get('ships'):
+            if data['lastStarport'].get('ships') and data['commander'].get('docked'):
                 shipyard.export(data, args.s)
             else:
                 sys.stderr.write("Couldn't retrieve shipyard info\n")

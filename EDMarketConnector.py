@@ -289,13 +289,13 @@ class AppWindow:
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
-                    (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
+                    (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
-                    if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
+                    if (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
-                    elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
+                    elif not (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
 
@@ -310,6 +310,10 @@ class AppWindow:
                                 td.export(data)
                             if config.getint('output') & config.OUT_BPC:
                                 bpc.export(data, False)
+
+                        elif has_market and (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
+                            # Overwrite any previous error message
+                            self.status['text'] = _("Error: Can't get market data!")
 
                         if config.getint('output') & config.OUT_EDDN:
                             old_status = self.status['text']
@@ -420,7 +424,7 @@ class AppWindow:
 
     def station_url(self, text):
         if text:
-            (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
+            (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
             if station_id:
                 return 'http://eddb.io/station/%d' % station_id
 

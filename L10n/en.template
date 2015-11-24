@@ -47,6 +47,9 @@
 "Error: Can't connect to EDSM" = "Error: Can't connect to EDSM";
 
 /* [EDMarketConnector.py] */
+"Error: Can't get market data!" = "Error: Can't get market data!";
+
+/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Error: Connection to EDDN timed out";
 
 /* [edsm.py] */

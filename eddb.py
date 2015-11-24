@@ -11,6 +11,10 @@ from sys import platform
 
 class EDDB:
 
+    HAS_MARKET = 1
+    HAS_OUTFITTING = 2
+    HAS_SHIPYARD = 4
+
     def __init__(self):
         self.system_ids  = cPickle.load(open(join(self.respath(), 'systems.p'),  'rb'))
         self.station_ids = cPickle.load(open(join(self.respath(), 'stations.p'), 'rb'))
@@ -19,9 +23,10 @@ class EDDB:
     def system(self, system_name):
         return self.system_ids.get(system_name, 0)	# return 0 on failure (0 is not a valid id)
 
-    # (system_name, station_name) -> (station_id, has_shipyard, has_outfitting)
+    # (system_name, station_name) -> (station_id, has_market, has_outfitting, has_shipyard)
     def station(self, system_name, station_name):
-        return self.station_ids.get((self.system_ids.get(system_name), station_name), (0,False,False))
+        (station_id, flags) = self.station_ids.get((self.system_ids.get(system_name), station_name), (0,0))
+        return (station_id, bool(flags & EDDB.HAS_MARKET), bool(flags & EDDB.HAS_OUTFITTING), bool(flags & EDDB.HAS_SHIPYARD))
 
     def respath(self):
         if getattr(sys, 'frozen', False):
@@ -54,6 +59,6 @@ if __name__ == "__main__":
     cPickle.dump(system_ids,  open('systems.p',  'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
     # station_id by (system_id, station_name)
-    station_ids = dict([((x['system_id'], str(x['name'])), (x['id'], bool(x['has_shipyard']), bool(x['has_outfitting']))) for x in stations])
+    station_ids = dict([((x['system_id'], str(x['name'])), (x['id'], (EDDB.HAS_MARKET if x['has_market'] else 0) | (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) | (EDDB.HAS_SHIPYARD if x['has_shipyard'] else 0))) for x in stations])
     cPickle.dump(station_ids, open('stations.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 

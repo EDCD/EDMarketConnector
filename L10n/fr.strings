@@ -198,3 +198,6 @@
 
 /* Output settings prompt. [prefs.py] */
 "Re-start Elite: Dangerous to use this feature" = "Redémarrer Elite: Dangerous pour utiliser cette fonctionnalité";
+
+/* [EDMarketConnector.py] */
+"Error: Can't get market data!" = "Erreur: Impossible d'obtenir les données du marché!";
