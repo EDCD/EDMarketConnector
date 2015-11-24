@@ -201,3 +201,6 @@
 
 /* [EDMarketConnector.py] */
 "Error: Can't get market data!" = "Erreur: Impossible d'obtenir les données du marché!";
+
+/* Status bar message on launch. [EDMarketConnector.py] */
+"Re-start Elite: Dangerous for automatic log entries" = "Re-démarrer Elite: Dangereux pour les entrées de journal automatique";

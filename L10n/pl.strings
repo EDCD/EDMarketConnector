@@ -192,3 +192,6 @@
 
 /* [EDMarketConnector.py] */
 "Sending data to EDSM..." = "Wysłanie danych do EDSM...";
+
+/* Output settings prompt. [prefs.py] */
+"Re-start Elite: Dangerous to use this feature" = "";

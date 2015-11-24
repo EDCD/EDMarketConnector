@@ -197,7 +197,10 @@
 "Automatically make a log entry on entering a system" = "Inserire automaticamente una log entry entrando in un sistema";
 
 /* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Riavviare Elite:Dangerous per usare questa funzione";
+"Re-start Elite: Dangerous to use this feature" = "Riavviare Elite: Dangerous per usare questa funzione";
 
 /* [EDMarketConnector.py] */
 "Error: Can't get market data!" = "Errore: Non riesco a ottenere il market data!";
+
+/* Status bar message on launch. [EDMarketConnector.py] */
+"Re-start Elite: Dangerous for automatic log entries" = "Riavviare Elite: Dangerous per una log entry automatica";

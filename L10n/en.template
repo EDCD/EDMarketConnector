@@ -139,6 +139,9 @@
 /* Privacy setting. [prefs.py] */
 "Pseudo-anonymized ID" = "Pseudo-anonymized ID";
 
+/* Status bar message on launch. [EDMarketConnector.py] */
+"Re-start Elite: Dangerous for automatic log entries" = "Re-start Elite: Dangerous for automatic log entries";
+
 /* Output settings prompt. [prefs.py] */
 "Re-start Elite: Dangerous to use this feature" = "Re-start Elite: Dangerous to use this feature";
 

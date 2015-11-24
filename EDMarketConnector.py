@@ -155,12 +155,6 @@ class AppWindow:
         if platform != 'linux2':	# update_idletasks() doesn't allow for the menubar on Linux
             self.w.maxsize(-1, h)	# Maximum height = initial height
 
-        # First run
-        if not config.get('username') or not config.get('password'):
-            prefs.PreferencesDialog(self.w, self.login)
-        else:
-            self.login()
-
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
@@ -175,6 +169,12 @@ class AppWindow:
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
             monitor.enable_logging()
             monitor.start(self.w)
+
+        # First run
+        if not config.get('username') or not config.get('password'):
+            prefs.PreferencesDialog(self.w, self.login)
+        else:
+            self.login()
 
     # call after credentials have changed
     def login(self):
@@ -201,6 +201,9 @@ class AppWindow:
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
+
+        if not self.status['text'] and monitor.restart_required():
+            self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
         self.cooldown()
 
     # callback after verification code

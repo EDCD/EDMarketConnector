@@ -1,11 +1,15 @@
+import atexit
 import re
 import threading
 from os import listdir, pardir, rename, unlink
-from os.path import exists, isdir, isfile, join
+from os.path import basename, exists, isdir, isfile, join
 from platform import machine
 from sys import platform
 from time import strptime, localtime, mktime, sleep, time
 from datetime import datetime
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 if __debug__:
     from traceback import print_exc
@@ -60,15 +64,29 @@ elif platform=='win32':
         return True
 
 
-class EDLogs:
+class EDLogs(FileSystemEventHandler):
 
     def __init__(self):
+        FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
         self.root = None
         self.logdir = self._logdir()
+        self.logfile = None
         self.logging_enabled = self._logging_enabled
         self._restart_required = False
-        self.observer = None
-        self.last_event = None
+        self.thread = None
+        self.last_event = None	# for communicating the Jump event
+
+        if self.logdir:
+            # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
+            observer = Observer()
+            observer.daemon = True
+            observer.schedule(self, self.logdir)
+            observer.start()
+            atexit.register(observer.stop)
+
+            # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
+            logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
+            self.logfile = logfiles and join(self.logdir, logfiles[-1]) or None
 
     def enable_logging(self):
         if self.logging_enabled():
@@ -137,17 +155,22 @@ class EDLogs:
             return False
         if self.running():
             return True
-        self.observer = threading.Thread(target = self.worker, name = 'netLog worker')
-        self.observer.daemon = True
-        self.observer.start()
+        self.thread = threading.Thread(target = self.worker, name = 'netLog worker')
+        self.thread.daemon = True
+        self.thread.start()
         return True
 
     def stop(self):
-        self.observer = None	# Orphan the worker thread
+        self.thread = None	# Orphan the worker thread
         self.last_event = None
 
     def running(self):
-        return self.observer and self.observer.is_alive()
+        return self.thread and self.thread.is_alive()
+
+    def on_created(self, event):
+        # watchdog callback, e.g. client (re)started.
+        if not event.is_directory and basename(event.src_path).startswith('netLog.'):
+            self.logfile = event.src_path
 
     def worker(self):
         # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n".
@@ -155,27 +178,21 @@ class EDLogs:
         regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:')
 
         # Seek to the end of the latest log file
-        logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
-        logfile = logfiles and logfiles[-1] or None
+        logfile = self.logfile
         if logfile:
-            loghandle = open(join(self.logdir, logfile), 'rt')
+            loghandle = open(logfile, 'rt')
             loghandle.seek(0, 2)	# seek to EOF
         else:
             loghandle = None
 
         while True:
-            # Check whether we're still supposed to be running
-            if threading.current_thread() != self.observer:
-                return	# Terminate
-
-            # Check whether new log file started, e.g. client restarted. Assumes logs sort alphabetically.
-            logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
-            newlogfile = logfiles and logfiles[-1] or None
+            # Check whether new log file started, e.g. client (re)started.
+            newlogfile = self.logfile
             if logfile != newlogfile:
                 logfile = newlogfile
                 if loghandle:
                     loghandle.close()
-                loghandle = open(join(self.logdir, logfile), 'rt')
+                loghandle = open(logfile, 'rt')
 
             if logfile:
                 system = visited = None
@@ -200,6 +217,10 @@ class EDLogs:
                     self.root.event_generate('<<Jump>>', when="tail")
 
             sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often
+
+            # Check whether we're still supposed to be running
+            if threading.current_thread() != self.thread:
+                return	# Terminate
 
 
     if platform=='darwin':
