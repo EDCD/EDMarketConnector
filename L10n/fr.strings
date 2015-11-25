@@ -17,7 +17,7 @@
 "Cmdr name" = "Nom de Cmd";
 
 /* Main window. [EDMarketConnector.py] */
-"Cmdr:" = "Cmd:";
+"Cmdr" = "Cmd";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Temps de recharge {SS}s";
@@ -41,7 +41,7 @@
 "Exit" = "Quitter";
 
 /* [EDMarketConnector.py] */
-"Fetching station data..." = "Récupération des données de la station...";
+"Fetching data..." = "Récupération des données...";
 
 /* Menu title on Windows. [EDMarketConnector.py] */
 "File" = "Fichier";
@@ -119,10 +119,10 @@
 "Station doesn't have anything!" = "La station n'a rien du tout !";
 
 /* Main window. [EDMarketConnector.py] */
-"Station:" = "Station:";
+"Station" = "Station";
 
 /* Main window. [EDMarketConnector.py] */
-"System:" = "Système:";
+"System" = "Système";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Mettre à jour";
@@ -146,7 +146,7 @@
 "Hotkey" = "Raccourci clavier";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"none" = "aucun";
+"None" = "Aucun";
 
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Ouvrir Préférences Système";
@@ -202,5 +202,239 @@
 /* [EDMarketConnector.py] */
 "Error: Can't get market data!" = "Erreur: Impossible d'obtenir les données du marché!";
 
+/* Federation rank. [stats.py] */
+"Admiral" = "Amiral";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Vagabond";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Solde";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Baron";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Courtier";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Cadet";
+
+/* CQC rank. [stats.py] */
+"Champion" = "";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Premier Maître";
+
+/* Ranking. [stats.py] */
+"Combat" = "Combattant";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Compétent";
+
+/* Empire rank. [stats.py] */
+"Count" = "Comte";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "Vétéran";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Létal";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Revendeur";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Archiduc";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Marquis";
+
+/* Top rank. [stats.py] */
+"Elite" = "Élite";
+
+/* Ranking. [stats.py] */
+"Empire" = "Empire";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Enseigne";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Entrepreneur";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Expert";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Explorateur";
+
+/* Ranking. [stats.py] */
+"Federation" = "Fédération";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "Inoffensif";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "";
+
+/* CQC rank. [stats.py] */
+"Hero" = "";
+
+/* Empire rank. [stats.py] */
+"King" = "Roi";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Chevalier";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "Lieutenant";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Capitaine de Corvette";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Emprunt";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Banneret";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Duc";
+
+/* Combat rank. [stats.py] */
+"Master" = "Vilain";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Marchand";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Matelot";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Touriste";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "Bleu";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Mendiant";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Novice";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Étranger";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Découvreur";
+
+/* Trade rank. [stats.py] */
+"Pedlar" = "Boutiquier";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Sans-le-sou";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Second Maître";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Pionnier";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Capitaine de Vaisseau";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Capitaine de Frégate";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Powerplay";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Prince";
+
+/* CQC rank. [stats.py] */
+"Professional" = "";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Navigateur";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Rang 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Rang 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Rang 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Rang 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Rang 5";
+
 /* Status bar message on launch. [EDMarketConnector.py] */
 "Re-start Elite: Dangerous for automatic log entries" = "Re-démarrer Elite: Dangereux pour les entrées de journal automatique";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "Contre-Amiral";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Recrue";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Voyageur";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Serf";
+
+/* Status dialog subtitle. [stats.py] */
+"Ship" = "Vaisseau";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Vaisseaux";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Écuyer";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "État";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Éclaireur";
+
+/* Ranking. [stats.py] */
+"Trade" = "Commerçant";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Prospecteur";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Magnat";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Vice-Amiral";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Présentation";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Vicomte";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Major";

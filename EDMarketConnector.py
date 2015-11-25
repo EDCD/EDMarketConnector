@@ -18,6 +18,8 @@ if __debug__:
     from traceback import print_exc
 
 import l10n
+l10n.Translations().install()
+
 import companion
 import bpc
 import td
@@ -27,12 +29,12 @@ import loadout
 import coriolis
 import flightlog
 import eddb
+import stats
 import prefs
 from config import appname, applongname, config
 from hotkey import hotkeymgr
 from monitor import monitor
 
-l10n.Translations().install()
 EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
@@ -78,9 +80,9 @@ class AppWindow:
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
 
-        ttk.Label(frame, text=_('Cmdr:')).grid(row=0, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('System:')).grid(row=1, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('Cmdr')+':').grid(row=0, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('System')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('Station')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
@@ -111,6 +113,9 @@ class AppWindow:
             self.edit_menu.add_command(label=_('Copy'), accelerator='Command-c', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
             menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
             self.w.bind('<Command-c>', self.copy)
+            self.view_menu = tk.Menu(menubar, name='view')
+            self.view_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
+            menubar.add_cascade(label=_('View'), menu=self.view_menu)	# Menu title on OSX
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
@@ -121,7 +126,8 @@ class AppWindow:
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
-            file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu = self.view_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
             if platform == 'win32':
                 file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
@@ -183,16 +189,8 @@ class AppWindow:
         self.w.update_idletasks()
         try:
             self.session.login(config.get('username'), config.get('password'))
+            self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
             self.status['text'] = ''
-
-            # Try to obtain exclusive lock on flight log ASAP
-            if config.getint('output') & config.OUT_LOG_FILE:
-                try:
-                    flightlog.openlog()
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
             self.status['text'] = ''
@@ -202,8 +200,18 @@ class AppWindow:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
 
+        # Try to obtain exclusive lock on flight log ASAP
+        if config.getint('output') & config.OUT_LOG_FILE:
+            try:
+                flightlog.openlog()
+            except Exception as e:
+                if __debug__: print_exc()
+                if not self.status['text']:
+                    self.status['text'] = unicode(e)
+
         if not self.status['text'] and monitor.restart_required():
             self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
+
         self.cooldown()
 
     # callback after verification code
@@ -231,7 +239,7 @@ class AppWindow:
                 hotkeymgr.play_good()
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.system['image'] = ''
-            self.status['text'] = _('Fetching station data...')
+            self.status['text'] = _('Fetching data...')
             self.button['state'] = tk.DISABLED
             self.edit_menu.entryconfigure(_('Copy'), state=tk.DISABLED)
             self.w.update_idletasks()
@@ -259,6 +267,7 @@ class AppWindow:
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
+                self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
 
                 # stuff we can do when not docked
                 if config.getint('output') & config.OUT_SHIP_EDS:

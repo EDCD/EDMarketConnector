@@ -8,6 +8,8 @@ import sys
 from time import time, sleep
 
 import l10n
+l10n.Translations().install_dummy()
+
 import companion
 import bpc
 import outfitting
@@ -15,11 +17,11 @@ import loadout
 import coriolis
 import shipyard
 import eddb
+import stats
 import prefs
 from config import appcmdname, appversion, config
 
 
-l10n.Translations().install_dummy()
 EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
@@ -27,13 +29,15 @@ EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_NOT_DOCKED,
 
 try:
     # arg parsing
-    parser = argparse.ArgumentParser(prog=appcmdname, description='Prints the current system and station (if docked) to stdout and optionally writes ship loadout and/or station data to file. Requires prior setup through the accompanying GUI app.')
+    parser = argparse.ArgumentParser(prog=appcmdname, description='Prints the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file. Requires prior setup through the accompanying GUI app.')
     parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
     parser.add_argument('-c', metavar='FILE', help='write ship loadout to FILE in Coriolis json format')
     parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard format')
+    parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
     parser.add_argument('-m', metavar='FILE', help='write station commodity market data to FILE in CSV format')
     parser.add_argument('-o', metavar='FILE', help='write station outfitting data to FILE in CSV format')
     parser.add_argument('-s', metavar='FILE', help='write station shipyard data to FILE in CSV format')
+    parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
     args = parser.parse_args()
     if args.version:
         print '%.2f' % (float(''.join(appversion.split('.')[:3])) / 100)	# just first three digits
@@ -62,6 +66,10 @@ try:
         coriolis.export(data, args.c)
     if args.e:
         loadout.export(data, args.e)
+    if args.l:
+        stats.export_ships(data, args.l)
+    if args.t:
+        stats.export_status(data, args.t)
 
     if not data['commander'].get('docked'):
         print data['lastSystem']['name']

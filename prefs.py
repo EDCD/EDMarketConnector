@@ -167,7 +167,7 @@ class PreferencesDialog(tk.Toplevel):
                     ttk.Button(hotkeyframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(row=1, column=1, padx=5, pady=(0,5), sticky=tk.E)		# Shortcut settings button on OSX
             else:
                 self.hotkey_text = ttk.Entry(hotkeyframe, width = (platform == 'darwin' and 20 or 30), justify=tk.CENTER)
-                self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('none'))	# No hotkey/shortcut currently defined
+                self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=0, padx=5, pady=5, sticky=tk.NSEW)
@@ -277,7 +277,7 @@ class PreferencesDialog(tk.Toplevel):
         event.widget.unbind('<KeyRelease>')
         hotkeymgr.acquire_stop()	# in case focus was lost while in the middle of acquiring
         event.widget.delete(0, tk.END)
-        self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('none'))	# No hotkey/shortcut currently defined
+        self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
 
     def hotkeylisten(self, event):
         good = hotkeymgr.fromevent(event)
@@ -300,7 +300,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_only_btn['state'] = tk.NORMAL
                 self.hotkey_play_btn['state'] = tk.NORMAL
             else:
-                event.widget.insert(0, _('none'))	# No hotkey/shortcut currently defined
+                event.widget.insert(0, _('None'))	# No hotkey/shortcut currently defined
                 self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
             self.hotkey_only_btn.focus()	# move to next widget - calls hotkeyend() implicitly

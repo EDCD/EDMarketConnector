@@ -106,8 +106,8 @@ Linux:
 Command-line
 --------
 
-The command-line program `EDMC.py` writes the current system and station (if docked) to stdout and optionally
-writes ship loadout and/or station data to file. This program requires that the user has performed [setup](#setup) and verification through the app.
+The command-line program `EDMC.py` writes the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file.
+This program requires that the user has performed [setup](#setup) and verification through the app.
 
 Arguments:
 
@@ -116,9 +116,11 @@ Arguments:
  -v, --version  print program version and exit
  -c FILE        write ship loadout to FILE in Coriolis json format
  -e FILE        write ship loadout to FILE in E:D Shipyard format
+ -l FILE        write ship locations to FILE in CSV format
  -m FILE        write station commodity market data to FILE in CSV format
  -o FILE        write station outfitting data to FILE in CSV format
  -s FILE        write station shipyard data to FILE in CSV format
+ -t FILE        write player status to FILE in CSV format
 ```
 
 The program returns one of the following exit codes. Further information may be written to stderr.

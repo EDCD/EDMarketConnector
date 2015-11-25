@@ -52,7 +52,7 @@ class Translations:
                         match = regexp.match(line)
                         if match:
                             self.translations[match.group(1)] = match.group(2).replace(u'{CR}', u'\n')
-                        elif not comment.match(line):
+                        elif __debug__ and not comment.match(line):
                             print 'Bad translation: %s' % line.strip()
             __builtin__.__dict__['_'] = self.translate
 
