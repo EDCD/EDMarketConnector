@@ -209,7 +209,7 @@
 "Aimless" = "Vagabond";
 
 /* CQC rank. [stats.py] */
-"Amateur" = "";
+"Amateur" = "Amateur";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "Solde";
@@ -224,7 +224,7 @@
 "Cadet" = "Cadet";
 
 /* CQC rank. [stats.py] */
-"Champion" = "";
+"Champion" = "Champion";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Premier Maître";
@@ -278,16 +278,16 @@
 "Federation" = "Fédération";
 
 /* CQC rank. [stats.py] */
-"Gladiator" = "";
+"Gladiator" = "Gladiator";
 
 /* Combat rank. [stats.py] */
 "Harmless" = "Inoffensif";
 
 /* CQC rank. [stats.py] */
-"Helpless" = "";
+"Helpless" = "Helpless";
 
 /* CQC rank. [stats.py] */
-"Hero" = "";
+"Hero" = "Hero";
 
 /* Empire rank. [stats.py] */
 "King" = "Roi";
@@ -326,7 +326,7 @@
 "Mostly Harmless" = "Bleu";
 
 /* CQC rank. [stats.py] */
-"Mostly Helpless" = "";
+"Mostly Helpless" = "Mostly Helpless";
 
 /* Trade rank. [stats.py] */
 "Mostly Penniless" = "Mendiant";
@@ -365,7 +365,7 @@
 "Prince" = "Prince";
 
 /* CQC rank. [stats.py] */
-"Professional" = "";
+"Professional" = "Professional";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Navigateur";
@@ -398,7 +398,7 @@
 "Scout" = "Voyageur";
 
 /* CQC rank. [stats.py] */
-"Semi Professional" = "";
+"Semi Professional" = "Semi Professional";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";

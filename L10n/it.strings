@@ -203,205 +203,205 @@
 "Error: Can't get market data!" = "Errore: Non riesco a ottenere il market data!";
 
 /* Federation rank. [stats.py] */
-"Admiral" = "";
+"Admiral" = "Admiral";
 
 /* Explorer rank. [stats.py] */
-"Aimless" = "";
+"Aimless" = "Aimless";
 
 /* CQC rank. [stats.py] */
-"Amateur" = "";
+"Amateur" = "Amateur";
 
 /* Cmdr stats. [stats.py] */
-"Balance" = "";
+"Balance" = "Saldo";
 
 /* Empire rank. [stats.py] */
-"Baron" = "";
+"Baron" = "Baron";
 
 /* Trade rank. [stats.py] */
-"Broker" = "";
+"Broker" = "Broker";
 
 /* Federation rank. [stats.py] */
-"Cadet" = "";
+"Cadet" = "Cadet";
 
 /* CQC rank. [stats.py] */
-"Champion" = "";
+"Champion" = "Champion";
 
 /* Federation rank. [stats.py] */
-"Chief Petty Officer" = "";
+"Chief Petty Officer" = "Chief Petty Officer";
 
 /* Ranking. [stats.py] */
-"Combat" = "";
+"Combat" = "Combat";
 
 /* Combat rank. [stats.py] */
-"Competent" = "";
+"Competent" = "Competent";
 
 /* Empire rank. [stats.py] */
-"Count" = "";
+"Count" = "Count";
 
 /* Ranking. [stats.py] */
-"CQC" = "";
+"CQC" = "CQC";
 
 /* Combat rank. [stats.py] */
-"Dangerous" = "";
+"Dangerous" = "Dangerous";
 
 /* Combat rank. [stats.py] */
-"Deadly" = "";
+"Deadly" = "Deadly";
 
 /* Trade rank. [stats.py] */
-"Dealer" = "";
+"Dealer" = "Dealer";
 
 /* Empire rank. [stats.py] */
-"Duke" = "";
+"Duke" = "Duke";
 
 /* Empire rank. [stats.py] */
-"Earl" = "";
+"Earl" = "Earl";
 
 /* Top rank. [stats.py] */
-"Elite" = "";
+"Elite" = "Elite";
 
 /* Ranking. [stats.py] */
-"Empire" = "";
+"Empire" = "Impero";
 
 /* Federation rank. [stats.py] */
-"Ensign" = "";
+"Ensign" = "Ensign";
 
 /* Trade rank. [stats.py] */
-"Entrepreneur" = "";
+"Entrepreneur" = "Entrepreneur";
 
 /* Combat rank. [stats.py] */
-"Expert" = "";
+"Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "";
+"Explorer" = "Explorer";
 
 /* Ranking. [stats.py] */
-"Federation" = "";
+"Federation" = "Federazione";
 
 /* CQC rank. [stats.py] */
-"Gladiator" = "";
+"Gladiator" = "Gladiator";
 
 /* Combat rank. [stats.py] */
-"Harmless" = "";
+"Harmless" = "Harmless";
 
 /* CQC rank. [stats.py] */
-"Helpless" = "";
+"Helpless" = "Helpless";
 
 /* CQC rank. [stats.py] */
-"Hero" = "";
+"Hero" = "Hero";
 
 /* Empire rank. [stats.py] */
-"King" = "";
+"King" = "King";
 
 /* Empire rank. [stats.py] */
-"Knight" = "";
+"Knight" = "Knight";
 
 /* Federation rank. [stats.py] */
-"Lieutenant" = "";
+"Lieutenant" = "Lieutenant";
 
 /* Federation rank. [stats.py] */
-"Lieutenant Commander" = "";
+"Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "";
+"Loan" = "Prestito";
 
 /* Empire rank. [stats.py] */
-"Lord" = "";
+"Lord" = "Lord";
 
 /* Empire rank. [stats.py] */
-"Marquis" = "";
+"Marquis" = "Marquis";
 
 /* Combat rank. [stats.py] */
-"Master" = "";
+"Master" = "Master";
 
 /* Trade rank. [stats.py] */
-"Merchant" = "";
+"Merchant" = "Merchant";
 
 /* Federation rank. [stats.py] */
-"Midshipman" = "";
+"Midshipman" = "Midshipman";
 
 /* Explorer rank. [stats.py] */
-"Mostly Aimless" = "";
+"Mostly Aimless" = "Mostly Aimless";
 
 /* Combat rank. [stats.py] */
-"Mostly Harmless" = "";
+"Mostly Harmless" = "Mostly Harmless";
 
 /* CQC rank. [stats.py] */
-"Mostly Helpless" = "";
+"Mostly Helpless" = "Mostly Helpless";
 
 /* Trade rank. [stats.py] */
-"Mostly Penniless" = "";
+"Mostly Penniless" = "Mostly Penniless";
 
 /* Combat rank. [stats.py] */
-"Novice" = "";
+"Novice" = "Novice";
 
 /* Empire rank. [stats.py] */
-"Outsider" = "";
+"Outsider" = "Outsider";
 
 /* Explorer rank. [stats.py] */
-"Pathfinder" = "";
+"Pathfinder" = "Pathfinder";
 
 /* Trade rank. [stats.py] */
-"Pedlar" = "";
+"Pedlar" = "Pedlar";
 
 /* Trade rank. [stats.py] */
-"Penniless" = "";
+"Penniless" = "Penniless";
 
 /* Federation rank. [stats.py] */
-"Petty Officer" = "";
+"Petty Officer" = "Petty Officer";
 
 /* Explorer rank. [stats.py] */
-"Pioneer" = "";
+"Pioneer" = "Pioneer";
 
 /* Federation rank. [stats.py] */
-"Post Captain" = "";
+"Post Captain" = "Post Captain";
 
 /* Federation rank. [stats.py] */
-"Post Commander" = "";
+"Post Commander" = "Post Commander";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "";
+"Powerplay" = "Powerplay";
 
 /* Empire rank. [stats.py] */
-"Prince" = "";
+"Prince" = "Prince";
 
 /* CQC rank. [stats.py] */
-"Professional" = "";
+"Professional" = "Professional";
 
 /* Explorer rank. [stats.py] */
-"Ranger" = "";
+"Ranger" = "Ranger";
 
 /* Power rank. [stats.py] */
-"Rating 1" = "";
+"Rating 1" = "Rating 1";
 
 /* Power rank. [stats.py] */
-"Rating 2" = "";
+"Rating 2" = "Rating 2";
 
 /* Power rank. [stats.py] */
-"Rating 3" = "";
+"Rating 3" = "Rating 3";
 
 /* Power rank. [stats.py] */
-"Rating 4" = "";
+"Rating 4" = "Rating 4";
 
 /* Power rank. [stats.py] */
-"Rating 5" = "";
+"Rating 5" = "Rating 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
 "Re-start Elite: Dangerous for automatic log entries" = "Riavviare Elite: Dangerous per una log entry automatica";
 
 /* Federation rank. [stats.py] */
-"Rear Admiral" = "";
+"Rear Admiral" = "Rear Admiral";
 
 /* Federation rank. [stats.py] */
-"Recruit" = "";
+"Recruit" = "Recruit";
 
 /* Explorer rank. [stats.py] */
-"Scout" = "";
+"Scout" = "Scout";
 
 /* CQC rank. [stats.py] */
-"Semi Professional" = "";
+"Semi Professional" = "Semi Professional";
 
 /* Empire rank. [stats.py] */
-"Serf" = "";
+"Serf" = "Serf";
 
 /* Status dialog subtitle. [stats.py] */
 "Ship" = "Nave";
@@ -410,31 +410,31 @@
 "Ships" = "Navi";
 
 /* Empire rank. [stats.py] */
-"Squire" = "";
+"Squire" = "Squire";
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
 /* Explorer rank. [stats.py] */
-"Surveyor" = "";
+"Surveyor" = "Surveyor";
 
 /* Ranking. [stats.py] */
-"Trade" = "";
+"Trade" = "Trade";
 
 /* Explorer rank. [stats.py] */
-"Trailblazer" = "";
+"Trailblazer" = "Trailblazer";
 
 /* Trade rank. [stats.py] */
-"Tycoon" = "";
+"Tycoon" = "Tycoon";
 
 /* Federation rank. [stats.py] */
-"Vice Admiral" = "";
+"Vice Admiral" = "Vice Admiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
 "View" = "Vista";
 
 /* Empire rank. [stats.py] */
-"Viscount" = "";
+"Viscount" = "Viscount";
 
 /* Federation rank. [stats.py] */
-"Warrant Officer" = "";
+"Warrant Officer" = "Warrant Officer";
