@@ -8,17 +8,18 @@ from sys import platform
 from time import strptime, localtime, mktime, sleep, time
 from datetime import datetime
 
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-
 if __debug__:
     from traceback import print_exc
 
 if platform=='darwin':
     from AppKit import NSWorkspace
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
  
 elif platform=='win32':
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
     import ctypes
 
     CSIDL_LOCAL_APPDATA     = 0x001C
@@ -62,6 +63,9 @@ elif platform=='win32':
             lParam[0] = 1
             return False	# stop enumeration
         return True
+
+else:
+    FileSystemEventHandler = object	# dummy
 
 
 class EDLogs(FileSystemEventHandler):

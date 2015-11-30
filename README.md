@@ -90,12 +90,12 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python “requests” module - install this with `easy_install requests` .
+* Requires the Python “requests” and “watchdog” modules - install these with `easy_install requests watchdog` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “requests” module.
+* Requires Python2.7 and the Python “requests” and “watchdog” modules.
 * Run with `EDMarketConnector.py` .
 
 Linux:
