@@ -174,7 +174,7 @@ class StatsDialog(tk.Toplevel):
 
         self.parent = parent
         self.session = session
-        self.title('Statistics')
+        self.title(_('Status'))	# Menu item
 
         if parent.winfo_viewable():
             self.transient(parent)
