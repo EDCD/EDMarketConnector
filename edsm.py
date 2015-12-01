@@ -36,7 +36,7 @@ class EDSM:
             self.thread.daemon = True
             self.thread.start()
         else:
-            self.result = { 'img': '', 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
+            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
             r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()

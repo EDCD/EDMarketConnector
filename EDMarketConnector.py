@@ -285,10 +285,10 @@ class AppWindow:
                     else:
                         self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
                     self.status['text'] = ''
-                    self.edsmpoll()
                 except Exception as e:
                     if __debug__: print_exc()
                     self.status['text'] = unicode(e)
+                self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
@@ -415,13 +415,13 @@ class AppWindow:
                     edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
                 else:
                     self.edsm.start_lookup(system, EDDB.system(system))
-                self.edsmpoll()
                 self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
             except Exception as e:
                 if __debug__: print_exc()
                 self.status['text'] = unicode(e)
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
+            self.edsmpoll()
 
 
     def edsmpoll(self):
