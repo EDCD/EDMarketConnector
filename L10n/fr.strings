@@ -29,13 +29,13 @@
 "Error: Can't connect to EDDN" = "Erreur: Connexion impossible à EDDN";
 
 /* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Erreur ; Connexion à EDDN expirée";
+"Error: Connection to EDDN timed out" = "Erreur: Connexion à EDDN expirée";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Erreur : Identifiants invalides";
+"Error: Invalid Credentials" = "Erreur: Identifiants invalides";
 
 /* [companion.py] */
-"Error: Server is down" = "Erreur : Le serveur est indisponible";
+"Error: Server is down" = "Erreur: Le serveur est indisponible";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Quitter";
