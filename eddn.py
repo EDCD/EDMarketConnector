@@ -12,6 +12,7 @@ from config import applongname, appversion, config
 import companion
 import outfitting
 
+### upload = 'http://localhost:8081/upload/'	# testing
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 
 timeout= 10	# requests timeout
@@ -31,7 +32,7 @@ def send(cmdr, msg):
     msg['header'] = {
         'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
         'softwareVersion' : appversion,
-        'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr,
+        'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr.encode('utf-8'),
     }
     msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
 

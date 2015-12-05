@@ -260,7 +260,7 @@ class AppWindow:
             else:
                 if __debug__:	# Recording
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
-                        h.write(json.dumps(data, indent=2, sort_keys=True))
+                        h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True).encode('utf-8'))
 
                 self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
