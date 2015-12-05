@@ -1,21 +1,10 @@
-#!/usr/bin/python
-#
-# Script for building table ID->module mapping table from a dump of the Companion API output
-#
-
-import csv
-import json
-import os
-from os.path import exists, isfile
-import sys
 import time
 
 import companion
 from config import config
 
 
-outfile = 'outfitting.csv'
-outfitting = {}
+# Map API module names to in-game names
 
 armour_map = {
     'grade1'   : 'Lightweight Alloy',
@@ -349,65 +338,3 @@ def export(data, filename):
         except:
             if __debug__: raise
     h.close()
-
-
-# add all the modules
-def addmodules(data):
-    if not data.get('lastStarport'):
-        print 'No Starport!'
-        return
-    elif not data['lastStarport'].get('modules'):
-        print 'No outfitting here'
-        return
-
-    # read into outfitting
-    if isfile(outfile):
-        with open(outfile) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                key = int(row.pop('id'))	# index by int for easier lookup and sorting
-                outfitting[key] = row
-    size_pre = len(outfitting)
-
-    for key,module in data['lastStarport'].get('modules').iteritems():
-        # sanity check
-        if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
-        new = lookup(module)
-        if new:
-            old = outfitting.get(int(key))
-            if old:
-                # check consistency with existing data
-                for thing in ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']:
-                    if new.get(thing,'') != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
-            else:
-                outfitting[int(key)] = new
-
-    if len(outfitting) > size_pre:
-
-        if isfile(outfile):
-            if isfile(outfile+'.bak'):
-                os.unlink(outfile+'.bak')
-            os.rename(outfile, outfile+'.bak')
-
-        with open(outfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating'])
-            writer.writeheader()
-            for key in sorted(outfitting):
-                row = outfitting[key]
-                row['id'] = key
-                writer.writerow(row)
-
-        print 'Added %d new modules' % (len(outfitting) - size_pre)
-
-    else:
-        print
-
-if __name__ == "__main__":
-    if len(sys.argv) <= 1:
-        print 'Usage: outfitting.py [dump.json]'
-    else:
-        # read from dumped json file(s)
-        for f in sys.argv[1:]:
-            with open(f) as h:
-                print f,
-                addmodules(json.loads(h.read()))
