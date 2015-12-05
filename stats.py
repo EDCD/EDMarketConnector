@@ -8,8 +8,8 @@ import Tkinter as tk
 import ttk
 
 import companion
+from companion import ship_map
 import prefs
-from shipyard import ship_map
 
 
 # Hack to fix notebook page background. Doesn't seem possible to do this with styles.

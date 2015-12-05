@@ -9,12 +9,19 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
-from shipyard import ship_map
+import companion
 import outfitting
 
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 
 timeout= 10	# requests timeout
+
+# Map API ship names to EDDN schema names
+# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/shipyard-v1.0.json
+ship_map = dict(companion.ship_map)
+ship_map['asp'] = 'Asp'			# Pre E:D 1.5 name for backwards compatibility
+ship_map['cobramkiii'] = 'Cobra Mk III'	#	ditto
+ship_map['viper'] = 'Viper'		#	ditto
 
 bracketmap = { 1: 'Low',
                2: 'Med',
@@ -68,7 +75,7 @@ def export_outfitting(data):
     modules = []
     for v in data['lastStarport'].get('modules', {}).itervalues():
         try:
-            module = outfitting.lookup(v)
+            module = outfitting.lookup(v, ship_map)
             if module:
                 modules.append(module)
         except AssertionError as e:

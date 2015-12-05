@@ -9,8 +9,11 @@ import time
 
 from config import config
 import outfitting
-import shipyard
+import companion
 
+
+# Map API slot names to Coriolis categories
+# http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
 slot_map = {
     'hugehardpoint'    : 'hardpoints',
@@ -29,12 +32,15 @@ slot_map = {
     'slot'             : 'internal',
 }
 
-# Map draft E:D Shipyard & EDDN outfitting to Coriolis
-# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0-draft.json
-# http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
-ship_map = dict(shipyard.ship_map)
-ship_map['asp'] = 'Asp Explorer'
+# Map API ship names to Coriolis names
+ship_map = dict(companion.ship_map)
+ship_map['cobramkiii'] = 'Cobra Mk III'
+ship_map['viper'] = 'Viper'
+
+
+# Map EDDN outfitting schema / in-game names to Coriolis names
+# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0.json
 
 standard_map = OrderedDict([	# in output order
     ('Armour',            'bulkheads'),
@@ -78,8 +84,6 @@ def export(data, filename=None):
 
     querytime = config.getint('querytime') or int(time.time())
 
-    ship = shipyard.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-
     loadout = OrderedDict([	# Mimic Coriolis export ordering
         ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/2.json#'),
         ('name',       ship_map.get(data['ship']['name'].lower(), data['ship']['name'])),
@@ -114,7 +118,7 @@ def export(data, filename=None):
                 loadout['components'][category].append(None)
                 continue
 
-            module = outfitting.lookup(v['module'])
+            module = outfitting.lookup(v['module'], ship_map)
             if not module:
                 raise AssertionError('Unknown module %s' % v)	# Shouldn't happen
 
@@ -176,6 +180,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
+    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.json')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:

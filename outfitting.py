@@ -10,7 +10,7 @@ from os.path import exists, isfile
 import sys
 import time
 
-from shipyard import ship_map
+import companion
 from config import config
 
 
@@ -215,9 +215,11 @@ internal_map = {
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
 # English langauge game. For fitted modules, dict also includes { enabled, priority }.
-# Or returns None if the module is user-specific (i.e. decal, paintjob).
+# ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
+#
+# Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
-def lookup(module):
+def lookup(module, ship_map):
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
@@ -339,7 +341,7 @@ def export(data, filename):
     h.write(header)
     for v in data['lastStarport'].get('modules', {}).itervalues():
         try:
-            m = lookup(v)
+            m = lookup(v, companion.ship_map)
             if m:
                 h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], timestamp))
         except AssertionError as e:
