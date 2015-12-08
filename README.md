@@ -158,10 +158,11 @@ This app uses the “Companion” web API that Frontier supplies to support thei
 
 Acknowledgements
 --------
-* “Elite: Dangerous” is © 1984 - 2014 Frontier Developments plc.
+* “Elite: Dangerous” is © 1984 - 2015 Frontier Developments plc.
 * Thanks to [Cmdr Anthor](http://ed-td.space/) for the French translation.
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
+* Thanks to Armando Ota for the Slovenian translation.
 * Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [Cmdr Anthor](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
