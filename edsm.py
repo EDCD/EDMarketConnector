@@ -6,7 +6,7 @@ import urllib
 
 import Tkinter as tk
 
-from config import config
+from config import applongname, appversion, config
 import flightlog
 
 if __debug__:
@@ -121,7 +121,7 @@ def writelog(timestamp, system, edsmlookupfn):
         # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
         edsmlookupfn()
 
-        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp)))), timeout=EDSM._TIMEOUT)
+        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
         r.raise_for_status()
         reply = r.json()
         (msgnum, msg) = reply['msgnum'], reply['msg']
@@ -143,7 +143,7 @@ def writelog(timestamp, system, edsmlookupfn):
 def export_historical():
     try:
         for (timestamp, system_name) in flightlog.logs():
-            r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp)))), timeout=EDSM._TIMEOUT)
+            r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
 
             if r.json()['msgnum'] // 100 == 2:
