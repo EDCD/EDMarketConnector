@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
 from sys import platform
 import json
 from os import mkdir
@@ -17,6 +18,12 @@ from ttkHyperlinkLabel import HyperlinkLabel
 if __debug__:
     from traceback import print_exc
 
+from config import appname, applongname, config
+if platform == 'win32' and getattr(sys, 'frozen', False):
+    # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+    import tempfile
+    sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
+
 import l10n
 l10n.Translations().install()
 
@@ -31,7 +38,6 @@ import flightlog
 import eddb
 import stats
 import prefs
-from config import appname, applongname, config
 from hotkey import hotkeymgr
 from monitor import monitor
 
