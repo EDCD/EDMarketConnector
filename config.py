@@ -9,6 +9,9 @@ applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
 appversion = '1.8.8.1'
 
+update_feed = 'http://marginal.org.uk/edmarketconnector.xml'
+update_interval = 47*60*60
+
 
 if platform=='darwin':
     from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
@@ -144,7 +147,7 @@ class Config:
                     if disposition.value == REG_CREATED_NEW_KEY:
                         buf = ctypes.create_unicode_buffer('1')
                         RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
-                        buf = ctypes.create_unicode_buffer(unicode(47*60*60))
+                        buf = ctypes.create_unicode_buffer(unicode(update_interval))
                         RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
                     RegCloseKey(sparklekey)
 

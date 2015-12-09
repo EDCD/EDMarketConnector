@@ -17,6 +17,10 @@ import shutil
 import sys
 from tempfile import gettempdir
 
+from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
+from config import update_feed, update_interval
+
+
 if sys.platform=='win32':
     assert platform.architecture()[0]=='32bit', 'Assumes a Python built for 32bit'
     import py2exe
@@ -52,10 +56,6 @@ if sys.platform=='darwin':
 
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
-APPNAME = re.search(r"^appname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
-APPLONGNAME = re.search(r"^applongname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
-APPCMDNAME = re.search(r"^appcmdname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
-VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
 if sys.platform=='darwin':
@@ -80,8 +80,8 @@ if sys.platform=='darwin':
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
-                      'SUFeedURL': 'http://marginal.org.uk/edmarketconnector.xml',
-                      'SUScheduledCheckInterval': 47*60*60,
+                      'SUFeedURL': update_feed,
+                      'SUScheduledCheckInterval': update_interval,
                   },
                   'graph': True,	# output dependency graph in dist
               }

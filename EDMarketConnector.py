@@ -81,7 +81,7 @@ class AppWindow:
             style.configure('TRadiobutton', font=font)
             style.configure('TEntry', font=font)
 
-        frame = ttk.Frame(self.w)
+        frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
@@ -93,8 +93,8 @@ class AppWindow:
         self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
-        self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.status = ttk.Label(frame, width=-25)
+        self.button = ttk.Button(frame, name='update', text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.status = ttk.Label(frame, name='status', width=-25)
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
 
@@ -134,8 +134,7 @@ class AppWindow:
         else:
             file_menu = self.view_menu = tk.Menu(menubar, tearoff=tk.FALSE)
             file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
-            if platform == 'win32':
-                file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
+            file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
             file_menu.add_separator()
             file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
@@ -153,6 +152,7 @@ class AppWindow:
                                   style.lookup('TButton.label', 'background', ['active']))
             menubar.configure(  fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
             file_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
+            self.edit_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
         self.w['menu'] = menubar
 
         # update geometry
@@ -217,6 +217,8 @@ class AppWindow:
 
         if not self.status['text'] and monitor.restart_required():
             self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
+        elif not getattr(sys, 'frozen', False):
+            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
         self.cooldown()
 
