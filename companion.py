@@ -27,22 +27,30 @@ category_map = {
     'Narcotics'     : 'Legal Drugs',
     'Slaves'        : 'Slavery',
     'Waste '        : 'Waste',
-    'NonMarketable' : False,	# Don't report these
+    'NonMarketable' : False,	# Don't appear in the in-game market so don't report
 }
 
 commodity_map= {
-    'Agricultural Medicines'      : 'Agri-Medicines',
-    'Ai Relics'                   : 'AI Relics',
-    'Atmospheric Extractors'      : 'Atmospheric Processors',
-    'Auto Fabricators'            : 'Auto-Fabricators',
-    'Basic Narcotics'             : 'Narcotics',
-    'Bio Reducing Lichen'         : 'Bioreducing Lichen',
-    'Hazardous Environment Suits' : 'H.E. Suits',
-    'Heliostatic Furnaces'        : 'Microbial Furnaces',
-    'Marine Supplies'             : 'Marine Equipment',
-    'Non Lethal Weapons'          : 'Non-Lethal Weapons',
-    'S A P8 Core Container'       : 'SAP 8 Core Container',
-    'Terrain Enrichment Systems'  : 'Land Enrichment Systems',
+    'Agricultural Medicines'             : 'Agri-Medicines',
+    'Ai Relics'                          : 'AI Relics',
+    'Atmospheric Extractors'             : 'Atmospheric Processors',
+    'Auto Fabricators'                   : 'Auto-Fabricators',
+    'Basic Narcotics'                    : 'Narcotics',
+    'Bio Reducing Lichen'                : 'Bioreducing Lichen',
+    'Hafnium178'                         : 'Hafnium 178',
+    'Hazardous Environment Suits'        : 'H.E. Suits',
+    'Heliostatic Furnaces'               : 'Microbial Furnaces',
+    'Marine Supplies'                    : 'Marine Equipment',
+    'Non Lethal Weapons'                 : 'Non-Lethal Weapons',
+    'S A P8 Core Container'              : 'SAP 8 Core Container',	# Not seen in E:D 1.4 or later?
+    'Terrain Enrichment Systems'         : 'Land Enrichment Systems',
+    'U S S Cargo Ancient Artefact'       : 'Ancient Artefact',
+    'U S S Cargo Experimental Chemicals' : 'Experimental Chemicals',
+    'U S S Cargo Military Plans'         : 'Military Plans',
+    'U S S Cargo Prototype Tech'         : 'Prototype Tech',
+    'U S S Cargo Rebel Transmissions'    : 'Rebel Transmissions',
+    'U S S Cargo Technical Blueprints'   : 'Technical Blueprints',
+    'U S S Cargo Trade Data'             : 'Trade Data',
 }
 
 ship_map = {
