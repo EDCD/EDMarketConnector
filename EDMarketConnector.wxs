@@ -17,7 +17,7 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1036,1040,1045,1060,0" />	<!-- en-US, fr-FR, it-IT, pl, sl, neutral -->
+				 Languages="1033,1031,1036,1040,1045,1060,0" />	<!-- en-US, de-DE, fr-FR, it-IT, pl, sl, neutral -->
 
 		<!-- Always reinstall since patching is problematic -->
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -77,6 +77,9 @@
 					</Component>
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\de.strings" />
 					</Component>
 					<Component Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
@@ -363,6 +366,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="de.strings" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
