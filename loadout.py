@@ -14,7 +14,9 @@ import companion
 # Map API ship names to E:D Shipyard ship names
 ship_map = dict(companion.ship_map)
 ship_map['cobramkiii'] = 'Cobra Mk III'
-ship_map['viper'] = 'Viper'
+ship_map['cobramkiv']  = 'Cobra Mk IV',
+ship_map['viper']      = 'Viper'
+ship_map['viper_mkiv'] = 'Viper Mk IV'
 
 
 # Map API slot names to E:D Shipyard slot names
