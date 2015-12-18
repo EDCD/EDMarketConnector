@@ -8,10 +8,16 @@ import time
 
 from config import config
 import outfitting
-from companion import ship_map
+import companion
 
 
-# API slot names to E:D Shipyard slot names
+# Map API ship names to E:D Shipyard ship names
+ship_map = dict(companion.ship_map)
+ship_map['cobramkiii'] = 'Cobra Mk III'
+ship_map['viper'] = 'Viper'
+
+
+# Map API slot names to E:D Shipyard slot names
 slot_map = {
     'hugehardpoint'    : 'H',
     'largehardpoint'   : 'L',
@@ -28,7 +34,7 @@ slot_map = {
     'fueltank'         : 'FS',
 }
 
-def export(data):
+def export(data, filename=None):
 
     def class_rating(module):
         if 'guidance' in module:
@@ -40,8 +46,6 @@ def export(data):
 
     querytime = config.getint('querytime') or int(time.time())
 
-    ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-
     loadout = defaultdict(list)
 
     for slot in sorted(data['ship']['modules']):
@@ -50,7 +54,7 @@ def export(data):
         try:
             if not v: continue
 
-            module = outfitting.lookup(v['module'])
+            module = outfitting.lookup(v['module'], ship_map)
             if not module: continue
 
             cr = class_rating(module)
@@ -77,7 +81,7 @@ def export(data):
             if __debug__: raise
 
     # Construct description
-    string = '[%s]\n' % ship
+    string = '[%s]\n' % ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
     for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
@@ -86,7 +90,13 @@ def export(data):
                 string += '%s: %s\n' % (slot, name)
     string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['capacity'])
 
+    if filename:
+        with open(filename, 'wt') as h:
+            h.write(string)
+        return
+
     # Look for last ship of this type
+    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:

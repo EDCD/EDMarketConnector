@@ -9,12 +9,20 @@ from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import ship_map
+import companion
 import outfitting
 
+### upload = 'http://localhost:8081/upload/'	# testing
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 
 timeout= 10	# requests timeout
+
+# Map API ship names to EDDN schema names
+# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/shipyard-v1.0.json
+ship_map = dict(companion.ship_map)
+ship_map['asp'] = 'Asp'			# Pre E:D 1.5 name for backwards compatibility
+ship_map['cobramkiii'] = 'Cobra Mk III'	#	ditto
+ship_map['viper'] = 'Viper'		#	ditto
 
 bracketmap = { 1: 'Low',
                2: 'Med',
@@ -24,11 +32,11 @@ def send(cmdr, msg):
     msg['header'] = {
         'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
         'softwareVersion' : appversion,
-        'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr,
+        'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr.encode('utf-8'),
     }
     msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
 
-    r = requests.post(upload, data=json.dumps(msg), timeout=timeout)
+    r = requests.post(upload, json=msg, timeout=timeout)
     if __debug__ and r.status_code != requests.codes.ok:
         print 'Status\t%s'  % r.status_code
         print 'URL\t%s'  % r.url
@@ -68,7 +76,7 @@ def export_outfitting(data):
     modules = []
     for v in data['lastStarport'].get('modules', {}).itervalues():
         try:
-            module = outfitting.lookup(v)
+            module = outfitting.lookup(v, ship_map)
             if module:
                 modules.append(module)
         except AssertionError as e:

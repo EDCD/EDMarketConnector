@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import requests
 from collections import defaultdict
 from cookielib import LWPCookieJar
@@ -16,7 +13,7 @@ if __debug__:
 
 from config import config
 
-holdoff = 120	# be nice
+holdoff = 60	# be nice
 timeout = 10	# requests timeout
 
 URL_LOGIN   = 'https://companion.orerve.net/user/login'
@@ -24,12 +21,13 @@ URL_CONFIRM = 'https://companion.orerve.net/user/confirm'
 URL_QUERY   = 'https://companion.orerve.net/profile'
 
 
-# Map values reported by the Companion interface to names displayed in-game and recognized by trade tools
+# Map values reported by the Companion interface to names displayed in-game
 
 category_map = {
     'Narcotics'     : 'Legal Drugs',
     'Slaves'        : 'Slavery',
-    'NonMarketable' : False,
+    'Waste '        : 'Waste',
+    'NonMarketable' : False,	# Don't report these
 }
 
 commodity_map= {
@@ -50,8 +48,8 @@ commodity_map= {
 ship_map = {
     'adder'                       : 'Adder',
     'anaconda'                    : 'Anaconda',
-    'asp'                         : 'Asp',
-    'cobramkiii'                  : 'Cobra Mk III',
+    'asp'                         : 'Asp Explorer',
+    'cobramkiii'                  : 'Cobra MkIII',
     'diamondback'                 : 'Diamondback Scout',
     'diamondbackxl'               : 'Diamondback Explorer',
     'eagle'                       : 'Eagle',
@@ -71,7 +69,7 @@ ship_map = {
     'type6'                       : 'Type-6 Transporter',
     'type7'                       : 'Type-7 Transporter',
     'type9'                       : 'Type-9 Heavy',
-    'viper'                       : 'Viper',
+    'viper'                       : 'Viper MkIII',
     'vulture'                     : 'Vulture',
 }
 
@@ -229,7 +227,8 @@ class Session:
             commodity = commodities[i]
 
             # Check all required numeric fields are present and are numeric
-            # Catches "demandBracket": "" for some phantom commodites in ED 1.3
+            # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
+            # But also see https://github.com/Marginal/EDMarketConnector/issues/32
             for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
                 if not isinstance(commodity.get(thing), numbers.Number):
                     if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
@@ -237,9 +236,9 @@ class Session:
             else:
                 if not category_map.get(commodity['categoryname'], True):	# Check marketable
                     pass
-                elif not commodity.get('categoryname', '').strip():
+                elif not commodity.get('categoryname'):
                     if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
-                elif not commodity.get('name', '').strip():
+                elif not commodity.get('name'):
                     if __debug__: print 'Missing "name" for a commodity in "%s"' % commodity.get('categoryname', '')
                 elif not commodity['demandBracket'] in range(4):
                     if __debug__: print 'Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name'])
@@ -247,10 +246,8 @@ class Session:
                     if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
                 else:
                     # Rewrite text fields
-                    commodity['categoryname'] = category_map.get(commodity['categoryname'].strip(),
-                                                                 commodity['categoryname'].strip())
-                    commodity['name'] = commodity_map.get(commodity['name'].strip(),
-                                                          commodity['name'].strip())
+                    commodity['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
+                    commodity['name'] = commodity_map.get(commodity['name'], commodity['name'])
 
                     # Force demand and stock to zero if their corresponding bracket is zero
                     # Fixes spurious "demand": 1 in ED 1.3

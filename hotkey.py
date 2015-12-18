@@ -118,8 +118,8 @@ if platform == 'darwin':
                 if config.getint('hotkey_always'):
                     self.activated = True
                 else:	# Only trigger if game client is front process
-                    active = [x for x in NSWorkspace.sharedWorkspace().runningApplications() if x.isActive()]
-                    if active and active[0] and active[0].bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                    front = NSWorkspace.sharedWorkspace().frontmostApplication()
+                    if front and front.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
                         self.activated = True
 
         def acquire_start(self):
@@ -317,7 +317,9 @@ elif platform == 'win32':
             pass
 
         def fromevent(self, event):
-            # event.state is a pain - it shows the state of the modifiers *before* a modifier key was pressed
+            # event.state is a pain - it shows the state of the modifiers *before* a modifier key was pressed.
+            # event.state *does* differentiate between left and right Ctrl and Alt and between Return and Enter
+            # by putting KF_EXTENDED in bit 18, but RegisterHotKey doesn't differentiate.
             modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
             keycode = event.keycode
 
@@ -328,7 +330,7 @@ elif platform == 'win32':
                     return False
                 elif keycode in [ VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR ]:	# BkSp, Del, Clear = clear hotkey
                     return None
-                elif keycode in [ VK_RETURN, VK_SPACE, VK_OEM_MINUS] or 0x41 <= keycode <= 0x5a:	# don't allow keys needed for typing in System Map
+                elif keycode in [ VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord('Z'):	# don't allow keys needed for typing in System Map
                     winsound.MessageBeep()
                     return None
                 elif keycode in [ VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY ] or VK_CAPITAL <= keycode <= VK_MODECHANGE:	# ignore unmodified mode switch keys

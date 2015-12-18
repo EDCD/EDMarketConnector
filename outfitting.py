@@ -1,19 +1,10 @@
-#!/usr/bin/python
-#
-# Script for building table ID->module mapping table from a dump of the Companion API output
-#
+import time
 
-import csv
-import json
-import os
-from os.path import exists, isfile
-import sys
-
-from companion import ship_map
+import companion
+from config import config
 
 
-outfile = 'outfitting.csv'
-outfitting = {}
+# Map API module names to in-game names
 
 armour_map = {
     'grade1'   : 'Lightweight Alloy',
@@ -174,6 +165,14 @@ rating_map = {
     '5': 'A',
 }
 
+misc_internal_map = {
+    ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
+    ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
+    ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
+    ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
+    ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
+}
+
 standard_map = {
     # 'armour'         : handled separately
     'engine'           : 'Thrusters',
@@ -183,13 +182,6 @@ standard_map = {
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
     'sensors'          : 'Sensors',
-}
-
-stellar_map = {
-    'standard'     : ('Basic Discovery Scanner', 'E'),
-    'intermediate' : ('Intermediate Discovery Scanner', 'D'),
-    'advanced'     : ('Advanced Discovery Scanner', 'C'),
-    'tiny'         : ('Detailed Surface Scanner', 'C'),
 }
 
 internal_map = {
@@ -212,9 +204,11 @@ internal_map = {
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
 # English langauge game. For fitted modules, dict also includes { enabled, priority }.
-# Or returns None if the module is user-specific (i.e. decal, paintjob).
+# ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
+#
+# Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
-def lookup(module):
+def lookup(module, ship_map):
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
@@ -280,28 +274,22 @@ def lookup(module):
     elif name[0]=='hpt':
         raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
 
-    # Stellar scanners - e.g. Int_StellarBodyDiscoveryScanner_Standard
-    elif name[1] in ['stellarbodydiscoveryscanner', 'detailedsurfacescanner']:
-        new['category'] = 'internal'
-        new['name'], new['rating'] = stellar_map[name[2]]
-        new['class'] = '1'
+    elif name[0]!='int':
+        raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-    # Docking Computer - e.g. Int_DockingComputer_Standard
-    elif name[1] == 'dockingcomputer' and name[2] == 'standard':
+    # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
+    elif (name[1],name[2]) in misc_internal_map:
+        # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
         new['category'] = 'internal'
-        new['name'] = 'Standard Docking Computer'
+        new['name'], new['rating'] = misc_internal_map[(name[1],name[2])]
         new['class'] = '1'
-        new['rating'] = 'E'
 
     # Standard & Internal
     else:
-        # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
-        if name[0] != 'int': raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
-
         if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
 
-        if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1
+        if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
             new['category'] = 'standard'
             new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1
@@ -327,63 +315,26 @@ def lookup(module):
     return new
 
 
-# add all the modules
-def addmodules(data):
-    if not data.get('lastStarport'):
-        print 'No Starport!'
-        return
-    elif not data['lastStarport'].get('modules'):
-        print 'No outfitting here'
-        return
+def export(data, filename):
 
-    # read into outfitting
-    if isfile(outfile):
-        with open(outfile) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                key = int(row.pop('id'))	# index by int for easier lookup and sorting
-                outfitting[key] = row
-    size_pre = len(outfitting)
+    querytime = config.getint('querytime') or int(time.time())
 
-    for key,module in data['lastStarport'].get('modules').iteritems():
-        # sanity check
-        if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
-        new = lookup(module)
-        if new:
-            old = outfitting.get(int(key))
-            if old:
-                # check consistency with existing data
-                for thing in ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']:
-                    if new.get(thing,'') != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
-            else:
-                outfitting[int(key)] = new
+    assert data['lastSystem'].get('name')
+    assert data['lastStarport'].get('name')
 
-    if len(outfitting) > size_pre:
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
+    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,Date\n'
+    rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
 
-        if isfile(outfile):
-            if isfile(outfile+'.bak'):
-                os.unlink(outfile+'.bak')
-            os.rename(outfile, outfile+'.bak')
-
-        with open(outfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating'])
-            writer.writeheader()
-            for key in sorted(outfitting):
-                row = outfitting[key]
-                row['id'] = key
-                writer.writerow(row)
-
-        print 'Added %d new modules' % (len(outfitting) - size_pre)
-
-    else:
-        print
-
-if __name__ == "__main__":
-    if len(sys.argv) <= 1:
-        print 'Usage: outfitting.py [dump.json]'
-    else:
-        # read from dumped json file(s)
-        for f in sys.argv[1:]:
-            with open(f) as h:
-                print f,
-                addmodules(json.loads(h.read()))
+    h = open(filename, 'wt')
+    h.write(header)
+    for v in data['lastStarport'].get('modules', {}).itervalues():
+        try:
+            m = lookup(v, companion.ship_map)
+            if m:
+                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], timestamp))
+        except AssertionError as e:
+            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+        except:
+            if __debug__: raise
+    h.close()

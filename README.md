@@ -90,18 +90,48 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python “requests” module - install this with `easy_install requests` .
+* Requires the Python “requests” and “watchdog” modules - install these with `easy_install requests watchdog` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “requests” module.
+* Requires Python2.7 and the Python “requests” and “watchdog” modules.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
 * Requires the Python “imaging-tk”, “iniparse” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
 * Run with `./EDMarketConnector.py` .
+
+Command-line
+--------
+
+The command-line program `EDMC.py` writes the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file.
+This program requires that the user has performed [setup](#setup) and verification through the app.
+
+Arguments:
+
+```
+ -h, --help     show this help message and exit
+ -v, --version  print program version and exit
+ -c FILE        write ship loadout to FILE in Coriolis json format
+ -e FILE        write ship loadout to FILE in E:D Shipyard format
+ -l FILE        write ship locations to FILE in CSV format
+ -m FILE        write station commodity market data to FILE in CSV format
+ -o FILE        write station outfitting data to FILE in CSV format
+ -s FILE        write station shipyard data to FILE in CSV format
+ -t FILE        write player status to FILE in CSV format
+```
+
+The program returns one of the following exit codes. Further information may be written to stderr.
+<ol start="0">
+  <li>Success. Note that this doesn't necessarily mean that any requested output files have been produced - for example if the current station doesn't support the facilities for which data was requested.</li>
+  <li>Server is down.</li>
+  <li>Invalid Credentials.</li>
+  <li>Verification Required.</li>
+  <li>Not docked. You have requested station data but the user is not docked at a station.</li>
+  <li>I/O or other OS error.</li>
+</ol>
 
 
 Packaging for distribution
@@ -128,15 +158,16 @@ This app uses the “Companion” web API that Frontier supplies to support thei
 
 Acknowledgements
 --------
-* “Elite: Dangerous” is © 1984 - 2014 Frontier Developments plc.
+* “Elite: Dangerous” is © 1984 - 2015 Frontier Developments plc.
 * Thanks to [Cmdr Anthor](http://ed-td.space/) for the French translation.
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
+* Thanks to Armando Ota for the Slovenian translation.
 * Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [Cmdr Anthor](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
-* Uses [POEditor](https://poeditor.com/) for translation management.
+* Uses [OneSky](http://www.oneskyapp.com/) for [translation management](https://marginal.oneskyapp.com/collaboration/project?id=52710).
 
 License
 -------

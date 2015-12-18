@@ -12,6 +12,9 @@ import outfitting
 import companion
 
 
+# Map API slot names to Coriolis categories
+# http://cdn.coriolis.io/schemas/ship-loadout/2.json
+
 slot_map = {
     'hugehardpoint'    : 'hardpoints',
     'largehardpoint'   : 'hardpoints',
@@ -29,12 +32,15 @@ slot_map = {
     'slot'             : 'internal',
 }
 
-# Map draft E:D Shipyard & EDDN outfitting to Coriolis
-# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0-draft.json
-# http://cdn.coriolis.io/schemas/ship-loadout/2.json
 
+# Map API ship names to Coriolis names
 ship_map = dict(companion.ship_map)
-ship_map['asp'] = 'Asp Explorer'
+ship_map['cobramkiii'] = 'Cobra Mk III'
+ship_map['viper'] = 'Viper'
+
+
+# Map EDDN outfitting schema / in-game names to Coriolis names
+# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/outfitting-v1.0.json
 
 standard_map = OrderedDict([	# in output order
     ('Armour',            'bulkheads'),
@@ -57,7 +63,7 @@ weaponmount_map = {
 
 # Modules that have a name as well as a group
 bulkheads       = outfitting.armour_map.values()
-scanners        = [x[0] for x in outfitting.stellar_map.values()]
+scanners        = [x[0] for x in outfitting.misc_internal_map.values()]
 countermeasures = [x[0] for x in outfitting.countermeasure_map.values()]
 fixup_map = {
     'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
@@ -74,11 +80,9 @@ fixup_map = {
 }
 
 
-def export(data):
+def export(data, filename=None):
 
     querytime = config.getint('querytime') or int(time.time())
-
-    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
 
     loadout = OrderedDict([	# Mimic Coriolis export ordering
         ('$schema',    'http://cdn.coriolis.io/schemas/ship-loadout/2.json#'),
@@ -114,7 +118,7 @@ def export(data):
                 loadout['components'][category].append(None)
                 continue
 
-            module = outfitting.lookup(v['module'])
+            module = outfitting.lookup(v['module'], ship_map)
             if not module:
                 raise AssertionError('Unknown module %s' % v)	# Shouldn't happen
 
@@ -134,15 +138,15 @@ def export(data):
                     loadout['components'][category][standard_map[module['name']]] = thing
             else:
                 # All other items have a "group" member, some also have a "name"
-                if module['name'] in scanners:
+                if module['name'] in fixup_map:
+                    thing['group'], name = fixup_map[module['name']]
+                    if name: thing['name'] = name
+                elif module['name'] in scanners:
                     thing['group'] = 'Scanner'
                     thing['name'] = module['name']
                 elif module['name'] in countermeasures:
                     thing['group'] = 'Countermeasure'
                     thing['name'] = module['name']
-                elif module['name'] in fixup_map:
-                    thing['group'], name = fixup_map[module['name']]
-                    if name: thing['name'] = name
                 else:
                     thing['group'] = module['name']
 
@@ -170,7 +174,13 @@ def export(data):
     # Construct description
     string = json.dumps(loadout, indent=2)
 
+    if filename:
+        with open(filename, 'wt') as h:
+            h.write(string)
+        return
+
     # Look for last ship of this type
+    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.json')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:

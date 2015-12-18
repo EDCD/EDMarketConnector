@@ -18,6 +18,8 @@ if __debug__:
     from traceback import print_exc
 
 import l10n
+l10n.Translations().install()
+
 import companion
 import bpc
 import td
@@ -27,11 +29,12 @@ import loadout
 import coriolis
 import flightlog
 import eddb
+import stats
 import prefs
 from config import appname, applongname, config
 from hotkey import hotkeymgr
+from monitor import monitor
 
-l10n.Translations().install()
 EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
@@ -77,9 +80,9 @@ class AppWindow:
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
 
-        ttk.Label(frame, text=_('Cmdr:')).grid(row=0, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('System:')).grid(row=1, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('Station:')).grid(row=2, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('Cmdr')+':').grid(row=0, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('System')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
+        ttk.Label(frame, text=_('Station')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
 
         self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
@@ -110,6 +113,9 @@ class AppWindow:
             self.edit_menu.add_command(label=_('Copy'), accelerator='Command-c', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
             menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
             self.w.bind('<Command-c>', self.copy)
+            self.view_menu = tk.Menu(menubar, name='view')
+            self.view_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
+            menubar.add_cascade(label=_('View'), menu=self.view_menu)	# Menu title on OSX
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
@@ -120,7 +126,8 @@ class AppWindow:
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
-            file_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu = self.view_menu = tk.Menu(menubar, tearoff=tk.FALSE)
+            file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
             if platform == 'win32':
                 file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
@@ -154,12 +161,6 @@ class AppWindow:
         if platform != 'linux2':	# update_idletasks() doesn't allow for the menubar on Linux
             self.w.maxsize(-1, h)	# Maximum height = initial height
 
-        # First run
-        if not config.get('username') or not config.get('password'):
-            prefs.PreferencesDialog(self.w, self.login)
-        else:
-            self.login()
-
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
@@ -169,6 +170,18 @@ class AppWindow:
         self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
+        # Install log monitoring
+        self.w.bind_all('<<Jump>>', self.system_change)	# user-generated
+        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
+            monitor.enable_logging()
+            monitor.start(self.w)
+
+        # First run
+        if not config.get('username') or not config.get('password'):
+            prefs.PreferencesDialog(self.w, self.login)
+        else:
+            self.login()
+
     # call after credentials have changed
     def login(self):
         self.status['text'] = _('Logging in...')
@@ -176,16 +189,8 @@ class AppWindow:
         self.w.update_idletasks()
         try:
             self.session.login(config.get('username'), config.get('password'))
+            self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
             self.status['text'] = ''
-
-            # Try to obtain exclusive lock on flight log ASAP
-            if config.getint('output') & config.OUT_LOG_FILE:
-                try:
-                    flightlog.openlog()
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
             self.status['text'] = ''
@@ -194,6 +199,19 @@ class AppWindow:
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
+
+        # Try to obtain exclusive lock on flight log ASAP
+        if config.getint('output') & config.OUT_LOG_FILE:
+            try:
+                flightlog.openlog()
+            except Exception as e:
+                if __debug__: print_exc()
+                if not self.status['text']:
+                    self.status['text'] = unicode(e)
+
+        if not self.status['text'] and monitor.restart_required():
+            self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
+
         self.cooldown()
 
     # callback after verification code
@@ -221,7 +239,7 @@ class AppWindow:
                 hotkeymgr.play_good()
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.system['image'] = ''
-            self.status['text'] = _('Fetching station data...')
+            self.status['text'] = _('Fetching data...')
             self.button['state'] = tk.DISABLED
             self.edit_menu.entryconfigure(_('Copy'), state=tk.DISABLED)
             self.w.update_idletasks()
@@ -234,23 +252,22 @@ class AppWindow:
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
                 self.status['text'] = _("Who are you?!")		# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
             elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-                if play_sound: hotkeymgr.play_bad()
 
             else:
                 if __debug__:	# Recording
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
-                        h.write(json.dumps(data, indent=2, sort_keys=True))
+                        h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True).encode('utf-8'))
 
                 self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
+                self.status['text'] = ''
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
+                self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
 
                 # stuff we can do when not docked
                 if config.getint('output') & config.OUT_SHIP_EDS:
@@ -259,32 +276,40 @@ class AppWindow:
                     coriolis.export(data)
                 if config.getint('output') & config.OUT_LOG_FILE:
                     flightlog.export(data)
-                if config.getint('output') & config.OUT_LOG_EDSM:
-                    self.status['text'] = _('Sending data to EDSM...')
-                    self.w.update_idletasks()
-                    edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                else:
-                    self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
+                try:
+                    # Catch any EDSM errors here so that they don't prevent station update
+                    if config.getint('output') & config.OUT_LOG_EDSM:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
+                    else:
+                        self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
+                    self.status['text'] = ''
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
                 self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
-                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                    pass
 
                 elif not data['commander'].get('docked'):
-                    self.status['text'] = _("You're not docked at a station!")
                     # signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                    if play_sound: hotkeymgr.play_bad()
+                    if not self.status['text']:
+                        self.status['text'] = _("You're not docked at a station!")
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
-                    (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
+                    (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
-                    if (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities') and not has_outfitting and not has_shipyard:
-                        self.status['text'] = _("Station doesn't have anything!")
+                    if (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have anything!")
 
-                    elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
-                        self.status['text'] = _("Station doesn't have a market!")
+                    elif not (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')):
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have a market!")
 
                     else:
                         if data['lastStarport'].get('commodities'):
@@ -298,8 +323,14 @@ class AppWindow:
                             if config.getint('output') & config.OUT_BPC:
                                 bpc.export(data, False)
 
+                        elif has_market and (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
+                            # Overwrite any previous error message
+                            self.status['text'] = _("Error: Can't get market data!")
+
                         if config.getint('output') & config.OUT_EDDN:
-                            self.status['text'] = _('Sending data to EDDN...')
+                            old_status = self.status['text']
+                            if not old_status:
+                                self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
                             if has_outfitting:
@@ -317,8 +348,8 @@ class AppWindow:
                                     self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             elif __debug__ and data['lastStarport'].get('ships'):
                                 print 'Spurious shipyard!'
-
-                        self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+                            if not old_status:
+                                self.status['text'] = ''
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, self.verify)
@@ -327,7 +358,6 @@ class AppWindow:
         except companion.ServerError as e:
             if retrying:
                 self.status['text'] = unicode(e)
-                if play_sound: hotkeymgr.play_bad()
             else:
                 # Retry once if Companion server is unresponsive
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
@@ -336,17 +366,19 @@ class AppWindow:
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
-            if play_sound: hotkeymgr.play_bad()
 
         except requests.exceptions.Timeout as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Connection to EDDN timed out")
-            if play_sound: hotkeymgr.play_bad()
 
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
-            if play_sound: hotkeymgr.play_bad()
+
+        if not self.status['text']:	# no errors
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+        elif play_sound:
+            hotkeymgr.play_bad()
 
         self.holdofftime = querytime + companion.holdoff
         self.cooldown()
@@ -362,6 +394,36 @@ class AppWindow:
         except:
             pass
 
+    def system_change(self, event):
+
+        if not monitor.last_event:
+            if __debug__: print 'spurious system_change', event	# eh?
+            return
+
+        timestamp, system = monitor.last_event	# would like to use event user_data to carry this, but not accessible in Tkinter
+
+        if self.system['text'] != system:
+            try:
+                self.system['text'] = system
+                self.system['image'] = ''
+                self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+                if config.getint('output') & config.OUT_LOG_FILE:
+                    flightlog.writelog(timestamp, system)
+                if config.getint('output') & config.OUT_LOG_EDSM:
+                    self.status['text'] = _('Sending data to EDSM...')
+                    self.w.update_idletasks()
+                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                else:
+                    self.edsm.start_lookup(system, EDDB.system(system))
+                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            except Exception as e:
+                if __debug__: print_exc()
+                self.status['text'] = unicode(e)
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+            self.edsmpoll()
+
+
     def edsmpoll(self):
         result = self.edsm.result
         if result['done']:
@@ -374,7 +436,7 @@ class AppWindow:
 
     def station_url(self, text):
         if text:
-            (station_id, has_shipyard, has_outfitting) = EDDB.station(self.system['text'], self.station['text'])
+            (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
             if station_id:
                 return 'http://eddb.io/station/%d' % station_id
 
@@ -398,6 +460,7 @@ class AppWindow:
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
 
     def onexit(self, event=None):
+        flightlog.close()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()

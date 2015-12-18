@@ -34,7 +34,7 @@ macdeveloperid = None
 
 # Windows paths
 WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.9\bin'
-SDKPATH = r'C:\Program Files\Microsoft SDKs\Windows\v7.0'
+SDKPATH = r'C:\Program Files (x86)\Windows Kits\8.1\bin\x86'
 
 # Patch py2app recipe enumerator to skip the sip recipe since it's too enthusiastic - we'll list additional Qt modules explicitly
 if sys.platform=='darwin':
@@ -51,8 +51,10 @@ if sys.platform=='darwin':
 
 
 APP = 'EDMarketConnector.py'
+APPCMD = 'EDMC.py'
 APPNAME = re.search(r"^appname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 APPLONGNAME = re.search(r"^applongname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
+APPCMDNAME = re.search(r"^appcmdname\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 VERSION = re.search(r"^appversion\s*=\s*'(.+)'", file('config.py').read(), re.MULTILINE).group(1)
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
 
@@ -119,6 +121,12 @@ setup(
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
+    console = [ {'dest_base': APPCMDNAME,
+                 'script': APPCMD,
+                 'copyright': u'© 2015 Jonathan Harris',
+                 'name': APPNAME,
+                 'company_name': 'Marginal',
+             } ],
     data_files = DATA_FILES,
     options = OPTIONS,
     setup_requires = [sys.platform=='darwin' and 'py2app' or 'py2exe'],
@@ -155,9 +163,9 @@ else:
         shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
         for lcid in lcids[1:]:
             shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
-            os.system(r'cscript "%s\Samples\sysmgmt\msi\scripts\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
-            os.system(r'"%s\Bin\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
-            os.system(r'cscript "%s\Samples\sysmgmt\msi\scripts\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+            os.system(r'cscript "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
+            os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
+            os.system(r'cscript "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
 
 # Make appcast entry
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')

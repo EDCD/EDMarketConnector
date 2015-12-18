@@ -6,7 +6,8 @@ from sys import platform
 
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
-appversion = '1.8.2.0'
+appcmdname = 'EDMC'
+appversion = '1.8.8.1'
 
 
 if platform=='darwin':
@@ -74,6 +75,7 @@ class Config:
     #OUT_STAT = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
     OUT_LOG_EDSM = 256
+    OUT_LOG_AUTO = 512
 
     if platform=='darwin':
 

@@ -76,12 +76,14 @@ class HyperlinkLabel(ttk.Label, object):
             self.configure(font = self.font_u)
 
     def _leave(self, event):
-        self.configure(font = self.font_n)
+        if self.underline is None:
+            self.configure(font = self.font_n)
 
     def _click(self, event):
         if self['text'] and str(self['state']) != tk.DISABLED:
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
+                self._leave(event)	# Remove underline before we change window to browser
                 webbrowser.open(url)
 
     def _contextmenu(self, event):

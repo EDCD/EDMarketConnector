@@ -17,7 +17,7 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1036,1040,1045,0" />	<!-- en-US, fr-FR, it-IT, pl, neutral -->
+				 Languages="1033,1036,1040,1045,1060,0" />	<!-- en-US, fr-FR, it-IT, pl, sl, neutral -->
 
 		<!-- Always reinstall since patching is problematic -->
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -30,6 +30,13 @@
 		<Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
 		<!-- <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />	 Remove repair -->
 		<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />	<!-- Remove modify - also set by WixUI_Minimal -->
+		<Property Id="ARPHELPLINK" Value="https://github.com/Marginal/EDMarketConnector/wiki" />
+
+		<!-- http://blogs.technet.com/b/alexshev/archive/2008/02/09/from-msi-to-wix-part-2.aspx -->
+		<CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+		<InstallExecuteSequence>
+			<Custom Action="SetARPINSTALLLOCATION" After="InstallValidate"></Custom>
+		</InstallExecuteSequence>
 
 		<!-- Merge in C runtime -->
 		<DirectoryRef Id="TARGETDIR">
@@ -78,6 +85,9 @@
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.VisualElementsManifest.xml" />
 					</Component>
 					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
+					</Component>
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\fr.strings" />
 					</Component>
 					<Component Guid="*">
@@ -88,6 +98,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\pl.strings" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\sl.strings" />
 					</Component>
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
@@ -352,6 +365,7 @@
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
+			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="fr.strings" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="library.zip" />
@@ -359,6 +373,7 @@
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
 			<ComponentRef Id="select.pyd" />
+			<ComponentRef Id="sl.strings" />
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
 			<ComponentRef Id="stations.p" />

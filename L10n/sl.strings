@@ -1,206 +1,207 @@
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Un codice di verifica è stato inviato alla email{CR}associata al tuo account di Elite Dangerous.";
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "
+Koda za preverjanje istovetnosti{CR}je bila poslana na e-poštni naslov.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Informazioni su {APP}";
+"About {APP}" = "O {APP}";
 
 /* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Sfoglia...";
+"Browse..." = "Prebrskaj...";
 
 /* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Cambia...";
+"Change..." = "Spremeni...";
 
 /* [EDMarketConnector.py] */
-"Check for Updates..." = "Controlla aggiornamenti...";
+"Check for Updates..." = "Preveri posodobitve...";
 
 /* EDSM & privacy setting. [prefs.py] */
-"Cmdr name" = "Nome Cmdr";
+"Cmdr name" = "Cmdr ime";
 
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "disponibile tra {SS} secondi";
+"cooldown {SS}s" = "Posodobitev v {SS}s";
 
 /* Section heading in settings. [prefs.py] */
-"Credentials" = "Credenziali";
+"Credentials" = "Uporabniški podatki";
 
 /* [EDMarketConnector.py] */
-"Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
+"Error: Can't connect to EDDN" = "Napaka: povezava z EDDN ni mogoča";
 
 /* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Errore: Connessione con EDDN scaduta";
+"Error: Connection to EDDN timed out" = "Napaka: Povezava z EDDN se je iztekla";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Errore: Credenziali sbagliate";
+"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
 
 /* [companion.py] */
-"Error: Server is down" = "Errore: Il Server è offline";
+"Error: Server is down" = "Napaka: Strežnik ni na voljo";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Esci";
+"Exit" = "Izhod";
 
 /* [EDMarketConnector.py] */
-"Fetching data..." = "Raccogliendo i dati...";
+"Fetching data..." = "Nalagam podatke...";
 
 /* Menu title on Windows. [EDMarketConnector.py] */
-"File" = "File";
+"File" = "Datoteka";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "Percorso file";
+"File location" = "Lokacija datoteke";
 
 /* [prefs.py] */
-"Flight log in CSV format file" = "Flight log in formato CSV";
+"Flight log in CSV format file" = "Dnevnik leta v CSV formatu";
 
 /* [prefs.py] */
-"How do you want to be identified in the saved data" = "Come vuoi essere identificato nei dati salvati";
+"How do you want to be identified in the saved data" = "Kako se želite indentificirati v shranjnih podatkih";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Ultimo aggiornamento alle {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Zadnja osvežitev podatkov {HH}:{MM}:{SS} ";
 
 /* [EDMarketConnector.py] */
-"Logging in..." = "Mi sto loggando...";
+"Logging in..." = "Prijava v teku... ";
 
 /* [prefs.py] */
-"Market data in CSV format file" = "Market data in formato CSV";
+"Market data in CSV format file" = "Podatki trga v CSV formatu";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Market data in formato Slopey's BPC";
+"Market data in Slopey's BPC format file" = "Podatki trga v Slopey's BPC formatu";
 
 /* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Market data in formato Trade Dangerous";
+"Market data in Trade Dangerous format file" = "Podatki trga v Trade Dangerous formatu";
 
 /* [prefs.py] */
-"OK" = "OK";
+"OK" = "Potrdi";
 
 /* Section heading in settings. [prefs.py] */
-"Output" = "Output";
+"Output" = "Izpis";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Password";
+"Password" = "Geslo";
 
 /* [prefs.py] */
-"Please choose what data to save" = "Si prega di scegliere che dati salvare";
+"Please choose what data to save" = "Izberite podatke, ki jih želite shraniti";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Si prega di inserire il codice qua sotto.";
+"Please enter the code into the box below." = "Vpišite kodo v spodnje polje.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Si prega di loggarsi con le proprie credenziali di Elite: Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Vpišite se s podatki igre Elite:Dangerous";
 
 /* [prefs.py] */
-"Preferences" = "Preferenze";
+"Preferences" = "Nastavitve";
 
 /* Section heading in settings. [prefs.py] */
-"Privacy" = "Dati personali";
+"Privacy" = "Privatno";
 
 /* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "ID pseudo-anonimizzato";
+"Pseudo-anonymized ID" = "Psevdo anonimni identifikator";
 
 /* [prefs.py] */
-"Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
+"Sending data to EDDN..." = "Pošiljam podatke na EDDN";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Impostazioni";
+"Settings" = "Nastavitve";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Fit della nave in formato Coriolis";
+"Ship loadout in Coriolis format file" = "Oprema ladje v Coriolis formatu";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Fit della nave in formato E:D Shipyard";
+"Ship loadout in E:D Shipyard format file" = "Oprema ladje v E:D Shipyard formatu";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "La Stazione non ha un Market !";
+"Station doesn't have a market!" = "Postaja nima trga";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "La Stazione non ha niente !";
+"Station doesn't have anything!" = "Postaja nima ničesar";
 
 /* Main window. [EDMarketConnector.py] */
-"Station" = "Stazione";
+"Station" = "Postaja";
 
 /* Main window. [EDMarketConnector.py] */
-"System" = "Sistema";
+"System" = "Sistem";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Recupera";
+"Update" = "Osveži";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Username (Email)";
+"Username (Email)" = "Uporabniško ime";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Stai volando ?!";
+"What are you flying?!" = "S čim letiš";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Dove sei finito ?!";
+"Where are you?!" = "Kje se nahajaš";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Chi sei ?!";
+"Who are you?!" = "Kdo si";
 
 /* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
+"You're not docked at a station!" = "Nahajš se v postaji!";
 
 /* Section heading in settings on Windows. [prefs.py] */
-"Hotkey" = "Hotkey";
+"Hotkey" = "Bližnjica";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Nessuna";
+"None" = "Brez";
 
 /* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Apri Preferenze di Systema";
+"Open System Preferences" = "Odpri sistemske nastavitve";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Notifica sonora";
+"Play sound" = "Sproži zvok";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
+"Re-start {APP} to use shortcuts" = "Ponovno poženi {APP} za uporabo bližnjic";
 
 /* Section heading in settings on OSX. [prefs.py] */
-"Keyboard shortcut" = "Abbreviazione da tastiera";
+"Keyboard shortcut" = "Bližnjica";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Finestra";
+"Window" = "Okno";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
+"{APP} needs permission to use shortcuts" = "{APP} potrebuje dovoljenja za uporabo bližnjic";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è in primo piano";
+"Only when Elite: Dangerous is the active app" = "Samo ko je Elite:Dangerous aktivna aplikacija ";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Copia";
+"Copy" = "Kopiraj";
 
 /* Menu title. [EDMarketConnector.py] */
-"Edit" = "Appunti";
+"Edit" = "Uredi";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
+"API Key" = "API ključ";
 
 /* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
+"Elite Dangerous Star Map credentials" = "EDStarMap uporabniški podatki";
 
 /* [edsm.py] */
-"Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
+"Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
 /* [edsm.py]  */
-"Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
+"Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
 
 /* [prefs.py] */
-"Send flight log to Elite Dangerous Star Map" = "Manda il flight log a Elite Dangerous Star Map";
+"Send flight log to Elite Dangerous Star Map" = "Pošlji dnevnik leta na EDSM";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sto inviando i dati a EDSM...";
+"Sending data to EDSM..." = "Pošiljam podatke na EDSM";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Inserire automaticamente una log entry entrando in un sistema";
+"Automatically make a log entry on entering a system" = "Shrani podatke v dnevnik leta, ko prispeš v sistem";
 
 /* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Riavviare Elite: Dangerous per usare questa funzione";
+"Re-start Elite: Dangerous to use this feature" = "Ponovno poženi Elite: Dangerous za uporabo te funkcije";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Errore: Non riesco a ottenere il market data!";
+"Error: Can't get market data!" = "Napaka: Ne morem sprejeti tržnih podatkov";
 
 /* Federation rank. [stats.py] */
 "Admiral" = "Admiral";
@@ -212,7 +213,7 @@
 "Amateur" = "Amateur";
 
 /* Cmdr stats. [stats.py] */
-"Balance" = "Saldo";
+"Balance" = "Ravnotežje";
 
 /* Empire rank. [stats.py] */
 "Baron" = "Baron";
@@ -260,13 +261,13 @@
 "Elite" = "Elite";
 
 /* Ranking. [stats.py] */
-"Empire" = "Impero";
+"Empire" = "Cesarstvo";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
 /* Trade rank. [stats.py] */
-"Entrepreneur" = "Entrepreneur";
+"Entrepreneur" = "Enterpreneur";
 
 /* Combat rank. [stats.py] */
 "Expert" = "Expert";
@@ -275,7 +276,7 @@
 "Explorer" = "Explorer";
 
 /* Ranking. [stats.py] */
-"Federation" = "Federazione";
+"Federation" = "Federacija";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
@@ -296,13 +297,13 @@
 "Knight" = "Knight";
 
 /* Federation rank. [stats.py] */
-"Lieutenant" = "Lieutenant";
+"Lieutenant" = "LIeutenant";
 
 /* Federation rank. [stats.py] */
 "Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Prestito";
+"Loan" = "Posojilo";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
@@ -329,7 +330,7 @@
 "Mostly Helpless" = "Mostly Helpless";
 
 /* Trade rank. [stats.py] */
-"Mostly Penniless" = "Mostly Penniless";
+"Mostly Penniless" = "Mostly peniless";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -344,7 +345,7 @@
 "Pedlar" = "Pedlar";
 
 /* Trade rank. [stats.py] */
-"Penniless" = "Penniless";
+"Penniless" = "Peniless";
 
 /* Federation rank. [stats.py] */
 "Petty Officer" = "Petty Officer";
@@ -359,7 +360,7 @@
 "Post Commander" = "Post Commander";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Powerplay";
+"Powerplay" = "Igra moči";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
@@ -371,25 +372,25 @@
 "Ranger" = "Ranger";
 
 /* Power rank. [stats.py] */
-"Rating 1" = "Rating 1";
+"Rating 1" = "Ocena 1";
 
 /* Power rank. [stats.py] */
-"Rating 2" = "Rating 2";
+"Rating 2" = "Ocena 2";
 
 /* Power rank. [stats.py] */
-"Rating 3" = "Rating 3";
+"Rating 3" = "Ocena 3";
 
 /* Power rank. [stats.py] */
-"Rating 4" = "Rating 4";
+"Rating 4" = "Ocena 4";
 
 /* Power rank. [stats.py] */
-"Rating 5" = "Rating 5";
+"Rating 5" = "Ocena 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
-"Re-start Elite: Dangerous for automatic log entries" = "Riavviare Elite: Dangerous per una log entry automatica";
+"Re-start Elite: Dangerous for automatic log entries" = "Poženi ponovno Elite: Dangerous za vklop avtomatičnih vpisov v dnevnik";
 
 /* Federation rank. [stats.py] */
-"Rear Admiral" = "Rear Admiral";
+"Rear Admiral" = "Read Admiral";
 
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
@@ -401,13 +402,13 @@
 "Semi Professional" = "Semi Professional";
 
 /* Empire rank. [stats.py] */
-"Serf" = "Serf";
+"Serf" = "Serif";
 
 /* Status dialog subtitle. [stats.py] */
-"Ship" = "Nave";
+"Ship" = "Ladja";
 
 /* Status dialog title. [stats.py] */
-"Ships" = "Navi";
+"Ships" = "Ladje";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
@@ -419,7 +420,7 @@
 "Surveyor" = "Surveyor";
 
 /* Ranking. [stats.py] */
-"Trade" = "Trade";
+"Trade" = "Trgovanje";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Trailblazer";
@@ -431,7 +432,7 @@
 "Vice Admiral" = "Vice Admiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Vista";
+"View" = "Pogled";
 
 /* Empire rank. [stats.py] */
 "Viscount" = "Viscount";
