@@ -37,13 +37,21 @@ commodity_map= {
     'Auto Fabricators'                   : 'Auto-Fabricators',
     'Basic Narcotics'                    : 'Narcotics',
     'Bio Reducing Lichen'                : 'Bioreducing Lichen',
+    'Comercial Samples'                  : 'Commercial Samples',
+    'Drones'                             : 'Limpet',
+    'Encripted Data Storage'             : 'Encrypted Data Storage',
     'Hafnium178'                         : 'Hafnium 178',
     'Hazardous Environment Suits'        : 'H.E. Suits',
     'Heliostatic Furnaces'               : 'Microbial Furnaces',
     'Marine Supplies'                    : 'Marine Equipment',
+    'Meta Alloys'                        : 'Meta-Alloys',
+    'Mu Tom Imager'                      : 'Muon Imager',
     'Non Lethal Weapons'                 : 'Non-Lethal Weapons',
     'S A P8 Core Container'              : 'SAP 8 Core Container',	# Not seen in E:D 1.4 or later?
+    'Skimer Components'                  : 'Skimmer Components',
     'Terrain Enrichment Systems'         : 'Land Enrichment Systems',
+    'Trinkets Of Fortune'                : 'Trinkets Of Hidden Fortune',
+    'Unknown Artifact'                   : 'Unknown Artefact',
     'U S S Cargo Ancient Artefact'       : 'Ancient Artefact',
     'U S S Cargo Experimental Chemicals' : 'Experimental Chemicals',
     'U S S Cargo Military Plans'         : 'Military Plans',
@@ -51,6 +59,7 @@ commodity_map= {
     'U S S Cargo Rebel Transmissions'    : 'Rebel Transmissions',
     'U S S Cargo Technical Blueprints'   : 'Technical Blueprints',
     'U S S Cargo Trade Data'             : 'Trade Data',
+    'Wreckage Components'                : 'Salvageable Wreckage',
 }
 
 ship_map = {
