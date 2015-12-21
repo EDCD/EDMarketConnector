@@ -284,19 +284,17 @@ class AppWindow:
                     coriolis.export(data)
                 if config.getint('output') & config.OUT_LOG_FILE:
                     flightlog.export(data)
-                try:
+                if config.getint('output') & config.OUT_LOG_EDSM:
                     # Catch any EDSM errors here so that they don't prevent station update
-                    if config.getint('output') & config.OUT_LOG_EDSM:
+                    try:
                         self.status['text'] = _('Sending data to EDSM...')
                         self.w.update_idletasks()
                         edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                    else:
-                        self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
-                    self.status['text'] = ''
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                self.edsmpoll()
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                    self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
@@ -424,26 +422,23 @@ class AppWindow:
         timestamp, system = monitor.last_event	# would like to use event user_data to carry this, but not accessible in Tkinter
 
         if self.system['text'] != system:
-            try:
-                self.system['text'] = system
-                self.system['image'] = ''
-                self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
-                if config.getint('output') & config.OUT_LOG_FILE:
-                    flightlog.writelog(timestamp, system)
-                if config.getint('output') & config.OUT_LOG_EDSM:
+            self.system['text'] = system
+            self.system['image'] = ''
+            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            if config.getint('output') & config.OUT_LOG_FILE:
+                flightlog.writelog(timestamp, system)
+            if config.getint('output') & config.OUT_LOG_EDSM:
+                try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
                     edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
-                else:
-                    self.edsm.start_lookup(system, EDDB.system(system))
-                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-            except Exception as e:
-                if __debug__: print_exc()
-                self.status['text'] = unicode(e)
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
-            self.edsmpoll()
-
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
+                    if not config.getint('hotkey_mute'):
+                        hotkeymgr.play_bad()
+                self.edsmpoll()
 
     def edsmpoll(self):
         result = self.edsm.result
