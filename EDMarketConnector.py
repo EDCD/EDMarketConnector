@@ -311,11 +311,24 @@ class AppWindow:
                     # Finally - the data looks sane and we're docked at a station
                     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
-                    if (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
+
+                    # No EDDN output at known station?
+                    if (config.getint('output') & config.OUT_EDDN) and station_id and not has_market and not has_outfitting and not has_shipyard:
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
-                    elif not (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')):
+                    # No EDDN output at unknown station?
+                    elif (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities') and not data['lastStarport'].get('modules') and not data['lastStarport'].get('ships'):
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have anything!")
+
+                    # No market output at known station?
+                    elif not (config.getint('output') & config.OUT_EDDN) and station_id and not has_market:
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have a market!")
+
+                    # No market output at unknown station?
+                    elif not (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
 
@@ -341,12 +354,12 @@ class AppWindow:
                                 self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
-                            if has_outfitting:
+                            if has_outfitting or not station_id:
                                 # Only send if eddb says that the station provides outfitting
                                 eddn.export_outfitting(data)
                             elif __debug__ and data['lastStarport'].get('modules'):
                                 print 'Spurious outfitting!'
-                            if has_shipyard:
+                            if has_shipyard or not station_id:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
                                 if data['lastStarport'].get('ships'):
