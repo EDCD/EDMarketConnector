@@ -111,7 +111,7 @@ def export(data, filename=None):
                     break
             else:
                 # Uninteresting slot - e.g. DecalX or PaintJob
-                if __debug__ and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob'):
+                if __debug__ and not slot.lower().startswith('bobble') and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob') and not slot.lower().startswith('planetaryapproachsuite'):
                     print 'Coriolis: Unknown slot %s' % slot
                 continue
 

@@ -90,7 +90,7 @@ def export(data, filename=None):
         elif slot in loadout:
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
-    string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['capacity'])
+    string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['main']['capacity'])
 
     if filename:
         with open(filename, 'wt') as h:

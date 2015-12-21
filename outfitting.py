@@ -23,7 +23,7 @@ weapon_map = {
     'drunkmissilerack'               : 'Pack-Hound Missile Rack',
     'dumbfiremissilerack'            : 'Missile Rack',
     'minelauncher'                   : 'Mine Launcher',
-    ('minelauncher','impulse')       : 'Impulse Mine Launcher',	# Not seen in game?
+    ('minelauncher','impulse')       : 'Shock Mine Launcher',
     'mininglaser'                    : 'Mining Laser',
     ('mininglaser','advanced')       : 'Mining Lance Beam Laser',
     'multicannon'                    : 'Multi-Cannon',
@@ -165,6 +165,11 @@ rating_map = {
     '5': 'A',
 }
 
+planet_rating_map = {
+    '1': 'H',
+    '2': 'G',
+}
+
 misc_internal_map = {
     ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
     ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
@@ -185,18 +190,21 @@ standard_map = {
 }
 
 internal_map = {
+    'buggybay'          : 'Planetary Vehicle Hangar',
     'cargorack'         : 'Cargo Rack',
     'collection'        : 'Collector Limpet Controller',
     'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
     'fuelscoop'         : 'Fuel Scoop',
     'fueltransfer'      : 'Fuel Transfer Limpet Controller',
     'hullreinforcement' : 'Hull Reinforcement Package',
+    # 'planetapproachsuite' : 'Planetary Approach Suite',	# Don't report
     'prospector'        : 'Prospector Limpet Controller',
     'refinery'          : 'Refinery',
     'repairer'          : 'Auto Field-Maintenance Unit',
     'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
     'shieldcellbank'    : 'Shield Cell Bank',
     'shieldgenerator'   : 'Shield Generator',
+    ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
 }
 
@@ -226,16 +234,21 @@ def lookup(module, ship_map):
         new['rating'] = 'I'
 
     # Skip uninteresting stuff
-    elif name[0] in ['decal', 'paintjob']:
+    elif name[0] in ['bobble', 'decal', 'paintjob']:
         return None
 
     # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
-    elif 'category' in module and module['category'].lower() == 'powerplay':
-        return None
+    # Arghh - Bi-Weave Shield generators are incorrectly listed as 'powerplay' !
+    # elif 'category' in module and module['category'].lower() == 'powerplay':
+    #     return None
 
-    # Shouldn't be listing player-specific paid stuff
-    elif module.get('sku'):
+    # Shouldn't be listing player-specific paid stuff, other than Horizons
+    elif module.get('sku') and module['sku'].lower() != 'elite_horizons_v_planetary_landings':
         raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
+
+    # Skip Horizons Planetary Approach Suite
+    elif name[1] in ['planetapproachsuite']:
+        return None
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
     elif name[0]=='hpt' and name[1] in weapon_map:
@@ -300,7 +313,7 @@ def lookup(module, ship_map):
 
         if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = name[2][4:]
-        new['rating'] = rating_map[name[3][5:]]
+        new['rating'] = (name[1]=='buggybay' and planet_rating_map or rating_map)[name[3][5:]]
 
     # Disposition of fitted modules
     if 'on' in module and 'priority' in module:
