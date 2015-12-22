@@ -75,7 +75,10 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name)
+            if __debug__: print 'Calling: %s' % edsm_url
+            
+            r = requests.get(edsm_url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -83,7 +86,11 @@ class EDSM:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['done'] = True	# give feedback immediately
-                requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
+                
+                edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+                if __debug__: print 'Calling: %s' % edsm_url
+                
+                requests.get(edsm_url, timeout=EDSM._TIMEOUT)	# creates system
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
                 result['done'] = True	# give feedback immediately
@@ -99,7 +106,10 @@ class EDSM:
     def known(self, system_name, result):
         # Prefer to send user to "Show distances" page for systems with known coordinates
         try:
-            r = requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+            if __debug__: print 'Calling: %s' % edsm_url
+            
+            r = requests.get(edsm_url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
             result['url'] = self.syscache[system_name] = data['url']['show-system']
