@@ -1,35 +1,52 @@
 import os
 from os.path import dirname, join
 import sys
-
+from time import time
+import threading
 
 # ensure registry is set up on Windows before we start
-import config
-
-class NullUpdater:
-
-    def __init__(self, master):
-        pass
-
-    def checkForUpdates(self):
-        pass
-
-    def close(self):
-        pass
+from config import appname, appversion, update_feed, update_interval, config
 
 
 if not getattr(sys, 'frozen', False):
 
-    class Updater(NullUpdater):
-        pass
+    # quick and dirty version comparison assuming "strict" numeric only version numbers
+    def versioncmp(versionstring):
+        return map(int, versionstring.split('.'))
+
+    class Updater():
+
+        def __init__(self, master):
+            self.root = master
+
+        def checkForUpdates(self):
+            thread = threading.Thread(target = self.worker, name = 'update worker')
+            thread.daemon = True
+            thread.start()
+
+        def worker(self):
+            import requests
+            from xml.etree import ElementTree
+
+            r = requests.get(update_feed, timeout = 20)
+            feed = ElementTree.fromstring(r.text)
+            items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
+                           item.find('title').text) for item in feed.findall('channel/item')])
+            lastversion = sorted(items, key=versioncmp)[-1]
+            if versioncmp(lastversion) > versioncmp(appversion):
+                self.root.nametowidget('.%s.%s' % (appname.lower(), 'status'))['text'] = items[lastversion] + ' is available'
+                self.root.update_idletasks()
+
+        def close(self):
+            pass
 
 elif sys.platform=='darwin':
 
     import objc
 
-    class Updater(NullUpdater):
+    class Updater():
 
-        # https://github.com/sparkle-project/Sparkle/wiki/Customization
+        # http://sparkle-project.org/documentation/customization/
 
         def __init__(self, master):
             try:
@@ -57,7 +74,7 @@ elif sys.platform=='win32':
     def shutdown_request():
         root.event_generate('<<Quit>>', when="tail")
 
-    class Updater(NullUpdater):
+    class Updater():
 
         # https://github.com/vslavik/winsparkle/wiki/Basic-Setup
 
@@ -65,7 +82,7 @@ elif sys.platform=='win32':
             try:
                 sys.frozen	# don't want to try updating python.exe
                 self.updater = ctypes.cdll.WinSparkle
-                self.updater.win_sparkle_set_appcast_url('http://marginal.org.uk/edmarketconnector.xml')	# py2exe won't let us embed this in resources
+                self.updater.win_sparkle_set_appcast_url(update_feed)	# py2exe won't let us embed this in resources
 
                 # set up shutdown callback
                 global root
@@ -98,9 +115,3 @@ elif sys.platform=='win32':
             if self.updater:
                 updater.win_sparkle_cleanup()
             self.updater = None
-
-else:
-
-    class Updater(NullUpdater):
-        pass
-

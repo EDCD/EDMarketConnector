@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
 from sys import platform
 import json
 from os import mkdir
@@ -17,6 +18,12 @@ from ttkHyperlinkLabel import HyperlinkLabel
 if __debug__:
     from traceback import print_exc
 
+from config import appname, applongname, config
+if platform == 'win32' and getattr(sys, 'frozen', False):
+    # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+    import tempfile
+    sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
+
 import l10n
 l10n.Translations().install()
 
@@ -31,7 +38,6 @@ import flightlog
 import eddb
 import stats
 import prefs
-from config import appname, applongname, config
 from hotkey import hotkeymgr
 from monitor import monitor
 
@@ -75,7 +81,7 @@ class AppWindow:
             style.configure('TRadiobutton', font=font)
             style.configure('TEntry', font=font)
 
-        frame = ttk.Frame(self.w)
+        frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
@@ -87,8 +93,8 @@ class AppWindow:
         self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
-        self.button = ttk.Button(frame, text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.status = ttk.Label(frame, width=-25)
+        self.button = ttk.Button(frame, name='update', text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.status = ttk.Label(frame, name='status', width=-25)
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
 
@@ -128,8 +134,7 @@ class AppWindow:
         else:
             file_menu = self.view_menu = tk.Menu(menubar, tearoff=tk.FALSE)
             file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
-            if platform == 'win32':
-                file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
+            file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
             file_menu.add_separator()
             file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
@@ -147,6 +152,7 @@ class AppWindow:
                                   style.lookup('TButton.label', 'background', ['active']))
             menubar.configure(  fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
             file_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
+            self.edit_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
         self.w['menu'] = menubar
 
         # update geometry
@@ -211,6 +217,8 @@ class AppWindow:
 
         if not self.status['text'] and monitor.restart_required():
             self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
+        elif not getattr(sys, 'frozen', False):
+            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
         self.cooldown()
 
@@ -276,19 +284,17 @@ class AppWindow:
                     coriolis.export(data)
                 if config.getint('output') & config.OUT_LOG_FILE:
                     flightlog.export(data)
-                try:
+                if config.getint('output') & config.OUT_LOG_EDSM:
                     # Catch any EDSM errors here so that they don't prevent station update
-                    if config.getint('output') & config.OUT_LOG_EDSM:
+                    try:
                         self.status['text'] = _('Sending data to EDSM...')
                         self.w.update_idletasks()
                         edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                    else:
-                        self.edsm.start_lookup(self.system['text'], EDDB.system(self.system['text']))
-                    self.status['text'] = ''
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                self.edsmpoll()
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                    self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
@@ -303,11 +309,24 @@ class AppWindow:
                     # Finally - the data looks sane and we're docked at a station
                     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
-                    if (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
+
+                    # No EDDN output at known station?
+                    if (config.getint('output') & config.OUT_EDDN) and station_id and not has_market and not has_outfitting and not has_shipyard:
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
-                    elif not (config.getint('output') & config.OUT_EDDN) and not (has_market or data['lastStarport'].get('commodities')):
+                    # No EDDN output at unknown station?
+                    elif (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities') and not data['lastStarport'].get('modules') and not data['lastStarport'].get('ships'):
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have anything!")
+
+                    # No market output at known station?
+                    elif not (config.getint('output') & config.OUT_EDDN) and station_id and not has_market:
+                        if not self.status['text']:
+                            self.status['text'] = _("Station doesn't have a market!")
+
+                    # No market output at unknown station?
+                    elif not (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
 
@@ -333,12 +352,12 @@ class AppWindow:
                                 self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
-                            if has_outfitting:
+                            if has_outfitting or not station_id:
                                 # Only send if eddb says that the station provides outfitting
                                 eddn.export_outfitting(data)
                             elif __debug__ and data['lastStarport'].get('modules'):
                                 print 'Spurious outfitting!'
-                            if has_shipyard:
+                            if has_shipyard or not station_id:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
                                 if data['lastStarport'].get('ships'):
@@ -403,26 +422,23 @@ class AppWindow:
         timestamp, system = monitor.last_event	# would like to use event user_data to carry this, but not accessible in Tkinter
 
         if self.system['text'] != system:
-            try:
-                self.system['text'] = system
-                self.system['image'] = ''
-                self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
-                if config.getint('output') & config.OUT_LOG_FILE:
-                    flightlog.writelog(timestamp, system)
-                if config.getint('output') & config.OUT_LOG_EDSM:
+            self.system['text'] = system
+            self.system['image'] = ''
+            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            if config.getint('output') & config.OUT_LOG_FILE:
+                flightlog.writelog(timestamp, system)
+            if config.getint('output') & config.OUT_LOG_EDSM:
+                try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
                     edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
-                else:
-                    self.edsm.start_lookup(system, EDDB.system(system))
-                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-            except Exception as e:
-                if __debug__: print_exc()
-                self.status['text'] = unicode(e)
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
-            self.edsmpoll()
-
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
+                    if not config.getint('hotkey_mute'):
+                        hotkeymgr.play_bad()
+                self.edsmpoll()
 
     def edsmpoll(self):
         result = self.edsm.result

@@ -177,7 +177,7 @@ class EDLogs(FileSystemEventHandler):
             self.logfile = event.src_path
 
     def worker(self):
-        # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n".
+        # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n" or "... NormalFlight\r\n" or "... Supercruise\r\n"
         # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
         regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:')
 
@@ -277,13 +277,14 @@ class EDLogs(FileSystemEventHandler):
                             if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
                                 valbuf = ctypes.create_unicode_buffer(valsize.value / 2)
                                 if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), valbuf, ctypes.byref(valsize)):
-                                    custpath = join(valbuf.value, 'Products')
-                                    if isdir(custpath):
-                                        for d in listdir(custpath):
-                                            if d.startswith('FORC-FDEV-D-1') and isfile(join(custpath, d, 'AppConfig.xml')) and isdir(join(custpath, d, 'Logs')):
-                                                RegCloseKey(subkey)
-                                                RegCloseKey(key)
-                                                return join(custpath, d, 'Logs')
+                                    base = join(valbuf.value, 'Products')
+                                    if isdir(base):
+                                        for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Assume Horizons if both found
+                                            for d in listdir(base):
+                                                if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
+                                                    RegCloseKey(subkey)
+                                                    RegCloseKey(key)
+                                                    return join(base, d, 'Logs')
                         RegCloseKey(subkey)
                     i += 1
                 RegCloseKey(key)
@@ -293,13 +294,14 @@ class EDLogs(FileSystemEventHandler):
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, programs, CSIDL_PROGRAM_FILESX86, 0)
             applocal = ctypes.create_unicode_buffer(MAX_PATH)
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, applocal, CSIDL_LOCAL_APPDATA, 0)
-            for base in [join(programs.value, 'Steam', 'steamapps', 'common', 'Elite Dangerous', 'Products'),
-                         join(programs.value, 'Frontier', 'Products'),
-                         join(applocal.value, 'Frontier_Developments', 'Products')]:
-                if isdir(base):
-                    for d in listdir(base):
-                        if d.startswith('FORC-FDEV-D-1') and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
-                            return join(base, d, 'Logs')
+            for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Assume Horizons if both found
+                for base in [join(programs.value, 'Steam', 'steamapps', 'common', 'Elite Dangerous', 'Products'),
+                             join(programs.value, 'Frontier', 'Products'),
+                             join(applocal.value, 'Frontier_Developments', 'Products')]:
+                    if isdir(base):
+                        for d in listdir(base):
+                            if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
+                                return join(base, d, 'Logs')
 
             return None
 

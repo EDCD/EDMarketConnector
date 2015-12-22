@@ -17,7 +17,9 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1036,1040,1045,1060,0" />	<!-- en-US, fr-FR, it-IT, pl, sl, neutral -->
+				 Languages="1033,1031,1036,1040,1045,1058,1060,0" />
+				 <!-- en-US, de-DE, fr-FR, it-IT, pl, uk, sl, neutral -->
+				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -78,6 +80,9 @@
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\de.strings" />
+					</Component>
 					<Component Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
 					</Component>
@@ -128,6 +133,9 @@
 					</Component>
 					<Component Guid="{CE5A6F3A-8F6B-4C16-BCDC-F1BB89C9F1AF}">
 						<File KeyPath="yes" Source="SourceDir\tk85.dll" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\uk.strings" />
 					</Component>
 					<Component Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
 						<File KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
@@ -363,6 +371,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="de.strings" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
@@ -380,6 +389,7 @@
 			<ComponentRef Id="systems.p" />
 			<ComponentRef Id="tcl85.dll" />
 			<ComponentRef Id="tk85.dll" />
+			<ComponentRef Id="uk.strings" />
 			<ComponentRef Id="unicodedata.pyd" />
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />

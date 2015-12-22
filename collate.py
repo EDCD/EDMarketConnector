@@ -20,20 +20,27 @@ def addcommodities(data):
     if not data['lastStarport'].get('commodities'): return
 
     commodityfile = 'commodities.csv'
-    commodities = set()
+    commodities = {}
 
     # slurp existing
     if isfile(commodityfile):
         with open(commodityfile) as csvfile:
-            reader = csv.reader(csvfile)
-            assert(reader.next()) == ['category', 'name']
+            reader = csv.DictReader(csvfile)
             for row in reader:
-                commodities.add(tuple(row))
+                key = row.pop('name')
+                commodities[key] = row
     size_pre = len(commodities)
 
     for commodity in data['lastStarport'].get('commodities'):
-        commodities.add((category_map.get(commodity['categoryname']) or commodity['categoryname'],
-                         commodity_map.get(commodity['name']) or commodity['name']))
+        key = commodity_map.get(commodity['name']) or commodity['name']
+        new = { 'category' : category_map.get(commodity['categoryname']) or commodity['categoryname'],
+                'average'  : commodity['cost_mean'].split('.')[0] }
+        old = commodities.get(key)
+        if old:
+            if new != old:
+                raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
+        else:
+            commodities[key] = new
 
     if len(commodities) > size_pre:
 
@@ -43,9 +50,12 @@ def addcommodities(data):
             os.rename(commodityfile, commodityfile+'.bak')
 
         with open(commodityfile, 'wb') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['category', 'name'])
-            writer.writerows(sorted(commodities))
+            writer = csv.DictWriter(csvfile, ['category', 'name', 'average'])
+            writer.writeheader()
+            for key in commodities:
+                commodities[key]['name'] = key
+            for row in sorted(commodities.values(), key = lambda x: (x['category'], x['name'])):
+                writer.writerow(row)
 
         print 'Added %d new commodities' % (len(commodities) - size_pre)
 
@@ -162,7 +172,7 @@ if __name__ == "__main__":
                     if data['lastStarport'].get('modules'):
                         addmodules(data)
                     else:
-                        print 'No outfitting',
+                        print 'No outfitting'
                     if data['lastStarport'].get('ships'):
                         addships(data)
                     else:

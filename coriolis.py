@@ -36,7 +36,9 @@ slot_map = {
 # Map API ship names to Coriolis names
 ship_map = dict(companion.ship_map)
 ship_map['cobramkiii'] = 'Cobra Mk III'
-ship_map['viper'] = 'Viper'
+ship_map['cobramkiv']  = 'Cobra Mk IV',
+ship_map['viper']      = 'Viper'
+ship_map['viper_mkiv'] = 'Viper Mk IV'
 
 
 # Map EDDN outfitting schema / in-game names to Coriolis names
@@ -70,12 +72,12 @@ fixup_map = {
     'Cytoscrambler Burst Laser'     : ('Burst Laser', 'Cytoscrambler'),
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
     'Imperial Hammer Rail Gun'      : ('Rail Gun', 'Imperial Hammer'),
-    'Impulse Mine Launcher'         : ('Mine Launcher', 'Impulse'),
     'Mining Lance Beam Laser'       : ('Mining Laser', 'Mining Lance'),
     'Multi-Cannon'                  : ('Multi-cannon', None),
     'Pacifier Frag-Cannon'          : ('Fragment Cannon', 'Pacifier'),
     'Pack-Hound Missile Rack'       : ('Missile Rack', 'Pack-Hound'),
     'Pulse Disruptor Laser'         : ('Pulse Laser', 'Distruptor'),	# Note sp
+    'Shock Mine Launcher'           : ('Mine Launcher', 'Shock Mine Launcher'),		# XXX
     'Standard Docking Computer'     : ('Docking Computer', 'Standard Docking Computer'),
 }
 
@@ -109,7 +111,7 @@ def export(data, filename=None):
                     break
             else:
                 # Uninteresting slot - e.g. DecalX or PaintJob
-                if __debug__ and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob'):
+                if __debug__ and not slot.lower().startswith('bobble') and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob') and not slot.lower().startswith('planetaryapproachsuite'):
                     print 'Coriolis: Unknown slot %s' % slot
                 continue
 
