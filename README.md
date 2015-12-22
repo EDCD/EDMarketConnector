@@ -163,6 +163,7 @@ Acknowledgements
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
 * Thanks to Armando Ota for the Slovenian translation.
+* Thanks to Cmdr Mila Strelok for the Spanish translation.
 * Thanks to Taras Velychko for the Ukranian translation.
 * Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN) and to [Cmdr Anthor](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
