@@ -28,6 +28,7 @@ elif platform=='win32':
     # _winreg that ships with Python 2 doesn't support unicode, so do this instead
     from ctypes.wintypes import *
 
+    HKEY_CURRENT_USER       = 0x80000001
     HKEY_LOCAL_MACHINE      = 0x80000002
     KEY_READ                = 0x00020019
     REG_SZ    = 1
@@ -254,6 +255,9 @@ class EDLogs(FileSystemEventHandler):
     elif platform=='win32':
 
         def _logdir(self):
+
+            candidates = []
+
             # First try under the Launcher
             key = HKEY()
             if not RegOpenKeyEx(HKEY_LOCAL_MACHINE,
@@ -277,27 +281,33 @@ class EDLogs(FileSystemEventHandler):
                             if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
                                 valbuf = ctypes.create_unicode_buffer(valsize.value / 2)
                                 if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), valbuf, ctypes.byref(valsize)):
-                                    base = join(valbuf.value, 'Products')
-                                    if isdir(base):
-                                        for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Assume Horizons if both found
-                                            for d in listdir(base):
-                                                if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
-                                                    RegCloseKey(subkey)
-                                                    RegCloseKey(key)
-                                                    return join(base, d, 'Logs')
+                                    candidates.append(join(valbuf.value, 'Products'))
                         RegCloseKey(subkey)
                     i += 1
                 RegCloseKey(key)
 
-            # https://support.elitedangerous.com/kb/faq.php?id=108
+            # Next try locations described in https://support.elitedangerous.com/kb/faq.php?id=108, in reverse order of age
+
+            if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Valve\Steam', 0, KEY_READ, ctypes.byref(key)):
+                valtype = DWORD()
+                valsize = DWORD()
+                if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
+                    buf = ctypes.create_unicode_buffer(size.value / 2)
+                    if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
+                        candidates.append(join(buf.value, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
+                        candidates.append(join(buf.value, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
+                RegCloseKey(key)
+
             programs = ctypes.create_unicode_buffer(MAX_PATH)
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, programs, CSIDL_PROGRAM_FILESX86, 0)
+            candidates.append(join(programs.value, 'Frontier', 'Products')),
+
             applocal = ctypes.create_unicode_buffer(MAX_PATH)
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, applocal, CSIDL_LOCAL_APPDATA, 0)
-            for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Assume Horizons if both found
-                for base in [join(programs.value, 'Steam', 'steamapps', 'common', 'Elite Dangerous', 'Products'),
-                             join(programs.value, 'Frontier', 'Products'),
-                             join(applocal.value, 'Frontier_Developments', 'Products')]:
+            candidates.append(join(applocal.value, 'Frontier_Developments', 'Products'))
+
+            for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Look for Horizons in all candidate places first
+                for base in candidates:
                     if isdir(base):
                         for d in listdir(base):
                             if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
