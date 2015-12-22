@@ -294,7 +294,9 @@ class AppWindow:
                     except Exception as e:
                         if __debug__: print_exc()
                         self.status['text'] = unicode(e)
-                    self.edsmpoll()
+                else:
+                    self.edsm.link(self.system['text'])
+                self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                     # no station data requested - we're done
@@ -425,7 +427,6 @@ class AppWindow:
             self.system['text'] = system
             self.system['image'] = ''
             self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
             if config.getint('output') & config.OUT_LOG_FILE:
                 flightlog.writelog(timestamp, system)
             if config.getint('output') & config.OUT_LOG_EDSM:
@@ -433,12 +434,16 @@ class AppWindow:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
                     edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
                 except Exception as e:
                     if __debug__: print_exc()
                     self.status['text'] = unicode(e)
                     if not config.getint('hotkey_mute'):
                         hotkeymgr.play_bad()
-                self.edsmpoll()
+            else:
+                self.edsm.link(system)
+                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+            self.edsmpoll()
 
     def edsmpoll(self):
         result = self.edsm.result
