@@ -25,19 +25,27 @@ class EDSM:
         EDSM._IMG_NEW      = tk.PhotoImage(data = 'R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXOPvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//jd//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/slv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP///////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xHJk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+GBAcUCIIBBDSYYGiAAUMALFR6FAgAOw==')
         EDSM._IMG_ERROR    = tk.PhotoImage(data = 'R0lGODlhDgAOAIABAAAAAP///yH5BAEKAAEALAAAAAAOAA4AAAIcjIGJxqHaIJPypBYvzms77X1dWHlliKYmuI5GAQA7')	  # BBC Mode 5 '?'
 
-    def lookup(self, system_name, known=0):
+    def lookup(self, system_name, known=0, system_fdId=False):
         self.cancel_lookup()
 
         if system_name in self.syscache:	# Cache URLs of systems with known coordinates
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': self.syscache[system_name], 'done': True }
         elif known:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
-            self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
+            self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, system_fdId, self.result))
             self.thread.daemon = True
             self.thread.start()
         else:
             self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+
+            if system_fdId:
+                edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1&fdId=%s' % (urllib.quote(system_name), system_fdId)
+            else:
+                edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name)
+            
+            if __debug__: print 'Calling: %s' % edsm_url
+            
+            r = requests.get(edsm_url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -46,7 +54,7 @@ class EDSM:
                 self.result['img'] = EDSM._IMG_NEW
             elif data.get('coords'):
                 self.result['img'] = EDSM._IMG_KNOWN
-                self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
+                self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, system_fdId, self.result))
                 self.thread.daemon = True
                 self.thread.start()
             else:
@@ -60,12 +68,12 @@ class EDSM:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': self.syscache[system_name], 'done': True }
         elif known:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
-            self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
+            self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, False, self.result))
             self.thread.daemon = True
             self.thread.start()
         else:
             self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False }	# default URL
-            self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, self.result))
+            self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, False, self.result))
             self.thread.daemon = True
             self.thread.start()
 
@@ -73,9 +81,13 @@ class EDSM:
         self.thread = None	# orphan any existing thread
         self.result = { 'img': '', 'url': None, 'done': True }	# orphan existing thread's results
 
-    def worker(self, system_name, result):
+    def worker(self, system_name, system_fdId, result):
         try:
-            edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name)
+            if system_fdId:
+                edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1&fdId=%s' % (urllib.quote(system_name), system_fdId)
+            else:
+                edsm_url = 'http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name)
+            
             if __debug__: print 'Calling: %s' % edsm_url
             
             r = requests.get(edsm_url, timeout=EDSM._TIMEOUT)
@@ -87,7 +99,11 @@ class EDSM:
                 result['img'] = EDSM._IMG_NEW
                 result['done'] = True	# give feedback immediately
                 
-                edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+                if system_fdId:
+                    edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fdId=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), system_fdId, urllib.quote(applongname), urllib.quote(appversion))
+                else:
+                    edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+                
                 if __debug__: print 'Calling: %s' % edsm_url
                 
                 requests.get(edsm_url, timeout=EDSM._TIMEOUT)	# creates system
@@ -103,15 +119,20 @@ class EDSM:
         result['done'] = True
 
     # Worker for known known systems - saves initial EDSM API call
-    def known(self, system_name, result):
+    def known(self, system_name, system_fdId, result):
         # Prefer to send user to "Show distances" page for systems with known coordinates
         try:
-            edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+            if system_fdId:
+                edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fdId=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), system_fdId, urllib.quote(applongname), urllib.quote(appversion))
+            else:
+                edsm_url = 'http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion))
+            
             if __debug__: print 'Calling: %s' % edsm_url
             
             r = requests.get(edsm_url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
+                        
             result['url'] = self.syscache[system_name] = data['url']['show-system']
         except:
             if __debug__: print_exc()

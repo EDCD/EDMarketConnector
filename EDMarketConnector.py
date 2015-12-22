@@ -289,7 +289,7 @@ class AppWindow:
                     try:
                         self.status['text'] = _('Sending data to EDSM...')
                         self.w.update_idletasks()
-                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
+                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text']), data.get('lastSystem') and data.get('lastSystem').get('id') or False))	# Do EDSM lookup during EDSM export
                         self.status['text'] = ''
                     except Exception as e:
                         if __debug__: print_exc()
