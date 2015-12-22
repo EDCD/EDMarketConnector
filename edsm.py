@@ -37,7 +37,7 @@ class EDSM:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
         else:
             self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -68,7 +68,7 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -76,7 +76,7 @@ class EDSM:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['done'] = True	# give feedback immediately
-                requests.get('http://www.edsm.net/api-v1/url?sysname=%s' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)	# creates system
+                requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
                 result['done'] = True
