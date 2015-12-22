@@ -31,13 +31,13 @@ class EDSM:
         if system_name in self.syscache:	# Cache URLs of systems with known coordinates
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': self.syscache[system_name], 'done': True }
         elif known:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
             self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
         else:
-            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
+            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -59,12 +59,12 @@ class EDSM:
         if system_name in self.syscache:	# Cache URLs of systems with known coordinates
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': self.syscache[system_name], 'done': True }
         elif known:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }	# default URL
             self.thread = threading.Thread(target = self.known, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
         else:
-            self.result = { 'img': '', 'url': 'http://www.edsm.net/needed-distances?systemName=%s' % urllib.quote(system_name), 'done': False }	# default URL
+            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False }	# default URL
             self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
@@ -75,7 +75,7 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&showId=1' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -99,7 +99,7 @@ class EDSM:
     def known(self, system_name, result):
         # Prefer to send user to "Show distances" page for systems with known coordinates
         try:
-            r = requests.get('http://www.edsm.net/api-v1/url?sysname=%s' % urllib.quote(system_name), timeout=EDSM._TIMEOUT)
+            r = requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
             result['url'] = self.syscache[system_name] = data['url']['show-system']
