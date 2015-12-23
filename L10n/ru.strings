@@ -1,0 +1,441 @@
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Проверочный код был выслан на адрес электронной почты,{CR}указанный в вашей учетной записи Elite: Dangerous.";
+
+/* App menu entry on OSX. [EDMarketConnector.py] */
+"About {APP}" = "О программе {APP}";
+
+/* Federation rank. [stats.py] */
+"Admiral" = "Адмирал";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Бесцельный";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "Любитель";
+
+/* EDSM setting. [prefs.py] */
+"API Key" = "Ключ API";
+
+/* Output setting. [prefs.py] */
+"Automatically make a log entry on entering a system" = "Автоматически заносить в журнал полета каждую посещённую систему";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Баланс";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Барон";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Брокер";
+
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Обзор...";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Кадет";
+
+/* CQC rank. [stats.py] */
+"Champion" = "Чемпион";
+
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Обзор...";
+
+/* [EDMarketConnector.py] */
+"Check for Updates..." = "Поиск обновлений...";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Главный старшина";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Пилот";
+
+/* EDSM & privacy setting. [prefs.py] */
+"Cmdr name" = "Имя пилота";
+
+/* Ranking. [stats.py] */
+"Combat" = "Боевой";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Специалист";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "пауза {SS} сек";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Копировать";
+
+/* Empire rank. [stats.py] */
+"Count" = "Граф";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Section heading in settings. [prefs.py] */
+"Credentials" = "Учетные данные";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "Опасный";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Смертоносный";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Агент";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Герцог";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Эрл";
+
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Правка";
+
+/* Top rank. [stats.py] */
+"Elite" = "Элита";
+
+/* Section heading in settings. [prefs.py] */
+"Elite Dangerous Star Map credentials" = "Учетные данные Elite Dangerous Star Map";
+
+/* Ranking. [stats.py] */
+"Empire" = "Империя";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Энсин";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Предприниматель";
+
+/* [EDMarketConnector.py] */
+"Error: Can't connect to EDDN" = "Ошибка: не удалось подключиться к EDDN";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Ошибка: не удалось подключиться к EDSM";
+
+/* [EDMarketConnector.py] */
+"Error: Can't get market data!" = "Ошибка: не удалось получить торговые данные!";
+
+/* [EDMarketConnector.py] */
+"Error: Connection to EDDN timed out" = "Ошибка: сервер EDDN не отвечает";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Ошибка: EDSM {MSG}";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Ошибка: неверное имя пользователя или пароль";
+
+/* [companion.py] */
+"Error: Server is down" = "Ошибка: сервер не отвечает";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Выход";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Эксперт";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Исследовательский";
+
+/* Ranking. [stats.py] */
+"Federation" = "Федерация";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Получаем данные...";
+
+/* Menu title on Windows. [EDMarketConnector.py] */
+"File" = "Файл";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Сохранять файлы";
+
+/* [prefs.py] */
+"Flight log in CSV format file" = "Журнал полета в формате CSV";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "Гладиатор";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "Безвредный";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "Беспомощный";
+
+/* CQC rank. [stats.py] */
+"Hero" = "Герой";
+
+/* Section heading in settings on Windows. [prefs.py] */
+"Hotkey" = "Горячая клавиша";
+
+/* [prefs.py] */
+"How do you want to be identified in the saved data" = "Как вас идентифицировать при отправке данных";
+
+/* Section heading in settings on OSX. [prefs.py] */
+"Keyboard shortcut" = "Сочетание клавиш";
+
+/* Empire rank. [stats.py] */
+"King" = "Король";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Рыцарь";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Последнее обновление {HH}:{MM}:{SS}";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "Лейтенант";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Капитан-лейтенант";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Долг";
+
+/* [EDMarketConnector.py] */
+"Logging in..." = "Подключаемся...";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Лорд";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Торговые данные в формате CSV";
+
+/* [prefs.py] */
+"Market data in Slopey's BPC format file" = "Торговые данные в формате Slopey's BPC";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Торговые данные в формате Trade Dangerous";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Маркиз";
+
+/* Combat rank. [stats.py] */
+"Master" = "Мастер";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Коммерсант";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Гардемарин";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Почти бесцельный";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "В целом безвредный";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "Почти беспомощный";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Полунищий";
+
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Не назначена";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Новичок";
+
+/* [prefs.py] */
+"OK" = "OK";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Только в окне Elite: Dangerous";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Открыты «Системные настройки»";
+
+/* Section heading in settings. [prefs.py] */
+"Output" = "Данные";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Чужак";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Password" = "Пароль";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Следопыт";
+
+/* Trade rank. [stats.py] */
+"Pedlar" = "Мелкий торговец";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Нищий";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Старшина";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Первооткрыватель";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Звуковое оповещение";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Выберите какие данные сохранять";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"Please enter the code into the box below." = "Код верификации";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Please log in with your Elite: Dangerous account details" = "Используйте данные вашей учетной записи в Elite: Dangerous";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Командир корабля";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Начальник гарнизона";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Политика";
+
+/* [prefs.py] */
+"Preferences" = "Настройки";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Принц";
+
+/* Section heading in settings. [prefs.py] */
+"Privacy" = "Конфиденциальность";
+
+/* CQC rank. [stats.py] */
+"Professional" = "Профессионал";
+
+/* Privacy setting. [prefs.py] */
+"Pseudo-anonymized ID" = "Псевдо-анонимный ID";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Скиталец";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Ранг 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Ранг 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Ранг 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Ранг 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Ранг 5";
+
+/* Status bar message on launch. [EDMarketConnector.py] */
+"Re-start Elite: Dangerous for automatic log entries" = "Перезапустите Elite: Dangerous чтобы автоматически получать журнал полета";
+
+/* Output settings prompt. [prefs.py] */
+"Re-start Elite: Dangerous to use this feature" = "Перезапустите Elite: Dangerous чтобы изменения вступили в силу";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Перезапустите {APP}, чтобы использовать сочетание клавиш";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "Контр-адмирал";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Новобранец";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Разведчик";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "Полупрофессионал";
+
+/* [prefs.py] */
+"Send flight log to Elite Dangerous Star Map" = "Отправлять журнал полета на Elite Dangerous Star Map";
+
+/* [prefs.py] */
+"Send station data to the Elite Dangerous Data Network" = "Отправлять информацию о станциях на Elite Dangerous Data Network";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDDN..." = "Отправка данных на EDDN...";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDSM..." = "Отправка данных на EDSM...";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Крепостной";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Параметры";
+
+/* Status dialog subtitle. [stats.py] */
+"Ship" = "Корабль";
+
+/* [prefs.py] */
+"Ship loadout in Coriolis format file" = "Оборудование корабля в формате Coriolis";
+
+/* [prefs.py] */
+"Ship loadout in E:D Shipyard format file" = "Оборудование корабля в формате E:D Shipyard";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Корабли";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Оруженосец";
+
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Станция";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "На этой станции нет рынка!";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "На этой станции нет никаких услуг!";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "Статус";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Изыскатель";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Система";
+
+/* Ranking. [stats.py] */
+"Trade" = "Торговый";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Путешественние";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Магнат";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Обновить";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Username (Email)" = "Имя пользователя (адрес эл. почты)";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Вице-адмирал";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Вид";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Виконт";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Уорент-офицер";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "На чём вы летаете?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Где вы?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Кто вы?";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Окно";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = "Вы не пришвартованы к станции!";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} нужно разрешение использовать глобальные сочетания клавиш";
+

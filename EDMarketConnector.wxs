@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1031,1034,1036,1040,1045,1058,1060,0" />
-				 <!-- en-US, de-DE, es-ES, fr-FR, it-IT, pl, uk, sl, neutral -->
+				 Languages="1033,1031,1034,1036,1040,1045,1049,1058,1060,0" />
+				 <!-- en-US, de-DE, es-ES, fr-FR, it-IT, pl, ru, uk, sl, neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -107,17 +107,20 @@
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\pl.strings" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\sl.strings" />
-					</Component>
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
 					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
 						<File KeyPath="yes" Source="SourceDir\python27.dll" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\ru.strings" />
+					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
 						<File KeyPath="yes" Source="SourceDir\select.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\sl.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\snd_good.wav" />
@@ -385,6 +388,7 @@
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
+			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="sl.strings" />
 			<ComponentRef Id="snd_good.wav" />
