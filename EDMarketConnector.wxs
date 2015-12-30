@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1031,1034,1036,1040,1045,1049,1058,1060,0" />
-				 <!-- en-US, de-DE, es-ES, fr-FR, it-IT, pl, ru, uk, sl, neutral -->
+				 Languages="1033,  1031,  1034,  1036,  1040,  1043,  1045, 1049, 1058, 1060, 0" />
+				 <!--       en-US, de-DE, es-ES, fr-FR, it-IT, nl-NL, pl,   ru,   uk,   sl,   neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -103,6 +103,9 @@
 					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\nl.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\pl.strings" />
@@ -385,6 +388,7 @@
 			<ComponentRef Id="fr.strings" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="library.zip" />
+			<ComponentRef Id="nl.strings" />
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />

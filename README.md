@@ -159,6 +159,7 @@ This app uses the “Companion” web API that Frontier supplies to support thei
 Acknowledgements
 --------
 * “Elite: Dangerous” is © 1984 - 2015 Frontier Developments plc.
+* Thanks to Cmdr CoolBreeze for the Dutch translation.
 * Thanks to [Cmdr Anthor](http://ed-td.space/) for the French translation.
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
