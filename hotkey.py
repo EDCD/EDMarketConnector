@@ -278,6 +278,7 @@ elif platform == 'win32':
         def unregister(self):
             if self.thread:
                 PostThreadMessage(self.thread.ident, WM_QUIT, 0, 0)
+                self.thread.join()	# Wait for it to unregister hotkey and quit
             self.thread = None
 
         def worker(self, keycode, modifiers):
