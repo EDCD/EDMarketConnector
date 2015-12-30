@@ -4,8 +4,10 @@
 #
 
 import argparse
+import requests
 import sys
 from time import time, sleep
+from xml.etree import ElementTree
 
 import l10n
 l10n.Translations().install_dummy()
@@ -19,13 +21,18 @@ import shipyard
 import eddb
 import stats
 import prefs
-from config import appcmdname, appversion, config
+from config import appcmdname, appversion, update_feed, config
 
 
 EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_NOT_DOCKED, EXIT_SYS_ERR = range(6)
+
+# quick and dirty version comparison assuming "strict" numeric only version numbers
+def versioncmp(versionstring):
+    return map(int, versionstring.split('.'))
+
 
 try:
     # arg parsing
@@ -39,8 +46,22 @@ try:
     parser.add_argument('-s', metavar='FILE', help='write station shipyard data to FILE in CSV format')
     parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
     args = parser.parse_args()
+
     if args.version:
-        print '%.2f' % (float(''.join(appversion.split('.')[:3])) / 100)	# just first three digits
+        latest = ''
+        try:
+            # Copied from update.py - probably should refactor
+            r = requests.get(update_feed, timeout = 10)
+            feed = ElementTree.fromstring(r.text)
+            items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
+                           item.find('title').text) for item in feed.findall('channel/item')])
+            lastversion = sorted(items, key=versioncmp)[-1]
+            if versioncmp(lastversion) > versioncmp(appversion):
+
+                latest = ' (%s is available)' % items[lastversion]
+        except:
+            pass	# Quietly suppress timeouts etc.
+        print '%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest)	# just first three digits
         sys.exit(EXIT_SUCCESS)
 
     session = companion.Session()
