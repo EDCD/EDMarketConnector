@@ -83,6 +83,43 @@ Windows:
 
 Note: Uninstalling the app does not delete any output files that it has previously written.
 
+
+Troubleshooting
+--------
+
+### Can't Update - "Invalid Credentials"
+Some people find that they can log-in and receive a verification code from Frontier. But on hitting the Update button they see an "Invalid Credentials" error.
+
+It's not clear why this happens to some people, but it does seem to happen more often to people who purchased Horizons without Season 1.
+
+This problem is tracked as [Issue #43](https://github.com/Marginal/EDMarketConnector/issues/43).
+
+### Can't see commodities market at some Outposts - "Can't get market data!"
+The Frontier server that supplies the data to this app fails to supply commodity data for some outposts - particularly industrial and mining outposts. This is a [known bug](https://forums.frontier.co.uk/showthread.php?t=195774) in Frontier's servers.
+
+This problem is tracked as [Issue #6](https://github.com/Marginal/EDMarketConnector/issues/6)
+
+### Doesn't track Systems visited
+When you have the "Automatically make a log entry on entering a system" option selected this app uses Elite: Dangerous' logs to track and display the systems that you visit. Some people find that this doesn't work. The problem is most likely due to using the logs from a different copy of Elite: Dangerous than the copy that you're running.
+
+When looking for the log files, this app assumes:
+
+- That you're running "Horizons" 64bit, if you have both Horizons and Season 1 installed.
+- That you're running from Steam, if you have both Steam and non-Steam versions installed.
+
+In more detail, this app looks for the folder `elite-dangerous-64` in the following places:
+
+1. In the `Products` folder under the launcher (in English versions of Windows usually `C:\Program Files (x86)\Frontier\EDLaunch\Products`).
+2. In the `Elite Dangerous Horizons\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous Horizons\Products`).
+3. In the `Elite Dangerous\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products`).
+4. `%PROGRAMFILES(X86)%\Frontier\Products` (in English versions of Windows usually `C:\Program Files (x86)\Frontier\Products`).
+5. `%LOCALAPPDATA%\Frontier_Developments\Products` (usually `C:\Users\you\AppData\Local\Frontier_Developments\Products`).
+
+EDMC expects the `elite-dangerous-64` folder to contain the file AppConfig.xml and a Logs subfolder. It stops looking once it finds an `elite-dangerous-64` folder that meets these criteria.
+
+If it doesn't find `elite-dangerous-64` in the above places it looks for a folder starting with `FORC-FDEV-D-1` in the same places.
+
+
 Running from source
 --------
 
