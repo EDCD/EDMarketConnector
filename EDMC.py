@@ -83,7 +83,10 @@ try:
     print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(data['lastSystem']['name'], data['lastStarport']['name'])
 
-    if not (has_market or data['lastStarport'].get('commodities')) and not has_outfitting and not has_shipyard:
+    if station_id and not (has_market or has_outfitting or has_shipyard):
+        sys.stderr.write("Station doesn't have anything!\n")
+        sys.exit(EXIT_SUCCESS)
+    elif not station_id and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore usually spurious shipyard at unknown stations
         sys.stderr.write("Station doesn't have anything!\n")
         sys.exit(EXIT_SUCCESS)
 
@@ -98,7 +101,7 @@ try:
             sys.stderr.write("Station doesn't have a market\n")
 
     if args.o:
-        if has_outfitting:
+        if has_outfitting or not station_id:
             outfitting.export(data, args.o)
         else:
             sys.stderr.write("Station doesn't supply outfitting\n")
