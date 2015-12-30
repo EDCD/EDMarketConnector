@@ -46,6 +46,9 @@ class PreferencesDialog(tk.Toplevel):
     def __init__(self, parent, callback):
         tk.Toplevel.__init__(self, parent)
 
+        self.twitter_username = None
+        self.twitter_password = None
+
         self.parent = parent
         self.callback = callback
         self.title(platform=='darwin' and _('Preferences') or
@@ -71,7 +74,13 @@ class PreferencesDialog(tk.Toplevel):
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
-        credframe = ttk.LabelFrame(frame, text=_('Credentials'))	# Section heading in settings
+        credstab = ttk.Notebook(frame)
+        credstab.title = 'Credentials'
+        credstab.grid(padx=10, pady=5, sticky=tk.NSEW)
+        credstab.columnconfigure(1, weight=1)
+
+        # elite dangerous username/password
+        credframe = ttk.LabelFrame(credstab, text=_('Elite Dangerous'))	# Section heading in settings
         credframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         credframe.columnconfigure(1, weight=1)
 
@@ -87,8 +96,28 @@ class PreferencesDialog(tk.Toplevel):
         self.password.insert(0, config.get('password') or '')
         self.password.grid(row=2, column=1, sticky=tk.NSEW)
 
-        for child in credframe.winfo_children():
-            child.grid_configure(padx=5, pady=3)
+        # twitter username/password
+        twitframe = ttk.LabelFrame(credstab, text=_('Twitter'))	# Section heading in settings
+        twitframe.grid(padx=10, pady=5, sticky=tk.NSEW)
+        twitframe.columnconfigure(1, weight=1)
+
+        ttk.Label(twitframe, text=_('Please log in with your Twitter account details')).grid(row=0, columnspan=2, sticky=tk.W)	# Use same text as E:D Launcher's login dialog
+        ttk.Label(twitframe, text=_('Username (Email)')).grid(row=1, sticky=tk.W)
+        ttk.Label(twitframe, text=_('Password')).grid(row=2, sticky=tk.W)
+
+        self.twusername = ttk.Entry(twitframe)
+        self.twusername.insert(0, config.get('twit_username') or '')
+        self.twusername.grid(row=1, column=1, sticky=tk.NSEW)
+        self.twpassword = ttk.Entry(twitframe, show=u'•')
+        self.twpassword.insert(0, config.get('twit_password') or '')
+        self.twpassword.grid(row=2, column=1, sticky=tk.NSEW)
+
+        credstab.add(credframe, text='Elite Dangerous')
+        credstab.add(twitframe, text='Twitter')
+
+        for xframe in [credframe, twitframe]:
+            for child in xframe.winfo_children():
+                child.grid_configure(padx=5, pady=3)
 
         outframe = ttk.LabelFrame(frame, text=_('Output'))		# Section heading in settings
         outframe.grid(padx=10, pady=5, sticky=tk.NSEW)
