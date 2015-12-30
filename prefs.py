@@ -46,9 +46,6 @@ class PreferencesDialog(tk.Toplevel):
     def __init__(self, parent, callback):
         tk.Toplevel.__init__(self, parent)
 
-        self.twitter_username = None
-        self.twitter_password = None
-
         self.parent = parent
         self.callback = callback
         self.title(platform=='darwin' and _('Preferences') or
@@ -71,6 +68,9 @@ class PreferencesDialog(tk.Toplevel):
 
         style = ttk.Style()
 
+        # any output enabled?
+        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS)
+
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
@@ -80,7 +80,7 @@ class PreferencesDialog(tk.Toplevel):
         credstab.columnconfigure(1, weight=1)
 
         # elite dangerous username/password
-        credframe = ttk.LabelFrame(credstab, text=_('Elite Dangerous'))	# Section heading in settings
+        credframe = ttk.Frame(credstab)
         credframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         credframe.columnconfigure(1, weight=1)
 
@@ -97,32 +97,78 @@ class PreferencesDialog(tk.Toplevel):
         self.password.grid(row=2, column=1, sticky=tk.NSEW)
 
         # twitter username/password
-        twitframe = ttk.LabelFrame(credstab, text=_('Twitter'))	# Section heading in settings
+        twitframe = ttk.Frame(credstab)
         twitframe.grid(padx=10, pady=5, sticky=tk.NSEW)
         twitframe.columnconfigure(1, weight=1)
+        self.out_log_tweet = tk.IntVar(value=(output & config.OUT_LOG_TWEET) and 1)
+        ttk.Checkbutton(twitframe, text='Tweet if the System or Station have changed',
+                        variable=self.out_log_tweet,
+                        command=self.outvarchanged).grid(row=0, columnspan=2, padx=5, pady=(5,0), sticky=tk.W)
 
-        ttk.Label(twitframe, text=_('Please log in with your Twitter account details')).grid(row=0, columnspan=2, sticky=tk.W)	# Use same text as E:D Launcher's login dialog
-        ttk.Label(twitframe, text=_('Username (Email)')).grid(row=1, sticky=tk.W)
-        ttk.Label(twitframe, text=_('Password')).grid(row=2, sticky=tk.W)
+        self.tw_app_new = HyperlinkLabel(twitframe, text='Twitter access details',
+                                         disabledforeground=style.lookup('TLabelframe.Label', 'foreground'),
+                                         url='https://dev.twitter.com/apps/new',
+                                         underline=True)
+        self.tw_app_new.grid(row=1,
+                             columnspan=2,
+                             sticky=tk.W)
 
-        self.twusername = ttk.Entry(twitframe)
-        self.twusername.insert(0, config.get('twit_username') or '')
-        self.twusername.grid(row=1, column=1, sticky=tk.NSEW)
-        self.twpassword = ttk.Entry(twitframe, show=u'•')
-        self.twpassword.insert(0, config.get('twit_password') or '')
-        self.twpassword.grid(row=2, column=1, sticky=tk.NSEW)
+        ttk.Label(twitframe, text='Consumer Key').grid(row=2, sticky=tk.W)
+        ttk.Label(twitframe, text='Consumer Secret').grid(row=3, sticky=tk.W)
+        ttk.Label(twitframe, text='Access Token').grid(row=4, sticky=tk.W)
+        ttk.Label(twitframe, text='Access Secret').grid(row=5, sticky=tk.W)
+
+        self.tw_consumer_key = ttk.Entry(twitframe)
+        self.tw_consumer_key.insert(0, config.get('twit_consumer_key') or '')
+        self.tw_consumer_key.grid(row=2, column=1, sticky=tk.NSEW)
+
+        self.tw_consumer_secret = ttk.Entry(twitframe, show=u'•')
+        self.tw_consumer_secret.insert(0, config.get('twit_consumer_secret') or '')
+        self.tw_consumer_secret.grid(row=3, column=1, sticky=tk.NSEW)
+
+        self.tw_access_token = ttk.Entry(twitframe)
+        self.tw_access_token.insert(0, config.get('twit_access_token') or '')
+        self.tw_access_token.grid(row=4, column=1, sticky=tk.NSEW)
+
+        self.tw_access_secret = ttk.Entry(twitframe, show=u'•')
+        self.tw_access_secret.insert(0, config.get('twit_access_secret') or '')
+        self.tw_access_secret.grid(row=5, column=1, sticky=tk.NSEW)
+
+        edsmframe = ttk.Frame(credstab)
+        self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
+        ttk.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'),
+                        variable=self.out_log_edsm,
+                        command=self.outvarchanged).grid(row=0, columnspan=2, padx=5, pady=(5,0), sticky=tk.W)
+        self.edsm_label = HyperlinkLabel(edsmframe,
+                                         text=_('Elite Dangerous Star Map credentials'),
+                                         disabledforeground=style.lookup('TLabelframe.Label', 'foreground'),
+                                         url='http://www.edsm.net/settings/api',
+                                         underline=True)
+        edsmframe.grid(padx=10, pady=5, sticky=tk.NSEW)
+        self.edsm_label.grid(row=1, column=0, columnspan=2)
+        edsmframe.columnconfigure(1, weight=1)
+
+        ttk.Label(edsmframe, text=_('Cmdr name')).grid(row=2, sticky=tk.W)	# EDSM & privacy setting
+        self.edsm_cmdr = ttk.Entry(edsmframe)
+        self.edsm_cmdr.insert(0, config.get('edsm_cmdrname') or '')
+        self.edsm_cmdr.grid(row=2, column=1, sticky=tk.NSEW)
+
+        ttk.Label(edsmframe, text=_('API Key')).grid(row=3, sticky=tk.W)	# EDSM setting
+        self.edsm_apikey = ttk.Entry(edsmframe)
+        self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
+        self.edsm_apikey.grid(row=3, column=1, sticky=tk.NSEW)
 
         credstab.add(credframe, text='Elite Dangerous')
+        credstab.add(edsmframe, text="ED Star Map")
         credstab.add(twitframe, text='Twitter')
 
-        for xframe in [credframe, twitframe]:
+        for xframe in [credframe, twitframe, edsmframe]:
             for child in xframe.winfo_children():
                 child.grid_configure(padx=5, pady=3)
 
         outframe = ttk.LabelFrame(frame, text=_('Output'))		# Section heading in settings
         outframe.grid(padx=10, pady=5, sticky=tk.NSEW)
 
-        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS)
         ttk.Label(outframe, text=_('Please choose what data to save')).grid(row=0, padx=5, pady=3, sticky=tk.W)
         self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1)
         ttk.Checkbutton(outframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.out_eddn, command=self.outvarchanged).grid(row=1, padx=5, sticky=tk.W)
@@ -136,14 +182,13 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(row=5, padx=5, pady=(5,0), sticky=tk.W)
         self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1)
         ttk.Checkbutton(outframe, text=_('Ship loadout in Coriolis format file'), variable=self.out_ship_coriolis, command=self.outvarchanged).grid(row=6, padx=5, sticky=tk.W)
-        self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
-        ttk.Checkbutton(outframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(row=7, padx=5, pady=(5,0), sticky=tk.W)
+
         self.out_log_file = tk.IntVar(value = (output & config.OUT_LOG_FILE) and 1)
-        ttk.Checkbutton(outframe, text=_('Flight log in CSV format file'), variable=self.out_log_file, command=self.outvarchanged).grid(row=8, padx=5, sticky=tk.W)
+        ttk.Checkbutton(outframe, text=_('Flight log in CSV format file'), variable=self.out_log_file, command=self.outvarchanged).grid(row=7, padx=5, sticky=tk.W)
         self.out_log_auto = tk.IntVar(value = monitor.logdir and (output & config.OUT_LOG_AUTO) and 1 or 0)
         if monitor.logdir:
             self.out_log_auto_button = ttk.Checkbutton(outframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
-            self.out_log_auto_button.grid(row=9, padx=5, sticky=tk.W)
+            self.out_log_auto_button.grid(row=8, padx=5, sticky=tk.W)
             self.out_log_auto_text = ttk.Label(outframe)
 
         self.dir_label = ttk.Label(frame, text=_('File location'), foreground=style.lookup('TLabelframe.Label', 'foreground'))	# Section heading in settings
@@ -161,23 +206,7 @@ class PreferencesDialog(tk.Toplevel):
                                                     _('Browse...')), command=self.outbrowse)	# Folder selection button on Windows
         self.outbutton.grid(row=0, column=1, padx=5, pady=5, sticky=tk.NSEW)
 
-        self.edsm_label = HyperlinkLabel(frame, text=_('Elite Dangerous Star Map credentials'), disabledforeground=style.lookup('TLabelframe.Label', 'foreground'), url='http://www.edsm.net/settings/api', underline=True)	# Section heading in settings
-        edsmframe = ttk.LabelFrame(frame, labelwidget = self.edsm_label)
-        edsmframe.grid(padx=10, pady=5, sticky=tk.NSEW)
-        edsmframe.columnconfigure(1, weight=1)
 
-        ttk.Label(edsmframe, text=_('Cmdr name')).grid(row=0, sticky=tk.W)	# EDSM & privacy setting
-        self.edsm_cmdr = ttk.Entry(edsmframe)
-        self.edsm_cmdr.insert(0, config.get('edsm_cmdrname') or '')
-        self.edsm_cmdr.grid(row=0, column=1, sticky=tk.NSEW)
-
-        ttk.Label(edsmframe, text=_('API Key')).grid(row=1, sticky=tk.W)	# EDSM setting
-        self.edsm_apikey = ttk.Entry(edsmframe)
-        self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
-        self.edsm_apikey.grid(row=1, column=1, sticky=tk.NSEW)
-
-        for child in edsmframe.winfo_children():
-            child.grid_configure(padx=5, pady=3)
 
         if platform in ['darwin','win32']:
             self.hotkey_code = config.getint('hotkey_code')
@@ -257,9 +286,12 @@ class PreferencesDialog(tk.Toplevel):
 
 
         edsm = self.out_log_edsm.get()
-        self.edsm_label['state']  = edsm and tk.NORMAL or tk.DISABLED
-        self.edsm_cmdr['state']   = edsm and tk.NORMAL or tk.DISABLED
-        self.edsm_apikey['state'] = edsm and tk.NORMAL or tk.DISABLED
+        for child in [self.edsm_label, self.edsm_cmdr, self.edsm_apikey]:
+            child['state'] = edsm and tk.NORMAL or tk.DISABLED
+
+        tweet = self.out_log_tweet.get()
+        for child in [self.twusername, self.twpassword]:
+            child['state'] = tweet and tk.NORMAL or tk.DISABLED
 
     def outbrowse(self):
         if platform != 'win32':
@@ -341,11 +373,27 @@ class PreferencesDialog(tk.Toplevel):
         config.set('username', self.username.get().strip())
         config.set('password', self.password.get().strip())
 
-        config.set('output', (self.out_eddn.get() and config.OUT_EDDN) + (self.out_bpc.get() and config.OUT_BPC) + (self.out_td.get() and config.OUT_TD) + (self.out_csv.get() and config.OUT_CSV) + (self.out_ship_eds.get() and config.OUT_SHIP_EDS) + (self.out_log_file.get() and config.OUT_LOG_FILE) + (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) + (self.out_log_edsm.get() and config.OUT_LOG_EDSM) + (self.out_log_auto.get() and config.OUT_LOG_AUTO))
+
+        config.set('output',
+                   (self.out_eddn.get() and config.OUT_EDDN) +
+                   (self.out_bpc.get() and config.OUT_BPC) +
+                   (self.out_td.get() and config.OUT_TD) +
+                   (self.out_csv.get() and config.OUT_CSV) +
+                   (self.out_ship_eds.get() and config.OUT_SHIP_EDS) +
+                   (self.out_log_file.get() and config.OUT_LOG_FILE) +
+                   (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
+                   (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
+                   (self.out_log_auto.get() and config.OUT_LOG_AUTO) +
+                   (self.out_log_tweet.get() and config.OUT_LOG_TWEET))
         config.set('outdir', expanduser(self.outdir.get()))
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
+
+        config.set('twit_consumer_key', self.tw_consumer_key.get().strip())
+        config.set('twit_consumer_secret', self.tw_consumer_secret.get().strip())
+        config.set('twit_access_token', self.tw_access_token.get().strip())
+        config.set('twit_access_secret', self.tw_access_secret.get().strip())
 
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)
