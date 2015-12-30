@@ -290,7 +290,7 @@ class PreferencesDialog(tk.Toplevel):
             child['state'] = edsm and tk.NORMAL or tk.DISABLED
 
         tweet = self.out_log_tweet.get()
-        for child in [self.twusername, self.twpassword]:
+        for child in [self.tw_access_token, self.tw_access_secret, self.tw_consumer_key, self.tw_consumer_secret]:
             child['state'] = tweet and tk.NORMAL or tk.DISABLED
 
     def outbrowse(self):
