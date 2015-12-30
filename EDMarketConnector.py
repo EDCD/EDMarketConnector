@@ -15,6 +15,8 @@ import ttk
 import tkFont
 from ttkHyperlinkLabel import HyperlinkLabel
 
+import tweet
+
 if __debug__:
     from traceback import print_exc
 
@@ -307,10 +309,15 @@ class AppWindow:
                     if not self.status['text']:
                         self.status['text'] = _("You're not docked at a station!")
 
+                    if config.getint('output') & config.OUT_LOG_TWEET:
+                        tweet.systemchanged(self.system['text'])
+
                 else:
                     # Finally - the data looks sane and we're docked at a station
                     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
+                    if config.getint('output') & config.OUT_LOG_TWEET:
+                        tweet.stationchanged(self.system['text'], self.station['text'])
 
                     # No EDDN output at known station?
                     if (config.getint('output') & config.OUT_EDDN) and station_id and not (has_market or has_outfitting or has_shipyard):
@@ -429,6 +436,9 @@ class AppWindow:
             self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
             if config.getint('output') & config.OUT_LOG_FILE:
                 flightlog.writelog(timestamp, system)
+            if config.getint('output') & config.OUT_LOG_TWEET:
+                tweet.systemchange(system)
+
             if config.getint('output') & config.OUT_LOG_EDSM:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')

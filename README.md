@@ -66,6 +66,7 @@ This app can save a variety of data in a variety of formats:
 * Flight log
   * Elite Dangerous Star Map - sends a record of your location to “[EDSM](http://www.edsm.net/)” where you can view your logs under My&nbsp;account &rarr; Exploration&nbsp;Logs, and optionally add private comments about a system.
   * CSV format file - adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
+  * Optionally Tweet your current system/station.
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
@@ -133,11 +134,13 @@ Mac:
 Windows:
 
 * Requires Python2.7 and the Python “requests” and “watchdog” modules.
+* To Tweet system loation you need the twitter module from http://github.com/sixohsix/twitter/tree/master
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
 * Requires the Python “imaging-tk”, “iniparse” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
+* To Tweet system loation you need the twitter module from http://github.com/sixohsix/twitter/tree/master
 * Run with `./EDMarketConnector.py` .
 
 Command-line
