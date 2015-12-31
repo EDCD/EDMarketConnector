@@ -6,20 +6,12 @@ if __debug__:
 
 import Tkinter as tk
 import ttk
+import myNotebook as nb
 
 import companion
 from companion import ship_map
 import prefs
 
-
-# Hack to fix notebook page background. Doesn't seem possible to do this with styles.
-if platform == 'darwin':
-    from platform import mac_ver
-    PAGEFG = 'systemButtonText'
-    PAGEBG = map(int, mac_ver()[0].split('.')) >= [10,10] and '#dbdbdb' or '#dfdfdf'	# want e2 or e5 on screen
-elif platform == 'win32':
-    PAGEFG = 'SystemWindowText'
-    PAGEBG = 'SystemWindow'	# typically white
 
 RANKS = [	# in output order
     (_('Combat')     , 'combat'),	# Ranking
@@ -262,25 +254,18 @@ class StatsResults(tk.Toplevel):
         elif platform=='darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
-            if map(int, mac_ver()[0].split('.')) >= [10,10]:
-                # Hack for tab appearance with 8.5 on Yosemite. For proper fix see
-                # https://github.com/tcltk/tk/commit/55c4dfca9353bbd69bbcec5d63bf1c8dfb461e25
-                style = ttk.Style().configure('TNotebook.Tab', padding=(12,10,12,2))
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
-        notebook = ttk.Notebook(frame)
-        if platform!='darwin':
-            notebook.grid(padx=10, pady=10, sticky=tk.NSEW)
-        else:
-            notebook.grid(sticky=tk.NSEW)	# Already padded apropriately
+        notebook = nb.Notebook(frame)
 
         page = self.addpage(notebook)
         for thing in stats[1:3]:
             self.addpagerow(page, [thing[0], thing[1] + ' CR'])	# assumes things two and three are money
         for thing in stats[3:]:
             self.addpagerow(page, thing)
+        ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Status'))		# Status dialog title
 
         page = self.addpage(notebook, [_('Ship'),	# Status dialog subtitle
@@ -289,6 +274,7 @@ class StatsResults(tk.Toplevel):
         shiplist = ships(data)
         for thing in shiplist:
             self.addpagerow(page, thing, align=tk.W)
+        ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 
         if platform!='darwin':
@@ -303,10 +289,7 @@ class StatsResults(tk.Toplevel):
         self.grab_set()
 
     def addpage(self, parent, content=[], align=tk.E):
-        if platform in ['darwin', 'win32']:
-            page = tk.Frame(parent, bg=PAGEBG)
-        else:
-            page =ttk.Frame(parent)
+        page = nb.Frame(parent)
         page.grid(pady=10, sticky=tk.NSEW)
         page.columnconfigure(0, weight=1)
         if content:
@@ -324,10 +307,7 @@ class StatsResults(tk.Toplevel):
 
     def addpagerow(self, parent, content, align=tk.E):
         for i in range(len(content)):
-            if platform in ['darwin', 'win32']:
-                label = tk.Label(parent, text=content[i], fg=PAGEFG, bg=PAGEBG, highlightbackground=PAGEBG)
-            else:
-                label =ttk.Label(parent, text=content[i])
+            label = nb.Label(parent, text=content[i])
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)
                 row = parent.grid_size()[1]-1
