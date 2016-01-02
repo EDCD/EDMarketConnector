@@ -86,7 +86,7 @@
 "Duke" = "Герцог";
 
 /* Empire rank. [stats.py] */
-"Earl" = "Ерл";
+"Earl" = "Earl";
 
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Редагувати";
@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Герой";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Горяча клавіша";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Як вас ідентифікувати в збережених даних";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Ідентичність";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сполучення клавіш";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Відкрити налаштування системи";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Вивід";
 
 /* Empire rank. [stats.py] */

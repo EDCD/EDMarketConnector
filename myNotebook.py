@@ -37,6 +37,9 @@ class Notebook(ttk.Notebook):
             self.grid(sticky=tk.NSEW)	# Already padded apropriately
         elif platform == 'win32':
             style.configure('nb.TFrame',                          background=PAGEBG)
+            style.configure('nb.TButton',                         background=PAGEBG)
+            style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
+            style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
             self.grid(padx=10, pady=10, sticky=tk.NSEW)
         else:
             self.grid(padx=10, pady=10, sticky=tk.NSEW)
@@ -54,6 +57,7 @@ class Frame(platform == 'darwin' and tk.Frame or ttk.Frame):
         else:
             ttk.Frame.__init__(self, master, **kw)
             ttk.Frame(self).grid(pady=5)	# top spacer
+        self.configure(takefocus = 1)		# let the frame take focus so that no particular child is focused
 
 class Label(tk.Label):
 
@@ -65,3 +69,47 @@ class Label(tk.Label):
             kw['foreground'] = kw.pop('foreground', ttk.Style().lookup('TLabel', 'foreground'))
             kw['background'] = kw.pop('background', ttk.Style().lookup('TLabel', 'background'))
         tk.Label.__init__(self, master, **kw)	# Just use tk.Label on all platforms
+
+class Entry(platform == 'darwin' and tk.Entry or ttk.Entry):
+
+    def __init__(self, master=None, **kw):
+        if platform == 'darwin':
+            kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
+            tk.Entry.__init__(self, master, **kw)
+        else:
+            ttk.Entry.__init__(self, master, **kw)
+
+class Button(platform == 'darwin' and tk.Button or ttk.Button):
+
+    def __init__(self, master=None, **kw):
+        if platform == 'darwin':
+            kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
+            tk.Button.__init__(self, master, **kw)
+        elif platform == 'win32':
+            ttk.Button.__init__(self, master, style='nb.TButton', **kw)
+        else:
+            ttk.Button.__init__(self, master, **kw)
+
+class Checkbutton(platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton):
+
+    def __init__(self, master=None, **kw):
+        if platform == 'darwin':
+            kw['foreground'] = kw.pop('foreground', PAGEFG)
+            kw['background'] = kw.pop('background', PAGEBG)
+            tk.Checkbutton.__init__(self, master, **kw)
+        elif platform == 'win32':
+            ttk.Checkbutton.__init__(self, master, style='nb.TCheckbutton', **kw)
+        else:
+            ttk.Checkbutton.__init__(self, master, **kw)
+
+class Radiobutton(platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton):
+
+    def __init__(self, master=None, **kw):
+        if platform == 'darwin':
+            kw['foreground'] = kw.pop('foreground', PAGEFG)
+            kw['background'] = kw.pop('background', PAGEBG)
+            tk.Radiobutton.__init__(self, master, **kw)
+        elif platform == 'win32':
+            ttk.Radiobutton.__init__(self, master, style='nb.TRadiobutton', **kw)
+        else:
+            ttk.Radiobutton.__init__(self, master, **kw)

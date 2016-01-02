@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Héroe";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Tecla de acceso directo";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Cómo te gustaría ser identificado en los datos guardados";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identidad";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Tecla de acceso directo";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Abrir Preferencias del Sistema";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Salida";
 
 /* Empire rank. [stats.py] */
@@ -287,7 +290,7 @@
 "Post Commander" = "Capitán de fragata";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Potencias Galácticas";
+"Powerplay" = "Powerplay";
 
 /* [prefs.py] */
 "Preferences" = "Preferencias";

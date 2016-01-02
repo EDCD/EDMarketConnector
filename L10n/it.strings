@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Come vuoi essere identificato nei dati salvati";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identità";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Scorciatoia di tastiera";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Apri Preferenze di Sistema";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Output";
 
 /* Empire rank. [stats.py] */

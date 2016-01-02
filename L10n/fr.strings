@@ -4,204 +4,6 @@
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "À propos de {APP}";
 
-/* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Parcourir...";
-
-/* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Spécifier...";
-
-/* [EDMarketConnector.py] */
-"Check for Updates..." = "Chercher une mise à jour...";
-
-/* EDSM & privacy setting. [prefs.py] */
-"Cmdr name" = "Nom de Cmd";
-
-/* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Cmd";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "Temps de recharge {SS}s";
-
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Informations d'identification";
-
-/* [EDMarketConnector.py] */
-"Error: Can't connect to EDDN" = "Erreur: Connexion impossible à EDDN";
-
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Erreur: Connexion à EDDN expirée";
-
-/* [companion.py] */
-"Error: Invalid Credentials" = "Erreur: Identifiants invalides";
-
-/* [companion.py] */
-"Error: Server is down" = "Erreur: Le serveur est indisponible";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Quitter";
-
-/* [EDMarketConnector.py] */
-"Fetching data..." = "Récupération des données...";
-
-/* Menu title on Windows. [EDMarketConnector.py] */
-"File" = "Fichier";
-
-/* Section heading in settings. [prefs.py] */
-"File location" = "Emplacement des fichiers";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Journal de vol au format CSV";
-
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Comment voulez-vous être identifié dans les données sauvegardées ?";
-
-/* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Dernière mise à jour à {HH}:{MM}:{SS}";
-
-/* [EDMarketConnector.py] */
-"Logging in..." = "Connexion en cours...";
-
-/* [prefs.py] */
-"Market data in CSV format file" = "Données du marché au format CSV";
-
-/* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Données du marché au format Slopey's BPC";
-
-/* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Données du marché au format Trade Dangerous";
-
-/* [prefs.py] */
-"OK" = "OK";
-
-/* Section heading in settings. [prefs.py] */
-"Output" = "Sorties";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Mot de passe";
-
-/* [prefs.py] */
-"Please choose what data to save" = "Veuillez choisir les données à sauvegarder";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Veuillez entrer ce code dans le champ ci-dessus.";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Veuillez vous connecter avec vos identifiants de compte Elite: Dangerous";
-
-/* [prefs.py] */
-"Preferences" = "Préférences";
-
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Confidentialité";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
-
-/* [prefs.py] */
-"Send station data to the Elite Dangerous Data Network" = "Envoyer les données de la station à Elite Dangerous Data Network";
-
-/* [EDMarketConnector.py] */
-"Sending data to EDDN..." = "Envoi des données à EDDN...";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Paramètres";
-
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Équipements du vaisseau au format Coriolis";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Équipements du vaisseau au format E:D Shipyard";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "La station n'a pas de marché !";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "La station n'a rien du tout !";
-
-/* Main window. [EDMarketConnector.py] */
-"Station" = "Station";
-
-/* Main window. [EDMarketConnector.py] */
-"System" = "Système";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Mettre à jour";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Nom d'utilisateur (e-mail)";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Avec quoi volez-vous ?";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Où êtes-vous ?";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Qui êtes-vous ?";
-
-/* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Vous n'êtes pas amarré à une station !";
-
-/* Section heading in settings on Windows. [prefs.py] */
-"Hotkey" = "Raccourci clavier";
-
-/* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Aucun";
-
-/* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Ouvrir Préférences Système";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Jouer un son";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Rédémarrer {APP} pour utiliser les raccourcis";
-
-/* Section heading in settings on OSX. [prefs.py] */
-"Keyboard shortcut" = "Raccourci clavier";
-
-/* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Fenêtre";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} a besoin de permissions pour utiliser les raccourcis";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Seulement quand Elite: Dangerous est l'application active";
-
-/* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Copier";
-
-/* Menu title. [EDMarketConnector.py] */
-"Edit" = "Édition";
-
-/* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
-
-/* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Informations d'identification pour Elite Dangerous Star Map";
-
-/* [edsm.py] */
-"Error: Can't connect to EDSM" = "Erreur: Connexion impossible à EDSM";
-
-/* [edsm.py]  */
-"Error: EDSM {MSG}" = "Erreur: EDSM {MSG}";
-
-/* [prefs.py] */
-"Send flight log to Elite Dangerous Star Map" = "Envoyer le journal de vol à Elite Dangerous Star Map";
-
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Envoi des données à EDSM...";
-
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Ajouter automatiquement une entrée au journal en entrant dans un système";
-
-/* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Redémarrer Elite: Dangerous pour utiliser cette fonctionnalité";
-
-/* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Erreur: Impossible d'obtenir les données du marché!";
-
 /* Federation rank. [stats.py] */
 "Admiral" = "Amiral";
 
@@ -210,6 +12,12 @@
 
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
+
+/* EDSM setting. [prefs.py] */
+"API Key" = "API Key";
+
+/* Output setting. [prefs.py] */
+"Automatically make a log entry on entering a system" = "Ajouter automatiquement une entrée au journal en entrant dans un système";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "Solde";
@@ -220,14 +28,29 @@
 /* Trade rank. [stats.py] */
 "Broker" = "Courtier";
 
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Parcourir...";
+
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Champion";
 
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Spécifier...";
+
+/* [EDMarketConnector.py] */
+"Check for Updates..." = "Chercher une mise à jour...";
+
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Premier Maître";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Cmd";
+
+/* EDSM & privacy setting. [prefs.py] */
+"Cmdr name" = "Nom de Cmd";
 
 /* Ranking. [stats.py] */
 "Combat" = "Combattant";
@@ -235,11 +58,20 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Compétent";
 
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "Temps de recharge {SS}s";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Copier";
+
 /* Empire rank. [stats.py] */
 "Count" = "Comte";
 
 /* Ranking. [stats.py] */
 "CQC" = "CQC";
+
+/* Section heading in settings. [prefs.py] */
+"Credentials" = "Informations d'identification";
 
 /* Combat rank. [stats.py] */
 "Dangerous" = "Vétéran";
@@ -256,8 +88,14 @@
 /* Empire rank. [stats.py] */
 "Earl" = "Marquis";
 
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Édition";
+
 /* Top rank. [stats.py] */
 "Elite" = "Élite";
+
+/* Section heading in settings. [prefs.py] */
+"Elite Dangerous Star Map credentials" = "Informations d'identification pour Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
@@ -268,6 +106,30 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
+/* [EDMarketConnector.py] */
+"Error: Can't connect to EDDN" = "Erreur : Connexion impossible à EDDN";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Erreur : Connexion impossible à EDSM";
+
+/* [EDMarketConnector.py] */
+"Error: Can't get market data!" = "Erreur : Impossible d'obtenir les données du marché !";
+
+/* [EDMarketConnector.py] */
+"Error: Connection to EDDN timed out" = "Erreur : Connexion à EDDN expirée";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Erreur : EDSM {MSG}";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Erreur : Identifiants invalides";
+
+/* [companion.py] */
+"Error: Server is down" = "Erreur : Le serveur est indisponible";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Quitter";
+
 /* Combat rank. [stats.py] */
 "Expert" = "Expert";
 
@@ -276,6 +138,18 @@
 
 /* Ranking. [stats.py] */
 "Federation" = "Fédération";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Récupération des données...";
+
+/* Menu title on Windows. [EDMarketConnector.py] */
+"File" = "Fichier";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Emplacement des fichiers";
+
+/* [prefs.py] */
+"Flight log in CSV format file" = "Journal de vol au format CSV";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
@@ -289,11 +163,26 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
+/* Tab heading in settings on Windows. [prefs.py] */
+"Hotkey" = "Raccourci clavier";
+
+/* [prefs.py] */
+"How do you want to be identified in the saved data" = "Comment voulez-vous être identifié dans les données sauvegardées ?";
+
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identité";
+
+/* Tab heading in settings on OSX. [prefs.py] */
+"Keyboard shortcut" = "Raccourci clavier";
+
 /* Empire rank. [stats.py] */
 "King" = "Roi";
 
 /* Empire rank. [stats.py] */
 "Knight" = "Chevalier";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Dernière mise à jour à {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
@@ -304,8 +193,20 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Emprunt";
 
+/* [EDMarketConnector.py] */
+"Logging in..." = "Connexion en cours...";
+
 /* Empire rank. [stats.py] */
 "Lord" = "Banneret";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Données du marché au format CSV";
+
+/* [prefs.py] */
+"Market data in Slopey's BPC format file" = "Données du marché au format Slopey's BPC";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Données du marché au format Trade Dangerous";
 
 /* Empire rank. [stats.py] */
 "Marquis" = "Duc";
@@ -331,11 +232,29 @@
 /* Trade rank. [stats.py] */
 "Mostly Penniless" = "Mendiant";
 
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Aucun";
+
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
+/* [prefs.py] */
+"OK" = "OK";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Seulement quand Elite: Dangerous est l'application active";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Ouvrir Préférences Système";
+
+/* Tab heading in settings. [prefs.py] */
+"Output" = "Sorties";
+
 /* Empire rank. [stats.py] */
 "Outsider" = "Étranger";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Password" = "Mot de passe";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Découvreur";
@@ -352,6 +271,18 @@
 /* Explorer rank. [stats.py] */
 "Pioneer" = "Pionnier";
 
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Jouer un son";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Veuillez choisir les données à sauvegarder";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"Please enter the code into the box below." = "Veuillez entrer ce code dans le champ ci-dessus.";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Please log in with your Elite: Dangerous account details" = "Veuillez vous connecter avec vos identifiants de compte Elite: Dangerous";
+
 /* Federation rank. [stats.py] */
 "Post Captain" = "Capitaine de Vaisseau";
 
@@ -361,11 +292,20 @@
 /* Ranking. [stats.py] */
 "Powerplay" = "Powerplay";
 
+/* [prefs.py] */
+"Preferences" = "Préférences";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
+/* Section heading in settings. [prefs.py] */
+"Privacy" = "Confidentialité";
+
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
+
+/* Privacy setting. [prefs.py] */
+"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Navigateur";
@@ -386,7 +326,13 @@
 "Rating 5" = "Rang 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
-"Re-start Elite: Dangerous for automatic log entries" = "Re-démarrer Elite: Dangereux pour les entrées de journal automatique";
+"Re-start Elite: Dangerous for automatic log entries" = "Redémarrez Elite: Dangerous pour les entrées de journal automatiques";
+
+/* Output settings prompt. [prefs.py] */
+"Re-start Elite: Dangerous to use this feature" = "Redémarrez Elite: Dangerous pour utiliser cette fonctionnalité";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Rédémarrez {APP} pour utiliser les raccourcis";
 
 /* Federation rank. [stats.py] */
 "Rear Admiral" = "Contre-Amiral";
@@ -400,11 +346,32 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
+/* [prefs.py] */
+"Send flight log to Elite Dangerous Star Map" = "Envoyer le journal de vol à Elite Dangerous Star Map";
+
+/* [prefs.py] */
+"Send station data to the Elite Dangerous Data Network" = "Envoyer les données de la station à Elite Dangerous Data Network";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDDN..." = "Envoi des données à EDDN...";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDSM..." = "Envoi des données à EDSM...";
+
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Paramètres";
+
 /* Status dialog subtitle. [stats.py] */
 "Ship" = "Vaisseau";
+
+/* [prefs.py] */
+"Ship loadout in Coriolis format file" = "Équipements du vaisseau au format Coriolis";
+
+/* [prefs.py] */
+"Ship loadout in E:D Shipyard format file" = "Équipements du vaisseau au format E:D Shipyard";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Vaisseaux";
@@ -412,11 +379,23 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Écuyer";
 
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Station";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "La station n'a pas de marché !";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "La station n'a rien du tout !";
+
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "État";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Éclaireur";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Système";
 
 /* Ranking. [stats.py] */
 "Trade" = "Commerçant";
@@ -426,6 +405,12 @@
 
 /* Trade rank. [stats.py] */
 "Tycoon" = "Magnat";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Mettre à jour";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Username (Email)" = "Nom d'utilisateur (e-mail)";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice-Amiral";
@@ -438,3 +423,22 @@
 
 /* Federation rank. [stats.py] */
 "Warrant Officer" = "Major";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "Avec quoi volez-vous ?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Où êtes-vous ?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Qui êtes-vous ?";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Fenêtre";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = "Vous n'êtes pas amarré à une station !";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} a besoin de permissions pour utiliser les raccourcis";
+

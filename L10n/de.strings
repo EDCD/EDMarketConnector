@@ -8,7 +8,7 @@
 "Admiral" = "Admiral";
 
 /* Explorer rank. [stats.py] */
-"Aimless" = "Total Planlos";
+"Aimless" = "Total planlos";
 
 /* CQC rank. [stats.py] */
 "Amateur" = "Anfänger";
@@ -53,7 +53,7 @@
 "Cmdr name" = "Nickname";
 
 /* Ranking. [stats.py] */
-"Combat" = "Kampf";
+"Combat" = "Kampfrang";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Kompetent";
@@ -68,7 +68,7 @@
 "Count" = "Anzahl";
 
 /* Ranking. [stats.py] */
-"CQC" = "CQC";
+"CQC" = "CQC-Rang";
 
 /* Section heading in settings. [prefs.py] */
 "Credentials" = "Anmeldedaten";
@@ -95,7 +95,7 @@
 "Elite" = "Elite";
 
 /* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Elite: Dangerous Star Map Logindaten";
+"Elite Dangerous Star Map credentials" = "Elite: Dangerous Star Map Anmeldedaten";
 
 /* Ranking. [stats.py] */
 "Empire" = "Imperium";
@@ -134,7 +134,7 @@
 "Expert" = "Experte";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Erkunder";
+"Explorer" = "Erkunderrang";
 
 /* Ranking. [stats.py] */
 "Federation" = "Föderation";
@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Held";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Welcher Name soll in den Dateien hinterlegt werden?";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identität";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Tastaturkurzbefehl";
 
 /* Empire rank. [stats.py] */
@@ -179,7 +182,7 @@
 "Knight" = "Ritter";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Zuletzt aktualisiert vor {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Zuletzt aktualisiert um {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Kapitänleutnant";
@@ -230,7 +233,7 @@
 "Mostly Penniless" = "Sehr Arm";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "—";
+"None" = "Keine Zuweisung";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Neuling";
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Öffne Systemeinstellungen";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Ausgabe";
 
 /* Empire rank. [stats.py] */
@@ -278,7 +281,7 @@
 "Please enter the code into the box below." = "Bitte gib den Code unten ein";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Bitte melde dich mit deinem Elite: Dangerous-Spielkontodaten an";
+"Please log in with your Elite: Dangerous account details" = "Bitte melde dich mit deinem Elite: Dangerous Konto an";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Kapitän";
@@ -308,19 +311,19 @@
 "Ranger" = "Aufseher";
 
 /* Power rank. [stats.py] */
-"Rating 1" = "1. Wertung";
+"Rating 1" = "Wertung 1";
 
 /* Power rank. [stats.py] */
-"Rating 2" = "2. Wertung";
+"Rating 2" = "Wertung 2";
 
 /* Power rank. [stats.py] */
-"Rating 3" = "3. Wertung";
+"Rating 3" = "Wertung 3";
 
 /* Power rank. [stats.py] */
-"Rating 4" = "4. Wertung";
+"Rating 4" = "Wertung 4";
 
 /* Power rank. [stats.py] */
-"Rating 5" = "5. Wertung";
+"Rating 5" = "Wertung 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
 "Re-start Elite: Dangerous for automatic log entries" = "Starte Elite: Dangerous für automatische Logbucheinträge neu";
@@ -353,7 +356,7 @@
 "Sending data to EDDN..." = "Daten werden an das EDDN gesendet...";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Schicke Daten an EDSM...";
+"Sending data to EDSM..." = "Schicke Daten zur EDSM...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Leibeigener";
@@ -395,7 +398,7 @@
 "System" = "System";
 
 /* Ranking. [stats.py] */
-"Trade" = "Handeln";
+"Trade" = "Handelsrang";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Wegebner";
@@ -404,7 +407,7 @@
 "Tycoon" = "Magnat";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Update";
+"Update" = "Aktualisieren";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Benutzername (E-Mail)";

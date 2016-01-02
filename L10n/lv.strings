@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Varonis";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Ātrais taustiņš";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Kā jūs vēlaties tikt atpazīts saglabātajā informācijā";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identitāte";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Ātrais taustiņš";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Atvērt sistēmas iestatījumus";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Izvade";
 
 /* Empire rank. [stats.py] */
