@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from os.path import dirname, expanduser, isdir, sep
+from os.path import dirname, expanduser, isdir, join, sep
 from sys import platform
 
 import Tkinter as tk
@@ -136,8 +136,8 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_label = nb.Label(outframe, text=_('File location'))	# Section heading in settings
         self.outdir_label.grid(padx=BUTTONX, sticky=tk.W)
         self.outdir = nb.Entry(outframe, takefocus=False)
-        if config.get('outdir').startswith(expanduser('~')):
-            self.outdir.insert(0, '~' + config.get('outdir')[len(expanduser('~')):])
+        if config.get('outdir').startswith(config.home):
+            self.outdir.insert(0, '~' + config.get('outdir')[len(config.home):])
         else:
             self.outdir.insert(0, config.get('outdir'))
         self.outdir.grid(row=20, padx=(PADX,0), sticky=tk.EW)
@@ -286,7 +286,7 @@ class PreferencesDialog(tk.Toplevel):
             browseInfo.lpszTitle = _('File location')
             browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
             browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            browseInfo.lParam = expanduser(self.outdir.get())
+            browseInfo.lParam = self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[1:]) or self.outdir.get()
             ctypes.windll.ole32.CoInitialize(None)
             pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
             if pidl:
@@ -300,8 +300,8 @@ class PreferencesDialog(tk.Toplevel):
         if d:
             self.outdir['state'] = tk.NORMAL	# must be writable to update
             self.outdir.delete(0, tk.END)
-            if d.startswith(expanduser('~')):
-                self.outdir.insert(0, '~' + d[len(expanduser('~')):])
+            if d.startswith(config.home):
+                self.outdir.insert(0, '~' + d[len(config.home):])
             else:
                 self.outdir.insert(0, d)
             self.outdir['state'] = 'readonly'
@@ -362,7 +362,7 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
                    (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
                    (self.out_log_auto.get() and config.OUT_LOG_AUTO))
-        config.set('outdir', expanduser(self.outdir.get()))
+        config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[1:]) or self.outdir.get())
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
