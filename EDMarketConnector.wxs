@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,  1031,  1034,  1036,  1040,  1043,  1045, 1049, 1058, 1060, 1062, 0" />
-				 <!--       en-US, de-DE, es-ES, fr-FR, it-IT, nl-NL, pl,   ru,   uk,   sl,   lv,   neutral -->
+				 Languages="1033,1031,1034,1036,1040,1043,1045,1049,1058,1060,1062,0" />
+				 <!--        en   de   es   fr   it   nl   pl   ru   uk   sl   lv  neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
