@@ -177,6 +177,11 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
         self.edsm_apikey.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
+       self.edsm_autoopen= tk.IntVar(value = (output & config.EDSM_autoopen) and 1)
+        nb.Checkbutton(edsmframe, text=_('Automatically open EDSM System view for uncharted systems'), variable=self.EDSM_autoopen).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+
+
+
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
 
@@ -361,7 +366,8 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_log_file.get() and config.OUT_LOG_FILE) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
                    (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
-                   (self.out_log_auto.get() and config.OUT_LOG_AUTO))
+                   (self.out_log_auto.get() and config.OUT_LOG_AUTO) +
+                   (self.EDSM_autoopen.get() and config.EDSM_autoopen))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[1:]) or self.outdir.get())
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
