@@ -177,10 +177,8 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
         self.edsm_apikey.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
-       self.edsm_autoopen= tk.IntVar(value = (output & config.EDSM_autoopen) and 1)
+        self.edsm_autoopen= tk.IntVar(value = (output & config.EDSM_autoopen) and 1)
         nb.Checkbutton(edsmframe, text=_('Automatically open EDSM System view for uncharted systems'), variable=self.EDSM_autoopen).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-
-
 
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
