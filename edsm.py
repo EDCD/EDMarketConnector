@@ -44,11 +44,15 @@ class EDSM:
             if data == -1:
                 # System not present - but don't create it on the assumption that the caller will
                 self.result['img'] = EDSM._IMG_NEW
+                if (config.getint('EDSM_autoopen')):
+                    webbrowser.open(self.result['url'])
             elif data.get('coords'):
                 self.result['img'] = EDSM._IMG_KNOWN
                 self.syscache.add(system_name)
             else:
                 self.result['img'] = EDSM._IMG_UNKNOWN
+                if (config.getint('EDSM_autoopen')):
+                    webbrowser.open(self.result['url'])
 
     # Asynchronous version of the above
     def start_lookup(self, system_name, known=0):
