@@ -3,7 +3,7 @@ import threading
 from sys import platform
 import time
 import urllib
-
+import webbrowser
 import Tkinter as tk
 
 from config import applongname, appversion, config
@@ -44,14 +44,14 @@ class EDSM:
             if data == -1:
                 # System not present - but don't create it on the assumption that the caller will
                 self.result['img'] = EDSM._IMG_NEW
-                if (config.getint('EDSM_autoopen')):
+                if (config.EDSM_AUTOOPEN):
                     webbrowser.open(self.result['url'])
             elif data.get('coords'):
                 self.result['img'] = EDSM._IMG_KNOWN
                 self.syscache.add(system_name)
             else:
                 self.result['img'] = EDSM._IMG_UNKNOWN
-                if (config.getint('EDSM_autoopen')):
+                if (config.EDSM_AUTOOPEN):
                     webbrowser.open(self.result['url'])
 
     # Asynchronous version of the above
@@ -81,15 +81,20 @@ class EDSM:
                 result['img'] = EDSM._IMG_NEW
                 result['done'] = True	# give feedback immediately
                 requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
+                if (config.EDSM_AUTOOPEN):
+                    webbrowser.open('http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name))                
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
                 result['done'] = True
                 self.syscache.add(system_name)
             else:
                 result['img'] = EDSM._IMG_UNKNOWN
+                if (config.EDSM_AUTOOPEN):
+                    webbrowser.open('http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name))                
         except:
             if __debug__: print_exc()
             result['img'] = EDSM._IMG_ERROR
+
         result['done'] = True
 
 
