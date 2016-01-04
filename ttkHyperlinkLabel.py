@@ -25,6 +25,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         if platform == 'darwin':
             # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
             kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
+            kw['anchor'] = kw.pop('anchor', tk.W)	# like ttk.Label
             tk.Label.__init__(self, master, **kw)
         else:
             ttk.Label.__init__(self, master, **kw)

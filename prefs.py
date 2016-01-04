@@ -366,7 +366,7 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
                    (self.out_log_auto.get() and config.OUT_LOG_AUTO) +
                    (self.edsm_autoopen.get() and config.EDSM_AUTOOPEN))
-        config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[1:]) or self.outdir.get())
+        config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
