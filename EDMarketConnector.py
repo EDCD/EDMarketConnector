@@ -449,6 +449,8 @@ class AppWindow:
         result = self.edsm.result
         if result['done']:
             self.system['image'] = result['img']
+            if result['uncharted'] and (config.getint('output') & config.EDSM_AUTOOPEN):
+                webbrowser.open(result['url'])
         else:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 

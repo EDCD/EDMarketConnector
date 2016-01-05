@@ -19,6 +19,9 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
 
+/* [prefs.py] */
+"Automatically open uncharted systems' EDSM page" = "Automatically open uncharted systems' EDSM page";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Balance";
 

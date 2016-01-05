@@ -156,6 +156,9 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(edsmframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
         self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
         nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.edsm_autoopen = tk.IntVar(value = (output & config.EDSM_AUTOOPEN) and 1)
+        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_("Automatically open uncharted systems' EDSM page"), variable=self.edsm_autoopen)
+        self.edsm_autoopen_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         if monitor.logdir:
             self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
             self.edsm_log_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
@@ -176,9 +179,6 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_apikey = nb.Entry(edsmframe)
         self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
         self.edsm_apikey.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        self.edsm_autoopen= tk.IntVar(value = (output & config.EDSM_AUTOOPEN) and 1)
-        nb.Checkbutton(edsmframe, text=_('Automatically open EDSM System view for uncharted systems'), variable=self.edsm_autoopen).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
 
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
@@ -248,6 +248,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
 
         edsm_state = self.out_log_edsm.get() and tk.NORMAL or tk.DISABLED
+        self.edsm_autoopen_button['state'] = edsm_state
         self.edsm_label['state']        = edsm_state
         self.edsm_cmdr_label['state']   = edsm_state
         self.edsm_apikey_label['state'] = edsm_state
