@@ -157,7 +157,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
         nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.edsm_autoopen = tk.IntVar(value = (output & config.EDSM_AUTOOPEN) and 1)
-        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_("Automatically open uncharted systems' EDSM page"), variable=self.edsm_autoopen)
+        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_("Automatically open uncharted systems' EDSM pages"), variable=self.edsm_autoopen)
         self.edsm_autoopen_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         if monitor.logdir:
             self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
