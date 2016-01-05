@@ -28,15 +28,15 @@ class EDSM:
     # Just set link without doing a lookup
     def link(self, system_name):
         self.cancel_lookup()
-        self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
+        self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
 
     def lookup(self, system_name, known=0):
         self.cancel_lookup()
 
         if known or system_name in self.syscache:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
         else:
-            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
+            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
             r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
@@ -44,20 +44,22 @@ class EDSM:
             if data == -1:
                 # System not present - but don't create it on the assumption that the caller will
                 self.result['img'] = EDSM._IMG_NEW
+                self.result['uncharted'] = True
             elif data.get('coords'):
                 self.result['img'] = EDSM._IMG_KNOWN
                 self.syscache.add(system_name)
             else:
                 self.result['img'] = EDSM._IMG_UNKNOWN
+                self.result['uncharted'] = True
 
     # Asynchronous version of the above
     def start_lookup(self, system_name, known=0):
         self.cancel_lookup()
 
         if known or system_name in self.syscache:	# Cache URLs of systems with known coordinates
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True }
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
         else:
-            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False }
+            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False, 'uncharted': False }
             self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
@@ -75,6 +77,7 @@ class EDSM:
             if data == -1:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
+                result['uncharted'] = True
                 result['done'] = True	# give feedback immediately
                 requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
             elif data.get('coords'):
@@ -83,6 +86,7 @@ class EDSM:
                 self.syscache.add(system_name)
             else:
                 result['img'] = EDSM._IMG_UNKNOWN
+                result['uncharted'] = True
         except:
             if __debug__: print_exc()
             result['img'] = EDSM._IMG_ERROR
