@@ -234,10 +234,43 @@ elif platform == 'win32':
     VK_PROCESSKEY= 0xe5
     VK_OEM_CLEAR = 0xfe
 
+
     GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
     GetWindowText       = ctypes.windll.user32.GetWindowTextW
     GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
     GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+
+    def WindowTitle(h):
+        if h:
+            l = GetWindowTextLength(h) + 1
+            buf = ctypes.create_unicode_buffer(l)
+            if GetWindowText(h, buf, l):
+                return buf.value
+        return ''
+
+
+    class MOUSEINPUT(ctypes.Structure):
+        _fields_ = [('dx', LONG), ('dy', LONG), ('mouseData', DWORD), ('dwFlags', DWORD), ('time', DWORD), ('dwExtraInfo', ctypes.POINTER(ULONG))]
+
+    class KEYBDINPUT(ctypes.Structure):
+        _fields_ = [('wVk', WORD), ('wScan', WORD), ('dwFlags', DWORD), ('time', DWORD), ('dwExtraInfo', ctypes.POINTER(ULONG))]
+
+    class HARDWAREINPUT(ctypes.Structure):
+        _fields_ = [('uMsg', DWORD), ('wParamL', WORD), ('wParamH', WORD)]
+
+    class INPUT_union(ctypes.Union):
+        _fields_ = [('mi', MOUSEINPUT), ('ki', KEYBDINPUT), ('hi', HARDWAREINPUT)]
+
+    class INPUT(ctypes.Structure):
+        _fields_ = [('type', DWORD), ('union', INPUT_union)]
+
+    SendInput = ctypes.windll.user32.SendInput
+    SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(INPUT), ctypes.c_int]
+
+    INPUT_MOUSE = 0
+    INPUT_KEYBOARD = 1
+    INPUT_HARDWARE = 2
+
 
     class HotkeyMgr:
 
@@ -288,18 +321,20 @@ elif platform == 'win32':
                 self.thread = None
                 return
 
+            fake = INPUT(INPUT_KEYBOARD, INPUT_union(ki = KEYBDINPUT(keycode, keycode, 0, 0, None)))
+
             msg = MSG()
             while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
                 if msg.message == WM_HOTKEY:
-                    if config.getint('hotkey_always'):
+                    if config.getint('hotkey_always') or WindowTitle(GetForegroundWindow()).startswith('Elite - Dangerous'):
                         self.root.event_generate('<<Invoke>>', when="tail")
-                    else:	# Only trigger if game client is front process
-                        h = GetForegroundWindow()
-                        if h:
-                            l = GetWindowTextLength(h) + 1
-                            buf = ctypes.create_unicode_buffer(l)
-                            if GetWindowText(h, buf, l) and buf.value.startswith('Elite - Dangerous'):
-                                self.root.event_generate('<<Invoke>>', when="tail")
+                    else:
+                        # Pass the key on
+                        UnregisterHotKey(None, 1)
+                        SendInput(1, fake, ctypes.sizeof(INPUT))
+                        if not RegisterHotKey(None, 1, modifiers|MOD_NOREPEAT, keycode):
+                            break
+
                 elif msg.message == WM_SND_GOOD:
                     winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)	# synchronous
                 elif msg.message == WM_SND_BAD:

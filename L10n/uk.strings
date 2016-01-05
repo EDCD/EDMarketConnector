@@ -260,7 +260,7 @@
 "Pathfinder" = "Слідопит";
 
 /* Trade rank. [stats.py] */
-"Pedlar" = "Дрібний торговець";
+"Peddler" = "Дрібний торговець";
 
 /* Trade rank. [stats.py] */
 "Penniless" = "Злидень";
