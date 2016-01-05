@@ -9,6 +9,7 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
+import webbrowser
 
 import Tkinter as tk
 import ttk
