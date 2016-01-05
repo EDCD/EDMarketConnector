@@ -39,7 +39,7 @@ RANK_NAMES = {
                     _('Elite')],		# Top rank
     'trade'      : [_('Penniless'),		# Trade rank
                     _('Mostly Penniless'),	# Trade rank
-                    _('Pedlar'),		# Trade rank
+                    _('Peddler'),		# Trade rank
                     _('Dealer'),		# Trade rank
                     _('Merchant'),		# Trade rank
                     _('Broker'),		# Trade rank
