@@ -260,11 +260,12 @@ class EDLogs(FileSystemEventHandler):
             candidates = []
 
             # Steam and Steam libraries
+            key = HKEY()
             if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Valve\Steam', 0, KEY_READ, ctypes.byref(key)):
                 valtype = DWORD()
                 valsize = DWORD()
                 if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
-                    buf = ctypes.create_unicode_buffer(size.value / 2)
+                    buf = ctypes.create_unicode_buffer(valsize.value / 2)
                     if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
                         steamlibs = [buf.value]
                         try:
@@ -282,7 +283,6 @@ class EDLogs(FileSystemEventHandler):
                 RegCloseKey(key)
 
             # Next try custom installation under the Launcher
-            key = HKEY()
             if not RegOpenKeyEx(HKEY_LOCAL_MACHINE,
                                 machine().endswith('64') and
                                 r'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall' or	# Assumes that the launcher is a 32bit process
