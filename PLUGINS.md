@@ -55,7 +55,7 @@ def plugin_app(parent):
    
    tk.Label(status, text="Status:").grid(row=0, column=0)
    
-   # after this your even functions can directly update plugin_app.status["text"] 
+   # after this your event functions can directly update plugin_app.status["text"] 
    plugin_app.status = tk.Label(status, text="Happy!")
    plugin_app.status.grid(row=0, column=1)
 plugin_app.status = None
