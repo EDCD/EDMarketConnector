@@ -21,7 +21,7 @@ def plugin_start():
 # Plugin Hooks
 ## Configuration 
 
-If you want your plugin to be configurable via the GUI you can define form to be used by EDMC's settings window.
+If you want your plugin to be configurable via the GUI you can define a form (tab) to be used by EDMC's settings window.
 
 ```
 import Tkinter as tk
