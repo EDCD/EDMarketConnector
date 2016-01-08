@@ -13,16 +13,22 @@ import tkFont
 #   underline: If True/False the text is always/never underlined. If None (the default) the text is underlined only on hover.
 #   popup_copy: Whether right-click on non-empty label text pops up a context menu with a 'Copy' option. Defaults to no context menu. If popup_copy is a function it will be called with the current label text and should a boolean.
 #
-class HyperlinkLabel(ttk.Label, object):
+class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
     def __init__(self, master=None, **kw):
         self.url = kw.pop('url')
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)	# override ttk.Label's underline
         self.foreground = kw.get('foreground') or 'blue'
-        self.disabledforeground = kw.pop('disabledforeground', None) or 'SystemWindowText'
+        self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup('TLabel', 'foreground', ('disabled',)))
 
-        ttk.Label.__init__(self, master, **kw)
+        if platform == 'darwin':
+            # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
+            kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
+            kw['anchor'] = kw.pop('anchor', tk.W)	# like ttk.Label
+            tk.Label.__init__(self, master, **kw)
+        else:
+            ttk.Label.__init__(self, master, **kw)
 
         if self.url:
             self.bind('<Button-1>', self._click)

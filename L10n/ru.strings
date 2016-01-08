@@ -163,13 +163,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Герой";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Горячая клавиша";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Как вас идентифицировать при отправке данных";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Идентификатор";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сочетание клавиш";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +247,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Открыты «Системные настройки»";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Данные";
 
 /* Empire rank. [stats.py] */
@@ -257,7 +260,7 @@
 "Pathfinder" = "Следопыт";
 
 /* Trade rank. [stats.py] */
-"Pedlar" = "Мелкий торговец";
+"Peddler" = "Мелкий торговец";
 
 /* Trade rank. [stats.py] */
 "Penniless" = "Нищий";

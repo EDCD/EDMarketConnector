@@ -7,7 +7,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '2.0.1.0'
+appversion = '2.0.4.0'
 
 update_feed = 'http://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
@@ -22,6 +22,7 @@ elif platform=='win32':
 
     CSIDL_PERSONAL = 0x0005
     CSIDL_LOCAL_APPDATA = 0x001C
+    CSIDL_PROFILE = 0x0028
 
     # _winreg that ships with Python 2 doesn't support unicode, so do this instead
     from ctypes.wintypes import *
@@ -79,6 +80,7 @@ class Config:
     OUT_SHIP_CORIOLIS = 128
     OUT_LOG_EDSM = 256
     OUT_LOG_AUTO = 512
+    EDSM_AUTOOPEN = 1024
 
     if platform=='darwin':
 
@@ -86,6 +88,8 @@ class Config:
             self.app_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
+
+            self.home = expanduser('~')
 
             if not getattr(sys, 'frozen', False):
                 # Don't use Python's settings if interactive
@@ -127,6 +131,10 @@ class Config:
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
             
+            # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
+            ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PROFILE, 0)
+            self.home = buf.value
+
             self.hkey = HKEY()
             disposition = DWORD()
             if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\Marginal\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(self.hkey), ctypes.byref(disposition)):
@@ -152,6 +160,7 @@ class Config:
                     RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
+                buf = ctypes.create_unicode_buffer(MAX_PATH)
                 ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
                 self.set('outdir', buf.value)
 
@@ -196,6 +205,8 @@ class Config:
             self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
             if not isdir(self.app_dir):
                 makedirs(self.app_dir)
+
+            self.home = expanduser('~')
 
             self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, '%s.ini' % appname)
             if not isdir(dirname(self.filename)):

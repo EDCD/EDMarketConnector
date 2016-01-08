@@ -19,6 +19,9 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
 
+/* [prefs.py] */
+"Automatically open uncharted systems' EDSM pages" = "Automatically open uncharted systems' EDSM pages";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Balance";
 
@@ -163,13 +166,16 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
-/* Section heading in settings on Windows. [prefs.py] */
+/* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "How do you want to be identified in the saved data";
 
-/* Section heading in settings on OSX. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identity";
+
+/* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
 
 /* Empire rank. [stats.py] */
@@ -244,7 +250,7 @@
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Open System Preferences";
 
-/* Section heading in settings. [prefs.py] */
+/* Tab heading in settings. [prefs.py] */
 "Output" = "Output";
 
 /* Empire rank. [stats.py] */
@@ -257,7 +263,7 @@
 "Pathfinder" = "Pathfinder";
 
 /* Trade rank. [stats.py] */
-"Pedlar" = "Pedlar";
+"Peddler" = "Peddler";
 
 /* Trade rank. [stats.py] */
 "Penniless" = "Penniless";

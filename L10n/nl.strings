@@ -1,8 +1,8 @@
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Un codice di verifica è stato inviato alla email{CR}associata al tuo account di Elite Dangerous.";
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Een verificatie code is zojuist verstuurd naar het{CR}e-mail adres behorende bij je Elite account";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Informazioni su {APP}";
+"About {APP}" = "Over {APP}";
 
 /* Federation rank. [stats.py] */
 "Admiral" = "Admiral";
@@ -17,10 +17,10 @@
 "API Key" = "API Key";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Inserisce automaticamente una log entry entrando in un sistema";
+"Automatically make a log entry on entering a system" = "Automatisch een log regel aanmaken bij het binnengaan van een stelsel";
 
 /* Cmdr stats. [stats.py] */
-"Balance" = "Saldo";
+"Balance" = "Balans";
 
 /* Empire rank. [stats.py] */
 "Baron" = "Baron";
@@ -29,7 +29,7 @@
 "Broker" = "Broker";
 
 /* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Sfoglia...";
+"Browse..." = "Bladeren...";
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
@@ -38,10 +38,10 @@
 "Champion" = "Champion";
 
 /* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Cambia...";
+"Change..." = "Wijzigen...";
 
 /* [EDMarketConnector.py] */
-"Check for Updates..." = "Controlla aggiornamenti...";
+"Check for Updates..." = "Controleren op updates...";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
@@ -50,19 +50,19 @@
 "Cmdr" = "Cmdr";
 
 /* EDSM & privacy setting. [prefs.py] */
-"Cmdr name" = "Nome Cmdr";
+"Cmdr name" = "Cmdr naam";
 
 /* Ranking. [stats.py] */
-"Combat" = "Combat";
+"Combat" = "Gevechts rang";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "disponibile tra {SS} secondi";
+"cooldown {SS}s" = "wachtperiode {SS}s";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Copia";
+"Copy" = "Kopieëren";
 
 /* Empire rank. [stats.py] */
 "Count" = "Count";
@@ -71,7 +71,7 @@
 "CQC" = "CQC";
 
 /* Section heading in settings. [prefs.py] */
-"Credentials" = "Credenziali";
+"Credentials" = "Inlog gegevens";
 
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
@@ -89,16 +89,16 @@
 "Earl" = "Earl";
 
 /* Menu title. [EDMarketConnector.py] */
-"Edit" = "Appunti";
+"Edit" = "Bewerken";
 
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
 /* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map inlog gegevens";
 
 /* Ranking. [stats.py] */
-"Empire" = "Impero";
+"Empire" = "Empire";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -107,49 +107,49 @@
 "Entrepreneur" = "Entrepreneur";
 
 /* [EDMarketConnector.py] */
-"Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
+"Error: Can't connect to EDDN" = "Fout: Kan geen verbinding maken met EDDN";
 
 /* [edsm.py] */
-"Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
+"Error: Can't connect to EDSM" = "Fout: Kan geen verbinding maken met EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Errore: Non riesco a ottenere i dati del market !";
+"Error: Can't get market data!" = "Fout: Kan markt data niet ophalen!";
 
 /* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Errore: Connessione con EDDN scaduta";
+"Error: Connection to EDDN timed out" = "Fout: Verbinding met EDDN geeft een time-out";
 
 /* [edsm.py] */
-"Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
+"Error: EDSM {MSG}" = "Fout: EDSM {MSG}";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Errore: Credenziali non valide";
+"Error: Invalid Credentials" = "Fout: Ongeldige inlog gegevens";
 
 /* [companion.py] */
-"Error: Server is down" = "Errore: Il Server è offline";
+"Error: Server is down" = "Fout: Server is offline";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Esci";
+"Exit" = "Afsluiten";
 
 /* Combat rank. [stats.py] */
 "Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Explorer";
+"Explorer" = "Ontdekkingsreiziger rang";
 
 /* Ranking. [stats.py] */
-"Federation" = "Federazione";
+"Federation" = "Federation";
 
 /* [EDMarketConnector.py] */
-"Fetching data..." = "Sto raccogliendo i dati...";
+"Fetching data..." = "Data wordt opgehaald...";
 
 /* Menu title on Windows. [EDMarketConnector.py] */
-"File" = "File";
+"File" = "Bestand";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "Percorso del file";
+"File location" = "Bestand locatie";
 
 /* [prefs.py] */
-"Flight log in CSV format file" = "Flight log in formato CSV";
+"Flight log in CSV format file" = "Vlucht log in CSV bestand formaat";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
@@ -167,13 +167,13 @@
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
-"How do you want to be identified in the saved data" = "Come vuoi essere identificato nei dati salvati";
+"How do you want to be identified in the saved data" = "Hoe wil je geïdentificeerd worden in de opgeslagen data";
 
 /* Tab heading in settings. [prefs.py] */
-"Identity" = "Identità";
+"Identity" = "Identiteit";
 
 /* Tab heading in settings on OSX. [prefs.py] */
-"Keyboard shortcut" = "Scorciatoia di tastiera";
+"Keyboard shortcut" = "Toetscombinaties";
 
 /* Empire rank. [stats.py] */
 "King" = "King";
@@ -182,7 +182,7 @@
 "Knight" = "Knight";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Ultimo aggiornamento alle {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Voor het laatst ververst om {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
@@ -191,22 +191,22 @@
 "Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Prestito";
+"Loan" = "Lening";
 
 /* [EDMarketConnector.py] */
-"Logging in..." = "Mi sto loggando...";
+"Logging in..." = "Bezig met inloggen...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
 
 /* [prefs.py] */
-"Market data in CSV format file" = "Market data in formato CSV";
+"Market data in CSV format file" = "Markt data in CSV bestand formaat";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Market data in formato Slopey's BPC";
+"Market data in Slopey's BPC format file" = "Markt data in Slopey's BPC formaat bestand";
 
 /* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Market data in formato Trade Dangerous";
+"Market data in Trade Dangerous format file" = "Markt data in Trade Dangerous bestand formaat";
 
 /* Empire rank. [stats.py] */
 "Marquis" = "Marquis";
@@ -233,7 +233,7 @@
 "Mostly Penniless" = "Mostly Penniless";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Nessuna";
+"None" = "Geen";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -242,19 +242,19 @@
 "OK" = "OK";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è in primo piano";
+"Only when Elite: Dangerous is the active app" = "Alleen wanneer Elite: Dangerous de actieve applicatie is";
 
 /* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Apri Preferenze di Sistema";
+"Open System Preferences" = "Open Systeemvoorkeuren";
 
 /* Tab heading in settings. [prefs.py] */
-"Output" = "Output";
+"Output" = "Uitvoer";
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Password";
+"Password" = "Wachtwoord";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
@@ -272,16 +272,16 @@
 "Pioneer" = "Pioneer";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Notifica sonora";
+"Play sound" = "Geluid afspelen";
 
 /* [prefs.py] */
-"Please choose what data to save" = "Si prega di scegliere che dati salvare";
+"Please choose what data to save" = "Welke gegevens wilt u opslaan?";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Si prega di inserire il codice qua sotto.";
+"Please enter the code into the box below." = "Geef de authenticatie code hieronder in.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Si prega di loggarsi con le proprie credenziali di Elite: Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Log in met uw Elite: Dangerous account gegevens";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -293,19 +293,19 @@
 "Powerplay" = "Powerplay";
 
 /* [prefs.py] */
-"Preferences" = "Preferenze";
+"Preferences" = "Preferences";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
 /* Section heading in settings. [prefs.py] */
-"Privacy" = "Dati personali";
+"Privacy" = "Privacy";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
 
 /* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "ID pseudo-anonimizzato";
+"Pseudo-anonymized ID" = "Pseudo-geanonimiseerd ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -326,13 +326,13 @@
 "Rating 5" = "Rating 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
-"Re-start Elite: Dangerous for automatic log entries" = "Riavviare Elite: Dangerous per una log entry automatica";
+"Re-start Elite: Dangerous for automatic log entries" = "Elite: Dangerous heropstarten voor automatisch aanmaken log regels";
 
 /* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Riavviare Elite: Dangerous per usare questa funzione";
+"Re-start Elite: Dangerous to use this feature" = "Elite: Dangerous heropstarten om deze functie te gebruiken";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
+"Re-start {APP} to use shortcuts" = "{APP} heropstarten om toetscombinaties te gebruiken";
 
 /* Federation rank. [stats.py] */
 "Rear Admiral" = "Rear Admiral";
@@ -347,46 +347,46 @@
 "Semi Professional" = "Semi Professional";
 
 /* [prefs.py] */
-"Send flight log to Elite Dangerous Star Map" = "Manda il flight log a Elite Dangerous Star Map";
+"Send flight log to Elite Dangerous Star Map" = "Stuur vlucht log naar Elite Dangerous Star Map";
 
 /* [prefs.py] */
-"Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "Stuur station gegevens naar het Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
+"Sending data to EDDN..." = "Bezig data te versturen naar EDDN...";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sto inviando i dati a EDSM...";
+"Sending data to EDSM..." = "Bezig data te versturen naar EDSM...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Impostazioni";
+"Settings" = "Instellingen";
 
 /* Status dialog subtitle. [stats.py] */
-"Ship" = "Nave";
+"Ship" = "Schip";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Fit della nave in formato Coriolis";
+"Ship loadout in Coriolis format file" = "Schip inrichting in Coriolis bestand formaat";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Fit della nave in formato E:D Shipyard";
+"Ship loadout in E:D Shipyard format file" = "Schip inrichting in E:D Shipyard bestand formaat";
 
 /* Status dialog title. [stats.py] */
-"Ships" = "Navi";
+"Ships" = "Schepen";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
 /* Main window. [EDMarketConnector.py] */
-"Station" = "Stazione";
+"Station" = "Station";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "La Stazione non ha un Market !";
+"Station doesn't have a market!" = "Station heeft geen markt!";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "La Stazione non ha niente !";
+"Station doesn't have anything!" = "Station heeft helemaal niets!";
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
@@ -395,10 +395,10 @@
 "Surveyor" = "Surveyor";
 
 /* Main window. [EDMarketConnector.py] */
-"System" = "Sistema";
+"System" = "Systeem";
 
 /* Ranking. [stats.py] */
-"Trade" = "Trade";
+"Trade" = "Handels rang";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Trailblazer";
@@ -407,16 +407,16 @@
 "Tycoon" = "Tycoon";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Recupera";
+"Update" = "Verversen";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Username (Email)";
+"Username (Email)" = "Gebruikersnaam (e-mail)";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice Admiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Vista";
+"View" = "Beeld";
 
 /* Empire rank. [stats.py] */
 "Viscount" = "Viscount";
@@ -425,20 +425,20 @@
 "Warrant Officer" = "Warrant Officer";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Stai volando ?!";
+"What are you flying?!" = "Waar vlieg je in?!";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Dove sei finito ?!";
+"Where are you?!" = "Waar ben je?!";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Chi sei ?!";
+"Who are you?!" = "Wie ben je?!";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Finestra";
+"Window" = "Venster";
 
 /* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
+"You're not docked at a station!" = "Je bent momenteel niet gedockt in een station!";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
+"{APP} needs permission to use shortcuts" = "{APP} heeft toestemming nodig om toetscombinaties te gebruiken";
 

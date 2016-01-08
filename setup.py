@@ -40,6 +40,9 @@ macdeveloperid = None
 WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.9\bin'
 SDKPATH = r'C:\Program Files (x86)\Windows Kits\8.1\bin\x86'
 
+# OSX paths
+SPARKLE = '/Library/Frameworks/Sparkle.framework'
+
 # Patch py2app recipe enumerator to skip the sip recipe since it's too enthusiastic - we'll list additional Qt modules explicitly
 if sys.platform=='darwin':
     from py2app import recipes
@@ -72,7 +75,7 @@ if sys.platform=='darwin':
                   'plist': {
                       'CFBundleName': APPLONGNAME,
                       'CFBundleIdentifier': 'uk.org.marginal.%s' % APPNAME.lower(),
-                      'CFBundleLocalizations': [x[:-len('.lproj')] for x in os.listdir('/Library/Frameworks/Sparkle.framework/Resources') if x.endswith('.lproj')],	# https://github.com/sparkle-project/Sparkle/issues/238
+                      'CFBundleLocalizations': sorted(set([x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]) | set([x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')])),	# https://github.com/sparkle-project/Sparkle/issues/238
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
                       'LSMinimumSystemVersion': '10.9',

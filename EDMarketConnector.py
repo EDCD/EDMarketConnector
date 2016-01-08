@@ -9,6 +9,7 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
+import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -313,12 +314,12 @@ class AppWindow:
 
 
                     # No EDDN output at known station?
-                    if (config.getint('output') & config.OUT_EDDN) and station_id and not has_market and not has_outfitting and not has_shipyard:
+                    if (config.getint('output') & config.OUT_EDDN) and station_id and not (has_market or has_outfitting or has_shipyard):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
                     # No EDDN output at unknown station?
-                    elif (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities') and not data['lastStarport'].get('modules') and not data['lastStarport'].get('ships'):
+                    elif (config.getint('output') & config.OUT_EDDN) and not station_id and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore usually spurious shipyard at unknown stations
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
@@ -355,11 +356,11 @@ class AppWindow:
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
                             if has_outfitting or not station_id:
-                                # Only send if eddb says that the station provides outfitting
+                                # Only send if eddb says that the station provides outfitting, or unknown station
                                 eddn.export_outfitting(data)
                             elif __debug__ and data['lastStarport'].get('modules'):
                                 print 'Spurious outfitting!'
-                            if has_shipyard or not station_id:
+                            if has_shipyard:
                                 # Only send if eddb says that the station has a shipyard -
                                 # https://github.com/Marginal/EDMarketConnector/issues/16
                                 if data['lastStarport'].get('ships'):
@@ -449,6 +450,8 @@ class AppWindow:
         result = self.edsm.result
         if result['done']:
             self.system['image'] = result['img']
+            if result['uncharted'] and (config.getint('output') & config.EDSM_AUTOOPEN):
+                webbrowser.open(result['url'])
         else:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
@@ -481,6 +484,7 @@ class AppWindow:
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
 
     def onexit(self, event=None):
+        hotkeymgr.unregister()
         flightlog.close()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
