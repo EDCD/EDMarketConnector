@@ -256,9 +256,32 @@ class EDLogs(FileSystemEventHandler):
 
         def _logdir(self):
 
+            # Try locations described in https://support.elitedangerous.com/kb/faq.php?id=108, in reverse order of age
             candidates = []
 
-            # First try under the Launcher
+            # Steam and Steam libraries
+            if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Valve\Steam', 0, KEY_READ, ctypes.byref(key)):
+                valtype = DWORD()
+                valsize = DWORD()
+                if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
+                    buf = ctypes.create_unicode_buffer(size.value / 2)
+                    if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
+                        steamlibs = [buf.value]
+                        try:
+                            # Simple-minded Valve VDF parser
+                            with open(join(buf.value, 'config', 'config.vdf'), 'rU') as h:
+                                for line in h:
+                                    vals = line.split()
+                                    if vals and vals[0].startswith('"BaseInstallFolder_'):
+                                        steamlibs.append(vals[1].strip('"'))
+                        except:
+                            pass
+                        for lib in steamlibs:
+                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
+                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
+                RegCloseKey(key)
+
+            # Next try custom installation under the Launcher
             key = HKEY()
             if not RegOpenKeyEx(HKEY_LOCAL_MACHINE,
                                 machine().endswith('64') and
@@ -286,29 +309,7 @@ class EDLogs(FileSystemEventHandler):
                     i += 1
                 RegCloseKey(key)
 
-            # Next try locations described in https://support.elitedangerous.com/kb/faq.php?id=108, in reverse order of age
-
-            if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Valve\Steam', 0, KEY_READ, ctypes.byref(key)):
-                valtype = DWORD()
-                valsize = DWORD()
-                if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
-                    buf = ctypes.create_unicode_buffer(size.value / 2)
-                    if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
-                        steamlibs = [buf.value]
-                        try:
-                            # Simple-minded Valve VDF parser
-                            with open(join(buf.value, 'config', 'config.vdf'), 'rU') as h:
-                                for line in h:
-                                    vals = line.split()
-                                    if vals and vals[0].startswith('"BaseInstallFolder_'):
-                                        steamlibs.append(vals[1].strip('"'))
-                        except:
-                            pass
-                        for lib in steamlibs:
-                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
-                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
-                RegCloseKey(key)
-
+            # Standard non-Steam locations
             programs = ctypes.create_unicode_buffer(MAX_PATH)
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, programs, CSIDL_PROGRAM_FILESX86, 0)
             candidates.append(join(programs.value, 'Frontier', 'Products')),
