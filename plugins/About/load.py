@@ -32,11 +32,11 @@ def plugin_prefs(parent):
 
 def plugin_app(parent):
     """
-    Return a TK Frame for adding to the EDMC main window.
+    Return a TK Widget for adding to the EDMC main window.
     :param parent:
     :return:
     """
-    return None
+    return tk.Label(parent, text="---")
 
 
 def system_changed(timestamp, system):

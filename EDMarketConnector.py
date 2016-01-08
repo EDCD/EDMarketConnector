@@ -88,7 +88,6 @@ class AppWindow:
         frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         rows = 4
-
         plugin_items = list()
         for plugname in plug.PLUGINS:
             appitem = plug.get_plugin_app(plugname, frame)
@@ -120,8 +119,9 @@ class AppWindow:
         self.cmdr.grid(row=0, column=1, sticky=tk.EW)
         self.system.grid(row=1, column=1, sticky=tk.EW)
         self.station.grid(row=2, column=1, sticky=tk.EW)
-        self.button.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
-        self.status.grid(row=4, column=0, columnspan=2, sticky=tk.EW)
+
+        self.button.grid(row=nextrow + 1, column=0, columnspan=2, sticky=tk.NSEW)
+        self.status.grid(row=nextrow + 2, column=0, columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='darwin' and 3 or 2))
