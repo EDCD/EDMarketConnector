@@ -14,6 +14,7 @@ from config import applongname, config
 from hotkey import hotkeymgr
 from monitor import monitor
 
+import plug
 
 if platform == 'darwin':
     import objc
@@ -218,6 +219,7 @@ class PreferencesDialog(tk.Toplevel):
                          _('Hotkey'))			# Tab heading in settings on Windows
 
 
+
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
         else:
@@ -235,6 +237,12 @@ class PreferencesDialog(tk.Toplevel):
 
         # disable hotkey for the duration
         hotkeymgr.unregister()
+
+        # build plugin prefs tabs
+        for plugname in plug.PLUGINS:
+            plugframe = plug.get_plugin_pref(plugname, notebook)
+            if plugframe:
+                notebook.add(plugframe, text=plugname)
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
