@@ -294,8 +294,19 @@ class EDLogs(FileSystemEventHandler):
                 if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
                     buf = ctypes.create_unicode_buffer(size.value / 2)
                     if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
-                        candidates.append(join(buf.value, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
-                        candidates.append(join(buf.value, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
+                        steamlibs = [buf.value]
+                        try:
+                            # Simple-minded Valve VDF parser
+                            with open(join(buf.value, 'config', 'config.vdf'), 'rU') as h:
+                                for line in h:
+                                    vals = line.split()
+                                    if vals and vals[0].startswith('"BaseInstallFolder_'):
+                                        steamlibs.append(vals[1].strip('"'))
+                        except:
+                            pass
+                        for lib in steamlibs:
+                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
+                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
                 RegCloseKey(key)
 
             programs = ctypes.create_unicode_buffer(MAX_PATH)

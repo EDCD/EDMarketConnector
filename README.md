@@ -110,7 +110,7 @@ When looking for the log files, this app assumes:
 In more detail, this app looks for the folder `elite-dangerous-64` in the following places:
 
 1. In the `Products` folder under the launcher (in English versions of Windows usually `C:\Program Files (x86)\Frontier\EDLaunch\Products`).
-2. In the `Elite Dangerous Horizons\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous Horizons\Products`).
+2. In the `Elite Dangerous Horizons\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous Horizons\Products`) and under each Steam library.
 3. In the `Elite Dangerous\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products`).
 4. `%PROGRAMFILES(X86)%\Frontier\Products` (in English versions of Windows usually `C:\Program Files (x86)\Frontier\Products`).
 5. `%LOCALAPPDATA%\Frontier_Developments\Products` (usually `C:\Users\you\AppData\Local\Frontier_Developments\Products`).
