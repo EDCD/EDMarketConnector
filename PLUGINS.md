@@ -27,44 +27,36 @@ def plugin_start():
 # Plugin Hooks
 ## Configuration 
 
-If you want your plugin to be configurable via the GUI you can define a form (tab) to be used by EDMC's settings window.
+If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on it's own tab in EDMC's settings dialog. Use widgets from EDMC's myNotebook.py for the correct look-and-feel.
 
 ```
-import Tkinter as tk
+import myNotebook as nb
 
 def plugin_prefs(parent):
    """
    Return a TK Frame for adding to the EDMC settings dialog.
    """
-   prefs = tk.Frame(parent)
-   prefs.columnconfigure(1, weight=1)
-   prefs.rowconfigure(2, weight=1)
+   frame = nb.Frame(parent)
+   nb.Label(prefs, text="Hello").grid()
+   nb.Label(prefs, text="Commander").grid()
    
-   tk.Label(prefs, text="Hello").grid(row=0)
-   tk.Label(prefs, text="Commander").grid(row=1)
-   
-   return prefs
+   return frame
 ```
 
 ## Display
 
-You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`.
+You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a ttk.Label widget. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
 
 ```
 def plugin_app(parent):
    """
-   Create a TK frame for the main window
+   Create a TK widget for the EDMC main window
    """
-   status = tk.Frame(parent)
-   status.columnconfigure(2, weight=1)
-   status.rowconfigure(1, weight=1)
+   plugin_app.status = ttk.Label(parent, text="Status:")
+   return plugin_app.status
    
-   tk.Label(status, text="Status:").grid(row=0, column=0)
-   
-   # after this your event functions can directly update plugin_app.status["text"] 
-   plugin_app.status = tk.Label(status, text="Happy!")
-   plugin_app.status.grid(row=0, column=1)
-plugin_app.status = None
+# later on your event functions can directly update plugin_app.status["text"]
+plugin_app.status['text'] = "Status: Happy!"
 ```
 
 ## Events
@@ -72,8 +64,7 @@ plugin_app.status = None
 Once you have created your plugin and EDMC has loaded it there in addition to the `plugin_prefs()` and `plugin_app()` functions there are two other functions you can define to be notified by EDMC when something happens. 
 `system_changed()` and `cmdr_data()`.
 
-Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation or wish to update your plugin_app frame from the cmdr_data() event then
-you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
+Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
 ### Arriving in a System
 
@@ -84,7 +75,7 @@ def system_changed(timestamp, system):
    """
    We arrived at a new system!
    """
-   print "{} {}".format(timestamp, system)
+   sys.stderr.write("{} {}".format(timestamp, system))
 ```
 
 ### Getting Commander Data
@@ -96,7 +87,7 @@ def cmdr_data(data):
    """
    We have new data on our commander
    """
-   print data.get('commander') and data.get('commander').get('name') or ''
+   sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
 ```
 
 The data is a dictionary and full of lots of wonderful stuff!
