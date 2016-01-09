@@ -40,8 +40,8 @@ def plugin_prefs(parent):
    Return a TK Frame for adding to the EDMC settings dialog.
    """
    frame = nb.Frame(parent)
-   nb.Label(prefs, text="Hello").grid()
-   nb.Label(prefs, text="Commander").grid()
+   nb.Label(frame, text="Hello").grid()
+   nb.Label(frame, text="Commander").grid()
    
    return frame
 ```
