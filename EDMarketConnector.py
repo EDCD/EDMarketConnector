@@ -19,6 +19,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 if __debug__:
     from traceback import print_exc
 
+sys.path.append("/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC") # for some reason pythonpath isn't working for me on this
 from config import appname, applongname, config
 if platform == 'win32' and getattr(sys, 'frozen', False):
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
@@ -42,6 +43,8 @@ import prefs
 from hotkey import hotkeymgr
 from monitor import monitor
 
+import edmc_plusplus
+
 EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
@@ -57,6 +60,7 @@ class AppWindow:
         self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
         self.edsm = edsm.EDSM()
+        self.edmcpp = None # EDMC++
 
         self.w = master
         self.w.title(applongname)
@@ -115,6 +119,8 @@ class AppWindow:
             apple_menu = tk.Menu(menubar, name='apple')
             apple_menu.add_command(label=_("About {APP}").format(APP=applongname), command=lambda:self.w.call('tk::mac::standardAboutPanel'))	# App menu entry on OSX
             apple_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
+            apple_menu.add_separator()
+            apple_menu.add_command(label=_("EDMC++ (experimental)"), command=lambda:edmc_plusplus.activate(self))	# Item in the File menu on Windows
             menubar.add_cascade(menu=apple_menu)
             self.edit_menu = tk.Menu(menubar, name='edit')
             self.edit_menu.add_command(label=_('Copy'), accelerator='Command-c', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
@@ -137,6 +143,8 @@ class AppWindow:
             file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
             file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
             file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
+            file_menu.add_separator()
+            file_menu.add_command(label=_("EDMC++ (experimental)"), command=lambda:edmc_plusplus.activate(self))	# Item in the File menu on Windows
             file_menu.add_separator()
             file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
             menubar.add_cascade(label=_("File"), menu=file_menu)	# Menu title on Windows
@@ -254,6 +262,11 @@ class AppWindow:
                 return
             elif play_sound:
                 hotkeymgr.play_good()
+        if self.get(event,retrying):
+            self.send(event)
+
+    def get(self, event=None, retrying=False):
+        if not retrying:
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.system['image'] = ''
             self.status['text'] = _('Fetching data...')
@@ -262,9 +275,10 @@ class AppWindow:
             self.w.update_idletasks()
 
         try:
-            querytime = int(time())
-            data = self.session.query()
-            config.set('querytime', querytime)
+            self.querytime = int(time())
+            self.data = self.session.query()
+            data=self.data
+            config.set('querytime', self.querytime)
 
             # Validation
             if not data.get('commander') or not data['commander'].get('name','').strip():
@@ -286,6 +300,26 @@ class AppWindow:
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                 self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
 
+
+            return True
+
+        except companion.VerificationRequired:
+            return prefs.AuthenticationDialog(self.w, self.verify)
+
+        # Companion API problem
+        except companion.ServerError as e:
+            if retrying:
+                self.status['text'] = unicode(e)
+            else:
+                # Retry once if Companion server is unresponsive
+                self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
+                return False	# early exit to avoid starting cooldown count
+
+
+    def send(self, event=None):
+        data=self.data
+        try:
+            if True: # validation now done in get part
                 # stuff we can do when not docked
                 if config.getint('output') & config.OUT_SHIP_EDS:
                     loadout.export(data)
@@ -381,18 +415,6 @@ class AppWindow:
                             if not old_status:
                                 self.status['text'] = ''
 
-        except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.w, self.verify)
-
-        # Companion API problem
-        except companion.ServerError as e:
-            if retrying:
-                self.status['text'] = unicode(e)
-            else:
-                # Retry once if Companion server is unresponsive
-                self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
-                return	# early exit to avoid starting cooldown count
-
         except requests.exceptions.ConnectionError as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
@@ -406,11 +428,11 @@ class AppWindow:
             self.status['text'] = unicode(e)
 
         if not self.status['text']:	# no errors
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(self.querytime)).decode('utf-8')
         elif play_sound:
             hotkeymgr.play_bad()
 
-        self.holdofftime = querytime + companion.holdoff
+        self.holdofftime = self.querytime + companion.holdoff
         self.cooldown()
 
     def retry_for_shipyard(self):
