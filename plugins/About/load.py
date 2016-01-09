@@ -2,7 +2,11 @@
 A Skeleton EDMC Plugin
 """
 import sys
+import ttk
 import Tkinter as tk
+
+from config import applongname, appversion
+import myNotebook as nb
 
 
 def plugin_start():
@@ -17,27 +21,28 @@ def plugin_prefs(parent):
     """
     Return a TK Frame for adding to the EDMC settings dialog.
     """
-    prefs = tk.Frame(parent)
-    prefs.columnconfigure(1, weight=1)
-    prefs.rowconfigure(4, weight=1)
+    frame = nb.Frame(parent)
 
-    tk.Label(prefs, text="Elite Dangerous Market Connector").grid(row=0, column=0, sticky=tk.W)
-    tk.Label(prefs, text="Fly Safe!").grid(row=2, column=0, sticky=tk.W)
+    nb.Label(frame, text="{NAME} {VER}".format(NAME=applongname, VER=appversion)).grid(sticky=tk.W)
+    nb.Label(frame).grid()	# spacer
+    nb.Label(frame, text="Fly Safe!").grid(sticky=tk.W)
+    nb.Label(frame).grid()	# spacer
 
     if cmdr_data.last is not None:
         datalen = len(str(cmdr_data.last))
-        tk.Label(prefs, text="FD sent {} chars".format(datalen)).grid(row=3, column=0, sticky=tk.W)
+        nb.Label(frame, text="FD sent {} chars".format(datalen)).grid(sticky=tk.W)
 
-    return prefs
+    return frame
 
 
 def plugin_app(parent):
     """
-    Return a TK Widget for adding to the EDMC main window.
+    Return a TK Widget for the EDMC main window.
     :param parent:
     :return:
     """
-    return tk.Label(parent, text="---")
+    plugin_app.status = ttk.Label(parent, text="---")
+    return plugin_app.status
 
 
 def system_changed(timestamp, system):
@@ -57,6 +62,7 @@ def cmdr_data(data):
     :return:
     """
     cmdr_data.last = data
+    plugin_app.status['text'] = "Got new data ({} chars)".format(len(str(data)))
     sys.stderr.write("Got new data ({} chars)\n".format(len(str(data))))
 
 cmdr_data.last = None
