@@ -157,8 +157,8 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(edsmframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
         self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
         nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.edsm_autoopen = tk.IntVar(value = (output & config.EDSM_AUTOOPEN) and 1)
-        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_("Automatically open uncharted systems' EDSM pages"), variable=self.edsm_autoopen)
+        self.edsm_autoopen = tk.BooleanVar(value = config.getint('edsm_autoopen'))
+        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_(u"Automatically open uncharted systems’ EDSM pages"), variable=self.edsm_autoopen)
         self.edsm_autoopen_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         if monitor.logdir:
             self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
@@ -371,10 +371,10 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_log_file.get() and config.OUT_LOG_FILE) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
                    (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
-                   (self.out_log_auto.get() and config.OUT_LOG_AUTO) +
-                   (self.edsm_autoopen.get() and config.EDSM_AUTOOPEN))
+                   (self.out_log_auto.get() and config.OUT_LOG_AUTO))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
+        config.set('edsm_autoopen', self.edsm_autoopen.get())
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 

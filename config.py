@@ -80,7 +80,6 @@ class Config:
     OUT_SHIP_CORIOLIS = 128
     OUT_LOG_EDSM = 256
     OUT_LOG_AUTO = 512
-    EDSM_AUTOOPEN = 1024
 
     if platform=='darwin':
 
