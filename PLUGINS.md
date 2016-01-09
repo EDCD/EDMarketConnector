@@ -93,3 +93,10 @@ def cmdr_data(data):
 ```
 
 The data is a dictionary and full of lots of wonderful stuff!
+
+# Distributing a Plugin
+
+To package your plugin for distribution simply create a `.zip` archive of your plugin's folder:
+
+* Windows: In Explorer right click on your plugin's folder and choose Send to &rarr; Compressed (zipped) folder.
+* Mac: In Finder right click on your plugin's folder and choose Compress.

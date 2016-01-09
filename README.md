@@ -84,6 +84,19 @@ Windows:
 Note: Uninstalling the app does not delete any output files that it has previously written.
 
 
+Plugins
+--------
+Plugins extend the behavior of this app. To install a downloaded plugin, open the `.zip` archive and move the folder contained inside into the following folder:
+
+* Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins` (usually `C:\Users\you\AppData\Local\EDMarketConnector\plugins`).
+* Mac: `~/Library/Application Support/EDMarketConnector/plugins` (in Finder hold ⌥ and choose Go &rarr; Library to open your `~/Library` folder).
+* Linux: `$XDG_DATA_HOME/EDMarketConnector/plugins`, or `~/.local/share/EDMarketConnector/plugins` if `$XDG_DATA_HOME` is unset.
+
+You will need to re-start EDMC for it to notice the new plugin.
+
+Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
+
+
 Troubleshooting
 --------
 
