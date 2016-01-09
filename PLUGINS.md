@@ -1,12 +1,18 @@
 # EDMC Plugins
 
-Market Connector Plugins allow you to customise and extend the behavior of EDMC. 
+Plugins allow you to customise and extend the behavior of EDMC.
 
 # Writing a Plugin
 
 Plugins are loaded when EDMC starts up.
 
-Plugins are python files. Each plugin has it's own folder in the `plugins` directory. The plugin must have a file named `load.py` that must provide one module level function and optionally provide a few others.
+Each plugin has it's own folder in the `plugins` directory:
+
+* Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins`
+* Mac: `~/Library/Application Support/EDMarketConnector/plugins`
+* Linux: `$XDG_DATA_HOME/EDMarketConnector/plugins`, or `~/.local/share/EDMarketConnector/plugins` if `$XDG_DATA_HOME` is unset.
+
+Plugins are python files. The plugin folder must have a file named `load.py` that must provide one module level function and optionally provide a few others.
 
 EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
 
