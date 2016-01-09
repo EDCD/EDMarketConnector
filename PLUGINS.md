@@ -29,8 +29,11 @@ def plugin_start():
 
 If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on it's own tab in EDMC's settings dialog. Use widgets from EDMC's myNotebook.py for the correct look-and-feel.
 
+You can use `set()`, `get()` and `getint()` from EDMC's config object to store and retrieve your plugin's settings in a platform-independant way.
+
 ```
 import myNotebook as nb
+from config import config
 
 def plugin_prefs(parent):
    """
