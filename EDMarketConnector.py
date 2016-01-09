@@ -87,41 +87,32 @@ class AppWindow:
 
         frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
-        rows = 4
-        plugin_items = list()
-        for plugname in plug.PLUGINS:
-            appitem = plug.get_plugin_app(plugname, frame)
-            if appitem:
-                plugin_items.append(appitem)
-
-        rows += len(plugin_items)
-
         frame.columnconfigure(1, weight=1)
-        frame.rowconfigure(rows, weight=1)
 
         ttk.Label(frame, text=_('Cmdr')+':').grid(row=0, column=0, sticky=tk.W)	# Main window
         ttk.Label(frame, text=_('System')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
         ttk.Label(frame, text=_('Station')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
 
-        nextrow = 3
-        for plugin_item in plugin_items:
-            plugin_item.grid(row=nextrow, column=0, sticky=tk.W)
-            nextrow += 1
-
         self.cmdr = ttk.Label(frame, width=-21)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
-        self.button = ttk.Button(frame, name='update', text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.status = ttk.Label(frame, name='status', width=-25)
-        self.w.bind('<Return>', self.getandsend)
-        self.w.bind('<KP_Enter>', self.getandsend)
 
         self.cmdr.grid(row=0, column=1, sticky=tk.EW)
         self.system.grid(row=1, column=1, sticky=tk.EW)
         self.station.grid(row=2, column=1, sticky=tk.EW)
 
-        self.button.grid(row=nextrow + 1, column=0, columnspan=2, sticky=tk.NSEW)
-        self.status.grid(row=nextrow + 2, column=0, columnspan=2, sticky=tk.EW)
+        for plugname in plug.PLUGINS:
+            appitem = plug.get_plugin_app(plugname, frame)
+            if appitem:
+                appitem.grid(columnspan=2, sticky=tk.W)
+
+        self.button = ttk.Button(frame, name='update', text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.status = ttk.Label(frame, name='status', width=-25)
+        self.button.grid(columnspan=2, sticky=tk.NSEW)
+        self.status.grid(columnspan=2, sticky=tk.EW)
+
+        self.w.bind('<Return>', self.getandsend)
+        self.w.bind('<KP_Enter>', self.getandsend)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='darwin' and 3 or 2))
@@ -290,8 +281,6 @@ class AppWindow:
                     with open('%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True).encode('utf-8'))
 
-                plug.notify_newdata(data)
-
                 self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
@@ -299,7 +288,12 @@ class AppWindow:
                 self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
                 self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
 
+                if data['lastStarport'].get('commodities'):
+                    # Fixup anomalies in the commodity data
+                    self.session.fixup(data['lastStarport']['commodities'])
+
                 # stuff we can do when not docked
+                plug.notify_newdata(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
@@ -356,9 +350,6 @@ class AppWindow:
 
                     else:
                         if data['lastStarport'].get('commodities'):
-                            # Fixup anomalies in the commodity data
-                            self.session.fixup(data['lastStarport']['commodities'])
-
                             if config.getint('output') & config.OUT_CSV:
                                 bpc.export(data, True)
                             if config.getint('output') & config.OUT_TD:
@@ -448,10 +439,11 @@ class AppWindow:
         if self.system['text'] != system:
             self.system['text'] = system
 
-            plug.notify_system_changed(timestamp, system)
-
             self.system['image'] = ''
             self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+
+            plug.notify_system_changed(timestamp, system)
+
             if config.getint('output') & config.OUT_LOG_FILE:
                 flightlog.writelog(timestamp, system)
             if config.getint('output') & config.OUT_LOG_EDSM:

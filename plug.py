@@ -3,6 +3,9 @@ Plugin hooks for EDMC - Ian Norton
 """
 import os
 import imp
+import sys
+
+from config import config
 
 """
 Dictionary of loaded plugin modules.
@@ -16,9 +19,9 @@ def find_plugins():
     :return:
     """
     found = dict()
-    plug_folders = os.listdir("plugins")
+    plug_folders = os.listdir(config.plugin_dir)
     for name in plug_folders:
-        loadfile = os.path.join("plugins", name, "load.py")
+        loadfile = os.path.join(config.plugin_dir, name, "load.py")
         if os.path.isfile(loadfile):
             found[name] = loadfile
     return found
@@ -41,7 +44,7 @@ def load_plugins():
                     PLUGINS[plugname] = plugmod
 
         except Exception as plugerr:
-            print plugerr
+            sys.stderr.write('%s\n' % plugerr)	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
 
     imp.release_lock()
 

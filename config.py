@@ -89,6 +89,10 @@ class Config:
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
+            self.plugin_dir = join(self.app_dir, 'plugins')
+            if not isdir(self.plugin_dir):
+                mkdir(self.plugin_dir)
+
             self.home = expanduser('~')
 
             if not getattr(sys, 'frozen', False):
@@ -131,6 +135,10 @@ class Config:
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
             
+            self.plugin_dir = join(self.app_dir, 'plugins')
+            if not isdir(self.plugin_dir):
+                mkdir(self.plugin_dir)
+
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PROFILE, 0)
             self.home = buf.value
@@ -205,6 +213,10 @@ class Config:
             self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
             if not isdir(self.app_dir):
                 makedirs(self.app_dir)
+
+            self.plugin_dir = join(self.app_dir, 'plugins')
+            if not isdir(self.plugin_dir):
+                mkdir(self.plugin_dir)
 
             self.home = expanduser('~')
 

@@ -218,7 +218,11 @@ class PreferencesDialog(tk.Toplevel):
                          _('Keyboard shortcut') or	# Tab heading in settings on OSX
                          _('Hotkey'))			# Tab heading in settings on Windows
 
-
+        # build plugin prefs tabs
+        for plugname in plug.PLUGINS:
+            plugframe = plug.get_plugin_pref(plugname, notebook)
+            if plugframe:
+                notebook.add(plugframe, text=plugname)
 
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
@@ -237,12 +241,6 @@ class PreferencesDialog(tk.Toplevel):
 
         # disable hotkey for the duration
         hotkeymgr.unregister()
-
-        # build plugin prefs tabs
-        for plugname in plug.PLUGINS:
-            plugframe = plug.get_plugin_pref(plugname, notebook)
-            if plugframe:
-                notebook.add(plugframe, text=plugname)
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
