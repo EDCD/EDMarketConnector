@@ -61,8 +61,7 @@ plugin_app.status['text'] = "Status: Happy!"
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there in addition to the `plugin_prefs()` and `plugin_app()` functions there are two other functions you can define to be notified by EDMC when something happens. 
-`system_changed()` and `cmdr_data()`.
+Once you have created your plugin and EDMC has loaded it there are two other functions you can define to be notified by EDMC when something happens: `system_changed()` and `cmdr_data()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
