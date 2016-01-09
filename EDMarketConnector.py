@@ -158,6 +158,7 @@ class AppWindow:
                 system_menu.add_separator()
                 system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# System menu entry on Windows
                 menubar.add_cascade(menu=system_menu)
+                self.w.wm_attributes('-topmost', self.always_ontop.get())
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
 
@@ -173,7 +174,6 @@ class AppWindow:
         self.w['menu'] = menubar
 
         # update geometry
-        self.ontop_changed()
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
             if match and (platform!='darwin' or int(match.group(2))>0):	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
