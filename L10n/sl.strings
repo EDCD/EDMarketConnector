@@ -10,6 +10,9 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Aimless";
 
+/* System menu entry on Windows. [EDMarketConnector.py] */
+"Always on top" = "Vedno na vrhu";
+
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 

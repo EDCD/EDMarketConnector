@@ -10,6 +10,9 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Total planlos";
 
+/* System menu entry on Windows. [EDMarketConnector.py] */
+"Always on top" = "Immer im Vordergrund";
+
 /* CQC rank. [stats.py] */
 "Amateur" = "Anfänger";
 

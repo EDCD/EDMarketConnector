@@ -143,8 +143,15 @@ class AppWindow:
             self.edit_menu = tk.Menu(menubar, tearoff=tk.FALSE)
             self.edit_menu.add_command(label=_('Copy'), accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
             menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
+            if platform == 'win32':
+                self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
+                system_menu = tk.Menu(menubar, name='system', tearoff=tk.FALSE)
+                system_menu.add_separator()
+                system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# System menu entry on Windows
+                menubar.add_cascade(menu=system_menu)
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
+
         if platform == 'linux2':
             # Fix up menu to use same styling as everything else
             (fg, bg, afg, abg) = (style.lookup('TLabel.label', 'foreground'),
@@ -157,6 +164,7 @@ class AppWindow:
         self.w['menu'] = menubar
 
         # update geometry
+        self.ontop_changed()
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
             if match and (platform!='darwin' or int(match.group(2))>0):	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
@@ -477,6 +485,10 @@ class AppWindow:
         else:
             self.button['text'] = _('Update')	# Update button in main window
             self.button['state'] = tk.NORMAL
+
+    def ontop_changed(self, event=None):
+        config.set('always_ontop', self.always_ontop.get())
+        self.w.wm_attributes('-topmost', self.always_ontop.get())
 
     def copy(self, event=None):
         if self.system['text']:
