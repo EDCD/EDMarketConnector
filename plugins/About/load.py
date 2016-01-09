@@ -1,6 +1,7 @@
 """
 A Skeleton EDMC Plugin
 """
+import sys
 import Tkinter as tk
 
 
@@ -9,7 +10,7 @@ def plugin_start():
     Start this plugin
     :return:
     """
-    print "example plugin started"
+    sys.stderr.write("example plugin started\n")	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
 
 
 def plugin_prefs(parent):
@@ -46,7 +47,7 @@ def system_changed(timestamp, system):
     :param system: the name of the system
     :return:
     """
-    print "Arrived at {}".format(system)
+    sys.stderr.write("Arrived at {}\n".format(system))
 
 
 def cmdr_data(data):
@@ -56,7 +57,7 @@ def cmdr_data(data):
     :return:
     """
     cmdr_data.last = data
-    print "Got new data ({} chars)".format(len(str(data)))
+    sys.stderr.write("Got new data ({} chars)\n".format(len(str(data))))
 
 cmdr_data.last = None
 
