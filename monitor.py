@@ -4,6 +4,7 @@ import threading
 from os import listdir, pardir, rename, unlink
 from os.path import basename, exists, isdir, isfile, join
 from platform import machine
+import sys
 from sys import platform
 from time import strptime, localtime, mktime, sleep, time
 from datetime import datetime
@@ -235,6 +236,10 @@ class EDLogs(FileSystemEventHandler):
             suffix = join('Frontier Developments', 'Elite Dangerous')
             paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)
             if len(paths) and isdir(paths[0]) and isfile(join(paths[0], suffix, 'AppNetCfg.xml')) and isdir(join(paths[0], suffix, 'Logs')):
+                if __debug__:
+                    print 'Monitoring "%s"' % join(paths[0], suffix, 'Logs')
+                else:
+                    sys.stderr.write('Monitoring "%s"\n' % join(paths[0], suffix, 'Logs'))
                 return join(paths[0], suffix, 'Logs')
             else:
                 return None
@@ -267,14 +272,15 @@ class EDLogs(FileSystemEventHandler):
                 if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
                     buf = ctypes.create_unicode_buffer(valsize.value / 2)
                     if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
-                        steamlibs = [buf.value]
+                        steampath = buf.value.replace('/', '\\')	# For some reason uses POSIX seperators
+                        steamlibs = [steampath]
                         try:
                             # Simple-minded Valve VDF parser
-                            with open(join(buf.value, 'config', 'config.vdf'), 'rU') as h:
+                            with open(join(steampath, 'config', 'config.vdf'), 'rU') as h:
                                 for line in h:
                                     vals = line.split()
                                     if vals and vals[0].startswith('"BaseInstallFolder_'):
-                                        steamlibs.append(vals[1].strip('"'))
+                                        steamlibs.append(vals[1].strip('"').replace('\\\\', '\\'))
                         except:
                             pass
                         for lib in steamlibs:
@@ -323,6 +329,11 @@ class EDLogs(FileSystemEventHandler):
                     if isdir(base):
                         for d in listdir(base):
                             if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
+                                if __debug__:
+                                    print 'Monitoring "%s"' % join(base, d, 'Logs')
+                                else:
+                                    sys.stderr.write('Monitoring "%s"\n' % join(base, d, 'Logs'))
+                                    sys.stderr.flush()
                                 return join(base, d, 'Logs')
 
             return None
