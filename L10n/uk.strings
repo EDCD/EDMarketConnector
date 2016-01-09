@@ -62,7 +62,7 @@
 "Competent" = "Компетентний";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "очикування {SS}";
+"cooldown {SS}s" = "очикування {SS} сек";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
 "Copy" = "Копіювати";
@@ -98,7 +98,7 @@
 "Elite" = "Еліта";
 
 /* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map повноваження";
+"Elite Dangerous Star Map credentials" = "Дані Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
 "Empire" = "Імперія";
@@ -173,7 +173,7 @@
 "How do you want to be identified in the saved data" = "Як вас ідентифікувати в збережених даних";
 
 /* Tab heading in settings. [prefs.py] */
-"Identity" = "Ідентичність";
+"Identity" = "Ідентифікація";
 
 /* Tab heading in settings on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сполучення клавіш";
@@ -194,7 +194,7 @@
 "Lieutenant Commander" = "Капітан III рангу";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Позика";
+"Loan" = "Борг";
 
 /* [EDMarketConnector.py] */
 "Logging in..." = "Вхід в...";
@@ -284,7 +284,7 @@
 "Please enter the code into the box below." = "Будь ласка, введіть код в поле нижче.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть ваші реквізити Ваші Elite : Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite : Dangerous";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Капітан I рангу";
@@ -371,10 +371,10 @@
 "Ship" = "Корабель";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "\"Навантаження\" корабля в форматі Coriolis файлу";
+"Ship loadout in Coriolis format file" = "“Навантаження” корабля в форматі Coriolis файлу";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "\"Навантаження\" корабля в форматі E:D Shipyard файлу";
+"Ship loadout in E:D Shipyard format file" = "“Навантаження” корабля в форматі E:D Shipyard файлу";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Кораблі";
