@@ -27,9 +27,9 @@ def plugin_start():
 # Plugin Hooks
 ## Configuration 
 
-If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on it's own tab in EDMC's settings dialog. Use widgets from EDMC's myNotebook.py for the correct look-and-feel.
+If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. Use widgets from EDMC's myNotebook.py for the correct look-and-feel.
 
-You can use `set()`, `get()` and `getint()` from EDMC's config object to store and retrieve your plugin's settings in a platform-independant way.
+You can use `set()`, `get()` and `getint()` from EDMC's config object to store and retrieve your plugin's settings in a platform-independent way.
 
 ```
 import myNotebook as nb
