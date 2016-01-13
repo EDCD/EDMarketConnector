@@ -79,20 +79,9 @@ class EDLogs(FileSystemEventHandler):
         self.logfile = None
         self.logging_enabled = self._logging_enabled
         self._restart_required = False
+        self.observer = None
         self.thread = None
         self.last_event = None	# for communicating the Jump event
-
-        if self.logdir:
-            # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
-            observer = Observer()
-            observer.daemon = True
-            observer.schedule(self, self.logdir)
-            observer.start()
-            atexit.register(observer.stop)
-
-            # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
-            logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
-            self.logfile = logfiles and join(self.logdir, logfiles[-1]) or None
 
     def enable_logging(self):
         if self.logging_enabled():
@@ -161,6 +150,25 @@ class EDLogs(FileSystemEventHandler):
             return False
         if self.running():
             return True
+
+        # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
+        if not self.observer:
+            if __debug__:
+                print 'Monitoring "%s"' % self.logdir
+            elif getattr(sys, 'frozen', False):
+                sys.stderr.write('Monitoring "%s"\n' % self.logdir)
+                sys.stderr.flush()	# Required for line to show up immediately on Windows
+
+            self.observer = Observer()
+            self.observer.daemon = True
+            self.observer.schedule(self, self.logdir)
+            self.observer.start()
+            atexit.register(self.observer.stop)
+
+            # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
+            logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
+            self.logfile = logfiles and join(self.logdir, logfiles[-1]) or None
+
         self.thread = threading.Thread(target = self.worker, name = 'netLog worker')
         self.thread.daemon = True
         self.thread.start()
@@ -247,10 +255,6 @@ class EDLogs(FileSystemEventHandler):
             suffix = join('Frontier Developments', 'Elite Dangerous')
             paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)
             if len(paths) and isdir(paths[0]) and isfile(join(paths[0], suffix, 'AppNetCfg.xml')) and isdir(join(paths[0], suffix, 'Logs')):
-                if __debug__:
-                    print 'Monitoring "%s"' % join(paths[0], suffix, 'Logs')
-                elif getattr(sys, 'frozen', False):
-                    sys.stderr.write('Monitoring "%s"\n' % join(paths[0], suffix, 'Logs'))
                 return join(paths[0], suffix, 'Logs')
             else:
                 return None
@@ -340,11 +344,6 @@ class EDLogs(FileSystemEventHandler):
                     if isdir(base):
                         for d in listdir(base):
                             if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
-                                if __debug__:
-                                    print 'Monitoring "%s"' % join(base, d, 'Logs')
-                                elif getattr(sys, 'frozen', False):
-                                    sys.stderr.write('Monitoring "%s"\n' % join(base, d, 'Logs'))
-                                    sys.stderr.flush()
                                 return join(base, d, 'Logs')
 
             return None
