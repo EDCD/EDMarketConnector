@@ -202,6 +202,7 @@ class Session:
         # verification doesn't actually return a yes/no, so log in again to determine state
         try:
             self.login()
+            self.save()	# Save cookies now for use by command-line app
         except:
             pass
 
@@ -233,6 +234,9 @@ class Session:
             raise ServerError()
 
         return data
+
+    def save(self):
+        self.session.cookies.save()
 
     def close(self):
         self.state = Session.STATE_NONE

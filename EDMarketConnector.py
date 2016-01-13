@@ -244,6 +244,7 @@ class AppWindow:
     def verify(self, code):
         try:
             self.session.verify(code)
+            config.save()	# Save settings now for use by command-line app
         except Exception as e:
             if __debug__: print_exc()
             self.button['state'] = tk.NORMAL

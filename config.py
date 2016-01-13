@@ -119,9 +119,12 @@ class Config:
         def set(self, key, val):
             self.settings[key] = val
 
-        def close(self):
+        def save(self):
             self.defaults.setPersistentDomain_forName_(self.settings, self.bundle)
             self.defaults.synchronize()
+
+        def close(self):
+            self.save()
             self.defaults = None
 
     elif platform=='win32':
@@ -200,6 +203,9 @@ class Config:
             else:
                 raise NotImplementedError()
 
+        def save(self):
+            pass	# Redundant since registry keys are written immediately
+
         def close(self):
             RegCloseKey(self.hkey)
             self.hkey = None
@@ -247,10 +253,13 @@ class Config:
             except:
                 return 0
 
-        def close(self):
+        def save(self):
             h = codecs.open(self.filename, 'w', 'utf-8')
             h.write(unicode(self.config.data))
             h.close()
+
+        def close(self):
+            self.save()
             self.config = None
 
     else:	# ???
