@@ -60,7 +60,7 @@ elif sys.platform=='darwin':
             if self.updater:
                 self.updater.checkForUpdates_(None)
 
-        def close():
+        def close(self):
             self.updater = None
 
 
@@ -113,5 +113,5 @@ elif sys.platform=='win32':
 
         def close(self):
             if self.updater:
-                updater.win_sparkle_cleanup()
+                self.updater.win_sparkle_cleanup()
             self.updater = None
