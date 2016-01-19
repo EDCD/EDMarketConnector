@@ -223,10 +223,10 @@ class EDLogs(FileSystemEventHandler):
                             cqc = True
                         elif 'Left a playlist lobby' in match.group(1) or 'Destroying playlist lobby' in match.group(1):
                             cqc = False
-                    elif not cqc:
+                    else:
                         match = regexp.match(line)
                         if match:
-                            system, visited = match.group(2), match.group(1)
+                            system, visited = cqc and 'CQC' or match.group(2), match.group(1)
 
                 if system:
                     self._restart_required = False	# clearly logging is working

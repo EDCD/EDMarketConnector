@@ -15,6 +15,7 @@ if __debug__:
 class EDSM:
 
     _TIMEOUT = 10
+    FAKE = ['CQC', 'Training']	# Fake systems that shouldn't be sent to EDSM
 
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
@@ -28,12 +29,17 @@ class EDSM:
     # Just set link without doing a lookup
     def link(self, system_name):
         self.cancel_lookup()
-        self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+        if system_name in self.FAKE:
+            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+        else:
+            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
 
     def lookup(self, system_name, known=0):
         self.cancel_lookup()
 
-        if known or system_name in self.syscache:
+        if system_name in self.FAKE:
+            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+        elif known or system_name in self.syscache:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
@@ -56,7 +62,9 @@ class EDSM:
     def start_lookup(self, system_name, known=0):
         self.cancel_lookup()
 
-        if known or system_name in self.syscache:	# Cache URLs of systems with known coordinates
+        if system_name in self.FAKE:
+            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+        elif known or system_name in self.syscache:	# Cache URLs of systems with known coordinates
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False, 'uncharted': False }
@@ -106,6 +114,9 @@ def writelog(timestamp, system, edsmlookupfn):
     try:
         # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
         edsmlookupfn()
+
+        if system in EDSM.FAKE:
+            return
 
         r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
         r.raise_for_status()
