@@ -518,6 +518,7 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
+        self.updater.close()
         self.session.close()
         self.w.destroy()
 
