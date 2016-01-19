@@ -133,7 +133,11 @@ class CredentialsError(Exception):
         return unicode(self).encode('utf-8')
 
 class VerificationRequired(Exception):
-    pass
+    def __unicode__(self):
+        return _('Error: Verification failed')
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
 
 # Server companion.orerve.net uses a session cookie ("CompanionApp") to tie together login, verification
 # and query. So route all requests through a single Session object which holds this state.
@@ -199,12 +203,10 @@ class Session:
             raise VerificationRequired()
         r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
         r.raise_for_status()
-        # verification doesn't actually return a yes/no, so log in again to determine state
-        try:
-            self.login()
-            self.save()	# Save cookies now for use by command-line app
-        except:
-            pass
+        if r.url == URL_CONFIRM:	# redirects away on success
+            raise VerificationRequired()
+        self.save()	# Save cookies now for use by command-line app
+        self.login()
 
     def query(self):
         if self.state == Session.STATE_NONE:
