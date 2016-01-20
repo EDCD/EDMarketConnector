@@ -188,10 +188,10 @@ class Session:
         if 'server error' in r.text:
             self.dump(r)
             raise ServerError()
-        elif 'Password' in r.text:
+        elif r.url == URL_LOGIN:	# would have redirected away if success
             self.dump(r)
             raise CredentialsError()
-        elif 'Verification Code' in r.text:
+        elif r.url == URL_CONFIRM:	# redirected to verification page
             self.state = Session.STATE_AUTH
             raise VerificationRequired()
         else:
@@ -203,7 +203,7 @@ class Session:
             raise VerificationRequired()
         r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
         r.raise_for_status()
-        if r.url == URL_CONFIRM:	# redirects away on success
+        if r.url == URL_CONFIRM:	# would have redirected away if success
             raise VerificationRequired()
         self.save()	# Save cookies now for use by command-line app
         self.login()
@@ -223,7 +223,7 @@ class Session:
 
         if r.status_code != requests.codes.ok:
             self.dump(r)
-        if r.status_code == requests.codes.forbidden or (r.history and r.url == URL_LOGIN):
+        if r.status_code == requests.codes.forbidden or r.url == URL_LOGIN:
             # Start again - maybe our session cookie expired?
             self.login()
             return self.query()
