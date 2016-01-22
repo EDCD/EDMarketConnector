@@ -42,14 +42,8 @@ if platform == 'darwin':
 
             self.tkProcessKeyEvent_old = None
 
-            if getattr(sys, 'frozen', False):
-                respath = normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
-            elif __file__:
-                respath = dirname(__file__)
-            else:
-                respath = '.'
-            self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(join(respath, 'snd_good.wav'), False)
-            self.snd_bad  = NSSound.alloc().initWithContentsOfFile_byReference_(join(respath, 'snd_bad.wav'), False)
+            self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath, 'snd_good.wav'), False)
+            self.snd_bad  = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath, 'snd_bad.wav'), False)
 
         def register(self, root, keycode, modifiers):
             self.root = root
@@ -289,15 +283,8 @@ elif platform == 'win32':
         def __init__(self):
             self.root = None
             self.thread = None
-
-            if getattr(sys, 'frozen', False):
-                respath = dirname(sys.executable)
-            elif __file__:
-                respath = dirname(__file__)
-            else:
-                respath = '.'
-            self.snd_good = open(join(respath, 'snd_good.wav'), 'rb').read()
-            self.snd_bad  = open(join(respath, 'snd_bad.wav'),  'rb').read()
+            self.snd_good = open(join(config.respath, 'snd_good.wav'), 'rb').read()
+            self.snd_bad  = open(join(config.respath, 'snd_bad.wav'),  'rb').read()
 
         def register(self, root, keycode, modifiers):
             self.root = root

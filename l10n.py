@@ -24,7 +24,6 @@ class Translations:
         __builtin__.__dict__['_'] = lambda x: unicode(x).replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
     def install(self):
-        path = join(self.respath(), 'L10n')
         available = self.available()
         available.add(Translations.FALLBACK)
 

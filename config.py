@@ -1,6 +1,6 @@
 import sys
-from os import getenv, makedirs, mkdir
-from os.path import expanduser, dirname, isdir, join
+from os import getenv, makedirs, mkdir, pardir
+from os.path import expanduser, dirname, isdir, join, normpath
 from sys import platform
 
 
@@ -94,6 +94,8 @@ class Config:
 
             self.home = expanduser('~')
 
+            self.respath = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Resources')) or dirname(__file__)
+
             if not getattr(sys, 'frozen', False):
                 # Don't use Python's settings if interactive
                 self.bundle = 'uk.org.marginal.%s' % appname.lower()
@@ -144,6 +146,8 @@ class Config:
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
             ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PROFILE, 0)
             self.home = buf.value
+
+            self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
 
             self.hkey = HKEY()
             disposition = DWORD()
@@ -224,6 +228,8 @@ class Config:
                 mkdir(self.plugin_dir)
 
             self.home = expanduser('~')
+
+            self.respath = dirname(__file__)
 
             self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, '%s.ini' % appname)
             if not isdir(dirname(self.filename)):

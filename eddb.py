@@ -9,6 +9,8 @@ from os.path import dirname, join, normpath
 import sys
 from sys import platform
 
+from config import config
+
 class EDDB:
 
     HAS_MARKET = 1
@@ -16,8 +18,8 @@ class EDDB:
     HAS_SHIPYARD = 4
 
     def __init__(self):
-        self.system_ids  = cPickle.load(open(join(self.respath(), 'systems.p'),  'rb'))
-        self.station_ids = cPickle.load(open(join(self.respath(), 'stations.p'), 'rb'))
+        self.system_ids  = cPickle.load(open(join(config.respath, 'systems.p'),  'rb'))
+        self.station_ids = cPickle.load(open(join(config.respath, 'stations.p'), 'rb'))
 
     # system_name -> system_id or 0
     def system(self, system_name):
@@ -27,17 +29,6 @@ class EDDB:
     def station(self, system_name, station_name):
         (station_id, flags) = self.station_ids.get((self.system_ids.get(system_name), station_name), (0,0))
         return (station_id, bool(flags & EDDB.HAS_MARKET), bool(flags & EDDB.HAS_OUTFITTING), bool(flags & EDDB.HAS_SHIPYARD))
-
-    def respath(self):
-        if getattr(sys, 'frozen', False):
-            if platform=='darwin':
-                return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
-            else:
-                return dirname(sys.executable)
-        elif __file__:
-            return dirname(__file__)
-        else:
-            return '.'
 
 
 # build system & station database from files systems.json and stations.json from http://eddb.io/api
