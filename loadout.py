@@ -1,6 +1,7 @@
 # Export ship loadout in E:D Shipyard format
 
 from collections import defaultdict
+import cPickle
 import os
 from os.path import join
 import re
@@ -36,6 +37,11 @@ slot_map = {
     'fueltank'         : 'FS',
 }
 
+
+# Ship masses
+ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+
+
 def export(data, filename=None):
 
     def class_rating(module):
@@ -49,6 +55,8 @@ def export(data, filename=None):
     querytime = config.getint('querytime') or int(time.time())
 
     loadout = defaultdict(list)
+    mass = 0.0
+    fsd = None
 
     for slot in sorted(data['ship']['modules']):
 
@@ -60,12 +68,16 @@ def export(data, filename=None):
             if not module: continue
 
             cr = class_rating(module)
+            mass += module.get('mass', 0)
 
             # Specials
             if module['name'] in ['Fuel Tank', 'Cargo Rack']:
                 name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
             else:
                 name = module['name']
+
+            if name == 'Frame Shift Drive':
+                fsd = module	# save for range calculation
 
             for s in slot_map:
                 if slot.lower().startswith(s):
@@ -91,6 +103,20 @@ def export(data, filename=None):
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
     string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['main']['capacity'])
+
+    # Add mass and range
+    assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
+    assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
+    try:
+        # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
+        mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
+        string += 'Mass  : %.1f T empty\n        %.1f T full\n' % (mass, mass + data['ship']['fuel']['main']['capacity']+ data['ship']['cargo']['capacity'])
+        multiplier = pow(min(data['ship']['fuel']['main']['capacity'], fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
+        string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
+            multiplier / (mass + data['ship']['fuel']['main']['capacity']),
+            multiplier / (mass + data['ship']['fuel']['main']['capacity'] + data['ship']['cargo']['capacity']))
+    except:
+        if __debug__: raise
 
     if filename:
         with open(filename, 'wt') as h:

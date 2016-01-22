@@ -1,6 +1,7 @@
 # Export ship loadout in Coriolis format
 
 from collections import OrderedDict
+import cPickle
 import json
 import os
 from os.path import join
@@ -82,6 +83,10 @@ fixup_map = {
 }
 
 
+# Ship masses
+ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+
+
 def export(data, filename=None):
 
     querytime = config.getint('querytime') or int(time.time())
@@ -98,6 +103,8 @@ def export(data, filename=None):
         ])),
     ])
     maxpri = 0
+    mass = 0.0
+    fsd = None
 
     # Correct module ordering relies on the fact that "Slots" in the data  are correctly ordered alphabetically.
     # Correct hardpoint ordering additionally relies on the fact that "Huge" < "Large" < "Medium" < "Small"
@@ -123,6 +130,7 @@ def export(data, filename=None):
             module = outfitting.lookup(v['module'], ship_map)
             if not module:
                 raise AssertionError('Unknown module %s' % v)	# Shouldn't happen
+            mass += module.get('mass', 0)
 
             thing = OrderedDict([
                 ('class',int(module['class'])),
@@ -138,6 +146,8 @@ def export(data, filename=None):
                     loadout['components'][category]['bulkheads'] = module['name']	# Bulkheads are just strings
                 else:
                     loadout['components'][category][standard_map[module['name']]] = thing
+                    if module['name'] == 'Frame Shift Drive':
+                        fsd = module	# save for range calculation
             else:
                 # All other items have a "group" member, some also have a "name"
                 if module['name'] in fixup_map:
@@ -173,8 +183,30 @@ def export(data, filename=None):
         ('priority', maxpri),
     ])
 
+    # Add mass and range
+    assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
+    assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
+    try:
+        # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
+        hullMass = ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
+        mass += hullMass
+        multiplier = pow(min(data['ship']['fuel']['main']['capacity'], fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
+
+        loadout['stats'] = OrderedDict([
+            ('hullMass',      hullMass),
+            ('fuelCapacity',  data['ship']['fuel']['main']['capacity']),
+            ('cargoCapacity', data['ship']['cargo']['capacity']),
+            ('ladenMass',     mass + data['ship']['fuel']['main']['capacity'] + data['ship']['cargo']['capacity']),
+            ('unladenMass',   mass),
+            ('unladenRange',  round(multiplier / (mass + min(data['ship']['fuel']['main']['capacity'], fsd['maxfuel'])), 2)),	# fuel for one jump
+            ('fullTankRange', round(multiplier / (mass + data['ship']['fuel']['main']['capacity']), 2)),
+            ('ladenRange',    round(multiplier / (mass + data['ship']['fuel']['main']['capacity'] + data['ship']['cargo']['capacity']), 2)),
+        ])
+    except:
+        if __debug__: raise
+
     # Construct description
-    string = json.dumps(loadout, indent=2)
+    string = json.dumps(loadout, indent=2, separators=(',', ': '))
 
     if filename:
         with open(filename, 'wt') as h:

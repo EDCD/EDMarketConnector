@@ -73,12 +73,13 @@ def export_commodities(data):
 
 def export_outfitting(data):
     # *Do* send empty modules list - implies station has no outfitting
+    schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
     modules = []
     for v in data['lastStarport'].get('modules', {}).itervalues():
         try:
             module = outfitting.lookup(v, ship_map)
             if module:
-                modules.append(module)
+                modules.append({ k: module[k] for k in schemakeys if k in module })	# just the relevant keys
         except AssertionError as e:
             if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
         except:
