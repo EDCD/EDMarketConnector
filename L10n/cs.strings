@@ -1,8 +1,8 @@
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "A verification code has now been sent to the{CR}email address associated with your Elite account.";
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ověřovací kód byl odeslán na{CR}e-mailovou adresu spojenou s vašim Elite účtem.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "About {APP}";
+"About {APP}" = "O {APP}";
 
 /* Federation rank. [stats.py] */
 "Admiral" = "Admiral";
@@ -11,22 +11,22 @@
 "Aimless" = "Aimless";
 
 /* System menu entry on Windows. [EDMarketConnector.py] */
-"Always on top" = "Always on top";
+"Always on top" = "Vždy navrchu";
 
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
+"API Key" = "API klíč";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
+"Automatically make a log entry on entering a system" = "Automaticky vytvořit záznam při vstoupení do systému";
 
 /* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "Automatically open uncharted systems’ EDSM pages";
+"Automatically open uncharted systems’ EDSM pages" = "Automaticky otevřít EDSM stránku nezmapovaných systémů";
 
 /* Cmdr stats. [stats.py] */
-"Balance" = "Balance";
+"Balance" = "Zůstatek";
 
 /* Empire rank. [stats.py] */
 "Baron" = "Baron";
@@ -35,7 +35,7 @@
 "Broker" = "Broker";
 
 /* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Browse...";
+"Browse..." = "Procházet...";
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
@@ -44,10 +44,10 @@
 "Champion" = "Champion";
 
 /* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Change...";
+"Change..." = "Změnit...";
 
 /* [EDMarketConnector.py] */
-"Check for Updates..." = "Check for Updates...";
+"Check for Updates..." = "Zkontrolovat aktualizace...";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
@@ -56,7 +56,7 @@
 "Cmdr" = "Cmdr";
 
 /* EDSM & privacy setting. [prefs.py] */
-"Cmdr name" = "Cmdr name";
+"Cmdr name" = "Jméno CMDRa";
 
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
@@ -65,10 +65,10 @@
 "Competent" = "Competent";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "cooldown {SS}s";
+"cooldown {SS}s" = "Čekej {SS}s";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Copy";
+"Copy" = "Kopírovat";
 
 /* Empire rank. [stats.py] */
 "Count" = "Count";
@@ -77,7 +77,7 @@
 "CQC" = "CQC";
 
 /* Section heading in settings. [prefs.py] */
-"Credentials" = "Credentials";
+"Credentials" = "Přihlašovací údaje";
 
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
@@ -95,13 +95,13 @@
 "Earl" = "Earl";
 
 /* Menu title. [EDMarketConnector.py] */
-"Edit" = "Edit";
+"Edit" = "Upravit";
 
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
 /* Section heading in settings. [prefs.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map credentials";
+"Elite Dangerous Star Map credentials" = "Přihlašovací údaje Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
@@ -113,31 +113,31 @@
 "Entrepreneur" = "Entrepreneur";
 
 /* [EDMarketConnector.py] */
-"Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
+"Error: Can't connect to EDDN" = "Chyba: Nelze se připojit k EDDN";
 
 /* [edsm.py] */
-"Error: Can't connect to EDSM" = "Error: Can't connect to EDSM";
+"Error: Can't connect to EDSM" = "Chyba: Nelze se připojit k EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Error: Can't get market data!";
+"Error: Can't get market data!" = "Chyba: Nelze získat data z obchodu!";
 
 /* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Error: Connection to EDDN timed out";
+"Error: Connection to EDDN timed out" = "Chyba: Připojení k EDDN vypršelo";
 
 /* [edsm.py] */
-"Error: EDSM {MSG}" = "Error: EDSM {MSG}";
+"Error: EDSM {MSG}" = "Chyba: EDSM {MSG}";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Error: Invalid Credentials";
+"Error: Invalid Credentials" = "Chyba: Chybné přihlašovací údaje";
 
 /* [companion.py] */
-"Error: Server is down" = "Error: Server is down";
+"Error: Server is down" = "Chyba: Server je mimo provoz";
 
 /* [companion.py] */
-"Error: Verification failed" = "Error: Verification failed";
+"Error: Verification failed" = "Chyba: Ověření selhalo";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Exit";
+"Exit" = "Ukončit";
 
 /* Combat rank. [stats.py] */
 "Expert" = "Expert";
@@ -149,16 +149,16 @@
 "Federation" = "Federation";
 
 /* [EDMarketConnector.py] */
-"Fetching data..." = "Fetching data...";
+"Fetching data..." = "Načítání dat...";
 
 /* Menu title on Windows. [EDMarketConnector.py] */
-"File" = "File";
+"File" = "Soubor";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "File location";
+"File location" = "Cesta k souboru";
 
 /* [prefs.py] */
-"Flight log in CSV format file" = "Flight log in CSV format file";
+"Flight log in CSV format file" = "Letový záznam ve formátu CSV";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
@@ -173,16 +173,16 @@
 "Hero" = "Hero";
 
 /* Tab heading in settings on Windows. [prefs.py] */
-"Hotkey" = "Hotkey";
+"Hotkey" = "Klávesová zkratka";
 
 /* [prefs.py] */
-"How do you want to be identified in the saved data" = "How do you want to be identified in the saved data";
+"How do you want to be identified in the saved data" = "Zvolte identitu zobrazenou v uložených datech";
 
 /* Tab heading in settings. [prefs.py] */
-"Identity" = "Identity";
+"Identity" = "Identita";
 
 /* Tab heading in settings on OSX. [prefs.py] */
-"Keyboard shortcut" = "Keyboard shortcut";
+"Keyboard shortcut" = "Klávesová zkratka";
 
 /* Empire rank. [stats.py] */
 "King" = "King";
@@ -191,7 +191,7 @@
 "Knight" = "Knight";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Last updated at {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Naposledy aktualizováno {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
@@ -200,22 +200,22 @@
 "Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Loan";
+"Loan" = "Půjčka";
 
 /* [EDMarketConnector.py] */
-"Logging in..." = "Logging in...";
+"Logging in..." = "Přihlašování...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
 
 /* [prefs.py] */
-"Market data in CSV format file" = "Market data in CSV format file";
+"Market data in CSV format file" = "Obchodní data ve formátu CSV";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Market data in Slopey's BPC format file";
+"Market data in Slopey's BPC format file" = "Obchodní data ve formátu Slopey's BPC";
 
 /* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Market data in Trade Dangerous format file";
+"Market data in Trade Dangerous format file" = "Obchodní data ve formátu Trade Dangerous";
 
 /* Empire rank. [stats.py] */
 "Marquis" = "Marquis";
@@ -242,7 +242,7 @@
 "Mostly Penniless" = "Mostly Penniless";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "None";
+"None" = "Žádná";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -251,19 +251,19 @@
 "OK" = "OK";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Only when Elite: Dangerous is the active app";
+"Only when Elite: Dangerous is the active app" = "Pouze pokud je Elite: Dangerous aktivní";
 
 /* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Open System Preferences";
+"Open System Preferences" = "Otevřít Předvolby systému";
 
 /* Tab heading in settings. [prefs.py] */
-"Output" = "Output";
+"Output" = "Výstup";
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Password";
+"Password" = "Heslo";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
@@ -275,22 +275,22 @@
 "Penniless" = "Penniless";
 
 /* Federation rank. [stats.py] */
-"Petty Officer" = "Petty Officer";
+"Petty Officer" = "Poddůstojník";
 
 /* Explorer rank. [stats.py] */
 "Pioneer" = "Pioneer";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Play sound";
+"Play sound" = "Přehrát zvuk";
 
 /* [prefs.py] */
-"Please choose what data to save" = "Please choose what data to save";
+"Please choose what data to save" = "Vyberte, která data chcete ukládat";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Please enter the code into the box below.";
+"Please enter the code into the box below." = "Prosím, zadejte kód do pole níže.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Please log in with your Elite: Dangerous account details";
+"Please log in with your Elite: Dangerous account details" = "Přihlašte se pomocí účtu Elite: Dangerous";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -302,19 +302,19 @@
 "Powerplay" = "Powerplay";
 
 /* [prefs.py] */
-"Preferences" = "Preferences";
+"Preferences" = "Nastavení";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
 /* Section heading in settings. [prefs.py] */
-"Privacy" = "Privacy";
+"Privacy" = "Soukromí";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
 
 /* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
+"Pseudo-anonymized ID" = "Pseudo-anonymní ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -335,13 +335,13 @@
 "Rating 5" = "Rating 5";
 
 /* Status bar message on launch. [EDMarketConnector.py] */
-"Re-start Elite: Dangerous for automatic log entries" = "Re-start Elite: Dangerous for automatic log entries";
+"Re-start Elite: Dangerous for automatic log entries" = "Restartujte Elite: Dangerous pro aktivaci automatických záznamů";
 
 /* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Re-start Elite: Dangerous to use this feature";
+"Re-start Elite: Dangerous to use this feature" = "Restartujte Elite: Dangerous pro aktivaci této funkce";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Re-start {APP} to use shortcuts";
+"Re-start {APP} to use shortcuts" = "Restartujte {APP} pro aktivaci klávesových zkratek";
 
 /* Federation rank. [stats.py] */
 "Rear Admiral" = "Rear Admiral";
@@ -356,46 +356,46 @@
 "Semi Professional" = "Semi Professional";
 
 /* [prefs.py] */
-"Send flight log to Elite Dangerous Star Map" = "Send flight log to Elite Dangerous Star Map";
+"Send flight log to Elite Dangerous Star Map" = "Odeslat letový záznam do Elite Dangerous Star Map";
 
 /* [prefs.py] */
-"Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "Odeslat data o stanici do Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDDN..." = "Sending data to EDDN...";
+"Sending data to EDDN..." = "Odesílání dat do EDDN...";
 
 /* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sending data to EDSM...";
+"Sending data to EDSM..." = "Odesílání dat do EDSM...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Settings";
+"Settings" = "Nastavení";
 
 /* Status dialog subtitle. [stats.py] */
-"Ship" = "Ship";
+"Ship" = "Loď";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Ship loadout in Coriolis format file";
+"Ship loadout in Coriolis format file" = "Konfigurace lodi ve formátu Coriolis";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Ship loadout in E:D Shipyard format file";
+"Ship loadout in E:D Shipyard format file" = "Konfigurace lodi ve formátu E:D Shipyard";
 
 /* Status dialog title. [stats.py] */
-"Ships" = "Ships";
+"Ships" = "Lodě";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
 /* Main window. [EDMarketConnector.py] */
-"Station" = "Station";
+"Station" = "Stanice";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "Station doesn't have a market!";
+"Station doesn't have a market!" = "Stanice nemá obchod!";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "Station doesn't have anything!";
+"Station doesn't have anything!" = "Stanice nenabízí žádné služby!";
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
@@ -404,7 +404,7 @@
 "Surveyor" = "Surveyor";
 
 /* Main window. [EDMarketConnector.py] */
-"System" = "System";
+"System" = "Systém";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";
@@ -416,16 +416,16 @@
 "Tycoon" = "Tycoon";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Update";
+"Update" = "Aktualizovat";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Username (Email)";
+"Username (Email)" = "Už. jméno (E-mail)";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice Admiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "View";
+"View" = "Zobrazit";
 
 /* Empire rank. [stats.py] */
 "Viscount" = "Viscount";
@@ -434,20 +434,20 @@
 "Warrant Officer" = "Warrant Officer";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "What are you flying?!";
+"What are you flying?!" = "S jakou lodí létáte?";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Where are you?!";
+"Where are you?!" = "Kde zrovna jste?";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Who are you?!";
+"Who are you?!" = "Kdo jste?";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Window";
+"Window" = "Okno";
 
 /* [EDMarketConnector.py] */
-"You're not docked at a station!" = "You're not docked at a station!";
+"You're not docked at a station!" = "Nejste zadokováni ve stanici!";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} needs permission to use shortcuts";
+"{APP} needs permission to use shortcuts" = "{APP} vyžaduje oprávnění pro použití klávesových zkratek";
 
