@@ -33,8 +33,11 @@ def addcommodities(data):
 
     for commodity in data['lastStarport'].get('commodities'):
         key = commodity_map.get(commodity['name']) or commodity['name']
-        new = { 'category' : category_map.get(commodity['categoryname']) or commodity['categoryname'],
-                'average'  : commodity['cost_mean'].split('.')[0] }
+        new = {
+            'id'       : commodity['id'],
+            'category' : category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'average'  : commodity['cost_mean'].split('.')[0]
+        }
         old = commodities.get(key)
         if old:
             if new != old:
@@ -50,7 +53,7 @@ def addcommodities(data):
             os.rename(commodityfile, commodityfile+'.bak')
 
         with open(commodityfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['category', 'name', 'average'])
+            writer = csv.DictWriter(csvfile, ['id','category', 'name', 'average'])
             writer.writeheader()
             for key in commodities:
                 commodities[key]['name'] = key

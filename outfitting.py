@@ -250,7 +250,8 @@ def lookup(module, ship_map):
 
     # Shouldn't be listing player-specific paid stuff, other than Horizons
     elif module.get('sku') and module['sku'].lower() != 'elite_horizons_v_planetary_landings':
-        raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
+        # raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
+        return None
 
     # Skip Horizons Planetary Approach Suite
     elif name[1] in ['planetapproachsuite']:
