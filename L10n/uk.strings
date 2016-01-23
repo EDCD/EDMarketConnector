@@ -11,19 +11,19 @@
 "Aimless" = "Безцільний";
 
 /* System menu entry on Windows. [EDMarketConnector.py] */
-"Always on top" = "Zawsze na wierzchu";
+"Always on top" = "Поверх інших вікон";
 
 /* CQC rank. [stats.py] */
 "Amateur" = "Аматор";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
+"API Key" = "API Ключ";
 
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Автоматично робити запис у журналі на вході в систему";
 
 /* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "Автоматично відкривати сторінки EDSM для незвіданих систем";
+"Automatically open uncharted systems’ EDSM pages" = "Автоматично відкривати сторінки EDSM, для незвіданих систем";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "Баланс";
@@ -59,7 +59,7 @@
 "Cmdr name" = "Ім`я пілота";
 
 /* Ranking. [stats.py] */
-"Combat" = "Комбат";
+"Combat" = "Бойовий";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Компетентний";
@@ -92,7 +92,7 @@
 "Duke" = "Герцог";
 
 /* Empire rank. [stats.py] */
-"Earl" = "Earl";
+"Earl" = "Дворянин";
 
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Редагувати";
@@ -132,6 +132,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Помилка: Сервер недосяжний!";
+
+/* [companion.py] */
+"Error: Verification failed" = "Помилка: Не вдалося перевірити";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Вихід";
@@ -266,7 +269,7 @@
 "Pathfinder" = "Слідопит";
 
 /* Trade rank. [stats.py] */
-"Peddler" = "Дрібний торговець";
+"Peddler" = "Штовхач";
 
 /* Trade rank. [stats.py] */
 "Penniless" = "Злидень";
@@ -296,7 +299,7 @@
 "Post Commander" = "Капітан II рангу";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Боротьба";
+"Powerplay" = "Змагання";
 
 /* [prefs.py] */
 "Preferences" = "Уподобання";
@@ -374,10 +377,10 @@
 "Ship" = "Корабель";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "“Навантаження” корабля в форматі Coriolis файлу";
+"Ship loadout in Coriolis format file" = "Технічні дані корабля в форматі Coriolis файлу";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "“Навантаження” корабля в форматі E:D Shipyard файлу";
+"Ship loadout in E:D Shipyard format file" = "Технічні дані корабля в форматі E:D Shipyard файлу";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Кораблі";
