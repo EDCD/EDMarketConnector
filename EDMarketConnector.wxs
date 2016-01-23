@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1031,1034,1036,1040,1043,1045,1049,1058,1060,1062,0" />
-				 <!--        en   de   es   fr   it   nl   pl   ru   uk   sl   lv  neutral -->
+				 Languages="1033,1029,1031,1034,1036,1040,1043,1045,1049,1058,1060,1062,0" />
+				 <!--        en   cs,  de   es   fr   it   nl   pl   ru   uk   sl   lv  neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -79,6 +79,9 @@
 					</Component>
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\cs.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\de.strings" />
@@ -383,6 +386,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="cs.strings" />
 			<ComponentRef Id="de.strings" />
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
