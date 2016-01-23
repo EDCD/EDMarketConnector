@@ -19,7 +19,7 @@ def addcommodities(data):
 
     if not data['lastStarport'].get('commodities'): return
 
-    commodityfile = 'commodities.csv'
+    commodityfile = 'commodity.csv'
     commodities = {}
 
     # slurp existing
