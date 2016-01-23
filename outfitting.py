@@ -228,7 +228,7 @@ def lookup(module, ship_map):
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
 
     name = module['name'].lower().split('_')
-    new = {}
+    new = { 'id': module['id'] }
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
