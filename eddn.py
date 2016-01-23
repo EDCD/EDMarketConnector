@@ -37,13 +37,13 @@ def send(data, msg):
     }
     msg['message'].update({
         'station' : {
-            'id'      : data['lastStarport'].get('id', 0),
+            'id'      : int(data['lastStarport'].get('id', 0)),
             'name'    : data['lastStarport']['name'],
         },
         'system' : {
-            'id'      : data['lastSystem'].get('id', 0),
+            'id'      : int(data['lastSystem'].get('id', 0)),
             'name'    : data['lastSystem']['name'],
-            'address' : companion.listify(data['ships'])[data['commander']['currentShipId']]['starsystem'].get('systemaddress', 0),	# System where the currently piloted ship is docked
+            'address' : int(companion.listify(data['ships'])[data['commander']['currentShipId']]['starsystem'].get('systemaddress', 0)),	# System where the currently piloted ship is docked
         },
         'timestamp' : time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time()))),
     })
@@ -64,7 +64,7 @@ def export_commodities(data):
         commodities = []
         for commodity in data['lastStarport'].get('commodities', []):
             commodities.append({
-                'id'        : commodity['id'],
+                'id'        : int(commodity['id']),
                 'name'      : commodity['name'],
                 'buyPrice'  : commodity['buyPrice'],
                 'supply'    : int(commodity['stock']),
@@ -108,7 +108,7 @@ def export_shipyard(data):
             'message'    : {
                 'ships' : [
                     {
-                        'id'   : ship['id'],
+                        'id'   : int(ship['id']),
                         'name' : ship_map.get(ship['name'].lower(), ship['name'])
                     }
                     for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list')
