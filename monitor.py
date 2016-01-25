@@ -81,6 +81,7 @@ class EDLogs(FileSystemEventHandler):
         self._restart_required = False
         self.observer = None
         self.thread = None
+        self.callback = None
         self.last_event = None	# for communicating the Jump event
 
     def enable_logging(self):
@@ -143,6 +144,9 @@ class EDLogs(FileSystemEventHandler):
             if __debug__: print_exc()
             return False
 
+    def set_callback(self, callback):
+        self.callback = callback
+
     def start(self, root):
         self.root = root
         if not self.logdir:
@@ -150,6 +154,8 @@ class EDLogs(FileSystemEventHandler):
             return False
         if self.running():
             return True
+
+        self.root.bind_all('<<MonitorJump>>', self.jump)	# user-generated
 
         # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
         if not self.observer:
@@ -239,7 +245,7 @@ class EDLogs(FileSystemEventHandler):
                     time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
                     # Tk on Windows doesn't like to be called outside of an event handler, so generate an event
                     self.last_event = (mktime(time_struct), system)
-                    self.root.event_generate('<<Jump>>', when="tail")
+                    self.root.event_generate('<<MonitorJump>>', when="tail")
 
             sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often
 
@@ -247,6 +253,10 @@ class EDLogs(FileSystemEventHandler):
             if threading.current_thread() != self.thread:
                 return	# Terminate
 
+    def jump(self, event):
+        # Called from Tkinter's main loop
+        if self.callback and self.last_event:
+            self.callback(*self.last_event)
 
     if platform=='darwin':
 

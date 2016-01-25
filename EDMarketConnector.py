@@ -40,6 +40,7 @@ import eddb
 import stats
 import prefs
 import plug
+from edproxy import edproxy
 from hotkey import hotkeymgr
 from monitor import monitor
 
@@ -195,10 +196,12 @@ class AppWindow:
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
         # Install log monitoring
-        self.w.bind_all('<<Jump>>', self.system_change)	# user-generated
-        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_AUTO|config.OUT_LOG_EDSM)):
+        monitor.set_callback(self.system_change)
+        edproxy.set_callback(self.system_change)
+        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_FILE|config.OUT_LOG_EDSM)):
             monitor.enable_logging()
             monitor.start(self.w)
+            edproxy.start(self.w)
 
         # First run
         if not config.get('username') or not config.get('password'):
@@ -437,13 +440,7 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, event):
-
-        if not monitor.last_event:
-            if __debug__: print 'spurious system_change', event	# eh?
-            return
-
-        timestamp, system = monitor.last_event	# would like to use event user_data to carry this, but not accessible in Tkinter
+    def system_change(self, timestamp, system):
 
         if self.system['text'] != system:
             self.system['text'] = system
