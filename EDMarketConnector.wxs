@@ -111,6 +111,9 @@
 						<File KeyPath="yes" Source="SourceDir\lv.strings" />
 					</Component>
 					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\modules.p" />
+					</Component>
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\nl.strings" />
 					</Component>
 					<Component Guid="*">
@@ -127,6 +130,9 @@
 					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
 						<File KeyPath="yes" Source="SourceDir\select.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\ships.p" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\sl.strings" />
@@ -396,12 +402,14 @@
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="lv.strings" />
+			<ComponentRef Id="modules.p" />
 			<ComponentRef Id="nl.strings" />
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
+			<ComponentRef Id="ships.p" />
 			<ComponentRef Id="sl.strings" />
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
