@@ -65,10 +65,15 @@ This app can save a variety of data in a variety of formats:
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
 
 * Flight log
-  * Elite Dangerous Star Map - sends a record of your location to “[EDSM](http://www.edsm.net/)” where you can view your logs under My&nbsp;account &rarr; Exploration&nbsp;Logs, and optionally add private comments about a system.
   * CSV format file - adds a record of your location, ship and cargo to a file that you can open in a text editor or a spreadsheet program such as Excel. Note: Don't edit, rename or move this file - take a copy if you wish to change it.
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
+
+EDSM
+--------
+You can send a record of your location to [Elite: Dangerous Star Map](http://www.edsm.net/) where you can view your flight log under My&nbsp;account &rarr; Exploration&nbsp;Logs and optionally add private comments about a system. You will need to register for an account and follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
+
+If you select “Automatically make a log entry on entering a system” EDMC will pick up system changes from either Elite: Dangerous' log files or from [edproxy](https://bitbucket.org/westokyo/edproxy/) if it's running on the same subnet and if your router allows Multicast packets.
 
 
 Uninstall
