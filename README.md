@@ -209,7 +209,7 @@ Windows:
 
 Disclaimer
 --------
-This app uses the “Companion” web API that Frontier supplies to support their Elite Dangerous iOS app. This API isn't officially supported for third-party use, so could go away at some time in the future - in which case this app will cease to work.
+This app uses the “Companion” web API that Frontier originally supplied for their Elite Dangerous iOS app and now [support](https://forums.frontier.co.uk/showthread.php?t=218658&p=3371472#post3371472) for third-party apps. However this API could go away at some time in the future - in which case this app will cease to work.
 
 
 Acknowledgements
