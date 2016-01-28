@@ -275,7 +275,7 @@ class PreferencesDialog(tk.Toplevel):
 
             if log and self.out_log_auto.get():
                 if proxyaddr:
-                    self.out_log_auto_text['text'] = _('Connected to edproxy at {ADDR}').format(ADDR = proxyaddr)
+                    self.out_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
                 elif not monitor.enable_logging():
                     self.out_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
                 elif monitor.restart_required():
@@ -285,7 +285,7 @@ class PreferencesDialog(tk.Toplevel):
 
             if self.out_log_edsm.get() and self.out_log_auto.get():
                 if proxyaddr:
-                    self.edsm_log_auto_text['text'] = _('Connected to edproxy at {ADDR}').format(ADDR = proxyaddr)
+                    self.edsm_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
                 elif not monitor.enable_logging():
                     self.edsm_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
                 elif monitor.restart_required():

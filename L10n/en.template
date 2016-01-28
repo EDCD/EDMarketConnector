@@ -64,6 +64,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Output settings. [prefs.py] */
+"Connected to {EDPROXY} at {ADDR}" = "Connected to {EDPROXY} at {ADDR}";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "cooldown {SS}s";
 

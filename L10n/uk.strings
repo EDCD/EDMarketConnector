@@ -64,6 +64,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Компетентний";
 
+/* Output settings. [prefs.py] */
+"Connected to {EDPROXY} at {ADDR}" = "Підключено до {EDPROXY}, адреса {ADDR}";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "очикування {SS} сек";
 
@@ -143,7 +146,7 @@
 "Expert" = "Експерт";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Дослідник";
+"Explorer" = "Дослідницький";
 
 /* Ranking. [stats.py] */
 "Federation" = "Федерація";
@@ -407,7 +410,7 @@
 "System" = "Система";
 
 /* Ranking. [stats.py] */
-"Trade" = "Торгівля";
+"Trade" = "Торговий";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Новатор";

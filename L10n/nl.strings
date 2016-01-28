@@ -64,6 +64,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Output settings. [prefs.py] */
+"Connected to {EDPROXY} at {ADDR}" = "Verbonden met {EDPROXY} via {ADDR}";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "wachtperiode {SS}s";
 
@@ -132,6 +135,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Fout: Server is offline";
+
+/* [companion.py] */
+"Error: Verification failed" = "Fout: Verificatie mislukt";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Afsluiten";

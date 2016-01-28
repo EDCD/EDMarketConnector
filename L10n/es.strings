@@ -133,6 +133,9 @@
 /* [companion.py] */
 "Error: Server is down" = "Error: El Servidor está caído";
 
+/* [companion.py] */
+"Error: Verification failed" = "Error: Verificación fallida";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Salir";
 
