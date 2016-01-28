@@ -195,10 +195,7 @@ class EDLogs(FileSystemEventHandler):
     def worker(self):
         # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n" or "... NormalFlight\r\n" or "... Supercruise\r\n"
         # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
-        regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:')
-        regexp_cqc = re.compile(r'\{.+\} \[PG\] (.+)')
-
-        cqc = False
+        regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:(\d+) .* (\S*)')	# (localtime, system, body, context)
 
         # Seek to the end of the latest log file
         logfile = self.logfile
@@ -216,23 +213,15 @@ class EDLogs(FileSystemEventHandler):
                 if loghandle:
                     loghandle.close()
                 loghandle = open(logfile, 'rt')
-                cqc = False
 
             if logfile:
                 system = visited = None
                 loghandle.seek(0, 1)	# reset EOF flag
 
                 for line in loghandle:
-                    match = regexp_cqc.match(line)
+                    match = regexp.match(line)
                     if match:
-                        if 'Joined a gameplay lobby' in match.group(1) or 'Created playlist lobby' in match.group(1) or 'Found matchmaking lobby object' in match.group(1):
-                            cqc = True
-                        elif 'Left a playlist lobby' in match.group(1) or 'Destroying playlist lobby' in match.group(1):
-                            cqc = False
-                    else:
-                        match = regexp.match(line)
-                        if match:
-                            system, visited = cqc and 'CQC' or match.group(2), match.group(1)
+                        system, visited = match.group(4) == 'ProvingGround' and 'CQC' or match.group(2), match.group(1)
 
                 if system:
                     self._restart_required = False	# clearly logging is working
