@@ -15,7 +15,7 @@ if __debug__:
 class EDSM:
 
     _TIMEOUT = 10
-    FAKE = ['CQC', 'Training']	# Fake systems that shouldn't be sent to EDSM
+    FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
