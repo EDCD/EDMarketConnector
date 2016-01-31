@@ -30,6 +30,7 @@ class _EDProxy:
 
 
     def __init__(self):
+        self.root = None
         self.lock = threading.Lock()
         self.addr = None
         self.port = None
@@ -54,7 +55,8 @@ class _EDProxy:
 
     def stop(self):
         # Still listening, but stop callbacks
-        self.root.unbind_all('<<ProxyJump>>')
+        if self.root:
+            self.root.unbind_all('<<ProxyJump>>')
 
     def status(self):
         self.lock.acquire()
