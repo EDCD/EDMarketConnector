@@ -10,7 +10,7 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Aimless";
 
-/* System menu entry on Windows. [EDMarketConnector.py] */
+/* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Zawsze na wierzchu";
 
 /* CQC rank. [stats.py] */
@@ -19,8 +19,14 @@
 /* EDSM setting. [prefs.py] */
 "API Key" = "API Key";
 
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Wygląd";
+
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Stwórz automatycznie wpis w logu po wejściu do systemu";
+
+/* [prefs.py] */
+"Automatically open uncharted systems’ EDSM pages" = "Automatycznie otwieraj nie skatalogowane systemy w EDSM";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "Saldo";
@@ -61,6 +67,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Output settings. [prefs.py] */
+"Connected to {EDPROXY} at {ADDR}" = "Połąćzono do {EDPROXY} na {ADDR}";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Oczekiwanie {SS} sek.";
 
@@ -79,11 +88,17 @@
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Ciemny";
+
 /* Combat rank. [stats.py] */
 "Deadly" = "Deadly";
 
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
+
+/* Appearance theme setting. [prefs.py] */
+"Default" = "Domyślne";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
@@ -130,6 +145,9 @@
 /* [companion.py] */
 "Error: Server is down" = "Błąd: Serwer padł";
 
+/* [companion.py] */
+"Error: Verification failed" = "Błąd: Weryfikacja niepoprawna";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Zakończ";
 
@@ -165,6 +183,9 @@
 
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
+
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Podświetlony tekst";
 
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Skr. Klaw.";
@@ -237,6 +258,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "Brak";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Zwykły tekst";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -399,6 +423,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "System";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Schemat kolorystyczny";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

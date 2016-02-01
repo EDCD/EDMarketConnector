@@ -10,7 +10,7 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Безцільний";
 
-/* System menu entry on Windows. [EDMarketConnector.py] */
+/* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Поверх інших вікон";
 
 /* CQC rank. [stats.py] */
@@ -18,6 +18,9 @@
 
 /* EDSM setting. [prefs.py] */
 "API Key" = "API Ключ";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Зовнішній вигляд";
 
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Автоматично робити запис у журналі на вході в систему";
@@ -85,11 +88,17 @@
 /* Combat rank. [stats.py] */
 "Dangerous" = "Небезпечний";
 
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Темний";
+
 /* Combat rank. [stats.py] */
 "Deadly" = "Убивчий";
 
 /* Trade rank. [stats.py] */
 "Dealer" = "Дилер";
+
+/* Appearance theme setting. [prefs.py] */
+"Default" = "Стандарт";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
@@ -175,6 +184,9 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Герой";
 
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Виділений текст";
+
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Горяча клавіша";
 
@@ -246,6 +258,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "Нічого";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Нормальний текст";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Новачок";
@@ -408,6 +423,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Система";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Тема";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговий";

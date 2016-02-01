@@ -10,7 +10,7 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Aimless";
 
-/* System menu entry on Windows. [EDMarketConnector.py] */
+/* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Altijd op voorgrond";
 
 /* CQC rank. [stats.py] */
@@ -18,6 +18,9 @@
 
 /* EDSM setting. [prefs.py] */
 "API Key" = "API Key";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Vormgeving";
 
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automatisch een log regel aanmaken bij het binnengaan van een stelsel";
@@ -85,11 +88,17 @@
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Donker";
+
 /* Combat rank. [stats.py] */
 "Deadly" = "Deadly";
 
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
+
+/* Appearance theme setting. [prefs.py] */
+"Default" = "Standaard";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
@@ -408,6 +417,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Systeem";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Thema";
 
 /* Ranking. [stats.py] */
 "Trade" = "Handels rang";

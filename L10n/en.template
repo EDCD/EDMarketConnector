@@ -10,7 +10,7 @@
 /* Explorer rank. [stats.py] */
 "Aimless" = "Aimless";
 
-/* System menu entry on Windows. [EDMarketConnector.py] */
+/* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Always on top";
 
 /* CQC rank. [stats.py] */
@@ -18,6 +18,9 @@
 
 /* EDSM setting. [prefs.py] */
 "API Key" = "API Key";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Appearance";
 
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
@@ -85,11 +88,17 @@
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Dark";
+
 /* Combat rank. [stats.py] */
 "Deadly" = "Deadly";
 
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
+
+/* Appearance theme setting. [prefs.py] */
+"Default" = "Default";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
@@ -175,6 +184,9 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Highlighted text";
+
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
@@ -246,6 +258,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "None";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normal text";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -408,6 +423,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "System";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Theme";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

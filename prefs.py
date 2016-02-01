@@ -6,7 +6,7 @@ from sys import platform
 
 import Tkinter as tk
 import ttk
-import tkFileDialog
+import tkColorChooser
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
@@ -14,6 +14,7 @@ from config import applongname, config
 from edproxy import edproxy
 from hotkey import hotkeymgr
 from monitor import monitor
+from theme import theme
 
 import plug
 
@@ -62,12 +63,12 @@ class PreferencesDialog(tk.Toplevel):
             self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
 
         # remove decoration
-        self.resizable(tk.FALSE, tk.FALSE)
         if platform=='win32':
             self.attributes('-toolwindow', tk.TRUE)
         elif platform=='darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
+        self.resizable(tk.FALSE, tk.FALSE)
 
         style = ttk.Style()
 
@@ -217,6 +218,33 @@ class PreferencesDialog(tk.Toplevel):
                          _('Keyboard shortcut') or	# Tab heading in settings on OSX
                          _('Hotkey'))			# Tab heading in settings on Windows
 
+        self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
+        self.theme = tk.IntVar(value = config.getint('theme') and 1 or 0)
+        self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
+        self.theme_prompts = [
+            _('Normal text'),		# Dark theme color setting
+            _('Highlighted text'),	# Dark theme color setting
+        ]
+        themeframe = nb.Frame(notebook)
+        themeframe.columnconfigure(2, weight=1)
+        nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
+        self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
+        self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+        nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Appearance setting
+        nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
+        nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
+        self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
+        self.theme_label_0.grid(row=10, padx=PADX, sticky=tk.W)
+        self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='black', command=lambda:self.themecolorbrowse(0))	# Main window
+        self.theme_button_0.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
+        self.theme_label_1.grid(row=11, padx=PADX, sticky=tk.W)
+        self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='black', command=lambda:self.themecolorbrowse(1))	# Do not translate
+        self.theme_button_1.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+
+        notebook.add(themeframe, text=_('Appearance'))	# Tab heading in settings
+
         # build plugin prefs tabs
         for plugname in plug.PLUGINS:
             plugframe = plug.get_plugin_pref(plugname, notebook)
@@ -237,14 +265,15 @@ class PreferencesDialog(tk.Toplevel):
 
         # Selectively disable buttons depending on output settings
         self.proxypoll()
+        self.themevarchanged()
 
         # disable hotkey for the duration
         hotkeymgr.unregister()
 
         # wait for window to appear on screen before calling grab_set
+        self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
         self.wait_visibility()
         self.grab_set()
-        #self.wait_window(self)	# causes duplicate events on OSX
 
 
     def proxypoll(self):
@@ -296,6 +325,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def outbrowse(self):
         if platform != 'win32':
+            import tkFileDialog
             d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(self.outdir.get()), title=_('File location'), mustexist=tk.TRUE)
         else:
             def browsecallback(hwnd, uMsg, lParam, lpData):
@@ -327,6 +357,25 @@ class PreferencesDialog(tk.Toplevel):
             else:
                 self.outdir.insert(0, d)
             self.outdir['state'] = 'readonly'
+
+    def themecolorbrowse(self, index):
+        (rgb, color) = tkColorChooser.askcolor(self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)
+        if color:
+            self.theme_colors[index] = color
+            self.themevarchanged()
+
+    def themevarchanged(self):
+        self.theme_button_0['foreground'], self.theme_button_1['foreground'] = self.theme_colors
+
+        state = self.theme.get() and tk.NORMAL or tk.DISABLED
+        self.theme_label_0['state'] = state
+        self.theme_label_1['state'] = state
+        self.theme_button_0['state'] = state
+        self.theme_button_1['state'] = state
+
+        if platform == 'linux2':
+            # Unmanaged windows are always on top on X
+            self.ontop_button['state'] = self.theme.get() and tk.DISABLED or tk.NORMAL
 
     def hotkeystart(self, event):
         event.widget.bind('<KeyPress>', self.hotkeylisten)
@@ -396,6 +445,12 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
 
+        config.set('always_ontop', self.always_ontop.get())
+        config.set('theme', self.theme.get())
+        config.set('dark_text', self.theme_colors[0])
+        config.set('dark_highlight', self.theme_colors[1])
+        theme.apply(self.parent)
+
         config.set('anonymous', self.out_anon.get())
 
         self._destroy()
@@ -412,6 +467,7 @@ class PreferencesDialog(tk.Toplevel):
         else:
             monitor.stop()
             edproxy.stop()
+        self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 
     if platform == 'darwin':

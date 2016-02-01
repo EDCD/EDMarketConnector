@@ -43,6 +43,7 @@ import plug
 from edproxy import edproxy
 from hotkey import hotkeymgr
 from monitor import monitor
+from theme import theme
 
 EDDB = eddb.EDDB()
 
@@ -65,62 +66,65 @@ class AppWindow:
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
+        # Special handling for overrideredict
+        self.w.bind("<Map>", self.onmap)
+
         plug.load_plugins()
 
-        if platform == 'win32':
-            self.w.wm_iconbitmap(default='EDMarketConnector.ico')
-        elif platform == 'linux2':
-            from PIL import Image, ImageTk
-            icon = ImageTk.PhotoImage(Image.open("EDMarketConnector.png"))
-            self.w.tk.call('wm', 'iconphoto', self.w, '-default', icon)
-            style = ttk.Style()
-            style.theme_use('clam')
-        elif platform=='darwin':
-            # Default ttk font choice looks bad on El Capitan
-            font = tkFont.Font(family='TkDefaultFont', size=13, weight=tkFont.NORMAL)
-            style = ttk.Style()
-            style.configure('TLabel', font=font)
-            style.configure('TButton', font=font)
-            style.configure('TLabelframe.Label', font=font)
-            style.configure('TCheckbutton', font=font)
-            style.configure('TRadiobutton', font=font)
-            style.configure('TEntry', font=font)
+        if platform != 'darwin':
+            if platform == 'win32':
+                self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+            else:
+                from PIL import Image, ImageTk
+                self.w.tk.call('wm', 'iconphoto', self.w, '-default', ImageTk.PhotoImage(Image.open("EDMarketConnector.png")))
+            self.theme_icon = tk.PhotoImage(data = 'R0lGODlhEAAQAMYAAAAAAAEAAAEBAQICAgQEAwYFBAsHBAoIBgwIBAwIBQ0IBA8JBBAJBBAKBRMMBRkPBhoQBykWCSoWCCoXCTsfCzwfCkAhDEIjDD8kC0AlDEEmC0EmDEcoDk4oDU8pDU4qEFMrD1ktDlotD1ouD1g0EWAyEWU0EV03EmA4EWo2EW03EWQ6Emw4EWo9FGo+E3Y8FH5AFH1IFoBJFo1RGo1SGY1SGpBTGZFTGZJTGZhYG6piHa1kHa5kHbBkHr9uIMt0IgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEKAEAALAAAAAAQABAAAAd7gACCg4SFhoeHGCiIhRs5JwMCkpKGGTIFODaaNjc/D4QaMQMAk5MuEIQOO6OFAiscCIQNPQk8NTO4NDofLwayPi0mIMPDLAcqvoIBDiQWkaUCAykKhAsXAoYCHRKEDDAjIyIiIyEEHhHYhAPr7BQlE+mMABXo8oTx9oWBADs=')
+            self.theme_minimize = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')
+            self.theme_close    = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')
 
-        frame = ttk.Frame(self.w, name=appname.lower())
+        frame = tk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
-        ttk.Label(frame, text=_('Cmdr')+':').grid(row=0, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('System')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
-        ttk.Label(frame, text=_('Station')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
+        tk.Label(frame, text=_('Cmdr')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
+        tk.Label(frame, text=_('System')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
+        tk.Label(frame, text=_('Station')+':').grid(row=3, column=0, sticky=tk.W)	# Main window
 
-        self.cmdr = ttk.Label(frame, width=-21)
+        self.cmdr = tk.Label(frame, anchor=tk.W)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
 
-        self.cmdr.grid(row=0, column=1, sticky=tk.EW)
-        self.system.grid(row=1, column=1, sticky=tk.EW)
-        self.station.grid(row=2, column=1, sticky=tk.EW)
+        self.cmdr.grid(row=1, column=1, sticky=tk.EW)
+        self.system.grid(row=2, column=1, sticky=tk.EW)
+        self.station.grid(row=3, column=1, sticky=tk.EW)
 
         for plugname in plug.PLUGINS:
             appitem = plug.get_plugin_app(plugname, frame)
             if appitem:
                 appitem.grid(columnspan=2, sticky=tk.W)
 
-        self.button = ttk.Button(frame, name='update', text=_('Update'), command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.status = ttk.Label(frame, name='status', width=-25)
-        self.button.grid(columnspan=2, sticky=tk.NSEW)
+        minwidth = platform == 'darwin' and 32 or 28
+        self.button = ttk.Button(frame, text=_('Update'), width=minwidth, command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.theme_button = tk.Label(frame, text=_('Update'), width=minwidth, state=tk.DISABLED)	# Update button in main window
+        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        row = frame.grid_size()[1]
+        self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
+        self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
+        theme.register_alternate((self.button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
 
+        theme.button_bind(self.theme_button, self.getandsend)
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform=='darwin' and 3 or 2))
+            child.grid_configure(padx=5, pady=(platform=='win32' and 1 or 3))
 
         menubar = tk.Menu()
         if platform=='darwin':
-            from Foundation import NSBundle
+            # Can't handle (de)iconify if topmost is set, so suppress iconify button
+            # http://wiki.tcl.tk/13428 and p15 of https://developer.apple.com/legacy/library/documentation/Carbon/Conceptual/HandlingWindowsControls/windowscontrols.pdf
+            root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox horizontalZoom resizable')
+
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             apple_menu = tk.Menu(menubar, name='apple')
             apple_menu.add_command(label=_("About {APP}").format(APP=applongname), command=lambda:self.w.call('tk::mac::standardAboutPanel'))	# App menu entry on OSX
@@ -135,6 +139,7 @@ class AppWindow:
             menubar.add_cascade(label=_('View'), menu=self.view_menu)	# Menu title on OSX
             window_menu = tk.Menu(menubar, name='window')
             menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
+            self.w['menu'] = menubar
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
             self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
             self.w.createcommand('tkAboutDialog', lambda:self.w.call('tk::mac::standardAboutPanel'))
@@ -157,34 +162,53 @@ class AppWindow:
                 self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
                 system_menu = tk.Menu(menubar, name='system', tearoff=tk.FALSE)
                 system_menu.add_separator()
-                system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# System menu entry on Windows
+                system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
                 menubar.add_cascade(menu=system_menu)
-                self.w.wm_attributes('-topmost', self.always_ontop.get())
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
+            theme.register(menubar)	# menus and children aren't automatically registered
+            theme.register(file_menu)
+            theme.register(self.edit_menu)
 
-        if platform == 'linux2':
-            # Fix up menu to use same styling as everything else
-            (fg, bg, afg, abg) = (style.lookup('TLabel.label', 'foreground'),
-                                  style.lookup('TLabel.label', 'background'),
-                                  style.lookup('TButton.label', 'foreground', ['active']),
-                                  style.lookup('TButton.label', 'background', ['active']))
-            menubar.configure(  fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
-            file_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
-            self.edit_menu.configure(fg = fg, bg = bg, activeforeground = afg, activebackground = abg)
-        self.w['menu'] = menubar
+            # Alternate title bar and menu for dark theme
+            theme_menubar = tk.Frame(frame)
+            theme_menubar.columnconfigure(2, weight=1)
+            theme_titlebar = tk.Label(theme_menubar, text=applongname, image=self.theme_icon, anchor=tk.W, compound=tk.LEFT)
+            theme_titlebar.grid(columnspan=3, sticky=tk.NSEW)
+            self.drag_offset = None
+            theme_titlebar.bind('<Button-1>', self.drag_start)
+            theme_titlebar.bind('<B1-Motion>', self.drag_continue)
+            theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
+            if platform == 'win32':	# Can't work out how to deiconify on Linux
+                theme_minimize = tk.Label(theme_menubar, image=self.theme_minimize)
+                theme_minimize.grid(row=0, column=3)
+                theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
+            theme_close = tk.Label(theme_menubar, image=self.theme_close)
+            theme_close.grid(row=0, column=4)
+            theme.button_bind(theme_close, self.onexit, image=self.theme_close)
+            theme_file_menu = tk.Label(theme_menubar, text=_('File'), anchor=tk.W)	# Menu title on Windows
+            theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
+            theme.button_bind(theme_file_menu, lambda e: file_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            theme_edit_menu = tk.Label(theme_menubar, text=_('Edit'), anchor=tk.W)	# Menu title
+            theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
+            theme.button_bind(theme_edit_menu, lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            theme.register_highlight(theme_titlebar)
+            theme.register(self.theme_minimize)	# images aren't automatically registered
+            theme.register(self.theme_close)
+            theme.register_alternate((menubar, theme_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
 
         # update geometry
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
             if match and (platform!='darwin' or int(match.group(2))>0):	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
                 self.w.geometry(config.get('geometry'))
-        self.w.update_idletasks()
-        self.w.wait_visibility()
-        (w, h) = (self.w.winfo_width(), self.w.winfo_height())
-        self.w.minsize(w, h)		# Minimum size = initial size
-        if platform != 'linux2':	# update_idletasks() doesn't allow for the menubar on Linux
-            self.w.maxsize(-1, h)	# Maximum height = initial height
+        self.w.attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+        self.w.resizable(tk.TRUE, tk.FALSE)
+
+        theme.register(frame)
+        theme.register_highlight(self.system)
+        theme.register_highlight(self.station)
+        theme.apply(self.w)
 
         # Load updater after UI creation (for WinSparkle)
         import update
@@ -212,7 +236,7 @@ class AppWindow:
     # call after credentials have changed
     def login(self):
         self.status['text'] = _('Logging in...')
-        self.button['state'] = tk.DISABLED
+        self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
             self.session.login(config.get('username'), config.get('password'))
@@ -250,7 +274,7 @@ class AppWindow:
             config.save()	# Save settings now for use by command-line app
         except Exception as e:
             if __debug__: print_exc()
-            self.button['state'] = tk.NORMAL
+            self.button['state'] = self.theme_button['state'] = tk.NORMAL
             self.status['text'] = unicode(e)
         else:
             return self.getandsend()	# try again
@@ -270,7 +294,7 @@ class AppWindow:
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.system['image'] = ''
             self.status['text'] = _('Fetching data...')
-            self.button['state'] = tk.DISABLED
+            self.theme_button['state'] = tk.DISABLED
             self.edit_menu.entryconfigure(_('Copy'), state=tk.DISABLED)
             self.w.update_idletasks()
 
@@ -494,11 +518,11 @@ class AppWindow:
 
     def cooldown(self):
         if time() < self.holdofftime:
-            self.button['text'] = _('cooldown {SS}s').format(SS = int(self.holdofftime - time()))	# Update button in main window
+            self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS = int(self.holdofftime - time()))	# Update button in main window
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = _('Update')	# Update button in main window
-            self.button['state'] = tk.NORMAL
+            self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
+            self.button['state'] = self.theme_button['state'] = tk.NORMAL
 
     def ontop_changed(self, event=None):
         config.set('always_ontop', self.always_ontop.get())
@@ -518,6 +542,27 @@ class AppWindow:
         self.updater.close()
         self.session.close()
         self.w.destroy()
+
+    def drag_start(self, event):
+        self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
+
+    def drag_continue(self, event):
+        if self.drag_offset:
+            self.w.geometry('+%d+%d' % (event.x_root - self.drag_offset[0], event.y_root - self.drag_offset[1]))
+
+    def drag_end(self, event):
+        self.drag_offset = None
+
+    def oniconify(self, event=None):
+        self.w.overrideredirect(0)	# Can't iconize while overrideredirect
+        self.w.iconify()
+        self.w.update_idletasks()	# Size and windows styles get recalculated here
+        self.w.wait_visibility()	# Need main window to be re-created before returning
+        theme.active = None		# So theme will be re-applied on map
+
+    def onmap(self, event=None):
+        if event.widget == self.w:
+            theme.apply(self.w)
 
 
 # Run the app
