@@ -102,9 +102,8 @@ class AppWindow:
             if appitem:
                 appitem.grid(columnspan=2, sticky=tk.W)
 
-        minwidth = platform == 'darwin' and 32 or 28
-        self.button = ttk.Button(frame, text=_('Update'), width=minwidth, command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.theme_button = tk.Label(frame, text=_('Update'), width=minwidth, state=tk.DISABLED)	# Update button in main window
+        self.button = ttk.Button(frame, text=_('Update'), width=28, command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.theme_button = tk.Label(frame, text=_('Update'), width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)	# Update button in main window
         self.status = tk.Label(frame, name='status', anchor=tk.W)
         row = frame.grid_size()[1]
         self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
