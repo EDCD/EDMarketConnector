@@ -36,7 +36,7 @@ def send(cmdr, msg):
     }
     msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
 
-    r = requests.post(upload, json=msg, timeout=timeout)
+    r = requests.post(upload, data=json.dumps(msg), timeout=timeout)
     if __debug__ and r.status_code != requests.codes.ok:
         print 'Status\t%s'  % r.status_code
         print 'URL\t%s'  % r.url
