@@ -90,6 +90,22 @@ class Button(platform == 'darwin' and tk.Button or ttk.Button):
         else:
             ttk.Button.__init__(self, master, **kw)
 
+class ColoredButton(platform == 'darwin' and tk.Label or tk.Button):
+
+    def __init__(self, master=None, **kw):
+        if platform == 'darwin':
+            # Can't set Button background on OSX, so use a Label instead
+            kw['relief'] = kw.pop('relief', tk.RAISED)
+            self._command = kw.pop('command', None)
+            tk.Label.__init__(self, master, **kw)
+            self.bind('<Button-1>', self._press)
+        else:
+            tk.Button.__init__(self, master, **kw)
+
+    if platform == 'darwin':
+        def _press(self, event):
+            self._command()
+
 class Checkbutton(platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton):
 
     def __init__(self, master=None, **kw):
