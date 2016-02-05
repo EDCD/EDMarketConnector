@@ -1,3 +1,4 @@
+import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
 from os.path import expanduser, dirname, isdir, join, normpath
@@ -18,7 +19,6 @@ if platform=='darwin':
 
 elif platform=='win32':
     import ctypes
-    import numbers
 
     CSIDL_PERSONAL = 0x0005
     CSIDL_LOCAL_APPDATA = 0x001C
@@ -54,13 +54,13 @@ elif platform=='win32':
     RegSetValueEx.restype = LONG
     RegSetValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, DWORD, LPCVOID, DWORD]
 
-    SHCopyKey = ctypes.windll.shlwapi.SHCopyKeyW
-    SHCopyKey.restype = LONG
-    SHCopyKey.argtypes = [HKEY, LPCWSTR, HKEY, DWORD]
+    RegCopyTree = ctypes.windll.advapi32.RegCopyTreeW
+    RegCopyTree.restype = LONG
+    RegCopyTree.argtypes = [HKEY, LPCWSTR, HKEY]
 
-    SHDeleteKey = ctypes.windll.shlwapi.SHDeleteKeyW
-    SHDeleteKey.restype = LONG
-    SHDeleteKey.argtypes = [HKEY, LPCWSTR]
+    RegDeleteKey = ctypes.windll.advapi32.RegDeleteTreeW
+    RegDeleteKey.restype = LONG
+    RegDeleteKey.argtypes = [HKEY, LPCWSTR]
 
 elif platform=='linux2':
     import codecs
@@ -159,9 +159,9 @@ class Config:
                 # Migrate pre-1.3.4 registry location
                 oldkey = HKEY()
                 if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\EDMarketConnector', 0, KEY_ALL_ACCESS, ctypes.byref(oldkey)):
-                    SHCopyKey(oldkey, None, self.hkey, 0)
-                    SHDeleteKey(oldkey, '')
+                    RegCopyTree(oldkey, None, self.hkey)
                     RegCloseKey(oldkey)
+                    RegDeleteKey(HKEY_CURRENT_USER, r'Software\EDMarketConnector')
 
                 # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
                 sparklekey = HKEY()
@@ -245,6 +245,7 @@ class Config:
                 self.set('outdir', expanduser('~'))
 
         def set(self, key, val):
+            assert isinstance(val, basestring) or isinstance(val, numbers.Integral), type(val)
             self.config.set('config', key, val)
 
         def get(self, key):
