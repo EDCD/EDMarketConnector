@@ -39,6 +39,7 @@ class Notebook(ttk.Notebook):
             style.configure('nb.TFrame',                          background=PAGEBG)
             style.configure('nb.TButton',                         background=PAGEBG)
             style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
+            style.configure('nb.TMenubutton',  foreground=PAGEFG, background=PAGEBG)
             style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
             self.grid(padx=10, pady=10, sticky=tk.NSEW)
         else:
@@ -129,3 +130,17 @@ class Radiobutton(platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton):
             ttk.Radiobutton.__init__(self, master, style='nb.TRadiobutton', **kw)
         else:
             ttk.Radiobutton.__init__(self, master, **kw)
+
+class OptionMenu(platform == 'darwin' and tk.OptionMenu or ttk.OptionMenu):
+
+    def __init__(self, master, variable, default=None, *values, **kw):
+        if platform == 'darwin':
+            variable.set(default)
+            bg = kw.pop('background', PAGEBG)
+            tk.OptionMenu.__init__(self, master, variable, *values, **kw)
+            self['background'] = bg
+        elif platform == 'win32':
+            # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
+            ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
+        else:
+            ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
