@@ -178,7 +178,8 @@ appcast.write('''
 \t\t<item>
 \t\t\t<title>Release {0:.2f}</title>
 \t\t\t<description>
-\t\t\t\t<![CDATA[{6}
+\t\t\t\t<![CDATA[
+<style>{6}</style>
 <h2>Release {0:.2f}</h2>
 <ul>
 
@@ -199,4 +200,4 @@ appcast.write('''
            sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive' or 'osx',
            VERSION,
            os.stat(PKG).st_size,
-           sys.platform=='win32' and '\n<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>' or ''))
+           sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' or 'h2 { font-size: 105%; }'))
