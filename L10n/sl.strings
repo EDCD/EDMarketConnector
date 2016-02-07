@@ -1,3 +1,6 @@
+/* Language name */
+"!Language" = "Slovenščina";
+
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Koda za preverjanje istovetnosti{CR}je bila poslana na e-poštni naslov.";
 
@@ -25,6 +28,9 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Shrani podatke v dnevnik leta, ko prispeš v sistem";
 
+/* [prefs.py] */
+"Automatically open uncharted systems’ EDSM pages" = "Automatically open uncharted systems’ EDSM pages";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Ravnotežje";
 
@@ -46,7 +52,7 @@
 /* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Spremeni...";
 
-/* [EDMarketConnector.py] */
+/* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Preveri posodobitve...";
 
 /* Federation rank. [stats.py] */
@@ -94,7 +100,7 @@
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
 
-/* Appearance theme setting. [prefs.py] */
+/* Appearance theme and language setting. [l10n.py] */
 "Default" = "Privzeta";
 
 /* Empire rank. [stats.py] */
@@ -142,6 +148,9 @@
 /* [companion.py] */
 "Error: Server is down" = "Napaka: Strežnik ni na voljo";
 
+/* [companion.py] */
+"Error: Verification failed" = "Error: Verification failed";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Izhod";
 
@@ -178,6 +187,9 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Highlighted text";
+
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Bližnjica";
 
@@ -195,6 +207,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jezik";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Zadnja osvežitev podatkov {HH}:{MM}:{SS} ";
@@ -249,6 +264,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "Brez";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normal text";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";

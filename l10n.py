@@ -4,6 +4,7 @@
 #
 
 import codecs
+from collections import OrderedDict
 import os
 from os.path import dirname, isfile, join, normpath
 import re
@@ -12,48 +13,63 @@ from sys import platform
 import __builtin__
 
 
+# Language name
+LANGUAGE_ID = '!Language'
+
+
 class Translations:
 
     FALLBACK = 'en'	# strings in this code are in English
+    FALLBACK_NAME = 'English'
+
+    TRANS_RE   = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
+    COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
+
 
     def __init__(self):
         self.translations = {}
 
     def install_dummy(self):
         # For when translation is not desired or not available
+        self.translations = {}	# not used
         __builtin__.__dict__['_'] = lambda x: unicode(x).replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
-    def install(self):
+    def install(self, lang=None):
         available = self.available()
         available.add(Translations.FALLBACK)
 
-        for preferred in self.preferred():
-            if preferred in available:
-                lang = preferred
-                break
-        else:
+        if not lang:
             for preferred in self.preferred():
-                preferred = preferred.split('-',1)[0]	# just base language
                 if preferred in available:
                     lang = preferred
                     break
             else:
-                lang = Translations.FALLBACK
+                for preferred in self.preferred():
+                    preferred = preferred.split('-',1)[0]	# just base language
+                    if preferred in available:
+                        lang = preferred
+                        break
 
         if lang not in self.available():
             self.install_dummy()
         else:
-            regexp = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
-            comment= re.compile(r'\s*/\*.*\*/\s*$')
-            with self.file(lang) as h:
-                for line in h:
-                    if line.strip():
-                        match = regexp.match(line)
-                        if match:
-                            self.translations[match.group(1)] = match.group(2).replace(u'{CR}', u'\n')
-                        elif __debug__ and not comment.match(line):
-                            print 'Bad translation: %s' % line.strip()
+            self.translations = self.contents(lang)
             __builtin__.__dict__['_'] = self.translate
+
+    def contents(self, lang):
+        assert lang in self.available()
+        translations = {}
+        with self.file(lang) as h:
+            for line in h:
+                if line.strip():
+                    match = Translations.TRANS_RE.match(line)
+                    if match:
+                        translations[match.group(1)] = match.group(2).replace(u'{CR}', u'\n')
+                    elif __debug__ and not Translations.COMMENT_RE.match(line):
+                        print 'Bad translation: %s' % line.strip()
+        if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
+            translations[LANGUAGE_ID] = unicode(lang)	# Replace language name with code if missing
+        return translations
 
     if __debug__:
         def translate(self, x):
@@ -74,6 +90,16 @@ class Translations:
         else:
             available = set([x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')])
         return available
+
+    # Available language names by code
+    def available_names(self):
+        names = OrderedDict([
+            (None, _('Default')),	# Appearance theme and language setting
+        ])
+        names.update(sorted([(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
+                            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
+                            key=lambda x: x[1]))	# Sort by name
+        return names
 
     # Returns list of preferred language codes in lowercase RFC4646 format.
     # Typically "lang[-script][-region]" where lang is a 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
@@ -149,6 +175,7 @@ if __name__ == "__main__":
                     seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % f
     if seen:
         template = codecs.open('L10n/en.template', 'w', 'utf-8')
+        template.write('/* Language name */\n"%s" = "%s";\n\n' % (LANGUAGE_ID, 'English'))
         for thing in sorted(seen, key=unicode.lower):
             if seen[thing]:
                 template.write('/* %s */\n' % (seen[thing]))

@@ -1,3 +1,6 @@
+/* Language name */
+"!Language" = "Italiano";
+
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Un codice di verifica è stato inviato alla email{CR}associata al tuo account di Elite Dangerous.";
 
@@ -49,7 +52,7 @@
 /* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Cambia...";
 
-/* [EDMarketConnector.py] */
+/* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Controlla aggiornamenti...";
 
 /* Federation rank. [stats.py] */
@@ -66,6 +69,9 @@
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
+
+/* Output settings. [prefs.py] */
+"Connected to {EDPROXY} at {ADDR}" = "Connesso a {EDPROXY} all'indirizzo {ADDR}";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "disponibile tra {SS} secondi";
@@ -94,7 +100,7 @@
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
 
-/* Appearance theme setting. [prefs.py] */
+/* Appearance theme and language setting. [l10n.py] */
 "Default" = "Predefinito";
 
 /* Empire rank. [stats.py] */
@@ -142,6 +148,9 @@
 /* [companion.py] */
 "Error: Server is down" = "Errore: Il Server è offline";
 
+/* [companion.py] */
+"Error: Verification failed" = "Errore: fallita Verifica";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Esci";
 
@@ -178,6 +187,9 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Testo evidenziato";
+
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
@@ -195,6 +207,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Lingua";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Ultimo aggiornamento alle {HH}:{MM}:{SS}";
@@ -249,6 +264,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "Nessuna";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Testo normale";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";

@@ -25,8 +25,8 @@ if platform == 'win32' and getattr(sys, 'frozen', False):
     import tempfile
     sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
 
-import l10n
-l10n.Translations().install()
+from l10n import Translations
+Translations().install(config.get('language') or None)
 
 import companion
 import bpc
@@ -85,9 +85,13 @@ class AppWindow:
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
-        tk.Label(frame, text=_('Cmdr')+':').grid(row=1, column=0, sticky=tk.W)	# Main window
-        tk.Label(frame, text=_('System')+':').grid(row=2, column=0, sticky=tk.W)	# Main window
-        tk.Label(frame, text=_('Station')+':').grid(row=3, column=0, sticky=tk.W)	# Main window
+        self.cmdr_label = tk.Label(frame)
+        self.system_label = tk.Label(frame)
+        self.station_label = tk.Label(frame)
+
+        self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
+        self.system_label.grid(row=2, column=0, sticky=tk.W)
+        self.station_label.grid(row=3, column=0, sticky=tk.W)
 
         self.cmdr = tk.Label(frame, anchor=tk.W)
         self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
@@ -103,8 +107,9 @@ class AppWindow:
                 appitem.grid(columnspan=2, sticky=tk.W)
 
         self.button = ttk.Button(frame, text=_('Update'), width=28, command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
-        self.theme_button = tk.Label(frame, text=_('Update'), width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)	# Update button in main window
+        self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
+
         row = frame.grid_size()[1]
         self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
@@ -118,83 +123,86 @@ class AppWindow:
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='win32' and 1 or 3))
 
-        menubar = tk.Menu()
+        self.menubar = tk.Menu()
         if platform=='darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
             # http://wiki.tcl.tk/13428 and p15 of https://developer.apple.com/legacy/library/documentation/Carbon/Conceptual/HandlingWindowsControls/windowscontrols.pdf
             root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox horizontalZoom resizable')
 
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
-            apple_menu = tk.Menu(menubar, name='apple')
-            apple_menu.add_command(label=_("About {APP}").format(APP=applongname), command=lambda:self.w.call('tk::mac::standardAboutPanel'))	# App menu entry on OSX
-            apple_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
-            menubar.add_cascade(menu=apple_menu)
-            self.edit_menu = tk.Menu(menubar, name='edit')
-            self.edit_menu.add_command(label=_('Copy'), accelerator='Command-c', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
-            menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
+            self.file_menu = tk.Menu(self.menubar, name='apple')
+            self.file_menu.add_command(command=lambda:self.w.call('tk::mac::standardAboutPanel'))
+            self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.menubar.add_cascade(menu=self.file_menu)
+            self.edit_menu = tk.Menu(self.menubar, name='edit')
+            self.edit_menu.add_command(accelerator='Command-c', state=tk.DISABLED, command=self.copy)
+            self.menubar.add_cascade(menu=self.edit_menu)
             self.w.bind('<Command-c>', self.copy)
-            self.view_menu = tk.Menu(menubar, name='view')
-            self.view_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
-            menubar.add_cascade(label=_('View'), menu=self.view_menu)	# Menu title on OSX
-            window_menu = tk.Menu(menubar, name='window')
-            menubar.add_cascade(label=_('Window'), menu=window_menu)	# Menu title on OSX
-            self.w['menu'] = menubar
+            self.view_menu = tk.Menu(self.menubar, name='view')
+            self.view_menu.add_command(state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))
+            self.menubar.add_cascade(menu=self.view_menu)
+            window_menu = tk.Menu(self.menubar, name='window')
+            self.menubar.add_cascade(menu=window_menu)
+            self.w['menu'] = self.menubar
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
             self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
             self.w.createcommand('tkAboutDialog', lambda:self.w.call('tk::mac::standardAboutPanel'))
             self.w.createcommand("::tk::mac::Quit", self.onexit)
-            self.w.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.login))
+            self.w.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.postprefs))
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
-            file_menu = self.view_menu = tk.Menu(menubar, tearoff=tk.FALSE)
-            file_menu.add_command(label=_('Status'), state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))	# Menu item
-            file_menu.add_command(label=_("Check for Updates..."), command=lambda:self.updater.checkForUpdates())
-            file_menu.add_command(label=_("Settings"), command=lambda:prefs.PreferencesDialog(self.w, self.login))	# Item in the File menu on Windows
-            file_menu.add_separator()
-            file_menu.add_command(label=_("Exit"), command=self.onexit)	# Item in the File menu on Windows
-            menubar.add_cascade(label=_("File"), menu=file_menu)	# Menu title on Windows
-            self.edit_menu = tk.Menu(menubar, tearoff=tk.FALSE)
-            self.edit_menu.add_command(label=_('Copy'), accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)	# As in Copy and Paste
-            menubar.add_cascade(label=_('Edit'), menu=self.edit_menu)	# Menu title
+            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.file_menu.add_command(state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))
+            self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.file_menu.add_command(command=lambda:prefs.PreferencesDialog(self.w, self.postprefs))
+            self.file_menu.add_separator()
+            self.file_menu.add_command(command=self.onexit)
+            self.menubar.add_cascade(menu=self.file_menu)
+            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
+            self.menubar.add_cascade(menu=self.edit_menu)
             if platform == 'win32':
+                # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
-                system_menu = tk.Menu(menubar, name='system', tearoff=tk.FALSE)
+                system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 system_menu.add_separator()
                 system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
-                menubar.add_cascade(menu=system_menu)
+                self.menubar.add_cascade(menu=system_menu)	# Gets index 0
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
-            theme.register(menubar)	# menus and children aren't automatically registered
-            theme.register(file_menu)
+            theme.register(self.menubar)	# menus and children aren't automatically registered
+            theme.register(self.file_menu)
             theme.register(self.edit_menu)
 
             # Alternate title bar and menu for dark theme
-            theme_menubar = tk.Frame(frame)
-            theme_menubar.columnconfigure(2, weight=1)
-            theme_titlebar = tk.Label(theme_menubar, text=applongname, image=self.theme_icon, anchor=tk.W, compound=tk.LEFT)
+            self.theme_menubar = tk.Frame(frame)
+            self.theme_menubar.columnconfigure(2, weight=1)
+            theme_titlebar = tk.Label(self.theme_menubar, text=applongname, image=self.theme_icon, anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, sticky=tk.NSEW)
             self.drag_offset = None
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
             if platform == 'win32':	# Can't work out how to deiconify on Linux
-                theme_minimize = tk.Label(theme_menubar, image=self.theme_minimize)
+                theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
                 theme_minimize.grid(row=0, column=3)
                 theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-            theme_close = tk.Label(theme_menubar, image=self.theme_close)
+            theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
             theme_close.grid(row=0, column=4)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-            theme_file_menu = tk.Label(theme_menubar, text=_('File'), anchor=tk.W)	# Menu title on Windows
-            theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
-            theme.button_bind(theme_file_menu, lambda e: file_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
-            theme_edit_menu = tk.Label(theme_menubar, text=_('Edit'), anchor=tk.W)	# Menu title
-            theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
-            theme.button_bind(theme_edit_menu, lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+            self.theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
+            theme.button_bind(self.theme_file_menu, lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)	# Menu title
+            self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
+            theme.button_bind(self.theme_edit_menu, lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
             theme.register_highlight(theme_titlebar)
             theme.register(self.theme_minimize)	# images aren't automatically registered
             theme.register(self.theme_close)
-            theme.register_alternate((menubar, theme_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
+            theme.register_alternate((self.menubar, self.theme_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
+
+        self.set_labels()
 
         # update geometry
         if config.get('geometry'):
@@ -228,18 +236,44 @@ class AppWindow:
 
         # First run
         if not config.get('username') or not config.get('password'):
-            prefs.PreferencesDialog(self.w, self.login)
+            prefs.PreferencesDialog(self.w, self.postprefs)
         else:
             self.login()
 
-    # call after credentials have changed
+    # callback after the Preferences dialog is applied
+    def postprefs(self):
+        self.set_labels()	# in case language has changed
+        self.login()		# in case credentials gave changed
+
+    # set main window labels, e.g. after language change
+    def set_labels(self):
+        self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
+        self.system_label['text']  = _('System') + ':'	# Main window
+        self.station_label['text'] = _('Station') + ':'	# Main window
+        self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
+        self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
+        self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
+        self.file_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
+        if platform == 'darwin':
+            self.file_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))	# App menu entry on OSX
+            self.menubar.entryconfigure(1, label=_('View'))	# Menu title on OSX
+            self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
+            self.menubar.entryconfigure(3, label=_('Window'))	# Menu title on OSX
+        else:
+            self.file_menu.entryconfigure(2, label=_("Settings"))	# Item in the File menu on Windows
+            self.file_menu.entryconfigure(4, label=_("Exit"))	# Item in the File menu on Windows
+            self.menubar.entryconfigure(self.menubar.index('end')-2, label=_('File'))	# Menu title on Windows
+            self.menubar.entryconfigure(self.menubar.index('end')-1, label=_('Edit'))	# Menu title
+            self.theme_file_menu['text'] = _('File')	# Menu title on Windows
+            self.theme_edit_menu['text'] = _('Edit')	# Menu title
+
     def login(self):
         self.status['text'] = _('Logging in...')
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
             self.session.login(config.get('username'), config.get('password'))
-            self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
+            self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
             self.status['text'] = ''
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
@@ -294,7 +328,7 @@ class AppWindow:
             self.system['image'] = ''
             self.status['text'] = _('Fetching data...')
             self.theme_button['state'] = tk.DISABLED
-            self.edit_menu.entryconfigure(_('Copy'), state=tk.DISABLED)
+            self.edit_menu.entryconfigure(0, state=tk.DISABLED)	# Copy
             self.w.update_idletasks()
 
         try:
@@ -320,8 +354,8 @@ class AppWindow:
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
-                self.edit_menu.entryconfigure(_('Copy'), state=tk.NORMAL)
-                self.view_menu.entryconfigure(_('Status'), state=tk.NORMAL)
+                self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
+                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
 
                 if data['lastStarport'].get('commodities'):
                     # Fixup anomalies in the commodity data

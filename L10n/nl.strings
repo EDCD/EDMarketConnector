@@ -1,3 +1,6 @@
+/* Language name */
+"!Language" = "Nederlands";
+
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Een verificatie code is zojuist verstuurd naar het{CR}e-mail adres behorende bij je Elite account";
 
@@ -49,7 +52,7 @@
 /* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Wijzigen...";
 
-/* [EDMarketConnector.py] */
+/* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Controleren op updates...";
 
 /* Federation rank. [stats.py] */
@@ -97,7 +100,7 @@
 /* Trade rank. [stats.py] */
 "Dealer" = "Dealer";
 
-/* Appearance theme setting. [prefs.py] */
+/* Appearance theme and language setting. [l10n.py] */
 "Default" = "Standaard";
 
 /* Empire rank. [stats.py] */
@@ -184,6 +187,9 @@
 /* CQC rank. [stats.py] */
 "Hero" = "Hero";
 
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Highlighted text";
+
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
@@ -201,6 +207,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Taal";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Voor het laatst ververst om {HH}:{MM}:{SS}";
@@ -255,6 +264,9 @@
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
 "None" = "Geen";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normal text";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";

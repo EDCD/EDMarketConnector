@@ -1,3 +1,6 @@
+/* Language name */
+"!Language" = "Deutsch";
+
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ein Verifizierungscode wurde an die mit{CR}Elite verknüpfte Email Adresse gesendet.";
 
@@ -49,7 +52,7 @@
 /* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Ordner...";
 
-/* [EDMarketConnector.py] */
+/* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Auf Aktualisierungen überprüfen...";
 
 /* Federation rank. [stats.py] */
@@ -97,7 +100,7 @@
 /* Trade rank. [stats.py] */
 "Dealer" = "Kleinhändler";
 
-/* Appearance theme setting. [prefs.py] */
+/* Appearance theme and language setting. [l10n.py] */
 "Default" = "Standard";
 
 /* Empire rank. [stats.py] */
@@ -204,6 +207,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Ritter";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Sprache";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Zuletzt aktualisiert um {HH}:{MM}:{SS}";

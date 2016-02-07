@@ -13,6 +13,7 @@ import myNotebook as nb
 from config import applongname, config
 from edproxy import edproxy
 from hotkey import hotkeymgr
+from l10n import Translations
 from monitor import monitor
 from theme import theme
 
@@ -218,6 +219,8 @@ class PreferencesDialog(tk.Toplevel):
                          _('Keyboard shortcut') or	# Tab heading in settings on OSX
                          _('Hotkey'))			# Tab heading in settings on Windows
 
+        self.languages = Translations().available_names()
+        self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
         self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
         self.theme = tk.IntVar(value = config.getint('theme') and 1 or 0)
         self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
@@ -227,21 +230,24 @@ class PreferencesDialog(tk.Toplevel):
         ]
         themeframe = nb.Frame(notebook)
         themeframe.columnconfigure(2, weight=1)
-        nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
-        self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
-        self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+        nb.Label(themeframe, text=_('Language')).grid(row=10, padx=PADX, sticky=tk.W)	# Appearance setting prompt
+        self.lang_button = nb.OptionMenu(themeframe, self.lang, self.lang.get(), *self.languages.values())
+        self.lang_button.grid(row=10, column=1, columnspan=2, padx=PADX, sticky=tk.W)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*6, sticky=tk.EW)
         nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Appearance setting
-        nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
+        nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
-        self.theme_label_0.grid(row=10, padx=PADX, sticky=tk.W)
+        self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
         self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='black', command=lambda:self.themecolorbrowse(0))	# Main window
-        self.theme_button_0.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        self.theme_button_0.grid(row=20, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
-        self.theme_label_1.grid(row=11, padx=PADX, sticky=tk.W)
+        self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
         self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='black', command=lambda:self.themecolorbrowse(1))	# Do not translate
-        self.theme_button_1.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*6, sticky=tk.EW)
+        self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
+        self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
 
         notebook.add(themeframe, text=_('Appearance'))	# Tab heading in settings
 
@@ -445,6 +451,10 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
 
+        lang_codes = { v: k for k, v in self.languages.iteritems() }	# Codes by name
+        config.set('language', lang_codes.get(self.lang.get()) or '')
+        Translations().install(config.get('language') or None)
+
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
@@ -454,7 +464,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('anonymous', self.out_anon.get())
 
         self._destroy()
-        if credentials != (config.get('username'), config.get('password')) and self.callback:
+        if self.callback:
             self.callback()
 
     def _destroy(self):
