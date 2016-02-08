@@ -256,8 +256,8 @@ class AppWindow:
         self.file_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
         if platform == 'darwin':
             self.file_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))	# App menu entry on OSX
-            self.menubar.entryconfigure(1, label=_('View'))	# Menu title on OSX
-            self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
+            self.menubar.entryconfigure(1, label=_('Edit'))	# Menu title
+            self.menubar.entryconfigure(2, label=_('View'))	# Menu title on OSX
             self.menubar.entryconfigure(3, label=_('Window'))	# Menu title on OSX
         else:
             self.file_menu.entryconfigure(2, label=_("Settings"))	# Item in the File menu on Windows
