@@ -105,7 +105,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
         nb.Label(credframe, text=_('How do you want to be identified in the saved data')).grid(columnspan=2, padx=PADX, sticky=tk.W)
-        nb.Radiobutton(credframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# EDSM & privacy setting
+        nb.Radiobutton(credframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
         nb.Radiobutton(credframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
 
         notebook.add(credframe, text=_('Identity'))		# Tab heading in settings
@@ -170,7 +170,7 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='http://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Cmdr name'))	# EDSM & privacy setting
+        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Commmander Name'))	# EDSM setting
         self.edsm_cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
         self.edsm_cmdr = nb.Entry(edsmframe)
         self.edsm_cmdr.insert(0, config.get('edsm_cmdrname') or '')

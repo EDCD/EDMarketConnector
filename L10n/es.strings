@@ -1,6 +1,9 @@
 /* Language name */
 "!Language" = "Español";
 
+/* EDSM setting. [prefs.py] */
+"Commmander Name" = "Commmander Name";
+
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Se ha enviado el código de verificación a la{CR}dirección de correo electrónico asociada a tu cuenta de Frontier.";
 
@@ -61,7 +64,7 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdt";
 
-/* EDSM & privacy setting. [prefs.py] */
+/* Privacy setting. [prefs.py] */
 "Cmdr name" = "Nombre Cmdt";
 
 /* Ranking. [stats.py] */

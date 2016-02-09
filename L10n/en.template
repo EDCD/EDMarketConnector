@@ -61,11 +61,14 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
-/* EDSM & privacy setting. [prefs.py] */
+/* Privacy setting. [prefs.py] */
 "Cmdr name" = "Cmdr name";
 
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
+
+/* EDSM setting. [prefs.py] */
+"Commmander Name" = "Commmander Name";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
