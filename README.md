@@ -114,14 +114,14 @@ Some people find that they can log-in and receive a verification code from Front
 If you've purchased Horizons (without Season 1) **on Steam** you may be able to solve this error by:
 
 * Logging on to Steam.
-* Check that you have both an Elite: Dangerous and Horizons DLC key.
+* Check that you have both an Elite: Dangerous and a Horizons DLC key.
 * In the [Partner Keys](https://www.frontierstore.net/eur/frontier_partnerkeys/) section of the Frontier Store add the base Elite: Dangerous key.
 
 If you've purchased Horizons (without Season 1) from **the Frontier store** you may be able to solve this error by:
 
 * Registering with / logging on to Steam.
-* In the [Partner Keys](https://www.frontierstore.net/eur/frontier_partnerkeys/) section of the Frontier Store link your your Frontier account to your Steam account.
-* Note that you can still play Horizons using your exisiting launcher and Frontier login.
+* In the [Partner Keys](https://www.frontierstore.net/eur/frontier_partnerkeys/) section of the Frontier Store link your Frontier account to your Steam account.
+* Note that you can still play Horizons using your existing launcher and Frontier login.
 
 This problem is tracked as [Issue #43](https://github.com/Marginal/EDMarketConnector/issues/43).
 
