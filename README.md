@@ -109,7 +109,7 @@ Troubleshooting
 --------
 
 ### Can't Update - "Invalid Credentials"
-Some people find that they can log-in and receive a verification code from Frontier. But on hitting the Update button they see an "Invalid Credentials" error.
+Some people find that they can log-in and receive a verification code from Frontier. But on hitting “Update” they see an "Invalid Credentials" error.
 
 If you've purchased Horizons (without Season 1) **on Steam** you may be able to solve this error by:
 
@@ -129,6 +129,13 @@ This problem is tracked as [Issue #43](https://github.com/Marginal/EDMarketConne
 The Frontier server that supplies the data to this app fails to supply commodity data for some outposts - particularly industrial and mining outposts. This is a [known bug](https://forums.frontier.co.uk/showthread.php?t=195774) in Frontier's servers.
 
 This problem is tracked as [Issue #6](https://github.com/Marginal/EDMarketConnector/issues/6)
+
+### Rares profits wiped out
+Due to a bug in the server that supplies the data to this app, profit on any Rare cargo in your hold is wiped out when you visit the in-game Commodity Market after having “Updated”.
+
+Ensure that you visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
+
+This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
 ### Doesn't track Systems visited
 When you have the "Automatically make a log entry on entering a system" option selected this app uses Elite: Dangerous' logs to track and display the systems that you visit. Some people find that this doesn't work. The problem is most likely due to using the logs from a different copy of Elite: Dangerous than the copy that you're running.
