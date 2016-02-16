@@ -9,8 +9,7 @@ import os
 from os.path import exists, isfile
 import sys
 
-from eddn import ship_map	# use EDDN ship names
-from companion import category_map, commodity_map
+from companion import category_map, commodity_map, ship_map
 import outfitting
 
 
@@ -69,6 +68,7 @@ def addmodules(data):
 
     outfile = 'outfitting.csv'
     modules = {}
+    schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
 
     # slurp existing
     if isfile(outfile):
@@ -87,10 +87,10 @@ def addmodules(data):
             old = modules.get(int(key))
             if old:
                 # check consistency with existing data
-                for thing in ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']:
+                for thing in schemakeys:
                     if new.get(thing,'') != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
             else:
-                modules[int(key)] = new
+                modules[int(key)] = { k: new[k] for k in schemakeys if k in new }
 
     if len(modules) > size_pre:
 
