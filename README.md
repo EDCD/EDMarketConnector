@@ -238,6 +238,7 @@ Acknowledgements
 * Thanks to Cmdr CoolBreeze for the Dutch translation.
 * Thanks to [Cmdr Anthor](http://ed-td.space/) for the French translation.
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
+* Thanks to Cmdr magni1200s for the Japanese translation.
 * Thanks to Cmdr bubis7 for the Latvian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
 * Thanks to Armando Ota for the Slovenian translation.
