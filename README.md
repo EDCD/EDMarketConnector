@@ -147,11 +147,10 @@ When looking for the log files, this app assumes:
 
 In more detail, this app looks for the folder `elite-dangerous-64` in the following places:
 
-1. In the `Elite Dangerous Horizons\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous Horizons\Products`) and under each Steam library.
-2. In the `Elite Dangerous\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products`) and under each Steam library.
-3. In the `Products` folder under the launcher (in English versions of Windows usually `C:\Program Files (x86)\Frontier\EDLaunch\Products`).
-4. `%PROGRAMFILES(X86)%\Frontier\Products` (in English versions of Windows usually `C:\Program Files (x86)\Frontier\Products`).
-5. `%LOCALAPPDATA%\Frontier_Developments\Products` (usually `C:\Users\you\AppData\Local\Frontier_Developments\Products`).
+1. In the `Elite Dangerous\Products` folder under Steam (in English versions of Windows usually `C:\Program Files (x86)\Steam\steamapps\common\Elite Dangerous\Products`) and under each Steam library.
+2. In the `Products` folder under the launcher (in English versions of Windows usually `C:\Program Files (x86)\Frontier\EDLaunch\Products`).
+3. `%PROGRAMFILES(X86)%\Frontier\Products` (in English versions of Windows usually `C:\Program Files (x86)\Frontier\Products`).
+4. `%LOCALAPPDATA%\Frontier_Developments\Products` (usually `C:\Users\you\AppData\Local\Frontier_Developments\Products`).
 
 EDMC expects the `elite-dangerous-64` folder to contain the file AppConfig.xml and a Logs subfolder. It stops looking once it finds an `elite-dangerous-64` folder that meets these criteria.
 

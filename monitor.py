@@ -298,7 +298,6 @@ class EDLogs(FileSystemEventHandler):
                         except:
                             pass
                         for lib in steamlibs:
-                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous Horizons', 'Products'))
                             candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
                 RegCloseKey(key)
 
