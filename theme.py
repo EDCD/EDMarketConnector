@@ -83,10 +83,10 @@ class _Theme:
             # Dark
             (r, g, b) = root.winfo_rgb(config.get('dark_text'))
             self.current = {
-                'background'         : 'black',
+                'background'         : 'grey4',	# OSX inactive dark titlebar color
                 'foreground'         : config.get('dark_text'),
                 'activebackground'   : config.get('dark_text'),
-                'activeforeground'   : 'black',
+                'activeforeground'   : 'grey4',
                 'disabledforeground' : '#%02x%02x%02x' % (r/384, g/384, b/384),
                 'highlight'          : config.get('dark_highlight'),
                 'font'               : 'TkDefaultFont',

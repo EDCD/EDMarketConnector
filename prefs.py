@@ -239,11 +239,11 @@ class PreferencesDialog(tk.Toplevel):
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
         self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
-        self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='black', command=lambda:self.themecolorbrowse(0))	# Main window
+        self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='grey4', command=lambda:self.themecolorbrowse(0))	# Main window
         self.theme_button_0.grid(row=20, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
-        self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='black', command=lambda:self.themecolorbrowse(1))	# Do not translate
+        self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='grey4', command=lambda:self.themecolorbrowse(1))	# Do not translate
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*6, sticky=tk.EW)
         self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
