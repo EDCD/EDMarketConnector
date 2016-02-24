@@ -207,8 +207,21 @@ class AppWindow:
         # update geometry
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
-            if match and (platform!='darwin' or int(match.group(2))>0):	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-                self.w.geometry(config.get('geometry'))
+            if match:
+                if platform == 'darwin':
+                    if int(match.group(2)) >= 0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+                        self.w.geometry(config.get('geometry'))
+                elif platform == 'win32':
+                    # Check that the titlebar will be at least partly on screen
+                    import ctypes
+                    from ctypes.wintypes import POINT
+                    # https://msdn.microsoft.com/en-us/library/dd145064
+                    MONITOR_DEFAULTTONULL = 0
+                    if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16), MONITOR_DEFAULTTONULL):
+
+                        self.w.geometry(config.get('geometry'))
+                else:
+                    self.w.geometry(config.get('geometry'))
         self.w.attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.w.resizable(tk.TRUE, tk.FALSE)
 
