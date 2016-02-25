@@ -68,29 +68,28 @@ def addmodules(data):
 
     outfile = 'outfitting.csv'
     modules = {}
-    schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
+    fields = ['id', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement']
 
     # slurp existing
     if isfile(outfile):
         with open(outfile) as csvfile:
-            reader = csv.DictReader(csvfile)
+            reader = csv.DictReader(csvfile, restval='')
             for row in reader:
-                key = int(row.pop('id'))	# index by int for easier lookup and sorting
-                modules[key] = row
+                modules[int(row['id'])] = row	# index by int for easier lookup and sorting
     size_pre = len(modules)
 
     for key,module in data['lastStarport'].get('modules').iteritems():
         # sanity check
         if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
-        new = outfitting.lookup(module, ship_map)
+        new = outfitting.lookup(module, ship_map, True)
         if new:
             old = modules.get(int(key))
             if old:
                 # check consistency with existing data
-                for thing in schemakeys:
-                    if new.get(thing,'') != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
+                for thing in fields:
+                    if str(new.get(thing,'')) != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
             else:
-                modules[int(key)] = { k: new[k] for k in schemakeys if k in new }
+                modules[int(key)] = new
 
     if len(modules) > size_pre:
 
@@ -100,12 +99,10 @@ def addmodules(data):
             os.rename(outfile, outfile+'.bak')
 
         with open(outfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating'])
+            writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
             writer.writeheader()
             for key in sorted(modules):
-                row = modules[key]
-                row['id'] = key
-                writer.writerow(row)
+                writer.writerow(modules[key])
 
         print 'Added %d new modules' % (len(modules) - size_pre)
 

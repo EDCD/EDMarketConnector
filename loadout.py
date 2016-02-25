@@ -86,10 +86,11 @@ def export(data, filename=None):
             else:
                 if slot.lower().startswith('slot'):
                     loadout[slot[-1]].append(cr + name)
-                elif __debug__: print 'Loadout: Unknown slot %s' % slot
+                elif __debug__ and not slot.lower().startswith('planetaryapproachsuite'):
+                    print 'EDShipyard: Unknown slot %s' % slot
 
         except AssertionError as e:
-            if __debug__: print 'Loadout: %s' % e
+            if __debug__: print 'EDShipyard: %s' % e
             continue	# Silently skip unrecognized modules
         except:
             if __debug__: raise

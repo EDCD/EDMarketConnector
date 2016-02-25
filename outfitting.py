@@ -187,6 +187,7 @@ standard_map = {
     'fueltank'         : 'Fuel Tank',
     'hyperdrive'       : 'Frame Shift Drive',
     'lifesupport'      : 'Life Support',
+    # 'planetapproachsuite' : handled separately
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
     'sensors'          : 'Sensors',
@@ -200,7 +201,6 @@ internal_map = {
     'fuelscoop'         : 'Fuel Scoop',
     'fueltransfer'      : 'Fuel Transfer Limpet Controller',
     'hullreinforcement' : 'Hull Reinforcement Package',
-    # 'planetapproachsuite' : 'Planetary Approach Suite',	# Don't report
     'prospector'        : 'Prospector Limpet Controller',
     'refinery'          : 'Refinery',
     'repairer'          : 'Auto Field-Maintenance Unit',
@@ -223,7 +223,7 @@ moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 #
 # Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
-def lookup(module, ship_map):
+def lookup(module, ship_map, entitled=False):
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
@@ -249,13 +249,9 @@ def lookup(module, ship_map):
     # elif 'category' in module and module['category'].lower() == 'powerplay':
     #     return None
 
-    # Shouldn't be listing player-specific paid stuff, other than Horizons
-    elif module.get('sku') and module['sku'].lower() != 'elite_horizons_v_planetary_landings':
+    # Shouldn't be listing player-specific paid stuff in outfitting, other than Horizons
+    elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
         # raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
-        return None
-
-    # Skip Horizons Planetary Approach Suite
-    elif name[1] in ['planetapproachsuite']:
         return None
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
@@ -298,8 +294,16 @@ def lookup(module, ship_map):
     elif name[0]!='int':
         raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
+    # Horizons Planetary Approach Suite
+    elif name[1] == 'planetapproachsuite':
+        new['category'] = 'standard'
+        new['name'] = 'Planetary Approach Suite'
+        new['class'] = '1'
+        new['rating'] = 'I'
+        new['entitlement'] = 'horizons'	# only listed in outfitting if the user is *playing* Horizons
+
     # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
-    elif (name[1],name[2]) in misc_internal_map:
+    elif len(name) > 2 and (name[1],name[2]) in misc_internal_map:
         # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
         new['category'] = 'internal'
         new['name'], new['rating'] = misc_internal_map[(name[1],name[2])]
@@ -327,6 +331,14 @@ def lookup(module, ship_map):
     if 'on' in module and 'priority' in module:
         new['enabled'], new['priority'] = module['on'], module['priority']	# priority is zero-based
 
+    # Entitlements
+    if not entitled or not module.get('sku'):
+        pass
+    elif module['sku'].startswith('ELITE_SPECIFIC_V_POWER'):
+        new['entitlement'] = 'powerplay'
+    elif module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
+        assert False, '%s: Unknown sku "%s"' % (module['id'], module['sku'])
+
     # Extra module data
     key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
     if __debug__:
@@ -339,7 +351,8 @@ def lookup(module, ship_map):
     new.update(moduledata.get(key, {}))
 
     # check we've filled out mandatory fields
-    for thing in ['category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
+    new['id'] = module['id']
+    for thing in ['id', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
         if not new.get(thing): raise AssertionError('%s: failed to set %s' % (module['id'], thing))
     if new['category'] == 'hardpoint' and not new.get('mount'):
         raise AssertionError('%s: failed to set %s' % (module['id'], 'mount'))

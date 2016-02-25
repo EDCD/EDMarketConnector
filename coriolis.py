@@ -326,5 +326,8 @@ if __name__ == "__main__":
                     }
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
+
+    modules[('Planetary Approach Suite', None, '1', 'I')] = { 'mass': 0 }	# not in data at time of writing
+
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
