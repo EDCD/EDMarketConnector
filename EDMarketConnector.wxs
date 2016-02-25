@@ -2,7 +2,7 @@
 
 <?define PRODUCTNAME = "EDMarketConnector"?>
 <?define PRODUCTLONGNAME = "Elite Dangerous Market Connector"?>
-<?define PRODUCTVERSION = "!(bind.fileVersion.MainExecutable.exe)" ?>
+<?define PRODUCTVERSION = "!(bind.fileVersion.EDMarketConnector.exe)" ?>
 <?define UPGRADECODE = "9df571ae-d56d-46e6-af79-4e72ad54efe6" ?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -10,7 +10,7 @@
 			 Name="$(var.PRODUCTLONGNAME)"
 			 Version="$(var.PRODUCTVERSION)"
 			 UpgradeCode="$(var.UPGRADECODE)"
-			 Language="!(bind.fileLanguage.MainExecutable.exe)"
+			 Language="!(bind.fileLanguage.EDMarketConnector.exe)"
 			 Manufacturer="Marginal">
 
 		<Package Id="*" Keywords="Installer"
@@ -48,6 +48,22 @@
 			<MergeRef Id="VCRedist90"/>
 		</Feature>
 
+		<!-- Launch app after upgrade -->
+		<Property Id="LAUNCH" Value="no" />
+		<CustomAction Id="DoLaunch"
+					  Directory="INSTALLDIR"
+					  ExeCommand='"[INSTALLDIR]EDMarketConnector.exe"'
+					  Return="asyncNoWait"
+					  Execute="deferred"
+					  Impersonate="yes"
+					  />
+		<InstallExecuteSequence>
+			<!-- http://alekdavis.blogspot.co.uk/2013/05/wix-woes-what-is-your-installer-doing.html -->
+			<Custom Action="DoLaunch" Before="InstallFinalize">
+				NOT Installed AND LAUNCH ~= "yes"
+			</Custom>
+		</InstallExecuteSequence>
+
 		<Directory Id="TARGETDIR" Name="SourceDir">
 
 			<!-- Generate with `heat.exe dir dist.win32 -gg -sfrag -suid -out foo.wxs` -->
@@ -56,7 +72,7 @@
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
 					<Component Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
-						<File Id="MainExecutable.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
+						<File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
 						<Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)" Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
 					</Component>
 					<Component Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
