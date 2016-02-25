@@ -31,8 +31,9 @@ class EDDB:
         return (station_id, bool(flags & EDDB.HAS_MARKET), bool(flags & EDDB.HAS_OUTFITTING), bool(flags & EDDB.HAS_SHIPYARD))
 
 
-# build databases from files systems.json, stations.json and modules.json from http://eddb.io/api
-# and from https://github.com/cmmcleod/coriolis-data
+#
+# build databases from files systems.json and stations.json from http://eddb.io/api
+#
 if __name__ == "__main__":
     import json
 
@@ -64,72 +65,3 @@ if __name__ == "__main__":
          (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0)))
                         for x in stations])
     cPickle.dump(station_ids, open('stations.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
-
-
-    # Map eddb's names to names displayed in the in-game shipyard
-    eddb_ship_map = {
-        'Sidewinder Mk. I' : 'Sidewinder',
-        'Eagle Mk. II'     : 'Eagle',
-        'Cobra Mk. III'    : 'Cobra MkIII',
-        'Cobra MK IV'      : 'Cobra MkIV',
-        'Viper Mk III'     : 'Viper MkIII',
-        'Viper MK IV'      : 'Viper MkIV',
-    }
-
-    # PP modules (see weapon-map in outfitting.py)
-    specials = {
-        'Retributor'       : 'Retributor Beam Laser',
-        'Pack-Hound'       : 'Pack-Hound Missile Rack',
-        'Mining Lance'     : 'Mining Lance Beam Laser',
-        'Enforcer'         : 'Enforcer Cannon',
-        'Advanced'         : 'Advanced Plasma Accelerator',
-        'Distruptor'       : 'Pulse Disruptor Laser',
-        'Cytoscrambler'    : 'Cytoscrambler Burst Laser',
-        'Imperial Hammer'  : 'Imperial Hammer Rail Gun',
-        'Pacifier'         : 'Pacifier Frag-Cannon',
-        'Prismatic'        : 'Prismatic Shield Generator',
-    }
-
-    # Module masses
-    modules = {}
-    for m in json.load(open('modules.json')):
-        # ignore mount and guidance, and convert strings to ascii to save space
-        key = (specials.get(m['name'], str(m['name'] or m['group']['name'])),
-               m['ship'] and eddb_ship_map.get(m['ship'], str(m['ship'])),
-               str(m['class']),
-               str(m['rating']))
-        if key in modules:
-            # Test our assumption that mount and guidance don't affect mass
-            assert modules[key]['mass'] == m.get('mass', 0), '%s !=\n%s' % (key, m)
-        else:
-            modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
-
-    # Add FSD data from Coriolis
-    for m in json.load(open('coriolis-data/components/standard/frame_shift_drive.json')).values():
-        key = ('Frame Shift Drive', None, str(m['class']), str(m['rating']))
-        assert key in modules, key
-        modules[key].update({
-            'optmass'   : m['optmass'],
-            'maxfuel'   : m['maxfuel'],
-            'fuelmul'   : m['fuelmul'],
-            'fuelpower' : m['fuelpower'],
-        })
-    cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
-
-
-    # Map Coriolis's names to names displayed in the in-game shipyard
-    coriolis_ship_map = {
-        'Cobra Mk III' : 'Cobra MkIII',
-        'Cobra Mk IV'  : 'Cobra MkIV',
-        'Viper'        : 'Viper MkIII',
-        'Viper Mk IV'  : 'Viper MkIV',
-    }
-
-    # Ship masses
-    ships = {}
-    for f in os.listdir('coriolis-data/ships'):
-        if not f.endswith('.json'): continue
-        for m in json.load(open(join('coriolis-data/ships', f))).values():
-            ships[coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))] = { 'hullMass' : m['properties']['hullMass'] }
-    cPickle.dump(ships, open('ships.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
-

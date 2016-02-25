@@ -1,4 +1,7 @@
+#!/usr/bin/python
+#
 # Export ship loadout in Coriolis format
+#
 
 from collections import OrderedDict
 import cPickle
@@ -66,9 +69,10 @@ weaponmount_map = {
 
 # Modules that have a name as well as a group
 bulkheads       = outfitting.armour_map.values()
-scanners        = [x[0] for x in outfitting.misc_internal_map.values()]
-countermeasures = [x[0] for x in outfitting.countermeasure_map.values()]
-fixup_map = {
+fixup_map = {}
+fixup_map.update({ x[0] : ('Scanner', x[0]) for x in outfitting.misc_internal_map.values() })
+fixup_map.update({ x[0] : ('Countermeasure', x[0]) for x in outfitting.countermeasure_map.values() })
+fixup_map.update({
     'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
     'Cytoscrambler Burst Laser'     : ('Burst Laser', 'Cytoscrambler'),
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
@@ -77,10 +81,11 @@ fixup_map = {
     'Multi-Cannon'                  : ('Multi-cannon', None),
     'Pacifier Frag-Cannon'          : ('Fragment Cannon', 'Pacifier'),
     'Pack-Hound Missile Rack'       : ('Missile Rack', 'Pack-Hound'),
-    'Pulse Disruptor Laser'         : ('Pulse Laser', 'Distruptor'),	# Note sp
-    'Shock Mine Launcher'           : ('Mine Launcher', 'Shock Mine Launcher'),		# XXX
+    'Pulse Disruptor Laser'         : ('Pulse Laser', 'Disruptor'),
+    'Retributor Beam Laser'         : ('Beam Laser', 'Retributor'),
+    'Shock Mine Launcher'           : ('Mine Launcher', 'Shock Mine Launcher'),
     'Standard Docking Computer'     : ('Docking Computer', 'Standard Docking Computer'),
-}
+})
 
 
 # Ship masses
@@ -153,12 +158,6 @@ def export(data, filename=None):
                 if module['name'] in fixup_map:
                     thing['group'], name = fixup_map[module['name']]
                     if name: thing['name'] = name
-                elif module['name'] in scanners:
-                    thing['group'] = 'Scanner'
-                    thing['name'] = module['name']
-                elif module['name'] in countermeasures:
-                    thing['group'] = 'Countermeasure'
-                    thing['name'] = module['name']
                 else:
                     thing['group'] = module['name']
 
@@ -226,3 +225,106 @@ def export(data, filename=None):
     filename = join(config.get('outdir'), '%s.%s.json' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
         h.write(string)
+
+
+#
+# build ship and module databases from https://github.com/cmmcleod/coriolis-data
+#
+if __name__ == "__main__":
+    import json
+    data = json.load(open('coriolis-data/dist/index.json'))
+
+    # Map Coriolis's names to names displayed in the in-game shipyard
+    coriolis_ship_map = {
+        'Cobra Mk III' : 'Cobra MkIII',
+        'Cobra Mk IV'  : 'Cobra MkIV',
+        'Viper'        : 'Viper MkIII',
+        'Viper Mk IV'  : 'Viper MkIV',
+    }
+
+    # From https://github.com/cmmcleod/coriolis/blob/master/src/app/shipyard/Constants.js
+    ModuleGroupToName = {
+        # Standard
+        'pp'  : 'Power Plant',
+        't'   : 'Thrusters',
+        'fsd' : 'Frame Shift Drive',
+        'ls'  : 'Life Support',
+        'pd'  : 'Power Distributor',
+        's'   : 'Sensors',
+        'ft'  : 'Fuel Tank',
+        'pas' : 'Planetary Approach Suite',
+
+        # Internal
+        'fs'  : 'Fuel Scoop',
+        'sc'  : 'Scanner',
+        'am'  : 'Auto Field-Maintenance Unit',
+        'bsg' : 'Bi-Weave Shield Generator',
+        'cr'  : 'Cargo Rack',
+        'fi'  : 'Frame Shift Drive Interdictor',
+        'hb'  : 'Hatch Breaker Limpet Controller',
+        'hr'  : 'Hull Reinforcement Package',
+        'rf'  : 'Refinery',
+        'scb' : 'Shield Cell Bank',
+        'sg'  : 'Shield Generator',
+        'pv'  : 'Planetary Vehicle Hangar',
+        'psg' : 'Prismatic Shield Generator',
+        'dc'  : 'Docking Computer',
+        'fx'  : 'Fuel Transfer Limpet Controller',
+        'pc'  : 'Prospector Limpet Controller',
+        'cc'  : 'Collector Limpet Controller',
+
+        # Hard Points
+        'bl'  : 'Beam Laser',
+        'ul'  : 'Burst Laser',
+        'c'   : 'Cannon',
+        'cs'  : 'Cargo Scanner',
+        'cm'  : 'Countermeasure',
+        'fc'  : 'Fragment Cannon',
+        'ws'  : 'Frame Shift Wake Scanner',
+        'kw'  : 'Kill Warrant Scanner',
+        'nl'  : 'Mine Launcher',
+        'ml'  : 'Mining Laser',
+        'mr'  : 'Missile Rack',
+        'pa'  : 'Plasma Accelerator',
+        'mc'  : 'Multi-cannon',
+        'pl'  : 'Pulse Laser',
+        'rg'  : 'Rail Gun',
+        'sb'  : 'Shield Booster',
+        'tp'  : 'Torpedo Pylon'
+    };
+
+    specials = { v:k for k,v in fixup_map.items() }
+
+    ships = {}
+    modules = {}
+
+    # Ship and armour masses
+    for m in data['Ships'].values():
+        name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
+        ships[name] = { 'hullMass' : m['properties']['hullMass'] }
+        for i in range(len(bulkheads)):
+            modules[(bulkheads[i], name, '1', 'I')] = { 'mass': m['bulkheads'][i]['mass'] }
+    cPickle.dump(ships, open('ships.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
+
+    # Module masses
+    for cat in data['Modules'].values():
+        for grp, mlist in cat.iteritems():
+            for m in mlist:
+                key = ('name' in m and specials[(ModuleGroupToName[grp], m['name'])] or specials.get((ModuleGroupToName[grp], None), ModuleGroupToName[grp]),
+                       None,
+                       str(m['class']),
+                       str(m['rating']))
+                if key in modules:
+                    # Test our assumption that mount and guidance don't affect mass
+                    assert modules[key]['mass'] == m.get('mass', 0), '%s !=\n%s' % (key, m)
+                elif grp == 'fsd':
+                    modules[key] = { 'mass'      : m['mass'],
+                                     'optmass'   : m['optmass'],
+                                     'maxfuel'   : m['maxfuel'],
+                                     'fuelmul'   : m['fuelmul'],
+                                     'fuelpower' : m['fuelpower'],
+                    }
+                else:
+                    modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
+    cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
+

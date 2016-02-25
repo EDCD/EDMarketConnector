@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import cPickle
 from os.path import join
 import time
@@ -8,13 +9,13 @@ from config import config
 
 # Map API module names to in-game names
 
-armour_map = {
-    'grade1'   : 'Lightweight Alloy',
-    'grade2'   : 'Reinforced Alloy',
-    'grade3'   : 'Military Grade Composite',
-    'mirrored' : 'Mirrored Surface Composite',
-    'reactive' : 'Reactive Surface Composite',
-}
+armour_map = OrderedDict([
+    ('grade1',   'Lightweight Alloy'),
+    ('grade2',   'Reinforced Alloy'),
+    ('grade3',   'Military Grade Composite'),
+    ('mirrored', 'Mirrored Surface Composite'),
+    ('reactive', 'Reactive Surface Composite'),
+])
 
 weapon_map = {
     'advancedtorppylon'              : 'Torpedo Pylon',
@@ -288,7 +289,7 @@ def lookup(module, ship_map):
         new['category'] = 'utility'
         new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
         if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = name[2][4:]
+        new['class'] = str(name[2][4:])
         new['rating'] = rating_map[name[3][5:]]
 
     elif name[0]=='hpt':
@@ -319,7 +320,7 @@ def lookup(module, ship_map):
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
         if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = name[2][4:]
+        new['class'] = str(name[2][4:])
         new['rating'] = (name[1]=='buggybay' and planet_rating_map or rating_map)[name[3][5:]]
 
     # Disposition of fitted modules
