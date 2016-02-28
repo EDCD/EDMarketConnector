@@ -22,6 +22,7 @@
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
+		<!-- http://www.joyofsetup.com/2010/01/16/major-upgrades-now-easier-than-ever/ -->
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
 		<Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
@@ -30,14 +31,37 @@
 
 		<!-- For Add/Remove programs -->
 		<Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
-		<!-- <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />	 Remove repair -->
 		<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />	<!-- Remove modify - also set by WixUI_Minimal -->
 		<Property Id="ARPHELPLINK" Value="https://github.com/Marginal/EDMarketConnector/wiki" />
 
+		<!-- Set INSTALLDIR from ARPINSTALLLOCATION if replacing/upgrading -->
+		<!-- https://wyrdfish.wordpress.com/2012/07/20/msi-writing-guidelines-this-may-be-out-of-date/ -->
+		<Property Id="ARPINSTALLLOCATION">
+			<RegistrySearch Id="GetARPINSTALLLOCATION"
+							Root="HKLM"
+							Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[WIX_UPGRADE_DETECTED]"
+							Name="InstallLocation"
+							Type="raw" />
+		</Property>
+		<CustomAction Id="SetINSTALLDIR" Property="INSTALLDIR" Value="[ARPINSTALLLOCATION]" />
+		<InstallUISequence>
+			<Custom Action="SetINSTALLDIR" After="AppSearch">
+				ARPINSTALLLOCATION
+			</Custom>
+		</InstallUISequence>
+		<InstallExecuteSequence>
+			<Custom Action="SetINSTALLDIR" After="AppSearch">
+				ARPINSTALLLOCATION
+			</Custom>
+		</InstallExecuteSequence>
+
+		<!-- Set ARPINSTALLLOCATION from INSTALLDIR if new install -->
 		<!-- http://blogs.technet.com/b/alexshev/archive/2008/02/09/from-msi-to-wix-part-2.aspx -->
 		<CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
 		<InstallExecuteSequence>
-			<Custom Action="SetARPINSTALLLOCATION" After="InstallValidate"></Custom>
+			<Custom Action="SetARPINSTALLLOCATION" After="InstallValidate">
+				NOT Installed
+			</Custom>
 		</InstallExecuteSequence>
 
 		<!-- Merge in C runtime -->
