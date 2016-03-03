@@ -47,7 +47,7 @@ class EDSM:
             r.raise_for_status()
             data = r.json()
 
-            if data == -1:
+            if data == -1 or (isinstance(data, list) and len(data) == 0):
                 # System not present - but don't create it on the assumption that the caller will
                 self.result['img'] = EDSM._IMG_NEW
                 self.result['uncharted'] = True
@@ -82,7 +82,7 @@ class EDSM:
             r.raise_for_status()
             data = r.json()
 
-            if data == -1:
+            if data == -1 or (isinstance(data, list) and len(data) == 0):
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['uncharted'] = True
