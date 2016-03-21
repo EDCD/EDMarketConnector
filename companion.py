@@ -231,7 +231,7 @@ class Session:
             self.dump(r)
         if r.status_code == requests.codes.forbidden or r.url == URL_LOGIN:
             # Start again - maybe our session cookie expired?
-            self.login()
+            self.state = Session.STATE_INIT
             return self.query()
 
         r.raise_for_status()
