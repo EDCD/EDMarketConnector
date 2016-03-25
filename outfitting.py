@@ -250,8 +250,7 @@ def lookup(module, ship_map, entitled=False):
     #     return None
 
     # Shouldn't be listing player-specific paid stuff in outfitting, other than Horizons
-    elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
-        # raise AssertionError('%s: Unexpected sku "%s"' % (module['id'], module['sku']))
+    elif not entitled and module.get('sku') and (module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' or name[1] == 'planetapproachsuite'):
         return None
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
@@ -332,12 +331,12 @@ def lookup(module, ship_map, entitled=False):
         new['enabled'], new['priority'] = module['on'], module['priority']	# priority is zero-based
 
     # Entitlements
-    if not entitled or not module.get('sku'):
+    if not module.get('sku'):
         pass
     elif module['sku'].startswith('ELITE_SPECIFIC_V_POWER'):
         new['entitlement'] = 'powerplay'
-    elif module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
-        assert False, '%s: Unknown sku "%s"' % (module['id'], module['sku'])
+    else:
+        assert module['sku'] == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS', '%s: Unknown sku "%s"' % (module['id'], module['sku'])
 
     # Extra module data
     key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
