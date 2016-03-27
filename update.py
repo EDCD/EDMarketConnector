@@ -28,7 +28,7 @@ if not getattr(sys, 'frozen', False):
             import requests
             from xml.etree import ElementTree
 
-            r = requests.get(update_feed, timeout = 20)
+            r = requests.get(update_feed, timeout = 20, verify = (sys.version_info >= (2,7,9)))
             feed = ElementTree.fromstring(r.text)
             items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
                            item.find('title').text) for item in feed.findall('channel/item')])
