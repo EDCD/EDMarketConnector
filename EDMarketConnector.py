@@ -168,7 +168,7 @@ class AppWindow:
                 system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 system_menu.add_separator()
                 system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
-                self.menubar.add_cascade(menu=system_menu)	# Gets index 0
+                self.menubar.add_cascade(menu=system_menu)
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
             theme.register(self.menubar)	# menus and children aren't automatically registered
@@ -218,7 +218,6 @@ class AppWindow:
                     # https://msdn.microsoft.com/en-us/library/dd145064
                     MONITOR_DEFAULTTONULL = 0
                     if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16), MONITOR_DEFAULTTONULL):
-
                         self.w.geometry(config.get('geometry'))
                 else:
                     self.w.geometry(config.get('geometry'))
@@ -275,8 +274,8 @@ class AppWindow:
         else:
             self.file_menu.entryconfigure(2, label=_("Settings"))	# Item in the File menu on Windows
             self.file_menu.entryconfigure(4, label=_("Exit"))	# Item in the File menu on Windows
-            self.menubar.entryconfigure(self.menubar.index('end')-2, label=_('File'))	# Menu title on Windows
-            self.menubar.entryconfigure(self.menubar.index('end')-1, label=_('Edit'))	# Menu title
+            self.menubar.entryconfigure(1, label=_('File'))	# Menu title on Windows
+            self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
             self.theme_file_menu['text'] = _('File')	# Menu title on Windows
             self.theme_edit_menu['text'] = _('Edit')	# Menu title
 
