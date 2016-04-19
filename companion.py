@@ -170,17 +170,14 @@ class Session:
 
     def login(self, username=None, password=None):
         if (not username or not password):
-            if not self.credentials:
-                raise CredentialsError()
-            elif self.state == Session.STATE_OK:
-                return	# already logged in
-        else:
-            credentials = { 'email' : username, 'password' : password }
-            if self.credentials == credentials and self.state == Session.STATE_OK:
-                return	# already logged in
-            else:
-                self.credentials = credentials
-                self.state = Session.STATE_INIT
+            raise CredentialsError()
+        credentials = { 'email' : username, 'password' : password }
+        if self.credentials == credentials and self.state == Session.STATE_OK:
+            return	# already logged in
+        if self.credentials and self.credentials['email'] != credentials['email']:	# changed account
+            self.session.cookies.clear()
+        self.credentials = credentials
+        self.state = Session.STATE_INIT
         try:
             r = self.session.post(URL_LOGIN, data = self.credentials, timeout=timeout)
         except:

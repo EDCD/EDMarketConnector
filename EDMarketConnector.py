@@ -284,6 +284,7 @@ class AppWindow:
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
+            self.view_menu.entryconfigure(0, state=tk.DISABLED)	# Status
             self.session.login(config.get('username'), config.get('password'))
             self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
             self.status['text'] = ''
