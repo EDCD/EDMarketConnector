@@ -9,6 +9,7 @@ import sys
 import threading
 from time import time, strptime, mktime
 from datetime import datetime
+from calendar import timegm
 
 if __debug__:
     from traceback import print_exc
@@ -113,7 +114,7 @@ class _EDProxy:
             s.settimeout(0)
             s.sendall(json.dumps({
                 'Type'      : 'Init',
-                'DateUtc'   : datetime.now().isoformat(),
+                'DateUtc'   : datetime.utcnow().isoformat(),
                 'StartTime' : 'now',
                 'Register'  : [ 'System' ],
             }))
@@ -132,7 +133,7 @@ class _EDProxy:
                 msg = json.loads(s.recv(self.MESSAGE_MAX))
                 if msg['Type'] == self.MESSAGE_SYSTEM:
                     if 'DateUtc' in msg:
-                        timestamp = mktime(datetime.strptime(msg['DateUtc'], '%Y-%m-%d %H:%M:%S').utctimetuple())
+                        timestamp = timegm(datetime.strptime(msg['DateUtc'], '%Y-%m-%d %H:%M:%S').utctimetuple())
                     else:
                         timestamp = mktime(strptime(msg['Date'], '%Y-%m-%d %H:%M:%S'))	# from local time
                     self.last_event = (timestamp, msg['System'])
