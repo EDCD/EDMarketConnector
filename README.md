@@ -128,7 +128,12 @@ This problem is tracked as [Issue #43](https://github.com/Marginal/EDMarketConne
 ### Can't see commodities market at some Outposts - "Can't get market data!"
 The Frontier server that supplies the data to this app fails to supply commodity data for some outposts - particularly industrial and mining outposts. This is a [known bug](https://forums.frontier.co.uk/showthread.php?t=195774) in Frontier's servers.
 
-This problem is tracked as [Issue #6](https://github.com/Marginal/EDMarketConnector/issues/6)
+This problem is tracked as [Issue #6](https://github.com/Marginal/EDMarketConnector/issues/6).
+
+### Shipyard data not reported
+The Frontier server that supplies the data to this app sometimes fails to supply shipyard data. Visit the shipyard in-game and try “Updating” again.
+
+This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConnector/issues/86).
 
 ### Rares profits wiped out
 Due to a bug in the server that supplies the data to this app, profit on any Rare cargo in your hold is wiped out when you visit the in-game Commodity Market after having “Updated”.
