@@ -387,7 +387,7 @@ class AppWindow:
                     try:
                         self.status['text'] = _('Sending data to EDSM...')
                         self.w.update_idletasks()
-                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
+                        edsm.export(data, None, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
                         self.status['text'] = ''
                     except Exception as e:
                         if __debug__: print_exc()
@@ -510,7 +510,7 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, timestamp, system):
+    def system_change(self, timestamp, system, coordinates):
 
         if self.system['text'] != system:
             self.system['text'] = system
@@ -526,7 +526,7 @@ class AppWindow:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
-                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                    edsm.writelog(timestamp, system, coordinates, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
                 except Exception as e:
                     if __debug__: print_exc()

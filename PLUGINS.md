@@ -73,11 +73,11 @@ Your events all get called on the main tkinter loop so be sure not to block for 
 This gets called when EDMC uses the netlog to notice that you have arrived at a new star system.
 
 ```
-def system_changed(timestamp, system):
+def system_changed(timestamp, system, coordinates):
    """
    We arrived at a new system!
    """
-   sys.stderr.write("{} {}".format(timestamp, system))
+   sys.stderr.write("{} {}".format(timestamp, system, coordinates))
 ```
 
 ### Getting Commander Data

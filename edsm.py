@@ -13,9 +13,9 @@ if __debug__:
     from traceback import print_exc
 
 class EDSM:
-
-    _TIMEOUT = 10
-    FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
+    endPoint    = 'https://www.edsm.net'
+    _TIMEOUT    = 10
+    FAKE        = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
@@ -30,70 +30,127 @@ class EDSM:
     def link(self, system_name):
         self.cancel_lookup()
         if system_name in self.FAKE:
-            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+            self.result = { 
+                'img'       : '', 
+                'url'       : None, 
+                'done'      : True, 
+                'uncharted' : False 
+            }
         else:
-            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = {
+                'img'       : '', 
+                'url'       : '%s/show-system?systemName=%s' % (self.endPoint, urllib.quote(system_name)), 
+                'done'      : True, 
+                'uncharted' : False 
+            }
 
     def lookup(self, system_name, known=0):
         self.cancel_lookup()
 
         if system_name in self.FAKE:
-            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+            self.result = { 
+                'img'       : '', 
+                'url'       : None, 
+                'done'      : True, 
+                'uncharted' : False 
+            }
         elif known or system_name in self.syscache:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = { 
+                'img'       : EDSM._IMG_KNOWN, 
+                'url'       : '%s/show-system?systemName=%s' % (self.endPoint, urllib.quote(system_name)), 
+                'done'      : True, 
+                'uncharted' : False 
+            }
         else:
-            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            self.result = { 
+                'img'       : EDSM._IMG_ERROR, 
+                'url'       : '%s/show-system?systemName=%s' % (self.endPoint, urllib.quote(system_name)), 
+                'done'      : True, 
+                'uncharted' : False 
+            }
+            r = requests.get('%s/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (self.endPoint, urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
             if data == -1 or not data:
                 # System not present - but don't create it on the assumption that the caller will
-                self.result['img'] = EDSM._IMG_NEW
-                self.result['uncharted'] = True
+                self.result['img']          = EDSM._IMG_NEW
+                self.result['uncharted']    = True
             elif data.get('coords'):
-                self.result['img'] = EDSM._IMG_KNOWN
+                self.result['img']          = EDSM._IMG_KNOWN
                 self.syscache.add(system_name)
             else:
-                self.result['img'] = EDSM._IMG_UNKNOWN
-                self.result['uncharted'] = True
+                self.result['img']          = EDSM._IMG_UNKNOWN
+                self.result['uncharted']    = True
 
     # Asynchronous version of the above
     def start_lookup(self, system_name, known=0):
         self.cancel_lookup()
 
         if system_name in self.FAKE:
-            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
+            self.result = { 
+                'img'       : '', 
+                'url'       : None, 
+                'done'      : True, 
+                'uncharted' : False 
+            }
         elif known or system_name in self.syscache:	# Cache URLs of systems with known coordinates
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = { 
+                'img'       : EDSM._IMG_KNOWN, 
+                'url'       : '%s/show-system?systemName=%s' % (self.endPoint, urllib.quote(system_name)), 
+                'done'      : True, 
+                'uncharted' : False 
+            }
         else:
-            self.result = { 'img': '', 'url': 'http://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False, 'uncharted': False }
+            self.result = { 
+                'img'       : '', 
+                'url'       : '%s/show-system?systemName=%s' % (self.endPoint, urllib.quote(system_name)), 
+                'done'      : False, 
+                'uncharted' : False 
+            }
             self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
 
     def cancel_lookup(self):
         self.thread = None	# orphan any existing thread
-        self.result = { 'img': '', 'url': None, 'done': True }	# orphan existing thread's results
+        self.result = { 
+            'img'   : '', 
+            'url'   : None, 
+            'done'  : True
+        }	# orphan existing thread's results
 
     def worker(self, system_name, result):
         try:
-            r = requests.get('http://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            url = '%s/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                self.endPoint, urllib.quote(system_name), 
+                urllib.quote(applongname), 
+                urllib.quote(appversion)
+            )
+            
+            r   = requests.get(url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
             if data == -1 or not data:
                 # System not present - create it
-                result['img'] = EDSM._IMG_NEW
+                result['img']       = EDSM._IMG_NEW
                 result['uncharted'] = True
-                result['done'] = True	# give feedback immediately
-                requests.get('http://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
+                result['done']      = True	# give feedback immediately
+                
+                url = '%s/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                    self.endPoint, 
+                    urllib.quote(system_name), 
+                    urllib.quote(applongname), 
+                    urllib.quote(appversion)
+                )
+                requests.get(url, timeout=EDSM._TIMEOUT)	# creates system
             elif data.get('coords'):
-                result['img'] = EDSM._IMG_KNOWN
-                result['done'] = True
+                result['img']       = EDSM._IMG_KNOWN
+                result['done']      = True
                 self.syscache.add(system_name)
             else:
-                result['img'] = EDSM._IMG_UNKNOWN
+                result['img']       = EDSM._IMG_UNKNOWN
                 result['uncharted'] = True
         except:
             if __debug__: print_exc()
@@ -102,14 +159,12 @@ class EDSM:
 
 
 # Flight log - http://www.edsm.net/api-logs
-def export(data, edsmlookupfn):
-
+def export(data, coordinates, edsmlookupfn):
     querytime = config.getint('querytime') or int(time.time())
+    writelog(querytime, data['lastSystem']['name'], coordinates, edsmlookupfn)
 
-    writelog(querytime, data['lastSystem']['name'], edsmlookupfn)
 
-
-def writelog(timestamp, system, edsmlookupfn):
+def writelog(timestamp, system, coordinates, edsmlookupfn):
 
     try:
         # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
@@ -117,8 +172,33 @@ def writelog(timestamp, system, edsmlookupfn):
 
         if system in EDSM.FAKE:
             return
-
-        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            
+        if coordinates:
+            (x,y,z) = coordinates
+            url = '%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&x=%s&y=%s&z=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                self.endPoint,
+                urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), 
+                urllib.quote(config.get('edsm_apikey')), 
+                urllib.quote(system), 
+                urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), 
+                urllib.quote(x), 
+                urllib.quote(y), 
+                urllib.quote(z),
+                urllib.quote(applongname),
+                urllib.quote(appversion)
+            )
+        else:
+            url = '%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                self.endPoint,
+                urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), 
+                urllib.quote(config.get('edsm_apikey')), 
+                urllib.quote(system), 
+                urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
+                urllib.quote(applongname),
+                urllib.quote(appversion)
+            )
+        
+        r = requests.get(url, timeout=EDSM._TIMEOUT)
         r.raise_for_status()
         reply = r.json()
         (msgnum, msg) = reply['msgnum'], reply['msg']
@@ -140,7 +220,7 @@ def writelog(timestamp, system, edsmlookupfn):
 def export_historical():
     try:
         for (timestamp, system_name) in flightlog.logs():
-            r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            r = requests.get('%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (self.endPoint, urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
 
             if r.json()['msgnum'] // 100 == 2:
