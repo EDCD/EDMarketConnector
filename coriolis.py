@@ -247,6 +247,7 @@ if __name__ == "__main__":
         # Standard
         'pp'  : 'Power Plant',
         't'   : 'Thrusters',
+        'ept' : 'Enhanced Performance Thrusters', # Not available in coriolis yet, but assume that it will be that code
         'fsd' : 'Frame Shift Drive',
         'ls'  : 'Life Support',
         'pd'  : 'Power Distributor',
@@ -328,6 +329,8 @@ if __name__ == "__main__":
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
     modules[('Planetary Approach Suite', None, '1', 'I')] = { 'mass': 0 }	# not in data at time of writing
+    modules[('Enhanced Performance Thrusters', None, '2', 'A')] = { 'mass': 2.5 }	# not in data at time of writing
+    modules[('Enhanced Performance Thrusters', None, '3', 'A')] = { 'mass': 5 }	# not in data at time of writing
 
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
