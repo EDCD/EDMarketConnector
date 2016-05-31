@@ -191,6 +191,8 @@ standard_map = {
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
     'sensors'          : 'Sensors',
+    
+    ('engine','fast')           : 'Enhanced Performance Thrusters',
 }
 
 internal_map = {
@@ -207,6 +209,7 @@ internal_map = {
     'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
     'shieldcellbank'    : 'Shield Cell Bank',
     'shieldgenerator'   : 'Shield Generator',
+    
     ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
 }
@@ -215,10 +218,9 @@ internal_map = {
 # Module mass, FSD data etc
 moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 
-
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
-# English langauge game. For fitted modules, dict also includes { enabled, priority }.
+# English language game. For fitted modules, dict also includes { enabled, priority }.
 # ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
 #
 # Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
@@ -312,7 +314,6 @@ def lookup(module, ship_map, entitled=False):
     else:
         if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
-
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
             new['category'] = 'standard'
             new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
