@@ -77,9 +77,7 @@ def export_outfitting(data):
     modules = []
     for v in data['lastStarport'].get('modules', {}).itervalues():
         try:
-            if v['name'] == 'Int_Engine_Size2_Class5_Fast': print 'V: %s' % v
             module = outfitting.lookup(v, ship_map)
-            if v['name'] == 'Int_Engine_Size2_Class5_Fast': print 'Module: %s' % module
             if module:
                 modules.append({ k: module[k] for k in schemakeys if k in module })	# just the relevant keys
         except AssertionError as e:
