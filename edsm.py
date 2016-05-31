@@ -68,7 +68,12 @@ class EDSM:
                 'done'      : True, 
                 'uncharted' : False 
             }
-            r = requests.get('%s/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (self.endPoint, urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            r = requests.get('%s/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                self.endPoint, 
+                urllib.quote(system_name), 
+                urllib.quote(applongname), 
+                urllib.quote(appversion)
+            ), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             data = r.json()
 
@@ -176,7 +181,7 @@ def writelog(timestamp, system, coordinates, edsmlookupfn):
         if coordinates:
             (x,y,z) = coordinates
             url = '%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&x=%s&y=%s&z=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-                self.endPoint,
+                EDSM.endPoint,
                 urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), 
                 urllib.quote(config.get('edsm_apikey')), 
                 urllib.quote(system), 
@@ -189,7 +194,7 @@ def writelog(timestamp, system, coordinates, edsmlookupfn):
             )
         else:
             url = '%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-                self.endPoint,
+                EDSM.endPoint,
                 urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), 
                 urllib.quote(config.get('edsm_apikey')), 
                 urllib.quote(system), 
@@ -220,7 +225,15 @@ def writelog(timestamp, system, coordinates, edsmlookupfn):
 def export_historical():
     try:
         for (timestamp, system_name) in flightlog.logs():
-            r = requests.get('%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (self.endPoint, urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+            r = requests.get('%s/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                EDSM.endPoint, 
+                urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), 
+                urllib.quote(config.get('edsm_apikey')), 
+                urllib.quote(system_name), 
+                urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), 
+                urllib.quote(applongname), 
+                urllib.quote(appversion)
+            ), timeout=EDSM._TIMEOUT)
             r.raise_for_status()
 
             if r.json()['msgnum'] // 100 == 2:
