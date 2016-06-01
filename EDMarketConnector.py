@@ -518,7 +518,7 @@ class AppWindow:
             self.system['image'] = ''
             self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
 
-            plug.notify_system_changed(timestamp, system, coordinates)
+            plug.notify_system_changed(timestamp, system)
 
             if config.getint('output') & config.OUT_LOG_FILE:
                 flightlog.writelog(timestamp, system)
