@@ -191,6 +191,8 @@ standard_map = {
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
     'sensors'          : 'Sensors',
+    
+    ('engine','fast')           : 'Enhanced Performance Thrusters', # Int_Engine_Size2_Class5_Fast
 }
 
 internal_map = {
@@ -207,6 +209,7 @@ internal_map = {
     'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
     'shieldcellbank'    : 'Shield Cell Bank',
     'shieldgenerator'   : 'Shield Generator',
+    
     ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
 }
@@ -215,10 +218,9 @@ internal_map = {
 # Module mass, FSD data etc
 moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 
-
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
-# English langauge game. For fitted modules, dict also includes { enabled, priority }.
+# English language game. For fitted modules, dict also includes { enabled, priority }.
 # ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
 #
 # Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
@@ -226,19 +228,20 @@ moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 def lookup(module, ship_map, entitled=False):
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
-    if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
+    if not module.get('name'):
+        raise AssertionError('%s: Missing name' % module['id'])
 
-    name = module['name'].lower().split('_')
-    new = {}
+    name    = module['name'].lower().split('_')
+    new     = {}
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
-        name = module['name'].lower().rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
-        new['category'] = 'standard'
-        new['name'] = armour_map[name[2]]
-        new['ship'] = ship_map[name[0]]		# Generate error on unknown ship
-        new['class'] = '1'
-        new['rating'] = 'I'
+        name                        = module['name'].lower().rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
+        new['category']             = 'standard'
+        new['name']                 = armour_map[name[2]]
+        new['ship']                 = ship_map[name[0]]		# Generate error on unknown ship
+        new['class']                = '1'
+        new['rating']               = 'I'
 
     # Skip uninteresting stuff
     elif name[0] in ['bobble', 'decal', 'paintjob']:
@@ -255,37 +258,46 @@ def lookup(module, ship_map, entitled=False):
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
     elif name[0]=='hpt' and name[1] in weapon_map:
-        if name[2] not in weaponmount_map: raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
-        if name[3] not in weaponclass_map: raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
-        new['category'] = 'hardpoint'
+        if name[2] not in weaponmount_map:
+            raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
+        if name[3] not in weaponclass_map:
+            raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
+        
+        new['category']             = 'hardpoint'
         if len(name)>4:
             if name[4] in weaponoldvariant_map:		# Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
-                new['name'] =  weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
-                new['rating'] = '?'
+                new['name']         =  weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
+                new['rating']       = '?'
             else:			# PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
-                new['name'] =  weapon_map[(name[1],name[4])]
-                new['rating'] = weaponrating_map.get(('_').join(name[:4]), '?')	# assumes same rating as base weapon
+                new['name']         =  weapon_map[(name[1],name[4])]
+                new['rating']       = weaponrating_map.get(('_').join(name[:4]), '?')	# assumes same rating as base weapon
         else:
-            new['name'] =  weapon_map[name[1]]
-            new['rating'] = weaponrating_map.get(module['name'].lower(), '?')		# no obvious rule - needs lookup table
-        new['mount'] = weaponmount_map[name[2]]
+            new['name']             =  weapon_map[name[1]]
+            new['rating']           = weaponrating_map.get(module['name'].lower(), '?')		# no obvious rule - needs lookup table
+        
+        new['mount']                = weaponmount_map[name[2]]
+        
         if name[1] in missiletype_map:	# e.g. Hpt_DumbfireMissileRack_Fixed_Small
-            new['guidance'] = missiletype_map[name[1]]
-        new['class'] = weaponclass_map[name[3]]
+            new['guidance']         = missiletype_map[name[1]]
+        
+        new['class']                = weaponclass_map[name[3]]
 
     # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
     elif name[0]=='hpt' and name[1] in countermeasure_map:
-        new['category'] = 'utility'
-        new['name'], new['rating'] = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        new['class'] = weaponclass_map[name[-1]]
+        new['category']             = 'utility'
+        new['name'], new['rating']  = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
+        new['class']                = weaponclass_map[name[-1]]
 
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
     elif name[0]=='hpt' and name[1] in utility_map:
-        new['category'] = 'utility'
-        new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = str(name[2][4:])
-        new['rating'] = rating_map[name[3][5:]]
+        new['category']             = 'utility'
+        new['name']                 = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
+        
+        if not name[2].startswith('size') or not name[3].startswith('class'):
+            raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        
+        new['class']                = str(name[2][4:])
+        new['rating']               = rating_map[name[3][5:]]
 
     elif name[0]=='hpt':
         raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
@@ -295,36 +307,37 @@ def lookup(module, ship_map, entitled=False):
 
     # Horizons Planetary Approach Suite
     elif name[1] == 'planetapproachsuite':
-        new['category'] = 'standard'
-        new['name'] = 'Planetary Approach Suite'
-        new['class'] = '1'
-        new['rating'] = 'I'
-        new['entitlement'] = 'horizons'	# only listed in outfitting if the user is *playing* Horizons
+        new['category']             = 'standard'
+        new['name']                 = 'Planetary Approach Suite'
+        new['class']                = '1'
+        new['rating']               = 'I'
+        new['entitlement']          = 'horizons'	# only listed in outfitting if the user is *playing* Horizons
 
     # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
     elif len(name) > 2 and (name[1],name[2]) in misc_internal_map:
         # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
-        new['category'] = 'internal'
-        new['name'], new['rating'] = misc_internal_map[(name[1],name[2])]
-        new['class'] = '1'
+        new['category']             = 'internal'
+        new['name'], new['rating']  = misc_internal_map[(name[1],name[2])]
+        new['class']                = '1'
 
     # Standard & Internal
     else:
         if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
-
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
-            new['category'] = 'standard'
-            new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
+            new['category']         = 'standard'
+            new['name']             = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1
-            new['category'] = 'internal'
-            new['name'] = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
+            new['category']         = 'internal'
+            new['name']             = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
         else:
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
-        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = str(name[2][4:])
-        new['rating'] = (name[1]=='buggybay' and planet_rating_map or rating_map)[name[3][5:]]
+        if not name[2].startswith('size') or not name[3].startswith('class'):
+            raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        
+        new['class']                = str(name[2][4:])
+        new['rating']               = (name[1]=='buggybay' and planet_rating_map or rating_map)[name[3][5:]]
 
     # Disposition of fitted modules
     if 'on' in module and 'priority' in module:
@@ -340,6 +353,7 @@ def lookup(module, ship_map, entitled=False):
 
     # Extra module data
     key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
+    
     if __debug__:
         assert key in moduledata, key
         m = moduledata.get(key, {})
@@ -347,12 +361,14 @@ def lookup(module, ship_map, entitled=False):
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
         else:
             assert 'mass' in m, m
+    
     new.update(moduledata.get(key, {}))
 
     # check we've filled out mandatory fields
     new['id'] = module['id']
     for thing in ['id', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
-        if not new.get(thing): raise AssertionError('%s: failed to set %s' % (module['id'], thing))
+        if not new.get(thing):
+            raise AssertionError('%s: failed to set %s' % (module['id'], thing))
     if new['category'] == 'hardpoint' and not new.get('mount'):
         raise AssertionError('%s: failed to set %s' % (module['id'], 'mount'))
 

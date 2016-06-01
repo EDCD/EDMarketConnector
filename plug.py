@@ -87,7 +87,7 @@ def get_plugin_pref(plugname, parent):
     return None
 
 
-def notify_system_changed(timestamp, system):
+def notify_system_changed(timestamp, system, coordinates):
     """
     Send notification data to each plugin when we arrive at a new system.
     :param timestamp:
@@ -98,7 +98,10 @@ def notify_system_changed(timestamp, system):
         system_changed = _get_plugin_func(plugname, "system_changed")
         if system_changed:
             try:
-                system_changed(timestamp, system)
+                if system_changed.func_code.co_argcount == 2:
+                    system_changed(timestamp, system)
+                elif system_changed.func_code.co_argcount == 3:
+                    system_changed(timestamp, system, coordinates)
             except Exception as plugerr:
                 print plugerr
 
