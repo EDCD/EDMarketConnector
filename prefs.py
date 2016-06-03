@@ -155,7 +155,7 @@ class PreferencesDialog(tk.Toplevel):
         edsmframe = nb.Frame(notebook)
         edsmframe.columnconfigure(1, weight=1)
 
-        HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='http://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
+        HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
         ttk.Separator(edsmframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
         self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
         nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
@@ -164,7 +164,7 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_log_auto_text = nb.Label(edsmframe, foreground='firebrick')
         self.edsm_log_auto_text.grid(columnspan=2, padx=(30,0), sticky=tk.W)
 
-        self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='http://www.edsm.net/settings/api', underline=True)	# Section heading in settings
+        self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
         self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Commmander Name'))	# EDSM setting
