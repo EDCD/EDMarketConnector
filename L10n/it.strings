@@ -358,12 +358,6 @@
 /* Power rank. [stats.py] */
 "Rating 5" = "Rating 5";
 
-/* Status bar message on launch. [EDMarketConnector.py] */
-"Re-start Elite: Dangerous for automatic log entries" = "Riavviare Elite: Dangerous per una log entry automatica";
-
-/* Output settings prompt. [prefs.py] */
-"Re-start Elite: Dangerous to use this feature" = "Riavviare Elite: Dangerous per usare questa funzione";
-
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
 

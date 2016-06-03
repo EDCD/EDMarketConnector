@@ -77,72 +77,10 @@ class EDLogs(FileSystemEventHandler):
         self.root = None
         self.logdir = self._logdir()
         self.logfile = None
-        self.logging_enabled = self._logging_enabled
-        self._restart_required = False
         self.observer = None
         self.thread = None
         self.callback = None
         self.last_event = None	# for communicating the Jump event
-
-    def enable_logging(self):
-        if self.logging_enabled():
-            return True
-        elif self._enable_logging():
-            self._restart_required = self._ED_is_running()
-            return True
-        else:
-            return False
-
-    def restart_required(self):
-        if not self._ED_is_running():
-            self._restart_required = False
-        return self._restart_required
-
-    def logging_enabled_in_file(self, appconf):
-        if not isfile(appconf):
-            return False
-
-        with open(appconf, 'rU') as f:
-            content = f.read().lower()
-            start = content.find('<network')
-            end = content.find('</network>')
-            if start >= 0 and end >= 0:
-                return bool(re.search('verboselogging\s*=\s*\"1\"', content[start+8:end]))
-            else:
-                return False
-
-    def enable_logging_in_file(self, appconf):
-        try:
-            if not exists(appconf):
-                with open(appconf, 'wt') as f:
-                    f.write('<AppConfig>\n\t<Network\n\t\tVerboseLogging="1"\n\t>\n\t</Network>\n</AppConfig>\n')
-                return True
-
-            with open(appconf, 'rU') as f:
-                content = f.read()
-                f.close()
-            backup = appconf[:-4] + '_backup.xml'
-            if exists(backup):
-                unlink(backup)
-            rename(appconf, backup)
-
-            with open(appconf, 'wt') as f:
-                start = content.lower().find('<network')
-                if start >= 0:
-                    f.write(content[:start+8] + '\n\t\tVerboseLogging="1"' + content[start+8:])
-                else:
-                    start = content.lower().find("</appconfig>")
-                    if start >= 0:
-                        f.write(content[:start] + '\t<Network\n\t\tVerboseLogging="1"\n\t>\n\t</Network>\n' + content[start:])
-                    else:
-                        f.write(content)	# eh ?
-                        return False
-
-            assert self._logging_enabled()
-            return self.logging_enabled_in_file(appconf)
-        except:
-            if __debug__: print_exc()
-            return False
 
     def set_callback(self, callback):
         self.callback = callback
@@ -232,7 +170,6 @@ class EDLogs(FileSystemEventHandler):
                         coordinates = (float(x), float(y), float(z))
 
                 if system:
-                    self._restart_required = False	# clearly logging is working
                     # Convert local time string to UTC date and time
                     visited_struct = strptime(visited, '%H:%M:%S')
                     now = localtime()
@@ -265,19 +202,6 @@ class EDLogs(FileSystemEventHandler):
                 return join(paths[0], suffix, 'Logs')
             else:
                 return None
-
-        def _logging_enabled(self):
-            return self.logdir and self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml'))
-
-        def _enable_logging(self):
-            return self.logdir and self.enable_logging_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml'))
-
-        def _ED_is_running(self):
-            for x in NSWorkspace.sharedWorkspace().runningApplications():
-                if x.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
-                    return True
-            else:
-                return False
 
     elif platform=='win32':
 
@@ -354,31 +278,10 @@ class EDLogs(FileSystemEventHandler):
 
             return None
 
-        def _logging_enabled(self):
-            return self.logdir and (self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml')) or
-                                    self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfig.xml')))
-
-        def _enable_logging(self):
-            return self.logdir and self.enable_logging_in_file(isfile(join(self.logdir, pardir, 'AppConfigLocal.xml')) and join(self.logdir, pardir, 'AppConfigLocal.xml') or join(self.logdir, pardir, 'AppConfig.xml'))
-
-        def _ED_is_running(self):
-            retval = DWORD(0)
-            EnumWindows(EnumWindowsProc, ctypes.addressof(retval))
-            return bool(retval)
-
     elif platform=='linux2':
 
         def _logdir(self):
             return None
-
-        def _logging_enabled(self):
-            return False
-
-        def _enable_logging(self):
-            return False
-
-        def _ED_is_running(self):
-            return False
 
 # singleton
 monitor = EDLogs()

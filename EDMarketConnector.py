@@ -242,7 +242,6 @@ class AppWindow:
         monitor.set_callback(self.system_change)
         edproxy.set_callback(self.system_change)
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_FILE|config.OUT_LOG_EDSM)):
-            monitor.enable_logging()
             monitor.start(self.w)
             edproxy.start(self.w)
 
@@ -306,9 +305,7 @@ class AppWindow:
                 if not self.status['text']:
                     self.status['text'] = unicode(e)
 
-        if not self.status['text'] and monitor.restart_required():
-            self.status['text'] = _('Re-start Elite: Dangerous for automatic log entries')	# Status bar message on launch
-        elif not getattr(sys, 'frozen', False):
+        if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
         self.cooldown()

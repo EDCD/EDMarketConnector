@@ -303,24 +303,12 @@ class PreferencesDialog(tk.Toplevel):
         if monitor.logdir or proxyaddr:
             log = self.out_log_file.get()
             self.out_log_auto_button['state']  = log and tk.NORMAL or tk.DISABLED
-
-            if log and self.out_log_auto.get():
-                if proxyaddr:
-                    self.out_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
-                elif not monitor.enable_logging():
-                    self.out_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
-                elif monitor.restart_required():
-                    self.out_log_auto_text['text'] = _('Re-start Elite: Dangerous to use this feature')	# Output settings prompt
+            if log and self.out_log_auto.get() and proxyaddr:
+                self.out_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
 
             self.edsm_log_auto_button['state']  = edsm_state
-
-            if self.out_log_edsm.get() and self.out_log_auto.get():
-                if proxyaddr:
-                    self.edsm_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
-                elif not monitor.enable_logging():
-                    self.edsm_log_auto_text['text'] = "Can't enable automatic logging!"	# Shouldn't happen - don't translate
-                elif monitor.restart_required():
-                    self.edsm_log_auto_text['text'] = _('Re-start Elite: Dangerous to use this feature')	# Output settings prompt
+            if self.out_log_edsm.get() and self.out_log_auto.get() and proxyaddr:
+                self.edsm_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
         else:
             self.out_log_auto_button['state'] = tk.DISABLED
             self.edsm_log_auto_button['state'] = tk.DISABLED
@@ -466,7 +454,6 @@ class PreferencesDialog(tk.Toplevel):
         # Re-enable hotkey and log monitoring before exit
         hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
         if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_FILE|config.OUT_LOG_EDSM)):
-            monitor.enable_logging()
             monitor.start(self.parent)
             edproxy.start(self.parent)
         else:
