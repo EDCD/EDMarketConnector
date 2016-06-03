@@ -55,7 +55,7 @@ def plugin_app(parent):
    """
    Create a TK widget for the EDMC main window
    """
-   plugin_app.status = ttk.Label(parent, text="Status:")
+   plugin_app.status = tk.Label(parent, text="Status:")
    return plugin_app.status
    
 # later on your event functions can directly update plugin_app.status["text"]

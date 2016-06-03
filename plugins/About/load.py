@@ -41,7 +41,7 @@ def plugin_app(parent):
     :param parent:
     :return:
     """
-    plugin_app.status = ttk.Label(parent, text="---")
+    plugin_app.status = tk.Label(parent, text="---")
     return plugin_app.status
 
 
