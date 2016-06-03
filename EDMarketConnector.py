@@ -29,7 +29,8 @@ from l10n import Translations
 Translations().install(config.get('language') or None)
 
 import companion
-import bpc
+import commodity
+from commodity import COMMODITY_BPC, COMMODITY_CSV
 import td
 import eddn
 import edsm
@@ -433,11 +434,11 @@ class AppWindow:
                     else:
                         if data['lastStarport'].get('commodities'):
                             if config.getint('output') & config.OUT_CSV:
-                                bpc.export(data, True)
+                                commodity.export(data, COMMODITY_CSV)
                             if config.getint('output') & config.OUT_TD:
                                 td.export(data)
                             if config.getint('output') & config.OUT_BPC:
-                                bpc.export(data, False)
+                                commodity.export(data, COMMODITY_BPC)
 
                         elif has_market and (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
                             # Overwrite any previous error message

@@ -13,7 +13,8 @@ import l10n
 l10n.Translations().install_dummy()
 
 import companion
-import bpc
+import commodity
+from commodity import COMMODITY_DEFAULT
 import outfitting
 import loadout
 import coriolis
@@ -115,7 +116,7 @@ try:
         if data['lastStarport'].get('commodities'):
             # Fixup anomalies in the commodity data
             session.fixup(data['lastStarport']['commodities'])
-            bpc.export(data, True, args.m)
+            commodity.export(data, COMMODITY_DEFAULT, args.m)
         elif has_market:
             sys.stderr.write("Error: Can't get market data!\n")
         else:
