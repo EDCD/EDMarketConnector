@@ -73,9 +73,11 @@ weaponrating_map = {
     'hpt_beamlaser_fixed_small'         : 'E',
     'hpt_beamlaser_fixed_medium'        : 'D',
     'hpt_beamlaser_fixed_large': 'C',
+    'hpt_beamlaser_fixed_huge': 'A',
     'hpt_beamlaser_gimbal_small': 'E',
     'hpt_beamlaser_gimbal_medium': 'D',
     'hpt_beamlaser_gimbal_large': 'C',
+    'hpt_beamlaser_gimbal_huge': 'A',
     'hpt_beamlaser_turret_small': 'F',
     'hpt_beamlaser_turret_medium': 'E',
     'hpt_beamlaser_turret_large': 'D',
@@ -99,8 +101,12 @@ weaponrating_map = {
     'hpt_mininglaser_fixed_medium': 'D',
     'hpt_multicannon_fixed_small': 'F',
     'hpt_multicannon_fixed_medium': 'E',
+    'hpt_multicannon_fixed_large': 'C',
+    'hpt_multicannon_fixed_huge': 'A',
     'hpt_multicannon_gimbal_small': 'G',
     'hpt_multicannon_gimbal_medium': 'F',
+    'hpt_multicannon_gimbal_large': 'C',
+    'hpt_multicannon_gimbal_huge': 'A',
     'hpt_multicannon_turret_small': 'G',
     'hpt_multicannon_turret_medium': 'F',
     'hpt_plasmaaccelerator_fixed_medium': 'C',
@@ -109,9 +115,11 @@ weaponrating_map = {
     'hpt_pulselaser_fixed_small': 'F',
     'hpt_pulselaser_fixed_medium': 'E',
     'hpt_pulselaser_fixed_large': 'D',
+    'hpt_pulselaser_fixed_huge': 'A',
     'hpt_pulselaser_gimbal_small': 'G',
     'hpt_pulselaser_gimbal_medium': 'F',
     'hpt_pulselaser_gimbal_large': 'E',
+    'hpt_pulselaser_gimbal_huge': 'A',
     'hpt_pulselaser_turret_small': 'G',
     'hpt_pulselaser_turret_medium': 'F',
     'hpt_pulselaser_turret_large': 'F',
@@ -184,6 +192,7 @@ misc_internal_map = {
 standard_map = {
     # 'armour'         : handled separately
     'engine'           : 'Thrusters',
+    ('engine','fast')  : 'Enhanced Performance Thrusters',
     'fueltank'         : 'Fuel Tank',
     'hyperdrive'       : 'Frame Shift Drive',
     'lifesupport'      : 'Life Support',
@@ -264,10 +273,10 @@ def lookup(module, ship_map, entitled=False):
                 new['rating'] = '?'
             else:			# PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
                 new['name'] =  weapon_map[(name[1],name[4])]
-                new['rating'] = weaponrating_map.get(('_').join(name[:4]), '?')	# assumes same rating as base weapon
+                new['rating'] = weaponrating_map['_'.join(name[:4])]	# assumes same rating as base weapon
         else:
             new['name'] =  weapon_map[name[1]]
-            new['rating'] = weaponrating_map.get(module['name'].lower(), '?')		# no obvious rule - needs lookup table
+            new['rating'] = weaponrating_map[module['name'].lower()]	# no obvious rule - needs lookup table
         new['mount'] = weaponmount_map[name[2]]
         if name[1] in missiletype_map:	# e.g. Hpt_DumbfireMissileRack_Fixed_Small
             new['guidance'] = missiletype_map[name[1]]
