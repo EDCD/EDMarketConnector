@@ -9,7 +9,6 @@ from os.path import expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime
-import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -512,7 +511,7 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, timestamp, system):
+    def system_change(self, timestamp, system, coordinates):
 
         if self.system['text'] != system:
             self.system['text'] = system
@@ -520,7 +519,7 @@ class AppWindow:
             self.system['image'] = ''
             self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
 
-            plug.notify_system_changed(timestamp, system)
+            plug.notify_system_changed(timestamp, system, coordinates)
 
             if config.getint('output') & config.OUT_LOG_FILE:
                 flightlog.writelog(timestamp, system)
@@ -528,7 +527,7 @@ class AppWindow:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
-                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)))	# Do EDSM lookup during EDSM export
+                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)), coordinates)	# Do EDSM lookup during EDSM export
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
                 except Exception as e:
                     if __debug__: print_exc()
@@ -544,8 +543,6 @@ class AppWindow:
         result = self.edsm.result
         if result['done']:
             self.system['image'] = result['img']
-            if result['uncharted'] and config.getint('edsm_autoopen'):
-                webbrowser.open(result['url'])
         else:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 

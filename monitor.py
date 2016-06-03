@@ -193,9 +193,14 @@ class EDLogs(FileSystemEventHandler):
             self.logfile = event.src_path
 
     def worker(self):
-        # e.g. "{18:11:44} System:22(Gamma Doradus) Body:3 Pos:(3.69928e+07,1.13173e+09,-1.75892e+08) \r\n" or "... NormalFlight\r\n" or "... Supercruise\r\n"
+        # e.g.:
+        #   "{18:00:41} System:"Shinrarta Dezhra" StarPos:(55.719,17.594,27.156)ly  NormalFlight\r\n"
+        # or with verboseLogging:
+        #   "{17:20:18} System:"Shinrarta Dezhra" StarPos:(55.719,17.594,27.156)ly Body:69 RelPos:(0.334918,1.20754,1.23625)km NormalFlight\r\n"
+        # or:
+        #   "... Supercruise\r\n"
         # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
-        regexp = re.compile(r'\{(.+)\} System:\d+\((.+)\) Body:(\d+) .* (\S*)')	# (localtime, system, body, context)
+        regexp = re.compile(r'\{(.+)\} System:"(.+)" StarPos:\((.+),(.+),(.+)\)ly.* (\S+)')	# (localtime, system, x, y, z, context)
 
         # Seek to the end of the latest log file
         logfile = self.logfile
@@ -215,13 +220,16 @@ class EDLogs(FileSystemEventHandler):
                 loghandle = open(logfile, 'rt')
 
             if logfile:
-                system = visited = None
+                system = visited = coordinates = None
                 loghandle.seek(0, 1)	# reset EOF flag
 
                 for line in loghandle:
                     match = regexp.match(line)
                     if match:
-                        system, visited = match.group(4) == 'ProvingGround' and 'CQC' or match.group(2), match.group(1)
+                        (visited, system, x, y, z, context) = match.groups()
+                        if system == 'ProvingGround':
+                            system = 'CQC'
+                        coordinates = (float(x), float(y), float(z))
 
                 if system:
                     self._restart_required = False	# clearly logging is working
@@ -233,7 +241,7 @@ class EDLogs(FileSystemEventHandler):
                         now = localtime(time()-12*60*60)	# yesterday
                     time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
                     # Tk on Windows doesn't like to be called outside of an event handler, so generate an event
-                    self.last_event = (mktime(time_struct), system)
+                    self.last_event = (mktime(time_struct), system, coordinates)
                     self.root.event_generate('<<MonitorJump>>', when="tail")
 
             sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often

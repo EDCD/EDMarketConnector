@@ -31,9 +31,6 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automaticky vytvořit záznam při vstoupení do systému";
 
-/* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "Automaticky otevřít EDSM stránku nezmapovaných systémů";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Zůstatek";
 

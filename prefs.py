@@ -159,9 +159,6 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(edsmframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
         self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
         nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.edsm_autoopen = tk.BooleanVar(value = config.getint('edsm_autoopen'))
-        self.edsm_autoopen_button = nb.Checkbutton(edsmframe, text=_(u"Automatically open uncharted systems’ EDSM pages"), variable=self.edsm_autoopen)
-        self.edsm_autoopen_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
         self.edsm_log_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.edsm_log_auto_text = nb.Label(edsmframe, foreground='firebrick')
@@ -294,7 +291,6 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
 
         edsm_state = self.out_log_edsm.get() and tk.NORMAL or tk.DISABLED
-        self.edsm_autoopen_button['state'] = edsm_state
         self.edsm_label['state']        = edsm_state
         self.edsm_cmdr_label['state']   = edsm_state
         self.edsm_apikey_label['state'] = edsm_state
@@ -441,7 +437,6 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_log_auto.get() and config.OUT_LOG_AUTO))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
-        config.set('edsm_autoopen', self.edsm_autoopen.get())
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 

@@ -109,7 +109,7 @@ def export(data, edsmlookupfn):
     writelog(querytime, data['lastSystem']['name'], edsmlookupfn)
 
 
-def writelog(timestamp, system, edsmlookupfn):
+def writelog(timestamp, system, edsmlookupfn, coordinates=None):
 
     try:
         # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
@@ -118,7 +118,17 @@ def writelog(timestamp, system, edsmlookupfn):
         if system in EDSM.FAKE:
             return
 
-        r = requests.get('http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
+        url = 'http://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+            urllib.quote(config.get('edsm_cmdrname').encode('utf-8')),
+            urllib.quote(config.get('edsm_apikey')),
+            urllib.quote(system),
+            urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
+            urllib.quote(applongname),
+            urllib.quote(appversion)
+        )
+        if coordinates:
+            url += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
+        r = requests.get(url, timeout=EDSM._TIMEOUT)
         r.raise_for_status()
         reply = r.json()
         (msgnum, msg) = reply['msgnum'], reply['msg']

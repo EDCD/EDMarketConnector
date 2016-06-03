@@ -45,14 +45,18 @@ def plugin_app(parent):
     return plugin_app.status
 
 
-def system_changed(timestamp, system):
+def system_changed(timestamp, system, coordinates):
     """
     Arrived in a new System
     :param timestamp: when we arrived
     :param system: the name of the system
+    :param coordinates: tuple of (x,y,z) ly relative to Sol, or None if unknown
     :return:
     """
-    sys.stderr.write("Arrived at {}\n".format(system))
+    if coordinates:
+        sys.stderr.write("Arrived at {} ({},{},{})\n".format(system, *coordinates))
+    else:
+        sys.stderr.write("Arrived at {}\n".format(system))
 
 
 def cmdr_data(data):

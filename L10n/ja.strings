@@ -31,9 +31,6 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "別の星系に移動したら自動的にフライトログを記録する";
 
-/* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "EDSMに座標が登録されていない星系のページを自動的に開く";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Balance";
 

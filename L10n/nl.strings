@@ -31,9 +31,6 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Automatisch een log regel aanmaken bij het binnengaan van een stelsel";
 
-/* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "Automatisch openen van nog niet in kaart gebrachte systemen op EDSM website";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Balans";
 

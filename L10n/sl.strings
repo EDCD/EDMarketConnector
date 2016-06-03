@@ -31,9 +31,6 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Shrani podatke v dnevnik leta, ko prispeš v sistem";
 
-/* [prefs.py] */
-"Automatically open uncharted systems’ EDSM pages" = "Automatically open uncharted systems’ EDSM pages";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Ravnotežje";
 
