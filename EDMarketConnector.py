@@ -408,23 +408,13 @@ class AppWindow:
                     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
 
-                    # No EDDN output at known station?
-                    if (config.getint('output') & config.OUT_EDDN) and station_id and not (has_market or has_outfitting or has_shipyard):
+                    # No EDDN output?
+                    if (config.getint('output') & config.OUT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
-                    # No EDDN output at unknown station?
-                    elif (config.getint('output') & config.OUT_EDDN) and not station_id and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore usually spurious shipyard at unknown stations
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have anything!")
-
-                    # No market output at known station?
-                    elif not (config.getint('output') & config.OUT_EDDN) and station_id and not has_market:
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have a market!")
-
-                    # No market output at unknown station?
-                    elif not (config.getint('output') & config.OUT_EDDN) and not station_id and not data['lastStarport'].get('commodities'):
+                    # No market output?
+                    elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
 
@@ -437,31 +427,18 @@ class AppWindow:
                             if config.getint('output') & config.OUT_BPC:
                                 commodity.export(data, COMMODITY_BPC)
 
-                        elif has_market and (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
-                            # Overwrite any previous error message
-                            self.status['text'] = _("Error: Can't get market data!")
-
                         if config.getint('output') & config.OUT_EDDN:
                             old_status = self.status['text']
                             if not old_status:
                                 self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
                             eddn.export_commodities(data)
-                            if has_outfitting or not station_id:
-                                # Only send if eddb says that the station provides outfitting, or unknown station
-                                eddn.export_outfitting(data)
-                            elif __debug__ and data['lastStarport'].get('modules'):
-                                print 'Spurious outfitting!'
-                            if has_shipyard:
-                                # Only send if eddb says that the station has a shipyard -
-                                # https://github.com/Marginal/EDMarketConnector/issues/16
-                                if data['lastStarport'].get('ships'):
-                                    eddn.export_shipyard(data)
-                                else:
-                                    # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
-                                    self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
-                            elif __debug__ and data['lastStarport'].get('ships'):
-                                print 'Spurious shipyard!'
+                            eddn.export_outfitting(data)
+                            if has_shipyard and not data['lastStarport'].get('ships'):
+                                # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
+                                self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
+                            else:
+                                eddn.export_shipyard(data)
                             if not old_status:
                                 self.status['text'] = ''
 

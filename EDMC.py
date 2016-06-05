@@ -105,10 +105,7 @@ try:
     print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(data['lastSystem']['name'], data['lastStarport']['name'])
 
-    if station_id and not (has_market or has_outfitting or has_shipyard):
-        sys.stderr.write("Station doesn't have anything!\n")
-        sys.exit(EXIT_SUCCESS)
-    elif not station_id and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore usually spurious shipyard at unknown stations
+    if (args.m or args.o or args.s) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
         sys.stderr.write("Station doesn't have anything!\n")
         sys.exit(EXIT_SUCCESS)
 
@@ -117,26 +114,23 @@ try:
             # Fixup anomalies in the commodity data
             session.fixup(data['lastStarport']['commodities'])
             commodity.export(data, COMMODITY_DEFAULT, args.m)
-        elif has_market:
-            sys.stderr.write("Error: Can't get market data!\n")
         else:
             sys.stderr.write("Station doesn't have a market\n")
 
     if args.o:
-        if has_outfitting or not station_id:
+        if data['lastStarport'].get('modules'):
             outfitting.export(data, args.o)
         else:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
     if args.s:
-        if has_shipyard:
-            if not data['lastStarport'].get('ships'):
-                sleep(SERVER_RETRY)
-                data = session.query()
-            if data['lastStarport'].get('ships') and data['commander'].get('docked'):
-                shipyard.export(data, args.s)
-            else:
-                sys.stderr.write("Couldn't retrieve shipyard info\n")
+        if has_shipyard and not data['lastStarport'].get('ships'):
+            sleep(SERVER_RETRY)
+            data = session.query()
+        if data['lastStarport'].get('ships'):
+            shipyard.export(data, args.s)
+        elif has_shipyard:
+            sys.stderr.write("Couldn't retrieve shipyard info\n")
         else:
             sys.stderr.write("Station doesn't have a shipyard\n")
 

@@ -72,27 +72,28 @@ def export_commodities(data):
         })
 
 def export_outfitting(data):
-    # *Do* send empty modules list - implies station has no outfitting
-    schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
-    modules = []
-    for v in data['lastStarport'].get('modules', {}).itervalues():
-        try:
-            module = outfitting.lookup(v, ship_map)
-            if module:
-                modules.append({ k: module[k] for k in schemakeys if k in module })	# just the relevant keys
-        except AssertionError as e:
-            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
-        except:
-            if __debug__: raise
+    # Don't send empty modules list
+    if data['lastStarport'].get('modules'):
+        schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
+        modules = []
+        for v in data['lastStarport'].get('modules', {}).itervalues():
+            try:
+                module = outfitting.lookup(v, ship_map)
+                if module:
+                    modules.append({ k: module[k] for k in schemakeys if k in module })	# just the relevant keys
+            except AssertionError as e:
+                if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+            except:
+                if __debug__: raise
 
-    send(data['commander']['name'], {
-        '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
-        'message'    : {
-            'systemName'  : data['lastSystem']['name'].strip(),
-            'stationName' : data['lastStarport']['name'].strip(),
-            'modules'     : modules,
-        }
-    })
+        send(data['commander']['name'], {
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
+            'message'    : {
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'modules'     : modules,
+            }
+        })
 
 def export_shipyard(data):
     # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
