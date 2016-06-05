@@ -550,11 +550,11 @@ class AppWindow:
         if text:
             (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
             if station_id:
-                return 'http://eddb.io/station/%d' % station_id
+                return 'https://eddb.io/station/%d' % station_id
 
             system_id = EDDB.system(self.system['text'])
             if system_id:
-                return 'http://eddb.io/system/%d' % system_id
+                return 'https://eddb.io/system/%d' % system_id
 
         return None
 
