@@ -76,7 +76,7 @@ fixup_map.update({
     'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
     'Cytoscrambler Burst Laser'     : ('Burst Laser', 'Cytoscrambler'),
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
-    'Enhanced Performance Thrusters': ('Thrusters', 'Enhanced Performance Thrusters'),
+    'Enhanced Performance Thrusters': ('Thrusters', 'Enhanced Performance'),
     'Imperial Hammer Rail Gun'      : ('Rail Gun', 'Imperial Hammer'),
     'Mining Lance Beam Laser'       : ('Mining Laser', 'Mining Lance'),
     'Multi-Cannon'                  : ('Multi-cannon', None),
