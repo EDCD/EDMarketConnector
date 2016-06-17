@@ -77,7 +77,7 @@ class AppWindow:
             else:
                 from PIL import Image, ImageTk
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default', ImageTk.PhotoImage(Image.open("EDMarketConnector.png")))
-            self.theme_icon = tk.PhotoImage(data = 'R0lGODlhEAAQAMYAAAAAAAEAAAEBAQICAgQEAwYFBAsHBAoIBgwIBAwIBQ0IBA8JBBAJBBAKBRMMBRkPBhoQBykWCSoWCCoXCTsfCzwfCkAhDEIjDD8kC0AlDEEmC0EmDEcoDk4oDU8pDU4qEFMrD1ktDlotD1ouD1g0EWAyEWU0EV03EmA4EWo2EW03EWQ6Emw4EWo9FGo+E3Y8FH5AFH1IFoBJFo1RGo1SGY1SGpBTGZFTGZJTGZhYG6piHa1kHa5kHbBkHr9uIMt0IgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEKAEAALAAAAAAQABAAAAd7gACCg4SFhoeHGCiIhRs5JwMCkpKGGTIFODaaNjc/D4QaMQMAk5MuEIQOO6OFAiscCIQNPQk8NTO4NDofLwayPi0mIMPDLAcqvoIBDiQWkaUCAykKhAsXAoYCHRKEDDAjIyIiIyEEHhHYhAPr7BQlE+mMABXo8oTx9oWBADs=')
+            self.theme_icon = tk.PhotoImage(data = 'R0lGODlhFAAQAMZVAAAAAAEAAAIBAAMBAAQCAAYDAAcDAAkEAAoEAAwGAQ8IARAIAREJARYKABkLARsMASMQASgSAiUUAy0UAjAVAioXBDIWAy4YBC4ZBS8ZBTkZA0EdBDsgBkUfA0MkB00iA1AjA1IlBFQmBE4qCFgoBVkoBFArCF0qBVQtCGUrBGMtBWYtBWA0Cm8xBW8xBm8yBXMzBXU1Bms5C3s1BXs2BXw2BX02BXw4B4A5B3Q/DIJGDYNGDYJHDoNHDYdJDppGCItLD4xLDo5MDo5MD5hSD59VEKdaEbJgErtlE7tlFLxlE8BpFMJpFMNpFMZrFdFxFtl1F995GOB6GOF6GP+LG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAejgACCgiODhoeGBABPPgACj48DA4gAk00cSRUYGZycEogBAE4LCUM8Oj2pOzlQBAKHSBeKlABKBq+DHkS0g0wJiCZFvABHJBuHBSxADFRTUs/PUUsiKhaIKEZBKTM13TU0Nj8IIRqThjJCK8MnFIgKMMMAJRGGAQUvvAIPLocBAjgdPggcKMLAgRi0GjxYyNBBCwjwQoEKQLEiABA3HMU7NOFQIAA7')
             self.theme_minimize = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')
             self.theme_close    = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')
 
@@ -179,22 +179,22 @@ class AppWindow:
             self.theme_menubar = tk.Frame(frame)
             self.theme_menubar.columnconfigure(2, weight=1)
             theme_titlebar = tk.Label(self.theme_menubar, text=applongname, image=self.theme_icon, anchor=tk.W, compound=tk.LEFT)
-            theme_titlebar.grid(columnspan=3, sticky=tk.NSEW)
+            theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
             self.drag_offset = None
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
             if platform == 'win32':	# Can't work out how to deiconify on Linux
                 theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-                theme_minimize.grid(row=0, column=3)
+                theme_minimize.grid(row=0, column=3, padx=2)
                 theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
             theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
-            theme_close.grid(row=0, column=4)
+            theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
             self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
             self.theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
             theme.button_bind(self.theme_file_menu, lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
-            self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)	# Menu title
+            self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
             self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
             theme.button_bind(self.theme_edit_menu, lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
             theme.register_highlight(theme_titlebar)
