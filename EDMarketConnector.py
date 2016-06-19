@@ -3,6 +3,7 @@
 
 import sys
 from sys import platform
+from functools import partial
 import json
 from os import mkdir
 from os.path import expanduser, isdir, join
@@ -143,7 +144,7 @@ class AppWindow:
             self.menubar.add_cascade(menu=self.edit_menu)
             self.w.bind('<Command-c>', self.copy)
             self.view_menu = tk.Menu(self.menubar, name='view')
-            self.view_menu.add_command(state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))
+            self.view_menu.add_command(command=lambda:stats.StatsDialog(self))
             self.menubar.add_cascade(menu=self.view_menu)
             window_menu = tk.Menu(self.menubar, name='window')
             self.menubar.add_cascade(menu=window_menu)
@@ -157,7 +158,7 @@ class AppWindow:
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
         else:
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
-            self.file_menu.add_command(state=tk.DISABLED, command=lambda:stats.StatsDialog(self.w, self.session))
+            self.file_menu.add_command(command=lambda:stats.StatsDialog(self))
             self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
             self.file_menu.add_command(command=lambda:prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
@@ -287,9 +288,7 @@ class AppWindow:
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            self.view_menu.entryconfigure(0, state=tk.DISABLED)	# Status
             self.session.login(config.get('username'), config.get('password'))
-            self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
             self.status['text'] = ''
         except companion.VerificationRequired:
             # don't worry about authentication now - prompt on query
@@ -315,7 +314,7 @@ class AppWindow:
         self.cooldown()
 
     # callback after verification code
-    def verify(self, code):
+    def verify(self, callback, code):
         try:
             self.session.verify(code)
             config.save()	# Save settings now for use by command-line app
@@ -324,7 +323,7 @@ class AppWindow:
             self.button['state'] = self.theme_button['state'] = tk.NORMAL
             self.status['text'] = unicode(e)
         else:
-            return self.getandsend()	# try again
+            return callback()	# try again
 
     def getandsend(self, event=None, retrying=False):
 
@@ -341,7 +340,7 @@ class AppWindow:
             self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
             self.system['image'] = ''
             self.status['text'] = _('Fetching data...')
-            self.theme_button['state'] = tk.DISABLED
+            self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.edit_menu.entryconfigure(0, state=tk.DISABLED)	# Copy
             self.w.update_idletasks()
 
@@ -370,7 +369,6 @@ class AppWindow:
                 self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
-                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
 
                 if data['lastStarport'].get('commodities'):
                     # Fixup anomalies in the commodity data
@@ -447,7 +445,7 @@ class AppWindow:
                                 self.status['text'] = ''
 
         except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.w, self.verify)
+            return prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
 
         # Companion API problem
         except companion.ServerError as e:

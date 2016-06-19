@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from sys import platform
+from functools import partial
 import time
 if __debug__:
     from traceback import print_exc
@@ -159,58 +160,23 @@ def export_ships(data, filename):
     h.close()
 
 
-class StatsDialog(tk.Toplevel):
+class StatsDialog():
 
-    def __init__(self, parent, session):
-        tk.Toplevel.__init__(self, parent)
-
-        self.parent = parent
-        self.session = session
-        self.title(_('Status'))	# Menu item
-
-        if parent.winfo_viewable():
-            self.transient(parent)
-
-        # position over parent
-        if platform!='darwin' or parent.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
-
-        # remove decoration
-        self.resizable(tk.FALSE, tk.FALSE)
-        if platform=='win32':
-            self.attributes('-toolwindow', tk.TRUE)
-        elif platform=='darwin':
-            # http://wiki.tcl.tk/13428
-            parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
-
-        frame = ttk.Frame(self)
-        frame.grid(sticky=tk.NSEW)
-
-        self.status = ttk.Label(frame, text=_('Fetching data...'))
-        self.status.grid(padx=10, pady=10)
-
-        # wait for window to appear on screen before calling grab_set
-        self.wait_visibility()
-        self.grab_set()
-        self.update()	# update_idletasks() isn't cutting it
-
+    def __init__(self, app):
+        self.parent = app.w
+        self.session = app.session
+        self.status = app.status
+        self.verify = app.verify
         self.showstats()
 
-    # callback after verification code
-    def verify(self, code):
-        try:
-            self.session.verify(code)
-        except Exception as e:
-            if __debug__: print_exc()
-            self.status['text'] = unicode(e)
-        else:
-            self.showstats()
-
     def showstats(self):
+        self.status['text'] = _('Fetching data...')
+        self.parent.update_idletasks()
+
         try:
             data = self.session.query()
         except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.parent, self.verify)
+            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.showstats))
         except companion.ServerError as e:
             self.status['text'] = str(e)
             return
@@ -226,8 +192,8 @@ class StatsDialog(tk.Toplevel):
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
         else:
+            self.status['text'] = ''
             StatsResults(self.parent, data)
-            self.destroy()
 
 
 class StatsResults(tk.Toplevel):

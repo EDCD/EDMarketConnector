@@ -177,8 +177,13 @@ class Session:
 
     def login(self, username=None, password=None):
         if (not username or not password):
-            raise CredentialsError()
-        credentials = { 'email' : username, 'password' : password }
+            if not self.credentials:
+                raise CredentialsError()
+            else:
+                credentials = self.credentials
+        else:
+            credentials = { 'email' : username, 'password' : password }
+
         if self.credentials == credentials and self.state == Session.STATE_OK:
             return	# already logged in
         if self.credentials and self.credentials['email'] != credentials['email']:	# changed account
