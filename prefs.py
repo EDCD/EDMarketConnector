@@ -515,7 +515,7 @@ class AuthenticationDialog(tk.Toplevel):
                   '\n' +
                   _('Please enter the code into the box below.'), anchor=tk.W, justify=tk.LEFT).grid(columnspan=4, sticky=tk.NSEW)	# Use same text as E:D Launcher's verification dialog
         ttk.Label(frame).grid(row=1, column=0)	# spacer
-        self.code = ttk.Entry(frame, width=8, validate='key', validatecommand=(self.register(self.validatecode), '%P'))
+        self.code = ttk.Entry(frame, width=8, validate='key', validatecommand=(self.register(self.validatecode), '%P', '%d', '%i', '%S'))
         self.code.grid(row=1, column=1)
         self.code.focus_set()
         ttk.Label(frame).grid(row=1, column=2)	# spacer
@@ -529,19 +529,31 @@ class AuthenticationDialog(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         # wait for window to appear on screen before calling grab_set
+        self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
         self.wait_visibility()
         self.grab_set()
         #self.wait_window(self)	# causes duplicate events on OSX
 
-    def validatecode(self, newval):
+        self.bind('<Return>', self.apply)
+
+
+    def validatecode(self, newval, ins, idx, diff):
+        self.code.selection_clear()
+        self.code.delete(0, tk.END)
+        self.code.insert(0, newval.upper())
+        self.code.icursor(int(idx) + (int(ins)>0 and len(diff) or 0))
+        self.after_idle(lambda: self.code.config(validate='key'))	# http://tcl.tk/man/tcl8.5/TkCmd/entry.htm#M21
         self.button['state'] = len(newval.strip())==5 and tk.NORMAL or tk.DISABLED
         return True
 
-    def apply(self):
+    def apply(self, event=None):
         code = self.code.get().strip()
-        self.destroy()
-        if self.callback: self.callback(code)
+        if len(code) == 5:
+            self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+            self.destroy()
+            if self.callback: self.callback(code)
 
     def _destroy(self):
+        self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
         if self.callback: self.callback(None)
