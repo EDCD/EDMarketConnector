@@ -71,7 +71,7 @@ def export(data, filename=None):
             mass += module.get('mass', 0)
 
             # Specials
-            if module['name'] in ['Fuel Tank', 'Cargo Rack']:
+            if 'Fuel Tank'in module['name'] or 'Cargo Rack' in module['name']:
                 name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
             else:
                 name = module['name']

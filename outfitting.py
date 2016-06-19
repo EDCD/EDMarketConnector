@@ -206,6 +206,7 @@ internal_map = {
     'buggybay'          : 'Planetary Vehicle Hangar',
     'cargorack'         : 'Cargo Rack',
     'collection'        : 'Collector Limpet Controller',
+    'corrosionproofcargorack' : 'Corrosion Resistant Cargo Rack',
     'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
     'fuelscoop'         : 'Fuel Scoop',
     'fueltransfer'      : 'Fuel Transfer Limpet Controller',

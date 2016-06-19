@@ -74,6 +74,7 @@ fixup_map.update({ x[0] : ('Scanner', x[0]) for x in outfitting.misc_internal_ma
 fixup_map.update({ x[0] : ('Countermeasure', x[0]) for x in outfitting.countermeasure_map.values() })
 fixup_map.update({
     'Advanced Plasma Accelerator'   : ('Plasma Accelerator', 'Advanced Plasma Accelerator'),
+    'Corrosion Resistant Cargo Rack': ('Cargo Rack', 'Corrosion Resistant'),
     'Cytoscrambler Burst Laser'     : ('Burst Laser', 'Cytoscrambler'),
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
     'Enhanced Performance Thrusters': ('Thrusters', 'Enhanced Performance'),
@@ -328,7 +329,14 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
-    modules[('Planetary Approach Suite', None, '1', 'I')] = { 'mass': 0 }	# not in data at time of writing
+    # not in coriolis-data at time of writing - stop outfitting complaining about them in debug mode
+    for module in [
+            ('Planetary Approach Suite', None, '1', 'I'),
+            ('Corrosion Resistant Cargo Rack', None, '1', 'D'),
+            ('Corrosion Resistant Cargo Rack', None, '2', 'D'),
+    ]:
+        if not module in modules:
+            modules[module] = { 'mass': 0 }
 
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
