@@ -17,6 +17,10 @@ from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
     from traceback import print_exc
+    if platform != 'win32':
+        import pdb
+        import signal
+        signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
 from config import appname, applongname, config
 if platform == 'win32' and getattr(sys, 'frozen', False):
