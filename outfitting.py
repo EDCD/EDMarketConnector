@@ -350,9 +350,10 @@ def lookup(module, ship_map, entitled=False):
     # Extra module data
     key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
     if __debug__:
-        assert key in moduledata, key
         m = moduledata.get(key, {})
-        if new['name'] == 'Frame Shift Drive':
+        if not m:
+            print 'No data for module %s' % str(key)
+        elif new['name'] == 'Frame Shift Drive':
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
         else:
             assert 'mass' in m, m

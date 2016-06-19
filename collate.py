@@ -39,8 +39,10 @@ def addcommodities(data):
         }
         old = commodities.get(key)
         if old:
-            if new != old:
+            if new['id'] != old['id'] or new['category'] != old['category']:
                 raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
+            elif new['average'] != old['average']:
+                commodities[key] = new
         else:
             commodities[key] = new
 

@@ -4,6 +4,7 @@
 #
 
 import argparse
+import json
 import requests
 import sys
 from time import time, sleep
@@ -12,6 +13,7 @@ from xml.etree import ElementTree
 import l10n
 l10n.Translations().install_dummy()
 
+import collate
 import companion
 import commodity
 from commodity import COMMODITY_DEFAULT
@@ -46,6 +48,7 @@ try:
     parser.add_argument('-o', metavar='FILE', help='write station outfitting data to FILE in CSV format')
     parser.add_argument('-s', metavar='FILE', help='write station shipyard data to FILE in CSV format')
     parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
+    parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
     if args.version:
@@ -65,12 +68,18 @@ try:
         print '%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest)	# just first three digits
         sys.exit(EXIT_SUCCESS)
 
-    session = companion.Session()
-    session.login(config.get('username'), config.get('password'))
-
-    querytime = int(time())
-    data = session.query()
-    config.set('querytime', querytime)
+    if args.j:
+        # Import and collate from JSON dump
+        data = json.load(open(args.j))
+        collate.addcommodities(data)
+        collate.addmodules(data)
+        collate.addships(data)
+    else:
+        session = companion.Session()
+        session.login(config.get('username'), config.get('password'))
+        querytime = int(time())
+        data = session.query()
+        config.set('querytime', querytime)
 
     # Validation
     if not data.get('commander') or not data['commander'].get('name','').strip():
@@ -124,7 +133,7 @@ try:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
     if args.s:
-        if has_shipyard and not data['lastStarport'].get('ships'):
+        if has_shipyard and not data['lastStarport'].get('ships') and not args.j:
             sleep(SERVER_RETRY)
             data = session.query()
         if data['lastStarport'].get('ships'):
