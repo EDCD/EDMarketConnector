@@ -13,6 +13,7 @@ from time import time, localtime, strftime
 
 import Tkinter as tk
 import ttk
+import tkFileDialog
 import tkFont
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -135,9 +136,12 @@ class AppWindow:
             root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox horizontalZoom resizable')
 
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
-            self.file_menu = tk.Menu(self.menubar, name='apple')
-            self.file_menu.add_command(command=lambda:self.w.call('tk::mac::standardAboutPanel'))
-            self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.system_menu = tk.Menu(self.menubar, name='apple')
+            self.system_menu.add_command(command=lambda:self.w.call('tk::mac::standardAboutPanel'))
+            self.system_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.menubar.add_cascade(menu=self.system_menu)
+            self.file_menu = tk.Menu(self.menubar, name='file')
+            self.file_menu.add_command(command=self.save_raw)
             self.menubar.add_cascade(menu=self.file_menu)
             self.edit_menu = tk.Menu(self.menubar, name='edit')
             self.edit_menu.add_command(accelerator='Command-c', state=tk.DISABLED, command=self.copy)
@@ -159,6 +163,7 @@ class AppWindow:
         else:
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.file_menu.add_command(command=lambda:stats.StatsDialog(self))
+            self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
             self.file_menu.add_command(command=lambda:prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
@@ -170,10 +175,10 @@ class AppWindow:
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
-                system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
-                system_menu.add_separator()
-                system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
-                self.menubar.add_cascade(menu=system_menu)
+                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+                self.system_menu.add_separator()
+                self.system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
+                self.menubar.add_cascade(menu=self.system_menu)
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
             theme.register(self.menubar)	# menus and children aren't automatically registered
@@ -267,21 +272,26 @@ class AppWindow:
         self.system_label['text']  = _('System') + ':'	# Main window
         self.station_label['text'] = _('Station') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
-        self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
-        self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
-        self.file_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
         if platform == 'darwin':
-            self.file_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))	# App menu entry on OSX
-            self.menubar.entryconfigure(1, label=_('Edit'))	# Menu title
-            self.menubar.entryconfigure(2, label=_('View'))	# Menu title on OSX
-            self.menubar.entryconfigure(3, label=_('Window'))	# Menu title on OSX
-        else:
-            self.file_menu.entryconfigure(2, label=_("Settings"))	# Item in the File menu on Windows
-            self.file_menu.entryconfigure(4, label=_("Exit"))	# Item in the File menu on Windows
-            self.menubar.entryconfigure(1, label=_('File'))	# Menu title on Windows
+            self.menubar.entryconfigure(1, label=_('File'))	# Menu title
             self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
-            self.theme_file_menu['text'] = _('File')	# Menu title on Windows
+            self.menubar.entryconfigure(3, label=_('View'))	# Menu title on OSX
+            self.menubar.entryconfigure(4, label=_('Window'))	# Menu title on OSX
+            self.system_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))	# App menu entry on OSX
+            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
+            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))	# Menu item
+            self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
+        else:
+            self.menubar.entryconfigure(1, label=_('File'))	# Menu title
+            self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
+            self.theme_file_menu['text'] = _('File')	# Menu title
             self.theme_edit_menu['text'] = _('Edit')	# Menu title
+            self.file_menu.entryconfigure(0, label=_('Status'))	# Menu item
+            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))	# Menu item
+            self.file_menu.entryconfigure(2, label=_("Check for Updates..."))	# Menu item
+            self.file_menu.entryconfigure(3, label=_("Settings"))	# Item in the File menu on Windows
+            self.file_menu.entryconfigure(5, label=_("Exit"))	# Item in the File menu on Windows
+        self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
         self.status['text'] = _('Logging in...')
@@ -362,7 +372,7 @@ class AppWindow:
                 if __debug__:	# Recording
                     if not isdir('dump'): mkdir('dump')
                     with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
-                        h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True).encode('utf-8'))
+                        h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
                 self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
                 self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
@@ -553,6 +563,30 @@ class AppWindow:
         if self.system['text']:
             self.w.clipboard_clear()
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
+
+    def save_raw(self):
+        self.status['text'] = _('Fetching data...')
+        self.w.update_idletasks()
+
+        try:
+            data = self.session.query()
+            self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
+            self.status['text'] = ''
+            f = tkFileDialog.asksaveasfilename(parent = self.w,
+                                               defaultextension = platform=='darwin' and '.json' or '',
+                                               filetypes = [('JSON', '.json'), ('All Files', '*')],
+                                               initialdir = config.get('outdir'),
+                                               initialfile = '%s%s.%s.json' % (data['lastSystem'].get('name', 'Unknown'), data['commander'].get('docked') and '.'+data['lastStarport'].get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
+            if f:
+                with open(f, 'wt') as h:
+                    h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+        except companion.VerificationRequired:
+            prefs.AuthenticationDialog(self.w, partial(self.verify, self.save_raw))
+        except companion.ServerError as e:
+            self.status['text'] = str(e)
+        except Exception as e:
+            if __debug__: print_exc()
+            self.status['text'] = unicode(e)
 
     def onexit(self, event=None):
         hotkeymgr.unregister()

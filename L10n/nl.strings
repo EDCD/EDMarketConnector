@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Nederlands";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Taal";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Sla Raw-gegevens Op...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander Name";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Fout: Kan geen verbinding maken met EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Fout: Kan markt data niet ophalen!";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Fout: Verbinding met EDDN geeft een time-out";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Data wordt opgehaald...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Bestand";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Taal";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Voor het laatst ververst om {HH}:{MM}:{SS}";

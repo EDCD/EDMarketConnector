@@ -1,11 +1,17 @@
 /* Language name */
 "!Language" = "Deutsch";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Sprache";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Speichere Originaldaten...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander Name";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ein Verifizierungscode wurde an die mit{CR}Elite verknüpfte Email Adresse gesendet.";
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ein Verifizierungscode wurde an die mit{CR}Elite verknüpfte Email-Adresse gesendet.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Über {APP}";
@@ -41,7 +47,7 @@
 "Broker" = "Großhändler";
 
 /* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Ordner...";
+"Browse..." = "Durchsuchen...";
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Kadett";
@@ -80,7 +86,7 @@
 "Copy" = "Kopieren";
 
 /* Empire rank. [stats.py] */
-"Count" = "Anzahl";
+"Count" = "Graf";
 
 /* Ranking. [stats.py] */
 "CQC" = "CQC-Rang";
@@ -134,16 +140,13 @@
 "Error: Can't connect to EDSM" = "Fehler: Kann keine Verbindung zu EDSM aufbauen";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Fehler: Warenmarktdaten können nicht abgerufen werden!";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Fehler: Zeitüberschreitung zum EDDN";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Fehler: EDSM {MSG}";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Fehler: Ungültige Logindaten";
+"Error: Invalid Credentials" = "Fehler: Ungültige Anmeldedaten";
 
 /* [companion.py] */
 "Error: Server is down" = "Fehler: Server nicht erreichbar";
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Daten werden abgerufen...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Datei";
 
 /* Section heading in settings. [prefs.py] */
@@ -200,16 +203,13 @@
 "Identity" = "Identität";
 
 /* Tab heading in settings on OSX. [prefs.py] */
-"Keyboard shortcut" = "Tastaturkurzbefehl";
+"Keyboard shortcut" = "Makro";
 
 /* Empire rank. [stats.py] */
 "King" = "König";
 
 /* Empire rank. [stats.py] */
 "Knight" = "Ritter";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Sprache";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Zuletzt aktualisiert um {HH}:{MM}:{SS}";
@@ -266,7 +266,7 @@
 "None" = "Keine Zuweisung";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "Standardmäßiger Text";
+"Normal text" = "Normaler Text";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Neuling";
@@ -308,7 +308,7 @@
 "Play sound" = "Ton abspielen";
 
 /* [prefs.py] */
-"Please choose what data to save" = "Welche Dateien sollen gespeichert werden?";
+"Please choose what data to save" = "Bitte wähle zu speichernde Daten aus";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "Please enter the code into the box below." = "Bitte gib den Code unten ein";
@@ -395,10 +395,10 @@
 "Ship" = "Schiff";
 
 /* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Schiffsladung als Coriolis Datei";
+"Ship loadout in Coriolis format file" = "Schiffsausstattung im Coriolis-Dateiformat";
 
 /* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Schiffsladung als E:D-Shipyard Datei";
+"Ship loadout in E:D Shipyard format file" = "Schiffsausstattung im E:D-Shipyard-Dateiformat";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Schiffe";
@@ -446,7 +446,7 @@
 "Vice Admiral" = "Vizeadmiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Darstellung";
+"View" = "Ansicht";
 
 /* Empire rank. [stats.py] */
 "Viscount" = "Viscount";

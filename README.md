@@ -200,6 +200,7 @@ Arguments:
  -o FILE        write station outfitting data to FILE in CSV format
  -s FILE        write station shipyard data to FILE in CSV format
  -t FILE        write player status to FILE in CSV format
+ -d FILE        write raw JSON data to FILE
 ```
 
 The program returns one of the following exit codes. Further information may be written to stderr.

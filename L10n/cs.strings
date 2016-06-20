@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Čeština";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jazyk";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Uložit syrová data...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Jméno CMDRa";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Chyba: Nelze se připojit k EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Chyba: Nelze získat data z obchodu!";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Chyba: Připojení k EDDN vypršelo";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Načítání dat...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Soubor";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Jazyk";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Naposledy aktualizováno {HH}:{MM}:{SS}";

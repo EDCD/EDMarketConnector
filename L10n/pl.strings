@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Polski";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Język";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Zapisz Nieprzetworzone Dane...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander Name";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Błąd: Brak połączenia z EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Błąd: Nie można pobrać danych rynkowych!";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Błąd: Przedłużające się połączenie z EDDN";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Pobieranie danych...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Plik";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Język";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Ostatnia aktualizacja {HH}:{MM}:{SS}";

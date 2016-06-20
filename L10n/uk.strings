@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Українська";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Мова";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Зберегти Дані Негативів...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Ім`я пілота";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Помилка: Немає з`єднання з EDSM!";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Помилка: Не вдається отримати ринкові дані!";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Помилка: Перевищено термін очикування з'єднання з EDDN!";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Отримання даних...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Файл";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Лицар";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Мова";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Останнє оновлення було {HH}:{MM}:{SS}";

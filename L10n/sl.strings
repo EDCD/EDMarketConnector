@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Slovenščina";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jezik";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Shrani Izvirne Podatke...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander ime";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Napaka: Ne morem sprejeti tržnih podatkov";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Napaka: Povezava z EDDN se je iztekla";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Nalagam podatke...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Datoteka";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Jezik";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Zadnja osvežitev podatkov {HH}:{MM}:{SS} ";

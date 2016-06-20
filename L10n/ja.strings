@@ -4,6 +4,9 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "言語";
 
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "生データの保存...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander Name";
 
@@ -137,9 +140,6 @@
 "Error: Can't connect to EDSM" = "エラー: EDSMに接続できません";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "エラー: 市場データを取得できません！";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "エラー: EDDNへの接続がタイムアウトしました";
 
 /* [edsm.py] */
@@ -169,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "データを取得中...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "ファイル";
 
 /* Section heading in settings. [prefs.py] */

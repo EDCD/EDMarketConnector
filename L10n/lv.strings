@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Latviešu";
 
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Valoda";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Glābt Sākotnējos Datus...";
+
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Commander vārds";
 
@@ -134,9 +140,6 @@
 "Error: Can't connect to EDSM" = "Kļūda: Nevar savienoties ar EDSM";
 
 /* [EDMarketConnector.py] */
-"Error: Can't get market data!" = "Kļūda: Nevar iegūt tirgus datus";
-
-/* [EDMarketConnector.py] */
 "Error: Connection to EDDN timed out" = "Kļūda: Savienojums ar EDDN pārtraukts";
 
 /* [edsm.py] */
@@ -166,7 +169,7 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Iegūst datus...";
 
-/* Menu title on Windows. [EDMarketConnector.py] */
+/* Menu title. [EDMarketConnector.py] */
 "File" = "Fails";
 
 /* Section heading in settings. [prefs.py] */
@@ -207,9 +210,6 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Bruņinieks";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Valoda";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Pēdējo reizi atjaunināts {HH}:{MM}:{SS}";

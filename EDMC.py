@@ -48,6 +48,7 @@ try:
     parser.add_argument('-o', metavar='FILE', help='write station outfitting data to FILE in CSV format')
     parser.add_argument('-s', metavar='FILE', help='write station shipyard data to FILE in CSV format')
     parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
+    parser.add_argument('-d', metavar='FILE', help='write raw JSON data to FILE')
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
@@ -93,6 +94,9 @@ try:
         sys.exit(EXIT_SERVER)
 
     # stuff we can do when not docked
+    if args.d:
+        with open(args.d, 'wt') as h:
+            h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
     if args.c:
         coriolis.export(data, args.c)
     if args.e:
