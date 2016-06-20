@@ -2,7 +2,7 @@
 "!Language" = "Čeština";
 
 /* EDSM setting. [prefs.py] */
-"Commmander Name" = "Jméno CMDRa";
+"Commander Name" = "Jméno CMDRa";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ověřovací kód byl odeslán na{CR}e-mailovou adresu spojenou s vašim Elite účtem.";

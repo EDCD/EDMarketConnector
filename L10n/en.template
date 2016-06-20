@@ -65,7 +65,7 @@
 "Combat" = "Combat";
 
 /* EDSM setting. [prefs.py] */
-"Commmander Name" = "Commmander Name";
+"Commander Name" = "Commander Name";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";

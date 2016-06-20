@@ -2,7 +2,7 @@
 "!Language" = "Русский";
 
 /* EDSM setting. [prefs.py] */
-"Commmander Name" = "Имя пилота";
+"Commander Name" = "Имя пилота";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Проверочный код был выслан на адрес электронной почты,{CR}указанный в вашей учетной записи Elite: Dangerous.";

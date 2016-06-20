@@ -167,7 +167,7 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Commmander Name'))	# EDSM setting
+        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Commander Name'))	# EDSM setting
         self.edsm_cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
         self.edsm_cmdr = nb.Entry(edsmframe)
         self.edsm_cmdr.insert(0, config.get('edsm_cmdrname') or '')
