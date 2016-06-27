@@ -37,11 +37,6 @@ class EDDB:
 if __name__ == "__main__":
     import json
 
-    # still send market and outfitting for currently "suspended" stations -
-    # https://community.elitedangerous.com/galnet/uid/568a999f9657ba5e0986a8de
-    # https://community.elitedangerous.com/galnet/uid/569f610b9657ba7d3461ba04
-    suspended = set([7, 10035, 9765, 659, 39328, 5672, 30402, 30653, 21901, 11335])
-
     # system_name by system_id
     systems  = dict([(x['id'], str(x['name'])) for x in json.load(open('systems.json'))])
 
@@ -60,8 +55,8 @@ if __name__ == "__main__":
     station_ids = dict([(
         (x['system_id'], str(x['name'])),
         (x['id'],
-         (EDDB.HAS_MARKET     if x['has_market']     or x['is_planetary'] or x['id'] in suspended else 0) |
-         (EDDB.HAS_OUTFITTING if x['has_outfitting'] or x['is_planetary'] or x['id'] in suspended else 0) |
+         (EDDB.HAS_MARKET     if x['has_market']     else 0) |
+         (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
          (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0)))
                         for x in stations])
     cPickle.dump(station_ids, open('stations.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
