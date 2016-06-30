@@ -47,6 +47,7 @@ commodity_map= {
     'Hafnium178'                         : 'Hafnium 178',
     'Hazardous Environment Suits'        : 'H.E. Suits',
     'Heliostatic Furnaces'               : 'Microbial Furnaces',
+    'Low Temperature Diamond'            : 'Low Temperature Diamonds',
     'Marine Supplies'                    : 'Marine Equipment',
     'Meta Alloys'                        : 'Meta-Alloys',
     'Methanol Monohydrate Crystals'      : 'Methanol Monohydrate',
@@ -59,6 +60,7 @@ commodity_map= {
     'Terrain Enrichment Systems'         : 'Land Enrichment Systems',
     'Trinkets Of Fortune'                : 'Trinkets Of Hidden Fortune',
     'Unknown Artifact'                   : 'Unknown Artefact',
+    'Unknown Artifact2'                  : 'Unknown Probe',	# untested
     'U S S Cargo Ancient Artefact'       : 'Ancient Artefact',
     'U S S Cargo Experimental Chemicals' : 'Experimental Chemicals',
     'U S S Cargo Military Plans'         : 'Military Plans',
