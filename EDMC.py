@@ -7,6 +7,7 @@ import argparse
 import json
 import requests
 import sys
+from os.path import getmtime
 from time import time, sleep
 from xml.etree import ElementTree
 
@@ -69,14 +70,12 @@ try:
         print '%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest)	# just first three digits
         sys.exit(EXIT_SUCCESS)
 
+    session = companion.Session()
     if args.j:
         # Import and collate from JSON dump
         data = json.load(open(args.j))
-        collate.addcommodities(data)
-        collate.addmodules(data)
-        collate.addships(data)
+        config.set('querytime', getmtime(args.j))
     else:
-        session = companion.Session()
         session.login(config.get('username'), config.get('password'))
         querytime = int(time())
         data = session.query()
@@ -92,6 +91,10 @@ try:
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
         sys.stderr.write('What are you flying?!\n')	# Shouldn't happen
         sys.exit(EXIT_SERVER)
+
+    if data['lastStarport'].get('commodities'):
+        # Fixup anomalies in the commodity data
+        session.fixup(data['lastStarport']['commodities'])
 
     # stuff we can do when not docked
     if args.d:
@@ -122,10 +125,14 @@ try:
         sys.stderr.write("Station doesn't have anything!\n")
         sys.exit(EXIT_SUCCESS)
 
+    if args.j:
+        # Collate from JSON dump
+        collate.addcommodities(data)
+        collate.addmodules(data)
+        collate.addships(data)
+
     if args.m:
         if data['lastStarport'].get('commodities'):
-            # Fixup anomalies in the commodity data
-            session.fixup(data['lastStarport']['commodities'])
             commodity.export(data, COMMODITY_DEFAULT, args.m)
         else:
             sys.stderr.write("Station doesn't have a market\n")
