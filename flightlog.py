@@ -8,7 +8,7 @@ from sys import platform
 import time
 
 from config import config
-from companion import commodity_map, ship_map
+from companion import ship_map
 
 
 logfile = None
@@ -46,7 +46,7 @@ def export(data):
     commodities = defaultdict(int)
     for item in data['ship'].get('cargo',{}).get('items',[]):
         if item['commodity'] != 'drones':
-            commodities[commodity_map.get(item['commodity'], item['commodity'])] += item['qty']
+            commodities[item['commodity']] += item['qty']
 
     writelog(querytime,
              data['lastSystem']['name'],

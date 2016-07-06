@@ -47,6 +47,7 @@ commodity_map= {
     'Hafnium178'                         : 'Hafnium 178',
     'Hazardous Environment Suits'        : 'H.E. Suits',
     'Heliostatic Furnaces'               : 'Microbial Furnaces',
+    'Ion Distributor'                    :('Machinery', 'Ion Distributor'),
     'Low Temperature Diamond'            : 'Low Temperature Diamonds',
     'Marine Supplies'                    : 'Marine Equipment',
     'Meta Alloys'                        : 'Meta-Alloys',
@@ -58,7 +59,7 @@ commodity_map= {
     'S A P8 Core Container'              : 'SAP 8 Core Container',	# Not seen in E:D 1.4 or later?
     'Skimer Components'                  : 'Skimmer Components',
     'Terrain Enrichment Systems'         : 'Land Enrichment Systems',
-    'Trinkets Of Fortune'                : 'Trinkets Of Hidden Fortune',
+    'Trinkets Of Fortune'                :('Consumer Items', 'Trinkets Of Hidden Fortune'),
     'Unknown Artifact'                   : 'Unknown Artefact',
     'Unknown Artifact2'                  : 'Unknown Probe',	# untested
     'U S S Cargo Ancient Artefact'       : 'Ancient Artefact',
@@ -293,7 +294,11 @@ class Session:
                 else:
                     # Rewrite text fields
                     commodity['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
-                    commodity['name'] = commodity_map.get(commodity['name'], commodity['name'])
+                    fixed = commodity_map.get(commodity['name'])
+                    if type(fixed) == tuple:
+                        (commodity['categoryname'], commodity['name']) = fixed
+                    elif fixed:
+                        commodity['name'] = fixed
 
                     # Force demand and stock to zero if their corresponding bracket is zero
                     # Fixes spurious "demand": 1 in ED 1.3

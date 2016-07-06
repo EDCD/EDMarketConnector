@@ -9,11 +9,12 @@ import os
 from os.path import exists, isfile
 import sys
 
-from companion import category_map, commodity_map, ship_map
+from companion import ship_map
 import outfitting
 
 
 # keep a summary of commodities found using in-game names
+# Assumes that the commodity data has already been 'fixed up'
 def addcommodities(data):
 
     if not data['lastStarport'].get('commodities'): return
@@ -31,10 +32,10 @@ def addcommodities(data):
     size_pre = len(commodities)
 
     for commodity in data['lastStarport'].get('commodities'):
-        key = commodity_map.get(commodity['name']) or commodity['name']
+        key = commodity['name']
         new = {
             'id'       : commodity['id'],
-            'category' : category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'category' : commodity['categoryname'],
             'average'  : commodity['cost_mean'].split('.')[0]
         }
         old = commodities.get(key)
