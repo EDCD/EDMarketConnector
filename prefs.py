@@ -124,6 +124,9 @@ class PreferencesDialog(tk.Toplevel):
         nb.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_td  = tk.IntVar(value = (output & config.OUT_TD  ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MANUAL else 1)	# inverted
+        self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
+        self.out_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_ship_eds= tk.IntVar(value = (output & config.OUT_SHIP_EDS) and 1)
         nb.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1)
@@ -418,9 +421,10 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_bpc.get() and config.OUT_BPC) +
                    (self.out_td.get() and config.OUT_TD) +
                    (self.out_csv.get() and config.OUT_CSV) +
+                   (config.OUT_MANUAL if not self.out_auto.get() else 0) +
                    (self.out_ship_eds.get() and config.OUT_SHIP_EDS) +
-                   (self.out_log_file.get() and config.OUT_LOG_FILE) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
+                   (self.out_log_file.get() and config.OUT_LOG_FILE) +
                    (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
                    (self.out_log_auto.get() and config.OUT_LOG_AUTO))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
@@ -451,14 +455,8 @@ class PreferencesDialog(tk.Toplevel):
             self.callback()
 
     def _destroy(self):
-        # Re-enable hotkey and log monitoring before exit
+        # Re-enable hotkey monitoring before exit
         hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_FILE|config.OUT_LOG_EDSM)):
-            monitor.start(self.parent)
-            edproxy.start(self.parent)
-        else:
-            monitor.stop()
-            edproxy.stop()
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 

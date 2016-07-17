@@ -28,6 +28,9 @@
 /* Output setting. [prefs.py] */
 "Automatically make a log entry on entering a system" = "Crear automáticamente una entrada en el registro al entrar en un sistema";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Actualizar automáticamente al atracar";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Saldo";
 

@@ -10,7 +10,7 @@ This app downloads commodity market and other station data from the game [Elite:
 
 Usage
 --------
-The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to automatically download and transmit and/or save your choice of data.
+The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to download and transmit and/or save your choice of data.
 
 Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web broswer.
 
@@ -44,7 +44,7 @@ Setup
 The first time that you run the app you are prompted for your username and password. This is the same username and password
 combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the market data for the station that *you* are docked at.
 
-You can also choose here what data to save (refer to the next section for details), whether to set up a hotkey so you don't have to switch to the app in order to “Update”, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
+You can also choose here what data to save (refer to the next section for details), whether to “Update” automatically on docking and/or with a hotkey, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
 The first time that you hit “Update” you will be prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
 Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before

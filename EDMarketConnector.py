@@ -249,11 +249,11 @@ class AppWindow:
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
         # Install log monitoring
-        monitor.set_callback(self.system_change)
+        monitor.set_callback('Dock', self.getandsend)
+        monitor.set_callback('Jump', self.system_change)
+        monitor.start(self.w)
         edproxy.set_callback(self.system_change)
-        if (config.getint('output') & config.OUT_LOG_AUTO) and (config.getint('output') & (config.OUT_LOG_FILE|config.OUT_LOG_EDSM)):
-            monitor.start(self.w)
-            edproxy.start(self.w)
+        edproxy.start(self.w)
 
         # First run
         if not config.get('username') or not config.get('password'):
@@ -497,7 +497,7 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, timestamp, system, coordinates):
+    def system_change(self, event, timestamp, system, coordinates):
 
         if self.system['text'] != system:
             self.system['text'] = system

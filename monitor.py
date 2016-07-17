@@ -12,6 +12,9 @@ from datetime import datetime
 if __debug__:
     from traceback import print_exc
 
+from config import config
+
+
 if platform=='darwin':
     from AppKit import NSWorkspace
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
@@ -72,6 +75,8 @@ else:
 
 class EDLogs(FileSystemEventHandler):
 
+    _POLL = 5		# New system gets posted to log file before hyperspace ends, so don't need to poll too often
+
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
         self.root = None
@@ -79,11 +84,12 @@ class EDLogs(FileSystemEventHandler):
         self.logfile = None
         self.observer = None
         self.thread = None
-        self.callback = None
+        self.callbacks = { 'Jump': None, 'Dock': None }
         self.last_event = None	# for communicating the Jump event
 
-    def set_callback(self, callback):
-        self.callback = callback
+    def set_callback(self, name, callback):
+        if name in self.callbacks:
+            self.callbacks[name] = callback
 
     def start(self, root):
         self.root = root
@@ -94,6 +100,7 @@ class EDLogs(FileSystemEventHandler):
             return True
 
         self.root.bind_all('<<MonitorJump>>', self.jump)	# user-generated
+        self.root.bind_all('<<MonitorDock>>', self.dock)	# user-generated
 
         # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
         if not self.observer:
@@ -131,6 +138,10 @@ class EDLogs(FileSystemEventHandler):
             self.logfile = event.src_path
 
     def worker(self):
+        # Tk isn't thread-safe in general.
+        # event_generate() is the only safe way to poke the main thread from this thread:
+        # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
+
         # e.g.:
         #   "{18:00:41} System:"Shinrarta Dezhra" StarPos:(55.719,17.594,27.156)ly  NormalFlight\r\n"
         # or with verboseLogging:
@@ -139,6 +150,16 @@ class EDLogs(FileSystemEventHandler):
         #   "... Supercruise\r\n"
         # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
         regexp = re.compile(r'\{(.+)\} System:"(.+)" StarPos:\((.+),(.+),(.+)\)ly.* (\S+)')	# (localtime, system, x, y, z, context)
+
+        # e.g.:
+        #   "{14:42:11} GetSafeUniversalAddress Station Count 1 moved 0 Docked Not Landed\r\n"
+        # or:
+        #   "... Undocked Landed\r\n"
+        # Don't use the simpler "Commander Put ..." message since its more likely to be delayed.
+        dockre = re.compile(r'\{(.+)\} GetSafeUniversalAddress Station Count \d+ moved \d+ (\S+) ([^\r\n]+)')	# (localtime, docked_status, landed_status)
+
+        docked = False	# Whether we're docked
+        updated = False	# Whether we've sent an update since we docked
 
         # Seek to the end of the latest log file
         logfile = self.logfile
@@ -149,6 +170,13 @@ class EDLogs(FileSystemEventHandler):
             loghandle = None
 
         while True:
+
+            if docked and not updated and not config.getint('output') & config.OUT_MANUAL:
+                self.root.event_generate('<<MonitorDock>>', when="tail")
+                updated = True
+                if __debug__:
+                    print "%s :\t%s %s" % ('Updated', docked and " docked" or "!docked", updated and " updated" or "!updated")
+
             # Check whether new log file started, e.g. client (re)started.
             newlogfile = self.logfile
             if logfile != newlogfile:
@@ -168,8 +196,18 @@ class EDLogs(FileSystemEventHandler):
                         if system == 'ProvingGround':
                             system = 'CQC'
                         coordinates = (float(x), float(y), float(z))
+                    else:
+                        match = dockre.match(line)
+                        if match:
+                            if match.group(2) == 'Undocked':
+                                docked = updated = False
+                            elif match.group(2) == 'Docked':
+                                docked = True
+                                # do nothing now in case the API server is lagging, but update on next poll
+                            if __debug__:
+                                print "%s :\t%s %s" % (match.group(2), docked and " docked" or "!docked", updated and " updated" or "!updated")
 
-                if system:
+                if system and not docked and config.getint('output') & config.OUT_LOG_AUTO:
                     # Convert local time string to UTC date and time
                     visited_struct = strptime(visited, '%H:%M:%S')
                     now = localtime()
@@ -177,11 +215,10 @@ class EDLogs(FileSystemEventHandler):
                         # Crossed midnight between timestamp and poll
                         now = localtime(time()-12*60*60)	# yesterday
                     time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
-                    # Tk on Windows doesn't like to be called outside of an event handler, so generate an event
                     self.last_event = (mktime(time_struct), system, coordinates)
                     self.root.event_generate('<<MonitorJump>>', when="tail")
 
-            sleep(10)	# New system gets posted to log file before hyperspace ends, so don't need to poll too often
+            sleep(self._POLL)
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
@@ -189,8 +226,14 @@ class EDLogs(FileSystemEventHandler):
 
     def jump(self, event):
         # Called from Tkinter's main loop
-        if self.callback and self.last_event:
-            self.callback(*self.last_event)
+        if self.callbacks['Jump'] and self.last_event:
+            self.callbacks['Jump'](event, *self.last_event)
+
+    def dock(self, event):
+        # Called from Tkinter's main loop
+        if self.callbacks['Dock']:
+            self.callbacks['Dock'](event)
+
 
     if platform=='darwin':
 

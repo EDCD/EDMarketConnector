@@ -14,6 +14,8 @@ from calendar import timegm
 if __debug__:
     from traceback import print_exc
 
+from config import config
+
 
 class _EDProxy:
 
@@ -73,7 +75,7 @@ class _EDProxy:
     def jump(self, event):
         # Called from Tkinter's main loop
         if self.callback and self.last_event:
-            self.callback(*self.last_event)
+            self.callback(event, *self.last_event)
 
     def close():
         self.discover_sock.shutdown()
@@ -131,7 +133,7 @@ class _EDProxy:
             s.settimeout(None)	# was self.SERVICE_TIMEOUT, but heartbeat doesn't appear to work so wait indefinitely
             while True:
                 msg = json.loads(s.recv(self.MESSAGE_MAX))
-                if msg['Type'] == self.MESSAGE_SYSTEM:
+                if msg['Type'] == self.MESSAGE_SYSTEM and config.getint('output') & config.OUT_LOG_AUTO:
                     if 'DateUtc' in msg:
                         timestamp = timegm(datetime.strptime(msg['DateUtc'], '%Y-%m-%d %H:%M:%S').utctimetuple())
                     else:
