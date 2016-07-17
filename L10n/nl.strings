@@ -1,15 +1,6 @@
 /* Language name */
 "!Language" = "Nederlands";
 
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Taal";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Sla Raw-gegevens Op...";
-
-/* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
-
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Een verificatie code is zojuist verstuurd naar het{CR}e-mail adres behorende bij je Elite account";
 
@@ -72,6 +63,9 @@
 
 /* Ranking. [stats.py] */
 "Combat" = "Gevechts rang";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Commander Name";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -191,7 +185,7 @@
 "Hero" = "Hero";
 
 /* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Highlighted text";
+"Highlighted text" = "Gemarkeerde tekst";
 
 /* Tab heading in settings on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
@@ -210,6 +204,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Taal";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Voor het laatst ververst om {HH}:{MM}:{SS}";
@@ -266,7 +263,7 @@
 "None" = "Geen";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normal text";
+"Normal text" = "Normale tekst";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -366,6 +363,9 @@
 
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Sla Raw-gegevens Op...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";

@@ -1,15 +1,6 @@
 /* Language name */
 "!Language" = "日本語";
 
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "言語";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "生データの保存...";
-
-/* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
-
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "あなたのElite: Dangerousアカウントに登録された{CR}メールアドレス宛に確認用の暗証コードが送られました。";
 
@@ -72,6 +63,9 @@
 
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Commander Name";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -210,6 +204,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "言語";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "最終更新時間 {HH}:{MM}:{SS}";
@@ -366,6 +363,9 @@
 
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "生データの保存...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";

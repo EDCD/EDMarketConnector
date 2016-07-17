@@ -1,8 +1,8 @@
 .DS_Store
 build
 dist.*
+dump
 *.bak
-*.json
 *.pyc
 *.pyo
 *.dll

@@ -1,15 +1,6 @@
 /* Language name */
 "!Language" = "Čeština";
 
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Jazyk";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Uložit syrová data...";
-
-/* EDSM setting. [prefs.py] */
-"Commander Name" = "Jméno CMDRa";
-
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Ověřovací kód byl odeslán na{CR}e-mailovou adresu spojenou s vašim Elite účtem.";
 
@@ -72,6 +63,9 @@
 
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Jméno CMDRa";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -210,6 +204,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jazyk";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Naposledy aktualizováno {HH}:{MM}:{SS}";
@@ -366,6 +363,9 @@
 
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Uložit syrová data...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";

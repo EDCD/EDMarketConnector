@@ -1,15 +1,6 @@
 /* Language name */
 "!Language" = "Italiano";
 
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Lingua";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Salva i Dati Grezzi...";
-
-/* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
-
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
 "A verification code has now been sent to the{CR}email address associated with your Elite account." = "Un codice di verifica è stato inviato alla email{CR}associata al tuo account di Elite Dangerous.";
 
@@ -72,6 +63,9 @@
 
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Nome Commandante";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -210,6 +204,9 @@
 
 /* Empire rank. [stats.py] */
 "Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Lingua";
 
 /* [EDMarketConnector.py] */
 "Last updated at {HH}:{MM}:{SS}" = "Ultimo aggiornamento alle {HH}:{MM}:{SS}";
@@ -366,6 +363,9 @@
 
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Salva i Dati Grezzi...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";
