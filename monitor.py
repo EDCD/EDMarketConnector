@@ -16,7 +16,6 @@ from config import config
 
 
 if platform=='darwin':
-    from AppKit import NSWorkspace
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
@@ -53,22 +52,6 @@ elif platform=='win32':
     RegEnumKeyEx.restype = LONG
     RegEnumKeyEx.argtypes = [HKEY, DWORD, LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(DWORD), LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(FILETIME)]
 
-    WNDENUMPROC = ctypes.WINFUNCTYPE(BOOL, HWND, ctypes.POINTER(DWORD))
-    EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindows.argtypes = [WNDENUMPROC, LPARAM]
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-
-    @WNDENUMPROC
-    def EnumWindowsProc(hwnd, lParam):
-        l = GetWindowTextLength(hwnd) + 1
-        buf = ctypes.create_unicode_buffer(l)
-        if GetWindowText(hwnd, buf, l) and buf.value.startswith('Elite - Dangerous'):
-            lParam[0] = 1
-            return False	# stop enumeration
-        return True
-
 else:
     FileSystemEventHandler = object	# dummy
 
@@ -87,6 +70,52 @@ class EDLogs(FileSystemEventHandler):
         self.callbacks = { 'Jump': None, 'Dock': None }
         self.last_event = None	# for communicating the Jump event
 
+    def logging_enabled_in_file(self, appconf):
+        if not isfile(appconf):
+            return False
+
+        with open(appconf, 'rU') as f:
+            content = f.read().lower()
+            start = content.find('<network')
+            end = content.find('</network>')
+            if start >= 0 and end >= 0:
+                return bool(re.search('verboselogging\s*=\s*\"1\"', content[start+8:end]))
+            else:
+                return False
+
+    def enable_logging_in_file(self, appconf):
+        try:
+            if not exists(appconf):
+                with open(appconf, 'wt') as f:
+                    f.write('<AppConfig>\n\t<Network\n\t\tVerboseLogging="1"\n\t>\n\t</Network>\n</AppConfig>\n')
+                return True
+
+            with open(appconf, 'rU') as f:
+                content = f.read()
+                f.close()
+            backup = appconf[:-4] + '_backup.xml'
+            if exists(backup):
+                unlink(backup)
+            rename(appconf, backup)
+
+            with open(appconf, 'wt') as f:
+                start = content.lower().find('<network')
+                if start >= 0:
+                    f.write(content[:start+8] + '\n\t\tVerboseLogging="1"' + content[start+8:])
+                else:
+                    start = content.lower().find("</appconfig>")
+                    if start >= 0:
+                        f.write(content[:start] + '\t<Network\n\t\tVerboseLogging="1"\n\t>\n\t</Network>\n' + content[start:])
+                    else:
+                        f.write(content)	# eh ?
+                        return False
+
+            assert self._logging_enabled()
+            return self.logging_enabled_in_file(appconf)
+        except:
+            if __debug__: print_exc()
+            return False
+
     def set_callback(self, name, callback):
         if name in self.callbacks:
             self.callbacks[name] = callback
@@ -98,6 +127,9 @@ class EDLogs(FileSystemEventHandler):
             return False
         if self.running():
             return True
+        if not self._logging_enabled():
+            # verbose logging reduces likelihood that Docked/Undocked messages will be delayed
+            self._enable_logging()
 
         self.root.bind_all('<<MonitorJump>>', self.jump)	# user-generated
         self.root.bind_all('<<MonitorDock>>', self.dock)	# user-generated
@@ -246,6 +278,13 @@ class EDLogs(FileSystemEventHandler):
             else:
                 return None
 
+        def _logging_enabled(self):
+            return self.logdir and self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml'))
+
+        def _enable_logging(self):
+            return self.logdir and self.enable_logging_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml'))
+
+
     elif platform=='win32':
 
         def _logdir(self):
@@ -321,10 +360,25 @@ class EDLogs(FileSystemEventHandler):
 
             return None
 
+        def _logging_enabled(self):
+            return self.logdir and (self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfigLocal.xml')) or
+                                    self.logging_enabled_in_file(join(self.logdir, pardir, 'AppConfig.xml')))
+
+        def _enable_logging(self):
+            return self.logdir and self.enable_logging_in_file(isfile(join(self.logdir, pardir, 'AppConfigLocal.xml')) and join(self.logdir, pardir, 'AppConfigLocal.xml') or join(self.logdir, pardir, 'AppConfig.xml'))
+
+
     elif platform=='linux2':
 
         def _logdir(self):
             return None
+
+        def _logging_enabled(self):
+            return False
+
+        def _enable_logging(self):
+            return False
+
 
 # singleton
 monitor = EDLogs()
