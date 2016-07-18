@@ -32,18 +32,18 @@ class EDDB:
 
 
 #
-# build databases from files systems.json and stations.json from http://eddb.io/api
+# build databases from files systems_populated.json and stations.json from http://eddb.io/api
 #
 if __name__ == "__main__":
     import json
 
     # system_name by system_id
-    systems  = dict([(x['id'], str(x['name'])) for x in json.load(open('systems.json'))])
+    systems  = dict([(x['id'], str(x['name'])) for x in json.load(open('systems_populated.json'))])
 
     stations = json.load(open('stations.json'))
 
     # check that all populated systems have known coordinates
-    coords = dict([(x['id'], x['x'] or x['y'] or x['z']) for x in json.load(open('systems.json'))])
+    coords = dict([(x['id'], x['x'] or x['y'] or x['z']) for x in json.load(open('systems_populated.json'))])
     for x in stations:
         assert x['system_id'] == 17072 or coords[x['system_id']], (x['system_id'], systems[x['system_id']])
 
