@@ -138,7 +138,7 @@ class _EDProxy:
                         timestamp = timegm(datetime.strptime(msg['DateUtc'], '%Y-%m-%d %H:%M:%S').utctimetuple())
                     else:
                         timestamp = mktime(strptime(msg['Date'], '%Y-%m-%d %H:%M:%S'))	# from local time
-                    self.last_event = (timestamp, msg['System'])
+                    self.last_event = (timestamp, msg['System'], None)
                     self.root.event_generate('<<ProxyJump>>', when="tail")
         except:
             if __debug__: print_exc()

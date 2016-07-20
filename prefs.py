@@ -304,16 +304,17 @@ class PreferencesDialog(tk.Toplevel):
         self.out_log_auto_text['text'] = ''
         self.edsm_log_auto_text['text'] = ''
         if monitor.logdir or proxyaddr:
-            log = self.out_log_file.get()
-            self.out_log_auto_button['state']  = log and tk.NORMAL or tk.DISABLED
-            if log and self.out_log_auto.get() and proxyaddr:
+            self.out_auto_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED	# edproxy doesn't send docking status
+            self.out_log_auto_button['state']  = self.out_log_file.get() and tk.NORMAL or tk.DISABLED
+            if self.out_log_file.get() and self.out_log_auto.get() and proxyaddr:
                 self.out_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
 
             self.edsm_log_auto_button['state']  = edsm_state
             if self.out_log_edsm.get() and self.out_log_auto.get() and proxyaddr:
                 self.edsm_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
         else:
-            self.out_log_auto_button['state'] = tk.DISABLED
+            self.out_auto_button['state']      = tk.DISABLED
+            self.out_log_auto_button['state']  = tk.DISABLED
             self.edsm_log_auto_button['state'] = tk.DISABLED
 
     def outbrowse(self):
