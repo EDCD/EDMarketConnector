@@ -178,6 +178,12 @@ rating_map = {
     '5': 'A',
 }
 
+# Ratings are messed up for Corrosion Resistant Cargo Rack
+corrosion_rating_map = {
+    '1': 'E',
+    '2': 'F',
+}
+
 planet_rating_map = {
     '1': 'H',
     '2': 'G',
@@ -262,7 +268,11 @@ def lookup(module, ship_map, entitled=False):
     #     return None
 
     # Shouldn't be listing player-specific paid stuff in outfitting, other than Horizons
-    elif not entitled and module.get('sku') and (module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' or name[1] == 'planetapproachsuite'):
+    elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
+        return None
+
+    # Don't report Planetary Approach Suite in outfitting
+    elif not entitled and name[1] == 'planetapproachsuite':
         return None
 
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
@@ -305,13 +315,12 @@ def lookup(module, ship_map, entitled=False):
     elif name[0]!='int':
         raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-    # Horizons Planetary Approach Suite
+    # Horizons Planetary Approach Suite - only listed in outfitting if the user is *playing* Horizons
     elif name[1] == 'planetapproachsuite':
         new['category'] = 'standard'
         new['name'] = 'Planetary Approach Suite'
         new['class'] = '1'
         new['rating'] = 'I'
-        new['entitlement'] = 'horizons'	# only listed in outfitting if the user is *playing* Horizons
 
     # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
     elif len(name) > 2 and (name[1],name[2]) in misc_internal_map:
@@ -336,7 +345,9 @@ def lookup(module, ship_map, entitled=False):
 
         if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = str(name[2][4:])
-        new['rating'] = (name[1]=='buggybay' and planet_rating_map or rating_map)[name[3][5:]]
+        new['rating'] = (name[1]=='buggybay' and planet_rating_map or
+                         name[1]=='corrosionproofcargorack' and corrosion_rating_map or
+                         rating_map)[name[3][5:]]
 
     # Disposition of fitted modules
     if 'on' in module and 'priority' in module:
@@ -349,6 +360,7 @@ def lookup(module, ship_map, entitled=False):
         new['entitlement'] = 'powerplay'
     else:
         assert module['sku'] == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS', '%s: Unknown sku "%s"' % (module['id'], module['sku'])
+        new['entitlement'] = 'horizons'
 
     # Extra module data
     key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
