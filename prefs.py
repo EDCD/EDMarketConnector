@@ -153,10 +153,8 @@ class PreferencesDialog(tk.Toplevel):
 
         HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
         self.edsm_log = tk.IntVar(value = (output & config.OUT_SYS_EDSM) and 1)
-        nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.edsm_log, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.edsm_log_auto = tk.IntVar(value = output & config.OUT_SYS_AUTO and 1 or 0)
-        self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.edsm_log_auto, command=self.outvarchanged)	# Output setting
-        self.edsm_log_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.edsm_log_button = nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.edsm_log, command=self.outvarchanged)
+        self.edsm_log_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
 
         nb.Label(edsmframe).grid(sticky=tk.W)	# big spacer
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
@@ -275,10 +273,14 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def outvarchanged(self):
+        self.out_auto_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED
+
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
         self.outdir_label['state'] = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']    = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
+
+        self.edsm_log_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED
 
         edsm_state = self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state']        = edsm_state
@@ -286,13 +288,6 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_apikey_label['state'] = edsm_state
         self.edsm_cmdr['state']         = edsm_state
         self.edsm_apikey['state']       = edsm_state
-
-        if monitor.logdir:
-            self.out_auto_button['state']       = tk.NORMAL
-            self.edsm_log_auto_button['state']  = edsm_state
-        else:
-            self.out_auto_button['state']      = tk.DISABLED
-            self.edsm_log_auto_button['state'] = tk.DISABLED
 
     def outbrowse(self):
         if platform != 'win32':
@@ -402,8 +397,7 @@ class PreferencesDialog(tk.Toplevel):
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
                    (self.out_ship_eds.get()      and config.OUT_SHIP_EDS) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
-                   (self.edsm_log.get()          and config.OUT_SYS_EDSM) +
-                   (self.edsm_log_auto.get()     and config.OUT_SYS_AUTO))
+                   (self.edsm_log.get()          and config.OUT_SYS_EDSM))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())

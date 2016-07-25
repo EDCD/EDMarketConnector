@@ -26,9 +26,6 @@
 "Appearance" = "表示";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "別の星系に移動したら自動的にフライトログを記録する";
-
-/* Output setting. [prefs.py] */
 "Automatically update on docking" = "ドッキングした際に自動でデータを更新する";
 
 /* Cmdr stats. [stats.py] */

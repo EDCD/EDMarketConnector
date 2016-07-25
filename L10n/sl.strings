@@ -25,9 +25,6 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Videz";
 
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Shrani podatke v dnevnik leta, ko prispeš v sistem";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Ravnotežje";
 

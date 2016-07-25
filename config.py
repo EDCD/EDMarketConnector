@@ -79,7 +79,7 @@ class Config:
     # OUT_STAT        = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
     OUT_SYS_EDSM      = 256
-    OUT_SYS_AUTO      = 512
+    # OUT_SYS_AUTO    = 512	# Now always automatic
     OUT_MKT_MANUAL    = 1024
 
     if platform=='darwin':

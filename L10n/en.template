@@ -26,9 +26,6 @@
 "Appearance" = "Appearance";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Automatically make a log entry on entering a system";
-
-/* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatically update on docking";
 
 /* Cmdr stats. [stats.py] */

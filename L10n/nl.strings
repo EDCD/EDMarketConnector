@@ -26,9 +26,6 @@
 "Appearance" = "Vormgeving";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Automatisch een log regel aanmaken bij het binnengaan van een stelsel";
-
-/* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatisch bijwerken na landing";
 
 /* Cmdr stats. [stats.py] */

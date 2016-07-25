@@ -378,15 +378,11 @@ class AppWindow:
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
                 if config.getint('output') & config.OUT_SYS_EDSM:
-                    # Catch any EDSM errors here so that they don't prevent station update
+                    # Silently catch any EDSM errors here so that they don't prevent station update
                     try:
-                        self.status['text'] = _('Sending data to EDSM...')
-                        self.w.update_idletasks()
-                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                        self.status['text'] = ''
+                        self.edsm.lookup(self.system['text'], EDDB.system(self.system['text']))
                     except Exception as e:
                         if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
                 else:
                     self.edsm.link(self.system['text'])
                 self.edsmpoll()
@@ -492,7 +488,7 @@ class AppWindow:
 
             plug.notify_system_changed(timestamp, system, coordinates)
 
-            if config.getint('output') & (config.OUT_SYS_EDSM | config.OUT_SYS_AUTO) == (config.OUT_SYS_EDSM | OUT_SYS_AUTO):
+            if config.getint('output') & config.OUT_SYS_EDSM:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()

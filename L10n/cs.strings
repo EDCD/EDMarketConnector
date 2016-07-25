@@ -26,9 +26,6 @@
 "Appearance" = "Vzhled";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Automaticky vytvořit záznam při vstoupení do systému";
-
-/* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automaticky aktualizovat při zadokování";
 
 /* Cmdr stats. [stats.py] */

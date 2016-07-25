@@ -25,9 +25,6 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Apparence";
 
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Ajouter automatiquement une entrée au journal en entrant dans un système";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Solde";
 
