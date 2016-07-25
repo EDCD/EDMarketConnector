@@ -73,9 +73,6 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Kompetent";
 
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Verbunden mit {EDPROXY} bei {ADDR}";
-
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Wartezeit {SS}s";
 
@@ -171,9 +168,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Speicherort";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Fluglogbuch im CSV-Format";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";

@@ -7,7 +7,6 @@ import urllib
 import Tkinter as tk
 
 from config import applongname, appversion, config
-import flightlog
 
 if __debug__:
     from traceback import print_exc
@@ -139,21 +138,3 @@ def writelog(timestamp, system, edsmlookupfn, coordinates=None):
     # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
     if msgnum // 100 not in (1,4):
         raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
-
-    if not config.getint('edsm_historical'):
-        config.set('edsm_historical', 1)
-        thread = threading.Thread(target = export_historical, name = 'EDSM export')
-        thread.daemon = True
-        thread.start()
-
-# Make best effort to export existing flight log file. Be silent on error.
-def export_historical():
-    try:
-        for (timestamp, system_name) in flightlog.logs():
-            r = requests.get('https://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(config.get('edsm_cmdrname').encode('utf-8')), urllib.quote(config.get('edsm_apikey')), urllib.quote(system_name), urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
-            r.raise_for_status()
-
-            if r.json()['msgnum'] // 100 == 2:
-                raise Exception()
-    except:
-        if __debug__: print_exc()

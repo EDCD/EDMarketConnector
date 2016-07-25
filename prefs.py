@@ -11,7 +11,6 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import applongname, config
-from edproxy import edproxy
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -114,33 +113,27 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_EDDN | config.OUT_SHIP_EDS)	# default settings
+        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SHIP_EDS)	# default settings
+
         nb.Label(outframe, text=_('Please choose what data to save')).grid(columnspan=2, padx=PADX, sticky=tk.W)
-        self.out_eddn= tk.IntVar(value = (output & config.OUT_EDDN) and 1)
+        self.out_eddn= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
         nb.Checkbutton(outframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.out_eddn, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_csv = tk.IntVar(value = (output & config.OUT_CSV ) and 1)
+        self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_bpc = tk.IntVar(value = (output & config.OUT_BPC ) and 1)
+        self.out_bpc = tk.IntVar(value = (output & config.OUT_MKT_BPC ) and 1)
         nb.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_td  = tk.IntVar(value = (output & config.OUT_TD  ) and 1)
+        self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MANUAL else 1)	# inverted
-        self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
-        self.out_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_ship_eds= tk.IntVar(value = (output & config.OUT_SHIP_EDS) and 1)
         nb.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1)
         nb.Checkbutton(outframe, text=_('Ship loadout in Coriolis format file'), variable=self.out_ship_coriolis, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_log_file = tk.IntVar(value = (output & config.OUT_LOG_FILE) and 1)
-        nb.Checkbutton(outframe, text=_('Flight log in CSV format file'), variable=self.out_log_file, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.out_log_auto = tk.IntVar(value = output & config.OUT_LOG_AUTO and 1 or 0)
-        self.out_log_auto_button = nb.Checkbutton(outframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
-        self.out_log_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_log_auto_text = nb.Label(outframe, foreground='firebrick')
-        self.out_log_auto_text.grid(columnspan=2, padx=(30,0), sticky=tk.W)
+        self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MKT_MANUAL else 1)	# inverted
+        self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
+        self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
 
         self.outdir_label = nb.Label(outframe, text=_('File location'))	# Section heading in settings
-        self.outdir_label.grid(padx=BUTTONX, sticky=tk.W)
+        self.outdir_label.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.outdir = nb.Entry(outframe, takefocus=False)
         if config.get('outdir').startswith(config.home):
             self.outdir.insert(0, '~' + config.get('outdir')[len(config.home):])
@@ -159,14 +152,13 @@ class PreferencesDialog(tk.Toplevel):
         edsmframe.columnconfigure(1, weight=1)
 
         HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
-        ttk.Separator(edsmframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        self.out_log_edsm = tk.IntVar(value = (output & config.OUT_LOG_EDSM) and 1)
-        nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.out_log_edsm, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.out_log_auto, command=self.outvarchanged)	# Output setting
+        self.edsm_log = tk.IntVar(value = (output & config.OUT_SYS_EDSM) and 1)
+        nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.edsm_log, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.edsm_log_auto = tk.IntVar(value = output & config.OUT_SYS_AUTO and 1 or 0)
+        self.edsm_log_auto_button = nb.Checkbutton(edsmframe, text=_('Automatically make a log entry on entering a system'), variable=self.edsm_log_auto, command=self.outvarchanged)	# Output setting
         self.edsm_log_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.edsm_log_auto_text = nb.Label(edsmframe, foreground='firebrick')
-        self.edsm_log_auto_text.grid(columnspan=2, padx=(30,0), sticky=tk.W)
 
+        nb.Label(edsmframe).grid(sticky=tk.W)	# big spacer
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
@@ -270,7 +262,7 @@ class PreferencesDialog(tk.Toplevel):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         # Selectively disable buttons depending on output settings
-        self.proxypoll()
+        self.outvarchanged()
         self.themevarchanged()
 
         # disable hotkey for the duration
@@ -282,39 +274,24 @@ class PreferencesDialog(tk.Toplevel):
         self.grab_set()
 
 
-    def proxypoll(self):
-        self.outvarchanged()
-        self.after(1000, self.proxypoll)
-
-
     def outvarchanged(self):
-        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get() or self.out_log_file.get()
+        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
         self.outdir_label['state'] = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']    = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
 
-        edsm_state = self.out_log_edsm.get() and tk.NORMAL or tk.DISABLED
+        edsm_state = self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state']        = edsm_state
         self.edsm_cmdr_label['state']   = edsm_state
         self.edsm_apikey_label['state'] = edsm_state
         self.edsm_cmdr['state']         = edsm_state
         self.edsm_apikey['state']       = edsm_state
 
-        proxyaddr = edproxy.status()
-        self.out_log_auto_text['text'] = ''
-        self.edsm_log_auto_text['text'] = ''
-        if monitor.logdir or proxyaddr:
-            self.out_auto_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED	# edproxy doesn't send docking status
-            self.out_log_auto_button['state']  = self.out_log_file.get() and tk.NORMAL or tk.DISABLED
-            if self.out_log_file.get() and self.out_log_auto.get() and proxyaddr:
-                self.out_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
-
+        if monitor.logdir:
+            self.out_auto_button['state']       = tk.NORMAL
             self.edsm_log_auto_button['state']  = edsm_state
-            if self.out_log_edsm.get() and self.out_log_auto.get() and proxyaddr:
-                self.edsm_log_auto_text['text'] = _('Connected to {EDPROXY} at {ADDR}').format(EDPROXY = 'edproxy', ADDR = proxyaddr)	# Output settings
         else:
             self.out_auto_button['state']      = tk.DISABLED
-            self.out_log_auto_button['state']  = tk.DISABLED
             self.edsm_log_auto_button['state'] = tk.DISABLED
 
     def outbrowse(self):
@@ -418,16 +395,15 @@ class PreferencesDialog(tk.Toplevel):
         config.set('password', self.password.get().strip())
 
         config.set('output',
-                   (self.out_eddn.get() and config.OUT_EDDN) +
-                   (self.out_bpc.get() and config.OUT_BPC) +
-                   (self.out_td.get() and config.OUT_TD) +
-                   (self.out_csv.get() and config.OUT_CSV) +
-                   (config.OUT_MANUAL if not self.out_auto.get() else 0) +
-                   (self.out_ship_eds.get() and config.OUT_SHIP_EDS) +
+                   (self.out_eddn.get()          and config.OUT_MKT_EDDN) +
+                   (self.out_bpc.get()           and config.OUT_MKT_BPC) +
+                   (self.out_td.get()            and config.OUT_MKT_TD) +
+                   (self.out_csv.get()           and config.OUT_MKT_CSV) +
+                   (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
+                   (self.out_ship_eds.get()      and config.OUT_SHIP_EDS) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
-                   (self.out_log_file.get() and config.OUT_LOG_FILE) +
-                   (self.out_log_edsm.get() and config.OUT_LOG_EDSM) +
-                   (self.out_log_auto.get() and config.OUT_LOG_AUTO))
+                   (self.edsm_log.get()          and config.OUT_SYS_EDSM) +
+                   (self.edsm_log_auto.get()     and config.OUT_SYS_AUTO))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())

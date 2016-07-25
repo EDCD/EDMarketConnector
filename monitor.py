@@ -154,7 +154,7 @@ class EDLogs(FileSystemEventHandler):
 
         while True:
 
-            if docked and not updated and not config.getint('output') & config.OUT_MANUAL:
+            if docked and not updated and not config.getint('output') & config.OUT_MKT_MANUAL:
                 self.root.event_generate('<<MonitorDock>>', when="tail")
                 updated = True
                 if __debug__:
@@ -190,7 +190,7 @@ class EDLogs(FileSystemEventHandler):
                             if __debug__:
                                 print "%s :\t%s %s" % (match.group(2), docked and " docked" or "!docked", updated and " updated" or "!updated")
 
-                if system and not docked and config.getint('output') & config.OUT_LOG_AUTO:
+                if system and not docked and config.getint('output'):
                     # Convert local time string to UTC date and time
                     visited_struct = strptime(visited, '%H:%M:%S')
                     now = localtime()

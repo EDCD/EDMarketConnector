@@ -70,9 +70,6 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Connected to {EDPROXY} at {ADDR}";
-
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Atskaite {SS}";
 
@@ -168,9 +165,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Faila atrašanās vieta";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Lidojuma ieraksts SCV formāta failā";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiators";
