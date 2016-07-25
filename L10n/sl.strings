@@ -25,9 +25,6 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Videz";
 
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Shrani podatke v dnevnik leta, ko prispeš v sistem";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Ravnotežje";
 
@@ -69,9 +66,6 @@
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
-
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Connected to {EDPROXY} at {ADDR}";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Posodobitev v {SS}s";
@@ -168,9 +162,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Lokacija datoteke";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Dnevnik leta v CSV formatu";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";

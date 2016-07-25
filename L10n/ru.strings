@@ -25,9 +25,6 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Внешний вид";
 
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Автоматически заносить в журнал полета каждую посещённую систему";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Баланс";
 
@@ -69,9 +66,6 @@
 
 /* Combat rank. [stats.py] */
 "Competent" = "Специалист";
-
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Connected to {EDPROXY} at {ADDR}";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "пауза {SS} сек";
@@ -168,9 +162,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Сохранять файлы";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Журнал полета в формате CSV";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Гладиатор";

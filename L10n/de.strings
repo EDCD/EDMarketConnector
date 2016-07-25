@@ -26,9 +26,6 @@
 "Appearance" = "Aussehen";
 
 /* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Automatisch Logbucheintrag bei Systemeintritt anlegen";
-
-/* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatisch beim Andocken aktualisieren";
 
 /* Cmdr stats. [stats.py] */
@@ -72,9 +69,6 @@
 
 /* Combat rank. [stats.py] */
 "Competent" = "Kompetent";
-
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Verbunden mit {EDPROXY} bei {ADDR}";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Wartezeit {SS}s";
@@ -171,9 +165,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Speicherort";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Fluglogbuch im CSV-Format";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";

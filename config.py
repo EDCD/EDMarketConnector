@@ -70,17 +70,17 @@ elif platform=='linux2':
 
 class Config:
 
-    OUT_EDDN = 1
-    OUT_BPC  = 2
-    OUT_TD   = 4
-    OUT_CSV  = 8
-    OUT_SHIP_EDS = 16
-    OUT_LOG_FILE  = 32
-    #OUT_STAT = 64	# No longer available
+    OUT_MKT_EDDN      = 1
+    OUT_MKT_BPC       = 2
+    OUT_MKT_TD        = 4
+    OUT_MKT_CSV       = 8
+    OUT_SHIP_EDS      = 16
+    # OUT_SYS_FILE    = 32	# No longer supported
+    # OUT_STAT        = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
-    OUT_LOG_EDSM = 256
-    OUT_LOG_AUTO = 512
-    OUT_MANUAL = 1024
+    OUT_SYS_EDSM      = 256
+    # OUT_SYS_AUTO    = 512	# Now always automatic
+    OUT_MKT_MANUAL    = 1024
 
     if platform=='darwin':
 

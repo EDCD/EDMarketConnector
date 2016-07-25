@@ -41,12 +41,10 @@ import eddn
 import edsm
 import loadout
 import coriolis
-import flightlog
 import eddb
 import stats
 import prefs
 import plug
-from edproxy import edproxy
 from hotkey import hotkeymgr
 from monitor import monitor
 from theme import theme
@@ -252,8 +250,6 @@ class AppWindow:
         monitor.set_callback('Dock', self.getandsend)
         monitor.set_callback('Jump', self.system_change)
         monitor.start(self.w)
-        edproxy.set_callback(self.system_change)
-        edproxy.start(self.w)
 
         # First run
         if not config.get('username') or not config.get('password'):
@@ -308,15 +304,6 @@ class AppWindow:
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
-
-        # Try to obtain exclusive lock on flight log ASAP
-        if config.getint('output') & config.OUT_LOG_FILE:
-            try:
-                flightlog.openlog()
-            except Exception as e:
-                if __debug__: print_exc()
-                if not self.status['text']:
-                    self.status['text'] = unicode(e)
 
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
@@ -390,23 +377,17 @@ class AppWindow:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
-                if config.getint('output') & config.OUT_LOG_FILE:
-                    flightlog.export(data)
-                if config.getint('output') & config.OUT_LOG_EDSM:
-                    # Catch any EDSM errors here so that they don't prevent station update
+                if config.getint('output') & config.OUT_SYS_EDSM:
+                    # Silently catch any EDSM errors here so that they don't prevent station update
                     try:
-                        self.status['text'] = _('Sending data to EDSM...')
-                        self.w.update_idletasks()
-                        edsm.export(data, lambda:self.edsm.lookup(self.system['text'], EDDB.system(self.system['text'])))	# Do EDSM lookup during EDSM export
-                        self.status['text'] = ''
+                        self.edsm.lookup(self.system['text'], EDDB.system(self.system['text']))
                     except Exception as e:
                         if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
                 else:
                     self.edsm.link(self.system['text'])
                 self.edsmpoll()
 
-                if not (config.getint('output') & (config.OUT_CSV|config.OUT_TD|config.OUT_BPC|config.OUT_EDDN)):
+                if not (config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC|config.OUT_MKT_EDDN)):
                     # no station data requested - we're done
                     pass
 
@@ -421,25 +402,25 @@ class AppWindow:
 
 
                     # No EDDN output?
-                    if (config.getint('output') & config.OUT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
+                    if (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
 
                     # No market output?
-                    elif not (config.getint('output') & config.OUT_EDDN) and not data['lastStarport'].get('commodities'):
+                    elif not (config.getint('output') & config.OUT_MKT_EDDN) and not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
 
                     else:
                         if data['lastStarport'].get('commodities'):
-                            if config.getint('output') & config.OUT_CSV:
+                            if config.getint('output') & config.OUT_MKT_CSV:
                                 commodity.export(data, COMMODITY_CSV)
-                            if config.getint('output') & config.OUT_TD:
+                            if config.getint('output') & config.OUT_MKT_TD:
                                 td.export(data)
-                            if config.getint('output') & config.OUT_BPC:
+                            if config.getint('output') & config.OUT_MKT_BPC:
                                 commodity.export(data, COMMODITY_BPC)
 
-                        if config.getint('output') & config.OUT_EDDN:
+                        if config.getint('output') & config.OUT_MKT_EDDN:
                             old_status = self.status['text']
                             if not old_status:
                                 self.status['text'] = _('Sending data to EDDN...')
@@ -507,9 +488,7 @@ class AppWindow:
 
             plug.notify_system_changed(timestamp, system, coordinates)
 
-            if config.getint('output') & config.OUT_LOG_FILE:
-                flightlog.writelog(timestamp, system)
-            if config.getint('output') & config.OUT_LOG_EDSM:
+            if config.getint('output') & config.OUT_SYS_EDSM:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
@@ -590,7 +569,6 @@ class AppWindow:
 
     def onexit(self, event=None):
         hotkeymgr.unregister()
-        flightlog.close()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()

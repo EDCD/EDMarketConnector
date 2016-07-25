@@ -25,9 +25,6 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Apparence";
 
-/* Output setting. [prefs.py] */
-"Automatically make a log entry on entering a system" = "Ajouter automatiquement une entrée au journal en entrant dans un système";
-
 /* Cmdr stats. [stats.py] */
 "Balance" = "Solde";
 
@@ -69,9 +66,6 @@
 
 /* Combat rank. [stats.py] */
 "Competent" = "Compétent";
-
-/* Output settings. [prefs.py] */
-"Connected to {EDPROXY} at {ADDR}" = "Connecté à {EDPROXY} sur {ADDR}";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Temps de recharge {SS}s";
@@ -168,9 +162,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "Emplacement des fichiers";
-
-/* [prefs.py] */
-"Flight log in CSV format file" = "Journal de vol au format CSV";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
