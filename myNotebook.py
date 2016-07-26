@@ -52,6 +52,7 @@ class Frame(platform == 'darwin' and tk.Frame or ttk.Frame):
         if platform == 'darwin':
             kw['background'] = kw.pop('background', PAGEBG)
             tk.Frame.__init__(self, master, **kw)
+            tk.Frame(self).grid(pady=5)
         elif platform == 'win32':
             ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
             ttk.Frame(self).grid(pady=5)	# top spacer
