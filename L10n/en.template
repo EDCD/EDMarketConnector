@@ -70,6 +70,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Configuration";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "cooldown {SS}s";
 
@@ -102,6 +105,9 @@
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "E:D log file location";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -181,7 +187,7 @@
 /* Dark theme color setting. [prefs.py] */
 "Highlighted text" = "Highlighted text";
 
-/* Tab heading in settings on Windows. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
@@ -190,7 +196,7 @@
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identity";
 
-/* Tab heading in settings on OSX. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
 
 /* Empire rank. [stats.py] */

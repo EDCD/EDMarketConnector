@@ -132,7 +132,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
 
-        self.outdir_label = nb.Label(outframe, text=_('File location'))	# Section heading in settings
+        self.outdir_label = nb.Label(outframe, text=_('File location')+':')	# Section heading in settings
         self.outdir_label.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.outdir = nb.Entry(outframe, takefocus=False)
         if config.get('outdir').startswith(config.home):
@@ -141,12 +141,29 @@ class PreferencesDialog(tk.Toplevel):
             self.outdir.insert(0, config.get('outdir'))
         self.outdir.grid(row=20, padx=(PADX,0), sticky=tk.EW)
         self.outbutton = nb.Button(outframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
-                                                    _('Browse...')), command=self.outbrowse)	# Folder selection button on Windows
-        self.outbutton.grid(row=20, column=1, padx=PADX)
+                                                   _('Browse...')),	# Folder selection button on Windows
+                                   command = lambda:self.filebrowse(_('File location'), self.outdir))
+        self.outbutton.grid(row=20, column=1, padx=PADX, sticky=tk.NSEW)
         nb.Frame(outframe).grid(pady=5)	# bottom spacer
 
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
 
+
+        # eddnframe = nb.Frame(notebook)
+        # eddnframe.columnconfigure(0, weight=1)
+
+        # HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/jamesremuscat/EDDN/wiki', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
+        # ttk.Separator(eddnframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
+        # self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
+        # nb.Checkbutton(eddnframe, text=_('Send station data to EDDN'), variable=self.eddn_station, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Output setting
+        # self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
+        # self.eddn_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        # self.eddn_system= tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
+        # nb.Checkbutton(eddnframe, text=_('Send system and scan data to EDDN'), variable=self.eddn_system, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Output setting
+        # self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
+        # self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.out_auto, command=self.outvarchanged)	# Output setting under 'Send system and scan data to EDDN'
+
+        # notebook.add(eddnframe, text='EDDN')		# Not translated
 
         edsmframe = nb.Frame(notebook)
         edsmframe.columnconfigure(1, weight=1)
@@ -174,40 +191,58 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
+        configframe = nb.Frame(notebook)
+        configframe.columnconfigure(1, weight=1)
+
+        self.logdir = nb.Entry(configframe, takefocus=False)
+        if platform != 'darwin':
+            # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
+            nb.Label(configframe, text = _('E:D log file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Configuration setting
+            logdir = config.get('logdir') or monitor.logdir
+            if not logdir:
+                pass
+            elif logdir.startswith(config.home):
+                self.logdir.insert(0, '~' + logdir[len(config.home):])
+            else:
+                self.logdir.insert(0, logdir)
+            self.logdir['state'] = 'readonly'
+            self.logdir.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
+            self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
+                                                          _('Browse...')),	# Folder selection button on Windows
+                                       command = lambda:self.filebrowse(_('E:D log file location'), self.logdir))
+            self.logbutton.grid(row=10, column=2, padx=PADX, sticky=tk.EW)
+            nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = monitor.logdir and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
+
+        if platform == 'win32':
+            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
 
         if platform in ['darwin','win32']:
             self.hotkey_code = config.getint('hotkey_code')
             self.hotkey_mods = config.getint('hotkey_mods')
             self.hotkey_only = tk.IntVar(value = not config.getint('hotkey_always'))
             self.hotkey_play = tk.IntVar(value = not config.getint('hotkey_mute'))
-            hotkeyframe = nb.Frame(notebook)
-            hotkeyframe.columnconfigure(1, weight=1)
-            nb.Label(hotkeyframe).grid(sticky=tk.W)	# big spacer
+            nb.Label(configframe, text = platform=='darwin' and
+                     _('Keyboard shortcut') or	# Hotkey/Shortcut settings prompt on OSX
+                     _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
+            ).grid(row=20, padx=PADX, sticky=tk.W)
             if platform == 'darwin' and not was_accessible_at_launch:
                 if AXIsProcessTrusted():
-                    nb.Label(hotkeyframe, text = _('Re-start {APP} to use shortcuts').format(APP=applongname), foreground='firebrick').grid(padx=PADX, sticky=tk.NSEW)	# Shortcut settings prompt on OSX
+                    nb.Label(configframe, text = _('Re-start {APP} to use shortcuts').format(APP=applongname), foreground='firebrick').grid(padx=PADX, sticky=tk.W)	# Shortcut settings prompt on OSX
                 else:
-                    nb.Label(hotkeyframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname), foreground='firebrick').grid(columnspan=2, padx=PADX, sticky=tk.W)		# Shortcut settings prompt on OSX
-                    nb.Button(hotkeyframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(column=1, padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
+                    nb.Label(configframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname), foreground='firebrick').grid(columnspan=3, padx=PADX, sticky=tk.W)		# Shortcut settings prompt on OSX
+                    nb.Button(configframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(column=2, padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
             else:
-                self.hotkey_text = nb.Entry(hotkeyframe, width = (platform == 'darwin' and 20 or 30), justify=tk.CENTER)
+                self.hotkey_text = nb.Entry(configframe, width = (platform == 'darwin' and 20 or 30), justify=tk.CENTER)
                 self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
-                nb.Label(hotkeyframe, text = platform=='darwin' and
-                         _('Keyboard shortcut') or	# Tab heading in settings on OSX
-                         _('Hotkey')			# Tab heading in settings on Windows
-                         ).grid(row=10, column=0, padx=PADX, sticky=tk.NSEW)
-                self.hotkey_text.grid(row=10, column=1, padx=PADX, sticky=tk.NSEW)
-                nb.Label(hotkeyframe).grid(sticky=tk.W)	# big spacer
-                self.hotkey_only_btn = nb.Checkbutton(hotkeyframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
-                self.hotkey_only_btn.grid(columnspan=2, padx=PADX, sticky=tk.W)
-                self.hotkey_play_btn = nb.Checkbutton(hotkeyframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
-                self.hotkey_play_btn.grid(columnspan=2, padx=PADX, sticky=tk.W)
+                self.hotkey_text.grid(row=20, column=1, columnspan=2, padx=PADX, pady=(5,0), sticky=tk.W)
+                self.hotkey_only_btn = nb.Checkbutton(configframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
+                self.hotkey_only_btn.grid(columnspan=3, padx=PADX, pady=(5,0), sticky=tk.W)
+                self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
+                self.hotkey_play_btn.grid(columnspan=3, padx=PADX, sticky=tk.W)
 
-            notebook.add(hotkeyframe, text = platform=='darwin' and
-                         _('Keyboard shortcut') or	# Tab heading in settings on OSX
-                         _('Hotkey'))			# Tab heading in settings on Windows
+        notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
 
         self.languages = Translations().available_names()
         self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
@@ -223,7 +258,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(themeframe, text=_('Language')).grid(row=10, padx=PADX, sticky=tk.W)	# Appearance setting prompt
         self.lang_button = nb.OptionMenu(themeframe, self.lang, self.lang.get(), *self.languages.values())
         self.lang_button.grid(row=10, column=1, columnspan=2, padx=PADX, sticky=tk.W)
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*6, sticky=tk.EW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
         nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Appearance setting
         nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
@@ -235,9 +270,10 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
         self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='grey4', command=lambda:self.themecolorbrowse(1))	# Do not translate
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*6, sticky=tk.EW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
         self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
         self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
+        nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
 
         notebook.add(themeframe, text=_('Appearance'))	# Tab heading in settings
 
@@ -273,14 +309,15 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def outvarchanged(self):
-        self.out_auto_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED
+        logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
+        self.out_auto_button['state'] = logdir and isdir(logdir) and tk.NORMAL or tk.DISABLED
 
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
         self.outdir_label['state'] = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']    = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
 
-        self.edsm_log_button['state'] = monitor.logdir and tk.NORMAL or tk.DISABLED
+        self.edsm_log_button['state'] = self.logdir.get() and isdir(self.logdir.get()) and tk.NORMAL or tk.DISABLED
 
         edsm_state = self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state']        = edsm_state
@@ -289,10 +326,10 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_cmdr['state']         = edsm_state
         self.edsm_apikey['state']       = edsm_state
 
-    def outbrowse(self):
+    def filebrowse(self, title, entryfield):
         if platform != 'win32':
             import tkFileDialog
-            d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(self.outdir.get()), title=_('File location'), mustexist=tk.TRUE)
+            d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(entryfield.get()), title=title, mustexist=tk.TRUE)
         else:
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
@@ -301,10 +338,10 @@ class PreferencesDialog(tk.Toplevel):
                 return 0
 
             browseInfo = BROWSEINFO()
-            browseInfo.lpszTitle = _('File location')
+            browseInfo.lpszTitle = title
             browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
             browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            browseInfo.lParam = self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[1:]) or self.outdir.get()
+            browseInfo.lParam = entryfield.get().startswith('~') and join(config.home, entryfield.get()[2:]) or entryfield.get()
             ctypes.windll.ole32.CoInitialize(None)
             pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
             if pidl:
@@ -316,13 +353,26 @@ class PreferencesDialog(tk.Toplevel):
                 d = None
 
         if d:
-            self.outdir['state'] = tk.NORMAL	# must be writable to update
-            self.outdir.delete(0, tk.END)
+            entryfield['state'] = tk.NORMAL	# must be writable to update
+            entryfield.delete(0, tk.END)
             if d.startswith(config.home):
-                self.outdir.insert(0, '~' + d[len(config.home):])
+                entryfield.insert(0, '~' + d[len(config.home):])
             else:
-                self.outdir.insert(0, d)
-            self.outdir['state'] = 'readonly'
+                entryfield.insert(0, d)
+            entryfield['state'] = 'readonly'
+            self.outvarchanged()
+
+    def logdir_reset(self):
+        self.logdir['state'] = tk.NORMAL	# must be writable to update
+        self.logdir.delete(0, tk.END)
+        if not monitor.logdir:
+            pass
+        elif monitor.logdir.startswith(config.home):
+            self.logdir.insert(0, '~' + monitor.logdir[len(config.home):])
+        else:
+            self.logdir.insert(0, monitor.logdir)
+        self.logdir['state'] = 'readonly'
+        self.outvarchanged()
 
     def themecolorbrowse(self, index):
         (rgb, color) = tkColorChooser.askcolor(self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)
@@ -403,6 +453,11 @@ class PreferencesDialog(tk.Toplevel):
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 
+        logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
+        if monitor.logdir and logdir.lower() == monitor.logdir.lower():
+            config.set('logdir', '')	# default location
+        else:
+            config.set('logdir', logdir)
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)
@@ -426,8 +481,9 @@ class PreferencesDialog(tk.Toplevel):
             self.callback()
 
     def _destroy(self):
-        # Re-enable hotkey monitoring before exit
+        # Re-enable hotkey and log monitoring before exit
         hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+        monitor.start(self.parent)
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 

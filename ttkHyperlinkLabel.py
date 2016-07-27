@@ -40,7 +40,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
         if self.underline is not False:
             self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
-            self.font_u = tkFont.Font(self, self.font_n)
+            self.font_u = tkFont.Font(font = self.font_n)
             self.font_u.configure(underline = True)
             if self.underline is True:
                 self.configure(font = self.font_u)

@@ -33,6 +33,7 @@ elif platform=='win32':
     REG_OPENED_EXISTING_KEY = 0x00000002
     REG_SZ    = 1
     REG_DWORD = 4
+    REG_MULTI_SZ = 7
 
     RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
     RegCreateKeyEx.restype = LONG
@@ -61,6 +62,10 @@ elif platform=='win32':
     RegDeleteKey = ctypes.windll.advapi32.RegDeleteTreeW
     RegDeleteKey.restype = LONG
     RegDeleteKey.argtypes = [HKEY, LPCWSTR]
+
+    RegDeleteValue = ctypes.windll.advapi32.RegDeleteValueW
+    RegDeleteValue.restype = LONG
+    RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
 elif platform=='linux2':
     import codecs
@@ -101,17 +106,21 @@ class Config:
                 # Don't use Python's settings if interactive
                 self.bundle = 'uk.org.marginal.%s' % appname.lower()
                 NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.bundle
-            self.bundle = NSBundle.mainBundle().bundleIdentifier()
+            else:
+                self.bundle = NSBundle.mainBundle().bundleIdentifier()
             self.defaults = NSUserDefaults.standardUserDefaults()
-            settings = self.defaults.persistentDomainForName_(self.bundle) or {}
-            self.settings = dict(settings)
+            self.settings = dict(self.defaults.persistentDomainForName_(self.bundle) or {})	# make writeable
 
             # Check out_dir exists
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
         def get(self, key):
-            return self.settings.get(key)
+            val = self.settings.get(key)
+            if hasattr(val, '__iter__'):
+                return list(val)	# make writeable
+            else:
+                return val
 
         def getint(self, key):
             try:
@@ -121,6 +130,9 @@ class Config:
 
         def set(self, key, val):
             self.settings[key] = val
+
+        def delete(self, key):
+            self.settings.pop(key, None)
 
         def save(self):
             self.defaults.setPersistentDomain_forName_(self.settings, self.bundle)
@@ -182,11 +194,13 @@ class Config:
         def get(self, key):
             typ  = DWORD()
             size = DWORD()
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value != REG_SZ:
+            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
                 return None
             buf = ctypes.create_unicode_buffer(size.value / 2)
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                 return None
+            elif typ.value == REG_MULTI_SZ:
+                return [x.strip() for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
             else:
                 return buf.value
 
@@ -205,8 +219,15 @@ class Config:
                 RegSetValueEx(self.hkey, key, 0, REG_SZ, buf, len(buf)*2)
             elif isinstance(val, numbers.Integral):
                 RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
+            elif hasattr(val, '__iter__'):	# iterable
+                stringval = u'\x00'.join([unicode(x) or u' ' for x in val] + [u''])	# null terminated non-empty strings
+                buf = ctypes.create_unicode_buffer(stringval)
+                RegSetValueEx(self.hkey, key, 0, REG_MULTI_SZ, buf, len(buf)*2)
             else:
                 raise NotImplementedError()
+
+        def delete(self, key):
+            RegDeleteValue(self.hkey, key)
 
         def save(self):
             pass	# Redundant since registry keys are written immediately
@@ -216,6 +237,8 @@ class Config:
             self.hkey = None
 
     elif platform=='linux2':
+
+        SECTION = 'config'
 
         def __init__(self):
 
@@ -240,31 +263,41 @@ class Config:
             try:
                 self.config.readfp(codecs.open(self.filename, 'r', 'utf-8'))
             except:
-                self.config.add_section('config')
+                self.config.add_section(self.SECTION)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', expanduser('~'))
 
-        def set(self, key, val):
-            assert isinstance(val, basestring) or isinstance(val, numbers.Integral), type(val)
-            self.config.set('config', key, val)
-
         def get(self, key):
             try:
-                return self.config.get('config', key)	# all values are stored as strings
+                val = self.config.get(self.SECTION, key)
+                if u'\n' in val:
+                    return val.split(u'\n')
+                else:
+                    return val
             except:
                 return None
 
         def getint(self, key):
             try:
-                return int(self.config.get('config', key))	# all values are stored as strings
+                return self.config.getint(self.SECTION, key)
             except:
                 return 0
 
+        def set(self, key, val):
+            if isinstance(val, basestring) or isinstance(val, numbers.Integral):
+                self.config.set(self.SECTION, key, val)
+            elif hasattr(val, '__iter__'):	# iterable
+                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val]))
+            else:
+                raise NotImplementedError()
+
+        def delete(self, key):
+            self.config.remove_option(self.SECTION, key)
+
         def save(self):
-            h = codecs.open(self.filename, 'w', 'utf-8')
-            h.write(unicode(self.config.data))
-            h.close()
+            with codecs.open(self.filename, 'w', 'utf-8') as h:
+                h.write(unicode(self.config.data))
 
         def close(self):
             self.save()

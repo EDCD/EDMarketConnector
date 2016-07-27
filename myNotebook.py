@@ -52,6 +52,7 @@ class Frame(platform == 'darwin' and tk.Frame or ttk.Frame):
         if platform == 'darwin':
             kw['background'] = kw.pop('background', PAGEBG)
             tk.Frame.__init__(self, master, **kw)
+            tk.Frame(self).grid(pady=5)
         elif platform == 'win32':
             ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
             ttk.Frame(self).grid(pady=5)	# top spacer
@@ -142,5 +143,7 @@ class OptionMenu(platform == 'darwin' and tk.OptionMenu or ttk.OptionMenu):
         elif platform == 'win32':
             # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
             ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
+            self['menu'].configure(background = PAGEBG)
         else:
             ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
+            self['menu'].configure(background = ttk.Style().lookup('TMenu', 'background'))
