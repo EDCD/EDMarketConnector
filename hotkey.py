@@ -410,6 +410,11 @@ else:	# Linux
         def unregister(self):
             pass
 
+        def play_good(self):
+            pass
+
+        def play_bad(self):
+            pass
 
 # singleton
 hotkeymgr = HotkeyMgr()

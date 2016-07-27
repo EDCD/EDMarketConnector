@@ -1,7 +1,7 @@
 import atexit
 import re
 import threading
-from os import listdir, pardir, rename, unlink
+from os import listdir, pardir, rename, unlink, SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import basename, exists, isdir, isfile, join
 from platform import machine
 import sys
@@ -53,6 +53,7 @@ elif platform=='win32':
     RegEnumKeyEx.argtypes = [HKEY, DWORD, LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(DWORD), LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(FILETIME)]
 
 else:
+    # Linux's inotify doesn't work over CIFS or NFS, so poll
     FileSystemEventHandler = object	# dummy
 
 
@@ -63,9 +64,11 @@ class EDLogs(FileSystemEventHandler):
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
         self.root = None
-        self.logdir = self._logdir()
+        self.logdir = self._logdir()	# E:D client's default Logs directory, or None if not found
+        self.currentdir = None		# The actual logdir that we're monitoring
         self.logfile = None
         self.observer = None
+        self.observed = None
         self.thread = None
         self.callbacks = { 'Jump': None, 'Dock': None }
         self.last_event = None	# for communicating the Jump event
@@ -76,40 +79,58 @@ class EDLogs(FileSystemEventHandler):
 
     def start(self, root):
         self.root = root
-        if not self.logdir:
+        logdir = config.get('logdir') or self.logdir
+        if not logdir or not isdir(logdir):
             self.stop()
             return False
-        if self.running():
-            return True
+
+        if self.currentdir and self.currentdir != logdir:
+            self.stop()
+        self.currentdir = logdir
 
         self.root.bind_all('<<MonitorJump>>', self.jump)	# user-generated
         self.root.bind_all('<<MonitorDock>>', self.dock)	# user-generated
 
         # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
-        if not self.observer:
-            if __debug__:
-                print 'Monitoring "%s"' % self.logdir
-            elif getattr(sys, 'frozen', False):
-                sys.stderr.write('Monitoring "%s"\n' % self.logdir)
-                sys.stderr.flush()	# Required for line to show up immediately on Windows
-
+        # File system events are unreliable/non-existent over network drives on Linux.
+        # We can't easily tell whether a path points to a network drive, so assume
+        # any non-standard logdir might be on a network drive and poll instead.
+        polling = bool(config.get('logdir')) and platform != 'win32'
+        if not polling and not self.observer:
             self.observer = Observer()
             self.observer.daemon = True
-            self.observer.schedule(self, self.logdir)
             self.observer.start()
             atexit.register(self.observer.stop)
 
-            # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
-            logfiles = sorted([x for x in listdir(self.logdir) if x.startswith('netLog.')])
-            self.logfile = logfiles and join(self.logdir, logfiles[-1]) or None
+        if not self.observed and not polling:
+            self.observed = self.observer.schedule(self, self.currentdir)
 
-        self.thread = threading.Thread(target = self.worker, name = 'netLog worker')
-        self.thread.daemon = True
-        self.thread.start()
+        # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
+        try:
+            logfiles = sorted([x for x in listdir(logdir) if x.startswith('netLog.')])
+            self.logfile = logfiles and join(logdir, logfiles[-1]) or None
+        except:
+            self.logfile = None
+
+        if __debug__:
+            print '%s "%s"' % (polling and 'Polling' or 'Monitoring', logdir)
+            print 'Start logfile "%s"' % self.logfile
+
+        if not self.running():
+            self.thread = threading.Thread(target = self.worker, name = 'netLog worker')
+            self.thread.daemon = True
+            self.thread.start()
+
         return True
 
     def stop(self):
-        self.thread = None	# Orphan the worker thread
+        if __debug__:
+            print 'Stopping monitoring'
+        self.currentdir = None
+        if self.observed:
+            self.observed = None
+            self.observer.unschedule_all()
+        self.thread = None	# Orphan the worker thread - will terminate at next poll
         self.last_event = None
 
     def running(self):
@@ -147,8 +168,8 @@ class EDLogs(FileSystemEventHandler):
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
-            loghandle = open(logfile, 'rt')
-            loghandle.seek(0, 2)	# seek to EOF
+            loghandle = open(logfile, 'r')
+            loghandle.seek(0, SEEK_END)	# seek to EOF
         else:
             loghandle = None
 
@@ -161,16 +182,30 @@ class EDLogs(FileSystemEventHandler):
                     print "%s :\t%s %s" % ('Updated', docked and " docked" or "!docked", updated and " updated" or "!updated")
 
             # Check whether new log file started, e.g. client (re)started.
-            newlogfile = self.logfile
+            if self.observed:
+                newlogfile = self.logfile	# updated by on_created watchdog callback
+            else:
+                # Poll
+                logdir = config.get('logdir') or self.logdir
+                try:
+                    logfiles = sorted([x for x in listdir(logdir) if x.startswith('netLog.')])
+                    newlogfile = logfiles and join(logdir, logfiles[-1]) or None
+                except:
+                    if __debug__: print_exc()
+                    newlogfile = None
+
             if logfile != newlogfile:
                 logfile = newlogfile
                 if loghandle:
                     loghandle.close()
-                loghandle = open(logfile, 'rt')
+                if logfile:
+                    loghandle = open(logfile, 'r')
+                if __debug__:
+                    print 'New logfile "%s"' % logfile
 
             if logfile:
                 system = visited = coordinates = None
-                loghandle.seek(0, 1)	# reset EOF flag
+                loghandle.seek(0, SEEK_CUR)	# reset EOF flag
 
                 for line in loghandle:
                     match = regexp.match(line)
