@@ -195,17 +195,18 @@ class PreferencesDialog(tk.Toplevel):
         configframe.columnconfigure(1, weight=1)
 
         self.logdir = nb.Entry(configframe, takefocus=False)
+        logdir = config.get('logdir') or monitor.logdir
+        if not logdir:
+            pass
+        elif logdir.startswith(config.home):
+            self.logdir.insert(0, '~' + logdir[len(config.home):])
+        else:
+            self.logdir.insert(0, logdir)
+        self.logdir['state'] = 'readonly'
+
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
             nb.Label(configframe, text = _('E:D log file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Configuration setting
-            logdir = config.get('logdir') or monitor.logdir
-            if not logdir:
-                pass
-            elif logdir.startswith(config.home):
-                self.logdir.insert(0, '~' + logdir[len(config.home):])
-            else:
-                self.logdir.insert(0, logdir)
-            self.logdir['state'] = 'readonly'
             self.logdir.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
             self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                           _('Browse...')),	# Folder selection button on Windows
@@ -317,8 +318,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outbutton['state']    = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']       = local and 'readonly' or tk.DISABLED
 
-        self.edsm_log_button['state'] = self.logdir.get() and isdir(self.logdir.get()) and tk.NORMAL or tk.DISABLED
-
+        self.edsm_log_button['state'] = logdir and isdir(logdir) and tk.NORMAL or tk.DISABLED
         edsm_state = self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state']        = edsm_state
         self.edsm_cmdr_label['state']   = edsm_state
