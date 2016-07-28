@@ -9,7 +9,7 @@ import os
 from os.path import exists, isfile
 import sys
 
-from companion import ship_map
+import companion
 import outfitting
 
 
@@ -43,9 +43,8 @@ def addcommodities(data):
             if new['id'] != old['id'] or new['category'] != old['category']:
                 raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
             elif new['average'] != old['average']:
-                commodities[key] = new
-        else:
-            commodities[key] = new
+                size_pre -= 1
+        commodities[key] = new
 
     if len(commodities) > size_pre:
 
@@ -71,7 +70,7 @@ def addmodules(data):
 
     outfile = 'outfitting.csv'
     modules = {}
-    fields = ['id', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement']
+    fields = ['id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement']
 
     # slurp existing
     if isfile(outfile):
@@ -84,15 +83,17 @@ def addmodules(data):
     for key,module in data['lastStarport'].get('modules').iteritems():
         # sanity check
         if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
-        new = outfitting.lookup(module, ship_map, True)
+        new = outfitting.lookup(module, companion.ship_map, True)
         if new:
             old = modules.get(int(key))
             if old:
                 # check consistency with existing data
                 for thing in fields:
-                    if str(new.get(thing,'')) != old.get(thing): raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
-            else:
-                modules[int(key)] = new
+                    if not old.get(thing) and new.get(thing):
+                        size_pre -= 1
+                    elif str(new.get(thing,'')) != old.get(thing):
+                        raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
+            modules[int(key)] = new
 
     if len(modules) > size_pre:
 
@@ -116,26 +117,31 @@ def addships(data):
 
     shipfile = 'shipyard.csv'
     ships = {}
+    fields = ['id', 'symbol', 'name']
 
     # slurp existing
     if isfile(shipfile):
         with open(shipfile) as csvfile:
-            reader = csv.DictReader(csvfile)
+            reader = csv.DictReader(csvfile, restval='')
             for row in reader:
-                ships[int(row['id'])] = row['name']	# index by int for easier lookup and sorting
+                ships[int(row['id'])] = row	# index by int for easier lookup and sorting
     size_pre = len(ships)
 
     for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list'):
         # sanity check
         key = ship['id']
-        new = ship_map.get(ship['name'].lower())
+        new = { 'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower()) }
         if new:
             old = ships.get(int(key))
             if old:
                 # check consistency with existing data
-                if new != old: raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
-            else:
-                ships[int(key)] = new
+                for thing in fields:
+                    if not old.get(thing) and new.get(thing):
+                        ships[int(key)] = new
+                        size_pre -= 1
+                    elif str(new.get(thing,'')) != old.get(thing):
+                        raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
+            ships[int(key)] = new
 
     if len(ships) > size_pre:
 
@@ -145,11 +151,10 @@ def addships(data):
             os.rename(shipfile, shipfile+'.bak')
 
         with open(shipfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'name'])
+            writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
             writer.writeheader()
             for key in sorted(ships):
-                row = { 'id': key, 'name': ships[key] }
-                writer.writerow(row)
+                writer.writerow(ships[key])
 
         print 'Added %d new ships' % (len(ships) - size_pre)
 
@@ -159,6 +164,7 @@ if __name__ == "__main__":
         print 'Usage: collate.py [dump.json]'
     else:
         # read from dumped json file(s)
+        session = companion.Session()
         for f in sys.argv[1:]:
             with open(f) as h:
                 print f
@@ -169,6 +175,7 @@ if __name__ == "__main__":
                     print 'No starport!'
                 else:
                     if data['lastStarport'].get('commodities'):
+                        session.fixup(data['lastStarport']['commodities'])
                         addcommodities(data)
                     else:
                         print 'No market'

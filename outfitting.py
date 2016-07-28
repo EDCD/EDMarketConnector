@@ -247,7 +247,7 @@ def lookup(module, ship_map, entitled=False):
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
 
     name = module['name'].lower().split('_')
-    new = {}
+    new = { 'id': module['id'], 'symbol': module['name'] }
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
@@ -375,8 +375,7 @@ def lookup(module, ship_map, entitled=False):
     new.update(moduledata.get(key, {}))
 
     # check we've filled out mandatory fields
-    new['id'] = module['id']
-    for thing in ['id', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
+    for thing in ['id', 'symbol', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
         if not new.get(thing): raise AssertionError('%s: failed to set %s' % (module['id'], thing))
     if new['category'] == 'hardpoint' and not new.get('mount'):
         raise AssertionError('%s: failed to set %s' % (module['id'], 'mount'))
