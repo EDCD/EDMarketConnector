@@ -149,22 +149,6 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
 
 
-        # eddnframe = nb.Frame(notebook)
-        # eddnframe.columnconfigure(0, weight=1)
-
-        # HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/jamesremuscat/EDDN/wiki', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
-        # ttk.Separator(eddnframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        # self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-        # nb.Checkbutton(eddnframe, text=_('Send station data to EDDN'), variable=self.eddn_station, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Output setting
-        # self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
-        # self.eddn_auto_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        # self.eddn_system= tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
-        # nb.Checkbutton(eddnframe, text=_('Send system and scan data to EDDN'), variable=self.eddn_system, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Output setting
-        # self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
-        # self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.out_auto, command=self.outvarchanged)	# Output setting under 'Send system and scan data to EDDN'
-
-        # notebook.add(eddnframe, text='EDDN')		# Not translated
-
         edsmframe = nb.Frame(notebook)
         edsmframe.columnconfigure(1, weight=1)
 
@@ -311,15 +295,16 @@ class PreferencesDialog(tk.Toplevel):
 
     def outvarchanged(self):
         logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
-        self.out_auto_button['state'] = logdir and isdir(logdir) and tk.NORMAL or tk.DISABLED
+        logvalid = monitor.is_valid_logdir(logdir)
 
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
-        self.outdir_label['state'] = local and tk.NORMAL  or tk.DISABLED
-        self.outbutton['state']    = local and tk.NORMAL  or tk.DISABLED
-        self.outdir['state']       = local and 'readonly' or tk.DISABLED
+        self.out_auto_button['state']   = (local or self.out_eddn.get()) and logvalid and tk.NORMAL or tk.DISABLED
+        self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
+        self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
+        self.outdir['state']            = local and 'readonly' or tk.DISABLED
 
-        self.edsm_log_button['state'] = logdir and isdir(logdir) and tk.NORMAL or tk.DISABLED
-        edsm_state = self.edsm_log.get() and tk.NORMAL or tk.DISABLED
+        self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
+        edsm_state = logvalid and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state']        = edsm_state
         self.edsm_cmdr_label['state']   = edsm_state
         self.edsm_apikey_label['state'] = edsm_state

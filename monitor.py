@@ -80,7 +80,7 @@ class EDLogs(FileSystemEventHandler):
     def start(self, root):
         self.root = root
         logdir = config.get('logdir') or self.logdir
-        if not logdir or not isdir(logdir):
+        if not self.is_valid_logdir(logdir):
             self.stop()
             return False
 
@@ -252,17 +252,24 @@ class EDLogs(FileSystemEventHandler):
         if self.callbacks['Dock']:
             self.callbacks['Dock'](event)
 
+    def is_valid_logdir(self, path):
+        return self._is_valid_logdir(path)
+
 
     if platform=='darwin':
 
         def _logdir(self):
             # https://support.frontier.co.uk/kb/faq.php?id=97
-            suffix = join('Frontier Developments', 'Elite Dangerous')
             paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)
-            if len(paths) and isdir(paths[0]) and isfile(join(paths[0], suffix, 'AppNetCfg.xml')) and isdir(join(paths[0], suffix, 'Logs')):
-                return join(paths[0], suffix, 'Logs')
+            if len(paths) and self._is_valid_logdir(join(paths[0], 'Frontier Developments', 'Elite Dangerous', 'Logs')):
+                return join(paths[0], 'Frontier Developments', 'Elite Dangerous', 'Logs')
             else:
                 return None
+
+        def _is_valid_logdir(self, path):
+            # Apple's SMB implementation is too flaky so assume target machine is OSX
+            return path and isdir(path) and isfile(join(path, pardir, 'AppNetCfg.xml'))
+
 
     elif platform=='win32':
 
@@ -334,15 +341,25 @@ class EDLogs(FileSystemEventHandler):
                 for base in candidates:
                     if isdir(base):
                         for d in listdir(base):
-                            if d.startswith(game) and isfile(join(base, d, 'AppConfig.xml')) and isdir(join(base, d, 'Logs')):
+                            if d.startswith(game) and self._is_valid_logdir(join(base, d, 'Logs')):
                                 return join(base, d, 'Logs')
 
             return None
+
+        def _is_valid_logdir(self, path):
+            # Assume target machine is Windows
+            return path and isdir(path) and isfile(join(path, pardir, 'AppConfig.xml'))
+
 
     elif platform=='linux2':
 
         def _logdir(self):
             return None
+
+        def _is_valid_logdir(self, path):
+            # Assume target machine is Windows
+            return path and isdir(path) and isfile(join(path, pardir, 'AppConfig.xml'))
+
 
 # singleton
 monitor = EDLogs()
