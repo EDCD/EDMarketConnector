@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Wygląd";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Aktualizuj automatycznie po zadokowaniu";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Saldo";
 
@@ -67,6 +70,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Konfiguracja";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Oczekiwanie {SS} sek.";
 
@@ -99,6 +105,9 @@
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "E:D położenie pliku dziennika";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -178,7 +187,7 @@
 /* Dark theme color setting. [prefs.py] */
 "Highlighted text" = "Podświetlony tekst";
 
-/* Tab heading in settings on Windows. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Skr. Klaw.";
 
 /* [prefs.py] */
@@ -187,7 +196,7 @@
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Tożsamość";
 
-/* Tab heading in settings on OSX. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Skrót klawiaturowy";
 
 /* Empire rank. [stats.py] */
@@ -367,7 +376,7 @@
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Wyślij dziennik lotu do Elite Dangerous Star Map";
 
-/* [prefs.py] */
+/* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Wyślij dane do Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */

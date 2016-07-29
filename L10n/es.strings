@@ -70,6 +70,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competente";
 
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Configuración";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "Espere {SS}s";
 
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Por defecto";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Retrasar envío hasta el atraque";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duque";
+
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "Localización del log de E:D";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Conde Palatino";
@@ -181,7 +190,7 @@
 /* Dark theme color setting. [prefs.py] */
 "Highlighted text" = "Texto resaltado";
 
-/* Tab heading in settings on Windows. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Tecla de acceso directo";
 
 /* [prefs.py] */
@@ -190,7 +199,7 @@
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identidad";
 
-/* Tab heading in settings on OSX. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Tecla de acceso directo";
 
 /* Empire rank. [stats.py] */
@@ -370,8 +379,11 @@
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Enviar registro de vuelo a Elite Dangerous Star Map";
 
-/* [prefs.py] */
+/* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Enviar datos de la estación a Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Enviar datos de sistema y escáner a Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Enviando datos a EDDN...";

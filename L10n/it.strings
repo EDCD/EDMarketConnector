@@ -67,6 +67,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Configurazione";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "disponibile tra {SS} secondi";
 
@@ -178,7 +181,7 @@
 /* Dark theme color setting. [prefs.py] */
 "Highlighted text" = "Testo evidenziato";
 
-/* Tab heading in settings on Windows. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
 /* [prefs.py] */
@@ -187,7 +190,7 @@
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identità";
 
-/* Tab heading in settings on OSX. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Scorciatoia di tastiera";
 
 /* Empire rank. [stats.py] */
@@ -367,7 +370,7 @@
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Manda il flight log a Elite Dangerous Star Map";
 
-/* [prefs.py] */
+/* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */

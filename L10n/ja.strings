@@ -70,6 +70,9 @@
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
 
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "環境設定";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "次回更新まであと {SS}秒";
 
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "デフォルト";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "ドッキングするまでデータを送信しない";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "E:Dゲームクライアントのログ出力先";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -181,7 +190,7 @@
 /* Dark theme color setting. [prefs.py] */
 "Highlighted text" = "強調表示";
 
-/* Tab heading in settings on Windows. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "ホットキー";
 
 /* [prefs.py] */
@@ -190,7 +199,7 @@
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "個人情報";
 
-/* Tab heading in settings on OSX. [prefs.py] */
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "ショートカット";
 
 /* Empire rank. [stats.py] */
@@ -370,8 +379,11 @@
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Elite Dangerous Star Mapにフライトログを送信する";
 
-/* [prefs.py] */
+/* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Networkにステーションデータを送信する";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Elite Dangerous Data Networkに星系やスキャンした星のデータを送信する";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "EDDNにデータ送信中...";
