@@ -52,9 +52,9 @@ def export_commodities(data):
         for commodity in data['lastStarport'].get('commodities', []):
             commodities.append({
                 'name'      : commodity['name'],
-                'buyPrice'  : commodity['buyPrice'],
+                'buyPrice'  : int(commodity['buyPrice']),
                 'supply'    : int(commodity['stock']),
-                'sellPrice' : commodity['sellPrice'],
+                'sellPrice' : int(commodity['sellPrice']),
                 'demand'    : int(commodity['demand']),
             })
             if commodity['stockBracket']:

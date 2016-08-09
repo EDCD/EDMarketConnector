@@ -43,8 +43,8 @@ def export(data):
         for commodity in sorted(bycategory[category], key=itemgetter('name')):
             h.write('      %-23s %7d %7d %9s%c %8s%c  %s\n' % (
                 commodity['name'],
-                commodity['sellPrice'],
-                commodity['buyPrice'],
+                int(commodity['sellPrice']),
+                int(commodity['buyPrice']),
                 int(commodity['demand']) if commodity['demandBracket'] else '',
                 demandbracketmap[commodity['demandBracket']],
                 int(commodity['stock']) if commodity['stockBracket'] else '',

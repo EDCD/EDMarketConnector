@@ -45,8 +45,8 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
         line = sep.join([
             rowheader,
             commodity['name'],
-            commodity['sellPrice'] and str(commodity['sellPrice']) or '',
-            commodity['buyPrice'] and str(commodity['buyPrice']) or '',
+            commodity['sellPrice'] and str(int(commodity['sellPrice'])) or '',
+            commodity['buyPrice'] and str(int(commodity['buyPrice'])) or '',
             str(int(commodity['demand'])) if commodity['demandBracket'] else '',
             bracketmap[commodity['demandBracket']],
             str(int(commodity['stock'])) if commodity['stockBracket'] else '',
