@@ -55,8 +55,8 @@ authenticating you will need to wait for Frontier to send you a new code.
 If you are not prompted to authenticate, but instead see the message “Error: Invalid Credentials” then choose the menu
 option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
 
-Output
---------
+### Output
+
 This app can save a variety of data in a variety of formats:
 
 * Station data
@@ -70,9 +70,12 @@ This app can save a variety of data in a variety of formats:
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
-EDSM
---------
-You can send a record of your location to [Elite: Dangerous Star Map](http://www.edsm.net/) where you can view your flight log under My&nbsp;account &rarr; Exploration&nbsp;Logs and optionally add private comments about a system. You will need to register for an account and follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
+### EDSM
+
+You can send a record of your location to [Elite: Dangerous Star Map](http://www.edsm.net/) where you can view your flight log under My&nbsp;account &rarr; Exploration&nbsp;Logs and optionally add private comments about a system.
+
+- If you're running this app on a different machine from the Elite: Dangerous game or if the option to send your flight log to EDSM is greyed-out then adjust the “E:D log file location” setting on the Configuration tab to point to the game's log files using [this info](https://support.frontier.co.uk/kb/faq.php?id=108) as a guide.
+- You will need to register for an account and follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
 
 
 Uninstall
@@ -123,7 +126,7 @@ This app uses Elite: Dangerous' log files to track and display the systems that 
 - That you're running under Steam, if you have both Steam and non-Steam versions installed.
 - That you're running "Horizons" 64bit, if you have both Horizons and Season 1 installed.
 
-If you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), or if you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D log file location” setting to point to the game's log files using [this info](https://support.frontier.co.uk/kb/faq.php?id=108) as a guide.
+If you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), or if you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D log file location” setting on the Configuration tab to point to the game's log files using [this info](https://support.frontier.co.uk/kb/faq.php?id=108) as a guide.
 
 Running from source
 --------
