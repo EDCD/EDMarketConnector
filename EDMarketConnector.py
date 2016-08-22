@@ -297,8 +297,7 @@ class AppWindow:
             self.session.login(config.get('username'), config.get('password'))
             self.status['text'] = ''
         except companion.VerificationRequired:
-            # don't worry about authentication now - prompt on query
-            self.status['text'] = ''
+            return prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
         except companion.ServerError as e:
             self.status['text'] = unicode(e)
         except Exception as e:
