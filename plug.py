@@ -87,12 +87,33 @@ def get_plugin_pref(plugname, parent):
     return None
 
 
+def notify_journal_entry(cmdr, system, station, entry):
+    """
+    Send a journal entry to each plugin.
+    :param cmdr: The Cmdr name, or None if not yet known
+    :param system: The current system, or None if not yet known
+    :param station: The current station, or None if not docked or not yet known
+    :param entry: The journal entry as a dictionary
+    :return:
+    """
+    for plugname in PLUGINS:
+        journal_entry = _get_plugin_func(plugname, "journal_entry")
+        if journal_entry:
+            try:
+                # Pass a copy of the journal entry in case the callee modifies it
+                journal_entry(cmdr, system, station, dict(entry))
+            except Exception as plugerr:
+                print plugerr
+
+
 def notify_system_changed(timestamp, system, coordinates):
     """
     Send notification data to each plugin when we arrive at a new system.
     :param timestamp:
     :param system:
     :return:
+    deprecated:: 2.2
+    Use :func:`journal_entry` with the 'FSDJump' event.
     """
     for plugname in PLUGINS:
         system_changed = _get_plugin_func(plugname, "system_changed")

@@ -32,7 +32,8 @@ class _EDDN:
             'softwareVersion' : appversion,
             'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr.encode('utf-8'),
         }
-        msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
+        if not msg['message'].get('timestamp'):	# already present in journal messages
+            msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
 
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=timeout)
         if __debug__ and r.status_code != requests.codes.ok:
@@ -93,6 +94,12 @@ class _EDDN:
                     'ships'       : sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']]),
                 }
             })
+
+    def export_journal_entry(self, cmdr, is_beta, entry):
+        self.send(cmdr, {
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
+            'message'    : entry
+        })
 
 # singleton
 eddn = _EDDN()

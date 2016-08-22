@@ -113,11 +113,9 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SHIP_EDS)	# default settings
+        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP_EDS)	# default settings
 
         nb.Label(outframe, text=_('Please choose what data to save')).grid(columnspan=2, padx=PADX, sticky=tk.W)
-        self.out_eddn= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-        nb.Checkbutton(outframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.out_eddn, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_bpc = tk.IntVar(value = (output & config.OUT_MKT_BPC ) and 1)
@@ -149,13 +147,27 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
 
 
+        eddnframe = nb.Frame(notebook)
+
+        HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/jamesremuscat/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
+        self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
+        nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged).grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)	# Output setting
+        self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
+        self.eddn_auto_button.grid(padx=BUTTONX, sticky=tk.W)
+        self.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
+        self.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=self.eddn_system, command=self.outvarchanged)	# Output setting new in E:D 2.2
+        self.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
+
+        notebook.add(eddnframe, text='EDDN')		# Not translated
+
+
         edsmframe = nb.Frame(notebook)
         edsmframe.columnconfigure(1, weight=1)
 
         HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
         self.edsm_log = tk.IntVar(value = (output & config.OUT_SYS_EDSM) and 1)
         self.edsm_log_button = nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.edsm_log, command=self.outvarchanged)
-        self.edsm_log_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.edsm_log_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
 
         nb.Label(edsmframe).grid(sticky=tk.W)	# big spacer
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
@@ -196,7 +208,8 @@ class PreferencesDialog(tk.Toplevel):
                                                           _('Browse...')),	# Folder selection button on Windows
                                        command = lambda:self.filebrowse(_('E:D log file location'), self.logdir))
             self.logbutton.grid(row=10, column=2, padx=PADX, sticky=tk.EW)
-            nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = monitor.logdir and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
+            if monitor.logdir:
+                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = monitor.logdir and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
 
         if platform == 'win32':
             ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
@@ -298,10 +311,13 @@ class PreferencesDialog(tk.Toplevel):
         logvalid = monitor.is_valid_logdir(logdir)
 
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
-        self.out_auto_button['state']   = (local or self.out_eddn.get()) and logvalid and tk.NORMAL or tk.DISABLED
+        self.out_auto_button['state']   = local and logvalid and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
         self.outdir['state']            = local and 'readonly' or tk.DISABLED
+
+        self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
+        self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
 
         self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
         edsm_state = logvalid and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
@@ -425,13 +441,14 @@ class PreferencesDialog(tk.Toplevel):
         config.set('password', self.password.get().strip())
 
         config.set('output',
-                   (self.out_eddn.get()          and config.OUT_MKT_EDDN) +
                    (self.out_bpc.get()           and config.OUT_MKT_BPC) +
                    (self.out_td.get()            and config.OUT_MKT_TD) +
                    (self.out_csv.get()           and config.OUT_MKT_CSV) +
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
                    (self.out_ship_eds.get()      and config.OUT_SHIP_EDS) +
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
+                   (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
+                   (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
                    (self.edsm_log.get()          and config.OUT_SYS_EDSM))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 

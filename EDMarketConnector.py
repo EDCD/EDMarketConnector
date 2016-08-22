@@ -9,7 +9,8 @@ from os import mkdir
 from os.path import expanduser, isdir, join
 import re
 import requests
-from time import time, localtime, strftime
+from time import time, localtime, strftime, strptime
+from calendar import timegm
 
 import Tkinter as tk
 import ttk
@@ -74,9 +75,6 @@ class AppWindow:
         self.w.title(applongname)
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
-
-        # Special handling for overrideredict
-        self.w.bind("<Map>", self.onmap)
 
         plug.load_plugins()
 
@@ -242,6 +240,9 @@ class AppWindow:
         theme.register_highlight(self.station)
         theme.apply(self.w)
 
+        # Special handling for overrideredict
+        self.w.bind("<Map>", self.onmap)
+
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
@@ -252,8 +253,7 @@ class AppWindow:
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
         # Install log monitoring
-        monitor.set_callback('Dock', self.getandsend)
-        monitor.set_callback('Jump', self.system_change)
+        self.w.bind_all('<<JournalEvent>>', self.journal_event)	# user-generated
         monitor.start(self.w)
 
         # First run
@@ -394,9 +394,14 @@ class AppWindow:
                     pass
 
                 elif not data['commander'].get('docked'):
-                    # signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                    if not self.status['text']:
-                        self.status['text'] = _("You're not docked at a station!")
+                    if not event and not retrying:
+                        # Silently retry if we got here by 'Automatically update on docking' and the server hasn't caught up
+                        self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
+                        return	# early exit to avoid starting cooldown count
+                    else:
+                        # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
+                        if not self.status['text']:
+                            self.status['text'] = _("You're not docked at a station!")
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
@@ -479,31 +484,62 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, event, timestamp, system, coordinates):
+    # Handle event(s) from the journal
+    def journal_event(self, event):
+        while True:
+            entry = monitor.get_entry()
+            if entry is None:
+                return
+            system_changed  = monitor.system  and self.system['text']  != monitor.system
+            station_changed = monitor.station and self.station['text'] != monitor.station
 
-        if self.system['text'] != system:
-            self.system['text'] = system
+            # Update main window
+            self.cmdr['text'] = monitor.cmdr or ''
+            self.system['text'] = monitor.system or ''
+            self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
 
-            self.system['image'] = ''
-            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+            plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
 
-            plug.notify_system_changed(timestamp, system, coordinates)
+            if system_changed:
+                self.system['image'] = ''
+                timestamp = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
-            if config.getint('output') & config.OUT_SYS_EDSM:
-                try:
-                    self.status['text'] = _('Sending data to EDSM...')
-                    self.w.update_idletasks()
-                    self.edsm.writelog(timestamp, system, coordinates)	# Do EDSM lookup during EDSM export
+                # Backwards compatibility
+                plug.notify_system_changed(timestamp, monitor.system, monitor.coordinates)
+
+                # Update EDSM if we have coordinates - i.e. Location or FSDJump events
+                if config.getint('output') & config.OUT_SYS_EDSM and monitor.coordinates:
+                    try:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        self.edsm.writelog(timestamp, monitor.system, monitor.coordinates)
+                        self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        if not config.getint('hotkey_mute'):
+                            hotkeymgr.play_bad()
+                else:
+                    self.edsm.link(monitor.system)
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
-            else:
-                self.edsm.link(system)
-                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-            self.edsmpoll()
+                self.edsmpoll()
+
+            # Send interesting events to EDDN
+            if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
+                (entry['event'] == 'FSDJump' and system_changed  or
+                 entry['event'] == 'Docked'  and station_changed or
+                 entry['event'] == 'Scan')):
+                # strip out properties disallowed by the schema
+                for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
+                    entry.pop(thing, None)
+                for thing in entry.keys():
+                    if thing.endswith('_Localised'):
+                        entry.pop(thing, None)
+                eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
+
+            # Auto-Update after docking
+            if station_changed and config.getint('output') & (config.OUT_MKT_EDDN|config.OUT_MKT_MANUAL) == config.OUT_MKT_EDDN and entry['event'] == 'Docked':
+                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
     def edsmpoll(self):
         result = self.edsm.result

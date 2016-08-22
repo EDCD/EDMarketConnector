@@ -1,4 +1,6 @@
 import atexit
+from collections import OrderedDict
+import json
 import re
 import threading
 from os import listdir, pardir, rename, unlink, SEEK_SET, SEEK_CUR, SEEK_END
@@ -6,8 +8,7 @@ from os.path import basename, exists, isdir, isfile, join
 from platform import machine
 import sys
 from sys import platform
-from time import strptime, localtime, mktime, sleep, time
-from datetime import datetime
+from time import sleep
 
 if __debug__:
     from traceback import print_exc
@@ -68,11 +69,18 @@ class EDLogs(FileSystemEventHandler):
         self.currentdir = None		# The actual logdir that we're monitoring
         self.logfile = None
         self.observer = None
-        self.observed = None
+        self.observed = None		# a watchdog ObservedWatch, or None if polling
         self.thread = None
-        self.callbacks = { 'Jump': None, 'Dock': None }
-        self.last_event = None	# for communicating the Jump event
+        self.event_queue = []		# For communicating journal entries back to main thread
 
+        # Context for journal handling
+        self.version = None
+        self.is_beta = False
+        self.mode = None
+        self.cmdr = None
+        self.system = None
+        self.station = None
+        self.coordinates = None
 
     def set_callback(self, name, callback):
         if name in self.callbacks:
@@ -88,9 +96,6 @@ class EDLogs(FileSystemEventHandler):
         if self.currentdir and self.currentdir != logdir:
             self.stop()
         self.currentdir = logdir
-
-        self.root.bind_all('<<MonitorJump>>', self.jump)	# user-generated
-        self.root.bind_all('<<MonitorDock>>', self.dock)	# user-generated
 
         # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
         # File system events are unreliable/non-existent over network drives on Linux.
@@ -108,17 +113,17 @@ class EDLogs(FileSystemEventHandler):
 
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         try:
-            logfiles = sorted([x for x in listdir(logdir) if x.startswith('netLog.')])
-            self.logfile = logfiles and join(logdir, logfiles[-1]) or None
+            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+            self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
         except:
             self.logfile = None
 
         if __debug__:
-            print '%s "%s"' % (polling and 'Polling' or 'Monitoring', logdir)
+            print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
             print 'Start logfile "%s"' % self.logfile
 
         if not self.running():
-            self.thread = threading.Thread(target = self.worker, name = 'netLog worker')
+            self.thread = threading.Thread(target = self.worker, name = 'Journal worker')
             self.thread.daemon = True
             self.thread.start()
 
@@ -128,18 +133,19 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring'
         self.currentdir = None
+        self.version = self.mode = self.cmdr = self.system = self.station = self.coordinates = None
+        self.is_beta = False
         if self.observed:
             self.observed = None
             self.observer.unschedule_all()
         self.thread = None	# Orphan the worker thread - will terminate at next poll
-        self.last_event = None
 
     def running(self):
         return self.thread and self.thread.is_alive()
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and basename(event.src_path).startswith('netLog.'):
+        if not event.is_directory and basename(event.src_path).startswith('Journal.'):
             self.logfile = event.src_path
 
     def worker(self):
@@ -147,30 +153,16 @@ class EDLogs(FileSystemEventHandler):
         # event_generate() is the only safe way to poke the main thread from this thread:
         # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
 
-        # e.g.:
-        #   "{18:00:41} System:"Shinrarta Dezhra" StarPos:(55.719,17.594,27.156)ly  NormalFlight\r\n"
-        # or with verboseLogging:
-        #   "{17:20:18} System:"Shinrarta Dezhra" StarPos:(55.719,17.594,27.156)ly Body:69 RelPos:(0.334918,1.20754,1.23625)km NormalFlight\r\n"
-        # or:
-        #   "... Supercruise\r\n"
-        # Note that system name may contain parantheses, e.g. "Pipe (stem) Sector PI-T c3-5".
-        regexp = re.compile(r'\{(.+)\} System:"(.+)" StarPos:\((.+),(.+),(.+)\)ly.* (\S+)')	# (localtime, system, x, y, z, context)
-
-        # e.g.:
-        #   "{14:42:11} GetSafeUniversalAddress Station Count 1 moved 0 Docked Not Landed\r\n"
-        # or:
-        #   "... Undocked Landed\r\n"
-        # Don't use the simpler "Commander Put ..." message since its more likely to be delayed.
-        dockre = re.compile(r'\{(.+)\} GetSafeUniversalAddress Station Count \d+ moved \d+ (\S+) ([^\r\n]+)')	# (localtime, docked_status, landed_status)
-
-        docked = False	# Whether we're docked
-        updated = False	# Whether we've sent an update since we docked
-
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
             loghandle = open(logfile, 'r')
-            loghandle.seek(0, SEEK_END)	# seek to EOF
+            for line in loghandle:
+                try:
+                    self.parse_entry(line)	# Some events are of interest even in the past
+                except:
+                    if __debug__:
+                        print 'Invalid journal entry "%s"' % repr(line)
         else:
             loghandle = None
 
@@ -179,19 +171,13 @@ class EDLogs(FileSystemEventHandler):
 
         while True:
 
-            if docked and not updated and not config.getint('output') & config.OUT_MKT_MANUAL:
-                self.root.event_generate('<<MonitorDock>>', when="tail")
-                updated = True
-                if __debug__:
-                    print "%s :\t%s %s" % ('Updated', docked and " docked" or "!docked", updated and " updated" or "!updated")
-
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
                 newlogfile = self.logfile	# updated by on_created watchdog callback
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('netLog.')])
+                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
                 except:
                     if __debug__: print_exc()
@@ -207,37 +193,11 @@ class EDLogs(FileSystemEventHandler):
                     print 'New logfile "%s"' % logfile
 
             if logfile:
-                system = visited = coordinates = None
                 loghandle.seek(0, SEEK_CUR)	# reset EOF flag
-
                 for line in loghandle:
-                    match = regexp.match(line)
-                    if match:
-                        (visited, system, x, y, z, context) = match.groups()
-                        if system == 'ProvingGround':
-                            system = 'CQC'
-                        coordinates = (float(x), float(y), float(z))
-                    else:
-                        match = dockre.match(line)
-                        if match:
-                            if match.group(2) == 'Undocked':
-                                docked = updated = False
-                            elif match.group(2) == 'Docked':
-                                docked = True
-                                # do nothing now in case the API server is lagging, but update on next poll
-                            if __debug__:
-                                print "%s :\t%s %s" % (match.group(2), docked and " docked" or "!docked", updated and " updated" or "!updated")
-
-                if system and not docked and config.getint('output'):
-                    # Convert local time string to UTC date and time
-                    visited_struct = strptime(visited, '%H:%M:%S')
-                    now = localtime()
-                    if now.tm_hour == 0 and visited_struct.tm_hour == 23:
-                        # Crossed midnight between timestamp and poll
-                        now = localtime(time()-12*60*60)	# yesterday
-                    time_struct = datetime(now.tm_year, now.tm_mon, now.tm_mday, visited_struct.tm_hour, visited_struct.tm_min, visited_struct.tm_sec).timetuple()	# still local time
-                    self.last_event = (mktime(time_struct), system, coordinates)
-                    self.root.event_generate('<<MonitorJump>>', when="tail")
+                    self.event_queue.append(line)
+                if self.event_queue:
+                    self.root.event_generate('<<JournalEvent>>', when="tail")
 
             sleep(self._POLL)
 
@@ -245,15 +205,39 @@ class EDLogs(FileSystemEventHandler):
             if threading.current_thread() != self.thread:
                 return	# Terminate
 
-    def jump(self, event):
-        # Called from Tkinter's main loop
-        if self.callbacks['Jump'] and self.last_event:
-            self.callbacks['Jump'](event, *self.last_event)
+    def parse_entry(self, line):
+        try:
+            entry = json.loads(line, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
+            entry['timestamp']	# we expect this to exist
+            if entry['event'] == 'Fileheader':	# XXX or 'fileheader' ?
+                self.version = entry['gameversion']
+                self.is_beta = 'beta' in entry['gameversion'].lower()
+            elif entry['event'] == 'LoadGame':
+                self.cmdr = entry['Commander']
+                self.mode = entry['GameMode']
+            elif entry['event'] == 'NewCommander':
+                self.cmdr = entry['Name']
+            elif entry['event'] in ['Undocked']:
+                self.station = None
+                self.coordinates = None
+            elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
+                if 'StarPos' in entry:
+                    self.coordinates = tuple(entry['StarPos'])
+                elif self.system != entry['StarSystem']:
+                    self.coordinates = None	# Docked event doesn't include coordinates
+                self.system = entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem']
+                self.station = entry.get('StationName')	# May be None
+            return entry
+        except:
+            if __debug__:
+                print 'Invalid journal entry "%s"' % repr(line)
+            return { 'event': None }
 
-    def dock(self, event):
-        # Called from Tkinter's main loop
-        if self.callbacks['Dock']:
-            self.callbacks['Dock']()
+    def get_entry(self):
+        if not self.event_queue:
+            return None
+        else:
+            return self.parse_entry(self.event_queue.pop(0))
 
     def is_valid_logdir(self, path):
         return self._is_valid_logdir(path)
