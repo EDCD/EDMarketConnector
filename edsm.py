@@ -18,7 +18,7 @@ class EDSM:
 
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
-        self.syscache = set()
+        self.syscache = set()	# Cache URLs of systems with known coordinates
 
         EDSM._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhDgAOAMIEAFWjVVWkVWS/ZGfFZwAAAAAAAAAAAAAAACH5BAEKAAQALAAAAAAOAA4AAAMsSLrcHEIEp8C4GDSLu15dOCyB2E2EYGKCoq5DS5QwSsDjwomfzlOziA0ITAAAOw==')	# green circle
         EDSM._IMG_UNKNOWN  = tk.PhotoImage(data = 'R0lGODlhDgAOAKECAGVLJ+ddWO5fW+5fWyH5BAEKAAMALAAAAAAOAA4AAAImnI+JEAFqgJj0LYqFNTkf2VVGEFLBWE7nAJZbKlzhFnX00twQVAAAOw==')	# red circle
@@ -63,7 +63,7 @@ class EDSM:
 
         if system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
-        elif known or system_name in self.syscache:	# Cache URLs of systems with known coordinates
+        elif known or system_name in self.syscache:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False, 'uncharted': False }
@@ -100,41 +100,38 @@ class EDSM:
         result['done'] = True
 
 
-# Flight log - https://www.edsm.net/api-logs
-def export(data, edsmlookupfn):
+    # Send flight log and also do lookup
+    def writelog(self, timestamp, system_name, coordinates=None):
 
-    querytime = config.getint('querytime') or int(time.time())
-
-    writelog(querytime, data['lastSystem']['name'], edsmlookupfn)
-
-
-def writelog(timestamp, system, edsmlookupfn, coordinates=None):
-
-    try:
-        # Look up the system before adding it to the log, since adding it to the log has the side-effect of creating it
-        edsmlookupfn()
-
-        if system in EDSM.FAKE:
+        if system_name in self.FAKE:
+            self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
             return
 
-        url = 'https://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-            urllib.quote(config.get('edsm_cmdrname').encode('utf-8')),
-            urllib.quote(config.get('edsm_apikey')),
-            urllib.quote(system),
-            urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
-            urllib.quote(applongname),
-            urllib.quote(appversion)
-        )
-        if coordinates:
-            url += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
-        r = requests.get(url, timeout=EDSM._TIMEOUT)
-        r.raise_for_status()
-        reply = r.json()
-        (msgnum, msg) = reply['msgnum'], reply['msg']
-    except:
-        if __debug__: print_exc()
-        raise Exception(_("Error: Can't connect to EDSM"))
+        self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+        try:
+            url = 'https://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                urllib.quote(config.get('edsm_cmdrname').encode('utf-8')),
+                urllib.quote(config.get('edsm_apikey')),
+                urllib.quote(system_name),
+                urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
+                urllib.quote(applongname),
+                urllib.quote(appversion)
+            )
+            if coordinates:
+                url += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
+            r = requests.get(url, timeout=EDSM._TIMEOUT)
+            r.raise_for_status()
+            reply = r.json()
+            (msgnum, msg) = reply['msgnum'], reply['msg']
+        except:
+            if __debug__: print_exc()
+            raise Exception(_("Error: Can't connect to EDSM"))
 
-    # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
-    if msgnum // 100 not in (1,4):
-        raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
+        # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
+        if msgnum // 100 not in (1,4):
+            raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
+        elif reply.get('systemCreated'):
+            self.result['img'] = EDSM._IMG_NEW
+        else:
+            self.result['img'] = EDSM._IMG_KNOWN
+        self.syscache.add(system_name)

@@ -491,7 +491,7 @@ class AppWindow:
                 try:
                     self.status['text'] = _('Sending data to EDSM...')
                     self.w.update_idletasks()
-                    edsm.writelog(timestamp, system, lambda:self.edsm.lookup(system, EDDB.system(system)), coordinates)	# Do EDSM lookup during EDSM export
+                    self.edsm.writelog(timestamp, system, coordinates)	# Do EDSM lookup during EDSM export
                     self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
                 except Exception as e:
                     if __debug__: print_exc()
