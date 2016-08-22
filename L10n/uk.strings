@@ -101,7 +101,7 @@
 "Dealer" = "Дилер";
 
 /* Appearance theme and language setting. [l10n.py] */
-"Default" = "Стандарт";
+"Default" = "Стандартно";
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";

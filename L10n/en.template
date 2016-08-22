@@ -103,6 +103,9 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Default";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Delay sending until docked";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
@@ -376,8 +379,11 @@
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Send flight log to Elite Dangerous Star Map";
 
-/* [prefs.py] */
+/* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Send system and scan data to the Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sending data to EDDN...";

@@ -368,7 +368,7 @@
 "Recruit" = "Recruit";
 
 /* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Uložit syrová data...";
+"Save Raw Data..." = "Uložit surová data...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";

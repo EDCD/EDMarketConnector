@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Внешний вид";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Автоматически отправлять при стыковке";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Баланс";
 
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "По умолчанию";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Отложить отправку до завершения стыковки";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
+
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "Расположение файла журнала E:D";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Эрл";
@@ -143,7 +152,7 @@
 "Error: Server is down" = "Ошибка: сервер не отвечает";
 
 /* [companion.py] */
-"Error: Verification failed" = "Error: Verification failed";
+"Error: Verification failed" = "Ошибка: Проверка не пройдена";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Выход";
@@ -179,7 +188,7 @@
 "Hero" = "Герой";
 
 /* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Highlighted text";
+"Highlighted text" = "Выделенный текст";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Горячая клавиша";
@@ -257,7 +266,7 @@
 "None" = "Не назначена";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normal text";
+"Normal text" = "Обычный текст";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Новичок";
@@ -372,6 +381,9 @@
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Отправлять информацию о станциях на Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Отправлять данные о системе и данные сканирования в Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Отправка данных на EDDN...";
