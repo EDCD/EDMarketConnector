@@ -407,7 +407,7 @@ class AppWindow:
                             self.status['text'] = _("Station doesn't have a market!")
 
                     else:
-                        if data['lastStarport'].get('commodities'):
+                        if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC):
                             # Fixup anomalies in the commodity data
                             fixed = self.session.fixup(data)
 
