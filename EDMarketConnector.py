@@ -598,6 +598,16 @@ class AppWindow:
 
 # Run the app
 if __name__ == "__main__":
+
+    # Ensure only one copy of the app is running. OSX does this automatically. Linux TODO.
+    if platform == 'win32':
+        import ctypes
+        h = ctypes.windll.user32.FindWindowW(u'TkTopLevel', unicode(applongname))
+        if h:
+            ctypes.windll.user32.ShowWindow(h, 9)	# SW_RESTORE
+            ctypes.windll.user32.SetForegroundWindow(h)	# Probably not necessary
+            sys.exit(0)
+
     root = tk.Tk()
     app = AppWindow(root)
     root.mainloop()
