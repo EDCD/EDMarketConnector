@@ -28,7 +28,7 @@ Installation
 
 Mac:
 
-* Requires Mac OS 10.9 or later.
+* Requires Mac OS 10.10 or later.
 * Download the `.zip` archive of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
 * The zip archive contains the **EDMarketConnector** app - move this app to **Applications** or wherever you want it.
 * Double-click on the app to run it.

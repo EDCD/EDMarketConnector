@@ -22,9 +22,12 @@ class EDSM:
         self.syscache = set()	# Cache URLs of systems with known coordinates
 
         # OpenSSL 0.9.8 on OSX fails to negotiate with Cloudflare unless cipher is forced
-        sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-        sslcontext.set_ciphers("ECCdraft:HIGH:!aNULL")
-        self.opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslcontext))
+        if platform == 'darwin':
+            sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)	# Requires Python >= 2.7.9 on OSX >= 10.10
+            sslcontext.set_ciphers("ECCdraft:HIGH:!aNULL")
+            self.opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslcontext))
+        else:
+            self.opener = urllib2.build_opener()
         self.opener.addheaders = [('User-Agent', '%s/%s' % (appname, appversion))]
 
         # Can't be in class definition since can only call PhotoImage after window is created
