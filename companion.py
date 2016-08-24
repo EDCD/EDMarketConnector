@@ -267,10 +267,11 @@ class Session:
             pass
         self.session = None
 
-    # Returns a shallow copy of the received data with anomalies in the commodity data fixed up
-    def fixup(self, data):
-        commodities = []
-        for commodity in data['lastStarport'].get('commodities') or []:
+    # Fixup in-place anomalies in the recieved commodity data
+    def fixup(self, commodities):
+        i=0
+        while i<len(commodities):
+            commodity = commodities[i]
 
             # Check all required numeric fields are present and are numeric
             # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
@@ -292,29 +293,28 @@ class Session:
                     if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
                 else:
                     # Rewrite text fields
-                    new = dict(commodity)	# shallow copy
-                    new['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
+                    commodity['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
                     fixed = commodity_map.get(commodity['name'])
                     if type(fixed) == tuple:
-                        (new['categoryname'], new['name']) = fixed
+                        (commodity['categoryname'], commodity['name']) = fixed
                     elif fixed:
-                        new['name'] = fixed
+                        commodity['name'] = fixed
 
                     # Force demand and stock to zero if their corresponding bracket is zero
                     # Fixes spurious "demand": 1 in ED 1.3
                     if not commodity['demandBracket']:
-                        new['demand'] = 0
+                        commodity['demand'] = 0
                     if not commodity['stockBracket']:
-                        new['stock'] = 0
+                        commodity['stock'] = 0
 
                     # We're good
-                    commodities.append(new)
+                    i+=1
+                    continue
 
-        # return a shallow copy
-        datacopy = dict(data)
-        datacopy['lastStarport'] = dict(data['lastStarport'])
-        datacopy['lastStarport']['commodities'] = commodities
-        return datacopy
+            # Skip the commodity
+            commodities.pop(i)
+
+        return commodities
 
     def dump(self, r):
         if __debug__:

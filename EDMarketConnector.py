@@ -366,6 +366,10 @@ class AppWindow:
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
 
+                if data['lastStarport'].get('commodities'):
+                    # Fixup anomalies in the commodity data
+                    self.session.fixup(data['lastStarport']['commodities'])
+
                 # stuff we can do when not docked
                 plug.notify_newdata(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
@@ -408,15 +412,12 @@ class AppWindow:
 
                     else:
                         if data['lastStarport'].get('commodities'):
-                            # Fixup anomalies in the commodity data
-                            fixed = self.session.fixup(data)
-
                             if config.getint('output') & config.OUT_MKT_CSV:
-                                commodity.export(fixed, COMMODITY_CSV)
+                                commodity.export(data, COMMODITY_CSV)
                             if config.getint('output') & config.OUT_MKT_TD:
-                                td.export(fixed)
+                                td.export(data)
                             if config.getint('output') & config.OUT_MKT_BPC:
-                                commodity.export(fixed, COMMODITY_BPC)
+                                commodity.export(data, COMMODITY_BPC)
 
                         if config.getint('output') & config.OUT_MKT_EDDN:
                             old_status = self.status['text']

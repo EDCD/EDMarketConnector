@@ -92,6 +92,10 @@ try:
         sys.stderr.write('What are you flying?!\n')	# Shouldn't happen
         sys.exit(EXIT_SERVER)
 
+    if data['lastStarport'].get('commodities'):
+        # Fixup anomalies in the commodity data
+        session.fixup(data['lastStarport']['commodities'])
+
     # stuff we can do when not docked
     if args.d:
         with open(args.d, 'wt') as h:
@@ -129,7 +133,6 @@ try:
 
     if args.m:
         if data['lastStarport'].get('commodities'):
-            data = session.fixup(data)	# Fixup anomalies in the commodity data
             commodity.export(data, COMMODITY_DEFAULT, args.m)
         else:
             sys.stderr.write("Station doesn't have a market\n")

@@ -1,25 +1,32 @@
 # Export to EDDN
 
-from collections import OrderedDict
 import hashlib
 import json
 import numbers
-from platform import system
-import re
 import requests
+from platform import system
 from sys import platform
 import time
 
 from config import applongname, appversion, config
-from companion import category_map
-
+import companion
+import outfitting
 
 ### upload = 'http://localhost:8081/upload/'	# testing
 upload = 'http://eddn-gateway.elite-markets.net:8080/upload/'
 
 timeout= 10	# requests timeout
-module_re = re.compile('^Hpt_|^Int_|_Armour_')
 
+# Map API ship names to EDDN schema names
+# https://raw.githubusercontent.com/jamesremuscat/EDDN/master/schemas/shipyard-v1.0.json
+ship_map = dict(companion.ship_map)
+ship_map['asp'] = 'Asp'			# Pre E:D 1.5 name for backwards compatibility
+ship_map['cobramkiii'] = 'Cobra Mk III'	#	ditto
+ship_map['viper'] = 'Viper'		#	ditto
+
+bracketmap = { 1: 'Low',
+               2: 'Med',
+               3: 'High', }
 
 def send(cmdr, msg):
     msg['header'] = {
@@ -39,42 +46,52 @@ def send(cmdr, msg):
 
 
 def export_commodities(data):
-    commodities = []
-    for commodity in data['lastStarport'].get('commodities') or []:
-        if category_map.get(commodity['categoryname'], True):	# Check marketable
-            commodities.append(OrderedDict([
-                ('name',          commodity['name']),
-                ('meanPrice',     int(commodity['meanPrice'])),
-                ('buyPrice',      int(commodity['buyPrice'])),
-                ('stock',         int(commodity['stock'])),
-                ('stockBracket',  commodity['stockBracket']),
-                ('sellPrice',     int(commodity['sellPrice'])),
-                ('demand',        int(commodity['demand'])),
-                ('demandBracket', commodity['demandBracket']),
-            ]))
-            if commodity['statusFlags']:
-                commodities[-1]['statusFlags'] = commodity['statusFlags']
-
     # Don't send empty commodities list - schema won't allow it
-    if commodities:
+    if data['lastStarport'].get('commodities'):
+        commodities = []
+        for commodity in data['lastStarport'].get('commodities', []):
+            commodities.append({
+                'name'      : commodity['name'],
+                'buyPrice'  : int(commodity['buyPrice']),
+                'supply'    : int(commodity['stock']),
+                'sellPrice' : int(commodity['sellPrice']),
+                'demand'    : int(commodity['demand']),
+            })
+            if commodity['stockBracket']:
+                commodities[-1]['supplyLevel'] = bracketmap[commodity['stockBracket']]
+            if commodity['demandBracket']:
+                commodities[-1]['demandLevel'] = bracketmap[commodity['demandBracket']]
+
         send(data['commander']['name'], {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/3',
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/2',
             'message'    : {
-                'systemName'  : data['lastSystem']['name'],
-                'stationName' : data['lastStarport']['name'],
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
                 'commodities' : commodities,
             }
         })
 
 def export_outfitting(data):
-    # Don't send empty modules list - schema won't allow it
+    # Don't send empty modules list
     if data['lastStarport'].get('modules'):
+        schemakeys = ['category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating']
+        modules = []
+        for v in data['lastStarport'].get('modules', {}).itervalues():
+            try:
+                module = outfitting.lookup(v, ship_map)
+                if module:
+                    modules.append({ k: module[k] for k in schemakeys if k in module })	# just the relevant keys
+            except AssertionError as e:
+                if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+            except:
+                if __debug__: raise
+
         send(data['commander']['name'], {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/2',
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/1',
             'message'    : {
-                'systemName'  : data['lastSystem']['name'],
-                'stationName' : data['lastStarport']['name'],
-                'modules'     : sorted([module['name'] for module in (data['lastStarport'].get('modules') or {}).values() if module_re.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite']),
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'modules'     : modules,
             }
         })
 
@@ -82,10 +99,10 @@ def export_shipyard(data):
     # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
     if data['lastStarport'].get('ships'):
         send(data['commander']['name'], {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/2',
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/1',
             'message'    : {
-                'systemName'  : data['lastSystem']['name'],
-                'stationName' : data['lastStarport']['name'],
-                'ships'       : sorted([ship['name'] for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list')]),
+                'systemName'  : data['lastSystem']['name'].strip(),
+                'stationName' : data['lastStarport']['name'].strip(),
+                'ships'       : [ship_map[ship['name'].lower()] for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list') if ship['name'].lower() in ship_map],
             }
         })
