@@ -1,12 +1,13 @@
-import requests
+import json
 import threading
 from sys import platform
+import ssl
 import time
-import urllib
+import urllib2
 
 import Tkinter as tk
 
-from config import applongname, appversion, config
+from config import appname, applongname, appversion, config
 
 if __debug__:
     from traceback import print_exc
@@ -20,6 +21,13 @@ class EDSM:
         self.result = { 'img': None, 'url': None, 'done': True }
         self.syscache = set()	# Cache URLs of systems with known coordinates
 
+        # OpenSSL 0.9.8 on OSX fails to negotiate with Cloudflare unless cipher is forced
+        sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        sslcontext.set_ciphers("ECCdraft:HIGH:!aNULL")
+        self.opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslcontext))
+        self.opener.addheaders = [('User-Agent', '%s/%s' % (appname, appversion))]
+
+        # Can't be in class definition since can only call PhotoImage after window is created
         EDSM._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7rMpvNV4q932VSuRiPjQQAOw==')	# green circle
         EDSM._IMG_UNKNOWN  = tk.PhotoImage(data = 'R0lGODlhEAAQAKEDAGVLJ+ddWO5fW////yH5BAEKAAMALAAAAAAQABAAAAItnI+pywYRQBtA2CtVvTwjDgrJFlreEJRXgKSqwB5keQ6vOKq1E+7IE5kIh4kCADs=')	# red circle
         EDSM._IMG_NEW      = tk.PhotoImage(data = 'R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXOPvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//jd//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/slv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP///////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xHJk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+GBAcUCIIBBDSYYGiAAUMALFR6FAgAOw==')
@@ -31,7 +39,7 @@ class EDSM:
         if system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
         else:
-            self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
 
     def lookup(self, system_name, known=0):
         self.cancel_lookup()
@@ -39,12 +47,11 @@ class EDSM:
         if system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
         elif known or system_name in self.syscache:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
         else:
-            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
-            r = requests.get('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
-            r.raise_for_status()
-            data = r.json()
+            self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
+            r = self.opener.open('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)
+            data = json.loads(r.read())
 
             if data == -1 or not data:
                 # System not present - but don't create it on the assumption that the caller will
@@ -64,9 +71,9 @@ class EDSM:
         if system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
         elif known or system_name in self.syscache:
-            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+            self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
         else:
-            self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': False, 'uncharted': False }
+            self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': False, 'uncharted': False }
             self.thread = threading.Thread(target = self.worker, name = 'EDSM worker', args = (system_name, self.result))
             self.thread.daemon = True
             self.thread.start()
@@ -77,16 +84,15 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            r = requests.get('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)
-            r.raise_for_status()
-            data = r.json()
+            r = self.opener.open('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)
+            data = json.loads(r.read())
 
             if data == -1 or not data:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['uncharted'] = True
                 result['done'] = True	# give feedback immediately
-                requests.get('https://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib.quote(system_name), urllib.quote(applongname), urllib.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
+                requests.get('https://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
                 result['done'] = True
@@ -107,21 +113,20 @@ class EDSM:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
             return
 
-        self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib.quote(system_name), 'done': True, 'uncharted': False }
+        self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
         try:
             url = 'https://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-                urllib.quote(config.get('edsm_cmdrname').encode('utf-8')),
-                urllib.quote(config.get('edsm_apikey')),
-                urllib.quote(system_name),
-                urllib.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
-                urllib.quote(applongname),
-                urllib.quote(appversion)
+                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
+                urllib2.quote(config.get('edsm_apikey')),
+                urllib2.quote(system_name),
+                urllib2.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
+                urllib2.quote(applongname),
+                urllib2.quote(appversion)
             )
             if coordinates:
                 url += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
-            r = requests.get(url, timeout=EDSM._TIMEOUT)
-            r.raise_for_status()
-            reply = r.json()
+            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
+            reply = json.loads(r.read())
             (msgnum, msg) = reply['msgnum'], reply['msg']
         except:
             if __debug__: print_exc()
