@@ -379,15 +379,6 @@ class AppWindow:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
-                if config.getint('output') & config.OUT_SYS_EDSM:
-                    # Silently catch any EDSM errors here so that they don't prevent station update
-                    try:
-                        self.edsm.lookup(self.system['text'], EDDB.system(self.system['text']))
-                    except Exception as e:
-                        if __debug__: print_exc()
-                else:
-                    self.edsm.link(self.system['text'])
-                self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC|config.OUT_MKT_EDDN)):
                     # no station data requested - we're done
@@ -497,6 +488,8 @@ class AppWindow:
             self.cmdr['text'] = monitor.cmdr or ''
             self.system['text'] = monitor.system or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
+            if system_changed or station_changed:
+                self.status['text'] = ''
 
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
 
@@ -513,7 +506,7 @@ class AppWindow:
                         self.status['text'] = _('Sending data to EDSM...')
                         self.w.update_idletasks()
                         self.edsm.writelog(timestamp, monitor.system, monitor.coordinates)
-                        self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
+                        self.status['text'] = ''
                     except Exception as e:
                         if __debug__: print_exc()
                         self.status['text'] = unicode(e)
@@ -521,25 +514,41 @@ class AppWindow:
                             hotkeymgr.play_bad()
                 else:
                     self.edsm.link(monitor.system)
-                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
                 self.edsmpoll()
+
+            # Auto-Update after docking
+            if station_changed and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
             if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
                 (entry['event'] == 'FSDJump' and system_changed  or
                  entry['event'] == 'Docked'  and station_changed or
                  entry['event'] == 'Scan')):
-                # strip out properties disallowed by the schema
-                for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
-                    entry.pop(thing, None)
-                for thing in entry.keys():
-                    if thing.endswith('_Localised'):
-                        entry.pop(thing, None)
-                eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
+                try:
+                    self.status['text'] = _('Sending data to EDDN...')
 
-            # Auto-Update after docking
-            if station_changed and config.getint('output') & (config.OUT_MKT_EDDN|config.OUT_MKT_MANUAL) == config.OUT_MKT_EDDN and entry['event'] == 'Docked':
-                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+                    # strip out properties disallowed by the schema
+                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
+                        entry.pop(thing, None)
+                    for thing in entry.keys():
+                        if thing.endswith('_Localised'):
+                            entry.pop(thing, None)
+
+                    eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
+                    self.status['text'] = ''
+
+                except requests.exceptions.RequestException as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = _("Error: Can't connect to EDDN")
+                    if not config.getint('hotkey_mute'):
+                        hotkeymgr.play_bad()
+
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
+                    if not config.getint('hotkey_mute'):
+                        hotkeymgr.play_bad()
 
     def edsmpoll(self):
         result = self.edsm.result
