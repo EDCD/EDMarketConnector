@@ -23,6 +23,7 @@ import loadout
 import coriolis
 import shipyard
 import eddb
+import eddn
 import stats
 import prefs
 from config import appcmdname, appversion, update_feed, config
@@ -50,6 +51,7 @@ try:
     parser.add_argument('-s', metavar='FILE', help='write station shipyard data to FILE in CSV format')
     parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
     parser.add_argument('-d', metavar='FILE', help='write raw JSON data to FILE')
+    parser.add_argument('-n', action='store_true', help='send data to EDDN')
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
@@ -121,16 +123,18 @@ try:
         sys.stderr.write("Station doesn't have anything!\n")
         sys.exit(EXIT_SUCCESS)
 
+    # Fixup anomalies in the commodity data
+    fixed = session.fixup(data)
+
     if args.j:
         # Collate from JSON dump
-        collate.addcommodities(data)
-        collate.addmodules(data)
-        collate.addships(data)
+        collate.addcommodities(fixed)
+        collate.addmodules(fixed)
+        collate.addships(fixed)
 
     if args.m:
         if data['lastStarport'].get('commodities'):
-            data = session.fixup(data)	# Fixup anomalies in the commodity data
-            commodity.export(data, COMMODITY_DEFAULT, args.m)
+            commodity.export(fixed, COMMODITY_DEFAULT, args.m)
         else:
             sys.stderr.write("Station doesn't have a market\n")
 
@@ -150,6 +154,14 @@ try:
             sys.stderr.write("Couldn't retrieve shipyard info\n")
         else:
             sys.stderr.write("Station doesn't have a shipyard\n")
+
+    if args.n:
+        try:
+            eddn.export_commodities(data)
+            eddn.export_outfitting(data)
+            eddn.export_shipyard(data)
+        except Exception as e:
+            sys.stderr.write("Failed to send data to EDDN: %s\n" % unicode(e).encode('ascii', 'replace'))
 
     sys.exit(EXIT_SUCCESS)
 

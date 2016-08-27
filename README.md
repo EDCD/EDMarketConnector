@@ -167,6 +167,7 @@ Arguments:
  -s FILE        write station shipyard data to FILE in CSV format
  -t FILE        write player status to FILE in CSV format
  -d FILE        write raw JSON data to FILE
+ -n FILE        send data to EDDN
 ```
 
 The program returns one of the following exit codes. Further information may be written to stderr.
