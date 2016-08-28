@@ -18,8 +18,10 @@ class EDDB:
     HAS_SHIPYARD = 4
 
     def __init__(self):
-        self.system_ids  = cPickle.load(open(join(config.respath, 'systems.p'),  'rb'))
-        self.station_ids = cPickle.load(open(join(config.respath, 'stations.p'), 'rb'))
+        with open(join(config.respath, 'systems.p'),  'rb') as h:
+            self.system_ids  = cPickle.load(h)
+        with open(join(config.respath, 'stations.p'), 'rb') as h:
+            self.station_ids = cPickle.load(h)
 
     # system_name -> system_id or 0
     def system(self, system_name):
@@ -32,26 +34,66 @@ class EDDB:
 
 
 #
-# build databases from files systems_populated.json and stations.json from http://eddb.io/api
+# build databases from files systems.json and stations.json from http://eddb.io/api
 #
 if __name__ == "__main__":
+
     import json
 
-    # system_name by system_id
-    systems  = dict([(x['id'], str(x['name'])) for x in json.load(open('systems_populated.json'))])
+    # Ellipsoid that encompasses most of the systems in the bubble (but not outliers like Sothis)
+    RX = RZ = 260
+    CY = -50
+    RY = 300
 
-    stations = json.load(open('stations.json'))
+    RX2 = RX * RX
+    RY2 = RY * RY
+    RZ2 = RZ * RZ
 
-    # check that all populated systems have known coordinates
-    coords = dict([(x['id'], x['x'] or x['y'] or x['z']) for x in json.load(open('systems_populated.json'))])
-    for x in stations:
-        assert x['system_id'] == 17072 or coords[x['system_id']], (x['system_id'], systems[x['system_id']])
+    def inbubble(x, y, z):
+        return (x * x)/RX2 + ((y - CY) * (y - CY))/RY2 + (z * z)/RZ2 <= 1
 
-    # system_id by system_name - populated systems only
-    system_ids = dict([(systems[x['system_id']], x['system_id']) for x in stations])
-    cPickle.dump(system_ids,  open('systems.p',  'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
+    # Sphere around Jaques
+    JX, JY, JZ = -9530.50000, -910.28125, 19808.12500
+    RJ2 = 40 * 40
+
+    def around_jaques(x, y, z):
+        return ((x - JX) * (x - JX))/RJ2 + ((y - JY) * (y - JY))/RJ2 + ((z - JZ) * (z - JZ))/RJ2 <= 1
+
+    systems  = json.load(open('systems.json'))
+    print '%d\tsystems' % len(systems)
+
+    # system_id by system_name (ignoring duplicate names)
+    system_ids = dict([
+        (str(s['name']), s['id'])
+        for s in systems if s['is_populated'] or (inbubble(s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])) or around_jaques(s['x'], s['y'], s['z'])])	# skip unpopulated systems outside the bubble and those with a bogus name
+
+    cut = [s for s in systems if s['is_populated'] and not inbubble(s['x'], s['y'], s['z'])]
+    print '\n%d populated systems outside bubble calculation:' % len(cut)
+    for s in cut:
+        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'], s['x'], s['y'], s['z'])
+
+    cut = [s for s in systems if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None]
+    print '\n%d dropped systems inside bubble calculation:' % len(cut)
+    for s in cut:
+        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'].encode('utf-8'), s['x'], s['y'], s['z'])
+
+    cut = [s for s in systems if (s['is_populated'] or inbubble(s['x'], s['y'], s['z'])) and system_ids.get(s['name']) and system_ids[s['name']] != s['id']]
+    print '\n%d duplicate systems inside bubble calculation:' % len(cut)
+    for s in cut:
+        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'].encode('utf-8'), s['x'], s['y'], s['z'])
+
+    print '\n%d systems around Jacques' % len([s for s in systems if around_jaques(s['x'], s['y'], s['z'])])
+
+    # Hack - ensure duplicate system names are pointing at the more interesting system
+    system_ids['Almar'] = 750
+    system_ids['Arti'] = 60342
+
+    with open('systems.p',  'wb') as h:
+        cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
+    print '%d saved systems' % len(system_ids)
 
     # station_id by (system_id, station_name)
+    stations = json.load(open('stations.json'))
     station_ids = dict([(
         (x['system_id'], str(x['name'])),
         (x['id'],
@@ -59,4 +101,6 @@ if __name__ == "__main__":
          (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
          (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0)))
                         for x in stations])
-    cPickle.dump(station_ids, open('stations.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
+    with open('stations.p', 'wb') as h:
+        cPickle.dump(station_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
+    print '%d saved stations' % len(station_ids)
