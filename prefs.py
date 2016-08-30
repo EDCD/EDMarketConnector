@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from os.path import dirname, expanduser, isdir, join, sep
+from os.path import dirname, expanduser, exists, isdir, join, sep
 from sys import platform
 
 import Tkinter as tk
@@ -191,7 +191,7 @@ class PreferencesDialog(tk.Toplevel):
         configframe.columnconfigure(1, weight=1)
 
         self.logdir = nb.Entry(configframe, takefocus=False)
-        logdir = config.get('logdir') or monitor.logdir
+        logdir = config.get('journaldir') or config.default_journal_dir
         if not logdir:
             pass
         elif logdir.startswith(config.home):
@@ -202,14 +202,14 @@ class PreferencesDialog(tk.Toplevel):
 
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
-            nb.Label(configframe, text = _('E:D log file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Configuration setting
+            nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
             self.logdir.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
             self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                           _('Browse...')),	# Folder selection button on Windows
-                                       command = lambda:self.filebrowse(_('E:D log file location'), self.logdir))
+                                       command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
             self.logbutton.grid(row=10, column=2, padx=PADX, sticky=tk.EW)
-            if monitor.logdir:
-                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = monitor.logdir and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
+            if config.default_journal_dir:
+                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
 
         if platform == 'win32':
             ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
@@ -308,7 +308,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def outvarchanged(self):
         logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
-        logvalid = monitor.is_valid_logdir(logdir)
+        logvalid = logdir and exists(logdir)
 
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
         self.out_auto_button['state']   = local and logvalid and tk.NORMAL or tk.DISABLED
@@ -366,12 +366,12 @@ class PreferencesDialog(tk.Toplevel):
     def logdir_reset(self):
         self.logdir['state'] = tk.NORMAL	# must be writable to update
         self.logdir.delete(0, tk.END)
-        if not monitor.logdir:
-            pass
-        elif monitor.logdir.startswith(config.home):
-            self.logdir.insert(0, '~' + monitor.logdir[len(config.home):])
+        if not config.default_journal_dir:
+            pass	# Can't reset
+        elif config.default_journal_dir.startswith(config.home):
+            self.logdir.insert(0, '~' + config.default_journal_dir[len(config.home):])
         else:
-            self.logdir.insert(0, monitor.logdir)
+            self.logdir.insert(0, config.default_journal_dir)
         self.logdir['state'] = 'readonly'
         self.outvarchanged()
 
@@ -456,10 +456,10 @@ class PreferencesDialog(tk.Toplevel):
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 
         logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
-        if monitor.logdir and logdir.lower() == monitor.logdir.lower():
-            config.set('logdir', '')	# default location
+        if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
+            config.set('journaldir', '')	# default location
         else:
-            config.set('logdir', logdir)
+            config.set('journaldir', logdir)
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)

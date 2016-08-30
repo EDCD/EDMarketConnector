@@ -65,7 +65,6 @@ class EDLogs(FileSystemEventHandler):
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
         self.root = None
-        self.logdir = self._logdir()	# E:D client's default Logs directory, or None if not found
         self.currentdir = None		# The actual logdir that we're monitoring
         self.logfile = None
         self.observer = None
@@ -88,8 +87,8 @@ class EDLogs(FileSystemEventHandler):
 
     def start(self, root):
         self.root = root
-        logdir = config.get('logdir') or self.logdir
-        if not self.is_valid_logdir(logdir):
+        logdir = config.get('journaldir') or config.default_journal_dir
+        if not logdir or not exists(logdir):
             self.stop()
             return False
 
@@ -101,7 +100,7 @@ class EDLogs(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = bool(config.get('logdir')) and platform != 'win32'
+        polling = bool(config.get('journaldir')) and platform != 'win32'
         if not polling and not self.observer:
             self.observer = Observer()
             self.observer.daemon = True
@@ -238,114 +237,6 @@ class EDLogs(FileSystemEventHandler):
             return None
         else:
             return self.parse_entry(self.event_queue.pop(0))
-
-    def is_valid_logdir(self, path):
-        return self._is_valid_logdir(path)
-
-
-    if platform=='darwin':
-
-        def _logdir(self):
-            # https://support.frontier.co.uk/kb/faq.php?id=97
-            paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)
-            if len(paths) and self._is_valid_logdir(join(paths[0], 'Frontier Developments', 'Elite Dangerous', 'Logs')):
-                return join(paths[0], 'Frontier Developments', 'Elite Dangerous', 'Logs')
-            else:
-                return None
-
-        def _is_valid_logdir(self, path):
-            # Apple's SMB implementation is too flaky so assume target machine is OSX
-            return path and isdir(path) and isfile(join(path, pardir, 'AppNetCfg.xml'))
-
-
-    elif platform=='win32':
-
-        def _logdir(self):
-
-            # Try locations described in https://support.elitedangerous.com/kb/faq.php?id=108, in reverse order of age
-            candidates = []
-
-            # Steam and Steam libraries
-            key = HKEY()
-            if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Valve\Steam', 0, KEY_READ, ctypes.byref(key)):
-                valtype = DWORD()
-                valsize = DWORD()
-                if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
-                    buf = ctypes.create_unicode_buffer(valsize.value / 2)
-                    if not RegQueryValueEx(key, 'SteamPath', 0, ctypes.byref(valtype), buf, ctypes.byref(valsize)):
-                        steampath = buf.value.replace('/', '\\')	# For some reason uses POSIX seperators
-                        steamlibs = [steampath]
-                        try:
-                            # Simple-minded Valve VDF parser
-                            with open(join(steampath, 'config', 'config.vdf'), 'rU') as h:
-                                for line in h:
-                                    vals = line.split()
-                                    if vals and vals[0].startswith('"BaseInstallFolder_'):
-                                        steamlibs.append(vals[1].strip('"').replace('\\\\', '\\'))
-                        except:
-                            pass
-                        for lib in steamlibs:
-                            candidates.append(join(lib, 'steamapps', 'common', 'Elite Dangerous', 'Products'))
-                RegCloseKey(key)
-
-            # Next try custom installation under the Launcher
-            if not RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-                                machine().endswith('64') and
-                                r'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall' or	# Assumes that the launcher is a 32bit process
-                                r'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
-                                0, KEY_READ, ctypes.byref(key)):
-                buf = ctypes.create_unicode_buffer(MAX_PATH)
-                i = 0
-                while True:
-                    size = DWORD(MAX_PATH)
-                    if RegEnumKeyEx(key, i, buf, ctypes.byref(size), None, None, None, None):
-                        break
-
-                    subkey = HKEY()
-                    if not RegOpenKeyEx(key, buf, 0, KEY_READ, ctypes.byref(subkey)):
-                        valtype = DWORD()
-                        valsize = DWORD((len('Frontier Developments')+1)*2)
-                        valbuf = ctypes.create_unicode_buffer(valsize.value / 2)
-                        if not RegQueryValueEx(subkey, 'Publisher', 0, ctypes.byref(valtype), valbuf, ctypes.byref(valsize)) and valtype.value == REG_SZ and valbuf.value == 'Frontier Developments':
-                            if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), None, ctypes.byref(valsize)) and valtype.value == REG_SZ:
-                                valbuf = ctypes.create_unicode_buffer(valsize.value / 2)
-                                if not RegQueryValueEx(subkey, 'InstallLocation', 0, ctypes.byref(valtype), valbuf, ctypes.byref(valsize)):
-                                    candidates.append(join(valbuf.value, 'Products'))
-                        RegCloseKey(subkey)
-                    i += 1
-                RegCloseKey(key)
-
-            # Standard non-Steam locations
-            programs = ctypes.create_unicode_buffer(MAX_PATH)
-            ctypes.windll.shell32.SHGetSpecialFolderPathW(0, programs, CSIDL_PROGRAM_FILESX86, 0)
-            candidates.append(join(programs.value, 'Frontier', 'Products')),
-
-            applocal = ctypes.create_unicode_buffer(MAX_PATH)
-            ctypes.windll.shell32.SHGetSpecialFolderPathW(0, applocal, CSIDL_LOCAL_APPDATA, 0)
-            candidates.append(join(applocal.value, 'Frontier_Developments', 'Products'))
-
-            for game in ['elite-dangerous-64', 'FORC-FDEV-D-1']:	# Look for Horizons in all candidate places first
-                for base in candidates:
-                    if isdir(base):
-                        for d in listdir(base):
-                            if d.startswith(game) and self._is_valid_logdir(join(base, d, 'Logs')):
-                                return join(base, d, 'Logs')
-
-            return None
-
-        def _is_valid_logdir(self, path):
-            # Assume target machine is Windows
-            return path and isdir(path) and isfile(join(path, pardir, 'AppConfig.xml'))
-
-
-    elif platform=='linux2':
-
-        def _logdir(self):
-            return None
-
-        def _is_valid_logdir(self, path):
-            # Assume target machine is Windows
-            return path and isdir(path) and isfile(join(path, pardir, 'AppConfig.xml'))
 
 
 # singleton

@@ -69,7 +69,7 @@ This app can save a variety of data in a variety of formats:
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
-Some options work by reading the Elite: Dangerous game's log files. Normally this app will find the log files but if you find some options greyed-out then adjust the “E:D log file location” setting described [below](#doesnt-track-systems-visited).
+Some options work by reading the Elite: Dangerous game's “journal” files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
 ### EDDN
 
@@ -126,13 +126,7 @@ Ensure that you visit the in-game Commodity Market at a station where you intend
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
 ### Doesn't track Systems visited
-This app uses Elite: Dangerous' log files to track the systems and stations that you visit. When looking for the log files, this app assumes:
-
-- That you're running this app and Elite: Dangerous on the same machine.
-- That you're running Elite: Dangerous from Steam, if you have both Steam and non-Steam versions installed.
-- That you're running “Horizons” 64bit, if you have both Horizons and Season 1 installed.
-
-If you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), or if you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D log file location” setting on the Configuration tab to point to the game's log files using [this info](https://support.frontier.co.uk/kb/faq.php?id=108) as a guide.
+This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
 Running from source
 --------
