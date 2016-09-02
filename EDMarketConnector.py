@@ -37,7 +37,7 @@ import companion
 import commodity
 from commodity import COMMODITY_BPC, COMMODITY_CSV
 import td
-import eddn
+from eddn import eddn
 import edsm
 import loadout
 import coriolis
