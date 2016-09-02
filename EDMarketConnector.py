@@ -59,6 +59,11 @@ class AppWindow:
 
     STATION_UNDOCKED = u'×'	# "Station" name to display when not docked = U+00D7
 
+    # Tkinter Event types
+    EVENT_KEYPRESS = 2
+    EVENT_BUTTON   = 4
+    EVENT_VIRTUAL  = 35
+
     def __init__(self, master):
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
@@ -323,7 +328,8 @@ class AppWindow:
 
     def getandsend(self, event=None, retrying=False):
 
-        play_sound = event and event.type=='35' and not config.getint('hotkey_mute')
+        auto_update = not event
+        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
@@ -333,8 +339,6 @@ class AppWindow:
                 return
             elif play_sound:
                 hotkeymgr.play_good()
-            self.cmdr['text'] = self.system['text'] = self.station['text'] = ''
-            self.system['image'] = ''
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.edit_menu.entryconfigure(0, state=tk.DISABLED)	# Copy
@@ -352,6 +356,8 @@ class AppWindow:
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+            elif auto_update and (not data['commander'].get('docked') or (self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
+                raise companion.ServerLagging()
 
             else:
 
@@ -360,9 +366,10 @@ class AppWindow:
                     with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
-                self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
-                self.system['text'] = data.get('lastSystem') and data.get('lastSystem').get('name') or ''
-                self.station['text'] = data.get('commander') and data.get('commander').get('docked') and data.get('lastStarport') and data.get('lastStarport').get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
+                self.cmdr['text'] = data['commander']['name']
+                self.system['text'] = data['lastSystem']['name']
+                self.system['image'] = ''
+                self.station['text'] = data['commander'].get('docked') and data.get('lastStarport') and data['lastStarport'].get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
 
@@ -437,7 +444,7 @@ class AppWindow:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
 
         # Companion API problem
-        except companion.ServerError as e:
+        except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
                 self.status['text'] = unicode(e)
             else:
@@ -445,13 +452,9 @@ class AppWindow:
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                 return	# early exit to avoid starting cooldown count
 
-        except requests.exceptions.ConnectionError as e:
+        except requests.RequestException as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
-
-        except requests.exceptions.Timeout as e:
-            if __debug__: print_exc()
-            self.status['text'] = _("Error: Connection to EDDN timed out")
 
         except Exception as e:
             if __debug__: print_exc()

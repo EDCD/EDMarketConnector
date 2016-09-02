@@ -298,7 +298,7 @@ class EDLogs(FileSystemEventHandler):
     def dock(self, event):
         # Called from Tkinter's main loop
         if self.callbacks['Dock']:
-            self.callbacks['Dock'](event)
+            self.callbacks['Dock']()
 
     def is_valid_logdir(self, path):
         return self._is_valid_logdir(path)
