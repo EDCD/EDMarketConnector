@@ -356,6 +356,8 @@ class AppWindow:
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+            elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
+                raise companion.CredentialsError()			# Companion API credentials don't match Journal
             elif auto_update and (not data['commander'].get('docked') or (self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
                 raise companion.ServerLagging()
 
@@ -517,7 +519,7 @@ class AppWindow:
                 self.edsmpoll()
 
             # Auto-Update after docking
-            if station_changed and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            if station_changed and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
