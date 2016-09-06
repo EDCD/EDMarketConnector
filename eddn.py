@@ -4,11 +4,19 @@ from collections import OrderedDict
 import hashlib
 import json
 import numbers
+from os import SEEK_SET, SEEK_CUR, SEEK_END
+from os.path import exists, join
 from platform import system
 import re
 import requests
 from sys import platform
 import time
+
+if platform != 'win32':
+    from fcntl import lockf, LOCK_EX, LOCK_NB
+
+if __debug__:
+    from traceback import print_exc
 
 from config import applongname, appversion, config
 from companion import category_map
@@ -25,6 +33,38 @@ class _EDDN:
 
     def __init__(self):
         self.session = requests.Session()
+        self.replayfile = None	# For delayed messages
+
+    def load(self):
+        # Try to obtain exclusive access to the journal cache
+        filename = join(config.app_dir, 'replay.jsonl')
+        try:
+            try:
+                # Try to open existing file
+                self.replayfile = open(filename, 'r+')
+            except:
+                if exists(filename):
+                    raise	# Couldn't open existing file
+                else:
+                    self.replayfile = open(filename, 'w+')	# Create file
+            if platform != 'win32':	# open for writing is automatically exclusive on Windows
+                lockf(self.replayfile, LOCK_EX|LOCK_NB)
+        except:
+            if __debug__: print_exc()
+            if self.replayfile:
+                self.replayfile.close()
+            self.replayfile = None
+            raise Exception("Error: Is another copy of this app already running?")	# Shouldn't happen - don't bother localizing
+
+    def flush(self):
+        self.replayfile.seek(0, SEEK_SET)
+        for line in self.replayfile:
+            self.send(*json.loads(line, object_pairs_hook=OrderedDict))
+        self.replayfile.truncate(0)
+
+    def close(self):
+        if self.replayfile:
+            self.replayfile.close()
 
     def send(self, cmdr, msg):
         msg['header'] = {
@@ -96,10 +136,19 @@ class _EDDN:
             })
 
     def export_journal_entry(self, cmdr, is_beta, entry):
-        self.send(cmdr, {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
-            'message'    : entry
-        })
+        if config.getint('output') & config.OUT_SYS_DELAY and self.replayfile and entry['event'] != 'Docked':
+            self.replayfile.seek(0, SEEK_END)
+            self.replayfile.write('%s\n' % json.dumps([cmdr.encode('utf-8'), {
+                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
+                'message'    : entry
+            }]))
+            self.replayfile.flush()
+        else:
+            self.flush()
+            self.send(cmdr, {
+                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
+                'message'    : entry
+            })
 
 # singleton
 eddn = _EDDN()

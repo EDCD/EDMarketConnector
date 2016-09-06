@@ -309,6 +309,12 @@ class AppWindow:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
 
+        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
+        try:
+            eddn.load()
+        except Exception as e:
+            self.status['text'] = unicode(e)
+
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
@@ -620,6 +626,7 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
+        eddn.close()
         self.updater.close()
         self.session.close()
         self.w.destroy()

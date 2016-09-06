@@ -77,6 +77,7 @@ Some options work by reading the Elite: Dangerous game's “journal” files. If
   * Sends station commodity market, outfitting and shipyard data to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
 * System and scan data
   * Sends general system information and the results of your detailed planet scans to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
+  * You can choose to delay sending this information to EDDN until you're next safely docked at a station. Otherwise the information is sent as soon as you enter a system or perform a scan.
 
 ### EDSM
 

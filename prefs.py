@@ -11,6 +11,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import applongname, config
+from eddn import eddn
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -157,6 +158,9 @@ class PreferencesDialog(tk.Toplevel):
         self.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
         self.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=self.eddn_system, command=self.outvarchanged)	# Output setting new in E:D 2.2
         self.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
+        self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
+        self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.eddn_delay, command=self.outvarchanged)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
+        self.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
 
         notebook.add(eddnframe, text='EDDN')		# Not translated
 
@@ -318,6 +322,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
+        self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
         self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
         edsm_state = logvalid and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
@@ -449,6 +454,7 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
                    (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
                    (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
+                   (self.eddn_delay.get()        and config.OUT_SYS_DELAY) +
                    (self.edsm_log.get()          and config.OUT_SYS_EDSM))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
