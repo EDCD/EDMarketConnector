@@ -484,8 +484,6 @@ class AppWindow:
     def journal_event(self, event):
         while True:
             entry = monitor.get_entry()
-            if entry is None:
-                return
             system_changed  = monitor.system  and self.system['text']  != monitor.system
             station_changed = monitor.station and self.station['text'] != monitor.station
 
@@ -495,6 +493,8 @@ class AppWindow:
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
+            if entry is None:
+                return
 
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
 

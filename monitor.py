@@ -164,6 +164,7 @@ class EDLogs(FileSystemEventHandler):
                 except:
                     if __debug__:
                         print 'Invalid journal entry "%s"' % repr(line)
+            self.root.event_generate('<<JournalEvent>>', when="tail")	# Generate null event to update the display at start
         else:
             loghandle = None
 
