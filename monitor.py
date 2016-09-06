@@ -222,6 +222,9 @@ class EDLogs(FileSystemEventHandler):
         else:
             loghandle = None
 
+        # Watchdog thread
+        emitter = self.observed and self.observer._emitter_for_watch[self.observed]	# Note: Uses undocumented attribute
+
         while True:
 
             if docked and not updated and not config.getint('output') & config.OUT_MKT_MANUAL:
@@ -231,7 +234,7 @@ class EDLogs(FileSystemEventHandler):
                     print "%s :\t%s %s" % ('Updated', docked and " docked" or "!docked", updated and " updated" or "!updated")
 
             # Check whether new log file started, e.g. client (re)started.
-            if self.observed:
+            if emitter and emitter.is_alive():
                 newlogfile = self.logfile	# updated by on_created watchdog callback
             else:
                 # Poll
