@@ -9,7 +9,6 @@ from config import config
 
 if platform == 'darwin':
 
-    import threading
     import objc
 
     from AppKit import NSApplication, NSWorkspace, NSBeep, NSSound, NSEvent, NSKeyDown, NSKeyUp, NSFlagsChanged, NSKeyDownMask, NSFlagsChangedMask, NSShiftKeyMask, NSControlKeyMask, NSAlternateKeyMask, NSCommandKeyMask, NSNumericPadKeyMask, NSDeviceIndependentModifierFlagsMask, NSF1FunctionKey, NSF35FunctionKey, NSDeleteFunctionKey, NSClearLineFunctionKey
@@ -180,6 +179,7 @@ if platform == 'darwin':
 
 elif platform == 'win32':
 
+    import atexit
     import ctypes
     from ctypes.wintypes import *
     import threading
@@ -285,6 +285,7 @@ elif platform == 'win32':
             self.thread = None
             self.snd_good = open(join(config.respath, 'snd_good.wav'), 'rb').read()
             self.snd_bad  = open(join(config.respath, 'snd_bad.wav'),  'rb').read()
+            atexit.register(self.unregister)
 
         def register(self, root, keycode, modifiers):
             self.root = root
