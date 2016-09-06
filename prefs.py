@@ -489,9 +489,6 @@ class PreferencesDialog(tk.Toplevel):
             self.callback()
 
     def _destroy(self):
-        # Re-enable hotkey and log monitoring before exit
-        hotkeymgr.register(self.parent, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-        monitor.start(self.parent)
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 

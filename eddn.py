@@ -54,7 +54,8 @@ class _EDDN:
             if self.replayfile:
                 self.replayfile.close()
             self.replayfile = None
-            raise Exception("Error: Is another copy of this app already running?")	# Shouldn't happen - don't bother localizing
+            return False
+        return True
 
     def flush(self):
         self.replayfile.seek(0, SEEK_SET)

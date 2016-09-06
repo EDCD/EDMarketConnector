@@ -109,7 +109,7 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Location of the new Journal file in E:D 2.2. [prefs.py] */
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D journal file location";
 
 /* Empire rank. [stats.py] */

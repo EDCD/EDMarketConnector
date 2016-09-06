@@ -96,6 +96,15 @@ class EDLogs(FileSystemEventHandler):
             self.stop()
         self.currentdir = logdir
 
+        # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
+        # Do this before setting up the observer in case the journal directory has gone away
+        try:
+            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+            self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
+        except:
+            self.logfile = None
+            return False
+
         # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
@@ -109,13 +118,6 @@ class EDLogs(FileSystemEventHandler):
 
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
-
-        # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
-        try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
-            self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
-        except:
-            self.logfile = None
 
         if __debug__:
             print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)

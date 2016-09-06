@@ -122,10 +122,7 @@ class AppWindow:
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
-
         theme.button_bind(self.theme_button, self.getandsend)
-        self.w.bind('<Return>', self.getandsend)
-        self.w.bind('<KP_Enter>', self.getandsend)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='win32' and 1 or 3))
@@ -240,21 +237,16 @@ class AppWindow:
         theme.register_highlight(self.station)
         theme.apply(self.w)
 
-        # Special handling for overrideredict
-        self.w.bind("<Map>", self.onmap)
+        self.w.bind("<Map>", self.onmap)			# Special handling for overrideredict
+        self.w.bind('<Return>', self.getandsend)
+        self.w.bind('<KP_Enter>', self.getandsend)
+        self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
+        self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
+        self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
-        self.w.bind_all('<<Quit>>', self.onexit)	# user-generated
-
-        # Install hotkey monitoring
-        self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-
-        # Install log monitoring
-        self.w.bind_all('<<JournalEvent>>', self.journal_event)	# user-generated
-        monitor.start(self.w)
 
         # First run
         if not config.get('username') or not config.get('password'):
@@ -309,14 +301,19 @@ class AppWindow:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
 
-        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        try:
-            eddn.load()
-        except Exception as e:
-            self.status['text'] = unicode(e)
-
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
+
+        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
+        if not eddn.load():
+            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
+
+        # (Re-)install hotkey monitoring
+        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # (Re-)install log monitoring
+        if not monitor.start(self.w):
+            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
         self.cooldown()
 
