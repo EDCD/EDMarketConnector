@@ -39,6 +39,12 @@ class EDDB:
 if __name__ == "__main__":
 
     import json
+    import requests
+
+    def download(filename):
+        r = requests.get('https://eddb.io/archive/v4/' + filename)
+        print '\n%s\t%dK' % (filename, len(r.content) / 1024)
+        return json.loads(r.content)	# let json do the utf-8 decode
 
     # Ellipsoid that encompasses most of the systems in the bubble (but not outliers like Sothis)
     RX = RZ = 260
@@ -59,7 +65,7 @@ if __name__ == "__main__":
     def around_jaques(x, y, z):
         return ((x - JX) * (x - JX))/RJ2 + ((y - JY) * (y - JY))/RJ2 + ((z - JZ) * (z - JZ))/RJ2 <= 1
 
-    systems  = json.load(open('systems.json'))
+    systems = download('systems.json')
     print '%d\tsystems' % len(systems)
 
     # system_id by system_name (ignoring duplicate names)
@@ -70,30 +76,31 @@ if __name__ == "__main__":
     cut = [s for s in systems if s['is_populated'] and not inbubble(s['x'], s['y'], s['z'])]
     print '\n%d populated systems outside bubble calculation:' % len(cut)
     for s in cut:
-        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'], s['x'], s['y'], s['z'])
+        print '%-32s%7d %11.5f %11.5f %11.5f' % (s['name'], s['id'], s['x'], s['y'], s['z'])
 
     cut = [s for s in systems if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None]
     print '\n%d dropped systems inside bubble calculation:' % len(cut)
     for s in cut:
-        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'].encode('utf-8'), s['x'], s['y'], s['z'])
+        print '%s%s%7d %11.5f %11.5f %11.5f' % (s['name'].encode('utf-8'), ' '*(32-len(s['name'])), s['id'], s['x'], s['y'], s['z'])
 
     cut = [s for s in systems if (s['is_populated'] or inbubble(s['x'], s['y'], s['z'])) and system_ids.get(s['name']) and system_ids[s['name']] != s['id']]
     print '\n%d duplicate systems inside bubble calculation:' % len(cut)
     for s in cut:
-        print '%s \t%10.5f, %10.5f, %10.5f' % (s['name'].encode('utf-8'), s['x'], s['y'], s['z'])
+        print '%-24s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], s['id'], s['x'], s['y'], s['z'])
 
     print '\n%d systems around Jacques' % len([s for s in systems if around_jaques(s['x'], s['y'], s['z'])])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
     system_ids['Almar'] = 750
     system_ids['Arti'] = 60342
+    system_ids['Kamba'] = 10358
 
     with open('systems.p',  'wb') as h:
         cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
     print '%d saved systems' % len(system_ids)
 
     # station_id by (system_id, station_name)
-    stations = json.load(open('stations.json'))
+    stations = download('stations.json')
     station_ids = dict([(
         (x['system_id'], str(x['name'])),
         (x['id'],
