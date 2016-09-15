@@ -151,5 +151,12 @@ class _EDDN:
                 'message'    : entry
             })
 
+    def export_blackmarket(self, cmdr, is_beta, msg):
+        self.send(cmdr, {
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/blackmarket/1' + (is_beta and '/test' or ''),
+            'message'    : msg
+        })
+
+
 # singleton
 eddn = _EDDN()

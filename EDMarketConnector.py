@@ -3,6 +3,7 @@
 
 import sys
 from sys import platform
+from collections import OrderedDict
 from functools import partial
 import json
 from os import mkdir
@@ -526,13 +527,11 @@ class AppWindow:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
-            if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
-                (entry['event'] == 'FSDJump' and system_changed  or
-                 entry['event'] == 'Docked'  and station_changed or
-                 entry['event'] == 'Scan'    and monitor.system)):
-                try:
-                    self.status['text'] = _('Sending data to EDDN...')
-
+            try:
+                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
+                    (entry['event'] == 'FSDJump' and system_changed  or
+                     entry['event'] == 'Docked'  and station_changed or
+                     entry['event'] == 'Scan'    and monitor.system)):
                     # strip out properties disallowed by the schema
                     for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
                         entry.pop(thing, None)
@@ -544,20 +543,38 @@ class AppWindow:
                     if 'StarSystem' not in entry:
                         entry['StarSystem'] = monitor.system
 
+                    self.status['text'] = _('Sending data to EDDN...')
                     eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
                     self.status['text'] = ''
 
-                except requests.exceptions.RequestException as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = _("Error: Can't connect to EDDN")
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                elif (config.getint('output') & config.OUT_MKT_EDDN and monitor.cmdr and
+                      entry['event'] == 'MarketSell' and entry.get('BlackMarket')):
+                    # Construct blackmarket message
+                    msg = OrderedDict([
+                        ('systemName',  monitor.system),
+                        ('stationName', monitor.station),
+                        ('timestamp',   entry['timestamp']),
+                        ('name',        entry['Type']),
+                        ('sellPrice',   entry['SellPrice']),
+                        ('prohibited' , entry.get('IllegalGoods', False)),
+                    ])
 
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                    self.status['text'] = _('Sending data to EDDN...')
+                    eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
+                    self.status['text'] = ''
+
+            except requests.exceptions.RequestException as e:
+                if __debug__: print_exc()
+                self.status['text'] = _("Error: Can't connect to EDDN")
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
+            except Exception as e:
+                if __debug__: print_exc()
+                self.status['text'] = unicode(e)
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
 
     def edsmpoll(self):
         result = self.edsm.result
