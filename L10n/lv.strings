@@ -130,9 +130,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Kļūda: Nevar savienoties ar EDSM";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Kļūda: Savienojums ar EDDN pārtraukts";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Kļūda: EDSM {MSG}";
 

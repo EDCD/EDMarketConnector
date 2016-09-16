@@ -130,9 +130,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Errore: Connessione con EDDN scaduta";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
 

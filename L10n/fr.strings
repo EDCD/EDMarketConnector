@@ -103,6 +103,9 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Archiduc";
 
+/* Configuration setting. [prefs.py] */
+"E:D log file location" = "Emplacement des fichiers de log E:D";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Marquis";
 
@@ -130,9 +133,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Erreur : Connexion impossible à EDSM";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Erreur : Connexion à EDDN expirée";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Erreur : EDSM {MSG}";
 
@@ -141,6 +141,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Erreur : Le serveur est indisponible";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Server is lagging" = "Erreur : Le serveur ne répond pas";
 
 /* [companion.py] */
 "Error: Verification failed" = "Erreur : La vérification a échouée";

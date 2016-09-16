@@ -139,9 +139,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "エラー: EDSMに接続できません";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "エラー: EDDNへの接続がタイムアウトしました";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "エラー: EDSM {MSG}";
 
@@ -150,6 +147,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "エラー: サーバがダウンしています";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Server is lagging" = "エラー: サーバが混雑しています";
 
 /* [companion.py] */
 "Error: Verification failed" = "エラー: 認証に失敗しました";

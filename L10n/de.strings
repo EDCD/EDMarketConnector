@@ -139,9 +139,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Fehler: Kann keine Verbindung zu EDSM aufbauen";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Fehler: Zeitüberschreitung zum EDDN";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Fehler: EDSM {MSG}";
 
@@ -150,6 +147,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Fehler: Server nicht erreichbar";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Server is lagging" = "Fehler: Server ist überlastet";
 
 /* [companion.py] */
 "Error: Verification failed" = "Fehler: Verifizierung fehlgeschlagen";
@@ -374,7 +374,7 @@
 "Scout" = "Späher";
 
 /* CQC rank. [stats.py] */
-"Semi Professional" = "Semiprofi";
+"Semi Professional" = "Halbprofi";
 
 /* [prefs.py] */
 "Send flight log to Elite Dangerous Star Map" = "Schicke Fluglogbuch zu Elite Dangerous Star Map";

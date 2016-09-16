@@ -101,7 +101,7 @@
 "Dealer" = "Дилер";
 
 /* Appearance theme and language setting. [l10n.py] */
-"Default" = "Стандартно";
+"Default" = "Стандартне налаштування";
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";
@@ -139,9 +139,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Помилка: Немає з`єднання з EDSM!";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Помилка: Перевищено термін очикування з'єднання з EDDN!";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
 
@@ -150,6 +147,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Помилка: Сервер недосяжний!";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Server is lagging" = "Помилка: з`єднання з Сервером нетривке";
 
 /* [companion.py] */
 "Error: Verification failed" = "Помилка: Не вдалося перевірити";

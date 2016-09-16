@@ -136,9 +136,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Błąd: Brak połączenia z EDSM";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Błąd: Przedłużające się połączenie z EDDN";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Błąd: EDSM {MSG}";
 
@@ -147,6 +144,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Błąd: Serwer padł";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Server is lagging" = "Błąd: Serwer laguje";
 
 /* [companion.py] */
 "Error: Verification failed" = "Błąd: Weryfikacja niepoprawna";

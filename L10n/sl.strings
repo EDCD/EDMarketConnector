@@ -130,9 +130,6 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
-/* [EDMarketConnector.py] */
-"Error: Connection to EDDN timed out" = "Napaka: Povezava z EDDN se je iztekla";
-
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
 
