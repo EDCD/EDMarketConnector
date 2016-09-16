@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Apparence";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Mettre à jour automatiquement à l'amarrage";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Solde";
 
@@ -100,11 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Par défaut";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Retarder l'envoi jusqu'à l'amarrage";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Archiduc";
 
-/* Configuration setting. [prefs.py] */
-"E:D log file location" = "Emplacement des fichiers de log E:D";
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "Emplacement du journal E:D";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Marquis";
@@ -375,6 +381,9 @@
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Envoyer les données de la station à Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Envoyer les systèmes et les informations de scan à Elite Dangerous Data Network";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Envoi des données à EDDN...";
