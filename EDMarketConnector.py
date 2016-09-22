@@ -335,6 +335,9 @@ class AppWindow:
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
+        if monitor.cmdr and not monitor.mode:
+            return	# In CQC - do nothing
+
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
                 self.status['text'] = ''
@@ -494,8 +497,8 @@ class AppWindow:
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
-            if entry is None:
-                return
+            if not entry or not monitor.mode:
+                return	# Fake event or in CQC
 
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
 

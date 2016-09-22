@@ -216,7 +216,7 @@ class EDLogs(FileSystemEventHandler):
                 self.is_beta = 'beta' in entry['gameversion'].lower()
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
-                self.mode = entry['GameMode']
+                self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
             elif entry['event'] in ['Undocked']:
