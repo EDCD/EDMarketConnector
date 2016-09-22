@@ -211,7 +211,7 @@ class EDLogs(FileSystemEventHandler):
         try:
             entry = json.loads(line, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
             entry['timestamp']	# we expect this to exist
-            if entry['event'] == 'Fileheader':	# XXX or 'fileheader' ?
+            if entry['event'] == 'Fileheader':
                 self.version = entry['gameversion']
                 self.is_beta = 'beta' in entry['gameversion'].lower()
             elif entry['event'] == 'LoadGame':
@@ -221,7 +221,6 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Name']
             elif entry['event'] in ['Undocked']:
                 self.station = None
-                self.coordinates = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])
