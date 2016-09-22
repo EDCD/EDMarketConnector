@@ -108,7 +108,7 @@ class Config:
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous', 'Logs')	# FIXME: check this
+            self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
 
             self.home = expanduser('~')
 
@@ -171,11 +171,11 @@ class Config:
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
             SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_Profile.bytes_le), 0, 0, ctypes.byref(buf))
-            self.home = buf.value
+            self.home = buf.value or u'\\'
             CoTaskMemFree(buf)
 
             SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_SavedGames.bytes_le), 0, 0, ctypes.byref(buf))
-            self.default_journal_dir = buf.value
+            self.default_journal_dir = buf.value and join(buf.value, 'Frontier Developments', 'Elite Dangerous') or None
             CoTaskMemFree(buf)
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
