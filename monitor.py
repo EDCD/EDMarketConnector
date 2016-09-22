@@ -60,7 +60,7 @@ else:
 
 class EDLogs(FileSystemEventHandler):
 
-    _POLL = 5		# New system gets posted to log file before hyperspace ends, so don't need to poll too often
+    _POLL = 1		# Polling is cheap, so do it often
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
