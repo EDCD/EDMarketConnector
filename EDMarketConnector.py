@@ -335,7 +335,7 @@ class AppWindow:
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
-        if monitor.cmdr and not monitor.mode:
+        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
             return	# In CQC - do nothing
 
         if not retrying:
