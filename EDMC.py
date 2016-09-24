@@ -7,7 +7,8 @@ import argparse
 import json
 import requests
 import sys
-from os.path import getmtime
+import os
+from os.path import dirname, getmtime, join
 from time import time, sleep
 from xml.etree import ElementTree
 
@@ -58,6 +59,8 @@ try:
     if args.version:
         latest = ''
         try:
+            if sys.platform=='win32' and getattr(sys, 'frozen', False):
+                os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
             # Copied from update.py - probably should refactor
             r = requests.get(update_feed, timeout = 10)
             feed = ElementTree.fromstring(r.text)
