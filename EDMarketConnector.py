@@ -3,13 +3,15 @@
 
 import sys
 from sys import platform
+from collections import OrderedDict
 from functools import partial
 import json
 from os import mkdir
 from os.path import expanduser, isdir, join
 import re
 import requests
-from time import time, localtime, strftime
+from time import time, localtime, strftime, strptime
+from calendar import timegm
 
 import Tkinter as tk
 import ttk
@@ -75,9 +77,6 @@ class AppWindow:
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
-        # Special handling for overrideredict
-        self.w.bind("<Map>", self.onmap)
-
         plug.load_plugins()
 
         if platform != 'darwin':
@@ -124,10 +123,7 @@ class AppWindow:
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
-
         theme.button_bind(self.theme_button, self.getandsend)
-        self.w.bind('<Return>', self.getandsend)
-        self.w.bind('<KP_Enter>', self.getandsend)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform=='win32' and 1 or 3))
@@ -242,19 +238,16 @@ class AppWindow:
         theme.register_highlight(self.station)
         theme.apply(self.w)
 
+        self.w.bind("<Map>", self.onmap)			# Special handling for overrideredict
+        self.w.bind('<Return>', self.getandsend)
+        self.w.bind('<KP_Enter>', self.getandsend)
+        self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
+        self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
+        self.w.bind_all('<<Quit>>', self.onexit)		# Updater
+
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
-        self.w.bind_all('<<Quit>>', self.onexit)	# user-generated
-
-        # Install hotkey monitoring
-        self.w.bind_all('<<Invoke>>', self.getandsend)	# user-generated
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-
-        # Install log monitoring
-        monitor.set_callback('Dock', self.getandsend)
-        monitor.set_callback('Jump', self.system_change)
-        monitor.start(self.w)
 
         # First run
         if not config.get('username') or not config.get('password'):
@@ -312,6 +305,17 @@ class AppWindow:
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
+        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
+        if not eddn.load():
+            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
+
+        # (Re-)install hotkey monitoring
+        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # (Re-)install log monitoring
+        if not monitor.start(self.w):
+            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
+
         self.cooldown()
 
     # callback after verification code
@@ -330,6 +334,9 @@ class AppWindow:
 
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
+
+        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+            return	# In CQC - do nothing
 
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
@@ -356,6 +363,8 @@ class AppWindow:
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+            elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
+                raise companion.CredentialsError()			# Companion API credentials don't match Journal
             elif auto_update and (not data['commander'].get('docked') or (self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
                 raise companion.ServerLagging()
 
@@ -379,24 +388,20 @@ class AppWindow:
                     loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
-                if config.getint('output') & config.OUT_SYS_EDSM:
-                    # Silently catch any EDSM errors here so that they don't prevent station update
-                    try:
-                        self.edsm.lookup(self.system['text'], EDDB.system(self.system['text']))
-                    except Exception as e:
-                        if __debug__: print_exc()
-                else:
-                    self.edsm.link(self.system['text'])
-                self.edsmpoll()
 
                 if not (config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC|config.OUT_MKT_EDDN)):
                     # no station data requested - we're done
                     pass
 
                 elif not data['commander'].get('docked'):
-                    # signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                    if not self.status['text']:
-                        self.status['text'] = _("You're not docked at a station!")
+                    if not event and not retrying:
+                        # Silently retry if we got here by 'Automatically update on docking' and the server hasn't caught up
+                        self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
+                        return	# early exit to avoid starting cooldown count
+                    else:
+                        # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
+                        if not self.status['text']:
+                            self.status['text'] = _("You're not docked at a station!")
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
@@ -479,31 +484,100 @@ class AppWindow:
         except:
             pass
 
-    def system_change(self, event, timestamp, system, coordinates):
+    # Handle event(s) from the journal
+    def journal_event(self, event):
+        while True:
+            entry = monitor.get_entry()
+            system_changed  = monitor.system  and self.system['text']  != monitor.system
+            station_changed = monitor.station and self.station['text'] != monitor.station
 
-        if self.system['text'] != system:
-            self.system['text'] = system
+            # Update main window
+            self.cmdr['text'] = monitor.cmdr or ''
+            self.system['text'] = monitor.system or ''
+            self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
+            if system_changed or station_changed:
+                self.status['text'] = ''
+            if not entry or not monitor.mode:
+                return	# Fake event or in CQC
 
-            self.system['image'] = ''
-            self.station['text'] = EDDB.system(system) and self.STATION_UNDOCKED or ''
+            plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
 
-            plug.notify_system_changed(timestamp, system, coordinates)
+            if system_changed:
+                self.system['image'] = ''
+                timestamp = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
-            if config.getint('output') & config.OUT_SYS_EDSM:
-                try:
-                    self.status['text'] = _('Sending data to EDSM...')
-                    self.w.update_idletasks()
-                    self.edsm.writelog(timestamp, system, coordinates)	# Do EDSM lookup during EDSM export
-                    self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
-            else:
-                self.edsm.link(system)
-                self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(timestamp)).decode('utf-8')
-            self.edsmpoll()
+                # Backwards compatibility
+                plug.notify_system_changed(timestamp, monitor.system, monitor.coordinates)
+
+                # Update EDSM if we have coordinates - i.e. Location or FSDJump events
+                if config.getint('output') & config.OUT_SYS_EDSM and monitor.coordinates:
+                    try:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        self.edsm.writelog(timestamp, monitor.system, monitor.coordinates)
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        if not config.getint('hotkey_mute'):
+                            hotkeymgr.play_bad()
+                else:
+                    self.edsm.link(monitor.system)
+                self.edsmpoll()
+
+            # Auto-Update after docking
+            if station_changed and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+
+            # Send interesting events to EDDN
+            try:
+                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
+                    (entry['event'] == 'FSDJump' and system_changed  or
+                     entry['event'] == 'Docked'  and station_changed or
+                     entry['event'] == 'Scan'    and monitor.system)):
+                    # strip out properties disallowed by the schema
+                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
+                        entry.pop(thing, None)
+                    for thing in entry.keys():
+                        if thing.endswith('_Localised'):
+                            entry.pop(thing, None)
+
+                    # add mandatory StarSystem property to Scan events
+                    if 'StarSystem' not in entry:
+                        entry['StarSystem'] = monitor.system
+
+                    self.status['text'] = _('Sending data to EDDN...')
+                    eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
+                    self.status['text'] = ''
+
+                elif (config.getint('output') & config.OUT_MKT_EDDN and monitor.cmdr and
+                      entry['event'] == 'MarketSell' and entry.get('BlackMarket')):
+                    # Construct blackmarket message
+                    msg = OrderedDict([
+                        ('systemName',  monitor.system),
+                        ('stationName', monitor.station),
+                        ('timestamp',   entry['timestamp']),
+                        ('name',        entry['Type']),
+                        ('sellPrice',   entry['SellPrice']),
+                        ('prohibited' , entry.get('IllegalGoods', False)),
+                    ])
+
+                    self.status['text'] = _('Sending data to EDDN...')
+                    eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
+                    self.status['text'] = ''
+
+            except requests.exceptions.RequestException as e:
+                if __debug__: print_exc()
+                self.status['text'] = _("Error: Can't connect to EDDN")
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
+            except Exception as e:
+                if __debug__: print_exc()
+                self.status['text'] = unicode(e)
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
 
     def edsmpoll(self):
         result = self.edsm.result
@@ -573,6 +647,7 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         config.close()
+        eddn.close()
         self.updater.close()
         self.session.close()
         self.w.destroy()

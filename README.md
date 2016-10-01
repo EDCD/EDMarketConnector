@@ -1,10 +1,10 @@
 Elite: Dangerous Market Connector (EDMC)
 ========
 
-This app downloads your data and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
+This app downloads your Cmdr's data, system, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the station commodity market prices and other station data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) (“EDDN”) from where you and others can use it via online trading and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
-* saves the station market prices to files on your computer that you can load into trading tools such as [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081), [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
+* sends the station commodity market prices, other station data and system and scan data to the [Elite Dangerous Data Network](http://eddn-gateway.elite-markets.net/) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* saves the station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
 * sends your flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
 
@@ -46,7 +46,7 @@ Setup
 The first time that you run the app you are prompted for your username and password. This is the same username and password
 combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at.
 
-You can also choose here what data to save (refer to the next section for details), whether to “Update” automatically on docking and/or with a hotkey, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
+You can also choose here what data to save (refer to the next section for details), whether to “Update” Cmdr and station data automatically on docking and/or with a hotkey, and whether to attach your Cmdr name or a [pseudo-anonymized](http://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
 
 You will be prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
 Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before
@@ -59,8 +59,7 @@ option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) an
 
 This app can save a variety of data in a variety of formats:
 
-* Station data
-  * Elite Dangerous Data Network - sends station commodity market, outfitting and shipyard data to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* Market data
   * Slopey's BPC format file - saves commodity market data as files that you can load into [Slopey's BPC Market Tool](https://forums.frontier.co.uk/showthread.php?t=76081).
   * Trade Dangerous format file - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
   * CSV format file - saves commodity market data as files that you can upload to [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
@@ -70,7 +69,15 @@ This app can save a variety of data in a variety of formats:
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
-Some options work by reading the Elite: Dangerous game's log files. Normally this app will find the log files but if you find some options greyed-out then adjust the “E:D log file location” setting described [below](#doesnt-track-systems-visited).
+Some options work by reading the Elite: Dangerous game's “journal” files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
+
+### EDDN
+
+* Station data
+  * Sends station commodity market, outfitting and shipyard data to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* System and scan data
+  * Sends general system information and the results of your detailed planet scans to “[EDDN](http://eddn-gateway.elite-markets.net/)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
+  * You can choose to delay sending this information to EDDN until you're next safely docked at a station. Otherwise the information is sent as soon as you enter a system or perform a scan.
 
 ### EDSM
 
@@ -120,13 +127,7 @@ Ensure that you visit the in-game Commodity Market at a station where you intend
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
 ### Doesn't track Systems visited
-This app uses Elite: Dangerous' log files to track the systems and stations that you visit. When looking for the log files, this app assumes:
-
-- That you're running this app and Elite: Dangerous on the same machine.
-- That you're running Elite: Dangerous from Steam, if you have both Steam and non-Steam versions installed.
-- That you're running “Horizons” 64bit, if you have both Horizons and Season 1 installed.
-
-If you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), or if you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D log file location” setting on the Configuration tab to point to the game's log files using [this info](https://support.frontier.co.uk/kb/faq.php?id=108) as a guide.
+This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
 Running from source
 --------

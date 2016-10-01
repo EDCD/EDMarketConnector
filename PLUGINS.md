@@ -68,21 +68,23 @@ Once you have created your plugin and EDMC has loaded it there are two other fun
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
-### Arriving in a System
+### Journal Entry
 
-This gets called when EDMC uses the netlog to notice that you have arrived at a new star system.
+This gets called when EDMC sees a new entry in the game's journal.
 
 ```
-def system_changed(timestamp, system, coordinates):
-   """
-   We arrived at a new system!
-   """
-   sys.stderr.write("{} {}".format(timestamp, system))
+def journal_entry(cmdr, system, station, entry):
+    if entry['event'] == 'FSDJump':
+        # We arrived at a new system!
+        if 'StarPos' in entry:
+            sys.stderr.write("Arrived at {} ({},{},{})\n".format(entry['StarSystem'], *tuple(entry['StarPos'])))
+        else:
+            sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
 ### Getting Commander Data
 
-This gets called when EDMC has just fetched fresh data from Frontier's servers.
+This gets called when EDMC has just fetched fresh Cmdr and station data from Frontier's servers.
 
 ```
 def cmdr_data(data):

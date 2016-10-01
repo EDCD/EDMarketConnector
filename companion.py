@@ -77,6 +77,7 @@ ship_map = {
     'anaconda'                    : 'Anaconda',
     'asp'                         : 'Asp Explorer',
     'asp_scout'                   : 'Asp Scout',
+    'belugaliner'                 : 'Beluga Liner',
     'cobramkiii'                  : 'Cobra MkIII',
     'cobramkiv'                   : 'Cobra MkIV',
     'cutter'                      : 'Imperial Cutter',
@@ -97,6 +98,7 @@ ship_map = {
     'independant_trader'          : 'Keelback',
     'orca'                        : 'Orca',
     'python'                      : 'Python',
+    'scout'                       : 'Taipan Fighter',
     'sidewinder'                  : 'Sidewinder',
     'type6'                       : 'Type-6 Transporter',
     'type7'                       : 'Type-7 Transporter',
@@ -166,7 +168,7 @@ class Session:
         self.state = Session.STATE_INIT
         self.credentials = None
 
-        # yuck suppress InsecurePlatformWarning
+        # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
         try:
             from requests.packages import urllib3
             urllib3.disable_warnings()

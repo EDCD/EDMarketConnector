@@ -1,14 +1,14 @@
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
-from os.path import expanduser, dirname, isdir, join, normpath
+from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
 
 
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '2.1.7.2'
+appversion = '2.2.0.0'
 
 update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
@@ -19,14 +19,21 @@ if platform=='darwin':
 
 elif platform=='win32':
     import ctypes
+    from ctypes.wintypes import *
+    import uuid
 
-    CSIDL_PERSONAL = 0x0005
-    CSIDL_LOCAL_APPDATA = 0x001C
-    CSIDL_PROFILE = 0x0028
+    FOLDERID_Documents    = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
+    FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
+    FOLDERID_Profile      = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
+    FOLDERID_SavedGames   = uuid.UUID('{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}')
+
+    SHGetKnownFolderPath = ctypes.windll.shell32.SHGetKnownFolderPath
+    SHGetKnownFolderPath.argtypes = [ctypes.c_char_p, DWORD, HANDLE, ctypes.POINTER(ctypes.c_wchar_p)]
+
+    CoTaskMemFree = ctypes.windll.ole32.CoTaskMemFree
+    CoTaskMemFree.argtypes = [ctypes.c_void_p]
 
     # _winreg that ships with Python 2 doesn't support unicode, so do this instead
-    from ctypes.wintypes import *
-
     HKEY_CURRENT_USER       = 0x80000001
     KEY_ALL_ACCESS          = 0x000F003F
     REG_CREATED_NEW_KEY     = 0x00000001
@@ -83,9 +90,12 @@ class Config:
     # OUT_SYS_FILE    = 32	# No longer supported
     # OUT_STAT        = 64	# No longer available
     OUT_SHIP_CORIOLIS = 128
+    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_BPC|OUT_MKT_TD|OUT_MKT_CSV|OUT_SHIP_EDS|OUT_SHIP_CORIOLIS
     OUT_SYS_EDSM      = 256
     # OUT_SYS_AUTO    = 512	# Now always automatic
     OUT_MKT_MANUAL    = 1024
+    OUT_SYS_EDDN      = 2048
+    OUT_SYS_DELAY     = 4096
 
     if platform=='darwin':
 
@@ -97,6 +107,8 @@ class Config:
             self.plugin_dir = join(self.app_dir, 'plugins')
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
+
+            self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
 
             self.home = expanduser('~')
 
@@ -146,19 +158,25 @@ class Config:
 
         def __init__(self):
 
-            buf = ctypes.create_unicode_buffer(MAX_PATH)
-            ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_LOCAL_APPDATA, 0)
+            buf = ctypes.c_wchar_p()
+            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_LocalAppData.bytes_le), 0, 0, ctypes.byref(buf))
             self.app_dir = join(buf.value, appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
+            CoTaskMemFree(buf)
             
             self.plugin_dir = join(self.app_dir, 'plugins')
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
-            ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PROFILE, 0)
-            self.home = buf.value
+            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_Profile.bytes_le), 0, 0, ctypes.byref(buf))
+            self.home = buf.value or u'\\'
+            CoTaskMemFree(buf)
+
+            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_SavedGames.bytes_le), 0, 0, ctypes.byref(buf))
+            self.default_journal_dir = buf.value and join(buf.value, 'Frontier Developments', 'Elite Dangerous') or None
+            CoTaskMemFree(buf)
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
 
@@ -188,8 +206,9 @@ class Config:
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 buf = ctypes.create_unicode_buffer(MAX_PATH)
-                ctypes.windll.shell32.SHGetSpecialFolderPathW(0, buf, CSIDL_PERSONAL, 0)
+                SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_Documents.bytes_le), 0, 0, ctypes.byref(buf))
                 self.set('outdir', buf.value)
+                CoTaskMemFree(buf)
 
         def get(self, key):
             typ  = DWORD()
@@ -250,6 +269,8 @@ class Config:
             self.plugin_dir = join(self.app_dir, 'plugins')
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
+
+            self.default_journal_dir = None
 
             self.home = expanduser('~')
 
