@@ -74,6 +74,15 @@ elif platform=='win32':
     RegDeleteValue.restype = LONG
     RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
+    def KnownFolderPath(guid):
+        buf = ctypes.c_wchar_p()
+        if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
+            return None
+        retval = buf.value	# copy data
+        CoTaskMemFree(buf)	# and free original
+        return retval
+
+
 elif platform=='linux2':
     import codecs
     # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
@@ -158,25 +167,19 @@ class Config:
 
         def __init__(self):
 
-            buf = ctypes.c_wchar_p()
-            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_LocalAppData.bytes_le), 0, 0, ctypes.byref(buf))
-            self.app_dir = join(buf.value, appname)
+            self.app_dir = join(KnownFolderPath(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
-            CoTaskMemFree(buf)
-            
+
             self.plugin_dir = join(self.app_dir, 'plugins')
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
-            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_Profile.bytes_le), 0, 0, ctypes.byref(buf))
-            self.home = buf.value or u'\\'
-            CoTaskMemFree(buf)
+            self.home = KnownFolderPath(FOLDERID_Profile) or u'\\'
 
-            SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_SavedGames.bytes_le), 0, 0, ctypes.byref(buf))
-            self.default_journal_dir = buf.value and join(buf.value, 'Frontier Developments', 'Elite Dangerous') or None
-            CoTaskMemFree(buf)
+            journaldir = KnownFolderPath(FOLDERID_SavedGames)
+            self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
 
@@ -205,10 +208,7 @@ class Config:
                     RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
-                buf = ctypes.create_unicode_buffer(MAX_PATH)
-                SHGetKnownFolderPath(ctypes.create_string_buffer(FOLDERID_Documents.bytes_le), 0, 0, ctypes.byref(buf))
-                self.set('outdir', buf.value)
-                CoTaskMemFree(buf)
+                self.set('outdir', KnownFolderPath(FOLDERID_Documents))
 
         def get(self, key):
             typ  = DWORD()
