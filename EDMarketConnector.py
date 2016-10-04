@@ -356,7 +356,7 @@ class AppWindow:
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-            elif auto_update and (not data['commander'].get('docked') or (self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
+            elif auto_update and (not data['commander'].get('docked') or (monitor.logfile and self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
                 raise companion.ServerLagging()
 
             else:
