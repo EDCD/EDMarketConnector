@@ -329,14 +329,5 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
-    # not in coriolis-data at time of writing - stop outfitting complaining about them in debug mode
-    modules[('Burst Laser', None, '4', 'E')] = { 'mass': 16 }
-    for module in [
-            ('Corrosion Resistant Cargo Rack', None, '1', 'D'),
-            ('Corrosion Resistant Cargo Rack', None, '2', 'D'),
-    ]:
-        if not module in modules:
-            modules[module] = { 'mass': 0 }
-
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
