@@ -332,7 +332,6 @@ if __name__ == "__main__":
     # not in coriolis-data at time of writing - stop outfitting complaining about them in debug mode
     modules[('Burst Laser', None, '4', 'E')] = { 'mass': 16 }
     for module in [
-            ('Planetary Approach Suite', None, '1', 'I'),
             ('Corrosion Resistant Cargo Rack', None, '1', 'D'),
             ('Corrosion Resistant Cargo Rack', None, '2', 'D'),
     ]:
