@@ -63,7 +63,12 @@ if __name__ == "__main__":
     RJ2 = 40 * 40
 
     def around_jaques(x, y, z):
-        return ((x - JX) * (x - JX))/RJ2 + ((y - JY) * (y - JY))/RJ2 + ((z - JZ) * (z - JZ))/RJ2 <= 1
+        return ((x - JX) * (x - JX) + (y - JY) * (y - JY) + (z - JZ) * (z - JZ)) <= RJ2
+
+    # Sphere around outliers
+    RO2 = 30 * 30
+    def around_outlier(cx, cy, cz, x, y, z):
+        return ((x - ox) * (x - ox) + (y - oy) * (y - oy) + (z - oz) * (z - oz)) <= RO2
 
     systems = download('systems.json')
     print '%d\tsystems' % len(systems)
@@ -75,8 +80,15 @@ if __name__ == "__main__":
 
     cut = [s for s in systems if s['is_populated'] and not inbubble(s['x'], s['y'], s['z'])]
     print '\n%d populated systems outside bubble calculation:' % len(cut)
-    for s in cut:
-        print '%-32s%7d %11.5f %11.5f %11.5f' % (s['name'], s['id'], s['x'], s['y'], s['z'])
+    extra_ids = {}
+    for o in cut:
+        ox, oy, oz = o['x'], o['y'], o['z']
+        print '%-32s%7d %11.5f %11.5f %11.5f' % (o['name'], o['id'], ox, oy, oz)
+        extra_ids.update(dict([
+            (str(s['name']), s['id'])
+            for s in systems if around_outlier(ox, oy, oz, s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])]))
+    print '\n%d systems around outliers' % len(extra_ids)
+    system_ids.update(extra_ids)
 
     cut = [s for s in systems if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None]
     print '\n%d dropped systems inside bubble calculation:' % len(cut)
