@@ -83,6 +83,7 @@ ship_map = {
     'cutter'                      : 'Imperial Cutter',
     'diamondback'                 : 'Diamondback Scout',
     'diamondbackxl'               : 'Diamondback Explorer',
+    'dolphin'                     : 'Dolphin',
     'eagle'                       : 'Eagle',
     'empire_courier'              : 'Imperial Courier',
     'empire_eagle'                : 'Imperial Eagle',
