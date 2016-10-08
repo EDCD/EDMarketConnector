@@ -109,8 +109,8 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Configuration setting. [prefs.py] */
-"E:D log file location" = "E:Dゲームクライアントのログ出力先";
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:Dゲームクライアントのジャーナルファイル出力先";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";

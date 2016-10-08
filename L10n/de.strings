@@ -109,8 +109,8 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Herzog";
 
-/* Configuration setting. [prefs.py] */
-"E:D log file location" = "E:D Logdatei Speicherort";
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D Journal Dateispeicherort";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";

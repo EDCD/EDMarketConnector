@@ -103,11 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Domyślne";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Czekaj z wysłaniem na zadokowanie";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Configuration setting. [prefs.py] */
-"E:D log file location" = "E:D położenie pliku dziennika";
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D Lokacja pliku dziennika";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -378,6 +381,9 @@
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Wyślij dane do Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Wyślij dane skanowań do EDDN";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Wysłanie danych do EDDN...";
