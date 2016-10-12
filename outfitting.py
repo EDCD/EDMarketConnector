@@ -171,6 +171,14 @@ utility_map = {
     'shieldbooster'            : 'Shield Booster',
 }
 
+cabin_map = {
+    '1': 'Economy Class Passenger Cabin',
+    '2': 'Business Class Passenger Cabin',
+    '3': 'First Class Passenger Cabin',
+    '4': 'Luxury Class Passenger Cabin',
+    '5': 'Passenger Cabin',	# not seen
+}
+
 rating_map = {
     '1': 'E',
     '2': 'D',
@@ -342,7 +350,10 @@ def lookup(module, ship_map, entitled=False):
             new['name'] = standard_map[len(name)>4 and (name[1],name[4]) or name[1]]
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1
             new['category'] = 'internal'
-            new['name'] = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
+            if name[1] == 'passengercabin':
+                new['name'] = cabin_map[name[1]]
+            else:
+                new['name'] = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
         else:
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
