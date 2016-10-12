@@ -114,7 +114,7 @@ class AppWindow:
             if appitem:
                 appitem.grid(columnspan=2, sticky=tk.W)
 
-        self.button = ttk.Button(frame, text=_('Update'), width=28, command=self.getandsend, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
@@ -123,6 +123,7 @@ class AppWindow:
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
+        self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
