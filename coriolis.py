@@ -85,6 +85,7 @@ fixup_map.update({
     'Pack-Hound Missile Rack'       : ('Missile Rack', 'Pack-Hound'),
     'Pulse Disruptor Laser'         : ('Pulse Laser', 'Disruptor'),
     'Retributor Beam Laser'         : ('Beam Laser', 'Retributor'),
+    'Rocket Propelled FSD Disruptor': ('Missile Rack', 'Rocket Propelled FSD Disruptor'),
     'Shock Mine Launcher'           : ('Mine Launcher', 'Shock Mine Launcher'),
     'Standard Docking Computer'     : ('Docking Computer', 'Standard Docking Computer'),
 })
@@ -262,6 +263,7 @@ if __name__ == "__main__":
         'am'  : 'Auto Field-Maintenance Unit',
         'bsg' : 'Bi-Weave Shield Generator',
         'cr'  : 'Cargo Rack',
+        'fh'  : 'Fighter Hangar',
         'fi'  : 'Frame Shift Drive Interdictor',
         'hb'  : 'Hatch Breaker Limpet Controller',
         'hr'  : 'Hull Reinforcement Package',
@@ -273,6 +275,10 @@ if __name__ == "__main__":
         'dc'  : 'Docking Computer',
         'fx'  : 'Fuel Transfer Limpet Controller',
         'pc'  : 'Prospector Limpet Controller',
+        'pce' : 'Economy Class Passenger Cabin',
+        'pci' : 'Business Class Passenger Cabin',
+        'pcm' : 'First Class Passenger Cabin',
+        'pcq' : 'Luxury Passenger Cabin',
         'cc'  : 'Collector Limpet Controller',
 
         # Hard Points
