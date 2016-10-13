@@ -535,7 +535,7 @@ class AppWindow:
                 if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
                     (entry['event'] == 'FSDJump' and system_changed  or
                      entry['event'] == 'Docked'  and station_changed or
-                     entry['event'] == 'Scan'    and monitor.system)):
+                     entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
                     # strip out properties disallowed by the schema
                     for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
                         entry.pop(thing, None)
@@ -543,9 +543,11 @@ class AppWindow:
                         if thing.endswith('_Localised'):
                             entry.pop(thing, None)
 
-                    # add mandatory StarSystem property to Scan events
+                    # add mandatory StarSystem and StarPos properties to Scan events
                     if 'StarSystem' not in entry:
                         entry['StarSystem'] = monitor.system
+                    if 'StarPos' not in entry:
+                        entry['StarPos'] = list(monitor.coordinates)
 
                     self.status['text'] = _('Sending data to EDDN...')
                     eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
