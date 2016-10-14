@@ -58,10 +58,11 @@ class _EDDN:
         return True
 
     def flush(self):
-        self.replayfile.seek(0, SEEK_SET)
-        for line in self.replayfile:
-            self.send(*json.loads(line, object_pairs_hook=OrderedDict))
-        self.replayfile.truncate(0)
+        if self.replayfile or self.load():
+            self.replayfile.seek(0, SEEK_SET)
+            for line in self.replayfile:
+                self.send(*json.loads(line, object_pairs_hook=OrderedDict))
+            self.replayfile.truncate(0)
 
     def close(self):
         if self.replayfile:
@@ -137,7 +138,7 @@ class _EDDN:
             })
 
     def export_journal_entry(self, cmdr, is_beta, entry):
-        if config.getint('output') & config.OUT_SYS_DELAY and self.replayfile and entry['event'] != 'Docked':
+        if config.getint('output') & config.OUT_SYS_DELAY and entry['event'] != 'Docked' and (self.replayfile or self.load()):
             self.replayfile.seek(0, SEEK_END)
             self.replayfile.write('%s\n' % json.dumps([cmdr.encode('utf-8'), {
                 '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
