@@ -129,6 +129,9 @@ This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConne
 ### Doesn't track Systems visited
 This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
+### Error: Can't connect to EDDN
+EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
+
 Running from source
 --------
 
