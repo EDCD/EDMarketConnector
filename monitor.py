@@ -80,6 +80,7 @@ class EDLogs(FileSystemEventHandler):
         self.system = None
         self.station = None
         self.coordinates = None
+        self.ranks = None
 
     def set_callback(self, name, callback):
         if name in self.callbacks:
@@ -214,9 +215,11 @@ class EDLogs(FileSystemEventHandler):
             if entry['event'] == 'Fileheader':
                 self.version = entry['gameversion']
                 self.is_beta = 'beta' in entry['gameversion'].lower()
+                self.ranks = None
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
+                self.ranks = { "Combat": None, "Trade": None, "Explore": None, "Empire": None, "Federation": None, "CQC": None }
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
             elif entry['event'] in ['Undocked']:
@@ -228,6 +231,14 @@ class EDLogs(FileSystemEventHandler):
                     self.coordinates = None	# Docked event doesn't include coordinates
                 self.system = entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem']
                 self.station = entry.get('StationName')	# May be None
+            elif entry['event'] in ['Rank', 'Promotion'] and self.ranks:
+                for k,v in entry.iteritems():
+                    if k in self.ranks:
+                        self.ranks[k] = (v,0)
+            elif entry['event'] == 'Progress' and self.ranks:
+                for k,v in entry.iteritems():
+                    if self.ranks.get(k) is not None:
+                        self.ranks[k] = (self.ranks[k][0], min(v, 100))	# perhaps not taken promotion mission yet
             return entry
         except:
             if __debug__:
