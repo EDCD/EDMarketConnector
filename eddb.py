@@ -43,7 +43,7 @@ if __name__ == "__main__":
     import requests
 
     def download(filename):
-        r = requests.get('https://eddb.io/archive/v4/' + filename, stream=True)
+        r = requests.get('https://eddb.io/archive/v5/' + filename, stream=True)
         print '\n%s\t%dK' % (filename, len(r.content) / 1024)
         return r
 
@@ -71,57 +71,60 @@ if __name__ == "__main__":
     def around_outlier(cx, cy, cz, x, y, z):
         return ((x - ox) * (x - ox) + (y - oy) * (y - oy) + (z - oz) * (z - oz)) <= RO2
 
-    systems = [
-        { 'id'           : int(s['id']),
-          'name'         : s['name'].decode('utf-8'),
-          'x'            : float(s['x']),
-          'y'            : float(s['y']),
-          'z'            : float(s['z']),
-          'is_populated' : bool(s['is_populated']),
-        } for s in csv.DictReader(download('systems.csv').iter_lines())]
+    systems = { int(s['id']) : {
+        'name'         : s['name'].decode('utf-8'),
+        'x'            : float(s['x']),
+        'y'            : float(s['y']),
+        'z'            : float(s['z']),
+        'is_populated' : int(s['is_populated']),
+    } for s in csv.DictReader(download('systems.csv').iter_lines()) }
     print '%d\tsystems' % len(systems)
 
     # system_id by system_name (ignoring duplicate names)
-    system_ids = dict([
-        (str(s['name']), s['id'])
-        for s in systems if s['is_populated'] or ((inbubble(s['x'], s['y'], s['z']) or around_jaques(s['x'], s['y'], s['z'])) and all(ord(c) < 128 for c in s['name']))])	# skip unpopulated systems outside the bubble and those with a bogus name
+    system_ids = {
+        str(s['name']) : k
+        for k,s in systems.iteritems() if s['is_populated'] or ((inbubble(s['x'], s['y'], s['z']) or around_jaques(s['x'], s['y'], s['z'])) and all(ord(c) < 128 for c in s['name']))	# skip unpopulated systems outside the bubble and those with a bogus name
+    }
 
-    cut = dict([(s['name'], s) for s in systems if s['is_populated'] and not inbubble(s['x'], s['y'], s['z']) and s['name'] not in ['Colonia', 'Eol Prou RS-T d3-94']])
-
-    # Temporary hack for new Colonia outposts: https://community.elitedangerous.com/galnet/uid/5800bf2d9657bab47f9912eb
-    cut.update({ 'Blu Thua AI-A c14-10':     { 'id':   64214, 'x':   -54.5,     'y':  149.53125, 'z':  2099.21875 },
-                 'Lagoon Sector NI-S b4-10': { 'id':   69637, 'x':  -469.1875,  'y':  -84.84375, 'z':  4456.125   },
-                 'Eagle Sector IR-W d1-117': { 'id':  855737, 'x': -2054.09375, 'y':   85.71875, 'z':  6710.875   },
-                 'Skaudai CH-B d14-34':      { 'id': 1328989, 'x': -5481.84375, 'y': -579.15625, 'z': 10429.9375  },
-                 'Gru Hypue KS-T d3-31':     { 'id': 3288878, 'x': -4990.84375, 'y': -935.71875, 'z': 13387.15625 },
-                 'Boewnst KS-S c20-959':     { 'id': 3317609, 'x': -6195.46875, 'y': -140.28125, 'z': 16462.0625  },
-    })
+    cut = {
+        k : s for k,s in systems.iteritems()
+        if s['is_populated'] and not inbubble(s['x'], s['y'], s['z']) and not around_jaques(s['x'], s['y'], s['z'])
+    }
     print '\n%d populated systems outside bubble calculation:' % len(cut)
     extra_ids = {}
-    for name,o in cut.iteritems():
+    for k,o in cut.iteritems():
         ox, oy, oz = o['x'], o['y'], o['z']
-        print '%-32s%7d %11.5f %11.5f %11.5f' % (name, o['id'], ox, oy, oz)
-        extra_ids.update(dict([
-            (str(s['name']), s['id'])
-            for s in systems if around_outlier(ox, oy, oz, s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])]))
+        extra = {
+            str(s['name']) : k
+            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])
+        }
+        print '%-30s%7d %11.5f %11.5f %11.5f %3d' % (o['name'], k, ox, oy, oz, len(extra))
+        extra_ids.update(extra)
     print '\n%d systems around outliers' % len(extra_ids)
     system_ids.update(extra_ids)
 
-    print '%d systems around Jacques' % len([s for s in systems if around_jaques(s['x'], s['y'], s['z'])])
+    print '%d systems around Jacques' % len([s for s in systems.itervalues() if around_jaques(s['x'], s['y'], s['z'])])
 
-    cut = [s for s in systems if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None]
+    cut = {
+        k : s
+        for k,s in systems.iteritems() if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None
+    }
     print '\n%d dropped systems inside bubble calculation:' % len(cut)
-    for s in cut:
-        print '%s%s%7d %11.5f %11.5f %11.5f' % (s['name'].encode('utf-8'), ' '*(32-len(s['name'])), s['id'], s['x'], s['y'], s['z'])
+    for k,s in cut.iteritems():
+        print '%s%s%7d %11.5f %11.5f %11.5f' % (s['name'].encode('utf-8'), ' '*(30-len(s['name'])), k, s['x'], s['y'], s['z'])
 
-    cut = [s for s in systems if system_ids.get(s['name']) and system_ids[s['name']] != s['id'] and (s['is_populated'] or inbubble(s['x'], s['y'], s['z']))]
+    cut = {
+        k : s
+        for k,s in systems.iteritems() if system_ids.get(s['name']) and system_ids[s['name']] != k and (s['is_populated'] or inbubble(s['x'], s['y'], s['z']))
+    }
     print '\n%d duplicate systems inside bubble calculation:' % len(cut)
-    for s in cut:
-        print '%-24s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], s['id'], s['x'], s['y'], s['z'])
+    for k,s in cut.iteritems():
+        print '%-22s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
     system_ids['Almar'] = 750
     system_ids['Arti'] = 60342
+    system_ids['Futhark'] = 4901	# bogus data from ED-IBE
     system_ids['Kamba'] = 10358
 
     # point new name for Jaques at old entry (Eol Prou RS-T d3-94)
@@ -133,13 +136,13 @@ if __name__ == "__main__":
 
     # station_id by (system_id, station_name)
     stations = json.loads(download('stations.json').content)	# let json do the utf-8 decode
-    station_ids = dict([(
-        (x['system_id'], str(x['name'])),
+    station_ids = {
+        (x['system_id'], str(x['name'])) :
         (x['id'],
          (EDDB.HAS_MARKET     if x['has_market']     else 0) |
          (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
-         (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0)))
-                        for x in stations])
+         (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0))
+        for x in stations }
     with open('stations.p', 'wb') as h:
         cPickle.dump(station_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
     print '%d saved stations' % len(station_ids)
