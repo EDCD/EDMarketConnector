@@ -45,10 +45,12 @@ ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
 def export(data, filename=None):
 
     def class_rating(module):
-        if 'guidance' in module:
+        if 'guidance' in module:	# Missiles
             return module['class'] + module['rating'] + '/' + module.get('mount', 'F')[0] + module['guidance'][0] + ' '
-        elif 'mount' in module:
+        elif 'mount' in module:		# Hardpoints
             return module['class'] + module['rating'] + '/' + module['mount'][0] + ' '
+        elif 'Cabin' in module['name']:	# Passenger cabins
+            return module['class'] + module['rating'] + '/' + module['name'][0] + ' '
         else:
             return module['class'] + module['rating'] + ' '
 

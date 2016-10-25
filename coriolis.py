@@ -79,6 +79,7 @@ fixup_map.update({
     'Enforcer Cannon'               : ('Multi-cannon', 'Enforcer'),
     'Enhanced Performance Thrusters': ('Thrusters', 'Enhanced Performance'),
     'Imperial Hammer Rail Gun'      : ('Rail Gun', 'Imperial Hammer'),
+    'Luxury Class Passenger Cabin'  : ('Luxury Passenger Cabin', None),
     'Mining Lance Beam Laser'       : ('Mining Laser', 'Mining Lance'),
     'Multi-Cannon'                  : ('Multi-cannon', None),
     'Pacifier Frag-Cannon'          : ('Fragment Cannon', 'Pacifier'),
@@ -334,6 +335,9 @@ if __name__ == "__main__":
                     }
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
+
+    # not in coriolis-data at time of writing
+    modules[('Pulse Laser', None, '2', 'E')] = { 'mass': 4 }	# Fixed used to be 2F
 
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 

@@ -187,7 +187,8 @@ rating_map = {
     '5': 'A',
 }
 
-# Ratings are messed up for Corrosion Resistant Cargo Rack
+# Ratings are weird for the following
+
 corrosion_rating_map = {
     '1': 'E',
     '2': 'F',
@@ -196,6 +197,10 @@ corrosion_rating_map = {
 planet_rating_map = {
     '1': 'H',
     '2': 'G',
+}
+
+fighter_rating_map = {
+    '1': 'D',
 }
 
 misc_internal_map = {
@@ -224,7 +229,7 @@ internal_map = {
     'cargorack'         : 'Cargo Rack',
     'collection'        : 'Collector Limpet Controller',
     'corrosionproofcargorack' : 'Corrosion Resistant Cargo Rack',
-    'fighterbay'        : 'Fighter Bay',
+    'fighterbay'        : 'Fighter Hangar',
     'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
     'fuelscoop'         : 'Fuel Scoop',
     'fueltransfer'      : 'Fuel Transfer Limpet Controller',
@@ -351,7 +356,7 @@ def lookup(module, ship_map, entitled=False):
         elif name[1] in internal_map:	# e.g. Int_CargoRack_Size8_Class1
             new['category'] = 'internal'
             if name[1] == 'passengercabin':
-                new['name'] = cabin_map[name[1]]
+                new['name'] = cabin_map[name[3][5:]]
             else:
                 new['name'] = internal_map[len(name)>4 and (name[1],name[4]) or name[1]]
         else:
@@ -360,6 +365,7 @@ def lookup(module, ship_map, entitled=False):
         if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
         new['class'] = str(name[2][4:])
         new['rating'] = (name[1]=='buggybay' and planet_rating_map or
+                         name[1]=='fighterbay' and fighter_rating_map or
                          name[1]=='corrosionproofcargorack' and corrosion_rating_map or
                          rating_map)[name[3][5:]]
 
