@@ -208,11 +208,7 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.status_code != requests.codes.ok:
-            self.dump(r)
-        r.raise_for_status()
-
-        if 'server error' in r.text:
+        if r.status_code != requests.codes.ok or 'server error' in r.text:
             self.dump(r)
             raise ServerError()
         elif r.url == URL_LOGIN:	# would have redirected away if success
@@ -229,8 +225,7 @@ class Session:
         if not code:
             raise VerificationRequired()
         r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
-        r.raise_for_status()
-        if r.url == URL_CONFIRM:	# would have redirected away if success
+        if r.status_code != requests.codes.ok or r.url == URL_CONFIRM:	# would have redirected away if success
             raise VerificationRequired()
         self.save()	# Save cookies now for use by command-line app
         self.login()
@@ -248,14 +243,15 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.status_code != requests.codes.ok:
-            self.dump(r)
         if r.status_code == requests.codes.forbidden or r.url == URL_LOGIN:
             # Start again - maybe our session cookie expired?
             self.state = Session.STATE_INIT
             return self.query()
 
-        r.raise_for_status()
+        if r.status_code != requests.codes.ok:
+            self.dump(r)
+            raise ServerError()
+
         try:
             data = r.json()
         except:
