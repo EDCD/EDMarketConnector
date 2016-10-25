@@ -8,7 +8,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '2.2.0.3'
+appversion = '2.2.0.4'
 
 update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
