@@ -499,18 +499,32 @@ class AppWindow:
             if system_changed or station_changed:
                 self.status['text'] = ''
 
-            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and monitor.ranks and (not entry or entry['event'] in ['Progress', 'Promotion']):
+            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+                # Send credits to EDSM on startup
+                if monitor.credits and (not entry or entry['event'] == 'LoadGame'):
+                    try:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        self.edsm.setcredits(monitor.credits)
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        if not config.getint('hotkey_mute'):
+                            hotkeymgr.play_bad()
+                
                 # Send rank info to EDSM on startup or change
-                try:
-                    self.status['text'] = _('Sending data to EDSM...')
-                    self.w.update_idletasks()
-                    self.edsm.setranks(monitor.ranks)
-                    self.status['text'] = ''
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                if monitor.ranks and (not entry or entry['event'] in ['Progress', 'Promotion']):
+                    try:
+                        self.status['text'] = _('Sending data to EDSM...')
+                        self.w.update_idletasks()
+                        self.edsm.setranks(monitor.ranks)
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        if not config.getint('hotkey_mute'):
+                            hotkeymgr.play_bad()
 
             if not entry or not monitor.mode:
                 return	# Fake event or in CQC
