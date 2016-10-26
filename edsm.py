@@ -192,3 +192,27 @@ class EDSM:
 
         if msgnum // 100 not in (1,4):
             raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
+
+    def setshipid(self, shipid):
+        if not shipid:
+            return
+
+        try:
+            url = 'https://www.edsm.net/api-commander-v1/set-ship-id?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
+                urllib2.quote(config.get('edsm_apikey')),
+                urllib2.quote(applongname),
+                urllib2.quote(appversion)
+            )
+            
+            url += '&%s=%s' % ('shipId', urllib2.quote('%d;%d' % shipid))
+            
+            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
+            reply = json.loads(r.read())
+            (msgnum, msg) = reply['msgnum'], reply['msg']
+        except:
+            if __debug__: print_exc()
+            raise Exception(_("Error: Can't connect to EDSM"))
+
+        if msgnum // 100 not in (1,4):
+            raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
