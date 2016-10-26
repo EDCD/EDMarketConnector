@@ -41,9 +41,9 @@ from commodity import COMMODITY_BPC, COMMODITY_CSV
 import td
 from eddn import eddn
 import edsm
-import loadout
 import coriolis
 import eddb
+import edshipyard
 import stats
 import prefs
 import plug
@@ -386,7 +386,7 @@ class AppWindow:
                 # stuff we can do when not docked
                 plug.notify_newdata(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
-                    loadout.export(data)
+                    edshipyard.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
 
