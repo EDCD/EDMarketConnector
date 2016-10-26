@@ -503,7 +503,7 @@ class AppWindow:
                 # Send credits to EDSM on startup
                 if monitor.credits and (not entry or entry['event'] == 'LoadGame'):
                     try:
-                        self.status['text'] = _('Sending data to EDSM...')
+                        self.status['text'] = _('Sending balance/loan to EDSM...')
                         self.w.update_idletasks()
                         self.edsm.setcredits(monitor.credits)
                         self.status['text'] = ''
@@ -516,7 +516,7 @@ class AppWindow:
                 # Send rank info to EDSM on startup or change
                 if monitor.ranks and (not entry or entry['event'] in ['Progress', 'Promotion']):
                     try:
-                        self.status['text'] = _('Sending data to EDSM...')
+                        self.status['text'] = _('Sending ranks to EDSM...')
                         self.w.update_idletasks()
                         self.edsm.setranks(monitor.ranks)
                         self.status['text'] = ''
@@ -541,7 +541,7 @@ class AppWindow:
                 # Update EDSM if we have coordinates - i.e. Location or FSDJump events
                 if config.getint('output') & config.OUT_SYS_EDSM and monitor.coordinates:
                     try:
-                        self.status['text'] = _('Sending data to EDSM...')
+                        self.status['text'] = _('Sending flight log to EDSM...')
                         self.w.update_idletasks()
                         self.edsm.writelog(timestamp, monitor.system, monitor.coordinates)
                         self.status['text'] = ''
