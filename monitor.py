@@ -77,7 +77,7 @@ class EDLogs(FileSystemEventHandler):
         self.is_beta = False
         self.mode = None
         self.cmdr = None
-        self.shipId = None
+        self.shipid = None
         self.system = None
         self.station = None
         self.coordinates = None
@@ -220,12 +220,14 @@ class EDLogs(FileSystemEventHandler):
                 self.ranks = None
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
-                self.shipId = entry['ShipID']
+                self.shipid = entry['ShipID']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.ranks = { "Combat": None, "Trade": None, "Explore": None, "Empire": None, "Federation": None, "CQC": None }
                 self.credits = { "balance": entry['Credits'], "loan": entry['Loan'] }
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
+            elif entry['event'] in ['ShipyardSwap']:
+                self.shipid = entry['ShipID']
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
