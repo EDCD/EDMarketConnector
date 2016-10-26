@@ -513,6 +513,19 @@ class AppWindow:
                         if not config.getint('hotkey_mute'):
                             hotkeymgr.play_bad()
                 
+                # Send shipid to EDSM on startup or change
+                if monitor.shipid and (not entry or entry['event'] in ['LoadGame', 'ShipyardSwap']):
+                    try:
+                        self.status['text'] = _('Sending shipId to EDSM...')
+                        self.w.update_idletasks()
+                        self.edsm.setshipid(monitor.shipid)
+                        self.status['text'] = ''
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        if not config.getint('hotkey_mute'):
+                            hotkeymgr.play_bad()
+                
                 # Send rank info to EDSM on startup or change
                 if monitor.ranks and (not entry or entry['event'] in ['Progress', 'Promotion']):
                     try:
