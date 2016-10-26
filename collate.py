@@ -175,8 +175,8 @@ if __name__ == "__main__":
                     print 'No starport!'
                 else:
                     if data['lastStarport'].get('commodities'):
-                        session.fixup(data['lastStarport']['commodities'])
-                        addcommodities(data)
+                        fixed = session.fixup(data)
+                        addcommodities(fixed)
                     else:
                         print 'No market'
                     if data['lastStarport'].get('modules'):

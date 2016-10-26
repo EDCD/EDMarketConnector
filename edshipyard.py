@@ -19,8 +19,9 @@ def export(data, filename=None):
 
         # special handling for completely empty trees
         p = props[0]
-        if not data[p]:
+        if p in data and not data[p]:
             to[p] = data[p]
+            return
 
         # Does the leaf exist ?
         tail = data
@@ -47,17 +48,22 @@ def export(data, filename=None):
     # subset of "ship" that's not noisy
     ship = {}
     for props in [
+            ('alive',),
             ('cargo', 'capacity'),
+            ('free',),
             ('fuel', 'main', 'capacity'),
             ('fuel', 'reserve', 'capacity'),
             ('fuel', 'superchargedFSD'),
             ('id',),
             ('name',),
+            ('value', 'hull'),
+            ('value', 'modules'),
+            ('value', 'unloaned'),
     ]: addleaf(data['ship'], ship, props)
 
     ship['modules'] = {}
     for slot in data['ship'].get('modules', {}):
-        for prop in ('id', 'modifiers', 'name', 'on', 'priority'):
+        for prop in ['free', 'id', 'modifiers', 'name', 'on', 'priority', 'recipeLevel', 'recipeName', 'recipeValue', 'unloaned', 'value']:
             addleaf(data['ship']['modules'], ship['modules'], (slot, 'module', prop))
 
     string = json.dumps(ship, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8')
