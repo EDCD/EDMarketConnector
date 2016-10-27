@@ -446,6 +446,17 @@ class AppWindow:
                             if not old_status:
                                 self.status['text'] = ''
 
+                    # Update credits and send to EDSM
+                    if data['commander'].get('credits') is not None:
+                        monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
+                        if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+                            try:
+                                self.edsm.setcredits(monitor.credits)
+                            except Exception as e:
+                                # Not particularly important so silent on failure
+                                if __debug__: print_exc()
+
+
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
 
