@@ -529,6 +529,8 @@ class AppWindow:
                     # Send ship info to EDSM on startup or change
                     if entry['event'] in [None, 'LoadGame', 'ShipyardNew', 'ShipyardSwap']:
                         self.edsm.setshipid(monitor.shipid)
+                    elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
+                        self.edsm.sellship(entry.get('SellShipID'))
 
                     # Write EDSM log on change
                     if monitor.mode and entry['event'] in ['Location', 'FSDJump']:
