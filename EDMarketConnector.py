@@ -499,73 +499,48 @@ class AppWindow:
             if system_changed or station_changed:
                 self.status['text'] = ''
 
+            # Send interesting events to EDSM
             if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
-                # Send credits to EDSM on startup
-                if monitor.credits and (not entry or entry['event'] == 'LoadGame'):
-                    try:
-                        self.status['text'] = _('Sending balance/loan to EDSM...')
-                        self.w.update_idletasks()
+                self.status['text'] = _('Sending data to EDSM...')
+                self.w.update_idletasks()
+                try:
+                    # Send credits to EDSM on startup
+                    if not entry or entry['event'] == 'LoadGame':
                         self.edsm.setcredits(monitor.credits)
-                        self.status['text'] = ''
-                    except Exception as e:
-                        if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
-                        if not config.getint('hotkey_mute'):
-                            hotkeymgr.play_bad()
-                
-                # Send shipid to EDSM on startup or change
-                if monitor.shipid and (not entry or entry['event'] in ['LoadGame', 'ShipyardSwap']):
-                    try:
-                        self.status['text'] = _('Sending shipId to EDSM...')
-                        self.w.update_idletasks()
-                        self.edsm.setshipid(monitor.shipid)
-                        self.status['text'] = ''
-                    except Exception as e:
-                        if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
-                        if not config.getint('hotkey_mute'):
-                            hotkeymgr.play_bad()
-                
-                # Send rank info to EDSM on startup or change
-                if monitor.ranks and (not entry or entry['event'] in ['Progress', 'Promotion']):
-                    try:
-                        self.status['text'] = _('Sending ranks to EDSM...')
-                        self.w.update_idletasks()
+
+                    # Send rank info to EDSM on startup or change
+                    if not entry or entry['event'] in ['Progress', 'Promotion']:
                         self.edsm.setranks(monitor.ranks)
-                        self.status['text'] = ''
-                    except Exception as e:
-                        if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
-                        if not config.getint('hotkey_mute'):
-                            hotkeymgr.play_bad()
+
+                    # Send ship info to EDSM on startup or change
+                    if not entry or entry['event'] in ['LoadGame', 'ShipyardNew', 'ShipyardSwap']:
+                        self.edsm.setshipid(monitor.shipid)
+
+                    # Write EDSM log on change
+                    if monitor.mode and entry and entry['event'] in ['Location', 'FSDJump']:
+                        self.system['image'] = ''
+                        self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.shipid)
+
+                except Exception as e:
+                    if __debug__: print_exc()
+                    self.status['text'] = unicode(e)
+                    if not config.getint('hotkey_mute'):
+                        hotkeymgr.play_bad()
+                else:
+                    self.status['text'] = ''
+                self.edsmpoll()
+
+            elif system_changed:
+                self.edsm.link(monitor.system)
+                self.edsmpoll()
 
             if not entry or not monitor.mode:
-                return	# Fake event or in CQC
+                return	# Startup or in CQC
 
+            # Plugins
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
-
-            if system_changed:
-                self.system['image'] = ''
-                timestamp = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-
-                # Backwards compatibility
-                plug.notify_system_changed(timestamp, monitor.system, monitor.coordinates)
-
-                # Update EDSM if we have coordinates - i.e. Location or FSDJump events
-                if config.getint('output') & config.OUT_SYS_EDSM and monitor.coordinates:
-                    try:
-                        self.status['text'] = _('Sending flight log to EDSM...')
-                        self.w.update_idletasks()
-                        self.edsm.writelog(timestamp, monitor.system, monitor.coordinates)
-                        self.status['text'] = ''
-                    except Exception as e:
-                        if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
-                        if not config.getint('hotkey_mute'):
-                            hotkeymgr.play_bad()
-                else:
-                    self.edsm.link(monitor.system)
-                self.edsmpoll()
+            if system_changed:	# Backwards compatibility
+                plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
             if station_changed and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
@@ -574,8 +549,8 @@ class AppWindow:
             # Send interesting events to EDDN
             try:
                 if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
-                    (entry['event'] == 'FSDJump' and system_changed  or
-                     entry['event'] == 'Docked'  and station_changed or
+                    (entry['event'] == 'FSDJump' or
+                     entry['event'] == 'Docked'  or
                      entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
                     # strip out properties disallowed by the schema
                     for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
