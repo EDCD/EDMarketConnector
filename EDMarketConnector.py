@@ -489,6 +489,9 @@ class AppWindow:
     def journal_event(self, event):
         while True:
             entry = monitor.get_entry()
+            if not entry:
+                return
+
             system_changed  = monitor.system  and self.system['text']  != monitor.system
             station_changed = monitor.station and self.station['text'] != monitor.station
 
@@ -505,19 +508,19 @@ class AppWindow:
                 self.w.update_idletasks()
                 try:
                     # Send credits to EDSM on startup
-                    if not entry or entry['event'] == 'LoadGame':
+                    if entry['event'] in [None, 'LoadGame']:
                         self.edsm.setcredits(monitor.credits)
 
                     # Send rank info to EDSM on startup or change
-                    if not entry or entry['event'] in ['Progress', 'Promotion']:
+                    if entry['event'] in [None, 'Progress', 'Promotion']:
                         self.edsm.setranks(monitor.ranks)
 
                     # Send ship info to EDSM on startup or change
-                    if not entry or entry['event'] in ['LoadGame', 'ShipyardNew', 'ShipyardSwap']:
+                    if entry['event'] in [None, 'LoadGame', 'ShipyardNew', 'ShipyardSwap']:
                         self.edsm.setshipid(monitor.shipid)
 
                     # Write EDSM log on change
-                    if monitor.mode and entry and entry['event'] in ['Location', 'FSDJump']:
+                    if monitor.mode and entry['event'] in ['Location', 'FSDJump']:
                         self.system['image'] = ''
                         self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.shipid)
 
@@ -534,7 +537,7 @@ class AppWindow:
                 self.edsm.link(monitor.system)
                 self.edsmpoll()
 
-            if not entry or not monitor.mode:
+            if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
 
             # Plugins
