@@ -36,6 +36,29 @@ class EDSM:
         EDSM._IMG_NEW      = tk.PhotoImage(data = 'R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXOPvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//jd//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/slv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP///////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xHJk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+GBAcUCIIBBDSYYGiAAUMALFR6FAgAOw==')
         EDSM._IMG_ERROR    = tk.PhotoImage(data = 'R0lGODlhEAAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAQABAAAAIwlBWpeR0AIwwNPRmZuVNJinyWuClhBlZjpm5fqnIAHJPtOd3Hou9mL6NVgj2LplEAADs=')	  # BBC Mode 5 '?'
 
+    # Call an EDSM endpoint with args (which should be quoted)
+    def call(self, endpoint, args):
+        try:
+            url = 'https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+                endpoint,
+                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
+                urllib2.quote(config.get('edsm_apikey')),
+                urllib2.quote(applongname),
+                urllib2.quote(appversion),
+            ) + args
+            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
+            reply = json.loads(r.read())
+            (msgnum, msg) = reply['msgnum'], reply['msg']
+        except:
+            if __debug__: print_exc()
+            raise Exception(_("Error: Can't connect to EDSM"))
+
+        # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
+        if msgnum // 100 not in (1,4):
+            raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
+        else:
+            return reply
+
     # Just set link without doing a lookup
     def link(self, system_name):
         self.cancel_lookup()
@@ -53,8 +76,7 @@ class EDSM:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
-            r = self.opener.open('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)
-            data = json.loads(r.read())
+            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name))
 
             if data == -1 or not data:
                 # System not present - but don't create it on the assumption that the caller will
@@ -87,15 +109,14 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            r = self.opener.open('https://www.edsm.net/api-v1/system?sysname=%s&coords=1&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)
-            data = json.loads(r.read())
+            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name))
 
             if data == -1 or not data:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['uncharted'] = True
                 result['done'] = True	# give feedback immediately
-                requests.get('https://www.edsm.net/api-v1/url?sysname=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (urllib2.quote(system_name), urllib2.quote(applongname), urllib2.quote(appversion)), timeout=EDSM._TIMEOUT)	# creates system
+                self.call('api-v1/url', '&sysname=%s' % urllib2.quote(system_name))	# creates system
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
                 result['done'] = True
@@ -110,60 +131,43 @@ class EDSM:
 
 
     # Send flight log and also do lookup
-    def writelog(self, timestamp, system_name, coordinates=None):
+    def writelog(self, timestamp, system_name, coordinates, shipid = None):
 
         if system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
             return
 
         self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
-        try:
-            url = 'https://www.edsm.net/api-logs-v1/set-log?commanderName=%s&apiKey=%s&systemName=%s&dateVisited=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
-                urllib2.quote(config.get('edsm_apikey')),
-                urllib2.quote(system_name),
-                urllib2.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
-                urllib2.quote(applongname),
-                urllib2.quote(appversion)
-            )
-            if coordinates:
-                url += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
-            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
-            reply = json.loads(r.read())
-            (msgnum, msg) = reply['msgnum'], reply['msg']
-        except:
-            if __debug__: print_exc()
-            raise Exception(_("Error: Can't connect to EDSM"))
 
-        # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
-        if msgnum // 100 not in (1,4):
-            raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
-        elif reply.get('systemCreated'):
+        args = '&systemName=%s&dateVisited=%s' % (
+            urllib2.quote(system_name),
+            urllib2.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
+        )
+        if coordinates:
+            args += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
+        if shipid:
+            args += '&shipId=%d' % shipid
+        reply = self.call('api-logs-v1/set-log', args)
+
+        if reply.get('systemCreated'):
             self.result['img'] = EDSM._IMG_NEW
         else:
             self.result['img'] = EDSM._IMG_KNOWN
         self.syscache.add(system_name)
 
     def setranks(self, ranks):
-        if not ranks:
-            return
-
-        try:
-            url = 'https://www.edsm.net/api-commander-v1/set-ranks?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
-                urllib2.quote(config.get('edsm_apikey')),
-                urllib2.quote(applongname),
-                urllib2.quote(appversion)
-            )
+        args = ''
+        if ranks:
             for k,v in ranks.iteritems():
                 if v is not None:
-                    url += '&%s=%s' % (k, urllib2.quote('%d;%d' % v))
-            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
-            reply = json.loads(r.read())
-            (msgnum, msg) = reply['msgnum'], reply['msg']
-        except:
-            if __debug__: print_exc()
-            raise Exception(_("Error: Can't connect to EDSM"))
+                    args += '&%s=%s' % (k, urllib2.quote('%d;%d' % v))
+        if args:
+            self.call('api-commander-v1/set-ranks', args)
 
-        if msgnum // 100 not in (1,4):
-            raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
+    def setcredits(self, credits):
+        if credits:
+            self.call('api-commander-v1/set-credits', '&balance=%d&loan=%d' % credits)
+
+    def setshipid(self, shipid):
+        if shipid is not None:
+            self.call('api-commander-v1/set-ship-id', '&shipId=%d' % shipid)
