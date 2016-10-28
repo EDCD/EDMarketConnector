@@ -78,6 +78,7 @@ class EDLogs(FileSystemEventHandler):
         self.mode = None
         self.cmdr = None
         self.shipid = None
+        self.shiptype = None
         self.system = None
         self.station = None
         self.coordinates = None
@@ -222,6 +223,7 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.shipid = entry.get('ShipID')	# None in CQC
+                self.shiptype = 'Ship' in entry and entry['Ship'].lower() or None	# None in CQC
                 self.system = None
                 self.station = None
                 self.coordinates = None
@@ -231,8 +233,10 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Name']
             elif entry['event'] == 'ShipyardNew':
                 self.shipid = entry['NewShipID']
+                self.shiptype = entry['ShipType'].lower()
             elif entry['event'] == 'ShipyardSwap':
                 self.shipid = entry['ShipID']
+                self.shiptype = entry['ShipType'].lower()
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:

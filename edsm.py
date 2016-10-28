@@ -172,6 +172,13 @@ class EDSM:
         if shipid is not None:
             self.call('api-commander-v1/set-ship-id', '&shipId=%d' % shipid)
 
+    def updateship(self, shipid, shiptype, slot = None, thing = None):
+        if shipid is not None and shiptype:
+            args = '&shipId=%d&type=%s' % (shipid, shiptype)
+            if slot:
+                args += '&%s=%s' % (slot, thing)
+            self.call('api-commander-v1/update-ship', args)
+
     def sellship(self, shipid):
         if shipid is not None:
             self.call('api-commander-v1/sell-ship', '&shipId=%d' % shipid)
