@@ -127,9 +127,6 @@ if __name__ == "__main__":
     system_ids['Futhark'] = 4901	# bogus data from ED-IBE
     system_ids['Kamba'] = 10358
 
-    # point new name for Jaques at old entry (Eol Prou RS-T d3-94)
-    system_ids['Colonia'] = 633211
-
     with open('systems.p',  'wb') as h:
         cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
     print '\n%d saved systems' % len(system_ids)
