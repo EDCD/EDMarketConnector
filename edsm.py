@@ -1,7 +1,6 @@
 import json
 import threading
 from sys import platform
-import ssl
 import time
 import urllib2
 
@@ -12,6 +11,54 @@ from config import appname, applongname, appversion, config
 if __debug__:
     from traceback import print_exc
 
+
+if platform=='darwin':
+    # mimimal implementation of requests interface since OpenSSL 0.9.8 on OSX
+    # fails to negotiate with Cloudflare unless cipher is forced
+
+    import ssl
+
+    class Response(object):
+
+        def __init__(self, url, status_code, headers, content):
+            self.url = url
+            self.status_code = status_code
+            self.headers = headers	# actually a mimetools.Message instance
+            self.content = content
+
+        def json(self):
+            return json.loads(self.content)
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise urllib2.HTTPError(self.url, self.status_code, '%d %s' % (self.status_code, self.status_code >= 500 and 'Server Error' or 'Client Error'), self.headers, None)
+
+    class Session(object):
+
+        def __init__(self):
+            self.headers = {}
+            sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)	# Requires Python >= 2.7.9 on OSX >= 10.10
+            sslcontext.set_ciphers("ECCdraft:HIGH:!aNULL")
+            self.opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslcontext))
+            self.opener.addheaders = [('User-Agent', '%s/%s' % (appname, appversion))]
+
+        def get(self, url, timeout=None, headers={}):
+            try:
+                h = self.opener.open(url, timeout=timeout)
+                r = Response(h.geturl(), h.code, h.info(), h.read())
+                h.close()
+                return r
+            except urllib2.HTTPError, e:
+                return urllib2.Response(url, e.code, {}, '')	# requests doesn't raise exceptions for HTTP errors
+            except:
+                raise
+
+        def close(self):
+            pass
+else:
+    from requests import Session
+
+
 class EDSM:
 
     _TIMEOUT = 10
@@ -20,15 +67,7 @@ class EDSM:
     def __init__(self):
         self.result = { 'img': None, 'url': None, 'done': True }
         self.syscache = set()	# Cache URLs of systems with known coordinates
-
-        # OpenSSL 0.9.8 on OSX fails to negotiate with Cloudflare unless cipher is forced
-        if platform == 'darwin':
-            sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)	# Requires Python >= 2.7.9 on OSX >= 10.10
-            sslcontext.set_ciphers("ECCdraft:HIGH:!aNULL")
-            self.opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslcontext))
-        else:
-            self.opener = urllib2.build_opener()
-        self.opener.addheaders = [('User-Agent', '%s/%s' % (appname, appversion))]
+        self.session = Session()
 
         # Can't be in class definition since can only call PhotoImage after window is created
         EDSM._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7rMpvNV4q932VSuRiPjQQAOw==')	# green circle
@@ -46,8 +85,9 @@ class EDSM:
                 urllib2.quote(applongname),
                 urllib2.quote(appversion),
             ) + args
-            r = self.opener.open(url, timeout=EDSM._TIMEOUT)
-            reply = json.loads(r.read())
+            r = self.session.get(url, timeout=EDSM._TIMEOUT)
+            r.raise_for_status()
+            reply = r.json()
             (msgnum, msg) = reply['msgnum'], reply['msg']
         except:
             if __debug__: print_exc()
