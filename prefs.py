@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from os.path import dirname, expanduser, exists, isdir, join, sep
+from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath
 from sys import platform
 
 import Tkinter as tk
@@ -21,6 +21,7 @@ import plug
 
 if platform == 'darwin':
     import objc
+    from Foundation import NSFileManager
     try:
         from ApplicationServices import AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
     except:
@@ -34,6 +35,12 @@ elif platform=='win32':
     # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
     import ctypes
     from ctypes.wintypes import *
+
+    SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
+    SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
+
+    LoadString = ctypes.windll.user32.LoadStringW
+    LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
 
     # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
     BIF_RETURNONLYFSDIRS   = 0x00000001
@@ -131,14 +138,12 @@ class PreferencesDialog(tk.Toplevel):
         self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
 
+        self.outdir = tk.StringVar()
+        self.outdir.set(config.get('outdir'))
         self.outdir_label = nb.Label(outframe, text=_('File location')+':')	# Section heading in settings
         self.outdir_label.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.outdir = nb.Entry(outframe, takefocus=False)
-        if config.get('outdir').startswith(config.home):
-            self.outdir.insert(0, '~' + config.get('outdir')[len(config.home):])
-        else:
-            self.outdir.insert(0, config.get('outdir'))
-        self.outdir.grid(row=20, padx=(PADX,0), sticky=tk.EW)
+        self.outdir_entry = nb.Entry(outframe, takefocus=False)
+        self.outdir_entry.grid(row=20, padx=(PADX,0), sticky=tk.EW)
         self.outbutton = nb.Button(outframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                    _('Browse...')),	# Folder selection button on Windows
                                    command = lambda:self.filebrowse(_('File location'), self.outdir))
@@ -194,20 +199,14 @@ class PreferencesDialog(tk.Toplevel):
         configframe = nb.Frame(notebook)
         configframe.columnconfigure(1, weight=1)
 
-        self.logdir = nb.Entry(configframe, takefocus=False)
-        logdir = config.get('journaldir') or config.default_journal_dir
-        if not logdir:
-            pass
-        elif logdir.startswith(config.home):
-            self.logdir.insert(0, '~' + logdir[len(config.home):])
-        else:
-            self.logdir.insert(0, logdir)
-        self.logdir['state'] = 'readonly'
+        self.logdir = tk.StringVar()
+        self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
+        self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
             nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
-            self.logdir.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
+            self.logdir_entry.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
             self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                           _('Browse...')),	# Folder selection button on Windows
                                        command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
@@ -311,14 +310,17 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def outvarchanged(self):
-        logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
+        self.displaypath(self.outdir, self.outdir_entry)
+        self.displaypath(self.logdir, self.logdir_entry)
+
+        logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
         local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
         self.out_auto_button['state']   = local and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
-        self.outdir['state']            = local and 'readonly' or tk.DISABLED
+        self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
 
         self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
@@ -332,10 +334,10 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_cmdr['state']         = edsm_state
         self.edsm_apikey['state']       = edsm_state
 
-    def filebrowse(self, title, entryfield):
+    def filebrowse(self, title, pathvar):
         if platform != 'win32':
             import tkFileDialog
-            d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(entryfield.get()), title=title, mustexist=tk.TRUE)
+            d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(pathvar.get()), title=title, mustexist=tk.TRUE)
         else:
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
@@ -347,7 +349,7 @@ class PreferencesDialog(tk.Toplevel):
             browseInfo.lpszTitle = title
             browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
             browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            browseInfo.lParam = entryfield.get().startswith('~') and join(config.home, entryfield.get()[2:]) or entryfield.get()
+            browseInfo.lParam = pathvar.get().startswith('~') and join(config.home, pathvar.get()[2:]) or pathvar.get()
             ctypes.windll.ole32.CoInitialize(None)
             pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
             if pidl:
@@ -359,25 +361,44 @@ class PreferencesDialog(tk.Toplevel):
                 d = None
 
         if d:
-            entryfield['state'] = tk.NORMAL	# must be writable to update
-            entryfield.delete(0, tk.END)
-            if d.startswith(config.home):
-                entryfield.insert(0, '~' + d[len(config.home):])
-            else:
-                entryfield.insert(0, d)
-            entryfield['state'] = 'readonly'
+            pathvar.set(d)
             self.outvarchanged()
 
-    def logdir_reset(self):
-        self.logdir['state'] = tk.NORMAL	# must be writable to update
-        self.logdir.delete(0, tk.END)
-        if not config.default_journal_dir:
-            pass	# Can't reset
-        elif config.default_journal_dir.startswith(config.home):
-            self.logdir.insert(0, '~' + config.default_journal_dir[len(config.home):])
+    def displaypath(self, pathvar, entryfield):
+        entryfield['state'] = tk.NORMAL	# must be writable to update
+        entryfield.delete(0, tk.END)
+        if platform=='win32':
+            start = pathvar.get().lower().startswith(config.home.lower()) and len(config.home.split('\\')) or 0
+            display = []
+            components = normpath(pathvar.get()).split('\\')
+            buf = ctypes.create_unicode_buffer(MAX_PATH)
+            pidsRes = ctypes.c_int()
+            for i in range(start, len(components)):
+                try:
+                    if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
+                        LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
+                        display.append(buf.value)
+                    else:
+                        display.append(components[i])
+                except:
+                    display.append(components[i])
+            entryfield.insert(0, '\\'.join(display))
+        elif platform=='darwin':
+            if pathvar.get().startswith(config.home):
+                display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):]
+            else:
+                display = NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())
+            entryfield.insert(0, '/'.join(display))
         else:
-            self.logdir.insert(0, config.default_journal_dir)
-        self.logdir['state'] = 'readonly'
+            if pathvar.get().startswith(config.home):
+                entryfield.insert(0, '~' + pathvar.get()[len(config.home):])
+            else:
+                entryfield.insert(0, pathvar.get())
+        entryfield['state'] = 'readonly'
+
+    def logdir_reset(self):
+        if config.default_journal_dir:
+            self.logdir.set(config.default_journal_dir)
         self.outvarchanged()
 
     def themecolorbrowse(self, index):
@@ -461,7 +482,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
         config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 
-        logdir = self.logdir.get().startswith('~') and join(config.home, self.logdir.get()[2:]) or self.logdir.get()
+        logdir = self.logdir.get()
         if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
             config.set('journaldir', '')	# default location
         else:
