@@ -508,10 +508,14 @@ class AppWindow:
 
             # Update main window
             self.cmdr['text'] = monitor.cmdr or ''
-            self.system['text'] = monitor.system or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
+            if system_changed:
+                self.system['text'] = monitor.system or ''
+                self.system['image'] = ''
+                self.edsm.link(monitor.system)
+            self.w.update_idletasks()
 
             # Send interesting events to EDSM
             if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
@@ -540,7 +544,6 @@ class AppWindow:
 
                     # Write EDSM log on change
                     if monitor.mode and entry['event'] in ['Location', 'FSDJump']:
-                        self.system['image'] = ''
                         self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.shipid)
 
                 except Exception as e:
@@ -550,11 +553,7 @@ class AppWindow:
                         hotkeymgr.play_bad()
                 else:
                     self.status['text'] = ''
-                self.edsmpoll()
-
-            elif system_changed:
-                self.edsm.link(monitor.system)
-                self.edsmpoll()
+            self.edsmpoll()
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
