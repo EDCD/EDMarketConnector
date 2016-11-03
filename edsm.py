@@ -215,7 +215,7 @@ class EDSM:
     def updateship(self, shipid, shiptype, slot = None, thing = None):
         if shipid is not None and shiptype:
             args = '&shipId=%d&type=%s' % (shipid, shiptype)
-            if slot:
+            if slot and thing is not None:
                 args += '&%s=%s' % (slot, thing)
             self.call('api-commander-v1/update-ship', args)
 

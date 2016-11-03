@@ -446,15 +446,21 @@ class AppWindow:
                             if not old_status:
                                 self.status['text'] = ''
 
-                    # Update credits and send to EDSM
-                    if data['commander'].get('credits') is not None:
-                        monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
-                        if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
-                            try:
+                    # Update credits and ship info and send to EDSM
+                    if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+                        try:
+                            if data['commander'].get('credits') is not None:
+                                monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
                                 self.edsm.setcredits(monitor.credits)
-                            except Exception as e:
-                                # Not particularly important so silent on failure
-                                if __debug__: print_exc()
+                            if monitor.shippaint is None:	# paintjob only reported in Journal on change
+                                monitor.shipid = data['ship']['id']
+                                monitor.shiptype = data['ship']['name'].lower()
+                                monitor.shippaint = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
+                                self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
+
+                        except Exception as e:
+                            # Not particularly important so silent on failure
+                            if __debug__: print_exc()
 
 
         except companion.VerificationRequired:
@@ -533,14 +539,13 @@ class AppWindow:
                     # Send ship info to EDSM on startup or change
                     if entry['event'] in [None, 'LoadGame', 'ShipyardNew', 'ShipyardSwap']:
                         self.edsm.setshipid(monitor.shipid)
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype)
+                        self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                         self.edsm.sellship(entry.get('SellShipID'))
 
                     # Send paintjob info to EDSM on change
                     if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                        symbol = re.match('\$(.+)_name;', entry.get('BuyItem', ''))
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', (symbol and symbol.group(1).lower() or entry.get('BuyItem', '')))
+                        self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
 
                     # Write EDSM log on change
                     if monitor.mode and entry['event'] in ['Location', 'FSDJump']:

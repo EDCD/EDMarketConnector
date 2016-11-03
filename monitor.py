@@ -79,6 +79,7 @@ class EDLogs(FileSystemEventHandler):
         self.cmdr = None
         self.shipid = None
         self.shiptype = None
+        self.shippaint = None
         self.system = None
         self.station = None
         self.coordinates = None
@@ -224,6 +225,7 @@ class EDLogs(FileSystemEventHandler):
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.shipid = entry.get('ShipID')	# None in CQC
                 self.shiptype = 'Ship' in entry and entry['Ship'].lower() or None	# None in CQC
+                self.shippaint = None
                 self.system = None
                 self.station = None
                 self.coordinates = None
@@ -234,9 +236,14 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'ShipyardNew':
                 self.shipid = entry['NewShipID']
                 self.shiptype = entry['ShipType'].lower()
+                self.shippaint = None
             elif entry['event'] == 'ShipyardSwap':
                 self.shipid = entry['ShipID']
                 self.shiptype = entry['ShipType'].lower()
+                self.shippaint = None
+            elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
+                symbol = re.match('\$(.+)_name;', entry.get('BuyItem', ''))
+                self.shippaint = symbol and symbol.group(1).lower() or entry.get('BuyItem', '')
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
