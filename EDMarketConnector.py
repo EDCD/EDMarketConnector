@@ -587,6 +587,7 @@ class AppWindow:
                         entry['StarPos'] = list(monitor.coordinates)
 
                     self.status['text'] = _('Sending data to EDDN...')
+                    self.w.update_idletasks()
                     eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
                     self.status['text'] = ''
 
@@ -603,6 +604,7 @@ class AppWindow:
                     ])
 
                     self.status['text'] = _('Sending data to EDDN...')
+                    self.w.update_idletasks()
                     eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
                     self.status['text'] = ''
 
