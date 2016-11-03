@@ -522,8 +522,8 @@ class AppWindow:
                 self.status['text'] = _('Sending data to EDSM...')
                 self.w.update_idletasks()
                 try:
-                    # Send credits to EDSM on startup
-                    if entry['event'] in [None, 'LoadGame']:
+                    # Send credits to EDSM on new game (but not on startup - data might be old)
+                    if entry['event'] == 'LoadGame':
                         self.edsm.setcredits(monitor.credits)
 
                     # Send rank info to EDSM on startup or change
