@@ -119,7 +119,6 @@ class EDLogs(FileSystemEventHandler):
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
-            atexit.register(self.observer.stop)
 
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
@@ -145,6 +144,17 @@ class EDLogs(FileSystemEventHandler):
             self.observed = None
             self.observer.unschedule_all()
         self.thread = None	# Orphan the worker thread - will terminate at next poll
+
+    def close(self):
+        thread = self.thread
+        self.stop()
+        if self.observer:
+            self.observer.stop()
+        if thread:
+            thread.join()
+        if self.observer:
+            self.observer.join()
+            self.observer = None
 
     def running(self):
         return self.thread and self.thread.is_alive()

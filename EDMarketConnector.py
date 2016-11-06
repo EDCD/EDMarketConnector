@@ -30,7 +30,7 @@ from config import appname, applongname, config
 if platform == 'win32' and getattr(sys, 'frozen', False):
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
     import tempfile
-    sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt')
+    sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
 
 from l10n import Translations
 Translations().install(config.get('language') or None)
@@ -690,13 +690,15 @@ class AppWindow:
             self.status['text'] = unicode(e)
 
     def onexit(self, event=None):
-        hotkeymgr.unregister()
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
-        config.close()
+        self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
+        hotkeymgr.unregister()
+        monitor.close()
         eddn.close()
         self.updater.close()
         self.session.close()
+        config.close()
         self.w.destroy()
 
     def drag_start(self, event):
