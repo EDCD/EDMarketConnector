@@ -76,7 +76,7 @@ class EDSM:
         EDSM._IMG_ERROR    = tk.PhotoImage(data = 'R0lGODlhEAAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAQABAAAAIwlBWpeR0AIwwNPRmZuVNJinyWuClhBlZjpm5fqnIAHJPtOd3Hou9mL6NVgj2LplEAADs=')	  # BBC Mode 5 '?'
 
     # Call an EDSM endpoint with args (which should be quoted)
-    def call(self, endpoint, args):
+    def call(self, endpoint, args, check_msgnum=True):
         try:
             url = 'https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
                 endpoint,
@@ -88,6 +88,8 @@ class EDSM:
             r = self.session.get(url, timeout=EDSM._TIMEOUT)
             r.raise_for_status()
             reply = r.json()
+            if not check_msgnum:
+                return reply
             (msgnum, msg) = reply['msgnum'], reply['msg']
         except:
             if __debug__: print_exc()
@@ -116,7 +118,7 @@ class EDSM:
             self.result = { 'img': EDSM._IMG_KNOWN, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': EDSM._IMG_ERROR, 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
-            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name))
+            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name), check_msgnum=False)
 
             if data == -1 or not data:
                 # System not present - but don't create it on the assumption that the caller will
@@ -149,17 +151,14 @@ class EDSM:
 
     def worker(self, system_name, result):
         try:
-            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name))
+            data = self.call('api-v1/system', '&sysname=%s&coords=1' % urllib2.quote(system_name), check_msgnum=False)
 
             if data == -1 or not data:
                 # System not present - create it
                 result['img'] = EDSM._IMG_NEW
                 result['uncharted'] = True
-                result['done'] = True	# give feedback immediately
-                self.call('api-v1/url', '&sysname=%s' % urllib2.quote(system_name))	# creates system
             elif data.get('coords'):
                 result['img'] = EDSM._IMG_KNOWN
-                result['done'] = True
                 self.syscache.add(system_name)
             else:
                 result['img'] = EDSM._IMG_UNKNOWN

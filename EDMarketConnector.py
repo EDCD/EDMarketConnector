@@ -377,8 +377,9 @@ class AppWindow:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
                 self.cmdr['text'] = data['commander']['name']
-                self.system['text'] = data['lastSystem']['name']
-                self.system['image'] = ''
+                if not monitor.system:
+                    self.system['text'] = data['lastSystem']['name']
+                    self.system['image'] = ''
                 self.station['text'] = data['commander'].get('docked') and data.get('lastStarport') and data['lastStarport'].get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
@@ -528,6 +529,10 @@ class AppWindow:
                 self.status['text'] = _('Sending data to EDSM...')
                 self.w.update_idletasks()
                 try:
+                    # Update system status on startup
+                    if monitor.mode and not entry['event']:
+                        self.edsm.lookup(monitor.system)
+
                     # Send credits to EDSM on new game (but not on startup - data might be old)
                     if entry['event'] == 'LoadGame':
                         self.edsm.setcredits(monitor.credits)
