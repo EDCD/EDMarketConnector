@@ -1,18 +1,23 @@
 # Export ship loadout in E:D Shipyard format
 
+import base64
 from collections import defaultdict
 import json
 import os
 from os.path import join
 import re
+import StringIO
 import time
+import urllib2
+import gzip
 
 import companion
 
 from config import config
 
 
-def export(data, filename=None):
+# Return a description of the current ship as a JSON object
+def description(data):
 
     # Add a leaf to a dictionary, creating empty dictionaries along the branch if necessary
     def addleaf(data, to, props):
@@ -66,7 +71,12 @@ def export(data, filename=None):
         for prop in ['free', 'id', 'modifiers', 'name', 'on', 'priority', 'recipeLevel', 'recipeName', 'recipeValue', 'unloaned', 'value']:
             addleaf(data['ship']['modules'], ship['modules'], (slot, 'module', prop))
 
-    string = json.dumps(ship, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8')
+    return ship
+
+
+def export(data, filename=None):
+
+    string = json.dumps(description(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))	# pretty print
 
     if filename:
         with open(filename, 'wt') as h:
@@ -86,3 +96,15 @@ def export(data, filename=None):
     filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
         h.write(string)
+
+
+# Return a URL for the current ship
+def url(data):
+
+    string = json.dumps(description(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
+
+    out = StringIO.StringIO()
+    with gzip.GzipFile(fileobj=out, mode='w') as f:
+        f.write(string)
+    return 'http://www.edshipyard.com/#/I=' + urllib2.quote(base64.standard_b64encode(out.getvalue()), safe='')
+

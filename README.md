@@ -14,6 +14,8 @@ Usage
 --------
 The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to download and transmit and/or save your choice of data.
 
+Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) in your web broswer.
+
 Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web broswer.
 
 Click on the station name to go to its [Elite: Dangerous Database](http://eddb.io/) (“eddb”) entry in your web broswer.

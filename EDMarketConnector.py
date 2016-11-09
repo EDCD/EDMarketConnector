@@ -94,20 +94,24 @@ class AppWindow:
         frame.columnconfigure(1, weight=1)
 
         self.cmdr_label = tk.Label(frame)
+        self.ship_label = tk.Label(frame)
         self.system_label = tk.Label(frame)
         self.station_label = tk.Label(frame)
 
         self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
-        self.system_label.grid(row=2, column=0, sticky=tk.W)
-        self.station_label.grid(row=3, column=0, sticky=tk.W)
+        self.ship_label.grid(row=2, column=0, sticky=tk.W)
+        self.system_label.grid(row=3, column=0, sticky=tk.W)
+        self.station_label.grid(row=4, column=0, sticky=tk.W)
 
-        self.cmdr = tk.Label(frame, anchor=tk.W)
-        self.system =  HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
+        self.cmdr    = tk.Label(frame, anchor=tk.W)
+        self.ship    = HyperlinkLabel(frame, url = self.edshipyard_url)
+        self.system  = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
 
         self.cmdr.grid(row=1, column=1, sticky=tk.EW)
-        self.system.grid(row=2, column=1, sticky=tk.EW)
-        self.station.grid(row=3, column=1, sticky=tk.EW)
+        self.ship.grid(row=2, column=1, sticky=tk.EW)
+        self.system.grid(row=3, column=1, sticky=tk.EW)
+        self.station.grid(row=4, column=1, sticky=tk.EW)
 
         for plugname in plug.PLUGINS:
             appitem = plug.get_plugin_app(plugname, frame)
@@ -127,7 +131,7 @@ class AppWindow:
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform=='win32' and 1 or 3))
+            child.grid_configure(padx=5, pady=(platform!='win32' and 2 or 0))
 
         self.menubar = tk.Menu()
         if platform=='darwin':
@@ -235,6 +239,7 @@ class AppWindow:
         self.w.resizable(tk.TRUE, tk.FALSE)
 
         theme.register(frame)
+        theme.register_highlight(self.ship)
         theme.register_highlight(self.system)
         theme.register_highlight(self.station)
         theme.apply(self.w)
@@ -264,6 +269,7 @@ class AppWindow:
     # set main window labels, e.g. after language change
     def set_labels(self):
         self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
+        self.ship_label['text']    = _('Ship') + ':'	# Main window
         self.system_label['text']  = _('System') + ':'	# Main window
         self.station_label['text'] = _('Station') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
@@ -366,7 +372,7 @@ class AppWindow:
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CredentialsError()			# Companion API credentials don't match Journal
-            elif auto_update and (not data['commander'].get('docked') or (monitor.logfile and self.system['text'] and data['lastSystem']['name'] != self.system['text'])):
+            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.shiptype and data['ship']['name'].lower() != monitor.shiptype):
                 raise companion.ServerLagging()
 
             else:
@@ -377,6 +383,7 @@ class AppWindow:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
                 self.cmdr['text'] = data['commander']['name']
+                self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                 if not monitor.system:
                     self.system['text'] = data['lastSystem']['name']
                     self.system['image'] = ''
@@ -515,6 +522,7 @@ class AppWindow:
 
             # Update main window
             self.cmdr['text'] = monitor.cmdr or ''
+            self.ship['text'] = monitor.shiptype and companion.ship_map.get(monitor.shiptype, monitor.shiptype) or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
@@ -637,6 +645,33 @@ class AppWindow:
             self.system['image'] = result['img']
         else:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
+
+    def edshipyard_url(self, shipname=None):
+        self.status['text'] = _('Fetching data...')
+        self.w.update_idletasks()
+        try:
+            data = self.session.query()
+        except companion.VerificationRequired:
+            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.edshipyard_url))
+        except companion.ServerError as e:
+            self.status['text'] = str(e)
+            return
+        except Exception as e:
+            if __debug__: print_exc()
+            self.status['text'] = str(e)
+            return
+
+        if not data.get('commander') or not data['commander'].get('name','').strip():
+            self.status['text'] = _("Who are you?!")		# Shouldn't happen
+        elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
+            self.status['text'] = _("Where are you?!")		# Shouldn't happen
+        elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
+            self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+        elif shipname and shipname != companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name']):
+            self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
+        else:
+            self.status['text'] = ''
+            return edshipyard.url(data)
 
     def system_url(self, text):
         return text and self.edsm.result['url']
