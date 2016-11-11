@@ -8,7 +8,6 @@ from os.path import join
 import re
 import StringIO
 import time
-import urllib2
 import gzip
 
 import companion
@@ -106,5 +105,4 @@ def url(data):
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
-    return 'http://www.edshipyard.com/#/I=' + urllib2.quote(base64.standard_b64encode(out.getvalue()), safe='')
-
+    return 'http://www.edshipyard.com/#/I=' + base64.urlsafe_b64encode(out.getvalue())
