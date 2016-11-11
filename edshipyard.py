@@ -48,8 +48,6 @@ def description(data):
         p = props[-1]
         to[p] = data[p]
 
-    querytime = config.getint('querytime') or int(time.time())
-
     # subset of "ship" that's not noisy
     ship = {}
     for props in [
@@ -92,6 +90,8 @@ def export(data, filename=None):
             if h.read() == string:
                 return	# same as last time - don't write
 
+    querytime = config.getint('querytime') or int(time.time())
+    
     # Write
     filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
