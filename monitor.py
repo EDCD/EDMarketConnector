@@ -80,6 +80,7 @@ class EDLogs(FileSystemEventHandler):
         self.shipid = None
         self.shiptype = None
         self.shippaint = None
+        self.body = None
         self.system = None
         self.station = None
         self.coordinates = None
@@ -138,7 +139,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring'
         self.currentdir = None
-        self.version = self.mode = self.cmdr = self.system = self.station = self.coordinates = None
+        self.version = self.mode = self.cmdr = self.body = self.system = self.station = self.coordinates = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -236,6 +237,7 @@ class EDLogs(FileSystemEventHandler):
                 self.shipid = entry.get('ShipID')	# None in CQC
                 self.shiptype = 'Ship' in entry and entry['Ship'].lower() or None	# None in CQC
                 self.shippaint = None
+                self.body = None
                 self.system = None
                 self.station = None
                 self.coordinates = None
@@ -257,12 +259,18 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
+                if entry['event'] != 'Docked':
+                    self.body = None
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None	# Docked event doesn't include coordinates
                 self.system = entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem']
                 self.station = entry.get('StationName')	# May be None
+            elif entry['event'] == 'SupercruiseExit':
+                self.body = entry.get('BodyType') == 'Planet' and entry.get('Body')
+            elif entry['event'] == 'SupercruiseEntry':
+                self.body = None
             elif entry['event'] in ['Rank', 'Promotion'] and self.ranks:
                 for k,v in entry.iteritems():
                     if k in self.ranks:

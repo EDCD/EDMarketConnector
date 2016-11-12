@@ -598,6 +598,10 @@ class AppWindow:
                         if thing.endswith('_Localised'):
                             entry.pop(thing, None)
 
+                    # add planet to Docked event for planetary stations if known
+                    if entry['event'] == 'Docked' and monitor.body:
+                        entry['BodyName'] = monitor.body
+
                     # add mandatory StarSystem and StarPos properties to Scan events
                     if 'StarSystem' not in entry:
                         entry['StarSystem'] = monitor.system
