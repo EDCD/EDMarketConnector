@@ -22,14 +22,15 @@ def plugin_start():
    Load this plugin into EDMC
    """
    print "I am loaded!"
+   return "Test"
 ```
 
 # Plugin Hooks
 ## Configuration 
 
-If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. Use widgets from EDMC's myNotebook.py for the correct look-and-feel.
+If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. The tab title will be the value that you returned from `plugin_start`. Use widgets from EDMC's myNotebook.py for the correct look-and-feel. You can be notified when the settings dialog is closed so you can save your settings.
 
-You can use `set()`, `get()` and `getint()` from EDMC's config object to store and retrieve your plugin's settings in a platform-independent way.
+You can use `set()`, `get()` and `getint()` from EDMC's config object to retrieve your plugin's settings in a platform-independent way.
 
 ```
 import myNotebook as nb
@@ -46,20 +47,28 @@ def plugin_prefs(parent):
    return frame
 ```
 
+def notify_prefs_changed():
+   """
+   Save settings.
+   """
+   config.setint('MyPluginSetting', 1)
+```
+
 ## Display
 
-You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a ttk.Label widget. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
+You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
 
 ```
 def plugin_app(parent):
    """
    Create a TK widget for the EDMC main window
    """
-   plugin_app.status = tk.Label(parent, text="Status:")
-   return plugin_app.status
+   label = tk.Label(parent, text="Status:")
+   plugin_app.status = tk.Label(parent, anchor=tk.W, text="")
+   return (label, plugin_app.status)
    
 # later on your event functions can directly update plugin_app.status["text"]
-plugin_app.status['text'] = "Status: Happy!"
+plugin_app.status['text'] = "Happy!"
 ```
 
 ## Events

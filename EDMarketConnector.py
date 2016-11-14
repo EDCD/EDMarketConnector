@@ -116,7 +116,12 @@ class AppWindow:
         for plugname in plug.PLUGINS:
             appitem = plug.get_plugin_app(plugname, frame)
             if appitem:
-                appitem.grid(columnspan=2, sticky=tk.W)
+                if isinstance(appitem, tuple) and len(appitem)==2:
+                    row = frame.grid_size()[1]
+                    appitem[0].grid(row=row, column=0, sticky=tk.W)
+                    appitem[1].grid(row=row, column=1, sticky=tk.EW)
+                else:
+                    appitem.grid(columnspan=2, sticky=tk.W)
 
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)

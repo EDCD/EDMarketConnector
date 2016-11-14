@@ -40,11 +40,11 @@ def load_plugins():
                 plugmod = imp.load_module(plugname, plugfile, found[plugname],
                                           (".py", "r", imp.PY_SOURCE))
                 if "plugin_start" in dir(plugmod):
-                    plugmod.plugin_start()
-                    PLUGINS[plugname] = plugmod
+                    newname = plugmod.plugin_start()
+                    PLUGINS[newname and unicode(newname) or plugname] = plugmod
 
         except Exception as plugerr:
-            sys.stderr.write('%s\n' % plugerr)	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
+            sys.stderr.write('%s: %s\n' % (plugname, plugerr))	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
 
     imp.release_lock()
 
@@ -74,7 +74,7 @@ def get_plugin_app(plugname, parent):
     return None
 
 
-def get_plugin_pref(plugname, parent):
+def get_plugin_prefs(plugname, parent):
     """
     If the plugin provides a prefs frame, create and return it.
     :param plugname: name of the plugin
@@ -85,6 +85,20 @@ def get_plugin_pref(plugname, parent):
     if plugin_prefs:
         return plugin_prefs(parent)
     return None
+
+
+def notify_prefs_changed():
+    """
+    Notify each plugin that the settings dialog has been closed.
+    :return:
+    """
+    for plugname in PLUGINS:
+        prefs_changed = _get_plugin_func(plugname, "prefs_changed")
+        if prefs_changed:
+            try:
+                prefs_changed()
+            except Exception as plugerr:
+                print plugerr
 
 
 def notify_journal_entry(cmdr, system, station, entry):

@@ -12,9 +12,10 @@ import myNotebook as nb
 def plugin_start():
     """
     Start this plugin
-    :return:
+    :return: Plugin name
     """
     sys.stderr.write("example plugin started\n")	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
+    return 'About'
 
 
 def plugin_prefs(parent):

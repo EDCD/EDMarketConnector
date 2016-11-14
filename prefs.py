@@ -196,6 +196,12 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
+        # build plugin prefs tabs
+        for plugname in plug.PLUGINS:
+            plugframe = plug.get_plugin_prefs(plugname, notebook)
+            if plugframe:
+                notebook.add(plugframe, text=plugname)
+
         configframe = nb.Frame(notebook)
         configframe.columnconfigure(1, weight=1)
 
@@ -277,12 +283,6 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
 
         notebook.add(themeframe, text=_('Appearance'))	# Tab heading in settings
-
-        # build plugin prefs tabs
-        for plugname in plug.PLUGINS:
-            plugframe = plug.get_plugin_pref(plugname, notebook)
-            if plugframe:
-                notebook.add(plugframe, text=plugname)
 
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
@@ -504,6 +504,8 @@ class PreferencesDialog(tk.Toplevel):
         theme.apply(self.parent)
 
         config.set('anonymous', self.out_anon.get())
+
+        plug.notify_prefs_changed()
 
         self._destroy()
         if self.callback:
