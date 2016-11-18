@@ -383,7 +383,7 @@ class PreferencesDialog(tk.Toplevel):
                 except:
                     display.append(components[i])
             entryfield.insert(0, '\\'.join(display))
-        elif platform=='darwin':
+        elif platform=='darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):	# None if path doesn't exist
             if pathvar.get().startswith(config.home):
                 display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):]
             else:
