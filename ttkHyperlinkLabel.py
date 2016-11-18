@@ -30,8 +30,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         else:
             ttk.Label.__init__(self, master, **kw)
 
-        if self.url:
-            self.bind('<Button-1>', self._click)
+        self.bind('<Button-1>', self._click)
 
         if self.popup_copy:
             self.menu = tk.Menu(None, tearoff=tk.FALSE)
@@ -86,7 +85,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
             self.configure(font = self.font_n)
 
     def _click(self, event):
-        if self['text'] and str(self['state']) != tk.DISABLED:
+        if self.url and self['text'] and str(self['state']) != tk.DISABLED:
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
                 self._leave(event)	# Remove underline before we change window to browser
