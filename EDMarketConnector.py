@@ -44,6 +44,7 @@ import edsm
 import coriolis
 import eddb
 import edshipyard
+import loadout
 import stats
 import prefs
 import plug
@@ -399,7 +400,7 @@ class AppWindow:
                 # stuff we can do when not docked
                 plug.notify_newdata(data)
                 if config.getint('output') & config.OUT_SHIP_EDS:
-                    edshipyard.export(data)
+                    loadout.export(data)
                 if config.getint('output') & config.OUT_SHIP_CORIOLIS:
                     coriolis.export(data)
 
