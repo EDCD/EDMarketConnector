@@ -104,7 +104,7 @@ class AppWindow:
         self.station_label.grid(row=4, column=0, sticky=tk.W)
 
         self.cmdr    = tk.Label(frame, anchor=tk.W)
-        self.ship    = HyperlinkLabel(frame, url = self.edshipyard_url)
+        self.ship    = HyperlinkLabel(frame, url = self.shipyard_url)
         self.system  = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
         self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
 
@@ -435,7 +435,7 @@ class AppWindow:
                     else:
                         if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC):
                             # Fixup anomalies in the commodity data
-                            fixed = self.session.fixup(data)
+                            fixed = companion.fixup(data)
 
                             if config.getint('output') & config.OUT_MKT_CSV:
                                 commodity.export(fixed, COMMODITY_CSV)
@@ -655,13 +655,13 @@ class AppWindow:
         else:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
-    def edshipyard_url(self, shipname=None):
+    def shipyard_url(self, shipname=None):
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
         try:
             data = self.session.query()
         except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.edshipyard_url))
+            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.shipyard_url))
         except companion.ServerError as e:
             self.status['text'] = str(e)
             return

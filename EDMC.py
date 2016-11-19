@@ -68,19 +68,18 @@ try:
                            item.find('title').text) for item in feed.findall('channel/item')])
             lastversion = sorted(items, key=versioncmp)[-1]
             if versioncmp(lastversion) > versioncmp(appversion):
-
                 latest = ' (%s is available)' % items[lastversion]
         except:
             pass	# Quietly suppress timeouts etc.
         print '%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest)	# just first three digits
         sys.exit(EXIT_SUCCESS)
 
-    session = companion.Session()
     if args.j:
         # Import and collate from JSON dump
         data = json.load(open(args.j))
         config.set('querytime', getmtime(args.j))
     else:
+        session = companion.Session()
         session.login(config.get('username'), config.get('password'))
         querytime = int(time())
         data = session.query()
@@ -127,7 +126,7 @@ try:
         sys.exit(EXIT_SUCCESS)
 
     # Fixup anomalies in the commodity data
-    fixed = session.fixup(data)
+    fixed = companion.fixup(data)
 
     if args.j:
         # Collate from JSON dump

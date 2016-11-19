@@ -272,58 +272,115 @@ class Session:
             pass
         self.session = None
 
-    # Returns a shallow copy of the received data with anomalies in the commodity data fixed up
-    def fixup(self, data):
-        commodities = []
-        for commodity in data['lastStarport'].get('commodities') or []:
-
-            # Check all required numeric fields are present and are numeric
-            # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
-            # But also see https://github.com/Marginal/EDMarketConnector/issues/32
-            for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
-                if not isinstance(commodity.get(thing), numbers.Number):
-                    if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
-                    break
-            else:
-                if not category_map.get(commodity['categoryname'], True):	# Check marketable
-                    pass
-                elif not commodity.get('categoryname'):
-                    if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
-                elif not commodity.get('name'):
-                    if __debug__: print 'Missing "name" for a commodity in "%s"' % commodity.get('categoryname', '')
-                elif not commodity['demandBracket'] in range(4):
-                    if __debug__: print 'Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name'])
-                elif not commodity['stockBracket'] in range(4):
-                    if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
-                else:
-                    # Rewrite text fields
-                    new = dict(commodity)	# shallow copy
-                    new['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
-                    fixed = commodity_map.get(commodity['name'])
-                    if type(fixed) == tuple:
-                        (new['categoryname'], new['name']) = fixed
-                    elif fixed:
-                        new['name'] = fixed
-
-                    # Force demand and stock to zero if their corresponding bracket is zero
-                    # Fixes spurious "demand": 1 in ED 1.3
-                    if not commodity['demandBracket']:
-                        new['demand'] = 0
-                    if not commodity['stockBracket']:
-                        new['stock'] = 0
-
-                    # We're good
-                    commodities.append(new)
-
-        # return a shallow copy
-        datacopy = dict(data)
-        datacopy['lastStarport'] = dict(data['lastStarport'])
-        datacopy['lastStarport']['commodities'] = commodities
-        return datacopy
-
     def dump(self, r):
         if __debug__:
             print 'Status\t%s'  % r.status_code
             print 'URL\t%s' % r.url
             print 'Headers\t%s' % r.headers
             print ('Content:\n%s' % r.text).encode('utf-8')
+
+
+# Returns a shallow copy of the received data with anomalies in the commodity data fixed up
+def fixup(data):
+    commodities = []
+    for commodity in data['lastStarport'].get('commodities') or []:
+
+        # Check all required numeric fields are present and are numeric
+        # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
+        # But also see https://github.com/Marginal/EDMarketConnector/issues/32
+        for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
+            if not isinstance(commodity.get(thing), numbers.Number):
+                if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
+                break
+        else:
+            if not category_map.get(commodity['categoryname'], True):	# Check marketable
+                pass
+            elif not commodity.get('categoryname'):
+                if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
+            elif not commodity.get('name'):
+                if __debug__: print 'Missing "name" for a commodity in "%s"' % commodity.get('categoryname', '')
+            elif not commodity['demandBracket'] in range(4):
+                if __debug__: print 'Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name'])
+            elif not commodity['stockBracket'] in range(4):
+                if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
+            else:
+                # Rewrite text fields
+                new = dict(commodity)	# shallow copy
+                new['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
+                fixed = commodity_map.get(commodity['name'])
+                if type(fixed) == tuple:
+                    (new['categoryname'], new['name']) = fixed
+                elif fixed:
+                    new['name'] = fixed
+
+                # Force demand and stock to zero if their corresponding bracket is zero
+                # Fixes spurious "demand": 1 in ED 1.3
+                if not commodity['demandBracket']:
+                    new['demand'] = 0
+                if not commodity['stockBracket']:
+                    new['stock'] = 0
+
+                # We're good
+                commodities.append(new)
+
+    # return a shallow copy
+    datacopy = dict(data)
+    datacopy['lastStarport'] = dict(data['lastStarport'])
+    datacopy['lastStarport']['commodities'] = commodities
+    return datacopy
+
+
+# Return a subset of the received data describing the current ship
+def ship(data):
+
+    # Add a leaf to a dictionary, creating empty dictionaries along the branch if necessary
+    def addleaf(data, to, props):
+
+        # special handling for completely empty trees
+        p = props[0]
+        if p in data and not data[p]:
+            to[p] = data[p]
+            return
+
+        # Does the leaf exist ?
+        tail = data
+        for p in props:
+            if not hasattr(data, 'get') or p not in tail:
+                return
+            else:
+                tail = tail[p]
+
+        for p in props[:-1]:
+            if not hasattr(data, 'get') or p not in data:
+                return
+            elif p not in to:
+                to[p] = {}
+            elif not hasattr(to, 'get'):
+                return	# intermediate is not a dictionary - inconsistency!
+            data = data[p]
+            to = to[p]
+        p = props[-1]
+        to[p] = data[p]
+
+    # subset of "ship" that's not noisy
+    description = {}
+    for props in [
+            ('alive',),
+            ('cargo', 'capacity'),
+            ('free',),
+            ('fuel', 'main', 'capacity'),
+            ('fuel', 'reserve', 'capacity'),
+            ('fuel', 'superchargedFSD'),
+            ('id',),
+            ('name',),
+            ('value', 'hull'),
+            ('value', 'modules'),
+            ('value', 'unloaned'),
+    ]: addleaf(data['ship'], description, props)
+
+    description['modules'] = {}
+    for slot in data['ship'].get('modules', {}):
+        for prop in ['free', 'id', 'modifiers', 'name', 'on', 'priority', 'recipeLevel', 'recipeName', 'recipeValue', 'unloaned', 'value']:
+            addleaf(data['ship']['modules'], description['modules'], (slot, 'module', prop))
+
+    return description
