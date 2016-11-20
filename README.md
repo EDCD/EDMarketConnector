@@ -12,13 +12,13 @@ You can run the app on the same machine on which you're running Elite: Dangerous
 
 Usage
 --------
-The user-interface is deliberately minimal - when you land at a station just switch to the app and press the “Update” button or press Enter to download and transmit and/or save your choice of data.
+The user-interface is deliberately minimal - your choice of data is automatically downloaded, transmitted and/or saved when you land at a station, jump to a system or scan a body.
 
-Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) in your web broswer.
+Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) in your web browser.
 
-Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web broswer.
+Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web browser.
 
-Click on the station name to go to its [Elite: Dangerous Database](http://eddb.io/) (“eddb”) entry in your web broswer.
+Click on the station name to go to its [Elite: Dangerous Database](http://eddb.io/) (“eddb”) entry in your web browser.
 
 ![Windows screenshot](img/win.png) &nbsp; ![Mac screenshot](img/mac.png)
 
@@ -124,11 +124,11 @@ This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConne
 ### Rares profits wiped out
 Due to a bug in the server that supplies the data to this app, profit on any Rare cargo in your hold may be wiped out when you visit the in-game Commodity Market after having “Updated”.
 
-Ensure that you visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
+If you're trading Rares turn off the “Automatically update on docking” setting and ensure that you visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
 
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
-### Doesn't track Systems visited
+### Doesn't auto-update or track Systems visited
 This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
 ### Error: Can't connect to EDDN
