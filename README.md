@@ -134,6 +134,9 @@ This app uses Elite: Dangerous' “journal” files to track the systems and sta
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
 
+### Import failed: No ship loadout found
+Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
+
 Running from source
 --------
 

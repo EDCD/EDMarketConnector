@@ -5,6 +5,33 @@ import Tkinter as tk
 import ttk
 import tkFont
 
+if platform == 'win32':
+    import subprocess
+    import ctypes
+    from ctypes.wintypes import *
+
+    HKEY_CLASSES_ROOT = 0x80000000
+    HKEY_CURRENT_USER = 0x80000001
+
+    KEY_READ          = 0x00020019
+    KEY_ALL_ACCESS    = 0x000F003F
+
+    REG_SZ            = 1
+    REG_DWORD         = 4
+    REG_MULTI_SZ      = 7
+
+    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
+    RegOpenKeyEx.restype = LONG
+    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
+
+    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
+    RegCloseKey.restype = LONG
+    RegCloseKey.argtypes = [HKEY]
+
+    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
+    RegQueryValueEx.restype = LONG
+    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
+
 
 # A clickable ttk Label
 #
@@ -89,7 +116,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
                 self._leave(event)	# Remove underline before we change window to browser
-                webbrowser.open(url)
+                openurl(url)
 
     def _contextmenu(self, event):
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
@@ -100,3 +127,40 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         self.clipboard_append(self['text'])
 
 
+def openurl(url):
+    if platform == 'win32':
+        # On Windows webbrowser.open calls os.startfile which calls ShellExecute which can't handle long arguments,
+        # so discover and launch the browser directly.
+        # https://blogs.msdn.microsoft.com/oldnewthing/20031210-00/?p=41553
+
+        hkey = HKEY()
+        cls  = 'http'
+        if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice', 0, KEY_READ, ctypes.byref(hkey)):
+            typ  = DWORD()
+            size = DWORD()
+            if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
+                buf = ctypes.create_unicode_buffer(size.value / 2)
+                if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), buf, ctypes.byref(size)):
+                    if buf.value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
+                        # IE and Edge can't handle long arguments so just use webbrowser.open and hope
+                        # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
+                        cls = None
+                    else:
+                        cls = buf.value
+            RegCloseKey(hkey)
+
+        if cls and not RegOpenKeyEx(HKEY_CLASSES_ROOT, r'%s\shell\open\command' % cls, 0, KEY_READ, ctypes.byref(hkey)):
+            typ  = DWORD()
+            size = DWORD()
+            if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
+                buf = ctypes.create_unicode_buffer(size.value / 2)
+                if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), buf, ctypes.byref(size)) and 'iexplore' not in buf.value.lower():
+                    RegCloseKey(hkey)
+                    if '%1' in buf.value:
+                        subprocess.Popen(buf.value.replace('%1', url))
+                    else:
+                        subprocess.Popen('%s "%s"' % (buf.value, url))
+                    return
+            RegCloseKey(hkey)
+
+    webbrowser.open(url)
