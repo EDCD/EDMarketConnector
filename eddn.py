@@ -138,19 +138,22 @@ class _EDDN:
             })
 
     def export_journal_entry(self, cmdr, is_beta, entry):
-        if config.getint('output') & config.OUT_SYS_DELAY and entry['event'] != 'Docked' and (self.replayfile or self.load()):
+        msg = {
+            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
+            'message'    : entry
+        }
+        if self.replayfile or self.load():
+            # Store the entry
             self.replayfile.seek(0, SEEK_END)
-            self.replayfile.write('%s\n' % json.dumps([cmdr.encode('utf-8'), {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
-                'message'    : entry
-            }]))
+            self.replayfile.write('%s\n' % json.dumps([cmdr.encode('utf-8'), msg]))
             self.replayfile.flush()
+
+            if entry['event'] == 'Docked' or not (config.getint('output') & config.OUT_SYS_DELAY):
+                # Try to send this and previous entries
+                self.flush()
         else:
-            self.flush()
-            self.send(cmdr, {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
-                'message'    : entry
-            })
+            # Can't access replay file! Send immediately.
+            self.send(cmdr, msg)
 
     def export_blackmarket(self, cmdr, is_beta, msg):
         self.send(cmdr, {
