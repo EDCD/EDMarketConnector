@@ -71,10 +71,10 @@
 "Competent" = "Competent";
 
 /* Tab heading in settings. [prefs.py] */
-"Configuration" = "Konfigurace";
+"Configuration" = "Nastavení";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "Čekej {SS}s";
+"cooldown {SS}s" = "Počkej ještě {SS}s";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
 "Copy" = "Kopírovat";
@@ -92,7 +92,7 @@
 "Dangerous" = "Dangerous";
 
 /* Appearance theme setting. [prefs.py] */
-"Dark" = "Tmavý";
+"Dark" = "Tmavé";
 
 /* Combat rank. [stats.py] */
 "Deadly" = "Deadly";
@@ -148,7 +148,7 @@
 /* [companion.py] */
 "Error: Server is down" = "Chyba: Server je mimo provoz";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Server is lagging" = "Chyba: Server není dostupný";
 
 /* [companion.py] */
@@ -194,7 +194,7 @@
 "Hotkey" = "Klávesová zkratka";
 
 /* [prefs.py] */
-"How do you want to be identified in the saved data" = "Zvolte identitu zobrazenou v uložených datech";
+"How do you want to be identified in the saved data" = "Zvolte identitu zobrazenou v uložených dat";
 
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identita";
@@ -212,7 +212,7 @@
 "Language" = "Jazyk";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Naposledy aktualizováno {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Poslední aktualizace {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
@@ -314,7 +314,7 @@
 "Please enter the code into the box below." = "Prosím, zadejte kód do pole níže.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Přihlašte se pomocí účtu Elite: Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Přihlaste se pomocí účtu Elite: Dangerous";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -327,6 +327,9 @@
 
 /* [prefs.py] */
 "Preferences" = "Nastavení";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Preferovaný konfigurátor";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
@@ -397,14 +400,11 @@
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Nastavení";
 
-/* Status dialog subtitle. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "Ship" = "Loď";
 
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Konfigurace lodi ve formátu Coriolis";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Konfigurace lodi ve formátu E:D Shipyard";
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Konfigurace lodi";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Lodě";

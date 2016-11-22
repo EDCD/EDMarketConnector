@@ -3,13 +3,16 @@
 # Export ship loadout in Coriolis format
 #
 
+import base64
 from collections import OrderedDict
 import cPickle
 import json
 import os
 from os.path import join
 import re
+import StringIO
 import time
+import gzip
 
 from config import config
 import outfitting
@@ -327,11 +330,12 @@ if __name__ == "__main__":
                     # Test our assumption that mount and guidance don't affect mass
                     assert modules[key]['mass'] == m.get('mass', 0), '%s !=\n%s' % (key, m)
                 elif grp == 'fsd':
-                    modules[key] = { 'mass'      : m['mass'],
-                                     'optmass'   : m['optmass'],
-                                     'maxfuel'   : m['maxfuel'],
-                                     'fuelmul'   : m['fuelmul'],
-                                     'fuelpower' : m['fuelpower'],
+                    modules[key] = {
+                        'mass'      : m['mass'],
+                        'optmass'   : m['optmass'],
+                        'maxfuel'   : m['maxfuel'],
+                        'fuelmul'   : m['fuelmul'],
+                        'fuelpower' : m['fuelpower'],
                     }
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
@@ -341,3 +345,13 @@ if __name__ == "__main__":
 
     cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
 
+
+# Return a URL for the current ship
+def url(data):
+
+    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
+
+    out = StringIO.StringIO()
+    with gzip.GzipFile(fileobj=out, mode='w') as f:
+        f.write(string)
+    return 'https://coriolis.edcd.io/import?data=' + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')

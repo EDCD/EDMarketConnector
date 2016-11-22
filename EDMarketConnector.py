@@ -422,7 +422,6 @@ class AppWindow:
                     # Finally - the data looks sane and we're docked at a station
                     (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
-
                     # No EDDN output?
                     if (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
                         if not self.status['text']:
@@ -681,7 +680,13 @@ class AppWindow:
             self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
-            return edshipyard.url(data)
+            if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
+                return edshipyard.url(data)
+            elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
+                return coriolis.url(data)
+            else:
+                assert False, config.getint('shipyard')
+                return False
 
     def system_url(self, text):
         return text and self.edsm.result['url']

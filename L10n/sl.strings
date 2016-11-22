@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Videz";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Automatically update on docking";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Ravnotežje";
 
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Privzeta";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Delay sending until docked";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D journal file location";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -138,6 +147,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Napaka: Strežnik ni na voljo";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+"Error: Server is lagging" = "Error: Server is lagging";
 
 /* [companion.py] */
 "Error: Verification failed" = "Error: Verification failed";
@@ -316,6 +328,9 @@
 /* [prefs.py] */
 "Preferences" = "Nastavitve";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Preferred Shipyard";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -370,6 +385,9 @@
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
 
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Send system and scan data to the Elite Dangerous Data Network";
+
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Pošiljam podatke na EDDN";
 
@@ -382,14 +400,11 @@
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Nastavitve";
 
-/* Status dialog subtitle. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "Ship" = "Ladja";
 
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Oprema ladje v Coriolis formatu";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Oprema ladje v E:D Shipyard formatu";
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Oprema ladje";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Ladje";

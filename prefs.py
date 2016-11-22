@@ -121,7 +121,7 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP_EDS)	# default settings
+        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP)	# default settings
 
         nb.Label(outframe, text=_('Please choose what data to save')).grid(columnspan=2, padx=PADX, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
@@ -130,10 +130,8 @@ class PreferencesDialog(tk.Toplevel):
         nb.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_ship_eds= tk.IntVar(value = (output & config.OUT_SHIP_EDS) and 1)
-        nb.Checkbutton(outframe, text=_('Ship loadout in E:D Shipyard format file'), variable=self.out_ship_eds, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.out_ship_coriolis= tk.IntVar(value = (output & config.OUT_SHIP_CORIOLIS) and 1)
-        nb.Checkbutton(outframe, text=_('Ship loadout in Coriolis format file'), variable=self.out_ship_coriolis, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.out_ship= tk.IntVar(value = (output & (config.OUT_SHIP|config.OUT_SHIP_EDS|config.OUT_SHIP_CORIOLIS) and 1))
+        nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)	# Output setting
         self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MKT_MANUAL else 1)	# inverted
         self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
@@ -164,7 +162,7 @@ class PreferencesDialog(tk.Toplevel):
         self.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=self.eddn_system, command=self.outvarchanged)	# Output setting new in E:D 2.2
         self.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
-        self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.eddn_delay, command=self.outvarchanged)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
+        self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.eddn_delay)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
         self.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
 
         notebook.add(eddnframe, text='EDDN')		# Not translated
@@ -249,6 +247,13 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_play_btn.grid(columnspan=3, padx=PADX, sticky=tk.W)
 
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+        nb.Label(configframe, text=_('Preferred Shipyard')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.
+        self.shipyard = tk.IntVar(value = config.getint('shipyard'))
+        nb.Radiobutton(configframe, text='E:D Shipyard', variable=self.shipyard, value=config.SHIPYARD_EDSHIPYARD).grid(columnspan=3, padx=BUTTONX, pady=(5,0), sticky=tk.W)
+        nb.Radiobutton(configframe, text='Coriolis',     variable=self.shipyard, value=config.SHIPYARD_CORIOLIS  ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
+        nb.Label(configframe).grid(sticky=tk.W)	# big spacer
+
         notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
 
         self.languages = Translations().available_names()
@@ -316,7 +321,7 @@ class PreferencesDialog(tk.Toplevel):
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
-        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship_eds.get() or self.out_ship_coriolis.get()
+        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship.get()
         self.out_auto_button['state']   = local and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
@@ -471,8 +476,7 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_td.get()            and config.OUT_MKT_TD) +
                    (self.out_csv.get()           and config.OUT_MKT_CSV) +
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
-                   (self.out_ship_eds.get()      and config.OUT_SHIP_EDS) +
-                   (self.out_ship_coriolis.get() and config.OUT_SHIP_CORIOLIS) +
+                   (self.out_ship.get()          and config.OUT_SHIP) +
                    (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
                    (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
                    (self.eddn_delay.get()        and config.OUT_SYS_DELAY) +
@@ -492,6 +496,7 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
+        config.set('shipyard', self.shipyard.get())
 
         lang_codes = { v: k for k, v in self.languages.iteritems() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')

@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Aspetto";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Auto-aggiornamento all'ormeggio";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Saldo";
 
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Predefinito";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "locazione del file E:D journal";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -138,6 +147,9 @@
 
 /* [companion.py] */
 "Error: Server is down" = "Errore: Il Server è offline";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+"Error: Server is lagging" = "Errore: il server sta laggando";
 
 /* [companion.py] */
 "Error: Verification failed" = "Errore: fallita Verifica";
@@ -316,6 +328,9 @@
 /* [prefs.py] */
 "Preferences" = "Preferenze";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Shipyard preferito";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -370,6 +385,9 @@
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
 
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Manda il sistema e i dati scansionati a EDDN";
+
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
 
@@ -382,14 +400,11 @@
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Impostazioni";
 
-/* Status dialog subtitle. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "Ship" = "Nave";
 
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Fit della nave in formato Coriolis";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Fit della nave in formato E:D Shipyard";
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Fit della nave";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Navi";

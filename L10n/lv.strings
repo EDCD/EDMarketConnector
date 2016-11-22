@@ -25,6 +25,9 @@
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Izskats";
 
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Automtiski atjaunoties nosēžoties.";
+
 /* Cmdr stats. [stats.py] */
 "Balance" = "Bilance";
 
@@ -62,7 +65,7 @@
 "Combat" = "Combat";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander vārds";
+"Commander Name" = "Komandiera vārds";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -100,8 +103,14 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Noklusējuma";
 
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D žurnāla faila atrašanās vieta";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
@@ -139,8 +148,11 @@
 /* [companion.py] */
 "Error: Server is down" = "Kļūda: Serveris nav aktīvs";
 
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+"Error: Server is lagging" = "Kļūda: Serveris aizkavējas";
+
 /* [companion.py] */
-"Error: Verification failed" = "Error: Verification failed";
+"Error: Verification failed" = "Kļūda: Apstiprināšana nav izdevusies";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Iziet";
@@ -176,7 +188,7 @@
 "Hero" = "Varonis";
 
 /* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Highlighted text";
+"Highlighted text" = "Izceltais teksts";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Ātrais taustiņš";
@@ -254,7 +266,7 @@
 "None" = "Neviens";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normal text";
+"Normal text" = "Normālais teksts";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
@@ -316,6 +328,9 @@
 /* [prefs.py] */
 "Preferences" = "Iestatījumi";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Preferred Shipyard";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -356,7 +371,7 @@
 "Recruit" = "Recruit";
 
 /* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Glābt Sākotnējos Datus...";
+"Save Raw Data..." = "Saglabāt sākotnējos datus...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";
@@ -370,6 +385,9 @@
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
 
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
+
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sūta datus uz EDDN...";
 
@@ -382,14 +400,11 @@
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Iestatījumi";
 
-/* Status dialog subtitle. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "Ship" = "Kuģis";
 
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Kuģa loadout Coriolis formātā";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Kuģa loadout E:D Shipyard formātā";
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Kuģa loadout";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Kuģi";

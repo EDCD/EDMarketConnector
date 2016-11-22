@@ -148,7 +148,7 @@
 /* [companion.py] */
 "Error: Server is down" = "Erreur : Le serveur est indisponible";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Server is lagging" = "Erreur : Le serveur ne répond pas";
 
 /* [companion.py] */
@@ -328,6 +328,9 @@
 /* [prefs.py] */
 "Preferences" = "Préférences";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Chantier naval préféré";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -397,14 +400,11 @@
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Settings" = "Paramètres";
 
-/* Status dialog subtitle. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "Ship" = "Vaisseau";
 
-/* [prefs.py] */
-"Ship loadout in Coriolis format file" = "Équipements du vaisseau au format Coriolis";
-
-/* [prefs.py] */
-"Ship loadout in E:D Shipyard format file" = "Équipements du vaisseau au format E:D Shipyard";
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Équipements du vaisseau";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Vaisseaux";
