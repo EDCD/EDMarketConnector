@@ -144,7 +144,7 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python “requests” and “watchdog” modules - install these with `easy_install requests watchdog` .
+* Requires the Python “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U requests watchdog py2app` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:

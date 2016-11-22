@@ -26,6 +26,11 @@ if sys.platform=='win32':
     import py2exe
     dist_dir = 'dist.win32'
 elif sys.platform=='darwin':
+    if sys.executable.startswith('/usr'):
+        # SIP doesn't allow symlinks to /usr/bin/...
+        import subprocess
+        subprocess.call(['/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python'] + sys.argv, stdout=sys.stdout, stderr=sys.stderr)
+        sys.exit(0)
     dist_dir = 'dist.macosx'
 else:
     assert False, 'Unsupported platform %s' % sys.platform
