@@ -14,7 +14,7 @@ Usage
 --------
 The user-interface is deliberately minimal - your choice of data is automatically downloaded, transmitted and/or saved when you land at a station, jump to a system or scan a body.
 
-Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) in your web browser.
+Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) or [Coriolis](http://coriolis.io) in your web browser.
 
 Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web browser.
 
