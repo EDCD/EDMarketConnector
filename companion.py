@@ -370,7 +370,6 @@ def ship(data):
             ('free',),
             ('fuel', 'main', 'capacity'),
             ('fuel', 'reserve', 'capacity'),
-            ('fuel', 'superchargedFSD'),
             ('id',),
             ('name',),
             ('value', 'hull'),

@@ -378,7 +378,7 @@ class AppWindow:
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CredentialsError()			# Companion API credentials don't match Journal
-            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.shiptype and data['ship']['name'].lower() != monitor.shiptype):
+            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.shipid and data['ship']['id'] != monitor.shipid) or (monitor.shiptype and data['ship']['name'].lower() != monitor.shiptype):
                 raise companion.ServerLagging()
 
             else:
@@ -465,12 +465,25 @@ class AppWindow:
                             if data['commander'].get('credits') is not None:
                                 monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
                                 self.edsm.setcredits(monitor.credits)
-                            if monitor.shippaint is None:	# paintjob only reported in Journal on change
+                            ship = companion.ship(data)
+                            if ship == self.edsm.lastship:
+                                props = []
+                            else:
+                                props = [
+                                    ('cargoCapacity',    ship['cargo']['capacity']),
+                                    ('fuelMainCapacity', ship['fuel']['main']['capacity']),
+                                    ('linkToCoriolis',   coriolis.url(data)),
+                                    ('linkToEDShipyard', edshipyard.url(data)),
+                                ]
+                            if monitor.shippaint is None:
+                                # Companion API server can lag, so prefer Journal. But paintjob only reported in Journal on change.
                                 monitor.shipid = data['ship']['id']
                                 monitor.shiptype = data['ship']['name'].lower()
                                 monitor.shippaint = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
-                                self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
-
+                                props.append(('paintJob', monitor.shippaint))
+                            if props:
+                                self.edsm.updateship(monitor.shipid, monitor.shiptype, props)
+                                self.edsm.lastship = ship
                         except Exception as e:
                             # Not particularly important so silent on failure
                             if __debug__: print_exc()
@@ -557,13 +570,13 @@ class AppWindow:
                     # Send ship info to EDSM on startup or change
                     if entry['event'] in [None, 'LoadGame', 'ShipyardNew', 'ShipyardSwap']:
                         self.edsm.setshipid(monitor.shipid)
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
+                        self.edsm.updateship(monitor.shipid, monitor.shiptype, monitor.shippaint and [('paintJob', monitor.shippaint)] or [])
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                         self.edsm.sellship(entry.get('SellShipID'))
 
                     # Send paintjob info to EDSM on change
                     if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype, 'paintJob', monitor.shippaint)
+                        self.edsm.updateship(monitor.shipid, monitor.shiptype, [('paintJob', monitor.shippaint)])
 
                     # Write EDSM log on change
                     if monitor.mode and entry['event'] in ['Location', 'FSDJump']:

@@ -68,6 +68,7 @@ class EDSM:
         self.result = { 'img': None, 'url': None, 'done': True }
         self.syscache = set()	# Cache URLs of systems with known coordinates
         self.session = Session()
+        self.lastship = None	# Description of last ship that we sent to EDSM
 
         # Can't be in class definition since can only call PhotoImage after window is created
         EDSM._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7rMpvNV4q932VSuRiPjQQAOw==')	# green circle
@@ -211,11 +212,11 @@ class EDSM:
         if shipid is not None:
             self.call('api-commander-v1/set-ship-id', '&shipId=%d' % shipid)
 
-    def updateship(self, shipid, shiptype, slot = None, thing = None):
+    def updateship(self, shipid, shiptype, props=[]):
         if shipid is not None and shiptype:
             args = '&shipId=%d&type=%s' % (shipid, shiptype)
-            if slot and thing is not None:
-                args += '&%s=%s' % (slot, thing)
+            for (slot, thing) in props:
+                args += '&%s=%s' % (slot, urllib2.quote(unicode(thing)))
             self.call('api-commander-v1/update-ship', args)
 
     def sellship(self, shipid):
