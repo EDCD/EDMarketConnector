@@ -1,3 +1,5 @@
+[![Chat to us on Discord](https://img.shields.io/badge/Discord-EDCD%20%23edmc-blue.svg?style=social)](https://discord.gg/usQ5e6n)
+
 Elite: Dangerous Market Connector (EDMC)
 ========
 
