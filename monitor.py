@@ -234,8 +234,8 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
-                self.shipid = entry.get('ShipID')	# None in CQC
-                self.shiptype = 'Ship' in entry and entry['Ship'].lower() or None	# None in CQC
+                self.shiptype = 'Ship' in entry and entry['Ship'] not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] and entry['Ship'].lower() or None	# None in CQC. TestBuggy or *_Fighter if game starts in SRV/fighter.
+                self.shipid = self.shiptype and entry.get('ShipID') or None	# None in CQC
                 self.shippaint = None
                 self.body = None
                 self.system = None

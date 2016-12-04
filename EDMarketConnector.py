@@ -390,6 +390,9 @@ class AppWindow:
 
                 self.cmdr['text'] = data['commander']['name']
                 self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                if not monitor.shiptype:	# Started game in SRV or fighter
+                    monitor.shipid =   data['ship']['id']
+                    monitor.shiptype = data['ship']['name'].lower()
                 if not monitor.system:
                     self.system['text'] = data['lastSystem']['name']
                     self.system['image'] = ''
