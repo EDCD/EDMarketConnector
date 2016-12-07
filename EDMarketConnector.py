@@ -388,7 +388,6 @@ class AppWindow:
                     with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
-                self.cmdr['text'] = data['commander']['name']
                 self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                 if not monitor.shiptype:	# Started game in SRV or fighter
                     monitor.shipid =   data['ship']['id']
@@ -542,7 +541,7 @@ class AppWindow:
             station_changed = monitor.station and self.station['text'] != monitor.station
 
             # Update main window
-            self.cmdr['text'] = monitor.cmdr or ''
+            self.cmdr['text'] = monitor.cmdr and monitor.group and ' / '.join([monitor.cmdr, monitor.group]) or monitor.cmdr or ''
             self.ship['text'] = monitor.shiptype and companion.ship_map.get(monitor.shiptype, monitor.shiptype) or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
@@ -742,7 +741,6 @@ class AppWindow:
 
         try:
             data = self.session.query()
-            self.cmdr['text'] = data.get('commander') and data.get('commander').get('name') or ''
             self.status['text'] = ''
             f = tkFileDialog.asksaveasfilename(parent = self.w,
                                                defaultextension = platform=='darwin' and '.json' or '',

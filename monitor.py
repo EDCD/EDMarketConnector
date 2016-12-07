@@ -76,6 +76,7 @@ class EDLogs(FileSystemEventHandler):
         self.version = None
         self.is_beta = False
         self.mode = None
+        self.group = None
         self.cmdr = None
         self.shipid = None
         self.shiptype = None
@@ -139,7 +140,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring'
         self.currentdir = None
-        self.version = self.mode = self.cmdr = self.body = self.system = self.station = self.coordinates = None
+        self.version = self.mode = self.group = self.cmdr = self.body = self.system = self.station = self.coordinates = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -234,6 +235,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
+                self.group = entry.get('Group')
                 self.shiptype = 'Ship' in entry and entry['Ship'] not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] and entry['Ship'].lower() or None	# None in CQC. TestBuggy or *_Fighter if game starts in SRV/fighter.
                 self.shipid = self.shiptype and entry.get('ShipID') or None	# None in CQC
                 self.shippaint = None
@@ -245,6 +247,7 @@ class EDLogs(FileSystemEventHandler):
                 self.credits = ( entry['Credits'], entry['Loan'] )
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
+                self.group = None
             elif entry['event'] == 'ShipyardNew':
                 self.shipid = entry['NewShipID']
                 self.shiptype = entry['ShipType'].lower()
