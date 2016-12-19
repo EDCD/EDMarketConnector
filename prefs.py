@@ -126,8 +126,6 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(outframe, text=_('Please choose what data to save')).grid(columnspan=2, padx=PADX, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_bpc = tk.IntVar(value = (output & config.OUT_MKT_BPC ) and 1)
-        nb.Checkbutton(outframe, text=_("Market data in Slopey's BPC format file"), variable=self.out_bpc, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
         nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_ship= tk.IntVar(value = (output & (config.OUT_SHIP|config.OUT_SHIP_EDS|config.OUT_SHIP_CORIOLIS) and 1))
@@ -321,7 +319,7 @@ class PreferencesDialog(tk.Toplevel):
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
-        local = self.out_bpc.get() or self.out_td.get() or self.out_csv.get() or self.out_ship.get()
+        local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
         self.out_auto_button['state']   = local and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
@@ -472,7 +470,6 @@ class PreferencesDialog(tk.Toplevel):
         config.set('password', self.password.get().strip())
 
         config.set('output',
-                   (self.out_bpc.get()           and config.OUT_MKT_BPC) +
                    (self.out_td.get()            and config.OUT_MKT_TD) +
                    (self.out_csv.get()           and config.OUT_MKT_CSV) +
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +

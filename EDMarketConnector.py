@@ -37,7 +37,7 @@ Translations().install(config.get('language') or None)
 
 import companion
 import commodity
-from commodity import COMMODITY_BPC, COMMODITY_CSV
+from commodity import COMMODITY_CSV
 import td
 from eddn import eddn
 import edsm
@@ -401,12 +401,10 @@ class AppWindow:
 
                 # stuff we can do when not docked
                 plug.notify_newdata(data)
-                if config.getint('output') & config.OUT_SHIP_EDS:
+                if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
-                if config.getint('output') & config.OUT_SHIP_CORIOLIS:
-                    coriolis.export(data)
 
-                if not (config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC|config.OUT_MKT_EDDN)):
+                if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
                     # no station data requested - we're done
                     pass
 
@@ -435,7 +433,7 @@ class AppWindow:
                             self.status['text'] = _("Station doesn't have a market!")
 
                     else:
-                        if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD|config.OUT_MKT_BPC):
+                        if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD):
                             # Fixup anomalies in the commodity data
                             fixed = companion.fixup(data)
 
@@ -443,8 +441,6 @@ class AppWindow:
                                 commodity.export(fixed, COMMODITY_CSV)
                             if config.getint('output') & config.OUT_MKT_TD:
                                 td.export(fixed)
-                            if config.getint('output') & config.OUT_MKT_BPC:
-                                commodity.export(fixed, COMMODITY_BPC)
 
                         if config.getint('output') & config.OUT_MKT_EDDN:
                             old_status = self.status['text']

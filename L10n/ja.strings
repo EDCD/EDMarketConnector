@@ -233,9 +233,6 @@
 "Market data in CSV format file" = "市場データをCSV形式で記録する";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "市場データをSlopey's BPC形式で記録する";
-
-/* [prefs.py] */
 "Market data in Trade Dangerous format file" = "市場データをTrade Dangerous形式で記録する";
 
 /* Empire rank. [stats.py] */

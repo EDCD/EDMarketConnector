@@ -30,7 +30,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
         rowheader = sep.join([data['lastSystem']['name'], data['lastStarport']['name']])
     elif kind == COMMODITY_BPC:
         sep = ';'
-        header = sep.join(['userID', 'System','Station','Commodity','Sell','Buy','Demand','','Supply','','Average','Date\n'])
+        header = sep.join(['userID', 'System','Station','Commodity','Sell','Buy','Demand','','Supply','','Date\n'])
         cmdr = data['commander']['name'].strip()
         rowheader = sep.join([(config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest()) or (sep in cmdr and '"%s"' % cmdr) or cmdr, data['lastSystem']['name'], data['lastStarport']['name']])
     else:

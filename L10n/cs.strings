@@ -233,9 +233,6 @@
 "Market data in CSV format file" = "Obchodní data ve formátu CSV";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Obchodní data ve formátu Slopey's BPC";
-
-/* [prefs.py] */
 "Market data in Trade Dangerous format file" = "Obchodní data ve formátu Trade Dangerous";
 
 /* Empire rank. [stats.py] */

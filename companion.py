@@ -367,7 +367,6 @@ def ship(data):
     # subset of "ship" that's not noisy
     description = {}
     for props in [
-            ('alive',),
             ('cargo', 'capacity'),
             ('free',),
             ('fuel', 'main', 'capacity'),

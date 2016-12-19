@@ -233,9 +233,6 @@
 "Market data in CSV format file" = "Торговые данные в формате CSV";
 
 /* [prefs.py] */
-"Market data in Slopey's BPC format file" = "Торговые данные в формате Slopey's BPC";
-
-/* [prefs.py] */
 "Market data in Trade Dangerous format file" = "Торговые данные в формате Trade Dangerous";
 
 /* Empire rank. [stats.py] */
