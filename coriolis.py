@@ -36,6 +36,7 @@ slot_map = {
     'powerdistributor' : 'standard',
     'radar'            : 'standard',
     'fueltank'         : 'standard',
+    'military'         : 'internal',
     'slot'             : 'internal',
 }
 

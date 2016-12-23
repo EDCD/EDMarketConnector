@@ -80,6 +80,7 @@ ship_map = {
     'belugaliner'                 : 'Beluga Liner',
     'cobramkiii'                  : 'Cobra MkIII',
     'cobramkiv'                   : 'Cobra MkIV',
+    'clipper'                     : 'Panther Clipper',
     'cutter'                      : 'Imperial Cutter',
     'diamondback'                 : 'Diamondback Scout',
     'diamondbackxl'               : 'Diamondback Explorer',

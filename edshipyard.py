@@ -37,6 +37,7 @@ slot_map = {
     'powerdistributor' : 'PC',
     'radar'            : 'SS',
     'fueltank'         : 'FS',
+    'military'         : 'MC',
 }
 
 
@@ -102,7 +103,7 @@ def export(data, filename=None):
 
     # Construct description
     string = '[%s]\n' % ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-    for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
+    for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
         elif slot in loadout:

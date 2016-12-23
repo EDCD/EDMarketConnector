@@ -235,6 +235,7 @@ internal_map = {
     'fuelscoop'         : 'Fuel Scoop',
     'fueltransfer'      : 'Fuel Transfer Limpet Controller',
     'hullreinforcement' : 'Hull Reinforcement Package',
+    'modulereinforcement' : 'Module Reinforcement Package',
     'passengercabin'    : 'Passenger Cabin',
     'prospector'        : 'Prospector Limpet Controller',
     'refinery'          : 'Refinery',
