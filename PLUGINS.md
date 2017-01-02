@@ -33,25 +33,23 @@ If you want your plugin to be configurable via the GUI you can define a frame (p
 You can use `set()`, `get()` and `getint()` from EDMC's config object to retrieve your plugin's settings in a platform-independent way.
 
 ```
+import Tkinter as tk
 import myNotebook as nb
 from config import config
+
+this = sys.modules[__name__]	# For holding module globals
 
 def plugin_prefs(parent):
    """
    Return a TK Frame for adding to the EDMC settings dialog.
    """
+   this.mysetting = tk.IntVar(value=config.get("MyPluginSetting"))	# Retrieve saved value from config
    frame = nb.Frame(parent)
    nb.Label(frame, text="Hello").grid()
    nb.Label(frame, text="Commander").grid()
-   
-   return frame
-```
+   nb.Checkbutton(frame, text="My Setting", variable=this.mysetting).grid()
 
-def notify_prefs_changed():
-   """
-   Save settings.
-   """
-   config.setint('MyPluginSetting', 1)
+   return frame
 ```
 
 ## Display
@@ -64,16 +62,16 @@ def plugin_app(parent):
    Create a TK widget for the EDMC main window
    """
    label = tk.Label(parent, text="Status:")
-   plugin_app.status = tk.Label(parent, anchor=tk.W, text="")
+   this.status = tk.Label(parent, anchor=tk.W, text="")
    return (label, plugin_app.status)
    
-# later on your event functions can directly update plugin_app.status["text"]
-plugin_app.status['text'] = "Happy!"
+# later on your event functions can directly update this.status["text"]
+this.status["text"] = "Happy!"
 ```
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there are two other functions you can define to be notified by EDMC when something happens: `system_changed()` and `cmdr_data()`.
+Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `cmdr_data()` and `prefs_changed()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
@@ -104,6 +102,18 @@ def cmdr_data(data):
 ```
 
 The data is a dictionary and full of lots of wonderful stuff!
+
+### Configuration
+
+This gets called when the user dismisses the settings dialog.
+
+```
+def prefs_changed():
+   """
+   Save settings.
+   """
+   config.setint('MyPluginSetting', this.mysetting.get())	# Store new value in config
+```
 
 # Distributing a Plugin
 
