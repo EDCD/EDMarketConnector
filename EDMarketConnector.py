@@ -349,7 +349,7 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
         if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
-            return	# In CQC - do nothing
+            return	# In CQC or Beta - do nothing
 
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
@@ -667,6 +667,10 @@ class AppWindow:
             self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
 
     def shipyard_url(self, shipname=None):
+
+        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+            return False	# In CQC or Beta - do nothing
+
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
         try:
