@@ -221,6 +221,7 @@ standard_map = {
     # 'planetapproachsuite' : handled separately
     'powerdistributor' : 'Power Distributor',
     'powerplant'       : 'Power Plant',
+    ('powerplant', 'highheatweight') : 'Enhanced Power Plant',	# Not seen
     'sensors'          : 'Sensors',
 }
 
@@ -349,6 +350,8 @@ def lookup(module, ship_map, entitled=False):
     else:
         if name[1] == 'dronecontrol':	# e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
+        elif name[-1] == 'free':	# Starter Sidewinder or Freagle modules - just treat them like vanilla modules
+            name.pop()
 
         if name[1] in standard_map:	# e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
             new['category'] = 'standard'
