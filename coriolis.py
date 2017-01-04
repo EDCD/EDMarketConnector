@@ -129,9 +129,12 @@ def export(data, filename=None):
                     category = slot_map[s]
                     break
             else:
-                # Uninteresting slot - e.g. DecalX or PaintJob
-                if __debug__ and not slot.lower().startswith('bobble') and not slot.lower().startswith('decal') and not slot.lower().startswith('paintjob') and not slot.lower().startswith('planetaryapproachsuite'):
-                    print 'Coriolis: Unknown slot %s' % slot
+                if __debug__:
+                    for skip in ['bobble', 'decal', 'paintjob', 'planetaryapproachsuite', 'enginecolour', 'shipkit', 'weaponcolour']:
+                        if slot.lower().startswith(skip):
+                            break
+                    else:
+                        print 'Coriolis: Unknown slot %s' % slot
                 continue
 
             if not v:

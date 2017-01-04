@@ -255,7 +255,7 @@ moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 # English langauge game. For fitted modules, dict also includes { enabled, priority }.
 # ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
 #
-# Returns None if the module is user-specific (i.e. decal, paintjob) or PP-specific in station outfitting.
+# Returns None if the module is user-specific (i.e. decal, paintjob, kit) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
 def lookup(module, ship_map, entitled=False):
 
@@ -275,7 +275,7 @@ def lookup(module, ship_map, entitled=False):
         new['rating'] = 'I'
 
     # Skip uninteresting stuff
-    elif name[0] in ['bobble', 'decal', 'paintjob']:
+    elif name[0] in ['bobble', 'decal', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
         return None
 
     # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
