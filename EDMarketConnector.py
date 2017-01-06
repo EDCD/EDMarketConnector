@@ -6,8 +6,8 @@ from sys import platform
 from collections import OrderedDict
 from functools import partial
 import json
-from os import mkdir
-from os.path import expanduser, isdir, join
+from os import chdir, mkdir
+from os.path import dirname, expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime, strptime
@@ -28,6 +28,7 @@ if __debug__:
 
 from config import appname, applongname, config
 if platform == 'win32' and getattr(sys, 'frozen', False):
+    chdir(dirname(sys.path[0]))
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
     import tempfile
     sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
