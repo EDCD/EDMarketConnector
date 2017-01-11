@@ -148,13 +148,13 @@ def ships(data):
 
         if not data['commander'].get('docked'):
             # Set current system, not last docked
-            return [ [ship_map.get(ships[0]['name'].lower(), ships[0]['name']), data['lastSystem']['name'], ''] ] + [ [ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name']] for ship in ships[1:] if ship]
+            return [ (ship_map.get(ships[0]['name'].lower(), ships[0]['name']), data['lastSystem']['name'], '') ] + [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship]
 
-    return [ [ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name']] for ship in ships if ship]
+    return [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
 
 def export_ships(data, filename):
     h = open(filename, 'wt')
-    h.write('Ship,System,Station\n')
+    h.write('Ship,System,Station,Value\n')
     for thing in ships(data):
         h.write(','.join(thing) + '\n')
     h.close()
@@ -234,12 +234,15 @@ class StatsResults(tk.Toplevel):
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Status'))		# Status dialog title
 
-        page = self.addpage(notebook, [_('Ship'),	# Status dialog subtitle
-                                       _('System'),	# Status dialog subtitle
-                                       _('Station')], align=tk.W)	# Status dialog subtitle
+        page = self.addpage(notebook, [
+            _('Ship'),		# Status dialog subtitle
+            _('System'),	# Status dialog subtitle
+            _('Station'),	# Status dialog subtitle
+            _('Value'),		# Status dialog subtitle - CR value of ship
+        ])
         shiplist = ships(data)
         for thing in shiplist:
-            self.addpagerow(page, thing, align=tk.W)
+            self.addpagerow(page, thing)
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 
@@ -254,30 +257,28 @@ class StatsResults(tk.Toplevel):
         self.wait_visibility()
         self.grab_set()
 
-    def addpage(self, parent, content=[], align=tk.E):
+    def addpage(self, parent, header=[], align=None):
         page = nb.Frame(parent)
         page.grid(pady=10, sticky=tk.NSEW)
         page.columnconfigure(0, weight=1)
-        if content:
-            self.addpageheader(page, content, align=align)
+        if header:
+            self.addpageheader(page, header, align=align)
         return page
 
-    def addpageheader(self, parent, content, align=tk.E):
-        #if parent.grid_size()[1]:	# frame not empty - add spacer
-        #    self.addpagerow(parent, [''])
-        self.addpagerow(parent, content, align=align)
-        ttk.Separator(parent, orient=tk.HORIZONTAL).grid(columnspan=3, padx=10, pady=2, sticky=tk.EW)
+    def addpageheader(self, parent, header, align=None):
+        self.addpagerow(parent, header, align=align)
+        ttk.Separator(parent, orient=tk.HORIZONTAL).grid(columnspan=len(header), padx=10, pady=2, sticky=tk.EW)
 
     def addpagespacer(self, parent):
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent, content, align=tk.E):
+    def addpagerow(self, parent, content, align=None):
         for i in range(len(content)):
             label = nb.Label(parent, text=content[i])
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)
                 row = parent.grid_size()[1]-1
-            elif i == 2:
-                label.grid(row=row, column=i, padx=10, sticky=align)
+            elif align is None and i == len(content) - 1:	# Assumes last column right justified if unspecified
+                label.grid(row=row, column=i, padx=10, sticky=tk.E)
             else:
-                label.grid(row=row, column=i, padx=10, sticky=align, columnspan=4-len(content))
+                label.grid(row=row, column=i, padx=10, sticky=align or tk.W)

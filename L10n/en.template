@@ -445,6 +445,9 @@
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Username (Email)";
 
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Value";
+
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice Admiral";
 
