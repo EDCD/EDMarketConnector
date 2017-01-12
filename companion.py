@@ -153,6 +153,12 @@ class CredentialsError(Exception):
     def __str__(self):
         return unicode(self).encode('utf-8')
 
+class CmdrError(Exception):
+    def __unicode__(self):
+        return _('Error: Wrong Cmdr')	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
 class VerificationRequired(Exception):
     def __unicode__(self):
         return _('Error: Verification failed')

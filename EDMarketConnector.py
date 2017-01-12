@@ -397,7 +397,7 @@ class AppWindow:
             elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
-                raise companion.CredentialsError()			# Companion API credentials don't match Journal
+                raise companion.CmdrError()				# Companion API return doesn't match Journal
             elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.shipid and data['ship']['id'] != monitor.shipid) or (monitor.shiptype and data['ship']['name'].lower() != monitor.shiptype):
                 raise companion.ServerLagging()
 

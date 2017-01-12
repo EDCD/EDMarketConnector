@@ -132,6 +132,18 @@ This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConne
 ### Doesn't auto-update or track Systems visited
 This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
+### Error: Wrong Cmdr
+The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. Either:
+
+1. You have multiple accounts and the username/password setting is not for the account that you're currently playing; or
+2. You have reset your Cmdr but Frontier's server is still supplying data for the old Cmdr.
+
+If 1 check your username/password settings.
+
+If 2 this problem may or may not resolve itself in time.
+
+This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
+
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
 

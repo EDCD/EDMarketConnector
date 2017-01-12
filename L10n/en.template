@@ -157,6 +157,9 @@
 /* [companion.py] */
 "Error: Verification failed" = "Error: Verification failed";
 
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Error: Wrong Cmdr";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Exit";
 
