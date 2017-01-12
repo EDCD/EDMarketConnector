@@ -12,6 +12,7 @@ import re
 import requests
 from time import time, localtime, strftime, strptime
 from calendar import timegm
+import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -163,6 +164,10 @@ class AppWindow:
             self.menubar.add_cascade(menu=self.view_menu)
             window_menu = tk.Menu(self.menubar, name='window')
             self.menubar.add_cascade(menu=window_menu)
+            self.help_menu = tk.Menu(self.menubar, name='help')
+            self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
+            self.help_menu.add_command(command=self.help_releases)
+            self.menubar.add_cascade(menu=self.help_menu)
             self.w['menu'] = self.menubar
             # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
             self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
@@ -175,7 +180,6 @@ class AppWindow:
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.file_menu.add_command(command=lambda:stats.StatsDialog(self))
             self.file_menu.add_command(command=self.save_raw)
-            self.file_menu.add_command(command=lambda:self.updater.checkForUpdates())
             self.file_menu.add_command(command=lambda:prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
@@ -183,6 +187,11 @@ class AppWindow:
             self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
+            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.help_menu.add_command(command=self.help_general)
+            self.help_menu.add_command(command=self.help_releases)
+            self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
@@ -195,6 +204,7 @@ class AppWindow:
             theme.register(self.menubar)	# menus and children aren't automatically registered
             theme.register(self.file_menu)
             theme.register(self.edit_menu)
+            theme.register(self.help_menu)
 
             # Alternate title bar and menu for dark theme
             self.theme_menubar = tk.Frame(frame)
@@ -218,6 +228,9 @@ class AppWindow:
             self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
             self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
             theme.button_bind(self.theme_edit_menu, lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+            self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
+            theme.button_bind(self.theme_help_menu, lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
             theme.register_highlight(theme_titlebar)
             theme.register(self.theme_minimize)	# images aren't automatically registered
             theme.register(self.theme_close)
@@ -285,20 +298,26 @@ class AppWindow:
             self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
             self.menubar.entryconfigure(3, label=_('View'))	# Menu title on OSX
             self.menubar.entryconfigure(4, label=_('Window'))	# Menu title on OSX
+            self.menubar.entryconfigure(5, label=_('Help'))	# Menu title
             self.system_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))	# App menu entry on OSX
             self.system_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))	# Menu item
             self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
+            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
         else:
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
             self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
+            self.menubar.entryconfigure(3, label=_('Help'))	# Menu title
             self.theme_file_menu['text'] = _('File')	# Menu title
             self.theme_edit_menu['text'] = _('Edit')	# Menu title
+            self.theme_help_menu['text'] = _('Help')	# Menu title
             self.file_menu.entryconfigure(0, label=_('Status'))	# Menu item
             self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))	# Menu item
-            self.file_menu.entryconfigure(2, label=_("Check for Updates..."))	# Menu item
-            self.file_menu.entryconfigure(3, label=_("Settings"))	# Item in the File menu on Windows
-            self.file_menu.entryconfigure(5, label=_("Exit"))	# Item in the File menu on Windows
+            self.file_menu.entryconfigure(2, label=_('Settings'))	# Item in the File menu on Windows
+            self.file_menu.entryconfigure(4, label=_('Exit'))	# Item in the File menu on Windows
+            self.help_menu.entryconfigure(0, label=_('Documentation'))	# Help menu item
+            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
+            self.help_menu.entryconfigure(2, label=_("Check for Updates..."))	# Menu item
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
@@ -735,6 +754,12 @@ class AppWindow:
         if self.system['text']:
             self.w.clipboard_clear()
             self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
+
+    def help_general(self, event=None):
+        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')
+
+    def help_releases(self, event=None):
+        webbrowser.open('https://github.com/Marginal/EDMarketConnector/releases')
 
     def save_raw(self):
         self.status['text'] = _('Fetching data...')
