@@ -252,7 +252,7 @@ if __name__ == "__main__":
         'Viper Mk IV'  : 'Viper MkIV',
     }
 
-    # From https://github.com/cmmcleod/coriolis/blob/master/src/app/shipyard/Constants.js
+    # From https://github.com/EDCD/coriolis/blob/master/src/app/shipyard/Constants.js
     ModuleGroupToName = {
         # Standard
         'pp'  : 'Power Plant',
@@ -281,6 +281,7 @@ if __name__ == "__main__":
         'psg' : 'Prismatic Shield Generator',
         'dc'  : 'Docking Computer',
         'fx'  : 'Fuel Transfer Limpet Controller',
+        'mrp' : 'Module Reinforcement Package',
         'pc'  : 'Prospector Limpet Controller',
         'pce' : 'Economy Class Passenger Cabin',
         'pci' : 'Business Class Passenger Cabin',
@@ -292,15 +293,19 @@ if __name__ == "__main__":
         'bl'  : 'Beam Laser',
         'ul'  : 'Burst Laser',
         'c'   : 'Cannon',
+        'ch'  : 'Chaff Launcher',
         'cs'  : 'Cargo Scanner',
         'cm'  : 'Countermeasure',
+        'ec'  : 'Electronic Countermeasure',
         'fc'  : 'Fragment Cannon',
+        'hs'  : 'Heat Sink Launcher',
         'ws'  : 'Frame Shift Wake Scanner',
         'kw'  : 'Kill Warrant Scanner',
         'nl'  : 'Mine Launcher',
         'ml'  : 'Mining Laser',
         'mr'  : 'Missile Rack',
         'pa'  : 'Plasma Accelerator',
+        'po'  : 'Point Defence',
         'mc'  : 'Multi-cannon',
         'pl'  : 'Pulse Laser',
         'rg'  : 'Rail Gun',
@@ -325,7 +330,7 @@ if __name__ == "__main__":
     for cat in data['Modules'].values():
         for grp, mlist in cat.iteritems():
             for m in mlist:
-                key = ('name' in m and specials[(ModuleGroupToName[grp], m['name'])] or specials.get((ModuleGroupToName[grp], None), ModuleGroupToName[grp]),
+                key = (specials.get((ModuleGroupToName[grp], m.get('name'))) or ModuleGroupToName[grp],
                        None,
                        str(m['class']),
                        str(m['rating']))
