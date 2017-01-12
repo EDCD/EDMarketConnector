@@ -122,9 +122,11 @@ if __name__ == "__main__":
         print '%-22s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
+    system_ids['Aarti'] = 3616854	# bogus data from EDSM
     system_ids['Almar'] = 750
     system_ids['Arti'] = 60342
     system_ids['Futhark'] = 4901	# bogus data from ED-IBE
+    system_ids['K Carinae'] = 375886	# both unpopulated
     system_ids['Kamba'] = 10358
 
     with open('systems.p',  'wb') as h:
@@ -139,7 +141,13 @@ if __name__ == "__main__":
          (EDDB.HAS_MARKET     if x['has_market']     else 0) |
          (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
          (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0))
-        for x in stations }
+        for x in stations if x['max_landing_pad_size'] and all(ord(c) < 128 for c in x['name']) }
+
+    cut = [ x for x in stations if any(ord(c) >= 128 for c in x['name']) ]
+    print '\n%d dropped stations:' % len(cut)
+    for s in cut:
+        print '%-30s%7d %s' % (s['name'], s['id'], systems[s['system_id']]['name'])
+
     with open('stations.p', 'wb') as h:
         cPickle.dump(station_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
-    print '%d saved stations' % len(station_ids)
+    print '\n%d saved stations' % len(station_ids)
