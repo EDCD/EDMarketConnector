@@ -65,7 +65,7 @@
 "Combat" = "Gevechts rang";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
+"Commander Name" = "Commander naam";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -105,6 +105,9 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Stel verzending uit tot na het docken";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Documentatie";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
@@ -154,6 +157,9 @@
 /* [companion.py] */
 "Error: Verification failed" = "Fout: Verificatie mislukt";
 
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Fout: Verkeerde CMDR";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Afsluiten";
 
@@ -180,6 +186,9 @@
 
 /* Combat rank. [stats.py] */
 "Harmless" = "Harmless";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Help";
 
 /* CQC rank. [stats.py] */
 "Helpless" = "Helpless";
@@ -367,8 +376,11 @@
 /* Federation rank. [stats.py] */
 "Recruit" = "Recruit";
 
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Release opmerkingen";
+
 /* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Sla Raw-gegevens Op...";
+"Save Raw Data..." = "Sla onbewerkte gegevens op...";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Scout";
@@ -444,6 +456,9 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Gebruikersnaam (e-mail)";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Waarde";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice Admiral";

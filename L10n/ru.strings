@@ -106,6 +106,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Отложить отправку до завершения стыковки";
 
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Документация";
+
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
 
@@ -154,6 +157,9 @@
 /* [companion.py] */
 "Error: Verification failed" = "Ошибка: Проверка не пройдена";
 
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Error: Wrong Cmdr";
+
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Выход";
 
@@ -180,6 +186,9 @@
 
 /* Combat rank. [stats.py] */
 "Harmless" = "Безвредный";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Справка";
 
 /* CQC rank. [stats.py] */
 "Helpless" = "Беспомощный";
@@ -367,6 +376,9 @@
 /* Federation rank. [stats.py] */
 "Recruit" = "Новобранец";
 
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Заметки о выпуске";
+
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "Сохранять Сырые Данные...";
 
@@ -444,6 +456,9 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Имя пользователя (адрес эл. почты)";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Цена";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Вице-адмирал";
