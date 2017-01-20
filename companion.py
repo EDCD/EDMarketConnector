@@ -39,6 +39,7 @@ commodity_map= {
     'Basic Narcotics'                    : 'Narcotics',
     'Bio Reducing Lichen'                : 'Bioreducing Lichen',
     'C M M Composite'                    : 'CMM Composite',
+    'Cooling Hoses'                      : 'Micro-Weave Cooling Hoses',
     'Comercial Samples'                  : 'Commercial Samples',
     'Diagnostic Sensor'                  : 'Hardware Diagnostic Sensor',
     'Drones'                             : 'Limpet',
