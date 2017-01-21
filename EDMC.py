@@ -82,7 +82,10 @@ try:
         config.set('querytime', getmtime(args.j))
     else:
         session = companion.Session()
-        session.login(config.get('username'), config.get('password'))
+        if config.get('cmdrs'):
+            session.login(config.get('fdev_usernames')[0], config.get('fdev_passwords')[0])
+        else:	# <= 2.25 not yet migrated
+            session.login(config.get('username'), config.get('password'))
         querytime = int(time())
         data = session.query()
         config.set('querytime', querytime)

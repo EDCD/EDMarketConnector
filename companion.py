@@ -1,9 +1,10 @@
 import requests
 from collections import defaultdict
 from cookielib import LWPCookieJar
+import hashlib
 import numbers
 import os
-from os.path import dirname, join
+from os.path import dirname, isfile, join
 import sys
 from sys import platform
 import time
@@ -178,6 +179,7 @@ class Session:
     def __init__(self):
         self.state = Session.STATE_INIT
         self.credentials = None
+        self.session = None
 
         # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
         try:
@@ -188,14 +190,6 @@ class Session:
 
         if platform=='win32' and getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
-
-        self.session = requests.Session()
-        self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257'
-        self.session.cookies = LWPCookieJar(join(config.app_dir, 'cookies.txt'))
-        try:
-            self.session.cookies.load()
-        except IOError:
-            pass
 
     def login(self, username=None, password=None):
         if (not username or not password):
@@ -208,8 +202,20 @@ class Session:
 
         if self.credentials == credentials and self.state == Session.STATE_OK:
             return	# already logged in
-        if self.credentials and self.credentials['email'] != credentials['email']:	# changed account
-            self.session.cookies.clear()
+
+        if not self.credentials or self.credentials['email'] != credentials['email']:	# changed account
+            self.close()
+            self.session = requests.Session()
+            self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257'
+            cookiefile = join(config.app_dir, 'cookies-%s.txt' % hashlib.md5(credentials['email']).hexdigest())
+            if not isfile(cookiefile) and isfile(join(config.app_dir, 'cookies.txt')):
+                os.rename(join(config.app_dir, 'cookies.txt'), cookiefile)	# migration from <= 2.25
+            self.session.cookies = LWPCookieJar(cookiefile)
+            try:
+                self.session.cookies.load()
+            except IOError:
+                pass
+
         self.credentials = credentials
         self.state = Session.STATE_INIT
         try:
@@ -237,7 +243,7 @@ class Session:
         r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
         if r.status_code != requests.codes.ok or r.url == URL_CONFIRM:	# would have redirected away if success
             raise VerificationRequired()
-        self.save()	# Save cookies now for use by command-line app
+        self.session.cookies.save()	# Save cookies now for use by command-line app
         self.login()
 
     def query(self):
@@ -270,16 +276,14 @@ class Session:
 
         return data
 
-    def save(self):
-        self.session.cookies.save()
-
     def close(self):
         self.state = Session.STATE_NONE
-        try:
-            self.session.cookies.save()
-            self.session.close()
-        except:
-            pass
+        if self.session:
+            try:
+                self.session.cookies.save()
+                self.session.close()
+            except:
+                if __debug__: print_exc()
         self.session = None
 
     def dump(self, r):

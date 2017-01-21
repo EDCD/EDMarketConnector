@@ -106,7 +106,7 @@ class EDLogs(FileSystemEventHandler):
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
         try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.') and x.endswith('.log')])
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
         except:
             self.logfile = None
@@ -128,6 +128,8 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
             print 'Start logfile "%s"' % self.logfile
+
+        self.event_queue.append(None)	# Generate null event to signal (re)start
 
         if not self.running():
             self.thread = threading.Thread(target = self.worker, name = 'Journal worker')
@@ -181,8 +183,6 @@ class EDLogs(FileSystemEventHandler):
                 except:
                     if __debug__:
                         print 'Invalid journal entry "%s"' % repr(line)
-            self.event_queue.append(None)	# Generate null event to signal start
-            self.root.event_generate('<<JournalEvent>>', when="tail")
         else:
             loghandle = None
 

@@ -144,6 +144,9 @@ If 2 this problem may or may not resolve itself in time.
 
 This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
 
+### Credentials settings are greyed out
+You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
+
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
 
