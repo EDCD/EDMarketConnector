@@ -236,8 +236,6 @@ class AppWindow:
             theme.register(self.theme_close)
             theme.register_alternate((self.menubar, self.theme_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
 
-        self.set_labels()
-
         # update geometry
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
@@ -274,17 +272,25 @@ class AppWindow:
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
+        if not getattr(sys, 'frozen', False):
+            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
-        # First run
-        if not config.get('username') or not config.get('password'):
-            prefs.PreferencesDialog(self.w, self.postprefs)
-        else:
-            self.login()
+        self.postprefs()	# Companion login happens in callback from monitor
+
+        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
+        if not eddn.load():
+            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
 
     # callback after the Preferences dialog is applied
     def postprefs(self):
         self.set_labels()	# in case language has changed
-        self.login()		# in case credentials gave changed
+
+        # (Re-)install hotkey monitoring
+        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # (Re-)install log monitoring
+        if not monitor.start(self.w):
+            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
     # set main window labels, e.g. after language change
     def set_labels(self):
@@ -321,11 +327,15 @@ class AppWindow:
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
-        self.status['text'] = _('Logging in...')
+        if not self.status['text']:
+            self.status['text'] = _('Logging in...')
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            self.session.login(config.get('username'), config.get('password'))
+            if not monitor.cmdr or monitor.cmdr not in config.get('cmdrs'):
+                raise companion.CredentialsError()
+            idx = config.get('cmdrs').index(monitor.cmdr)
+            self.session.login(config.get('fdev_usernames')[idx], config.get('fdev_passwords')[idx])
             self.status['text'] = ''
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
@@ -334,21 +344,6 @@ class AppWindow:
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
-
-        if not getattr(sys, 'frozen', False):
-            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
-
-        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        if not eddn.load():
-            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
-
-        # (Re-)install hotkey monitoring
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-
-        # (Re-)install log monitoring
-        if not monitor.start(self.w):
-            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
-
         self.cooldown()
 
     # callback after verification code
@@ -368,7 +363,7 @@ class AppWindow:
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
-        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return	# In CQC or Beta - do nothing
 
         if not retrying:
@@ -478,7 +473,7 @@ class AppWindow:
                                 self.status['text'] = ''
 
                     # Update credits and ship info and send to EDSM
-                    if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+                    if config.getint('output') & config.OUT_SYS_EDSM:
                         try:
                             if data['commander'].get('credits') is not None:
                                 monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
@@ -568,13 +563,25 @@ class AppWindow:
                 self.edsm.link(monitor.system)
             self.w.update_idletasks()
 
+            # New Cmdr?
+            if entry['event'] in [None, 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+                prefs.migrate(monitor.cmdr)	# migration from <= 2.25
+                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
+                    prefs.make_current(monitor.cmdr)
+                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
+                    cmdrs = config.get('cmdrs')
+                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
+                    config.set('cmdrs', cmdrs)
+                else:
+                    prefs.PreferencesDialog(self.w, self.postprefs)	# First run or new Cmdr
+
             # Send interesting events to EDSM
             if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
                 self.status['text'] = _('Sending data to EDSM...')
                 self.w.update_idletasks()
                 try:
                     # Update system status on startup
-                    if monitor.mode and not entry['event']:
+                    if monitor.mode and monitor.system and not entry['event']:
                         self.edsm.lookup(monitor.system)
 
                     # Send credits to EDSM on new game (but not on startup - data might be old)
@@ -608,6 +615,10 @@ class AppWindow:
                 else:
                     self.status['text'] = ''
             self.edsmpoll()
+
+            # Companion login - do this after EDSM so any EDSM errors don't mask login errors
+            if entry['event'] in [None, 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+                self.login()
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
@@ -688,7 +699,7 @@ class AppWindow:
 
     def shipyard_url(self, shipname=None):
 
-        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return False	# In CQC or Beta - do nothing
 
         self.status['text'] = _('Fetching data...')

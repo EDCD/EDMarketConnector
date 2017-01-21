@@ -7,6 +7,7 @@ import urllib2
 import Tkinter as tk
 
 from config import appname, applongname, appversion, config
+from monitor import monitor
 
 if __debug__:
     from traceback import print_exc
@@ -79,10 +80,11 @@ class EDSM:
     # Call an EDSM endpoint with args (which should be quoted)
     def call(self, endpoint, args, check_msgnum=True):
         try:
+            idx = config.get('cmdrs').index(monitor.cmdr)
             url = 'https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
                 endpoint,
-                urllib2.quote(config.get('edsm_cmdrname').encode('utf-8')),
-                urllib2.quote(config.get('edsm_apikey')),
+                urllib2.quote(config.get('edsm_usernames')[idx].encode('utf-8')),
+                urllib2.quote(config.get('edsm_apikeys')[idx]),
                 urllib2.quote(applongname),
                 urllib2.quote(appversion),
             ) + args

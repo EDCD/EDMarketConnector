@@ -11,6 +11,7 @@ import myNotebook as nb
 
 import companion
 from companion import ship_map
+from monitor import monitor
 import prefs
 
 if platform=='win32':
@@ -175,6 +176,9 @@ class StatsDialog():
         self.showstats()
 
     def showstats(self):
+        if not monitor.cmdr or monitor.is_beta:
+            return	# In Beta - do nothing
+
         self.status['text'] = _('Fetching data...')
         self.parent.update_idletasks()
 
