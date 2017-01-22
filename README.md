@@ -147,6 +147,11 @@ This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConn
 ### Credentials settings are greyed out
 You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
 
+### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
+EDMC supports this scenario of you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
+
+EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
+
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
 
