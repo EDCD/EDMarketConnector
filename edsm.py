@@ -49,7 +49,7 @@ if platform=='darwin':
                 h.close()
                 return r
             except urllib2.HTTPError, e:
-                return urllib2.Response(url, e.code, {}, '')	# requests doesn't raise exceptions for HTTP errors
+                return Response(url, e.code, {}, '')	# requests doesn't raise exceptions for HTTP errors
             except:
                 raise
 
