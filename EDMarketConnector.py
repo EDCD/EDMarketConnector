@@ -832,14 +832,40 @@ class AppWindow:
 # Run the app
 if __name__ == "__main__":
 
-    # Ensure only one copy of the app is running. OSX does this automatically. Linux TODO.
+    # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
     if platform == 'win32':
         import ctypes
-        h = ctypes.windll.user32.FindWindowW(u'TkTopLevel', unicode(applongname))
-        if h:
-            ctypes.windll.user32.ShowWindow(h, 9)	# SW_RESTORE
-            ctypes.windll.user32.SetForegroundWindow(h)	# Probably not necessary
-            sys.exit(0)
+        from ctypes.wintypes import *
+        EnumWindows            = ctypes.windll.user32.EnumWindows
+        EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+        GetClassName           = ctypes.windll.user32.GetClassNameW
+        GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
+        GetWindowText          = ctypes.windll.user32.GetWindowTextW
+        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+        GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
+        GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
+        SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
+        ShowWindow             = ctypes.windll.user32.ShowWindow
+
+        def WindowTitle(h):
+            if h:
+                l = GetWindowTextLength(h) + 1
+                buf = ctypes.create_unicode_buffer(l)
+                if GetWindowText(h, buf, l):
+                    return buf.value
+            return None
+
+        def enumwindowsproc(hWnd, lParam):
+            # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
+            cls = ctypes.create_unicode_buffer(257)
+            if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
+                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                ShowWindow(hWnd, 9)	# SW_RESTORE
+                SetForegroundWindow(hWnd)
+                sys.exit(0)
+            return True
+
+        EnumWindows(EnumWindowsProc(enumwindowsproc), 0)
 
     root = tk.Tk()
     app = AppWindow(root)
