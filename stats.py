@@ -13,6 +13,11 @@ import companion
 from companion import ship_map
 import prefs
 
+if platform=='win32':
+    import ctypes
+    from ctypes.wintypes import *
+    CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+    CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
 
 RANKS = [	# in output order
     (_('Combat')     , 'combat'),	# Ranking
@@ -256,6 +261,14 @@ class StatsResults(tk.Toplevel):
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()
         self.grab_set()
+
+        # Ensure fully on-screen
+        if platform == 'win32':
+            position = RECT()
+            if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
+                                            SIZE(self.winfo_width(), self.winfo_height()),
+                                            0x10000, None, position):
+                self.geometry("+%d+%d" % (position.left, position.top))
 
     def addpage(self, parent, header=[], align=None):
         page = nb.Frame(parent)

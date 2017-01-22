@@ -52,6 +52,8 @@ elif platform=='win32':
     class BROWSEINFO(ctypes.Structure):
         _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
+    CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+    CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
 
 class PreferencesDialog(tk.Toplevel):
 
@@ -311,6 +313,13 @@ class PreferencesDialog(tk.Toplevel):
         self.wait_visibility()
         self.grab_set()
 
+        # Ensure fully on-screen
+        if platform == 'win32':
+            position = RECT()
+            if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
+                                            SIZE(self.winfo_width(), self.winfo_height()),
+                                            0x10000, None, position):
+                self.geometry("+%d+%d" % (position.left, position.top))
 
     def outvarchanged(self):
         self.displaypath(self.outdir, self.outdir_entry)
