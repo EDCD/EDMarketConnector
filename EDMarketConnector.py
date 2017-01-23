@@ -573,7 +573,7 @@ class AppWindow:
             self.w.update_idletasks()
 
             # Send interesting events to EDSM
-            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
                 self.status['text'] = _('Sending data to EDSM...')
                 self.w.update_idletasks()
                 try:
