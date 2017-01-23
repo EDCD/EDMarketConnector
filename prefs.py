@@ -341,24 +341,26 @@ class PreferencesDialog(tk.Toplevel):
         self.cmdr_text['text']  = self.edsm_cmdr_text['text']  = monitor.cmdr and monitor.is_beta and ('%s [Beta]' % monitor.cmdr) or monitor.cmdr or _('None')	# No hotkey/shortcut currently defined
         if self.cmdr != monitor.cmdr:
             # Cmdr has changed - update settings
-            if not monitor.is_beta:
-                migrate(monitor.cmdr)	# migration from <= 2.25
-            if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                config_idx = config.get('cmdrs').index(monitor.cmdr)
-            else:
-                config_idx = None
             self.username['state'] = tk.NORMAL
             self.username.delete(0, tk.END)
-            self.username.insert(0, config_idx is not None and config.get('fdev_usernames')[config_idx] or '')
             self.password['state'] = tk.NORMAL
             self.password.delete(0, tk.END)
-            self.password.insert(0, config_idx is not None and config.get('fdev_passwords')[config_idx] or '')
             self.edsm_user['state'] = tk.NORMAL
             self.edsm_user.delete(0, tk.END)
-            self.edsm_user.insert(0, config_idx is not None and config.get('edsm_usernames')[config_idx] or '')
             self.edsm_apikey['state'] = tk.NORMAL
             self.edsm_apikey.delete(0, tk.END)
-            self.edsm_apikey.insert(0, config_idx is not None and config.get('edsm_apikeys')[config_idx] or '')
+            if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
+                config_idx = config.get('cmdrs').index(monitor.cmdr)
+                self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
+                self.password.insert(0, config.get('fdev_passwords')[config_idx] or '')
+                self.edsm_user.insert(0, config.get('edsm_usernames')[config_idx] or '')
+                self.edsm_apikey.insert(0, config.get('edsm_apikeys')[config_idx] or '')
+            elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
+                # migration from <= 2.25
+                self.username.insert(0, config.get('username')[config_idx] or '')
+                self.password.insert(0, config.get('password')[config_idx] or '')
+                self.edsm_user.insert(0,config.get('edsm_cmdrname')[config_idx] or '')
+                self.edsm_apikey.insert(0, config.get('edsm_apikey')[config_idx] or '')
             self.cmdr = monitor.cmdr
 
         cmdr_state = not monitor.is_beta and monitor.cmdr and tk.NORMAL or tk.DISABLED

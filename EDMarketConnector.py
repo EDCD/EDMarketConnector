@@ -275,6 +275,15 @@ class AppWindow:
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
+        # Migration from <= 2.25
+        if not config.get('cmdrs') and config.get('username') and config.get('password'):
+            try:
+                self.session.login(config.get('username'), config.get('password'))
+                data = self.session.query()
+                prefs.migrate(data['commander']['name'])
+            except:
+                if __debug__: print_exc()
+
         self.postprefs()	# Companion login happens in callback from monitor
 
         # Try to obtain exclusive lock on journal cache, even if we don't need it yet
@@ -332,7 +341,7 @@ class AppWindow:
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            if not monitor.cmdr or monitor.cmdr not in config.get('cmdrs'):
+            if not monitor.cmdr or not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
                 raise companion.CredentialsError()
             idx = config.get('cmdrs').index(monitor.cmdr)
             self.session.login(config.get('fdev_usernames')[idx], config.get('fdev_passwords')[idx])
@@ -563,18 +572,6 @@ class AppWindow:
                 self.edsm.link(monitor.system)
             self.w.update_idletasks()
 
-            # New Cmdr?
-            if entry['event'] in [None, 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
-                prefs.migrate(monitor.cmdr)	# migration from <= 2.25
-                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                    prefs.make_current(monitor.cmdr)
-                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
-                    cmdrs = config.get('cmdrs')
-                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
-                    config.set('cmdrs', cmdrs)
-                else:
-                    prefs.PreferencesDialog(self.w, self.postprefs)	# First run or new Cmdr
-
             # Send interesting events to EDSM
             if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
                 self.status['text'] = _('Sending data to EDSM...')
@@ -617,8 +614,16 @@ class AppWindow:
             self.edsmpoll()
 
             # Companion login - do this after EDSM so any EDSM errors don't mask login errors
-            if entry['event'] in [None, 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
-                self.login()
+            if entry['event'] in [None, 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
+                    prefs.make_current(monitor.cmdr)
+                    self.login()
+                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
+                    cmdrs = config.get('cmdrs')
+                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
+                    config.set('cmdrs', cmdrs)
+                else:
+                    prefs.PreferencesDialog(self.w, self.postprefs)	# First run or failed migration
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
