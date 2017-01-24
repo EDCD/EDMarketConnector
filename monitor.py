@@ -165,7 +165,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and basename(event.src_path).startswith('Journal.'):
+        if not event.is_directory and basename(event.src_path).startswith('Journal.') and basename(event.src_path).endswith('.log'):
             self.logfile = event.src_path
 
     def worker(self):
@@ -197,7 +197,7 @@ class EDLogs(FileSystemEventHandler):
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.') and x.endswith('.log')])
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
                 except:
                     if __debug__: print_exc()
