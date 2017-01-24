@@ -145,7 +145,7 @@ If 2 this problem may or may not resolve itself in time.
 This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
 
 ### Credentials settings are greyed out
-You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
+You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
 
 ### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
 EDMC supports this scenario of you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.

@@ -80,7 +80,7 @@ class PreferencesDialog(tk.Toplevel):
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
         self.resizable(tk.FALSE, tk.FALSE)
 
-        self.cmdr = None	# Note if Cmdr changes in the Journal
+        self.cmdr = False	# Note if Cmdr changes in the Journal
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
@@ -106,7 +106,7 @@ class PreferencesDialog(tk.Toplevel):
         self.password_label = nb.Label(credframe, text=_('Password'))		# Use same text as E:D Launcher's login dialog
         self.password_label.grid(row=12, padx=PADX, sticky=tk.W)
 
-        self.cmdr_text = nb.Label(credframe, text=_('None'))			# No hotkey/shortcut currently defined
+        self.cmdr_text = nb.Label(credframe)
         self.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
         self.username = nb.Entry(credframe)
         self.username.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
@@ -194,7 +194,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Cmdr'))	# Main window
         self.edsm_cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
-        self.edsm_cmdr_text = nb.Label(edsmframe, text=_('None'))	# No hotkey/shortcut currently defined
+        self.edsm_cmdr_text = nb.Label(edsmframe)
         self.edsm_cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
         self.edsm_user_label = nb.Label(edsmframe, text=_('Commander Name'))	# EDSM setting
@@ -338,7 +338,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def outvarchanged(self, event=None):
         self.cmdr_text['state'] = self.edsm_cmdr_text['state'] = tk.NORMAL	# must be writable to update
-        self.cmdr_text['text']  = self.edsm_cmdr_text['text']  = monitor.cmdr and monitor.is_beta and ('%s [Beta]' % monitor.cmdr) or monitor.cmdr or _('None')	# No hotkey/shortcut currently defined
+        self.cmdr_text['text']  = self.edsm_cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
         if self.cmdr != monitor.cmdr:
             # Cmdr has changed - update settings
             self.username['state'] = tk.NORMAL
