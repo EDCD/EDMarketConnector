@@ -148,7 +148,7 @@ This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConn
 You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
 
 ### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
-EDMC supports this scenario of you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
+EDMC supports this scenario if you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
 
 EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
 
