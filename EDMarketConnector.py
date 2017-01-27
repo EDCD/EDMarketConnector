@@ -28,8 +28,9 @@ if __debug__:
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
 from config import appname, applongname, config
-if platform == 'win32' and getattr(sys, 'frozen', False):
-    chdir(dirname(sys.path[0]))
+if getattr(sys, 'frozen', False):
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
     import tempfile
     sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
