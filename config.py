@@ -298,7 +298,7 @@ class Config:
             try:
                 val = self.config.get(self.SECTION, key)
                 if u'\n' in val:
-                    return val.split(u'\n')
+                    return val.split(u'\n')[:-1]
                 else:
                     return val
             except:
@@ -314,7 +314,7 @@ class Config:
             if isinstance(val, basestring) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, val)
             elif hasattr(val, '__iter__'):	# iterable
-                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val]))
+                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val] + [u';']))
             else:
                 raise NotImplementedError()
 
