@@ -352,15 +352,15 @@ class PreferencesDialog(tk.Toplevel):
             if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
                 config_idx = config.get('cmdrs').index(monitor.cmdr)
                 self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
-                self.password.insert(0, config.get('fdev_passwords')[config_idx] or '')
+                self.password.insert(0, config.get_password(config.get('fdev_usernames')[config_idx]) or '')
                 self.edsm_user.insert(0, config.get('edsm_usernames')[config_idx] or '')
                 self.edsm_apikey.insert(0, config.get('edsm_apikeys')[config_idx] or '')
             elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
                 # migration from <= 2.25
-                self.username.insert(0, config.get('username')[config_idx] or '')
-                self.password.insert(0, config.get('password')[config_idx] or '')
-                self.edsm_user.insert(0,config.get('edsm_cmdrname')[config_idx] or '')
-                self.edsm_apikey.insert(0, config.get('edsm_apikey')[config_idx] or '')
+                self.username.insert(0, config.get('username') or '')
+                self.password.insert(0, config.get('password') or '')
+                self.edsm_user.insert(0,config.get('edsm_cmdrname') or '')
+                self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
             self.cmdr = monitor.cmdr
 
         cmdr_state = not monitor.is_beta and monitor.cmdr and tk.NORMAL or tk.DISABLED
@@ -519,17 +519,19 @@ class PreferencesDialog(tk.Toplevel):
 
     def apply(self):
         if self.cmdr and not monitor.is_beta:
+            if self.password.get().strip():
+                config.set_password(self.username.get().strip(), self.password.get().strip())	# Can fail if keyring not unlocked
+            else:
+                config.delete_password(self.username.get().strip())	# user may have cleared the password field
             if not config.get('cmdrs'):
                 config.set('cmdrs', [self.cmdr])
                 config.set('fdev_usernames', [self.username.get().strip()])
-                config.set('fdev_passwords', [self.password.get().strip()])
                 config.set('edsm_usernames', [self.edsm_user.get().strip()])
                 config.set('edsm_apikeys',   [self.edsm_apikey.get().strip()])
             else:
                 idx = config.get('cmdrs').index(self.cmdr) if self.cmdr in config.get('cmdrs') else -1
                 _putfirst('cmdrs', idx, self.cmdr)
                 _putfirst('fdev_usernames', idx, self.username.get().strip())
-                _putfirst('fdev_passwords', idx, self.password.get().strip())
                 _putfirst('edsm_usernames', idx, self.edsm_user.get().strip())
                 _putfirst('edsm_apikeys',   idx, self.edsm_apikey.get().strip())
 
@@ -677,9 +679,9 @@ class AuthenticationDialog(tk.Toplevel):
 # migration from <= 2.25. Assumes current Cmdr corresponds to the saved credentials
 def migrate(current_cmdr):
     if current_cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
+        config.set_password(config.get('username'), config.get('password'))	# Can fail on Linux
         config.set('cmdrs', [current_cmdr])
         config.set('fdev_usernames', [config.get('username')])
-        config.set('fdev_passwords', [config.get('password')])
         config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
         config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
         # XXX to be done for release
@@ -694,7 +696,6 @@ def make_current(current_cmdr):
         idx = config.get('cmdrs').index(current_cmdr)
         _putfirst('cmdrs', idx)
         _putfirst('fdev_usernames', idx)
-        _putfirst('fdev_passwords', idx)
         _putfirst('edsm_usernames', idx)
         _putfirst('edsm_apikeys',   idx)
 

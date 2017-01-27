@@ -6,6 +6,7 @@ from sys import platform
 from collections import OrderedDict
 from functools import partial
 import json
+import keyring
 from os import chdir, mkdir
 from os.path import dirname, expanduser, isdir, join
 import re
@@ -276,6 +277,11 @@ class AppWindow:
         if not getattr(sys, 'frozen', False):
             self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
+        try:
+            config.get_password('')	# Prod SecureStorage on Linux to initialise
+        except RuntimeError:
+            pass
+
         # Migration from <= 2.25
         if not config.get('cmdrs') and config.get('username') and config.get('password'):
             try:
@@ -286,6 +292,9 @@ class AppWindow:
                 if __debug__: print_exc()
 
         self.postprefs()	# Companion login happens in callback from monitor
+
+        if keyring.get_keyring().priority < 1:
+            self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
 
         # Try to obtain exclusive lock on journal cache, even if we don't need it yet
         if not eddn.load():
@@ -345,7 +354,8 @@ class AppWindow:
             if not monitor.cmdr or not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
                 raise companion.CredentialsError()
             idx = config.get('cmdrs').index(monitor.cmdr)
-            self.session.login(config.get('fdev_usernames')[idx], config.get('fdev_passwords')[idx])
+            username = config.get('fdev_usernames')[idx]
+            self.session.login(username, config.get_password(username))
             self.status['text'] = ''
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
