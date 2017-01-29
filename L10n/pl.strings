@@ -448,6 +448,9 @@
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Trailblazer";
 
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Przezroczyste";
+
 /* Trade rank. [stats.py] */
 "Tycoon" = "Tycoon";
 

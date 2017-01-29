@@ -151,19 +151,16 @@ class _Theme:
                              background = self.current['background'])
 
         for pair, gridopts in self.widgets_pair:
-            (default, dark) = pair
-            if isinstance(default, tk.Menu):
+            for widget in pair:
+                widget.grid_remove()
+            if isinstance(pair[0], tk.Menu):
                 if theme:
                     root['menu'] = ''
-                    dark.grid(**gridopts)
+                    pair[theme].grid(**gridopts)
                 else:
-                    root['menu'] = default
-                    dark.grid_remove()
+                    root['menu'] = pair[0]
             else:
-                old = theme and default or dark
-                current = theme and dark or default
-                old.grid_remove()
-                current.grid(**gridopts)
+                pair[theme].grid(**gridopts)
 
         if self.active == theme:
             return	# Don't need to mess with the window manager
@@ -188,17 +185,16 @@ class _Theme:
         elif platform == 'win32':
             # tk8.5.9/win/tkWinWm.c:342
             import ctypes
-            GWL_STYLE = -16
-            WS_BORDER        = 0x00800000
-            WS_OVERLAPPEDWINDOW =0x00CF0000
             GWL_EXSTYLE = -20
-            WS_EX_WINDOWEDGE = 0x00000100
             WS_EX_APPWINDOW  = 0x00040000
-            root.overrideredirect(theme and 1 or 0)	# Destroys any top-level window
+            WS_EX_LAYERED    = 0x00080000
+
+            root.overrideredirect(theme and 1 or 0)
+            root.attributes("-transparentcolor", theme > 1 and 'grey4' or '')
+            root.withdraw()
             root.update_idletasks()	# Size and windows styles get recalculated here
             hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_STYLE, theme and WS_BORDER or WS_OVERLAPPEDWINDOW)
-            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, theme and WS_EX_APPWINDOW or WS_EX_WINDOWEDGE)
+            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, theme > 1 and WS_EX_APPWINDOW|WS_EX_LAYERED or WS_EX_APPWINDOW)	# Add to taskbar
             root.deiconify()
             root.wait_visibility()	# need main window to be displayed before returning
 

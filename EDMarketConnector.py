@@ -88,7 +88,7 @@ class AppWindow:
             else:
                 from PIL import Image, ImageTk
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default', ImageTk.PhotoImage(Image.open("EDMarketConnector.png")))
-            self.theme_icon = tk.PhotoImage(data = 'R0lGODlhFAAQAMZVAAAAAAEAAAIBAAMBAAQCAAYDAAcDAAkEAAoEAAwGAQ8IARAIAREJARYKABkLARsMASMQASgSAiUUAy0UAjAVAioXBDIWAy4YBC4ZBS8ZBTkZA0EdBDsgBkUfA0MkB00iA1AjA1IlBFQmBE4qCFgoBVkoBFArCF0qBVQtCGUrBGMtBWYtBWA0Cm8xBW8xBm8yBXMzBXU1Bms5C3s1BXs2BXw2BX02BXw4B4A5B3Q/DIJGDYNGDYJHDoNHDYdJDppGCItLD4xLDo5MDo5MD5hSD59VEKdaEbJgErtlE7tlFLxlE8BpFMJpFMNpFMZrFdFxFtl1F995GOB6GOF6GP+LG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAejgACCgiODhoeGBABPPgACj48DA4gAk00cSRUYGZycEogBAE4LCUM8Oj2pOzlQBAKHSBeKlABKBq+DHkS0g0wJiCZFvABHJBuHBSxADFRTUs/PUUsiKhaIKEZBKTM13TU0Nj8IIRqThjJCK8MnFIgKMMMAJRGGAQUvvAIPLocBAjgdPggcKMLAgRi0GjxYyNBBCwjwQoEKQLEiABA3HMU7NOFQIAA7')
+            self.theme_icon = tk.PhotoImage(data = 'R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')
             self.theme_minimize = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')
             self.theme_close    = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')
 
@@ -133,7 +133,7 @@ class AppWindow:
         row = frame.grid_size()[1]
         self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
-        theme.register_alternate((self.button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
+        theme.register_alternate((self.button, self.theme_button, self.theme_button), {'row':row, 'columnspan':2, 'sticky':tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
@@ -234,7 +234,10 @@ class AppWindow:
             theme.register_highlight(theme_titlebar)
             theme.register(self.theme_minimize)	# images aren't automatically registered
             theme.register(self.theme_close)
-            theme.register_alternate((self.menubar, self.theme_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
+            self.blank_menubar = tk.Frame(frame)
+            tk.Label(self.blank_menubar).grid()
+            tk.Label(self.blank_menubar).grid()
+            theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
 
         self.set_labels()
 
@@ -264,7 +267,11 @@ class AppWindow:
         theme.register_highlight(self.station)
         theme.apply(self.w)
 
-        self.w.bind("<Map>", self.onmap)			# Special handling for overrideredict
+        self.w.bind('<Map>', self.onmap)			# Special handling for overrideredict
+        self.w.bind('<Enter>', self.onenter)			# Special handling for transparency
+        self.w.bind('<FocusIn>', self.onenter)			#   "
+        self.w.bind('<Leave>', self.onleave)			#   "
+        self.w.bind('<FocusOut>', self.onleave)			#   "
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
         self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
@@ -817,6 +824,17 @@ class AppWindow:
         if event.widget == self.w:
             theme.apply(self.w)
 
+    def onenter(self, event=None):
+        if config.getint('theme') > 1:
+            self.w.attributes("-transparentcolor", '')
+            self.blank_menubar.grid_remove()
+            self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
+
+    def onleave(self, event=None):
+        if config.getint('theme') > 1 and event.widget==self.w:
+            self.w.attributes("-transparentcolor", 'grey4')
+            self.theme_menubar.grid_remove()
+            self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 # Run the app
 if __name__ == "__main__":

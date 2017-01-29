@@ -259,7 +259,7 @@ class PreferencesDialog(tk.Toplevel):
         self.languages = Translations().available_names()
         self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
         self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
-        self.theme = tk.IntVar(value = config.getint('theme') and 1 or 0)
+        self.theme = tk.IntVar(value = config.getint('theme'))
         self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
         self.theme_prompts = [
             _('Normal text'),		# Dark theme color setting
@@ -274,6 +274,8 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Appearance setting
         nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
+        if platform == 'win32':
+            nb.Radiobutton(themeframe, text=_('Transparent'), variable=self.theme, value=2, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
         self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
         self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='grey4', command=lambda:self.themecolorbrowse(0))	# Main window

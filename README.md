@@ -26,6 +26,7 @@ Click on the station name to go to its [Elite: Dangerous Database](http://eddb.i
 
 ![Windows screenshot](img/win_dark.png) &nbsp; ![Mac screenshot](img/mac_dark.png)
 
+![Windows screenshot](img/win_transparent.png)
 
 Installation
 --------

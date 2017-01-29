@@ -448,6 +448,9 @@
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Путешественние";
 
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Прозрачный";
+
 /* Trade rank. [stats.py] */
 "Tycoon" = "Магнат";
 
