@@ -80,12 +80,13 @@ class PreferencesDialog(tk.Toplevel):
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
         self.resizable(tk.FALSE, tk.FALSE)
 
-        style = ttk.Style()
+        self.cmdr = False	# Note if Cmdr changes in the Journal
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
         notebook = nb.Notebook(frame)
+        notebook.bind('<<NotebookTabChanged>>', self.outvarchanged)	# Recompute on tab change
 
         PADX = 10
         BUTTONX = 12	# indent Checkbuttons and Radiobuttons
@@ -96,17 +97,23 @@ class PreferencesDialog(tk.Toplevel):
 
         nb.Label(credframe, text=_('Credentials')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
         ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        nb.Label(credframe, text=_('Please log in with your Elite: Dangerous account details')).grid(padx=PADX, columnspan=2, sticky=tk.W)	# Use same text as E:D Launcher's login dialog
-        nb.Label(credframe, text=_('Username (Email)')).grid(row=10, padx=PADX, sticky=tk.W)	# Use same text as E:D Launcher's login dialog
-        nb.Label(credframe, text=_('Password')).grid(row=11, padx=PADX, sticky=tk.W)		# Use same text as E:D Launcher's login dialog
+        self.cred_label = nb.Label(credframe, text=_('Please log in with your Elite: Dangerous account details'))	# Use same text as E:D Launcher's login dialog
+        self.cred_label.grid(padx=PADX, columnspan=2, sticky=tk.W)
+        self.cmdr_label = nb.Label(credframe, text=_('Cmdr'))	# Main window
+        self.cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
+        self.username_label = nb.Label(credframe, text=_('Username (Email)'))	# Use same text as E:D Launcher's login dialog
+        self.username_label.grid(row=11, padx=PADX, sticky=tk.W)
+        self.password_label = nb.Label(credframe, text=_('Password'))		# Use same text as E:D Launcher's login dialog
+        self.password_label.grid(row=12, padx=PADX, sticky=tk.W)
 
+        self.cmdr_text = nb.Label(credframe)
+        self.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
         self.username = nb.Entry(credframe)
-        self.username.insert(0, config.get('username') or '')
-        self.username.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-        self.username.focus_set()
+        self.username.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+        if not monitor.is_beta and monitor.cmdr:
+            self.username.focus_set()
         self.password = nb.Entry(credframe, show=u'•')
-        self.password.insert(0, config.get('password') or '')
-        self.password.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+        self.password.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
         nb.Label(credframe).grid(sticky=tk.W)	# big spacer
         nb.Label(credframe, text=_('Privacy')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
@@ -125,13 +132,17 @@ class PreferencesDialog(tk.Toplevel):
 
         output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP)	# default settings
 
-        nb.Label(outframe, text=_('Please choose what data to save')).grid(columnspan=2, padx=PADX, sticky=tk.W)
+        self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
+        self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
-        nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.out_csv_button = nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged)
+        self.out_csv_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
-        nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.out_td_button = nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged)
+        self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_ship= tk.IntVar(value = (output & (config.OUT_SHIP|config.OUT_SHIP_EDS|config.OUT_SHIP_CORIOLIS) and 1))
-        nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged).grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)	# Output setting
+        self.out_ship_button = nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged)	# Output setting
+        self.out_ship_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MKT_MANUAL else 1)	# inverted
         self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
@@ -155,7 +166,8 @@ class PreferencesDialog(tk.Toplevel):
 
         HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/jamesremuscat/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
         self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-        nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged).grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)	# Output setting
+        self.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged)	# Output setting
+        self.eddn_station_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
         self.eddn_auto_button.grid(padx=BUTTONX, sticky=tk.W)
         self.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
@@ -180,17 +192,20 @@ class PreferencesDialog(tk.Toplevel):
         self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
         self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Commander Name'))	# EDSM setting
+        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Cmdr'))	# Main window
         self.edsm_cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
-        self.edsm_cmdr = nb.Entry(edsmframe)
-        self.edsm_cmdr.insert(0, config.get('edsm_cmdrname') or '')
-        self.edsm_cmdr.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+        self.edsm_cmdr_text = nb.Label(edsmframe)
+        self.edsm_cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
+
+        self.edsm_user_label = nb.Label(edsmframe, text=_('Commander Name'))	# EDSM setting
+        self.edsm_user_label.grid(row=11, padx=PADX, sticky=tk.W)
+        self.edsm_user = nb.Entry(edsmframe)
+        self.edsm_user.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
         self.edsm_apikey_label = nb.Label(edsmframe, text=_('API Key'))	# EDSM setting
-        self.edsm_apikey_label.grid(row=11, padx=PADX, sticky=tk.W)
+        self.edsm_apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
         self.edsm_apikey = nb.Entry(edsmframe)
-        self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
-        self.edsm_apikey.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+        self.edsm_apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
@@ -323,30 +338,59 @@ class PreferencesDialog(tk.Toplevel):
                                             0x10000, None, position):
                 self.geometry("+%d+%d" % (position.left, position.top))
 
-    def outvarchanged(self):
+    def outvarchanged(self, event=None):
+        self.cmdr_text['state'] = self.edsm_cmdr_text['state'] = tk.NORMAL	# must be writable to update
+        self.cmdr_text['text']  = self.edsm_cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
+        if self.cmdr != monitor.cmdr:
+            # Cmdr has changed - update settings
+            self.username['state'] = tk.NORMAL
+            self.username.delete(0, tk.END)
+            self.password['state'] = tk.NORMAL
+            self.password.delete(0, tk.END)
+            self.edsm_user['state'] = tk.NORMAL
+            self.edsm_user.delete(0, tk.END)
+            self.edsm_apikey['state'] = tk.NORMAL
+            self.edsm_apikey.delete(0, tk.END)
+            if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
+                config_idx = config.get('cmdrs').index(monitor.cmdr)
+                self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
+                self.password.insert(0, config.get_password(config.get('fdev_usernames')[config_idx]) or '')
+                self.edsm_user.insert(0, config.get('edsm_usernames')[config_idx] or '')
+                self.edsm_apikey.insert(0, config.get('edsm_apikeys')[config_idx] or '')
+            elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
+                # migration from <= 2.25
+                self.username.insert(0, config.get('username') or '')
+                self.password.insert(0, config.get('password') or '')
+                self.edsm_user.insert(0,config.get('edsm_cmdrname') or '')
+                self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
+            self.cmdr = monitor.cmdr
+
+        cmdr_state = not monitor.is_beta and monitor.cmdr and tk.NORMAL or tk.DISABLED
+        self.cred_label['state'] = self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = cmdr_state
+        self.cmdr_text['state'] = self.username['state'] = self.password['state'] = cmdr_state
+
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
-        local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
-        self.out_auto_button['state']   = local and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
+        self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = not monitor.is_beta and tk.NORMAL or tk.DISABLED
+        local = not monitor.is_beta and (self.out_td.get() or self.out_csv.get() or self.out_ship.get())
+        self.out_auto_button['state']   = local and logvalid and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
         self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
 
+        self.eddn_station_button['state'] = not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
         self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
-        self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
-        edsm_state = logvalid and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
-        self.edsm_label['state']        = edsm_state
-        self.edsm_cmdr_label['state']   = edsm_state
-        self.edsm_apikey_label['state'] = edsm_state
-        self.edsm_cmdr['state']         = edsm_state
-        self.edsm_apikey['state']       = edsm_state
+        self.edsm_log_button['state']   = logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
+        edsm_state = logvalid and monitor.cmdr and not monitor.is_beta and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
+        self.edsm_label['state'] = self.edsm_cmdr_label['state'] = self.edsm_user_label['state'] = self.edsm_apikey_label['state'] = edsm_state
+        self.edsm_cmdr_text['state'] = self.edsm_user['state'] = self.edsm_apikey['state'] = edsm_state
 
     def filebrowse(self, title, pathvar):
         if platform != 'win32':
@@ -476,9 +520,22 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
-        credentials = (config.get('username'), config.get('password'))
-        config.set('username', self.username.get().strip())
-        config.set('password', self.password.get().strip())
+        if self.cmdr and not monitor.is_beta:
+            if self.password.get().strip():
+                config.set_password(self.username.get().strip(), self.password.get().strip())	# Can fail if keyring not unlocked
+            else:
+                config.delete_password(self.username.get().strip())	# user may have cleared the password field
+            if not config.get('cmdrs'):
+                config.set('cmdrs', [self.cmdr])
+                config.set('fdev_usernames', [self.username.get().strip()])
+                config.set('edsm_usernames', [self.edsm_user.get().strip()])
+                config.set('edsm_apikeys',   [self.edsm_apikey.get().strip()])
+            else:
+                idx = config.get('cmdrs').index(self.cmdr) if self.cmdr in config.get('cmdrs') else -1
+                _putfirst('cmdrs', idx, self.cmdr)
+                _putfirst('fdev_usernames', idx, self.username.get().strip())
+                _putfirst('edsm_usernames', idx, self.edsm_user.get().strip())
+                _putfirst('edsm_apikeys',   idx, self.edsm_apikey.get().strip())
 
         config.set('output',
                    (self.out_td.get()            and config.OUT_MKT_TD) +
@@ -490,9 +547,6 @@ class PreferencesDialog(tk.Toplevel):
                    (self.eddn_delay.get()        and config.OUT_SYS_DELAY) +
                    (self.edsm_log.get()          and config.OUT_SYS_EDSM))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
-
-        config.set('edsm_cmdrname', self.edsm_cmdr.get().strip())
-        config.set('edsm_apikey',   self.edsm_apikey.get().strip())
 
         logdir = self.logdir.get()
         if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
@@ -623,3 +677,34 @@ class AuthenticationDialog(tk.Toplevel):
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
         if self.callback: self.callback(None)
+
+# migration from <= 2.25. Assumes current Cmdr corresponds to the saved credentials
+def migrate(current_cmdr):
+    if current_cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
+        config.set_password(config.get('username'), config.get('password'))	# Can fail on Linux
+        config.set('cmdrs', [current_cmdr])
+        config.set('fdev_usernames', [config.get('username')])
+        config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
+        config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
+        # XXX to be done for release
+        # config.delete('username')
+        # config.delete('password')
+        # config.delete('edsm_cmdrname')
+        # config.delete('edsm_apikey')
+
+# Put current Cmdr first in the lists
+def make_current(current_cmdr):
+    if current_cmdr and config.get('cmdrs') and current_cmdr in config.get('cmdrs'):
+        idx = config.get('cmdrs').index(current_cmdr)
+        _putfirst('cmdrs', idx)
+        _putfirst('fdev_usernames', idx)
+        _putfirst('edsm_usernames', idx)
+        _putfirst('edsm_apikeys',   idx)
+
+def _putfirst(setting, config_idx, new_value=None):
+    assert config_idx>=0 or new_value is not None, (setting, config_idx, new_value)
+    values = config.get(setting)
+    values.insert(0, new_value if config_idx<0 else values.pop(config_idx))
+    if new_value is not None:
+        values[0] = new_value
+    config.set(setting, values)

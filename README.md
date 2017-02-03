@@ -145,6 +145,14 @@ If 2 this problem may or may not resolve itself in time.
 
 This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
 
+### Credentials settings are greyed out
+You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
+
+### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
+EDMC supports this scenario if you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
+
+EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
+
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
 
@@ -158,17 +166,17 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U requests watchdog py2app` .
+* Requires the Python “keyring”, “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U keyring requests watchdog py2app` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “requests” and “watchdog” modules.
+* Requires Python2.7 and the Python “keyring”, “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
-* Requires the Python “imaging-tk”, “iniparse” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
+* Requires the Python “imaging-tk”, “iniparse”, “keyring” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-keyring python-requests` .
 * Run with `./EDMarketConnector.py` .
 
 Command-line
@@ -243,6 +251,7 @@ Acknowledgements
 * Thanks to Taras Velychko for the Ukranian translation.
 * Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN/wiki) and to [Cmdr Anthor](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
+* Uses [Python Keyring Lib](https://github.com/jaraco/keyring) by Jason R. Coombs, Kang Zhang, et al.
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
 * Uses [OneSky](http://www.oneskyapp.com/) for [translation management](https://marginal.oneskyapp.com/collaboration/project?id=52710).

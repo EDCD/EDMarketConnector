@@ -106,7 +106,7 @@ class EDLogs(FileSystemEventHandler):
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
         try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.') and x.endswith('.log')])
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
         except:
             self.logfile = None
@@ -128,6 +128,8 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
             print 'Start logfile "%s"' % self.logfile
+
+        self.event_queue.append(None)	# Generate null event to signal (re)start
 
         if not self.running():
             self.thread = threading.Thread(target = self.worker, name = 'Journal worker')
@@ -163,7 +165,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and basename(event.src_path).startswith('Journal.'):
+        if not event.is_directory and basename(event.src_path).startswith('Journal.') and basename(event.src_path).endswith('.log'):
             self.logfile = event.src_path
 
     def worker(self):
@@ -181,8 +183,6 @@ class EDLogs(FileSystemEventHandler):
                 except:
                     if __debug__:
                         print 'Invalid journal entry "%s"' % repr(line)
-            self.event_queue.append(None)	# Generate null event to signal start
-            self.root.event_generate('<<JournalEvent>>', when="tail")
         else:
             loghandle = None
 
@@ -197,7 +197,7 @@ class EDLogs(FileSystemEventHandler):
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.')])
+                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal.') and x.endswith('.log')])
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
                 except:
                     if __debug__: print_exc()

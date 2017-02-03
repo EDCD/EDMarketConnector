@@ -70,7 +70,7 @@ if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests' ],
+                  'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
@@ -100,7 +100,7 @@ elif sys.platform=='win32':
     OPTIONS =  { 'py2exe':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests' ],
+                  'packages': [ 'requests', 'keyring.backends' ],
                   'excludes': [ 'PIL', 'simplejson' ],
               }
     }

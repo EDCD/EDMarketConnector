@@ -1,3 +1,4 @@
+import keyring
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
@@ -8,7 +9,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '2.2.5.0'
+appversion = '2.2.6.1'
 
 update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
@@ -130,12 +131,12 @@ class Config:
 
             if not getattr(sys, 'frozen', False):
                 # Don't use Python's settings if interactive
-                self.bundle = 'uk.org.marginal.%s' % appname.lower()
-                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.bundle
+                self.identifier = 'uk.org.marginal.%s' % appname.lower()
+                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
             else:
-                self.bundle = NSBundle.mainBundle().bundleIdentifier()
+                self.identifier = NSBundle.mainBundle().bundleIdentifier()
             self.defaults = NSUserDefaults.standardUserDefaults()
-            self.settings = dict(self.defaults.persistentDomainForName_(self.bundle) or {})	# make writeable
+            self.settings = dict(self.defaults.persistentDomainForName_(self.identifier) or {})	# make writeable
 
             # Check out_dir exists
             if not self.get('outdir') or not isdir(self.get('outdir')):
@@ -161,7 +162,7 @@ class Config:
             self.settings.pop(key, None)
 
         def save(self):
-            self.defaults.setPersistentDomain_forName_(self.settings, self.bundle)
+            self.defaults.setPersistentDomain_forName_(self.settings, self.identifier)
             self.defaults.synchronize()
 
         def close(self):
@@ -187,6 +188,8 @@ class Config:
             self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
+
+            self.identifier = applongname
 
             self.hkey = HKEY()
             disposition = DWORD()
@@ -281,6 +284,8 @@ class Config:
 
             self.respath = dirname(__file__)
 
+            self.identifier = 'uk.org.marginal.%s' % appname.lower()
+
             self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, '%s.ini' % appname)
             if not isdir(dirname(self.filename)):
                 makedirs(dirname(self.filename))
@@ -298,7 +303,7 @@ class Config:
             try:
                 val = self.config.get(self.SECTION, key)
                 if u'\n' in val:
-                    return val.split(u'\n')
+                    return val.split(u'\n')[:-1]
                 else:
                     return val
             except:
@@ -314,7 +319,7 @@ class Config:
             if isinstance(val, basestring) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, val)
             elif hasattr(val, '__iter__'):	# iterable
-                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val]))
+                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val] + [u';']))
             else:
                 raise NotImplementedError()
 
@@ -333,6 +338,20 @@ class Config:
 
         def __init__(self):
             raise NotImplementedError('Implement me')
+
+    # Common
+
+    def get_password(self, account):
+        return keyring.get_password(self.identifier, account)
+
+    def set_password(self, account, password):
+        keyring.set_password(self.identifier, account, password)
+
+    def delete_password(self, account):
+        try:
+            keyring.delete_password(self.identifier, account)
+        except:
+            pass	# don't care - silently fail
 
 # singleton
 config = Config()

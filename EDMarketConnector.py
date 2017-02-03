@@ -6,6 +6,7 @@ from sys import platform
 from collections import OrderedDict
 from functools import partial
 import json
+import keyring
 from os import chdir, mkdir
 from os.path import dirname, expanduser, isdir, join
 import re
@@ -28,8 +29,9 @@ if __debug__:
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
 from config import appname, applongname, config
-if platform == 'win32' and getattr(sys, 'frozen', False):
-    chdir(dirname(sys.path[0]))
+if getattr(sys, 'frozen', False):
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
     import tempfile
     sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
@@ -239,8 +241,6 @@ class AppWindow:
             tk.Label(self.blank_menubar).grid()
             theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
 
-        self.set_labels()
-
         # update geometry
         if config.get('geometry'):
             match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))
@@ -281,17 +281,42 @@ class AppWindow:
         # Load updater after UI creation (for WinSparkle)
         import update
         self.updater = update.Updater(self.w)
+        if not getattr(sys, 'frozen', False):
+            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
 
-        # First run
-        if not config.get('username') or not config.get('password'):
-            prefs.PreferencesDialog(self.w, self.postprefs)
-        else:
-            self.login()
+        try:
+            config.get_password('')	# Prod SecureStorage on Linux to initialise
+        except RuntimeError:
+            pass
+
+        # Migration from <= 2.25
+        if not config.get('cmdrs') and config.get('username') and config.get('password'):
+            try:
+                self.session.login(config.get('username'), config.get('password'))
+                data = self.session.query()
+                prefs.migrate(data['commander']['name'])
+            except:
+                if __debug__: print_exc()
+
+        self.postprefs()	# Companion login happens in callback from monitor
+
+        if keyring.get_keyring().priority < 1:
+            self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
+
+        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
+        if not eddn.load():
+            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
 
     # callback after the Preferences dialog is applied
     def postprefs(self):
         self.set_labels()	# in case language has changed
-        self.login()		# in case credentials gave changed
+
+        # (Re-)install hotkey monitoring
+        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # (Re-)install log monitoring
+        if not monitor.start(self.w):
+            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
     # set main window labels, e.g. after language change
     def set_labels(self):
@@ -328,11 +353,16 @@ class AppWindow:
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
-        self.status['text'] = _('Logging in...')
+        if not self.status['text']:
+            self.status['text'] = _('Logging in...')
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            self.session.login(config.get('username'), config.get('password'))
+            if not monitor.cmdr or not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
+                raise companion.CredentialsError()
+            idx = config.get('cmdrs').index(monitor.cmdr)
+            username = config.get('fdev_usernames')[idx]
+            self.session.login(username, config.get_password(username))
             self.status['text'] = ''
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
@@ -341,21 +371,6 @@ class AppWindow:
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
-
-        if not getattr(sys, 'frozen', False):
-            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
-
-        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        if not eddn.load():
-            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
-
-        # (Re-)install hotkey monitoring
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
-
-        # (Re-)install log monitoring
-        if not monitor.start(self.w):
-            self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
-
         self.cooldown()
 
     # callback after verification code
@@ -375,7 +390,7 @@ class AppWindow:
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
 
-        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return	# In CQC or Beta - do nothing
 
         if not retrying:
@@ -485,7 +500,7 @@ class AppWindow:
                                 self.status['text'] = ''
 
                     # Update credits and ship info and send to EDSM
-                    if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+                    if config.getint('output') & config.OUT_SYS_EDSM:
                         try:
                             if data['commander'].get('credits') is not None:
                                 monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
@@ -576,12 +591,12 @@ class AppWindow:
             self.w.update_idletasks()
 
             # Send interesting events to EDSM
-            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta:
+            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
                 self.status['text'] = _('Sending data to EDSM...')
                 self.w.update_idletasks()
                 try:
                     # Update system status on startup
-                    if monitor.mode and not entry['event']:
+                    if monitor.mode and monitor.system and not entry['event']:
                         self.edsm.lookup(monitor.system)
 
                     # Send credits to EDSM on new game (but not on startup - data might be old)
@@ -615,6 +630,18 @@ class AppWindow:
                 else:
                     self.status['text'] = ''
             self.edsmpoll()
+
+            # Companion login - do this after EDSM so any EDSM errors don't mask login errors
+            if entry['event'] in [None, 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
+                    prefs.make_current(monitor.cmdr)
+                    self.login()
+                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
+                    cmdrs = config.get('cmdrs')
+                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
+                    config.set('cmdrs', cmdrs)
+                else:
+                    prefs.PreferencesDialog(self.w, self.postprefs)	# First run or failed migration
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
@@ -695,7 +722,7 @@ class AppWindow:
 
     def shipyard_url(self, shipname=None):
 
-        if (monitor.cmdr and not monitor.mode) or monitor.is_beta:
+        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return False	# In CQC or Beta - do nothing
 
         self.status['text'] = _('Fetching data...')
@@ -839,14 +866,40 @@ class AppWindow:
 # Run the app
 if __name__ == "__main__":
 
-    # Ensure only one copy of the app is running. OSX does this automatically. Linux TODO.
+    # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
     if platform == 'win32':
         import ctypes
-        h = ctypes.windll.user32.FindWindowW(u'TkTopLevel', unicode(applongname))
-        if h:
-            ctypes.windll.user32.ShowWindow(h, 9)	# SW_RESTORE
-            ctypes.windll.user32.SetForegroundWindow(h)	# Probably not necessary
-            sys.exit(0)
+        from ctypes.wintypes import *
+        EnumWindows            = ctypes.windll.user32.EnumWindows
+        EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+        GetClassName           = ctypes.windll.user32.GetClassNameW
+        GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
+        GetWindowText          = ctypes.windll.user32.GetWindowTextW
+        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+        GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
+        GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
+        SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
+        ShowWindow             = ctypes.windll.user32.ShowWindow
+
+        def WindowTitle(h):
+            if h:
+                l = GetWindowTextLength(h) + 1
+                buf = ctypes.create_unicode_buffer(l)
+                if GetWindowText(h, buf, l):
+                    return buf.value
+            return None
+
+        def enumwindowsproc(hWnd, lParam):
+            # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
+            cls = ctypes.create_unicode_buffer(257)
+            if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
+                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                ShowWindow(hWnd, 9)	# SW_RESTORE
+                SetForegroundWindow(hWnd)
+                sys.exit(0)
+            return True
+
+        EnumWindows(EnumWindowsProc(enumwindowsproc), 0)
 
     root = tk.Tk()
     app = AppWindow(root)
