@@ -129,6 +129,13 @@ if __name__ == "__main__":
     system_ids['K Carinae'] = 375886	# both unpopulated
     system_ids['Kamba'] = 10358
 
+    # Ancient ruins
+    system_ids['Synuefe XR-H d11-102']     = 3524806	# Site 1 / Beta
+    system_ids['IC 2391 Sector GW-V b2-4'] = 3954820	# Site 2
+    system_ids['IC 2391 Sector ZE-A d101'] = 6259569	# Site 3 / Alpha
+    system_ids['Synuefe ZL-J d10-119']     = 6024386	# https://community.elitedangerous.com/en/galnet/uid/58872def9657ba9230f89d99
+    system_ids['Synuefe XO-P c22-17']      = 6259676	#  "
+
     with open('systems.p',  'wb') as h:
         cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
     print '\n%d saved systems' % len(system_ids)
