@@ -686,11 +686,10 @@ def migrate(current_cmdr):
         config.set('fdev_usernames', [config.get('username')])
         config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
         config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
-        # XXX to be done for release
-        # config.delete('username')
-        # config.delete('password')
-        # config.delete('edsm_cmdrname')
-        # config.delete('edsm_apikey')
+        config.delete('username')
+        config.delete('password')
+        config.delete('edsm_cmdrname')
+        config.delete('edsm_apikey')
 
 # Put current Cmdr first in the lists
 def make_current(current_cmdr):
