@@ -133,6 +133,11 @@ This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConne
 ### Doesn't auto-update or track Systems visited
 This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
 
+### Credentials settings are greyed out
+You can't edit your Username/Password or EDSM Commander Name/API Key if:
+- Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
+- Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
+
 ### Error: Wrong Cmdr
 The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. Either:
 
@@ -144,9 +149,6 @@ If 1 check your username/password settings.
 If 2 this problem may or may not resolve itself in time.
 
 This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
-
-### Credentials settings are greyed out
-You can't edit your Username/Password or EDSM Commander Name/API Key while Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
 
 ### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
 EDMC supports this scenario if you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
