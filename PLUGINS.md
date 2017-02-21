@@ -121,3 +121,23 @@ To package your plugin for distribution simply create a `.zip` archive of your p
 
 * Windows: In Explorer right click on your plugin's folder and choose Send to &rarr; Compressed (zipped) folder.
 * Mac: In Finder right click on your plugin's folder and choose Compress.
+
+If there are any external dependecies, for example paho.mqtt, you have to bundle 
+any within the plugin folder and make sure it can be included from there.
+
+Example in top of load.py add
+```python
+import sys
+import os
+try:
+    import paho.mqtt.client as mqtt
+except:
+    print 'failed to load'
+    #add current folder to path
+    #dependencies should be included within
+    sys.path.append(os.path.join(os.path.dirname(__file__)))
+    #import again
+    import paho.mqtt.client as mqtt
+    
+```
+
