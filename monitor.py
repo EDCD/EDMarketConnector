@@ -8,7 +8,7 @@ from os.path import basename, exists, isdir, isfile, join
 from platform import machine
 import sys
 from sys import platform
-from time import sleep
+from time import gmtime, sleep, strftime
 
 if __debug__:
     from traceback import print_exc
@@ -72,6 +72,14 @@ class EDLogs(FileSystemEventHandler):
         self.thread = None
         self.event_queue = []		# For communicating journal entries back to main thread
 
+        # On startup we might be:
+        # 1) Looking at an old journal file because the game isn't running or the user has exited to the main menu.
+        # 2) Looking at an empty journal (only 'Fileheader') because the user is at the main menu.
+        # 3) In the middle of a 'live' game.
+        # If 1 or 2 a LoadGame event will happen when the game goes live.
+        # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
+        self.live = False
+
         # Context for journal handling
         self.version = None
         self.is_beta = False
@@ -129,8 +137,6 @@ class EDLogs(FileSystemEventHandler):
             print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
             print 'Start logfile "%s"' % self.logfile
 
-        self.event_queue.append(None)	# Generate null event to signal (re)start
-
         if not self.running():
             self.thread = threading.Thread(target = self.worker, name = 'Journal worker')
             self.thread.daemon = True
@@ -186,6 +192,10 @@ class EDLogs(FileSystemEventHandler):
         else:
             loghandle = None
 
+        if self.live:
+            self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
+            self.live = False
+
         # Watchdog thread
         emitter = self.observed and self.observer._emitter_for_watch[self.observed]	# Note: Uses undocumented attribute
 
@@ -226,13 +236,18 @@ class EDLogs(FileSystemEventHandler):
                 return	# Terminate
 
     def parse_entry(self, line):
+        if line is None:
+            return { 'event': None }	# Fake startup event
+
         try:
             entry = json.loads(line, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
             entry['timestamp']	# we expect this to exist
             if entry['event'] == 'Fileheader':
+                self.live = False
                 self.version = entry['gameversion']
                 self.is_beta = 'beta' in entry['gameversion'].lower()
             elif entry['event'] == 'LoadGame':
+                self.live = True
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.group = entry.get('Group')
@@ -286,13 +301,18 @@ class EDLogs(FileSystemEventHandler):
         except:
             if __debug__:
                 print 'Invalid journal entry "%s"' % repr(line)
+                print_exc()
             return { 'event': None }
 
     def get_entry(self):
         if not self.event_queue:
             return None
         else:
-            return self.parse_entry(self.event_queue.pop(0))
+            entry = self.parse_entry(self.event_queue.pop(0))
+            if not self.live and entry['event'] not in [None, 'Fileheader']:
+                self.live = True
+                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+            return entry
 
 
 # singleton

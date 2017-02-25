@@ -596,7 +596,7 @@ class AppWindow:
                 self.w.update_idletasks()
                 try:
                     # Update system status on startup
-                    if monitor.mode and monitor.system and not entry['event']:
+                    if not entry['event'] and monitor.mode and monitor.system:
                         self.edsm.lookup(monitor.system)
 
                     # Send credits to EDSM on new game (but not on startup - data might be old)
@@ -604,11 +604,11 @@ class AppWindow:
                         self.edsm.setcredits(monitor.credits)
 
                     # Send rank info to EDSM on startup or change
-                    if entry['event'] in [None, 'Progress', 'Promotion']:
+                    if entry['event'] in ['StartUp', 'Progress', 'Promotion'] and monitor.ranks:
                         self.edsm.setranks(monitor.ranks)
 
                     # Send ship info to EDSM on startup or change
-                    if entry['event'] in [None, 'LoadGame', 'ShipyardNew', 'ShipyardSwap']:
+                    if entry['event'] in ['StartUp', 'LoadGame', 'ShipyardNew', 'ShipyardSwap'] and monitor.shipid:
                         self.edsm.setshipid(monitor.shipid)
                         self.edsm.updateship(monitor.shipid, monitor.shiptype, monitor.shippaint and [('paintJob', monitor.shippaint)] or [])
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
@@ -632,7 +632,7 @@ class AppWindow:
             self.edsmpoll()
 
             # Companion login - do this after EDSM so any EDSM errors don't mask login errors
-            if entry['event'] in [None, 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+            if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
                 if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
                     prefs.make_current(monitor.cmdr)
                     self.login()

@@ -77,7 +77,7 @@ Your events all get called on the main tkinter loop so be sure not to block for 
 
 ### Journal Entry
 
-This gets called when EDMC sees a new entry in the game's journal.
+This gets called when EDMC sees a new entry in the game's journal. A special 'StartUp' event is sent when EDMC is started while the game is already running.
 
 ```
 def journal_entry(cmdr, system, station, entry):
