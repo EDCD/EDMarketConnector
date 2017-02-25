@@ -86,15 +86,20 @@ class EDLogs(FileSystemEventHandler):
         self.mode = None
         self.group = None
         self.cmdr = None
-        self.shipid = None
-        self.shiptype = None
-        self.shippaint = None
         self.body = None
         self.system = None
         self.station = None
         self.coordinates = None
-        self.ranks = None
-        self.credits = None
+
+        # Cmdr state shared with EDSM and plugins
+        self.state = {
+            'Credits'      : None,
+            'Loan'         : None,
+            'PaintJob'     : None,
+            'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+            'ShipID'       : None,
+            'ShipType'     : None,
+        }
 
     def set_callback(self, name, callback):
         if name in self.callbacks:
@@ -251,29 +256,32 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.group = entry.get('Group')
-                self.shiptype = 'Ship' in entry and entry['Ship'] not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] and entry['Ship'].lower() or None	# None in CQC. TestBuggy or *_Fighter if game starts in SRV/fighter.
-                self.shipid = self.shiptype and entry.get('ShipID') or None	# None in CQC
-                self.shippaint = None
+                self.state = {
+                    'Credits'      : entry['Credits'],
+                    'Loan'         : entry['Loan'],
+                    'PaintJob'     : None,
+                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'ShipID'       : entry.get('ShipID') if entry.get('Ship') not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] else None 	# None in CQC or if game starts in SRV/fighter
+                }
+                self.state['ShipType']  = self.state['ShipID'] and entry.get('Ship').lower()
                 self.body = None
                 self.system = None
                 self.station = None
                 self.coordinates = None
-                self.ranks = { "Combat": None, "Trade": None, "Explore": None, "Empire": None, "Federation": None, "CQC": None }
-                self.credits = ( entry['Credits'], entry['Loan'] )
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
                 self.group = None
             elif entry['event'] == 'ShipyardNew':
-                self.shipid = entry['NewShipID']
-                self.shiptype = entry['ShipType'].lower()
-                self.shippaint = None
+                self.state['ShipID'] = entry['NewShipID']
+                self.state['ShipType'] = entry['ShipType'].lower()
+                self.state['PaintJob'] = None
             elif entry['event'] == 'ShipyardSwap':
-                self.shipid = entry['ShipID']
-                self.shiptype = entry['ShipType'].lower()
-                self.shippaint = None
+                self.state['ShipID'] = entry['ShipID']
+                self.state['ShipType'] = entry['ShipType'].lower()
+                self.state['PaintJob'] = None
             elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
                 symbol = re.match('\$(.+)_name;', entry.get('BuyItem', ''))
-                self.shippaint = symbol and symbol.group(1).lower() or entry.get('BuyItem', '')
+                self.state['PaintJob'] = symbol and symbol.group(1).lower() or entry.get('BuyItem', '')
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
@@ -289,14 +297,15 @@ class EDLogs(FileSystemEventHandler):
                 self.body = entry.get('BodyType') == 'Planet' and entry.get('Body')
             elif entry['event'] == 'SupercruiseEntry':
                 self.body = None
-            elif entry['event'] in ['Rank', 'Promotion'] and self.ranks:
+            elif entry['event'] in ['Rank', 'Promotion']:
                 for k,v in entry.iteritems():
-                    if k in self.ranks:
-                        self.ranks[k] = (v,0)
-            elif entry['event'] == 'Progress' and self.ranks:
+                    if k in self.state['Rank']:
+                        self.state['Rank'][k] = (v,0)
+            elif entry['event'] == 'Progress':
                 for k,v in entry.iteritems():
-                    if self.ranks.get(k) is not None:
-                        self.ranks[k] = (self.ranks[k][0], min(v, 100))	# perhaps not taken promotion mission yet
+                    if self.state['Rank'].get(k) is not None:
+                        self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
+
             return entry
         except:
             if __debug__:

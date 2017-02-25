@@ -420,7 +420,7 @@ class AppWindow:
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
-            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.shipid and data['ship']['id'] != monitor.shipid) or (monitor.shiptype and data['ship']['name'].lower() != monitor.shiptype):
+            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
                 raise companion.ServerLagging()
 
             else:
@@ -431,9 +431,9 @@ class AppWindow:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
                 self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-                if not monitor.shiptype:	# Started game in SRV or fighter
-                    monitor.shipid =   data['ship']['id']
-                    monitor.shiptype = data['ship']['name'].lower()
+                if not monitor.state['ShipType']:	# Started game in SRV or fighter
+                    monitor.state['ShipID'] =   data['ship']['id']
+                    monitor.state['ShipType'] = data['ship']['name'].lower()
                 if not monitor.system:
                     self.system['text'] = data['lastSystem']['name']
                     self.system['image'] = ''
@@ -503,8 +503,9 @@ class AppWindow:
                     if config.getint('output') & config.OUT_SYS_EDSM:
                         try:
                             if data['commander'].get('credits') is not None:
-                                monitor.credits = (data['commander']['credits'], data['commander'].get('debt', 0))
-                                self.edsm.setcredits(monitor.credits)
+                                monitor.state['Credits'] = data['commander']['credits']
+                                monitor.state['Loan'] = data['commander'].get('debt', 0)
+                                self.edsm.setcredits(monitor.state['Credits'], monitor.state['Loan'])
                             ship = companion.ship(data)
                             if ship == self.edsm.lastship:
                                 props = []
@@ -515,14 +516,14 @@ class AppWindow:
                                     ('linkToCoriolis',   coriolis.url(data)),
                                     ('linkToEDShipyard', edshipyard.url(data)),
                                 ]
-                            if monitor.shippaint is None:
+                            if monitor.state['PaintJob'] is None:
                                 # Companion API server can lag, so prefer Journal. But paintjob only reported in Journal on change.
-                                monitor.shipid = data['ship']['id']
-                                monitor.shiptype = data['ship']['name'].lower()
-                                monitor.shippaint = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
-                                props.append(('paintJob', monitor.shippaint))
+                                monitor.state['ShipID'] = data['ship']['id']
+                                monitor.state['ShipType'] = data['ship']['name'].lower()
+                                monitor.state['PaintJob'] = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
+                                props.append(('paintJob', monitor.state['PaintJob']))
                             if props:
-                                self.edsm.updateship(monitor.shipid, monitor.shiptype, props)
+                                self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], props)
                                 self.edsm.lastship = ship
                         except Exception as e:
                             # Not particularly important so silent on failure
@@ -580,7 +581,7 @@ class AppWindow:
 
             # Update main window
             self.cmdr['text'] = monitor.cmdr and monitor.group and ' / '.join([monitor.cmdr, monitor.group]) or monitor.cmdr or ''
-            self.ship['text'] = monitor.shiptype and companion.ship_map.get(monitor.shiptype, monitor.shiptype) or ''
+            self.ship['text'] = monitor.state['ShipType'] and companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
@@ -601,26 +602,26 @@ class AppWindow:
 
                     # Send credits to EDSM on new game (but not on startup - data might be old)
                     if entry['event'] == 'LoadGame':
-                        self.edsm.setcredits(monitor.credits)
+                        self.edsm.setcredits(monitor.state['Credits'], monitor.state['Loan'])
 
                     # Send rank info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'Progress', 'Promotion'] and monitor.ranks:
-                        self.edsm.setranks(monitor.ranks)
+                    if entry['event'] in ['StartUp', 'Progress', 'Promotion'] and monitor.state['Rank']:
+                        self.edsm.setranks(monitor.state['Rank'])
 
                     # Send ship info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'LoadGame', 'ShipyardNew', 'ShipyardSwap'] and monitor.shipid:
-                        self.edsm.setshipid(monitor.shipid)
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype, monitor.shippaint and [('paintJob', monitor.shippaint)] or [])
+                    if entry['event'] in ['StartUp', 'LoadGame', 'ShipyardNew', 'ShipyardSwap'] and monitor.state['ShipID']:
+                        self.edsm.setshipid(monitor.state['ShipID'])
+                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], monitor.state['PaintJob'] is not None and [('paintJob', monitor.state['PaintJob'])] or [])
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                         self.edsm.sellship(entry.get('SellShipID'))
 
                     # Send paintjob info to EDSM on change
                     if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                        self.edsm.updateship(monitor.shipid, monitor.shiptype, [('paintJob', monitor.shippaint)])
+                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], [('paintJob', monitor.state['PaintJob'])])
 
                     # Write EDSM log on change
                     if monitor.mode and entry['event'] in ['Location', 'FSDJump']:
-                        self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.shipid)
+                        self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.state['ShipID'])
 
                 except Exception as e:
                     if __debug__: print_exc()
@@ -647,7 +648,7 @@ class AppWindow:
                 return	# Startup or in CQC
 
             # Plugins
-            plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry)
+            plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
             if system_changed:	# Backwards compatibility
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 

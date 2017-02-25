@@ -46,13 +46,14 @@ def plugin_app(parent):
     return plugin_app.status
 
 
-def journal_entry(cmdr, system, station, entry):
+def journal_entry(cmdr, system, station, entry, state):
     """
     E:D client made a journal entry
     :param cmdr: The Cmdr name, or None if not yet known
     :param system: The current system, or None if not yet known
     :param station: The current station, or None if not docked or not yet known
     :param entry: The journal entry as a dictionary
+    :param state: A dictionary containing info about the Cmdr, current ship and cargo
     :return:
     """
     if entry['event'] == 'FSDJump':

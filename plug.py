@@ -101,13 +101,14 @@ def notify_prefs_changed():
                 print plugerr
 
 
-def notify_journal_entry(cmdr, system, station, entry):
+def notify_journal_entry(cmdr, system, station, entry, state):
     """
     Send a journal entry to each plugin.
     :param cmdr: The Cmdr name, or None if not yet known
     :param system: The current system, or None if not yet known
     :param station: The current station, or None if not docked or not yet known
     :param entry: The journal entry as a dictionary
+    :param state: A dictionary containing info about the Cmdr, current ship and cargo
     :return:
     """
     for plugname in PLUGINS:
@@ -115,7 +116,10 @@ def notify_journal_entry(cmdr, system, station, entry):
         if journal_entry:
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                journal_entry(cmdr, system, station, dict(entry))
+                if journal_entry.func_code.co_argcount == 4:
+                    journal_entry(cmdr, system, station, dict(entry))
+                else:
+                    journal_entry(cmdr, system, station, dict(entry), dict(state))
             except Exception as plugerr:
                 print plugerr
 

@@ -206,9 +206,9 @@ class EDSM:
         if args:
             self.call('api-commander-v1/set-ranks', args)
 
-    def setcredits(self, credits):
-        if credits:
-            self.call('api-commander-v1/set-credits', '&balance=%d&loan=%d' % credits)
+    def setcredits(self, balance, loan):
+        if balance is not None:
+            self.call('api-commander-v1/set-credits', '&balance=%d&loan=%d' % (balance, loan))
 
     def setshipid(self, shipid):
         if shipid is not None:
