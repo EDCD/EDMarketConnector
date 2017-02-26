@@ -98,6 +98,8 @@ class EDLogs(FileSystemEventHandler):
             'PaintJob'     : None,
             'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
             'ShipID'       : None,
+            'ShipIdent'    : None,
+            'ShipName'     : None,
             'ShipType'     : None,
         }
 
@@ -263,6 +265,8 @@ class EDLogs(FileSystemEventHandler):
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
                     'ShipID'       : entry.get('ShipID') if entry.get('Ship') not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] else None 	# None in CQC or if game starts in SRV/fighter
                 }
+                self.state['ShipIdent'] = self.state['ShipID'] and entry.get('ShipIdent')
+                self.state['ShipName']  = self.state['ShipID'] and entry.get('ShipName')
                 self.state['ShipType']  = self.state['ShipID'] and entry.get('Ship').lower()
                 self.body = None
                 self.system = None
@@ -271,14 +275,33 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
                 self.group = None
+            elif entry['event'] == 'SetUserShipName':
+                self.state['ShipID']    = entry['ShipID']
+                self.state['ShipIdent'] = entry.get('UserShipId')
+                self.state['ShipName']  = entry.get('UserShipName')
+                self.state['ShipType']  = entry['Ship'].lower()
             elif entry['event'] == 'ShipyardNew':
                 self.state['ShipID'] = entry['NewShipID']
+                self.state['ShipIdent'] = None
+                self.state['ShipName']  = None
                 self.state['ShipType'] = entry['ShipType'].lower()
                 self.state['PaintJob'] = None
             elif entry['event'] == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
+                self.state['ShipIdent'] = None
+                self.state['ShipName']  = None
                 self.state['ShipType'] = entry['ShipType'].lower()
                 self.state['PaintJob'] = None
+            elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, but also sent after changing ship
+                self.state['ShipID'] = entry['ShipID']
+                self.state['ShipIdent'] = entry['ShipIdent']
+                self.state['ShipName']  = entry['ShipName']
+                self.state['ShipType']  = entry['Ship'].lower()
+                # Ignore other Modules since they're missing Engineer modification details
+                self.state['PaintJob'] = ''
+                for module in entry['Modules']:
+                    if module.get('Slot') == 'PaintJob' and module.get('Item'):
+                        self.state['PaintJob'] = module['Item'].lower()
             elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
                 symbol = re.match('\$(.+)_name;', entry.get('BuyItem', ''))
                 self.state['PaintJob'] = symbol and symbol.group(1).lower() or entry.get('BuyItem', '')

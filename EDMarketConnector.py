@@ -518,7 +518,10 @@ class AppWindow:
                                 ]
                             if monitor.state['PaintJob'] is None:
                                 # Companion API server can lag, so prefer Journal. But paintjob only reported in Journal on change.
-                                monitor.state['ShipID'] = data['ship']['id']
+                                if monitor.state['ShipID'] != data['ship']['id']:
+                                    monitor.state['ShipID'] = data['ship']['id']
+                                    monitor.state['ShipIdent'] = None
+                                    monitor.state['ShipName'] = None
                                 monitor.state['ShipType'] = data['ship']['name'].lower()
                                 monitor.state['PaintJob'] = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
                                 props.append(('paintJob', monitor.state['PaintJob']))
@@ -609,9 +612,16 @@ class AppWindow:
                         self.edsm.setranks(monitor.state['Rank'])
 
                     # Send ship info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'LoadGame', 'ShipyardNew', 'ShipyardSwap'] and monitor.state['ShipID']:
+                    if entry['event'] in ['StartUp', 'Loadout', 'LoadGame', 'SetUserShipName'] and monitor.cmdr and monitor.state['ShipID']:
                         self.edsm.setshipid(monitor.state['ShipID'])
-                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], monitor.state['PaintJob'] is not None and [('paintJob', monitor.state['PaintJob'])] or [])
+                        props = []
+                        if monitor.state['ShipIdent'] is not None:
+                            props.append(('shipIdent', monitor.state['ShipIdent']))
+                        if monitor.state['ShipName'] is not None:
+                            props.append(('shipName', monitor.state['ShipName']))
+                        if monitor.state['PaintJob'] is not None:
+                            props.append(('paintJob', monitor.state['PaintJob']))
+                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], props)
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                         self.edsm.sellship(entry.get('SellShipID'))
 
