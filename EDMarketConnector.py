@@ -394,6 +394,12 @@ class AppWindow:
         if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return	# In CQC or Beta - do nothing
 
+        if auto_update and monitor.carrying_rares():
+            # https://github.com/Marginal/EDMarketConnector/issues/92
+            self.status['text'] = _("Didn't update: Carrying Rares")	# Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92
+            hotkeymgr.play_bad()
+            return
+
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
                 self.status['text'] = ''
