@@ -389,6 +389,7 @@ class AppWindow:
 
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
+        play_bad = False
 
         if not monitor.cmdr or not monitor.mode or monitor.is_beta:
             return	# In CQC or Beta - do nothing
@@ -455,10 +456,10 @@ class AppWindow:
                         # Silently retry if we got here by 'Automatically update on docking' and the server hasn't caught up
                         self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                         return	# early exit to avoid starting cooldown count
-                    else:
+                    elif not self.status['text']:
                         # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                        if not self.status['text']:
-                            self.status['text'] = _("You're not docked at a station!")
+                        self.status['text'] = _("You're not docked at a station!")
+                        play_bad = True
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
@@ -540,6 +541,7 @@ class AppWindow:
         except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
                 self.status['text'] = unicode(e)
+                play_bad = True
             else:
                 # Retry once if Companion server is unresponsive
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
@@ -548,14 +550,16 @@ class AppWindow:
         except requests.RequestException as e:
             if __debug__: print_exc()
             self.status['text'] = _("Error: Can't connect to EDDN")
+            play_bad = True
 
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
+            play_bad = True
 
         if not self.status['text']:	# no errors
             self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
-        elif play_sound:
+        if play_sound and play_bad:
             hotkeymgr.play_bad()
 
         self.holdofftime = querytime + companion.holdoff
