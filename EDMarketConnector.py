@@ -610,7 +610,7 @@ class AppWindow:
                 self.w.update_idletasks()
                 try:
                     # Update system status on startup
-                    if not entry['event'] and monitor.mode and monitor.system:
+                    if entry['event'] in [None, 'StartUp'] and monitor.mode and monitor.system:
                         self.edsm.lookup(monitor.system)
 
                     # Send credits to EDSM on new game (but not on startup - data might be old)

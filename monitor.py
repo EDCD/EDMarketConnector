@@ -17,6 +17,7 @@ from config import config
 
 
 if platform=='darwin':
+    from AppKit import NSWorkspace
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
@@ -52,6 +53,17 @@ elif platform=='win32':
     RegEnumKeyEx = ctypes.windll.advapi32.RegEnumKeyExW
     RegEnumKeyEx.restype = LONG
     RegEnumKeyEx.argtypes = [HKEY, DWORD, LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(DWORD), LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(FILETIME)]
+
+    EnumWindows            = ctypes.windll.user32.EnumWindows
+    EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+
+    CloseHandle            = ctypes.windll.kernel32.CloseHandle
+
+    GetWindowText          = ctypes.windll.user32.GetWindowTextW
+    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+    GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
+
+    GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
@@ -234,8 +246,11 @@ class EDLogs(FileSystemEventHandler):
             loghandle = None
 
         if self.live:
-            self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
-            self.live = False
+            if self.game_running():
+                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+            else:
+                self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
+                self.live = False
 
         # Watchdog thread
         emitter = self.observed and self.observer._emitter_for_watch[self.observed]	# Note: Uses undocumented attribute
@@ -331,7 +346,8 @@ class EDLogs(FileSystemEventHandler):
                 self.group = None
             elif entry['event'] == 'SetUserShipName':
                 self.state['ShipID']    = entry['ShipID']
-                self.state['ShipIdent'] = entry.get('UserShipId')
+                if 'UserShipId' in entry:	# Only present when changing the ship's ident
+                    self.state['ShipIdent'] = entry['UserShipId']
                 self.state['ShipName']  = entry.get('UserShipName')
                 self.state['ShipType']  = entry['Ship'].lower()
             elif entry['event'] == 'ShipyardNew':
@@ -433,6 +449,36 @@ class EDLogs(FileSystemEventHandler):
         for commodity in self.state['Cargo']:
             if commodity in self.RARES:
                 return True
+        return False
+
+    def game_running(self):
+
+        if platform == 'darwin':
+            for app in NSWorkspace.sharedWorkspace().runningApplications():
+                if app.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                    return True
+
+        elif platform == 'win32':
+
+            def WindowTitle(h):
+                if h:
+                    l = GetWindowTextLength(h) + 1
+                    buf = ctypes.create_unicode_buffer(l)
+                    if GetWindowText(h, buf, l):
+                        return buf.value
+                return None
+
+            def callback(hWnd, lParam):
+                name = WindowTitle(hWnd)
+                if name and name.startswith('Elite - Dangerous'):
+                    handle = GetProcessHandleFromHwnd(hWnd)
+                    if handle:	# If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                        CloseHandle(handle)
+                        return False	# stop enumeration
+                return True
+
+            return not EnumWindows(EnumWindowsProc(callback), 0)
+
         return False
 
 
