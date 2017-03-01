@@ -1,5 +1,5 @@
 import atexit
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
@@ -93,8 +93,12 @@ class EDLogs(FileSystemEventHandler):
 
         # Cmdr state shared with EDSM and plugins
         self.state = {
+            'Cargo'        : defaultdict(int),
             'Credits'      : None,
             'Loan'         : None,
+            'Raw'          : defaultdict(int),
+            'Manufactured' : defaultdict(int),
+            'Encoded'      : defaultdict(int),
             'PaintJob'     : None,
             'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
             'ShipID'       : None,
@@ -253,18 +257,38 @@ class EDLogs(FileSystemEventHandler):
                 self.live = False
                 self.version = entry['gameversion']
                 self.is_beta = 'beta' in entry['gameversion'].lower()
+                self.cmdr = None
+                self.mode = None
+                self.group = None
+                self.body = None
+                self.system = None
+                self.station = None
+                self.coordinates = None
+                self.state = {
+                    'Cargo'        : defaultdict(int),
+                    'Credits'      : None,
+                    'Loan'         : None,
+                    'Raw'          : defaultdict(int),
+                    'Manufactured' : defaultdict(int),
+                    'Encoded'      : defaultdict(int),
+                    'PaintJob'     : None,
+                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'ShipID'       : None,
+                    'ShipIdent'    : None,
+                    'ShipName'     : None,
+                    'ShipType'     : None,
+                }
             elif entry['event'] == 'LoadGame':
                 self.live = True
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
                 self.group = entry.get('Group')
-                self.state = {
+                self.state.update({
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
-                    'PaintJob'     : None,
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
                     'ShipID'       : entry.get('ShipID') if entry.get('Ship') not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] else None 	# None in CQC or if game starts in SRV/fighter
-                }
+                })
                 self.state['ShipIdent'] = self.state['ShipID'] and entry.get('ShipIdent')
                 self.state['ShipName']  = self.state['ShipID'] and entry.get('ShipName')
                 self.state['ShipType']  = self.state['ShipID'] and entry.get('Ship').lower()
@@ -328,6 +352,35 @@ class EDLogs(FileSystemEventHandler):
                 for k,v in entry.iteritems():
                     if self.state['Rank'].get(k) is not None:
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
+
+            elif entry['event'] == 'Cargo':
+                self.live = True	# First event in 2.3
+                self.state['Cargo'] = defaultdict(int)
+                self.state['Cargo'].update({ x['Name']: x['Count'] for x in entry['Inventory'] })
+            elif entry['event'] in ['CollectCargo', 'MarketBuy', 'MiningRefined']:
+                self.state['Cargo'][entry['Type']] += entry.get('Count', 1)
+            elif entry['event'] in ['EjectCargo', 'MarketSell']:
+                self.state['Cargo'][entry['Type']] -= entry.get('Count', 1)
+                if self.state['Cargo'][entry['Type']] <= 0:
+                    self.state['Cargo'].pop(entry['Type'])
+
+            elif entry['event'] == 'Materials':
+                for category in ['Raw', 'Manufactured', 'Encoded']:
+                    self.state[category] = defaultdict(int)
+                    self.state[category].update({ x['Name']: x['Count'] for x in entry.get(category, []) })
+            elif entry['event'] == 'MaterialCollected':
+                self.state[entry['Category']][entry['Name']] += entry['Count']
+            elif entry['event'] in ['MaterialDiscarded', 'ScientificResearch']:
+                self.state[entry['Category']][entry['Name']] -= entry['Count']
+                if self.state[entry['Category']][entry['Name']] <= 0:
+                    self.state[entry['Category']].pop(entry['Name'])
+            elif entry['event'] in ['EngineerCraft', 'Synthesis']:
+                for category in ['Raw', 'Manufactured', 'Encoded']:
+                    for x in entry[entry['event'] == 'EngineerCraft' and 'Ingredients' or 'Materials']:
+                        if x['Name'] in self.state[category]:
+                            self.state[category][x['Name']] -= x['Count']
+                            if self.state[category][x['Name']] <= 0:
+                                self.state[category].pop(x['Name'])
 
             return entry
         except:

@@ -625,6 +625,10 @@ class AppWindow:
                     elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                         self.edsm.sellship(entry.get('SellShipID'))
 
+                    # Send materials info to EDSM on startup or change
+                    if entry['event'] in ['StartUp', 'LoadGame', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
+                        self.edsm.setmaterials(monitor.state['Raw'], monitor.state['Manufactured'], monitor.state['Encoded'])
+
                     # Send paintjob info to EDSM on change
                     if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
                         self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], [('paintJob', monitor.state['PaintJob'])])

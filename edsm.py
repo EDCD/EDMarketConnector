@@ -210,6 +210,13 @@ class EDSM:
         if balance is not None:
             self.call('api-commander-v1/set-credits', '&balance=%d&loan=%d' % (balance, loan))
 
+    def setmaterials(self, raw, manufactured, encoded):
+        self.call('api-commander-v1/set-materials', "&type=data&values=%s" % json.dumps(encoded, separators = (',', ':')))
+        materials = {}
+        materials.update(raw)
+        materials.update(encoded)
+        self.call('api-commander-v1/set-materials', "&type=materials&values=%s" % json.dumps(materials, separators = (',', ':')))
+
     def setshipid(self, shipid):
         if shipid is not None:
             self.call('api-commander-v1/set-ship-id', '&shipId=%d' % shipid)
