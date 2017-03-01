@@ -63,7 +63,7 @@ def plugin_app(parent):
    """
    label = tk.Label(parent, text="Status:")
    this.status = tk.Label(parent, anchor=tk.W, text="")
-   return (label, plugin_app.status)
+   return (label, this.status)
    
 # later on your event functions can directly update this.status["text"]
 this.status["text"] = "Happy!"
@@ -124,22 +124,17 @@ To package your plugin for distribution simply create a `.zip` archive of your p
 * Windows: In Explorer right click on your plugin's folder and choose Send to &rarr; Compressed (zipped) folder.
 * Mac: In Finder right click on your plugin's folder and choose Compress.
 
-If there are any external dependecies, for example paho.mqtt, you have to bundle 
-any within the plugin folder and make sure it can be included from there.
+If there are any external dependencies then bundle them within the plugin's folder and add the plugin's folder to Python's load path.
 
-Example in top of load.py add
 ```python
 import sys
 import os
-try:
-    import paho.mqtt.client as mqtt
-except:
-    print 'failed to load'
-    #add current folder to path
-    #dependencies should be included within
-    sys.path.append(os.path.join(os.path.dirname(__file__)))
-    #import again
-    import paho.mqtt.client as mqtt
+
+# Add plugin's folder to Python's load path.
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
+# Assumes the dependency has been bundled in the plugin's folder.
+import paho.mqtt.client as mqtt
     
 ```
 
