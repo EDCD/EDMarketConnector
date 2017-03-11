@@ -11,7 +11,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import applongname, config
-from eddn import eddn
+import eddn
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor

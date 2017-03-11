@@ -25,48 +25,56 @@ from companion import category_map
 timeout= 10	# requests timeout
 module_re = re.compile('^Hpt_|^Int_|_Armour_')
 
+replayfile = None	# For delayed messages
 
-class _EDDN:
+class EDDN:
 
     ### UPLOAD = 'http://localhost:8081/upload/'	# testing
     UPLOAD = 'http://eddn-gateway.elite-markets.net:8080/upload/'
+    REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
+    REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
 
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
         self.session = requests.Session()
-        self.replayfile = None	# For delayed messages
+        self.replaylog = []
 
     def load(self):
         # Try to obtain exclusive access to the journal cache
+        global replayfile
         filename = join(config.app_dir, 'replay.jsonl')
         try:
             try:
                 # Try to open existing file
-                self.replayfile = open(filename, 'r+')
+                replayfile = open(filename, 'r+')
             except:
                 if exists(filename):
                     raise	# Couldn't open existing file
                 else:
-                    self.replayfile = open(filename, 'w+')	# Create file
+                    replayfile = open(filename, 'w+')	# Create file
             if platform != 'win32':	# open for writing is automatically exclusive on Windows
-                lockf(self.replayfile, LOCK_EX|LOCK_NB)
+                lockf(replayfile, LOCK_EX|LOCK_NB)
         except:
             if __debug__: print_exc()
-            if self.replayfile:
-                self.replayfile.close()
-            self.replayfile = None
+            if replayfile:
+                replayfile.close()
+            replayfile = None
             return False
+        self.replaylog = [line.strip() for line in replayfile]
         return True
 
     def flush(self):
-        if self.replayfile or self.load():
-            self.replayfile.seek(0, SEEK_SET)
-            for line in self.replayfile:
-                self.send(*json.loads(line, object_pairs_hook=OrderedDict))
-            self.replayfile.truncate(0)
+        replayfile.seek(0, SEEK_SET)
+        replayfile.truncate()
+        for line in self.replaylog:
+            replayfile.write('%s\n' % line)
+        replayfile.flush()
 
     def close(self):
-        if self.replayfile:
-            self.replayfile.close()
+        global replayfile
+        if replayfile:
+            replayfile.close()
+        replayfile = None
 
     def send(self, cmdr, msg):
         msg['header'] = {
@@ -84,6 +92,38 @@ class _EDDN:
             print 'Headers\t%s' % r.headers
             print ('Content:\n%s' % r.text).encode('utf-8')
         r.raise_for_status()
+
+    def sendreplay(self):
+        if not replayfile:
+            return	# Probably closing app
+
+        if not self.replaylog:
+            self.parent.status['text'] = ''
+            return
+
+        if len(self.replaylog) == 1:
+            self.parent.status['text'] = _('Sending data to EDDN...')
+        else:
+            self.parent.status['text'] = '%s [%d]' % (_('Sending data to EDDN...').replace('...',''), len(self.replaylog))
+        self.parent.w.update_idletasks()
+        try:
+            self.send(*json.loads(self.replaylog[0], object_pairs_hook=OrderedDict))
+            self.replaylog.pop(0)
+            if not len(self.replaylog) % self.REPLAYFLUSH:
+                self.flush()
+        except EnvironmentError as e:
+            if __debug__: print_exc()
+            self.parent.status['text'] = unicode(e)
+        except requests.exceptions.RequestException as e:
+            if __debug__: print_exc()
+            self.parent.status['text'] = _("Error: Can't connect to EDDN")
+            return	# stop sending
+        except Exception as e:
+            if __debug__: print_exc()
+            self.parent.status['text'] = unicode(e)
+            return	# stop sending
+
+        self.parent.w.after(self.REPLAYPERIOD, self.sendreplay)
 
     def export_commodities(self, data):
         commodities = []
@@ -142,25 +182,23 @@ class _EDDN:
             '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
             'message'    : entry
         }
-        if self.replayfile or self.load():
+        if replayfile or self.load():
             # Store the entry
-            self.replayfile.seek(0, SEEK_END)
-            self.replayfile.write('%s\n' % json.dumps([cmdr.encode('utf-8'), msg]))
-            self.replayfile.flush()
+            self.replaylog.append(json.dumps([cmdr.encode('utf-8'), msg]))
+            replayfile.write('%s\n' % self.replaylog[-1])
 
             if entry['event'] == 'Docked' or not (config.getint('output') & config.OUT_SYS_DELAY):
                 # Try to send this and previous entries
-                self.flush()
+                self.sendreplay()
         else:
             # Can't access replay file! Send immediately.
+            self.parent.status['text'] = _('Sending data to EDDN...')
+            self.parent.w.update_idletasks()
             self.send(cmdr, msg)
+            self.parent.status['text'] = ''
 
     def export_blackmarket(self, cmdr, is_beta, msg):
         self.send(cmdr, {
             '$schemaRef' : 'http://schemas.elite-markets.net/eddn/blackmarket/1' + (is_beta and '/test' or ''),
             'message'    : msg
         })
-
-
-# singleton
-eddn = _EDDN()

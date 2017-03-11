@@ -43,7 +43,7 @@ import companion
 import commodity
 from commodity import COMMODITY_CSV
 import td
-from eddn import eddn
+import eddn
 import edsm
 import coriolis
 import eddb
@@ -76,6 +76,7 @@ class AppWindow:
         self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
         self.edsm = edsm.EDSM()
+        self.eddn = eddn.EDDN(self)
 
         self.w = master
         self.w.title(applongname)
@@ -304,7 +305,7 @@ class AppWindow:
             self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
 
         # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        if not eddn.load():
+        if not self.eddn.load():
             self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
 
     # callback after the Preferences dialog is applied
@@ -496,13 +497,13 @@ class AppWindow:
                             if not old_status:
                                 self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
-                            eddn.export_commodities(data)
-                            eddn.export_outfitting(data)
+                            self.eddn.export_commodities(data)
+                            self.eddn.export_outfitting(data)
                             if has_shipyard and not data['lastStarport'].get('ships'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
                                 self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             else:
-                                eddn.export_shipyard(data)
+                                self.eddn.export_shipyard(data)
                             if not old_status:
                                 self.status['text'] = ''
 
@@ -578,7 +579,7 @@ class AppWindow:
             if __debug__:
                 print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
             if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
-                eddn.export_shipyard(data)
+                self.eddn.export_shipyard(data)
         except:
             pass
 
@@ -704,10 +705,7 @@ class AppWindow:
                     if 'StarPos' not in entry:
                         entry['StarPos'] = list(monitor.coordinates)
 
-                    self.status['text'] = _('Sending data to EDDN...')
-                    self.w.update_idletasks()
-                    eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
-                    self.status['text'] = ''
+                    self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
 
                 elif (config.getint('output') & config.OUT_MKT_EDDN and monitor.cmdr and
                       entry['event'] == 'MarketSell' and entry.get('BlackMarket')):
@@ -723,7 +721,7 @@ class AppWindow:
 
                     self.status['text'] = _('Sending data to EDDN...')
                     self.w.update_idletasks()
-                    eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
+                    self.eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
                     self.status['text'] = ''
 
             except requests.exceptions.RequestException as e:
@@ -756,7 +754,7 @@ class AppWindow:
         try:
             data = self.session.query()
         except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.shipyard_url))
+            return prefs.AuthenticationDialog(self.w, partial(self.verify, self.shipyard_url))
         except companion.ServerError as e:
             self.status['text'] = str(e)
             return
@@ -850,7 +848,7 @@ class AppWindow:
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         hotkeymgr.unregister()
         monitor.close()
-        eddn.close()
+        self.eddn.close()
         self.updater.close()
         self.session.close()
         config.close()
