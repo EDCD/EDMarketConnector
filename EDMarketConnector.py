@@ -598,10 +598,11 @@ class AppWindow:
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if system_changed or station_changed:
                 self.status['text'] = ''
-            if system_changed:
+            if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
                 self.system['image'] = ''
-                self.edsm.link(monitor.system)
+                if monitor.system:
+                    self.edsm.link(monitor.system)
             self.w.update_idletasks()
 
             # Send interesting events to EDSM
