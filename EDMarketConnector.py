@@ -597,19 +597,17 @@ class AppWindow:
             self.cmdr['text'] = monitor.cmdr and monitor.group and ' / '.join([monitor.cmdr, monitor.group]) or monitor.cmdr or ''
             self.ship['text'] = monitor.state['ShipType'] and companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or ''
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
-            if system_changed or station_changed:
-                self.status['text'] = ''
             if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
                 self.system['image'] = ''
                 if monitor.system:
                     self.edsm.link(monitor.system)
+            if entry['event'] in ['Undocked', 'StartJump', 'SetUserShipName', 'ShipyardBuy', 'ShipyardSell', 'ShipyardSwap', 'ModuleBuy', 'ModuleSell', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
+                self.status['text'] = ''	# Periodically clear any old error
             self.w.update_idletasks()
 
             # Send interesting events to EDSM
             if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
-                self.status['text'] = _('Sending data to EDSM...')
-                self.w.update_idletasks()
                 try:
                     # Update system status on startup
                     if entry['event'] in [None, 'StartUp'] and monitor.mode and monitor.system:
@@ -654,8 +652,6 @@ class AppWindow:
                     self.status['text'] = unicode(e)
                     if not config.getint('hotkey_mute'):
                         hotkeymgr.play_bad()
-                else:
-                    self.status['text'] = ''
             self.edsmpoll()
 
             # Companion login - do this after EDSM so any EDSM errors don't mask login errors
