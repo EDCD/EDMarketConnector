@@ -74,7 +74,7 @@
 "Configuration" = "Конфігурація";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "очикування {SS} сек";
+"cooldown {SS}s" = "очікування {SS} сек";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
 "Copy" = "Копіювати";
@@ -113,7 +113,7 @@
 "Duke" = "Герцог";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "Росташування файлу-журналу E:D";
+"E:D journal file location" = "Розташування файлу-журналу E:D";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Дворянин";
@@ -179,7 +179,7 @@
 "File" = "Файл";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "Росташування файлу";
+"File location" = "Розташування файлу";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Гладіатор";
@@ -200,7 +200,7 @@
 "Highlighted text" = "Виділений текст";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Горяча клавіша";
+"Hotkey" = "Гаряча клавіша";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Як вас ідентифікувати в збережених даних";
@@ -320,7 +320,7 @@
 "Please enter the code into the box below." = "Будь ласка, введіть код в поле нижче.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite : Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite: Dangerous";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Капітан I рангу";
