@@ -595,7 +595,8 @@ class AppWindow:
 
             # Update main window
             self.cmdr['text'] = monitor.cmdr and monitor.group and ' / '.join([monitor.cmdr, monitor.group]) or monitor.cmdr or ''
-            self.ship['text'] = monitor.state['ShipType'] and companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or ''
+            self.ship['text'] = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or ''
+            self.ship['state'] = monitor.is_beta and tk.DISABLED or tk.NORMAL
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
