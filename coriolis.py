@@ -238,6 +238,17 @@ def export(data, filename=None):
         h.write(string)
 
 
+# Return a URL for the current ship
+def url(data):
+
+    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
+
+    out = StringIO.StringIO()
+    with gzip.GzipFile(fileobj=out, mode='w') as f:
+        f.write(string)
+    return 'https://coriolis.edcd.io/import?data=' + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
+
+
 #
 # build ship and module databases from https://github.com/cmmcleod/coriolis-data
 #
@@ -325,7 +336,9 @@ if __name__ == "__main__":
         ships[name] = { 'hullMass' : m['properties']['hullMass'] }
         for i in range(len(bulkheads)):
             modules[(bulkheads[i], name, '1', 'I')] = { 'mass': m['bulkheads'][i]['mass'] }
-    cPickle.dump(ships, open('ships.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
+
+    ships = OrderedDict([(k,ships[k]) for k in sorted(ships)])	# sort for easier diffing
+    cPickle.dump(ships, open('ships.p', 'wb'))
 
     # Module masses
     for cat in data['Modules'].values():
@@ -352,15 +365,5 @@ if __name__ == "__main__":
     # not in coriolis-data at time of writing
     modules[('Pulse Laser', None, '2', 'E')] = { 'mass': 4 }	# Fixed used to be 2F
 
-    cPickle.dump(modules, open('modules.p', 'wb'), protocol = cPickle.HIGHEST_PROTOCOL)
-
-
-# Return a URL for the current ship
-def url(data):
-
-    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
-
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode='w') as f:
-        f.write(string)
-    return 'https://coriolis.edcd.io/import?data=' + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
+    modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
+    cPickle.dump(modules, open('modules.p', 'wb'))
