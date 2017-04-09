@@ -279,6 +279,7 @@ if __name__ == "__main__":
         # Internal
         'fs'  : 'Fuel Scoop',
         'sc'  : 'Scanner',
+        'ss'  : 'Detailed Surface Scanner',
         'am'  : 'Auto Field-Maintenance Unit',
         'bsg' : 'Bi-Weave Shield Generator',
         'cr'  : 'Cargo Rack',
@@ -361,9 +362,6 @@ if __name__ == "__main__":
                     }
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
-
-    # not in coriolis-data at time of writing
-    modules[('Pulse Laser', None, '2', 'E')] = { 'mass': 4 }	# Fixed used to be 2F
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
