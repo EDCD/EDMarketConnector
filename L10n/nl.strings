@@ -26,7 +26,7 @@
 "Appearance" = "Vormgeving";
 
 /* Output setting. [prefs.py] */
-"Automatically update on docking" = "Automatisch bijwerken zodra gedockt";
+"Automatically update on docking" = "Automatisch bijwerken na de landing";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "Balans";
@@ -105,6 +105,9 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Stel verzending uit tot na het docken";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Niet bijgewerkt: Zeldzame goederen aan boord";
 
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentatie";
@@ -221,7 +224,7 @@
 "Language" = "Taal";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Voor het laatst ververst om {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Voor het laatst bijgewerkt om {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
@@ -455,7 +458,7 @@
 "Tycoon" = "Tycoon";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Verversen";
+"Update" = "Bijwerken";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Username (Email)" = "Gebruikersnaam (e-mail)";

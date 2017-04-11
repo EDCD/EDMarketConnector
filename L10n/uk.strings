@@ -74,7 +74,7 @@
 "Configuration" = "Конфігурація";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "очикування {SS} сек";
+"cooldown {SS}s" = "очікування {SS} сек";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
 "Copy" = "Копіювати";
@@ -106,6 +106,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";
 
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Не оновлено: Перевозиться Рідкісний товар";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Документація";
 
@@ -113,7 +116,7 @@
 "Duke" = "Герцог";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "Росташування файлу-журналу E:D";
+"E:D journal file location" = "Розташування файлу-журналу E:D";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Дворянин";
@@ -179,7 +182,7 @@
 "File" = "Файл";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "Росташування файлу";
+"File location" = "Розташування файлу";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Гладіатор";
@@ -200,7 +203,7 @@
 "Highlighted text" = "Виділений текст";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Горяча клавіша";
+"Hotkey" = "Гаряча клавіша";
 
 /* [prefs.py] */
 "How do you want to be identified in the saved data" = "Як вас ідентифікувати в збережених даних";

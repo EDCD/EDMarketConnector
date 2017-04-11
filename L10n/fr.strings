@@ -65,7 +65,7 @@
 "Combat" = "Combattant";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
+"Commander Name" = "Nom du commandant";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Compétent";
@@ -105,6 +105,9 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Retarder l'envoi jusqu'à l'amarrage";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "N'a pas mise à jour : Apportant Rares";
 
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentation";
@@ -158,7 +161,7 @@
 "Error: Verification failed" = "Erreur : La vérification a échouée";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Error: Wrong Cmdr";
+"Error: Wrong Cmdr" = "Erreur : Cmdr incorrect";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Quitter";

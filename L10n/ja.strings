@@ -20,7 +20,7 @@
 "Amateur" = "Amateur";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
+"API Key" = "APIキー";
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "表示";
@@ -65,7 +65,7 @@
 "Combat" = "Combat";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
+"Commander Name" = "コマンダー名";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Competent";
@@ -105,6 +105,9 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "ドッキングするまでデータを送信しない";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "レア交易品を積載しているため更新を中止しました";
 
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "ドキュメント";
@@ -377,7 +380,7 @@
 "Recruit" = "Recruit";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "リリース ノート";
+"Release Notes" = "リリースノート";
 
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "生データの保存...";
@@ -461,7 +464,7 @@
 "Username (Email)" = "ユーザ名(メールアドレス)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "値";
+"Value" = "価値";
 
 /* Federation rank. [stats.py] */
 "Vice Admiral" = "Vice Admiral";

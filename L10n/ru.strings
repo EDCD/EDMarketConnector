@@ -65,7 +65,7 @@
 "Combat" = "Боевой";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Имя пилота";
+"Commander Name" = "Имя Пилота";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Специалист";
@@ -158,7 +158,7 @@
 "Error: Verification failed" = "Ошибка: Проверка не пройдена";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Error: Wrong Cmdr";
+"Error: Wrong Cmdr" = "Ошибка: неверное имя";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Выход";
@@ -380,7 +380,7 @@
 "Release Notes" = "Заметки о выпуске";
 
 /* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Сохранять Сырые Данные...";
+"Save Raw Data..." = "Сохранить все данные..";
 
 /* Explorer rank. [stats.py] */
 "Scout" = "Разведчик";

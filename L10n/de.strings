@@ -20,7 +20,7 @@
 "Amateur" = "Anfänger";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API-Schlüssel";
+"API Key" = "API Schlüssel";
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Aussehen";
@@ -65,7 +65,7 @@
 "Combat" = "Kampfrang";
 
 /* EDSM setting. [prefs.py] */
-"Commander Name" = "Commander Name";
+"Commander Name" = "Kommandantenname";
 
 /* Combat rank. [stats.py] */
 "Competent" = "Kompetent";
@@ -105,6 +105,9 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Senden verzögern bis angedockt";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Nicht aktualisiert: Besondere Güter an Bord";
 
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentation";
