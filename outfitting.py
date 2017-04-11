@@ -100,6 +100,8 @@ weaponrating_map = {
     'hpt_minelauncher_fixed_medium': 'I',
     'hpt_mininglaser_fixed_small': 'D',
     'hpt_mininglaser_fixed_medium': 'D',
+    'hpt_mininglaser_turret_small': 'D',
+    'hpt_mininglaser_turret_medium': 'D',
     'hpt_multicannon_fixed_small': 'F',
     'hpt_multicannon_fixed_medium': 'E',
     'hpt_multicannon_fixed_large': 'C',
@@ -277,7 +279,7 @@ def lookup(module, ship_map, entitled=False):
         new['rating'] = 'I'
 
     # Skip uninteresting stuff
-    elif name[0] in ['bobble', 'decal', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
+    elif name[0] in ['bobble', 'decal', 'nameplate', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
         return None
 
     # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
