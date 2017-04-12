@@ -3,12 +3,12 @@
 Elite: Dangerous Market Connector (EDMC)
 ========
 
-This app downloads your Cmdr's data, system, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
+This app downloads your Cmdr's details and system, faction, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends the station commodity market prices, other station data and system and scan data to the [Elite Dangerous Data Network](https://github.com/jamesremuscat/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
-* saves the station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
+* sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/jamesremuscat/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
-* sends your ship details and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
+* sends your Cmdr's details, ship details, materials and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
 
 You can run the app on the same machine on which you're running Elite: Dangerous or on another machine connected via a network share.
 
@@ -16,7 +16,7 @@ Usage
 --------
 The user-interface is deliberately minimal - your choice of data is automatically downloaded, transmitted and/or saved when you land at a station, jump to a system or scan a body.
 
-Click on the ship name to view its loadout and modifications on [E:D&nbsp;Shipyard](http://www.edshipyard.com) or [Coriolis](http://coriolis.io) in your web browser.
+Click on the ship name to view its loadout on [E:D&nbsp;Shipyard](http://www.edshipyard.com) or [Coriolis](http://coriolis.io) in your web browser.
 
 Click on the system name to go to its [Elite: Dangerous Star Map](http://www.edsm.net/) (“EDSM”) entry in your web browser.
 
@@ -80,12 +80,12 @@ Some options work by reading the Elite: Dangerous game's “journal” files. If
 * Station data
   * Sends station commodity market, outfitting and shipyard data to “[EDDN](https://github.com/jamesremuscat/EDDN/wiki)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
 * System and scan data
-  * Sends general system information and the results of your detailed planet scans to “[EDDN](https://github.com/jamesremuscat/EDDN/wiki)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
+  * Sends system and faction information and the results of your planet scans to “[EDDN](https://github.com/jamesremuscat/EDDN/wiki)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
   * You can choose to delay sending this information to EDDN until you're next safely docked at a station. Otherwise the information is sent as soon as you enter a system or perform a scan.
 
 ### EDSM
 
-You can send a record of your ship and location to [Elite: Dangerous Star Map](http://www.edsm.net/) where you can view your fleet and flight log, and optionally add private comments about systems. You will need to register for an account and then follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
+You can send a record of your Cmdr's details, ship details, materials and flight log to [Elite: Dangerous Star Map](http://www.edsm.net/). You will need to register for an account and then follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
 
 
 Uninstall
@@ -123,10 +123,10 @@ The Frontier server that supplies the data to this app sometimes fails to supply
 
 This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConnector/issues/86).
 
-### Rares profits wiped out
+### Didn't update: Carrying Rares
 Due to a bug in the server that supplies the data to this app, profit on any Rare cargo in your hold may be wiped out when you visit the in-game Commodity Market after having “Updated”.
 
-If you're trading Rares turn off the “Automatically update on docking” setting and ensure that you visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
+This app will not auto-update when you dock if you're carrying Rares. Visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
 
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
