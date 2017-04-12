@@ -62,6 +62,8 @@ def export(data, filename=None):
 
     loadout = defaultdict(list)
     mass = 0.0
+    fuel = 0
+    cargo = 0
     fsd = None
 
     for slot in sorted(data['ship']['modules']):
@@ -77,7 +79,11 @@ def export(data, filename=None):
             mass += module.get('mass', 0)
 
             # Specials
-            if 'Fuel Tank'in module['name'] or 'Cargo Rack' in module['name']:
+            if 'Fuel Tank'in module['name']:
+                fuel += 2**int(module['class'])
+                name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+            elif 'Cargo Rack' in module['name']:
+                cargo += 2**int(module['class'])
                 name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
             else:
                 name = module['name']
@@ -109,7 +115,7 @@ def export(data, filename=None):
         elif slot in loadout:
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
-    string += '---\nCargo : %d T\nFuel  : %d T\n' % (data['ship']['cargo']['capacity'], data['ship']['fuel']['main']['capacity'])
+    string += '---\nCargo : %d T\nFuel  : %d T\n' % (cargo, fuel)
 
     # Add mass and range
     assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
@@ -117,11 +123,11 @@ def export(data, filename=None):
     try:
         # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
-        string += 'Mass  : %.1f T empty\n        %.1f T full\n' % (mass, mass + data['ship']['fuel']['main']['capacity']+ data['ship']['cargo']['capacity'])
-        multiplier = pow(min(data['ship']['fuel']['main']['capacity'], fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
+        string += 'Mass  : %.1f T empty\n        %.1f T full\n' % (mass, mass + fuel + cargo)
+        multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
         string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
-            multiplier / (mass + data['ship']['fuel']['main']['capacity']),
-            multiplier / (mass + data['ship']['fuel']['main']['capacity'] + data['ship']['cargo']['capacity']))
+            multiplier / (mass + fuel),
+            multiplier / (mass + fuel + cargo))
     except:
         if __debug__: raise
 

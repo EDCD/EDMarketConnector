@@ -519,8 +519,6 @@ class AppWindow:
                                 props = []
                             else:
                                 props = [
-                                    ('cargoCapacity',    ship['cargo']['capacity']),
-                                    ('fuelMainCapacity', ship['fuel']['main']['capacity']),
                                     ('linkToCoriolis',   coriolis.url(data)),
                                     ('linkToEDShipyard', edshipyard.url(data)),
                                 ]
