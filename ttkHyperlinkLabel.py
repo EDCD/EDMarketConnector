@@ -78,6 +78,11 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
     # Change cursor and appearance depending on state and text
     def configure(self, cnf=None, **kw):
+        # This class' state
+        for thing in ['url', 'popup_copy', 'underline', 'foreground', 'disabledforeground']:
+            if thing in kw:
+                setattr(self, thing, kw[thing])
+
         if kw.get('state') == tk.DISABLED:
             if 'foreground' not in kw:
                 kw['foreground'] = self.disabledforeground
