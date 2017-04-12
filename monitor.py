@@ -332,11 +332,7 @@ class EDLogs(FileSystemEventHandler):
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
-                    'ShipID'       : entry.get('ShipID') if entry.get('Ship') not in ['TestBuggy', 'Empire_Fighter', 'Federation_Fighter', 'Independent_Fighter'] else None 	# None in CQC or if game starts in SRV/fighter
                 })
-                self.state['ShipIdent'] = self.state['ShipID'] and entry.get('ShipIdent')
-                self.state['ShipName']  = self.state['ShipID'] and entry.get('ShipName')
-                self.state['ShipType']  = self.state['ShipID'] and entry.get('Ship').lower()
                 self.body = None
                 self.system = None
                 self.station = None
