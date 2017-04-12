@@ -438,8 +438,8 @@ class AppWindow:
                     with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
                         h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
-                self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                 if not monitor.state['ShipType']:	# Started game in SRV or fighter
+                    self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] =   data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
                 if not monitor.system:
@@ -764,7 +764,8 @@ class AppWindow:
             self.status['text'] = _("Where are you?!")		# Shouldn't happen
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-        elif shipname and shipname != companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name']):
+        elif (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
+            print shipname, data['ship']['name']
             self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
