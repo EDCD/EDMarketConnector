@@ -674,12 +674,12 @@ class AppWindow:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
-            if station_changed and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            if station_changed and monitor.mode and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
             try:
-                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and
+                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and monitor.mode and
                     (entry['event'] == 'FSDJump' or
                      entry['event'] == 'Docked'  or
                      entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):

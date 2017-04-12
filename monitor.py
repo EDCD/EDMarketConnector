@@ -326,7 +326,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'LoadGame':
                 self.live = True
                 self.cmdr = entry['Commander']
-                self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC
+                self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
                 self.state.update({
                     'Credits'      : entry['Credits'],
