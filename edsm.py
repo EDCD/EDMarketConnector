@@ -214,7 +214,7 @@ class EDSM:
         self.call('api-commander-v1/set-materials', "&type=data&values=%s" % json.dumps(encoded, separators = (',', ':')))
         materials = {}
         materials.update(raw)
-        materials.update(encoded)
+        materials.update(manufactured)
         self.call('api-commander-v1/set-materials', "&type=materials&values=%s" % json.dumps(materials, separators = (',', ':')))
 
     def setshipid(self, shipid):
