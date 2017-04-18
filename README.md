@@ -131,7 +131,7 @@ This app will not auto-update when you dock if you're carrying Rares. Visit the 
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
 ### Doesn't auto-update or track Systems visited
-This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
+This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files - typically C:\Users\_you_\Saved Games\Frontier Developments\EliteDangerous on Windows.
 
 ### Credentials settings are greyed out
 You can't edit your Username/Password or EDSM Commander Name/API Key if:
