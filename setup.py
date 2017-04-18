@@ -72,7 +72,7 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'PIL', 'simplejson' ],
+                  'excludes': [ 'certifi', 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'resources': ['snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
