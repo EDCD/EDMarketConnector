@@ -97,7 +97,7 @@ fixup_map.update({
 
 
 # Ship masses
-ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+ships = cPickle.load(open(join(config.respath, 'ships.p'),  'r'))
 
 
 def export(data, filename=None):

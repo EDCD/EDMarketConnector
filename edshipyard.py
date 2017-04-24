@@ -42,7 +42,7 @@ slot_map = {
 
 
 # Ship masses
-ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+ships = cPickle.load(open(join(config.respath, 'ships.p'),  'r'))
 
 
 # Export ship loadout in E:D Shipyard plain text format
