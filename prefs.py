@@ -3,6 +3,7 @@
 import os
 from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath
 from sys import platform
+import webbrowser
 
 import Tkinter as tk
 import ttk
@@ -320,9 +321,8 @@ class PreferencesDialog(tk.Toplevel):
         self.displaypath(plugdir, plugdirentry)
         plugdirentry.grid(row=10, padx=PADX, sticky=tk.EW)
 
-        if platform == 'win32':
-            nb.Button(plugsframe, text=_('Open'),	# Button that opens a folder in Explorer/Finder
-                      command=lambda: os.startfile(plugdir.get())).grid(row=10, column=1, padx=(0,PADX), sticky=tk.NSEW)
+        nb.Button(plugsframe, text=_('Open'),	# Button that opens a folder in Explorer/Finder
+                  command=lambda: webbrowser.open('file:///%s' % plugdir.get())).grid(row=10, column=1, padx=(0,PADX), sticky=tk.NSEW)
 
         nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name").format(EXT='.disabled')).grid(	# Help text in settings
             columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
