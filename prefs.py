@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import os
 from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath
 from sys import platform
 
@@ -305,6 +305,36 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
 
         notebook.add(themeframe, text=_('Appearance'))	# Tab heading in settings
+
+        # Plugin settings and info
+        plugsframe = nb.Frame(notebook)
+        plugsframe.columnconfigure(1, weight=1)
+        plugdir = config.plugin_dir
+
+        plugnames, disabled_plugins = plug.find_plugins()
+
+        nb.Label(plugsframe, text=_('Plugins Folder:')).grid(padx=PADX, sticky=tk.W)
+        nb.Label(plugsframe, text=plugdir).grid(padx=PADX, sticky=tk.W)
+        if platform == "win32":
+            nb.Button(plugsframe, text="Open",
+                      command=lambda: os.startfile(plugdir)).grid(padx=PADX, sticky=tk.W)
+
+        nb.Label(plugsframe, text=_("Tip: You can disable a plugin by\nadding '.disabled' to it's folder name")).grid(
+            padx=PADX, pady=10, sticky=tk.NSEW)
+
+        if len(plugnames):
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            nb.Label(plugsframe, text=_('Enabled Plugins:')).grid(padx=PADX, sticky=tk.W)
+            for plugname in plugnames:
+                nb.Label(plugsframe, text=plugname).grid(padx=PADX + 5, sticky=tk.W)
+        if len(disabled_plugins):
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            nb.Label(plugsframe, text=_('Disabled Plugins:')).grid(padx=PADX, sticky=tk.W)
+            for plugname in disabled_plugins:
+                nb.Label(plugsframe, text=plugname).grid(padx=PADX + 5, sticky=tk.W)
+
+        notebook.add(plugsframe, text=_('Plugins'))
+
 
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
