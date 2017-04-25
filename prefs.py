@@ -314,12 +314,17 @@ class PreferencesDialog(tk.Toplevel):
         plugnames, disabled_plugins = plug.find_plugins()
 
         nb.Label(plugsframe, text=_('Plugins Folder:')).grid(padx=PADX, sticky=tk.W)
-        nb.Label(plugsframe, text=plugdir).grid(padx=PADX, sticky=tk.W)
+        plugdirentry = nb.Entry(plugsframe,
+                                justify=tk.LEFT)
+        plugdirentry.insert(0, plugdir)
+        plugdirentry.grid(padx=PADX, columnspan=2, sticky=tk.EW)
+
         if platform == "win32":
             nb.Button(plugsframe, text="Open",
-                      command=lambda: os.startfile(plugdir)).grid(padx=PADX, sticky=tk.W)
+                      command=lambda: os.startfile(plugdir)).grid(padx=PADX-1, sticky=tk.W)
 
         nb.Label(plugsframe, text=_("Tip: You can disable a plugin by\nadding '.disabled' to it's folder name")).grid(
+            columnspan=2,
             padx=PADX, pady=10, sticky=tk.NSEW)
 
         if len(plugnames):
