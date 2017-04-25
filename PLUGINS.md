@@ -2,6 +2,11 @@
 
 Plugins allow you to customise and extend the behavior of EDMC.
 
+# Installing a Plugin
+
+EDMC loads all plugins it finds in it's `plugins` folder.  You can easily find this on your system via the Plugins tab
+of the Settings window.
+
 # Writing a Plugin
 
 Plugins are loaded when EDMC starts up.
@@ -137,4 +142,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import paho.mqtt.client as mqtt
     
 ```
+
+# Disable a plugin
+
+EDMC now lets you disable a plugin without deleting it, simply rename the plugin folder to append ".disabled". Eg,
+"SuperSpaceHelper" -> "SuperSpaceHelper.disabled"
+
+Disabled and enabled plugins are listed on the "Plugins" Settings tab
 

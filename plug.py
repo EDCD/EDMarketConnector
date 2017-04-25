@@ -19,12 +19,17 @@ def find_plugins():
     :return:
     """
     found = dict()
+    disabled = list()
     plug_folders = os.listdir(config.plugin_dir)
     for name in plug_folders:
+        if name.endswith(".disabled"):
+            name, discard = name.rsplit(".", 1)
+            disabled.append(name)
+            continue
         loadfile = os.path.join(config.plugin_dir, name, "load.py")
         if os.path.isfile(loadfile):
             found[name] = loadfile
-    return found
+    return found, disabled
 
 
 def load_plugins():
@@ -32,10 +37,14 @@ def load_plugins():
     Load all found plugins
     :return:
     """
-    found = find_plugins()
+    found, disabled = find_plugins()
     imp.acquire_lock()
+    for plugname in disabled:
+        sys.stdout.write("plugin {} disabled\n".format(plugname))
+
     for plugname in found:
         try:
+            sys.stdout.write("loading plugin {}\n".format(plugname))
             with open(found[plugname], "rb") as plugfile:
                 plugmod = imp.load_module(plugname, plugfile, found[plugname],
                                           (".py", "r", imp.PY_SOURCE))

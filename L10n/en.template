@@ -109,6 +109,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "Didn't update: Carrying Rares";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Disabled Plugins";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentation";
 
@@ -132,6 +135,9 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Enabled Plugins";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -286,6 +292,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Only when Elite: Dangerous is the active app";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Open";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Open System Preferences";
 
@@ -324,6 +333,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Please log in with your Elite: Dangerous account details";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Plugins folder";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -444,6 +459,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";
