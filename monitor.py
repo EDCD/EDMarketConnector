@@ -346,8 +346,8 @@ class EDLogs(FileSystemEventHandler):
                     self.state['ShipIdent'] = entry['UserShipId']
                 self.state['ShipName']  = entry.get('UserShipName')
                 self.state['ShipType']  = entry['Ship'].lower()
-            elif entry['event'] == 'ShipyardNew':
-                self.state['ShipID'] = entry['NewShipID']
+            elif entry['event'] == 'ShipyardBuy':
+                self.state['ShipID'] = None
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
                 self.state['ShipType'] = entry['ShipType'].lower()
@@ -358,7 +358,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipName']  = None
                 self.state['ShipType'] = entry['ShipType'].lower()
                 self.state['PaintJob'] = None
-            elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, but also sent after changing ship
+            elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, ShipyardNew, follows ShipyardSwap, ShipyardBuy
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']

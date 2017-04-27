@@ -515,24 +515,13 @@ class AppWindow:
                                 monitor.state['Loan'] = data['commander'].get('debt', 0)
                                 self.edsm.setcredits(monitor.state['Credits'], monitor.state['Loan'])
                             ship = companion.ship(data)
-                            if ship == self.edsm.lastship:
-                                props = []
-                            else:
-                                props = [
-                                    ('linkToCoriolis',   coriolis.url(data)),
-                                    ('linkToEDShipyard', edshipyard.url(data)),
-                                ]
-                            if monitor.state['PaintJob'] is None:
-                                # Companion API server can lag, so prefer Journal. But paintjob only reported in Journal on change.
-                                if monitor.state['ShipID'] != data['ship']['id']:
-                                    monitor.state['ShipID'] = data['ship']['id']
-                                    monitor.state['ShipIdent'] = None
-                                    monitor.state['ShipName'] = None
-                                monitor.state['ShipType'] = data['ship']['name'].lower()
-                                monitor.state['PaintJob'] = data['ship']['modules']['PaintJob'] and data['ship']['modules']['PaintJob']['module']['name'].lower() or ''
-                                props.append(('paintJob', monitor.state['PaintJob']))
-                            if props:
-                                self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], props)
+                            if ship != self.edsm.lastship:
+                                self.edsm.updateship(monitor.state['ShipID'],
+                                                     monitor.state['ShipType'],
+                                                     [
+                                                         ('linkToCoriolis',   coriolis.url(data)),
+                                                         ('linkToEDShipyard', edshipyard.url(data)),
+                                                     ])
                                 self.edsm.lastship = ship
                         except Exception as e:
                             # Not particularly important so silent on failure
@@ -765,7 +754,6 @@ class AppWindow:
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
         elif (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
-            print shipname, data['ship']['name']
             self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
