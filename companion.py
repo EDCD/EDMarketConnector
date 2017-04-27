@@ -140,13 +140,13 @@ def listify(thing):
 
 class ServerError(Exception):
     def __unicode__(self):
-        return _('Error: Server is down')
+        return _('Error: Frontier server is down')	# Raised when cannot contact the Companion API server
     def __str__(self):
         return unicode(self).encode('utf-8')
 
 class ServerLagging(Exception):
     def __unicode__(self):
-        return _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
+        return _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
     def __str__(self):
         return unicode(self).encode('utf-8')
 

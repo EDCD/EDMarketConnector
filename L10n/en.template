@@ -154,11 +154,14 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Error: Invalid Credentials";
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Error: Frontier server is down";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Error: Frontier server is lagging";
 
 /* [companion.py] */
-"Error: Server is down" = "Error: Server is down";
+"Error: Invalid Credentials" = "Error: Invalid Credentials";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Server is lagging" = "Error: Server is lagging";
