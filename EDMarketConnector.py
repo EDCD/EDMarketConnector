@@ -587,9 +587,8 @@ class AppWindow:
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
-                self.system['image'] = ''
-                if monitor.system:
-                    self.edsm.link(monitor.system)
+                self.edsm.link(monitor.system)
+                self.edsmpoll()
             if entry['event'] in ['Undocked', 'StartJump', 'SetUserShipName', 'ShipyardBuy', 'ShipyardSell', 'ShipyardSwap', 'ModuleBuy', 'ModuleSell', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
                 self.status['text'] = ''	# Periodically clear any old error
             self.w.update_idletasks()

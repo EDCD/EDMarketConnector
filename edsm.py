@@ -107,7 +107,7 @@ class EDSM:
     # Just set link without doing a lookup
     def link(self, system_name):
         self.cancel_lookup()
-        if system_name in self.FAKE:
+        if not system_name or system_name in self.FAKE:
             self.result = { 'img': '', 'url': None, 'done': True, 'uncharted': False }
         else:
             self.result = { 'img': '', 'url': 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system_name), 'done': True, 'uncharted': False }
