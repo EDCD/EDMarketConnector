@@ -39,16 +39,17 @@ class Translations:
         available.add(Translations.FALLBACK)
 
         if not lang:
+            # Choose the default language
             for preferred in self.preferred():
+                components = preferred.split('-')
                 if preferred in available:
                     lang = preferred
+                elif '-'.join(components[0:2]) in available:
+                    lang = '-'.join(components[0:2])	# language-script
+                elif components[0] in available:
+                    lang = components[0]	# just base language
+                if lang:
                     break
-            else:
-                for preferred in self.preferred():
-                    preferred = preferred.split('-',1)[0]	# just base language
-                    if preferred in available:
-                        lang = preferred
-                        break
 
         if lang not in self.available():
             self.install_dummy()
@@ -101,14 +102,14 @@ class Translations:
                             key=lambda x: x[1]))	# Sort by name
         return names
 
-    # Returns list of preferred language codes in lowercase RFC4646 format.
-    # Typically "lang[-script][-region]" where lang is a 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
-    # script is a 4 alpha ISO 15924 code and region is a 2 alpha ISO 3166 code
+    # Returns list of preferred language codes in RFC4646 format i.e. "lang[-script][-region]"
+    # Where lang is a lowercase 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
+    # script is a capitalized 4 alpha ISO 15924 code and region is an uppercase 2 alpha ISO 3166 code
     def preferred(self):
 
         if platform=='darwin':
             from Foundation import NSLocale
-            return [x.lower() for x in NSLocale.preferredLanguages()] or None
+            return NSLocale.preferredLanguages() or None
 
         elif platform=='win32':
 
@@ -133,13 +134,13 @@ class Translations:
             if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value):
                 buf = ctypes.create_unicode_buffer(size.value)
                 if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
-                    return [x.lower() for x in wszarray_to_list(buf)]
+                    return wszarray_to_list(buf)
             return None
 
         else:	# POSIX
             import locale
             lang = locale.getdefaultlocale()[0]
-            return lang and [lang.replace('_','-').lower()]
+            return lang and [lang.replace('_','-')]
 
     def respath(self):
         if getattr(sys, 'frozen', False):
