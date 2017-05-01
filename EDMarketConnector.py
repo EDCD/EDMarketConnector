@@ -428,7 +428,11 @@ class AppWindow:
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
-            elif (auto_update and not data['commander'].get('docked')) or (monitor.system and data['lastSystem']['name'] != monitor.system) or (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
+            elif ((auto_update and not data['commander'].get('docked')) or
+                  (monitor.system and data['lastSystem']['name'] != monitor.system) or
+                  (monitor.station and data['lastStarport']['name'] != monitor.station) or
+                  (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or
+                  (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType'])):
                 raise companion.ServerLagging()
 
             else:
