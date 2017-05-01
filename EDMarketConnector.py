@@ -28,13 +28,14 @@ if __debug__:
         import signal
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
-from config import appname, applongname, config
+from config import appname, applongname, appversion, config
 if getattr(sys, 'frozen', False):
     if platform == 'win32':
         chdir(dirname(sys.path[0]))
     # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
     import tempfile
     sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
+    print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
 
 from l10n import Translations
 Translations().install(config.get('language') or None)
