@@ -1,3 +1,8 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Fout: Frontier server is offline";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Fout: Frontier server is vertraagd";
 /* Language name */
 "!Language" = "Nederlands";
 
@@ -109,6 +114,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "Niet bijgewerkt: Zeldzame goederen aan boord";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Gedeactiveerde plugins";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentatie";
 
@@ -133,6 +141,9 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Geactiveerde plugins";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
@@ -150,12 +161,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Fout: Ongeldige inlog gegevens";
-
-/* [companion.py] */
-"Error: Server is down" = "Fout: Server is offline";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Fout: Server loopt achter";
 
 /* [companion.py] */
 "Error: Verification failed" = "Fout: Verificatie mislukt";
@@ -286,6 +291,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Alleen wanneer Elite: Dangerous de actieve applicatie is";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Openen";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Open Systeemvoorkeuren";
 
@@ -324,6 +332,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Log in met uw Elite: Dangerous account gegevens";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Plugins map";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -444,6 +458,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Thema";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: Je kan een plugin deactiveren door '{EXT}'{CR}toe te voegen aan de map naam";
 
 /* Ranking. [stats.py] */
 "Trade" = "Handels rang";

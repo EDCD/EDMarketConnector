@@ -1,3 +1,8 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "エラー: Frontier社のサーバがダウンしています";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "エラー: Frontier社のサーバが混雑しています";
 /* Language name */
 "!Language" = "日本語";
 
@@ -109,6 +114,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "レア交易品を積載しているため更新を中止しました";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "無効なプラグイン";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "ドキュメント";
 
@@ -133,6 +141,9 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "有効なプラグイン";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
@@ -150,12 +161,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "エラー: 認証情報に誤りがあります";
-
-/* [companion.py] */
-"Error: Server is down" = "エラー: サーバがダウンしています";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "エラー: サーバが混雑しています";
 
 /* [companion.py] */
 "Error: Verification failed" = "エラー: 認証に失敗しました";
@@ -286,6 +291,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Elite: Dangerousがアクティブの時だけ有効";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "開く";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "システム環境設定を開く";
 
@@ -324,6 +332,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Elite: Dangerousのアカウント情報を入力して下さい";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "プラグイン";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "プラグインフォルダ";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -444,6 +458,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "テーマ";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "ヒント: プラグインを無効にするには{CR}フォルダ名に '{EXT}' を追加してください";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

@@ -1,3 +1,8 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Erreur : Le serveur Frontier est indisponible";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Erreur : Le serveur Frontier ne répond pas";
 /* Language name */
 "!Language" = "Français";
 
@@ -109,6 +114,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "N'a pas mise à jour : Apportant Rares";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Plugins désactivés";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentation";
 
@@ -133,6 +141,9 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Plugins activés";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Enseigne";
 
@@ -150,12 +161,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Erreur : Identifiants invalides";
-
-/* [companion.py] */
-"Error: Server is down" = "Erreur : Le serveur est indisponible";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Erreur : Le serveur ne répond pas";
 
 /* [companion.py] */
 "Error: Verification failed" = "Erreur : La vérification a échouée";
@@ -286,6 +291,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Seulement quand Elite: Dangerous est l'application active";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Ouvrir";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Ouvrir Préférences Système";
 
@@ -324,6 +332,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Veuillez vous connecter avec vos identifiants de compte Elite: Dangerous";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Répertoire des plugins";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Capitaine de Vaisseau";
@@ -444,6 +458,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Thème";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Astuce : Vous pouvez désactiver un plugin en{CR}ajoutant '{EXT}' à son nom de répertoire";
 
 /* Ranking. [stats.py] */
 "Trade" = "Commerçant";

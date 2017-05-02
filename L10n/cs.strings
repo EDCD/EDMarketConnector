@@ -1,3 +1,8 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Chyba: Server Frontieru nejede";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Chyba: Server Frontieru laguje";
 /* Language name */
 "!Language" = "Čeština";
 
@@ -109,6 +114,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "Aktualizace přerušena: kvůli Rare komoditám";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Vypnuté pluginy";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentace";
 
@@ -133,6 +141,9 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Zapnuté pluginy";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
@@ -150,12 +161,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Chyba: Chybné přihlašovací údaje";
-
-/* [companion.py] */
-"Error: Server is down" = "Chyba: Server je mimo provoz";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Chyba: Server není dostupný";
 
 /* [companion.py] */
 "Error: Verification failed" = "Chyba: Ověření selhalo";
@@ -286,6 +291,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Pouze pokud je Elite: Dangerous aktivní";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Otevřít";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Otevřít Předvolby systému";
 
@@ -324,6 +332,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Přihlaste se pomocí účtu Elite: Dangerous";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Pluginy";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Složka pluginů";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -444,6 +458,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Schéma";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: Plugin můžete vypnout přidáním{CR}'{EXT}' do názvu jeho složky";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

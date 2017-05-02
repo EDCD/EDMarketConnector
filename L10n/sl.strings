@@ -149,12 +149,6 @@
 "Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
 
 /* [companion.py] */
-"Error: Server is down" = "Napaka: Strežnik ni na voljo";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Error: Server is lagging";
-
-/* [companion.py] */
 "Error: Verification failed" = "Error: Verification failed";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */

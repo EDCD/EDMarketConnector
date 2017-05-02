@@ -149,12 +149,6 @@
 "Error: Invalid Credentials" = "Błąd: Dane uwierzytelniające niepoprawne";
 
 /* [companion.py] */
-"Error: Server is down" = "Błąd: Serwer padł";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Błąd: Serwer laguje";
-
-/* [companion.py] */
 "Error: Verification failed" = "Błąd: Weryfikacja niepoprawna";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */

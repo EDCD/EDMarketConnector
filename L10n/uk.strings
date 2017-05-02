@@ -1,3 +1,8 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
 /* Language name */
 "!Language" = "Українська";
 
@@ -109,6 +114,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "Не оновлено: Перевозиться Рідкісний товар";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Вимкнені плагіни";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Документація";
 
@@ -133,6 +141,9 @@
 /* Ranking. [stats.py] */
 "Empire" = "Імперія";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Увімкнені плагіни";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Прапорщик";
 
@@ -150,12 +161,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
-
-/* [companion.py] */
-"Error: Server is down" = "Помилка: Сервер недосяжний!";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
-"Error: Server is lagging" = "Помилка: з`єднання з Сервером нетривке";
 
 /* [companion.py] */
 "Error: Verification failed" = "Помилка: Не вдалося перевірити";
@@ -286,6 +291,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Тільки тоді, коли Elite: Dangerous є активним додатком";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Відкрити";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Відкрити налаштування системи";
 
@@ -324,6 +332,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite : Dangerous";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Плагіни";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Сховище плагінів";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Капітан I рангу";
@@ -380,7 +394,7 @@
 "Recruit" = "Рекрут";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Нотатки про випуск";
+"Release Notes" = "Інформація про реліз";
 
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "Зберегти необроблені дані...";
@@ -444,6 +458,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Підказка: Ви можете відключити плагін через{CR}додання '{EXT}' до назви папки";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговий";
