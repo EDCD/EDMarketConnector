@@ -1,0 +1,515 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Virhe: Frontierin palvelin ei vastaa";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Virhe: Frontierin palvelin vastaa vanhoilla tiedoilla";
+/* Language name */
+"!Language" = "Suomi";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Vahvistuskoodi on lähetetty Elite -tiliisi{CR}yhdistettyyn sähköpostiosoitteeseen.";
+
+/* App menu entry on OSX. [EDMarketConnector.py] */
+"About {APP}" = "Ohjelmasta {APP}";
+
+/* Federation rank. [stats.py] */
+"Admiral" = "Admiral";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Aimless";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Always on top" = "Aina päällimmäisenä";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "Amateur";
+
+/* EDSM setting. [prefs.py] */
+"API Key" = "API avain";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Ulkoasu";
+
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Päivitä automaattisesti telakoituessa";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Saldo";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Baron";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Broker";
+
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Selaa...";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Cadet";
+
+/* CQC rank. [stats.py] */
+"Champion" = "Champion";
+
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Muuta...";
+
+/* Menu item. [EDMarketConnector.py] */
+"Check for Updates..." = "Tarkista päivitykset...";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Cmdr";
+
+/* Privacy setting. [prefs.py] */
+"Cmdr name" = "Komentajanimelläsi";
+
+/* Ranking. [stats.py] */
+"Combat" = "Combat";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Komentajanimi";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Competent";
+
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Valinnat";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "Jäähtymisaika {SS}s";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Kopioi";
+
+/* Empire rank. [stats.py] */
+"Count" = "Count";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Section heading in settings. [prefs.py] */
+"Credentials" = "Kirjautuminen";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "dangerous";
+
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Tumma";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Deadly";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Dealer";
+
+/* Appearance theme and language setting. [l10n.py] */
+"Default" = "Oletus";
+
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Ei päivitetty: rahtina harvinaista materiaalia";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Estetyt liitännäiset";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Dokumentaatio";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Duke";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D lokikirjan tiedostosijainti";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Earl";
+
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Muokkaa";
+
+/* Top rank. [stats.py] */
+"Elite" = "Elite";
+
+/* Section heading in settings. [prefs.py] */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
+
+/* Ranking. [stats.py] */
+"Empire" = "Imperiumi";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Käytössä olevat liitännäiset";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Ensign";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Entrepreneur";
+
+/* [EDMarketConnector.py] */
+"Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Virhe: ei saatu yhteyttä EDSM:ään";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
+
+/* [companion.py] */
+"Error: Verification failed" = "Virhe: varmentaminen epäonnistui";
+
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Virhe: väärä komentaja";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Lopeta";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Expert";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Explorer";
+
+/* Ranking. [stats.py] */
+"Federation" = "Federaatio";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Noudetaan tietoja...";
+
+/* Menu title. [EDMarketConnector.py] */
+"File" = "Tiedosto";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Tiedostosijainti";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "Gladiator";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "Harmless";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Apua";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "Helpless";
+
+/* CQC rank. [stats.py] */
+"Hero" = "Hero";
+
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Korostettu teksti";
+
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
+"Hotkey" = "Pikanäppäin";
+
+/* [prefs.py] */
+"How do you want to be identified in the saved data" = "Tunnistautuminen lähettämissäsi tiedoissa";
+
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Henkilöllisyys";
+
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
+"Keyboard shortcut" = "Näppäimistöoikopolku";
+
+/* Empire rank. [stats.py] */
+"King" = "King";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Kieli";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Päivitetty viimeksi {HH}:{MM}:{SS}";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "Lieutenant";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Lieutenant Commander";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Laina";
+
+/* [EDMarketConnector.py] */
+"Logging in..." = "Kirjaudutaan...";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Lord";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Markkinadata CSV -formaatissa";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Markkinadata Trade Dangerous -formaatissa";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Marquis";
+
+/* Combat rank. [stats.py] */
+"Master" = "Master";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Merchant";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Midshipman";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Mostly Aimless";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "Mostly Helpless";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Ei määritelty";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normaali teksti";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Novice";
+
+/* [prefs.py] */
+"OK" = "OK";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Vain jos Elite:Dangerous on käynnissä";
+
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Avaa";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Avaa järjestelmän asetukset";
+
+/* Tab heading in settings. [prefs.py] */
+"Output" = "Tallennus";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Outsider";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Password" = "Salasana";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Pathfinder";
+
+/* Trade rank. [stats.py] */
+"Peddler" = "Peddler";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Penniless";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Petty Officer";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Pioneer";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Toista ääni";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Valitse mitkä tiedot tallennetaan";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"Please enter the code into the box below." = "Syötä koodi alla olevaan kenttään";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Please log in with your Elite: Dangerous account details" = "Kirjaudu Elite:Dangerous -tilitiedoillasi";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Lisäosat";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Lisäosien hakemistosijainti";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Post Captain";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Post Commander";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Valtapeli";
+
+/* [prefs.py] */
+"Preferences" = "Valinnat";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Haluttu telakka";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Prince";
+
+/* Section heading in settings. [prefs.py] */
+"Privacy" = "Yksityisyys";
+
+/* CQC rank. [stats.py] */
+"Professional" = "Professional";
+
+/* Privacy setting. [prefs.py] */
+"Pseudo-anonymized ID" = "Salanimellä tunnistettava";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Ranger";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Luokitus 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Luokitus 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Luokitus 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Luokitus 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Luokitus 5";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Käynnistä {APP} uudelleen käyttääksesi pikanäppäimiä";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "Rear Admiral";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Recruit";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Julkaisutiedot";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Tallenna raakadata...";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Scout";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "Semi Professional";
+
+/* [prefs.py] */
+"Send flight log to Elite Dangerous Star Map" = "Lähetä lentoloki Elite Dangerous Star Map -palveluun";
+
+/* Output setting. [prefs.py] */
+"Send station data to the Elite Dangerous Data Network" = "Lähetä asematiedot Elite Dangerous Data Network -palveluun";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja saknnaustiedot Elite Dangerous Data Network -palveluun";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDSM..." = "Lähetetään tietoja EDSM:ään...";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Serf";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Valinnat";
+
+/* Main window. [EDMarketConnector.py] */
+"Ship" = "Alus";
+
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Aluksen konfiguraatio";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Alukset";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Squire";
+
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Asema";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "Asemalla ei ole kaupankäyntiä!";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "Asemalla ei ole mitään!";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "Tila";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Surveyor";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Järjestelmä";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Teema";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";
+
+/* Ranking. [stats.py] */
+"Trade" = "Kaupankäynti";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Trailblazer";
+
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Läpinäkyvä";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Tycoon";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Päivitä";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Username (Email)" = "Käyttäjänimi (sähköpostiosoite)";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Arvo";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Vice Admiral";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Näytä";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Viscount";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Warrant Officer";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "Mitä alusta lennät?!";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Missä olet?!";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Kuka olet?!";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Ikkuna";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = "Et ole telakoituneena asemalle!";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} tarvitsee lupasi pikakuvakkeiden käyttämiseen";
+

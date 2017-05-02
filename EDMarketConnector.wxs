@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1036,1040,1041,1043,1045,1049,1058,1060,1062,0" />
-				 <!--        en   cs,  de   es   fr   it   ja   nl   pl   ru   uk   sl   lv  neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1040,1041,1043,1045,1049,1058,1060,1062,0" />
+				 <!--        en   cs,  de   es   fi   fr   it   ja   nl   pl   ru   uk   sl   lv  neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -137,6 +137,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\es.strings" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\fi.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\fr.strings" />
@@ -441,6 +444,7 @@
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="es.strings" />
+			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />

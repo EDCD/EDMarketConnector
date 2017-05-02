@@ -246,6 +246,7 @@ Acknowledgements
 * “Elite: Dangerous” is © 1984 - 2016 Frontier Developments plc.
 * Thanks to Cmdrs CatfoodCZ, Mike Stix & DaraCZ for the Czech translation.
 * Thanks to Cmdr CoolBreeze for the Dutch translation.
+* Thanks to Cmdr FreezeFINN for the Finnish translation.
 * Thanks to [Cmdr Anthor](http://ed-td.space/) for the French translation.
 * Thanks to Cmdr DragoCubX for keeping the German translation up to date.
 * Thanks to [Cmdr Koreldan](http://ed-map.eu/) for the Italian translation.
