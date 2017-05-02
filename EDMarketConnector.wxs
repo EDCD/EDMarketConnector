@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1035,1036,1040,1041,1043,1045,1049,1058,1060,1062,0" />
-				 <!--        en   cs,  de   es   fi   fr   it   ja   nl   pl   ru   uk   sl   lv  neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1040,1041,1043,1045,1049,1058,1060,1062,2074,0" />
+				 <!--        en   cs,  de   es   fi   fr   it   ja   nl   pl   ru   uk   sl   lv  sr-Latn neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -182,6 +182,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\sl.strings" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\sr-Latn.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\snd_good.wav" />
@@ -459,6 +462,7 @@
 			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="ships.p" />
 			<ComponentRef Id="sl.strings" />
+			<ComponentRef Id="sr_Latn.strings" />
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
 			<ComponentRef Id="stations.p" />

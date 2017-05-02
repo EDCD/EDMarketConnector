@@ -254,6 +254,7 @@ Acknowledgements
 * Thanks to Cmdr bubis7 for the Latvian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
 * Thanks to Shadow Panther for keeping the Russian translation up to date.
+* Thanks to Cmdr SuperBrain for the Serbian translation.
 * Thanks to Armando Ota for the Slovenian translation.
 * Thanks to Cmdr Mila Strelok for the Spanish translation.
 * Thanks to Taras Velychko for the Ukranian translation.

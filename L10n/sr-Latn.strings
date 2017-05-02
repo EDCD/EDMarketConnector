@@ -1,0 +1,515 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
+/* Language name */
+"!Language" = "Srpski (Latinica)";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Verifikacioni kod je poslat na{CR}email adresu vezanu za vaš Elite nalog.";
+
+/* App menu entry on OSX. [EDMarketConnector.py] */
+"About {APP}" = "O {APP}";
+
+/* Federation rank. [stats.py] */
+"Admiral" = "Admiral";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Aimless";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Always on top" = "Uvek na vrhu";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "Amateur";
+
+/* EDSM setting. [prefs.py] */
+"API Key" = "API Ključ";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Izgled";
+
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Automatsko slanje prilikom pristajanja";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Balans";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Baron";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Broker";
+
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Potraži...";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Cadet";
+
+/* CQC rank. [stats.py] */
+"Champion" = "Champion";
+
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Izmeni...";
+
+/* Menu item. [EDMarketConnector.py] */
+"Check for Updates..." = "Proveri da li postoje izmene...";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Cmdr";
+
+/* Privacy setting. [prefs.py] */
+"Cmdr name" = "Cmdr ime";
+
+/* Ranking. [stats.py] */
+"Combat" = "Borba (Combat)";
+
+/* EDSM setting. [prefs.py] */
+"Commander Name" = "Ime komandira";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Competent";
+
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Konfiguracija";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "cooldown {SS}s";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Kopiraj";
+
+/* Empire rank. [stats.py] */
+"Count" = "Count";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Section heading in settings. [prefs.py] */
+"Credentials" = "Kredencijali";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "Dangerous";
+
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Tamno";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Deadly";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Dealer";
+
+/* Appearance theme and language setting. [l10n.py] */
+"Default" = "Podrazumevano";
+
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Odloži slanje pre pristajanja";
+
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Nije poslato: Nosite retku robu";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Deaktivirani dodaci (plugins)";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Dokumentacija";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Duke";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "Lokacija E:D Journal fajlova";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Earl";
+
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Izmeni";
+
+/* Top rank. [stats.py] */
+"Elite" = "Elite";
+
+/* Section heading in settings. [prefs.py] */
+"Elite Dangerous Star Map credentials" = "Kredencijali za Elite Dangerous Star Map";
+
+/* Ranking. [stats.py] */
+"Empire" = "Imperija";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Aktivirani dodaci (plugins)";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Ensign";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Entrepreneur";
+
+/* [EDMarketConnector.py] */
+"Error: Can't connect to EDDN" = "Greška: Nemoguće povezivanje na EDDN";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Greška: Nemoguće povezivanje na EDSM";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Greška: Pogrešni kredencijali";
+
+/* [companion.py] */
+"Error: Verification failed" = "Greška: Verifikacija nije uspela";
+
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Greška: Pogrešan Cmdr";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Izlaz";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Expert";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Istraživanje (Explorer)";
+
+/* Ranking. [stats.py] */
+"Federation" = "Federacija";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Preuzimanje podataka...";
+
+/* Menu title. [EDMarketConnector.py] */
+"File" = "Fajl";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Lokacija fajlova";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "Gladiator";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "Harmless";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Pomoć";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "Helpless";
+
+/* CQC rank. [stats.py] */
+"Hero" = "Hero";
+
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Označeni tekst";
+
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
+"Hotkey" = "Skraćenica";
+
+/* [prefs.py] */
+"How do you want to be identified in the saved data" = "Kako želite da budete identifikovani u snimljenim podacima";
+
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Identitet";
+
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
+"Keyboard shortcut" = "Skraćenica";
+
+/* Empire rank. [stats.py] */
+"King" = "King";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jezik";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Poslednji put osveženo {HH}:{MM}:{SS}";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "Lieutenant";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Lieutenant Commander";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Pozajmica";
+
+/* [EDMarketConnector.py] */
+"Logging in..." = "Prijavljivanje...";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Lord";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Fajl sa market podacima u CSV formatu";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Fajl sa market podacima u Trade Dangerous formatu";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Marquis";
+
+/* Combat rank. [stats.py] */
+"Master" = "Master";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Merchant";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Midshipman";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Mostly Aimless";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "Mostly Helpless";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Ništa";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normalan tekst";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Novice";
+
+/* [prefs.py] */
+"OK" = "OK";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Samo kada je Elite: Dangerous aktivna aplikacija";
+
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Otvori";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Otvori sistemska podešavanja";
+
+/* Tab heading in settings. [prefs.py] */
+"Output" = "Izlaz";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Outsider";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Password" = "Password";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Pathfinder";
+
+/* Trade rank. [stats.py] */
+"Peddler" = "Peddler";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Penniless";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Petty Officer";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Pioneer";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Zvučni efekat";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Izaberite koji se podaci snimaju";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"Please enter the code into the box below." = "Unesite kod u polje ispod";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Please log in with your Elite: Dangerous account details" = "Prijavite se sa svojim Elite: Dangerous nalogom";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Dodaci (plugins)";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Folder za dodatke (plugins)";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Post Captain";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Post Commander";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Powerplay";
+
+/* [prefs.py] */
+"Preferences" = "Podešavanja";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
+"Preferred Shipyard" = "Željeno Brodogradilište";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Prince";
+
+/* Section heading in settings. [prefs.py] */
+"Privacy" = "Privatnost";
+
+/* CQC rank. [stats.py] */
+"Professional" = "Professional";
+
+/* Privacy setting. [prefs.py] */
+"Pseudo-anonymized ID" = "Pseudo-anonimizirani ID";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Ranger";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Rejting 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Rejting 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Rejting 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Rejting 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Rejting 5";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Restartujte {APP} da bi ste koristili skraćenice";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "Rear Admiral";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Recruit";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Informacije o ovoj verziji";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Snimi sirove podatke...";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Scout";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "Semi Professional";
+
+/* [prefs.py] */
+"Send flight log to Elite Dangerous Star Map" = "Slanje dnevnika leta (flight log) na Elite Dangerous Star Map";
+
+/* Output setting. [prefs.py] */
+"Send station data to the Elite Dangerous Data Network" = "Slanje podataka o stanici na Elite Dangerous Data Network";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Slanje podataka o sistemu i skeniranju na Elite Dangerous Data Network";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDDN..." = "Slanje podataka na EDDN...";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDSM..." = "Slanje podataka na EDSM...";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Serf";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Podešavanja";
+
+/* Main window. [EDMarketConnector.py] */
+"Ship" = "Brod";
+
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Oprema na brodu";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Brodovi";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Squire";
+
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Stanica";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "Stanica nema market!";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "Stanica nema ništa!";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "Status";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Surveyor";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Sistem";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Tema";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: Možete deaktivirati dodatak (plugin) dodavanjem{CR}'{EXT}' na ime njegovog foldera";
+
+/* Ranking. [stats.py] */
+"Trade" = "Trgovina (Trade)";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Trailblazer";
+
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Transparentno";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Tycoon";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Osveži";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Username (Email)" = "Username (Email)";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Vrednost";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Vice Admiral";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Pogled";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Viscount";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Warrant Officer";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "U čemu letite?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Gde se nalazite?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Ko ste vi?";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Prozor";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = "Niste pristali na stanicu!";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi skraćenice";
+
