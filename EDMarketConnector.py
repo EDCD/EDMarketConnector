@@ -300,7 +300,7 @@ class AppWindow:
             except:
                 if __debug__: print_exc()
 
-        self.postprefs()	# Companion login happens in callback from monitor
+        self.postprefs(False)	# Companion login happens in callback from monitor
 
         if keyring.get_keyring().priority < 1:
             self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
@@ -310,7 +310,7 @@ class AppWindow:
             self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
 
     # callback after the Preferences dialog is applied
-    def postprefs(self):
+    def postprefs(self, dologin=True):
         self.set_labels()	# in case language has changed
 
         # (Re-)install hotkey monitoring
@@ -319,6 +319,8 @@ class AppWindow:
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
+        if dologin:
+            self.login()	# Login if not already logged in with this Cmdr
 
     # set main window labels, e.g. after language change
     def set_labels(self):
