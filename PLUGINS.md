@@ -30,7 +30,7 @@ def plugin_start():
    return "Test"
 ```
 
-Any errors or print statements from your plugin will appear in `%TMP%\EDMarketConnector.log` on Windows or `$TMPDIR\EDMarketConnector.log` on Mac.
+Any errors or print statements from your plugin will appear in `%TMP%\EDMarketConnector.log` on Windows or `$TMPDIR/EDMarketConnector.log` on Mac.
 
 # Plugin Hooks
 ## Configuration 
