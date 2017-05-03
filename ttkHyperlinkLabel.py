@@ -38,7 +38,7 @@ if platform == 'win32':
 # In addition to standard ttk.Label arguments, takes the following arguments:
 #   url: The URL as a string that the user will be sent to on clicking on non-empty label text. If url is a function it will be called on click with the current label text and should return the URL as a string.
 #   underline: If True/False the text is always/never underlined. If None (the default) the text is underlined only on hover.
-#   popup_copy: Whether right-click on non-empty label text pops up a context menu with a 'Copy' option. Defaults to no context menu. If popup_copy is a function it will be called with the current label text and should a boolean.
+#   popup_copy: Whether right-click on non-empty label text pops up a context menu with a 'Copy' option. Defaults to no context menu. If popup_copy is a function it will be called with the current label text and should return a boolean.
 #
 class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
@@ -47,7 +47,7 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)	# override ttk.Label's underline
         self.foreground = kw.get('foreground') or 'blue'
-        self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup('TLabel', 'foreground', ('disabled',)))
+        self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup('TLabel', 'foreground', ('disabled',)))	# ttk.Label doesn't support disabledforeground option
 
         if platform == 'darwin':
             # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
@@ -59,42 +59,41 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
         self.bind('<Button-1>', self._click)
 
-        if self.popup_copy:
-            self.menu = tk.Menu(None, tearoff=tk.FALSE)
-            self.menu.add_command(label=_('Copy'), command = self.copy)	# As in Copy and Paste
-            self.bind(platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
+        self.menu = tk.Menu(None, tearoff=tk.FALSE)
+        self.menu.add_command(label=_('Copy'), command = self.copy)	# As in Copy and Paste
+        self.bind(platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
 
-        if self.underline is not False:
-            self.font_n = kw.get('font', ttk.Style().lookup('TLabel', 'font'))
-            self.font_u = tkFont.Font(font = self.font_n)
-            self.font_u.configure(underline = True)
-            if self.underline is True:
-                self.configure(font = self.font_u)
-            else:
-                self.bind('<Enter>', self._enter)
-                self.bind('<Leave>', self._leave)
+        self.bind('<Enter>', self._enter)
+        self.bind('<Leave>', self._leave)
 
-        self.configure(state = kw.get('state'), text = kw.get('text'))	# set up initial appearance
+        # set up initial appearance
+        self.configure(state = kw.get('state', tk.NORMAL),
+                       text = kw.get('text'),
+                       font = kw.get('font', ttk.Style().lookup('TLabel', 'font')))
 
     # Change cursor and appearance depending on state and text
     def configure(self, cnf=None, **kw):
         # This class' state
-        for thing in ['url', 'popup_copy', 'underline', 'foreground', 'disabledforeground']:
+        for thing in ['url', 'popup_copy', 'underline']:
+            if thing in kw:
+                setattr(self, thing, kw.pop(thing))
+        for thing in ['foreground', 'disabledforeground']:
             if thing in kw:
                 setattr(self, thing, kw[thing])
 
+        # Emulate disabledforeground option for ttk.Label
         if kw.get('state') == tk.DISABLED:
             if 'foreground' not in kw:
                 kw['foreground'] = self.disabledforeground
-            if self.underline is not False and 'font' not in kw:
-                kw['font'] = self.font_n
-            if 'cursor' not in kw:
-                kw['cursor'] = 'arrow'	# System default
         elif 'state' in kw:
             if 'foreground' not in kw:
                 kw['foreground'] = self.foreground
-            if self.underline is True and 'font' not in kw:
-                kw['font'] = self.font_u
+
+        if 'font' in kw:
+            self.font_n = kw['font']
+            self.font_u = tkFont.Font(font = self.font_n)
+            self.font_u.configure(underline = True)
+            kw['font'] = self.underline is True and self.font_u or self.font_n
 
         # Hover cursor only if widget is enabled and text is non-empty
         if ('text' in kw or 'state' in kw) and 'cursor' not in kw:
@@ -109,12 +108,12 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         self.configure(None, **{key: value})
 
     def _enter(self, event):
-        if str(self['state']) != tk.DISABLED:
-            self.configure(font = self.font_u)
+        if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
+            super(HyperlinkLabel, self).configure(font = self.font_u)
 
     def _leave(self, event):
-        if self.underline is None:
-            self.configure(font = self.font_n)
+        if not self.underline:
+            super(HyperlinkLabel, self).configure(font = self.font_n)
 
     def _click(self, event):
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
