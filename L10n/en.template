@@ -187,6 +187,9 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Fetching data...";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
 /* Menu title. [EDMarketConnector.py] */
 "File" = "File";
 
@@ -196,8 +199,14 @@
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
 /* Combat rank. [stats.py] */
 "Harmless" = "Harmless";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Help";
@@ -400,6 +409,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Release Notes";
 
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Role";
+
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "Save Raw Data...";
 
@@ -420,9 +432,6 @@
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sending data to EDDN...";
-
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sending data to EDSM...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";

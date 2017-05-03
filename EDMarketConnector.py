@@ -325,7 +325,8 @@ class AppWindow:
     # set main window labels, e.g. after language change
     def set_labels(self):
         self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
-        self.ship_label['text']    = _('Ship') + ':'	# Main window
+        self.ship_label['text']    = (monitor.captain and _('Role') or	# Multicrew role label in main window
+                                      _('Ship')) + ':'	# Main window
         self.system_label['text']  = _('System') + ':'	# Main window
         self.station_label['text'] = _('Station') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
@@ -395,8 +396,8 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
         play_bad = False
 
-        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
-            return	# In CQC or Beta - do nothing
+        if not monitor.cmdr or not monitor.mode or monitor.is_beta or monitor.captain:
+            return	# In CQC, Beta or on crew - do nothing
 
         if auto_update and monitor.carrying_rares():
             # https://github.com/Marginal/EDMarketConnector/issues/92
@@ -579,6 +580,17 @@ class AppWindow:
 
     # Handle event(s) from the journal
     def journal_event(self, event):
+
+        def crewroletext(role):
+            # Return translated crew role. Needs to be dynamic to allow for changing language.
+            return {
+                None: '',
+                'Idle': '',
+                'FighterCon': _('Fighter'),	# Multicrew role
+                'FireCon':    _('Gunner'),	# Multicrew role
+                'FlightCon':  _('Helm'),	# Multicrew role
+            }.get(role, role)
+
         while True:
             entry = monitor.get_entry()
             if not entry:
@@ -588,20 +600,28 @@ class AppWindow:
             station_changed = monitor.station and self.station['text'] != monitor.station
 
             # Update main window
-            self.cmdr['text'] = monitor.cmdr and monitor.group and ' / '.join([monitor.cmdr, monitor.group]) or monitor.cmdr or ''
-            self.ship['text'] = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or ''
-            self.ship['state'] = monitor.is_beta and tk.DISABLED or tk.NORMAL
+            if monitor.cmdr and monitor.captain:
+                self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.captain)
+                self.ship_label['text'] = _('Role') + ':'	# Multicrew role label in main window
+                self.ship.configure(state = tk.NORMAL, text = crewroletext(monitor.role), url = None)
+            else:
+                self.cmdr['text'] = monitor.cmdr and monitor.group and ('%s / %s' % (monitor.cmdr, monitor.group)) or monitor.cmdr or ''
+                self.ship_label['text'] = _('Ship') + ':'	# Main window
+                self.ship.configure(state = monitor.is_beta and tk.DISABLED or tk.NORMAL,
+                                    text = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or '',
+                                    url = self.shipyard_url)
+
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
                 self.edsm.link(monitor.system)
                 self.edsmpoll()
-            if entry['event'] in ['Undocked', 'StartJump', 'SetUserShipName', 'ShipyardBuy', 'ShipyardSell', 'ShipyardSwap', 'ModuleBuy', 'ModuleSell', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
+            if entry['event'] in ['Undocked', 'StartJump', 'SetUserShipName', 'ShipyardBuy', 'ShipyardSell', 'ShipyardSwap', 'ModuleBuy', 'ModuleSell', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis', 'JoinACrew']:
                 self.status['text'] = ''	# Periodically clear any old error
             self.w.update_idletasks()
 
             # Send interesting events to EDSM
-            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
+            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and not monitor.captain and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
                 try:
                     # Update system status on startup
                     if entry['event'] in [None, 'StartUp'] and monitor.mode and monitor.system:
@@ -665,7 +685,13 @@ class AppWindow:
 
             # Plugins
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
-            if system_changed:	# Backwards compatibility
+
+            # Don't send to EDDN while on crew
+            if monitor.captain:
+                return
+
+            # Plugin backwards compatibility
+            if system_changed:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
