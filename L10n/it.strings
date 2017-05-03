@@ -1,8 +1,21 @@
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Ruolo";
+
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Errore: Il Server Frontier è offline";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Errore: il server Frontier sta laggando";
+
 /* Language name */
 "!Language" = "Italiano";
 
@@ -114,6 +127,9 @@
 /* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
 "Didn't update: Carrying Rares" = "Non aggiorna: Portando Rares";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Disabled Plugins";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentazione";
 
@@ -137,6 +153,9 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Impero";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Enabled Plugins";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -285,6 +304,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è in primo piano";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Apri";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Apri Preferenze di Sistema";
 
@@ -323,6 +345,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Si prega di loggarsi con le proprie credenziali di Elite: Dangerous";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Plugins folder";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -402,9 +430,6 @@
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
 
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sto inviando i dati a EDSM...";
-
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
@@ -443,6 +468,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

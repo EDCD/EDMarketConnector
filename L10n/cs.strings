@@ -1,8 +1,21 @@
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Role";
+
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Chyba: Server Frontieru nejede";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Chyba: Server Frontieru laguje";
+
 /* Language name */
 "!Language" = "Čeština";
 
@@ -416,9 +429,6 @@
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Odesílání dat do EDDN...";
-
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Odesílání dat do EDSM...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";

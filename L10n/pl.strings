@@ -1,3 +1,21 @@
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Rola";
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Błąd: Serwer Frontiera nie odpowiada";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Błąd: Serwer Frontiera laguje";
+
 /* Language name */
 "!Language" = "Polski";
 
@@ -20,7 +38,7 @@
 "Amateur" = "Amateur";
 
 /* EDSM setting. [prefs.py] */
-"API Key" = "API Key";
+"API Key" = "Klucz API";
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Wygląd";
@@ -106,6 +124,12 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Czekaj z wysłaniem na zadokowanie";
 
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Nie zaktualizowano: Posiadasz rzadkie towary";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Pluginy wyłączone";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentacja";
 
@@ -129,6 +153,9 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Imperium";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Włączone pluginy";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -277,6 +304,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Tylko gdy Elite: Dangerous jest aplikacją aktywną";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Otwórz";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Otwórz Preferencje systemowe";
 
@@ -315,6 +345,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Zaloguj się swoim kontem Elite: Dangerous";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Pluginy";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Folder pluginów";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -394,9 +430,6 @@
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Wysłanie danych do EDDN...";
 
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Wysłanie danych do EDSM...";
-
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
@@ -435,6 +468,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Schemat kolorystyczny";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Wskazówka: Możesz wyłączyć pluginy(CR)dodając '(EXT)' do nazwy folderu";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

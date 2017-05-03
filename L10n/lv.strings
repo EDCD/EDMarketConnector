@@ -1,3 +1,21 @@
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Loma";
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Kļūda: Frontier serveris nav aktīvs";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Kļūda: Frontier serveris aizkavējas";
+
 /* Language name */
 "!Language" = "Latviešu";
 
@@ -106,6 +124,12 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
 
+/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
+"Didn't update: Carrying Rares" = "Didn't update: Carrying Rares";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Disabled Plugins";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentācija";
 
@@ -129,6 +153,9 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Enabled Plugins";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -277,6 +304,9 @@
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Tikai kad Elite: Dangerous ir aktīvā aplikācija";
 
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Atvērt";
+
 /* Shortcut settings button on OSX. [prefs.py] */
 "Open System Preferences" = "Atvērt sistēmas iestatījumus";
 
@@ -315,6 +345,12 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Lūdzu autorizējaties ar Jūsu Elite: Dangerous profila informāciju";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Plugins folder";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -394,9 +430,6 @@
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Sūta datus uz EDDN...";
 
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Sūta datus uz EDSM...";
-
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
 
@@ -435,6 +468,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Dizains";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

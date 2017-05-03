@@ -1,8 +1,21 @@
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Hävittäjä";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Aseiden käyttäjä";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Pilotti";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Rooli";
+
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Virhe: Frontierin palvelin ei vastaa";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Virhe: Frontierin palvelin vastaa vanhoilla tiedoilla";
+
 /* Language name */
 "!Language" = "Suomi";
 
@@ -67,7 +80,7 @@
 "Cmdr name" = "Komentajanimelläsi";
 
 /* Ranking. [stats.py] */
-"Combat" = "Combat";
+"Combat" = "Taistelija -tasosi";
 
 /* EDSM setting. [prefs.py] */
 "Commander Name" = "Komentajanimi";
@@ -88,13 +101,13 @@
 "Count" = "Count";
 
 /* Ranking. [stats.py] */
-"CQC" = "CQC";
+"CQC" = "CQC -tasosi";
 
 /* Section heading in settings. [prefs.py] */
 "Credentials" = "Kirjautuminen";
 
 /* Combat rank. [stats.py] */
-"Dangerous" = "dangerous";
+"Dangerous" = "Dangerous";
 
 /* Appearance theme setting. [prefs.py] */
 "Dark" = "Tumma";
@@ -139,7 +152,7 @@
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
 
 /* Ranking. [stats.py] */
-"Empire" = "Imperiumi";
+"Empire" = "Imperiumin sotilasarvosi";
 
 /* List of plugins in settings. [prefs.py] */
 "Enabled Plugins" = "Käytössä olevat liitännäiset";
@@ -175,10 +188,10 @@
 "Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Explorer";
+"Explorer" = "Tutkimusmatkailija -tasosi";
 
 /* Ranking. [stats.py] */
-"Federation" = "Federaatio";
+"Federation" = "Federaation sotilasarvosi";
 
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Noudetaan tietoja...";
@@ -238,7 +251,7 @@
 "Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Laina";
+"Loan" = "Lainaa jäljellä";
 
 /* [EDMarketConnector.py] */
 "Logging in..." = "Kirjaudutaan...";
@@ -346,7 +359,7 @@
 "Post Commander" = "Post Commander";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Valtapeli";
+"Powerplay" = "Valtapeli -tasosi";
 
 /* [prefs.py] */
 "Preferences" = "Valinnat";
@@ -412,13 +425,10 @@
 "Send station data to the Elite Dangerous Data Network" = "Lähetä asematiedot Elite Dangerous Data Network -palveluun";
 
 /* Output setting new in E:D 2.2. [prefs.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja saknnaustiedot Elite Dangerous Data Network -palveluun";
+"Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja skannaustiedot Elite Dangerous Data Network -palveluun";
 
 /* [EDMarketConnector.py] */
 "Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
-
-/* [EDMarketConnector.py] */
-"Sending data to EDSM..." = "Lähetetään tietoja EDSM:ään...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
@@ -463,7 +473,7 @@
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";
 
 /* Ranking. [stats.py] */
-"Trade" = "Kaupankäynti";
+"Trade" = "Kaupankäynti -tasosi";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Trailblazer";
