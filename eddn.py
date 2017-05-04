@@ -33,6 +33,7 @@ class EDDN:
     UPLOAD = 'http://eddn-gateway.elite-markets.net:8080/upload/'
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
+    salt = 'SDC Harry Potter'
 
     def __init__(self, parent):
         self.parent = parent
@@ -80,7 +81,7 @@ class EDDN:
         msg['header'] = {
             'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
             'softwareVersion' : appversion,
-            'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest() or cmdr.encode('utf-8'),
+            'uploaderID'      : config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')+EDDN.salt.encode('utf-8')).hexdigest() or cmdr.encode('utf-8'),
         }
         if not msg['message'].get('timestamp'):	# already present in journal messages
             msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
