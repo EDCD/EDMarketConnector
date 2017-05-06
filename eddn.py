@@ -1,7 +1,6 @@
 # Export to EDDN
 
 from collections import OrderedDict
-import hashlib
 import json
 import numbers
 from os import SEEK_SET, SEEK_CUR, SEEK_END
@@ -78,15 +77,18 @@ class EDDN:
         replayfile = None
 
     def send(self, cmdr, msg):
-        salt = config.get('salt')
-        if not salt:
-            salt = uuid.uuid4().hex
-            config.set('salt', salt)
+        if config.getint('anonymous'):
+            uploaderID = config.get('uploaderID')
+            if not uploaderID:
+                uploaderID = uuid.uuid4().hex
+                config.set('uploaderID', uploaderID)
+        else:
+            uploaderID = cmdr.encode('utf-8')
 
         msg['header'] = {
             'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
             'softwareVersion' : appversion,
-            'uploaderID'      : config.getint('anonymous') and hashlib.sha1(cmdr.encode('utf-8') + salt).hexdigest() or cmdr.encode('utf-8'),
+            'uploaderID'      : uploaderID,
         }
         if not msg['message'].get('timestamp'):	# already present in journal messages
             msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
