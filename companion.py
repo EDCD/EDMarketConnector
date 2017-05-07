@@ -182,11 +182,9 @@ class Session:
         self.session = None
 
         # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
-        try:
+        if sys.version_info < (2,7,9):
             from requests.packages import urllib3
             urllib3.disable_warnings()
-        except:
-            pass
 
         if platform=='win32' and getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
