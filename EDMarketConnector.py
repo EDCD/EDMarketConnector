@@ -462,6 +462,16 @@ class AppWindow:
                 if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
 
+                # Send flightlog EDSM if FSDJump failed to do so
+                if config.getint('output') & config.OUT_SYS_EDSM and self.edsm.result['img'] == self.edsm._IMG_ERROR and not monitor.is_beta and not monitor.captain and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
+                    try:
+                        self.edsm.writelog(querytime, monitor.system, monitor.coordinates, monitor.state['ShipID'])
+                    except Exception as e:
+                        if __debug__: print_exc()
+                        self.status['text'] = unicode(e)
+                        play_bad = True
+                    self.edsmpoll()
+
                 if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
                     # no station data requested - we're done
                     pass
