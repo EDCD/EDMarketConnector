@@ -470,8 +470,7 @@
 "Theme" = "Тема";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка:
-Отключить расширение можно {CR}добавив '{EXT}' к имени папки";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка: Отключить расширение можно {CR}добавив '{EXT}' к имени папки";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговый";
