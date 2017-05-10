@@ -412,6 +412,20 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'][entry['Type']] -= entry.get('Count', 1)
                 if self.state['Cargo'][entry['Type']] <= 0:
                     self.state['Cargo'].pop(entry['Type'])
+            elif entry['event'] in ['MissionAccepted', 'MissionCompleted']:
+                # Not sure whether the names for 'Commodity' and 'CommodityReward' are from the same namespace as
+                # each other or from the 'Cargo' event.
+                if event.get('Commodity'):
+                    symbol = re.match('\$(.+)_Name;', event.get('Commodity'))
+                    commodity = (symbol and symbol.group(1) or event.get('Commodity')).lower()
+                    if entry['event'] == 'MissionAccepted':
+                        self.state['Cargo'][commodity] += entry.get('Count', 1)
+                    else:
+                        self.state['Cargo'][commodity] -= entry.get('Count', 1)
+                        if self.state['Cargo'][commodity] <= 0:
+                            self.state['Cargo'].pop(commodity)
+                for reward in event.get('CommodityReward', []):
+                    self.state['Cargo'][reward['Name'].lower()] += reward.get('Count', 1)
 
             elif entry['event'] == 'Materials':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
