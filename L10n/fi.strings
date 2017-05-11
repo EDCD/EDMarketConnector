@@ -101,7 +101,7 @@
 "Count" = "Count";
 
 /* Ranking. [stats.py] */
-"CQC" = "CQC -tasosi";
+"CQC" = "CQC -ranking";
 
 /* Section heading in settings. [prefs.py] */
 "Credentials" = "Kirjautuminen";
@@ -188,7 +188,7 @@
 "Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Tutkimusmatkailija -tasosi";
+"Explorer" = "Tutkimusmatkailija -ranking";
 
 /* Ranking. [stats.py] */
 "Federation" = "Federaation sotilasarvosi";
@@ -359,7 +359,7 @@
 "Post Commander" = "Post Commander";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Valtapeli -tasosi";
+"Powerplay" = "Valtapeli -ranking";
 
 /* [prefs.py] */
 "Preferences" = "Valinnat";
@@ -473,7 +473,7 @@
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";
 
 /* Ranking. [stats.py] */
-"Trade" = "Kaupankäynti -tasosi";
+"Trade" = "Kaupankäynti -ranking";
 
 /* Explorer rank. [stats.py] */
 "Trailblazer" = "Trailblazer";

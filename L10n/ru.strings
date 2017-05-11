@@ -1,11 +1,11 @@
 /* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
+"Fighter" = "Истребитель";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
+"Gunner" = "Стрелок";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
+"Helm" = "Шлем";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Роль";
@@ -470,8 +470,7 @@
 "Theme" = "Тема";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка:
-Отключить расширение можно {CR}добавив '{EXT}' к имени папки";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговый";

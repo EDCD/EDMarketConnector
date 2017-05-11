@@ -1,14 +1,14 @@
 /* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
+"Fighter" = "Винищувач";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
+"Gunner" = "Стрілець";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
+"Helm" = "Керівник";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Роль";
+"Role" = "Посада";
 
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";

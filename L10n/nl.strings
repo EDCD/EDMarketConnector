@@ -1,11 +1,11 @@
 /* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
+"Fighter" = "Gevechtsvlieger";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
+"Gunner" = "Schutter";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
+"Helm" = "Stuurman";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Rol";
