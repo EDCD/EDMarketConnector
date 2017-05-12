@@ -115,21 +115,27 @@ class EDDN:
             self.parent.status['text'] = '%s [%d]' % (_('Sending data to EDDN...').replace('...',''), len(self.replaylog))
         self.parent.w.update_idletasks()
         try:
-            self.send(*json.loads(self.replaylog[0], object_pairs_hook=OrderedDict))
-            self.replaylog.pop(0)
-            if not len(self.replaylog) % self.REPLAYFLUSH:
-                self.flush()
-        except EnvironmentError as e:
-            if __debug__: print_exc()
-            self.parent.status['text'] = unicode(e)
-        except requests.exceptions.RequestException as e:
-            if __debug__: print_exc()
-            self.parent.status['text'] = _("Error: Can't connect to EDDN")
-            return	# stop sending
-        except Exception as e:
-            if __debug__: print_exc()
-            self.parent.status['text'] = unicode(e)
-            return	# stop sending
+            cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
+        except:
+            # Couldn't decode - shouldn't happen!
+            if __debug__:
+                print self.replaylog[0]
+                print_exc()
+            self.replaylog.pop(0)	# Discard and continue
+        else:
+            try:
+                self.send(cmdr, msg)
+                self.replaylog.pop(0)
+                if not len(self.replaylog) % self.REPLAYFLUSH:
+                    self.flush()
+            except requests.exceptions.RequestException as e:
+                if __debug__: print_exc()
+                self.parent.status['text'] = _("Error: Can't connect to EDDN")
+                return	# stop sending
+            except Exception as e:
+                if __debug__: print_exc()
+                self.parent.status['text'] = unicode(e)
+                return	# stop sending
 
         self.parent.w.after(self.REPLAYPERIOD, self.sendreplay)
 
