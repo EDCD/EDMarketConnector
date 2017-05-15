@@ -149,7 +149,7 @@ def ships(data):
     ships = companion.listify(data.get('ships'))
     current = data['commander'].get('currentShipId')
 
-    if isinstance(current, int) and ships[current]:
+    if isinstance(current, int) and current < len(ships) and ships[current]:
         ships.insert(0, ships.pop(current))	# Put current ship first
 
         if not data['commander'].get('docked'):
