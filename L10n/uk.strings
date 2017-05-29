@@ -344,7 +344,7 @@
 "Please enter the code into the box below." = "Будь ласка, введіть код в поле нижче.";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite : Dangerous";
+"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite: Dangerous";
 
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Плагіни";
