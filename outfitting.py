@@ -251,7 +251,7 @@ internal_map = {
 
 
 # Module mass, FSD data etc
-moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
+moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'r'))
 
 
 # Given a module description from the Companion API returns a description of the module in the form of a
