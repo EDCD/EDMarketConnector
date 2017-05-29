@@ -7,13 +7,29 @@ from collections import OrderedDict
 from functools import partial
 import json
 import keyring
-from os import chdir, mkdir
+from os import chdir, mkdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
 import requests
 from time import time, localtime, strftime, strptime
 from calendar import timegm
 import webbrowser
+
+from config import appname, applongname, appversion, config
+
+if getattr(sys, 'frozen', False):
+    # Under py2exe sys.path[0] is the executable name
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
+
+    # Workaround for CSR's BlueSuite: http://sw.rucsok.hu/tkinter/tclenvar.html
+    if 'TCL_LIBRARY' in environ:
+        environ.pop('TCL_LIBRARY')
+
+    # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+    import tempfile
+    sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
+    print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
 
 import Tkinter as tk
 import ttk
@@ -27,15 +43,6 @@ if __debug__:
         import pdb
         import signal
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
-
-from config import appname, applongname, appversion, config
-if getattr(sys, 'frozen', False):
-    if platform == 'win32':
-        chdir(dirname(sys.path[0]))
-    # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-    import tempfile
-    sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
-    print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
 
 from l10n import Translations
 Translations().install(config.get('language') or None)
