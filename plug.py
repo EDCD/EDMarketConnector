@@ -5,6 +5,9 @@ import os
 import imp
 import sys
 
+if __debug__:
+    from traceback import print_exc
+
 from config import config
 
 """
@@ -46,14 +49,17 @@ def load_plugins():
         try:
             sys.stdout.write("loading plugin {}\n".format(plugname))
             with open(found[plugname], "rb") as plugfile:
-                plugmod = imp.load_module(plugname, plugfile, found[plugname],
+                plugmod = imp.load_module(plugname, plugfile, found[plugname].encode(sys.getfilesystemencoding()),
                                           (".py", "r", imp.PY_SOURCE))
                 if "plugin_start" in dir(plugmod):
                     newname = plugmod.plugin_start()
                     PLUGINS[newname and unicode(newname) or plugname] = plugmod
 
         except Exception as plugerr:
-            sys.stderr.write('%s: %s\n' % (plugname, plugerr))	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
+            if __debug__:
+                print_exc()
+            else:
+                sys.stderr.write('%s: %s\n' % (plugname, plugerr))	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
 
     imp.release_lock()
 
@@ -107,7 +113,10 @@ def notify_prefs_changed():
             try:
                 prefs_changed()
             except Exception as plugerr:
-                print plugerr
+                if __debug__:
+                    print_exc()
+                else:
+                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
 
 
 def notify_journal_entry(cmdr, system, station, entry, state):
@@ -130,7 +139,10 @@ def notify_journal_entry(cmdr, system, station, entry, state):
                 else:
                     journal_entry(cmdr, system, station, dict(entry), dict(state))
             except Exception as plugerr:
-                print plugerr
+                if __debug__:
+                    print_exc()
+                else:
+                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
 
 
 def notify_system_changed(timestamp, system, coordinates):
@@ -151,7 +163,10 @@ def notify_system_changed(timestamp, system, coordinates):
                 else:
                     system_changed(timestamp, system, coordinates)
             except Exception as plugerr:
-                print plugerr
+                if __debug__:
+                    print_exc()
+                else:
+                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
 
 
 def notify_newdata(data):
@@ -166,4 +181,7 @@ def notify_newdata(data):
             try:
                 cmdr_data(data)
             except Exception as plugerr:
-                print plugerr
+                if __debug__:
+                    print_exc()
+                else:
+                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
