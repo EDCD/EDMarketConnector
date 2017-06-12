@@ -51,7 +51,7 @@ def load_plugins():
             with open(found[plugname], "rb") as plugfile:
                 plugmod = imp.load_module(plugname, plugfile, found[plugname].encode(sys.getfilesystemencoding()),
                                           (".py", "r", imp.PY_SOURCE))
-                if "plugin_start" in dir(plugmod):
+                if hasattr(plugmod, "plugin_start"):
                     newname = plugmod.plugin_start()
                     PLUGINS[newname and unicode(newname) or plugname] = plugmod
 
@@ -71,9 +71,7 @@ def _get_plugin_func(plugname, funcname):
     :param funcname:
     :return:
     """
-    if funcname in dir(PLUGINS[plugname]):
-        return getattr(PLUGINS[plugname], funcname)
-    return None
+    return getattr(PLUGINS[plugname], funcname, None)
 
 
 def get_plugin_app(plugname, parent):
