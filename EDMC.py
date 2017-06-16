@@ -84,9 +84,9 @@ try:
         session = companion.Session()
         if config.get('cmdrs'):
             username = config.get('fdev_usernames')[0]
-            session.login(username, config.get_password(username), False)
+            session.login(username, config.get_password(username))
         else:	# <= 2.25 not yet migrated
-            session.login(config.get('username'), config.get('password'), False)
+            session.login(config.get('username'), config.get('password'))
         querytime = int(time())
         data = session.query()
         config.set('querytime', querytime)

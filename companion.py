@@ -191,7 +191,7 @@ class Session:
         if platform=='win32' and getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
 
-    def login(self, username, password, is_beta):
+    def login(self, username=None, password=None, is_beta=False):
         if (not username or not password):
             if not self.credentials:
                 raise CredentialsError()
