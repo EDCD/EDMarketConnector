@@ -111,7 +111,7 @@ class PreferencesDialog(tk.Toplevel):
         self.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
         self.username = nb.Entry(credframe)
         self.username.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-        if not monitor.is_beta and monitor.cmdr:
+        if monitor.cmdr:
             self.username.focus_set()
         self.password = nb.Entry(credframe, show=u'•')
         self.password.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
@@ -400,7 +400,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
             self.cmdr = monitor.cmdr
 
-        cmdr_state = not monitor.is_beta and monitor.cmdr and tk.NORMAL or tk.DISABLED
+        cmdr_state = monitor.cmdr and tk.NORMAL or tk.DISABLED
         self.cred_label['state'] = self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = cmdr_state
         self.cmdr_text['state'] = self.username['state'] = self.password['state'] = cmdr_state
 
@@ -410,20 +410,20 @@ class PreferencesDialog(tk.Toplevel):
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
-        self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = not monitor.is_beta and tk.NORMAL or tk.DISABLED
-        local = not monitor.is_beta and (self.out_td.get() or self.out_csv.get() or self.out_ship.get())
+        self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = tk.NORMAL or tk.DISABLED
+        local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
         self.out_auto_button['state']   = local and logvalid and tk.NORMAL or tk.DISABLED
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
         self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
 
-        self.eddn_station_button['state'] = not monitor.is_beta and tk.NORMAL or tk.DISABLED
-        self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
+        self.eddn_station_button['state'] = tk.NORMAL or tk.DISABLED
+        self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
-        self.edsm_log_button['state']   = logvalid and not monitor.is_beta and tk.NORMAL or tk.DISABLED
-        edsm_state = logvalid and monitor.cmdr and not monitor.is_beta and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
+        self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
+        edsm_state = logvalid and monitor.cmdr and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
         self.edsm_label['state'] = self.edsm_cmdr_label['state'] = self.edsm_user_label['state'] = self.edsm_apikey_label['state'] = edsm_state
         self.edsm_cmdr_text['state'] = self.edsm_user['state'] = self.edsm_apikey['state'] = edsm_state
 
@@ -555,7 +555,7 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
-        if self.cmdr and not monitor.is_beta:
+        if self.cmdr:
             if self.password.get().strip():
                 config.set_password(self.username.get().strip(), self.password.get().strip())	# Can fail if keyring not unlocked
             else:

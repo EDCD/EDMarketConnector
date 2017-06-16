@@ -239,14 +239,14 @@ def export(data, filename=None):
 
 
 # Return a URL for the current ship
-def url(data):
+def url(data, is_beta):
 
     string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
 
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
-    return 'https://coriolis.edcd.io/import?data=' + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
+    return (is_beta and 'http://beta.coriolis.edcd.io/import?data=' or 'https://coriolis.edcd.io/import?data=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
 
 
 #

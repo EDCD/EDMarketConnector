@@ -176,8 +176,8 @@ class StatsDialog():
         self.showstats()
 
     def showstats(self):
-        if not monitor.cmdr or monitor.is_beta:
-            return	# In Beta - do nothing
+        if not monitor.cmdr:
+            return
 
         self.status['text'] = _('Fetching data...')
         self.parent.update_idletasks()

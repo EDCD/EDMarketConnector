@@ -17,9 +17,11 @@ from config import config
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
 
-URL_LOGIN   = 'https://companion.orerve.net/user/login'
-URL_CONFIRM = 'https://companion.orerve.net/user/confirm'
-URL_QUERY   = 'https://companion.orerve.net/profile'
+SERVER_LIVE = 'https://companion.orerve.net'
+SERVER_BETA = 'https://pts-companion.orerve.net'
+URL_LOGIN   = '/user/login'
+URL_CONFIRM = '/user/confirm'
+URL_QUERY   = '/profile'
 
 
 # Map values reported by the Companion interface to names displayed in-game
@@ -189,19 +191,20 @@ class Session:
         if platform=='win32' and getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
 
-    def login(self, username=None, password=None):
+    def login(self, username, password, is_beta):
         if (not username or not password):
             if not self.credentials:
                 raise CredentialsError()
             else:
                 credentials = self.credentials
         else:
-            credentials = { 'email' : username, 'password' : password }
+            credentials = { 'email' : username, 'password' : password, 'beta' : is_beta }
 
         if self.credentials == credentials and self.state == Session.STATE_OK:
             return	# already logged in
 
-        if not self.credentials or self.credentials['email'] != credentials['email']:	# changed account
+        if not self.credentials or self.credentials['email'] != credentials['email'] or self.credentials['beta'] != credentials['beta']:
+            # changed account
             self.close()
             self.session = requests.Session()
             self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257'
@@ -214,10 +217,11 @@ class Session:
             except IOError:
                 pass
 
+        self.server = credentials['beta'] and SERVER_BETA or SERVER_LIVE
         self.credentials = credentials
         self.state = Session.STATE_INIT
         try:
-            r = self.session.post(URL_LOGIN, data = self.credentials, timeout=timeout)
+            r = self.session.post(self.server + URL_LOGIN, data = self.credentials, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
@@ -225,10 +229,10 @@ class Session:
         if r.status_code != requests.codes.ok or 'server error' in r.text:
             self.dump(r)
             raise ServerError()
-        elif r.url == URL_LOGIN:	# would have redirected away if success
+        elif r.url == self.server + URL_LOGIN:		# would have redirected away if success
             self.dump(r)
             raise CredentialsError()
-        elif r.url == URL_CONFIRM:	# redirected to verification page
+        elif r.url == self.server + URL_CONFIRM:	# redirected to verification page
             self.state = Session.STATE_AUTH
             raise VerificationRequired()
         else:
@@ -238,8 +242,8 @@ class Session:
     def verify(self, code):
         if not code:
             raise VerificationRequired()
-        r = self.session.post(URL_CONFIRM, data = {'code' : code}, timeout=timeout)
-        if r.status_code != requests.codes.ok or r.url == URL_CONFIRM:	# would have redirected away if success
+        r = self.session.post(self.server + URL_CONFIRM, data = {'code' : code}, timeout=timeout)
+        if r.status_code != requests.codes.ok or r.url == self.server + URL_CONFIRM:	# would have redirected away if success
             raise VerificationRequired()
         self.session.cookies.save()	# Save cookies now for use by command-line app
         self.login()
@@ -252,12 +256,12 @@ class Session:
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
         try:
-            r = self.session.get(URL_QUERY, timeout=timeout)
+            r = self.session.get(self.server + URL_QUERY, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.status_code == requests.codes.forbidden or r.url == URL_LOGIN:
+        if r.status_code == requests.codes.forbidden or r.url == self.server + URL_LOGIN:
             # Start again - maybe our session cookie expired?
             self.state = Session.STATE_INIT
             return self.query()

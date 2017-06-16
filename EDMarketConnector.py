@@ -301,7 +301,7 @@ class AppWindow:
         # Migration from <= 2.25
         if not config.get('cmdrs') and config.get('username') and config.get('password'):
             try:
-                self.session.login(config.get('username'), config.get('password'))
+                self.session.login(config.get('username'), config.get('password'), False)
                 data = self.session.query()
                 prefs.migrate(data['commander']['name'])
             except:
@@ -374,7 +374,7 @@ class AppWindow:
                 raise companion.CredentialsError()
             idx = config.get('cmdrs').index(monitor.cmdr)
             username = config.get('fdev_usernames')[idx]
-            self.session.login(username, config.get_password(username))
+            self.session.login(username, config.get_password(username), monitor.is_beta)
             self.status['text'] = ''
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
@@ -403,8 +403,8 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
         play_bad = False
 
-        if not monitor.cmdr or not monitor.mode or monitor.is_beta or monitor.captain:
-            return	# In CQC, Beta or on crew - do nothing
+        if not monitor.cmdr or not monitor.mode or monitor.captain:
+            return	# In CQC or on crew - do nothing
 
         if auto_update and monitor.carrying_rares():
             # https://github.com/Marginal/EDMarketConnector/issues/92
@@ -522,18 +522,18 @@ class AppWindow:
                             if not old_status:
                                 self.status['text'] = _('Sending data to EDDN...')
                             self.w.update_idletasks()
-                            self.eddn.export_commodities(data)
-                            self.eddn.export_outfitting(data)
+                            self.eddn.export_commodities(data, monitor.is_beta)
+                            self.eddn.export_outfitting(data, monitor.is_beta)
                             if has_shipyard and not data['lastStarport'].get('ships'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
                                 self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             else:
-                                self.eddn.export_shipyard(data)
+                                self.eddn.export_shipyard(data, monitor.is_beta)
                             if not old_status:
                                 self.status['text'] = ''
 
                     # Update credits and ship info and send to EDSM
-                    if config.getint('output') & config.OUT_SYS_EDSM:
+                    if not monitor.is_beta and config.getint('output') & config.OUT_SYS_EDSM:
                         try:
                             if data['commander'].get('credits') is not None:
                                 monitor.state['Credits'] = data['commander']['credits']
@@ -544,8 +544,8 @@ class AppWindow:
                                 self.edsm.updateship(monitor.state['ShipID'],
                                                      monitor.state['ShipType'],
                                                      [
-                                                         ('linkToCoriolis',   coriolis.url(data)),
-                                                         ('linkToEDShipyard', edshipyard.url(data)),
+                                                         ('linkToCoriolis',   coriolis.url(data, monitor.is_beta)),
+                                                         ('linkToEDShipyard', edshipyard.url(data, monitor.is_beta)),
                                                      ])
                                 self.edsm.lastship = ship
                         except Exception as e:
@@ -591,7 +591,7 @@ class AppWindow:
             if __debug__:
                 print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
             if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
-                self.eddn.export_shipyard(data)
+                self.eddn.export_shipyard(data, monitor.is_beta)
         except:
             pass
 
@@ -624,8 +624,7 @@ class AppWindow:
             else:
                 self.cmdr['text'] = monitor.cmdr and monitor.group and ('%s / %s' % (monitor.cmdr, monitor.group)) or monitor.cmdr or ''
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
-                self.ship.configure(state = monitor.is_beta and tk.DISABLED or tk.NORMAL,
-                                    text = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or '',
+                self.ship.configure(text = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or '',
                                     url = self.shipyard_url)
 
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
@@ -686,7 +685,7 @@ class AppWindow:
             self.edsmpoll()
 
             # Companion login - do this after EDSM so any EDSM errors don't mask login errors
-            if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr and not monitor.is_beta:
+            if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
                 if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
                     prefs.make_current(monitor.cmdr)
                     self.login()
@@ -712,7 +711,7 @@ class AppWindow:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
-            if station_changed and monitor.mode and not monitor.is_beta and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            if station_changed and monitor.mode and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
@@ -779,8 +778,8 @@ class AppWindow:
 
     def shipyard_url(self, shipname=None):
 
-        if not monitor.cmdr or not monitor.mode or monitor.is_beta:
-            return False	# In CQC or Beta - do nothing
+        if not monitor.cmdr or not monitor.mode:
+            return False	# In CQC - do nothing
 
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
@@ -807,9 +806,9 @@ class AppWindow:
         else:
             self.status['text'] = ''
             if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
-                return edshipyard.url(data)
+                return edshipyard.url(data, monitor.is_beta)
             elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
-                return coriolis.url(data)
+                return coriolis.url(data, monitor.is_beta)
             else:
                 assert False, config.getint('shipyard')
                 return False

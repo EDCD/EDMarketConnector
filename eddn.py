@@ -139,7 +139,7 @@ class EDDN:
 
         self.parent.w.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data):
+    def export_commodities(self, data, is_beta):
         commodities = []
         for commodity in data['lastStarport'].get('commodities') or []:
             if category_map.get(commodity['categoryname'], True):	# Check marketable
@@ -159,7 +159,7 @@ class EDDN:
         # Don't send empty commodities list - schema won't allow it
         if commodities:
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/3',
+                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
@@ -167,11 +167,11 @@ class EDDN:
                 }
             })
 
-    def export_outfitting(self, data):
+    def export_outfitting(self, data, is_beta):
         # Don't send empty modules list - schema won't allow it
         if data['lastStarport'].get('modules'):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/2',
+                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/2' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
@@ -179,11 +179,11 @@ class EDDN:
                 }
             })
 
-    def export_shipyard(self, data):
+    def export_shipyard(self, data, is_beta):
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if data['lastStarport'].get('ships'):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/2',
+                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/2' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
