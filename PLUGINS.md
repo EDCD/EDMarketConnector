@@ -98,6 +98,17 @@ def journal_entry(cmdr, system, station, entry, state):
             sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
+### Player Interaction
+
+This gets called when the player interacts with another Cmdr in-game.
+
+If EDMC is started while the game is already running EDMC will send the last few interaction events from the current game session.
+
+```
+def interaction(cmdr, entry):
+    sys.stderr.write("Interacted: {} with Cmdr {}\n".format(', '.join(entry['Interactions']), entry['Name'].encode('utf-8'))
+```
+
 ### Getting Commander Data
 
 This gets called when EDMC has just fetched fresh Cmdr and station data from Frontier's servers.

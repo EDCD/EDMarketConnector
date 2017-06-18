@@ -62,6 +62,7 @@ import prefs
 import plug
 from hotkey import hotkeymgr
 from monitor import monitor
+from interactions import interactions
 from theme import theme
 
 EDDB = eddb.EDDB()
@@ -285,6 +286,7 @@ class AppWindow:
         self.w.bind('<KP_Enter>', self.getandsend)
         self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
+        self.w.bind_all('<<InteractionEvent>>', self.interaction_event)	# cmdrHistory monitoring
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
         # Load updater after UI creation (for WinSparkle)
@@ -326,6 +328,9 @@ class AppWindow:
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
+        elif monitor.started:
+            interactions.start(self.w, monitor.started)
+
         if dologin:
             self.login()	# Login if not already logged in with this Cmdr
 
@@ -702,6 +707,11 @@ class AppWindow:
             # Plugins
             plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
 
+            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Can start interaction monitoring
+                if not interactions.start(self.w, monitor.started):
+                    self.status['text'] = 'Error: Check %s' % _('E:D interaction log location')	# Setting for the log file that contains recent interactions with other Cmdrs
+
             # Don't send to EDDN while on crew
             if monitor.captain:
                 return
@@ -768,6 +778,15 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
+    # Handle interaction event(s) from cmdrHistory
+    def interaction_event(self, event):
+        while True:
+            entry = interactions.get_entry()
+            if not entry:
+                return
+
+            # Currently we don't do anything with these events
+            plug.notify_interaction(monitor.cmdr, entry)
 
     def edsmpoll(self):
         result = self.edsm.result
@@ -879,6 +898,7 @@ class AppWindow:
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         hotkeymgr.unregister()
+        interactions.close()
         monitor.close()
         self.eddn.close()
         self.updater.close()

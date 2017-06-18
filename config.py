@@ -125,6 +125,8 @@ class Config:
 
             self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
 
+            self.default_interaction_dir = join(self.default_journal_dir, 'CommanderHistory')
+
             self.home = expanduser('~')
 
             self.respath = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Resources')) or dirname(__file__)
@@ -186,6 +188,8 @@ class Config:
 
             journaldir = KnownFolderPath(FOLDERID_SavedGames)
             self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
+
+            self.default_interaction_dir = join(KnownFolderPath(FOLDERID_LocalAppData), 'Frontier Developments', 'Elite Dangerous', 'CommanderHistory')
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
 
@@ -279,6 +283,8 @@ class Config:
                 mkdir(self.plugin_dir)
 
             self.default_journal_dir = None
+
+            self.default_interaction_dir = None
 
             self.home = expanduser('~')
 

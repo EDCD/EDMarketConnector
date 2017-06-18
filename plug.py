@@ -143,6 +143,26 @@ def notify_journal_entry(cmdr, system, station, entry, state):
                     sys.stderr.write('%s: %s\n' % (plugname, plugerr))
 
 
+def notify_interaction(cmdr, entry):
+    """
+    Send an interaction entry to each plugin.
+    :param cmdr: The piloting Cmdr name
+    :param entry: The interaction entry as a dictionary
+    :return:
+    """
+    for plugname in PLUGINS:
+        interaction = _get_plugin_func(plugname, "interaction")
+        if interaction:
+            try:
+                # Pass a copy of the interaction entry in case the callee modifies it
+                interaction(cmdr, dict(entry))
+            except Exception as plugerr:
+                if __debug__:
+                    print_exc()
+                else:
+                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+
+
 def notify_system_changed(timestamp, system, coordinates):
     """
     Send notification data to each plugin when we arrive at a new system.

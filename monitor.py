@@ -1,14 +1,12 @@
-import atexit
 from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
-from os import listdir, pardir, rename, unlink, SEEK_SET, SEEK_CUR, SEEK_END
-from os.path import basename, exists, isdir, isfile, join
-from platform import machine
-import sys
+from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
+from os.path import basename, isdir, join
 from sys import platform
-from time import gmtime, sleep, strftime
+from time import gmtime, sleep, strftime, strptime
+from calendar import timegm
 
 if __debug__:
     from traceback import print_exc
@@ -26,9 +24,6 @@ elif platform=='win32':
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
     import ctypes
-
-    CSIDL_LOCAL_APPDATA     = 0x001C
-    CSIDL_PROGRAM_FILESX86  = 0x002A
 
     # _winreg that ships with Python 2 doesn't support unicode, so do this instead
     from ctypes.wintypes import *
@@ -70,6 +65,7 @@ else:
     FileSystemEventHandler = object	# dummy
 
 
+# Journal handler
 class EDLogs(FileSystemEventHandler):
 
     _POLL = 1		# Polling is cheap, so do it often
@@ -134,7 +130,7 @@ class EDLogs(FileSystemEventHandler):
         self.system = None
         self.station = None
         self.coordinates = None
-        self.state = {}		# Initialized in Fileheader
+        self.started = None	# Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
         self.state = {
@@ -152,14 +148,10 @@ class EDLogs(FileSystemEventHandler):
             'ShipType'     : None,
         }
 
-    def set_callback(self, name, callback):
-        if name in self.callbacks:
-            self.callbacks[name] = callback
-
     def start(self, root):
         self.root = root
         logdir = config.get('journaldir') or config.default_journal_dir
-        if not logdir or not exists(logdir):
+        if not logdir or not isdir(logdir):
             self.stop()
             return False
 
@@ -176,7 +168,7 @@ class EDLogs(FileSystemEventHandler):
             self.logfile = None
             return False
 
-        # Set up a watchog observer. This is low overhead so is left running irrespective of whether monitoring is desired.
+        # Set up a watchdog observer.
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
@@ -190,7 +182,7 @@ class EDLogs(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print '%s "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
+            print '%s Journal "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
             print 'Start logfile "%s"' % self.logfile
 
         if not self.running():
@@ -202,7 +194,7 @@ class EDLogs(FileSystemEventHandler):
 
     def stop(self):
         if __debug__:
-            print 'Stopping monitoring'
+            print 'Stopping monitoring Journal'
         self.currentdir = None
         self.version = self.mode = self.group = self.cmdr = self.body = self.system = self.station = self.coordinates = None
         self.is_beta = False
@@ -314,6 +306,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.coordinates = None
+                self.started = None
                 self.state = {
                     'Cargo'        : defaultdict(int),
                     'Credits'      : None,
@@ -339,6 +332,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.coordinates = None
+                self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self.state.update({
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
