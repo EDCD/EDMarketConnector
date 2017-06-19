@@ -1,21 +1,3 @@
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Винищувач";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Стрілець";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Керівник";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Посада";
-
-/* Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
-"Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
-
 /* Language name */
 "!Language" = "Українська";
 
@@ -136,6 +118,9 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
 
+/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
+"E:D interaction log location" = "E:D interaction log location";
+
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Розташування файлу-журналу E:D";
 
@@ -172,6 +157,12 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
 
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
+
 /* [companion.py] */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
 
@@ -196,6 +187,9 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Отримання даних...";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Винищувач";
+
 /* Menu title. [EDMarketConnector.py] */
 "File" = "Файл";
 
@@ -205,8 +199,14 @@
 /* CQC rank. [stats.py] */
 "Gladiator" = "Гладіатор";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Стрілець";
+
 /* Combat rank. [stats.py] */
 "Harmless" = "Безпечний";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Керівник";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Довідка";
@@ -408,6 +408,9 @@
 
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Інформація про реліз";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Посада";
 
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "Зберегти необроблені дані...";

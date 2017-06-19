@@ -118,6 +118,9 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
+/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
+"E:D interaction log location" = "E:D interaction log location";
+
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D journal file location";
 

@@ -1,21 +1,3 @@
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Uloga";
-
-/* Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
-"Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
-
 /* Language name */
 "!Language" = "Srpski (Latinica)";
 
@@ -136,6 +118,9 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
+/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
+"E:D interaction log location" = "Lokacija loga o E:D interakcijama";
+
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Lokacija E:D Journal fajlova";
 
@@ -172,6 +157,12 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
 
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
+
 /* [companion.py] */
 "Error: Invalid Credentials" = "Greška: Pogrešni kredencijali";
 
@@ -196,6 +187,9 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Preuzimanje podataka...";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Fighter";
+
 /* Menu title. [EDMarketConnector.py] */
 "File" = "Fajl";
 
@@ -205,8 +199,14 @@
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Gunner";
+
 /* Combat rank. [stats.py] */
 "Harmless" = "Harmless";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Helm";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Pomoć";
@@ -408,6 +408,9 @@
 
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Informacije o ovoj verziji";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Uloga";
 
 /* Menu item. [EDMarketConnector.py] */
 "Save Raw Data..." = "Snimi sirove podatke...";
