@@ -46,12 +46,12 @@
 		<CustomAction Id="SetINSTALLDIR" Property="INSTALLDIR" Value="[ARPINSTALLLOCATION]" />
 		<InstallUISequence>
 			<Custom Action="SetINSTALLDIR" After="AppSearch">
-				ARPINSTALLLOCATION
+				WIX_UPGRADE_DETECTED AND ARPINSTALLLOCATION
 			</Custom>
 		</InstallUISequence>
 		<InstallExecuteSequence>
 			<Custom Action="SetINSTALLDIR" After="AppSearch">
-				ARPINSTALLLOCATION
+				WIX_UPGRADE_DETECTED AND ARPINSTALLLOCATION
 			</Custom>
 		</InstallExecuteSequence>
 
