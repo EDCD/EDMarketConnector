@@ -73,7 +73,7 @@ This app can save a variety of data in a variety of formats:
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
-Some options work by reading the Elite: Dangerous game's “journal” files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files.
+Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” and “E:D interaction log location” settings on the Configuration tab to point to the game's log files.
 
 ### EDDN
 
@@ -136,11 +136,16 @@ This app will not auto-update when you dock if you're carrying Rares. Visit the 
 This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
 
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
-This app uses Elite: Dangerous' “journal” files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's journal files - typically C:\Users\_you_\Saved Games\Frontier Developments\EliteDangerous on Windows.
+This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” and “E:D interaction log location” settings on the Configuration tab to point to the game's log files.
+
+The default settings on Windows are typically:
+
+- `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous` and
+- `C:\Users\you\AppData\Local\Frontier Developments\EliteDangerous\CommanderHistory` respectively.
 
 ### Credentials settings are greyed out
 You can't edit your Username/Password or EDSM Commander Name/API Key if:
-- Elite: Dangerous is at the Main Menu or in Beta. You will be able to edit these values once you've entered the (non-Beta) game.
+- Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
 - Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
 
 ### Error: Wrong Cmdr

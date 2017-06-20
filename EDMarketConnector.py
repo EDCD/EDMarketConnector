@@ -328,8 +328,8 @@ class AppWindow:
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
-        elif monitor.started:
-            interactions.start(self.w, monitor.started)
+        elif monitor.started and not interactions.start(self.w, monitor.started):
+            self.status['text'] = 'Error: Check %s' % _('E:D interaction log location')	# Setting for the log file that contains recent interactions with other Cmdrs
 
         if dologin:
             self.login()	# Login if not already logged in with this Cmdr
