@@ -626,11 +626,19 @@ class AppWindow:
                 self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.captain)
                 self.ship_label['text'] = _('Role') + ':'	# Multicrew role label in main window
                 self.ship.configure(state = tk.NORMAL, text = crewroletext(monitor.role), url = None)
-            else:
-                self.cmdr['text'] = monitor.cmdr and monitor.group and ('%s / %s' % (monitor.cmdr, monitor.group)) or monitor.cmdr or ''
+            elif monitor.cmdr:
+                if monitor.group:
+                    self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.group)
+                elif monitor.mode.lower() == 'solo':
+                    self.cmdr['text'] = '%s / %s' % (monitor.cmdr, 'Solo')	# Game mode - not Open or Group. Don't translate
+                else:
+                    self.cmdr['text'] = monitor.cmdr
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
                 self.ship.configure(text = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or '',
                                     url = self.shipyard_url)
+            else:
+                self.ship_label['text'] = _('Ship') + ':'	# Main window
+                self.ship['text'] = ''
 
             self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if self.system['text'] != monitor.system:
