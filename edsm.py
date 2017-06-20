@@ -187,7 +187,7 @@ class EDSM:
         )
         if coordinates:
             args += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
-        if shipid:
+        if shipid is not None:
             args += '&shipId=%d' % shipid
         reply = self.call('api-logs-v1/set-log', args)
 

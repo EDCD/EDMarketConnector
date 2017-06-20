@@ -447,7 +447,7 @@ class AppWindow:
             elif ((auto_update and not data['commander'].get('docked')) or
                   (monitor.system and data['lastSystem']['name'] != monitor.system) or
                   (monitor.station and data['lastStarport']['name'] != monitor.station) or
-                  (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or
+                  (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or
                   (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType'])):
                 raise companion.ServerLagging()
 
@@ -820,7 +820,7 @@ class AppWindow:
             self.status['text'] = _("Where are you?!")		# Shouldn't happen
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-        elif (monitor.state['ShipID'] and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
+        elif (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
             self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
