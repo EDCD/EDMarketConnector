@@ -45,11 +45,15 @@ def load_plugins():
     for plugname in disabled:
         sys.stdout.write("plugin {} disabled\n".format(plugname))
 
-    for plugname in found:
+    for plugname, loadfile in found.iteritems():
         try:
             sys.stdout.write("loading plugin {}\n".format(plugname))
-            with open(found[plugname], "rb") as plugfile:
-                plugmod = imp.load_module(plugname, plugfile, found[plugname].encode(sys.getfilesystemencoding()),
+
+            # Add plugin's folder to Python's load path in case plugin has dependencies.
+            sys.path.append(os.path.dirname(loadfile))
+
+            with open(loadfile, "rb") as plugfile:
+                plugmod = imp.load_module(plugname, plugfile, loadfile.encode(sys.getfilesystemencoding()),
                                           (".py", "r", imp.PY_SOURCE))
                 if hasattr(plugmod, "plugin_start"):
                     newname = plugmod.plugin_start()
