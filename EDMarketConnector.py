@@ -637,6 +637,7 @@ class AppWindow:
                 self.ship.configure(text = monitor.state['ShipName'] or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType']) or '',
                                     url = self.shipyard_url)
             else:
+                self.cmdr['text'] = ''
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
                 self.ship['text'] = ''
 
