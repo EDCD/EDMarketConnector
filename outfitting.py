@@ -60,6 +60,7 @@ weaponmount_map = {
 weaponclass_map = {
     'tiny'   : '0',
     'small'  : '1',
+    'smallfree' : '1',
     'medium' : '2',
     'large'  : '3',
     'huge'   : '4',
@@ -116,6 +117,7 @@ weaponrating_map = {
     'hpt_plasmaaccelerator_fixed_large': 'B',
     'hpt_plasmaaccelerator_fixed_huge': 'A',
     'hpt_pulselaser_fixed_small': 'F',
+    'hpt_pulselaser_fixed_smallfree': 'F',
     'hpt_pulselaser_fixed_medium': 'E',
     'hpt_pulselaser_fixed_large': 'D',
     'hpt_pulselaser_fixed_huge': 'A',
