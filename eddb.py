@@ -93,6 +93,7 @@ if __name__ == "__main__":
         ('Col 173 Sector WZ-O b22-4', 1011.06250, -131.78125, -210.43750),
         ('Col 173 Sector XG-J c10-17', 1095.25000, -127.56250, -238.40625),
         ('Col 173 Sector YV-M d7-23', 1005.46875, -271.12500, -76.62500),
+        ('HIP 19026', -117.87500, -65.12500, -330.90625),
         ('HIP 17403', -93.68750, -158.96875, -367.62500),
         ('HIP 17862', -81.43750, -151.90625, -359.59375),
         ('HIP 39768', 866.59375, -119.12500, -109.03125),
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     }
     print '\n%d populated systems outside bubble calculation:' % len(cut)
     extra_ids = {}
-    for k1,o in cut.iteritems():
+    for k1,o in sorted(cut.iteritems()):
         ox, oy, oz = o['x'], o['y'], o['z']
         extra = {
             str(s['name']) : k
@@ -168,7 +169,7 @@ if __name__ == "__main__":
         for k,s in systems.iteritems() if inbubble(s['x'], s['y'], s['z']) and system_ids.get(s['name']) is None
     }
     print '\n%d dropped systems inside bubble calculation:' % len(cut)
-    for k,s in cut.iteritems():
+    for k,s in sorted(cut.iteritems()):
         print '%s%s%7d %11.5f %11.5f %11.5f' % (s['name'].encode('utf-8'), ' '*(30-len(s['name'])), k, s['x'], s['y'], s['z'])
 
     cut = {
@@ -176,7 +177,7 @@ if __name__ == "__main__":
         for k,s in systems.iteritems() if system_ids.get(s['name']) and system_ids[s['name']] != k and (s['is_populated'] or inbubble(s['x'], s['y'], s['z']))
     }
     print '\n%d duplicate systems inside bubble calculation:' % len(cut)
-    for k,s in cut.iteritems():
+    for k,s in sorted(cut.iteritems()):
         print '%-22s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
@@ -186,6 +187,8 @@ if __name__ == "__main__":
     system_ids['Arti'] = 60342
     system_ids['Futhark'] = 4901	# bogus data from ED-IBE
     system_ids['K Carinae'] = 375886	# both unpopulated
+    system_ids['Ogmar'] = 14915		# in bubble, not Colonia
+    system_ids['Ratri'] = 16001		#   "
 
     # Some extra interesting systems
     system_ids['Sagittarius A*']       = 21276
