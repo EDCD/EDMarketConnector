@@ -10,6 +10,7 @@ import re
 import requests
 from sys import platform
 import time
+from calendar import timegm
 import uuid
 
 if platform != 'win32':
@@ -29,8 +30,10 @@ replayfile = None	# For delayed messages
 
 class EDDN:
 
-    ### UPLOAD = 'http://localhost:8081/upload/'	# testing
-    UPLOAD = 'http://eddn-gateway.elite-markets.net:8080/upload/'
+    ### SERVER = 'http://localhost:8081/'	# testing
+    SERVER = 'http://eddn-gateway.elite-markets.net:8080/'
+    UPLOAD = '%s/upload/' % SERVER
+    HEALTH = '%s/health_check/' % SERVER
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
 
@@ -75,6 +78,17 @@ class EDDN:
         if replayfile:
             replayfile.close()
         replayfile = None
+
+    def time(self):
+        # Returns the EDDN gateway's idea of time-of-day.
+        # Assumes that the gateway returns a strictly compliant Date - https://tools.ietf.org/html/rfc7231#section-7.1.1.1
+        try:
+            r = self.session.get(self.HEALTH, timeout=timeout)
+            return timegm(time.strptime(r.headers['Date'], "%a, %d %b %Y %H:%M:%S GMT"))
+        except:
+            # On any error assume that we're good
+            if __debug__: print_exc()
+            return time.time()
 
     def send(self, cmdr, msg):
         if config.getint('anonymous'):

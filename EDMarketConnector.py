@@ -11,7 +11,7 @@ from os import chdir, mkdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
 import requests
-from time import time, localtime, strftime, strptime
+from time import gmtime, time, localtime, strftime, strptime
 from calendar import timegm
 import webbrowser
 
@@ -35,6 +35,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import tkFont
+import tkMessageBox
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
@@ -57,7 +58,6 @@ import coriolis
 import eddb
 import edshipyard
 import loadout
-from ntp import NTPCheck
 import stats
 import prefs
 import plug
@@ -70,6 +70,11 @@ EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EDSM_POLL = 0.1
+
+# Limits on local clock drift from EDDN gateway
+DRIFT_THRESHOLD = 3 * 60
+TZ_THRESHOLD = 30 * 60
+CLOCK_THRESHOLD = 11 * 60 * 60 + TZ_THRESHOLD
 
 
 class AppWindow:
@@ -310,7 +315,15 @@ class AppWindow:
             except:
                 if __debug__: print_exc()
 
-        if not NTPCheck(self.w):	# Check system time
+        # Check system time
+        drift = abs(time() - self.eddn.time())
+        if drift > DRIFT_THRESHOLD:
+            tkMessageBox.showerror(applongname,
+                                   _('This app requires accurate timestamps.') + '\n' +	# Error message shown if system time is wrong
+                                   (TZ_THRESHOLD < drift < CLOCK_THRESHOLD and
+                                    _("Check your system's Time Zone setting.") or		# Error message shown if system time is wrong
+                                    _("Check your system's Date and Time settings.")),	# Error message shown if system time is wrong
+                                   parent = self.w)
             self.w.destroy()
             return
 

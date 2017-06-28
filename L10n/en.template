@@ -52,10 +52,10 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Check for Updates...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
 
 /* Federation rank. [stats.py] */
@@ -481,7 +481,7 @@
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "This app requires accurate timestamps." = "This app requires accurate timestamps.";
 
 /* Help text in settings. [prefs.py] */
