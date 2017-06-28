@@ -178,17 +178,17 @@ Download and extract the source code of the [latest release](https://github.com/
 
 Mac:
 
-* Requires the Python “keyring”, “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U keyring requests watchdog py2app` .
+* Requires the Python “keyring”, “ntplib”, “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U keyring ntplib requests watchdog py2app` .
 * Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “keyring”, “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
+* Requires Python2.7 and the Python “keyring”, “ntplib”, “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
-* Requires the Python “imaging-tk”, “iniparse”, “keyring” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-keyring python-requests` .
+* Requires the Python “imaging-tk”, “iniparse”, “keyring”, “ntplib” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-ntplib python-keyring python-requests` .
 * Run with `./EDMarketConnector.py` .
 
 Command-line

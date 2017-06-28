@@ -57,6 +57,7 @@ import coriolis
 import eddb
 import edshipyard
 import loadout
+from ntp import NTPCheck
 import stats
 import prefs
 import plug
@@ -308,6 +309,10 @@ class AppWindow:
                 prefs.migrate(data['commander']['name'])
             except:
                 if __debug__: print_exc()
+
+        if not NTPCheck(self.w):	# Check system time
+            self.w.destroy()
+            return
 
         self.postprefs(False)	# Companion login happens in callback from monitor
 
