@@ -31,7 +31,7 @@ replayfile = None	# For delayed messages
 class EDDN:
 
     ### SERVER = 'http://localhost:8081/'	# testing
-    SERVER = 'http://eddn-gateway.elite-markets.net:8080/'
+    SERVER = 'http://eddn-gateway.elite-markets.net:8080'
     UPLOAD = '%s/upload/' % SERVER
     HEALTH = '%s/health_check/' % SERVER
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
