@@ -52,6 +52,12 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Chercher une mise à jour...";
 
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Date and Time settings." = "Vérifiez vos paramètres de Date et Temps système.";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Time Zone setting." = "Vérifiez les paramètres du fuseau horaire de votre système.";
+
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Premier Maître";
 
@@ -119,7 +125,7 @@
 "Duke" = "Archiduc";
 
 /* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
+"E:D interaction log location" = "Emplacement des fichiers d'interaction E:D";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Emplacement du journal E:D";
@@ -188,7 +194,7 @@
 "Fetching data..." = "Récupération des données...";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
+"Fighter" = "Chasseur";
 
 /* Menu title. [EDMarketConnector.py] */
 "File" = "Fichier";
@@ -200,13 +206,13 @@
 "Gladiator" = "Gladiator";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
+"Gunner" = "Artilleur";
 
 /* Combat rank. [stats.py] */
 "Harmless" = "Inoffensif";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
+"Helm" = "Pilote";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Aide";
@@ -471,6 +477,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Thème";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"This app requires accurate timestamps." = "Cette application requiert un horodatage précis.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Astuce : Vous pouvez désactiver un plugin en{CR}ajoutant '{EXT}' à son nom de répertoire";

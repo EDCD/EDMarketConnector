@@ -52,6 +52,12 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Controlla aggiornamenti...";
 
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
+
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -188,7 +194,7 @@
 "Fetching data..." = "Sto raccogliendo i dati...";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
+"Fighter" = "Cacciatore";
 
 /* Menu title. [EDMarketConnector.py] */
 "File" = "File";
@@ -200,13 +206,13 @@
 "Gladiator" = "Gladiator";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
+"Gunner" = "Artigliere";
 
 /* Combat rank. [stats.py] */
 "Harmless" = "Harmless";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
+"Helm" = "Timone";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Guida";
@@ -471,6 +477,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"This app requires accurate timestamps." = "This app requires accurate timestamps.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name";

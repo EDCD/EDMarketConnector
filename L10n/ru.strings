@@ -52,6 +52,12 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Поиск обновлений...";
 
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
+
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Главный старшина";
 
@@ -471,6 +477,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"This app requires accurate timestamps." = "This app requires accurate timestamps.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";

@@ -849,7 +849,7 @@ class AppWindow:
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
         elif (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
-            self.status['text'] = _('Error: Server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
+            self.status['text'] = _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
             if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:

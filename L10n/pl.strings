@@ -52,6 +52,12 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Sprawdź aktualizacje...";
 
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Date and Time settings." = "Sprawdź datę i czas systemowe.";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"Check your system's Time Zone setting." = "Sprawdź ustawienie strefy czasowej.";
+
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -119,7 +125,7 @@
 "Duke" = "Duke";
 
 /* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
+"E:D interaction log location" = "Miejsce składowania logu inerakcji z E:D";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D Lokacja pliku dziennika";
@@ -471,6 +477,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Schemat kolorystyczny";
+
+/* Error message shown if system time is wrong. [ntp.py] */
+"This app requires accurate timestamps." = "Aplikacja wymaga dokładnych sygnatur czasowych.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Wskazówka: Możesz wyłączyć pluginy(CR)dodając '(EXT)' do nazwy folderu";
