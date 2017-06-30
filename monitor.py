@@ -69,6 +69,7 @@ else:
 class EDLogs(FileSystemEventHandler):
 
     _POLL = 1		# Polling is cheap, so do it often
+    _RE_CANONICALISE = re.compile('\$(.+)_name;')
 
     # Mostly taken from http://elite-dangerous.wikia.com/wiki/List_of_Rare_Commodities
     RARES = set([
@@ -346,32 +347,31 @@ class EDLogs(FileSystemEventHandler):
                 if 'UserShipId' in entry:	# Only present when changing the ship's ident
                     self.state['ShipIdent'] = entry['UserShipId']
                 self.state['ShipName']  = entry.get('UserShipName')
-                self.state['ShipType']  = entry['Ship'].lower()
+                self.state['ShipType']  = self.canonicalise(entry['Ship'])
             elif entry['event'] == 'ShipyardBuy':
                 self.state['ShipID'] = None
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
-                self.state['ShipType'] = entry['ShipType'].lower()
+                self.state['ShipType'] = self.canonicalise(entry['ShipType'])
                 self.state['PaintJob'] = None
             elif entry['event'] == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
-                self.state['ShipType'] = entry['ShipType'].lower()
+                self.state['ShipType'] = self.canonicalise(entry['ShipType'])
                 self.state['PaintJob'] = None
             elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, ShipyardNew, follows ShipyardSwap, ShipyardBuy
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
-                self.state['ShipType']  = entry['Ship'].lower()
+                self.state['ShipType']  = self.canonicalise(entry['Ship'])
                 # Ignore other Modules since they're missing Engineer modification details
                 self.state['PaintJob'] = ''
                 for module in entry['Modules']:
                     if module.get('Slot') == 'PaintJob' and module.get('Item'):
-                        self.state['PaintJob'] = module['Item'].lower()
+                        self.state['PaintJob'] = self.canonicalise(module['Item'])
             elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                symbol = re.match('\$(.+)_name;', entry.get('BuyItem', ''))
-                self.state['PaintJob'] = symbol and symbol.group(1).lower() or entry.get('BuyItem', '')
+                self.state['PaintJob'] = self.canonicalise(entry.get('BuyItem'))
             elif entry['event'] in ['Undocked']:
                 self.station = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
@@ -399,35 +399,54 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'Cargo':
                 self.live = True	# First event in 2.3
                 self.state['Cargo'] = defaultdict(int)
-                self.state['Cargo'].update({ x['Name']: x['Count'] for x in entry['Inventory'] })
+                self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
             elif entry['event'] in ['CollectCargo', 'MarketBuy', 'MiningRefined']:
-                self.state['Cargo'][entry['Type']] += entry.get('Count', 1)
+                commodity = self.canonicalise(entry['Type'])
+                self.state['Cargo'][commodity] += entry.get('Count', 1)
             elif entry['event'] in ['EjectCargo', 'MarketSell']:
-                self.state['Cargo'][entry['Type']] -= entry.get('Count', 1)
-                if self.state['Cargo'][entry['Type']] <= 0:
-                    self.state['Cargo'].pop(entry['Type'])
+                commodity = self.canonicalise(entry['Type'])
+                self.state['Cargo'][commodity] -= entry.get('Count', 1)
+                if self.state['Cargo'][commodity] <= 0:
+                    self.state['Cargo'].pop(commodity)
             elif entry['event'] == 'MissionCompleted':
-                # Not sure whether the names for 'CommodityReward' are from the same namespace as the 'Cargo' event.
                 for reward in entry.get('CommodityReward', []):
-                    self.state['Cargo'][reward['Name'].lower()] += reward.get('Count', 1)
+                    commodity = self.canonicalise(reward['Name'])
+                    self.state['Cargo'][commodity] += reward.get('Count', 1)
 
             elif entry['event'] == 'Materials':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
                     self.state[category] = defaultdict(int)
-                    self.state[category].update({ x['Name']: x['Count'] for x in entry.get(category, []) })
+                    self.state[category].update({ self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, []) })
             elif entry['event'] == 'MaterialCollected':
-                self.state[entry['Category']][entry['Name']] += entry['Count']
+                material = self.canonicalise(entry['Name'])
+                self.state[entry['Category']][material] += entry['Count']
             elif entry['event'] in ['MaterialDiscarded', 'ScientificResearch']:
-                self.state[entry['Category']][entry['Name']] -= entry['Count']
-                if self.state[entry['Category']][entry['Name']] <= 0:
-                    self.state[entry['Category']].pop(entry['Name'])
+                material = self.canonicalise(entry['Name'])
+                self.state[entry['Category']][material] -= entry['Count']
+                if self.state[entry['Category']][material] <= 0:
+                    self.state[entry['Category']].pop(material)
             elif entry['event'] in ['EngineerCraft', 'Synthesis']:
                 for category in ['Raw', 'Manufactured', 'Encoded']:
                     for x in entry[entry['event'] == 'EngineerCraft' and 'Ingredients' or 'Materials']:
-                        if x['Name'] in self.state[category]:
-                            self.state[category][x['Name']] -= x['Count']
-                            if self.state[category][x['Name']] <= 0:
-                                self.state[category].pop(x['Name'])
+                        material = self.canonicalise(x['Name'])
+                        if material in self.state[category]:
+                            self.state[category][material] -= x['Count']
+                            if self.state[category][material] <= 0:
+                                self.state[category].pop(material)
+
+            elif entry['event'] == 'EngineerContribution':
+                commodity = self.canonicalise(entry.get('Commodity'))
+                if commodity:
+                    self.state['Cargo'][commodity] -= entry['Quantity']
+                    if self.state['Cargo'][commodity] <= 0:
+                        self.state['Cargo'].pop(commodity)
+                material = self.canonicalise(entry.get('Material'))
+                if material:
+                    for category in ['Raw', 'Manufactured', 'Encoded']:
+                        if material in self.state[category]:
+                            self.state[category][material] -= entry['Quantity']
+                            if self.state[category][material] <= 0:
+                                self.state[category].pop(material)
 
             elif entry['event'] == 'JoinACrew':
                 self.captain = entry['Captain']
@@ -452,6 +471,15 @@ class EDLogs(FileSystemEventHandler):
                 print 'Invalid journal entry "%s"' % repr(line)
                 print_exc()
             return { 'event': None }
+
+    # Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount", and "hnshockmount",
+    # "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1", "python" and "Python", etc.
+    # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
+    def canonicalise(self, item):
+        if not item: return ''
+        item = item.lower()
+        match = self._RE_CANONICALISE.match(item)
+        return match and match.group(1) or item
 
     def get_entry(self):
         if not self.event_queue:
