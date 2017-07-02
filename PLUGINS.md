@@ -59,11 +59,23 @@ def plugin_prefs(parent):
    return frame
 ```
 
+This gets called when the user dismisses the settings dialog:
+
+```
+def prefs_changed():
+   """
+   Save settings.
+   """
+   config.setint('MyPluginSetting', this.mysetting.get())	# Store new value in config
+```
+
 ## Display
 
 You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
 
 ```
+this = sys.modules[__name__]	# For holding module globals
+
 def plugin_app(parent):
    """
    Create a TK widget for the EDMC main window
@@ -78,7 +90,7 @@ this.status["text"] = "Happy!"
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `cmdr_data()` and `prefs_changed()`.
+Once you have created your plugin and EDMC has loaded it there are four other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `interaction()`, `cmdr_data()` and `prefs_changed()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
@@ -123,18 +135,6 @@ def cmdr_data(data):
 ```
 
 The data is a dictionary and full of lots of wonderful stuff!
-
-### Configuration
-
-This gets called when the user dismisses the settings dialog.
-
-```
-def prefs_changed():
-   """
-   Save settings.
-   """
-   config.setint('MyPluginSetting', this.mysetting.get())	# Store new value in config
-```
 
 # Distributing a Plugin
 
