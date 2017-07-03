@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # eddb.io station database
 #
@@ -71,51 +72,22 @@ if __name__ == "__main__":
     def around_outlier(cx, cy, cz, x, y, z):
         return ((x - ox) * (x - ox) + (y - oy) * (y - oy) + (z - oz) * (z - oz)) <= RO2
 
-    POIS = [
-        ('Col 173 Sector AP-Q b21-2', 1127.31250, -154.03125, -237.90625),
-        ('Col 173 Sector AV-N b23-5', 1117.03125, -71.03125, -202.15625),
-        ('Col 173 Sector CG-M b24-8', 1127.93750, -59.93750, -175.78125),
-        ('Col 173 Sector DH-K b25-2', 1027.09375, -80.25000, -163.43750),
-        ('Col 173 Sector EC-L d8-54', 1180.56250, -303.34375, -14.09375),
-        ('Col 173 Sector FC-L d8-28', 1231.09375, -307.21875, -10.96875),
-        ('Col 173 Sector HR-M b23-3', 1024.28125, -191.71875, -193.81250),
-        ('Col 173 Sector KN-J b25-5', 1002.90625, -152.28125, -160.25000),
-        ('Col 173 Sector KY-Q d5-47', 1043.87500, -100.75000, -246.06250),
-        ('Col 173 Sector LY-Q d5-13', 1120.34375, -87.21875, -216.87500),
-        ('Col 173 Sector LY-Q d5-59', 1078.09375, -86.56250, -249.46875),
-        ('Col 173 Sector OE-P d6-11', 1014.34375, -67.59375, -173.96875),
-        ('Col 173 Sector OG-Z c15-35', 1084.12500, 2.59375, 12.93750),
-        ('Col 173 Sector OT-Q d5-18', 1150.75000, -124.03125, -216.81250),
-        ('Col 173 Sector PV-B c14-1', 1023.65625, -217.40625, -81.09375),
-        ('Col 173 Sector UU-O d6-42', 1147.09375, -252.81250, -156.65625),
-        ('Col 173 Sector WF-N d7-52', 1186.68750, -166.18750, -80.18750),
-        ('Col 173 Sector WN-B b29-1', 1237.75000, -247.37500, -76.90625),
-        ('Col 173 Sector WZ-O b22-4', 1011.06250, -131.78125, -210.43750),
-        ('Col 173 Sector XG-J c10-17', 1095.25000, -127.56250, -238.40625),
-        ('Col 173 Sector YV-M d7-23', 1005.46875, -271.12500, -76.62500),
-        ('HIP 19026', -117.87500, -65.12500, -330.90625),
-        ('HIP 17403', -93.68750, -158.96875, -367.62500),
-        ('HIP 17862', -81.43750, -151.90625, -359.59375),
-        ('HIP 39768', 866.59375, -119.12500, -109.03125),
-        ('IC 2391 Sector FL-X b1-7', 611.34375, -78.40625, -51.68750),
-        ('IC 2391 Sector GW-V b2-4', 587.93750, -51.03125, -38.53125),
-        ('IC 2391 Sector ZE-A d101', 526.50000, -86.37500, -37.93750),
+    # Get Points Of Interest from Canonn Research - https://api.canonn.technology/api/docs/#!/System/V1StellarSystemsGet
+    POIS = [(s['name'], s['edsmCoordX'], s['edsmCoordY'], s['edsmCoordZ'])
+            for s in requests.get('https://api.canonn.technology/api/v1/stellar/systems').json()
+            if s.get('edsmExtId') or s.get('eddbExtId')]
+    POIS.extend([
+        # http://elite-dangerous.wikia.com/wiki/Alien_Crash_Site
         ('Pleiades Sector AB-W b2-4', -137.56250, -118.25000, -380.43750),
-        ('Skaudai AM-B d14-138', -5477.59375, -504.15625, 10436.25000),
-        ('Synuefe CE-R c21-6', 828.18750, -78.00000, -105.18750),
-        ('Synuefe LY-I b42-2', 814.71875, -222.78125, -151.15625),
-        ('Synuefe NL-N c23-4', 860.12500, -124.59375, -61.06250),
-        ('Synuefe TP-F b44-0', 838.75000, -197.84375, -111.84375),
-        ('Synuefe XO-P c22-17', 546.90625, -56.46875, -97.81250),
-        ('Synuefe XR-H d11-102', 357.34375, -49.34375, -74.75000),
-        ('Synuefe ZL-J d10-109', 852.65625, -51.12500, -124.84375),
-        ('Synuefe ZL-J d10-119', 834.21875, -51.21875, -154.65625),
-        ('Synuefe ZR-I b43-10', 811.40625, -60.43750, -144.71875),
-        ('Vela Dark Region EL-Y d32', 1000.65625, -166.21875, -64.15625),
-        ('Vela Dark Region HB-X c1-28', 1073.06250, -100.65625, -92.75000),
-        ('Vela Dark Region KR-W c1-24', 1036.87500, -163.59375, -85.96875),
-        ('Vela Dark Region RC-V b2-5', 1072.75000, -168.18750, -85.12500),
-    ]
+        ('HIP 17862',                  -81.43750, -151.90625, -359.59375),
+        ('HIP 17403',                  -93.68750, -158.96875, -367.62500),
+        # http://elite-dangerous.wikia.com/wiki/Thargoid_Surface_Site
+        ('HIP 19026',                 -117.87500,  -65.12500, -330.90625),
+        # POI
+        ('HIP 22460',                  -41.31250,  -58.96875, -354.78125),
+        ('Col 70 Sector FY-N c21-3',   687.06250, -362.53125, -697.06250),
+    ])
+    POIS.sort()
 
     systems = { int(s['id']) : {
         'name'         : s['name'].decode('utf-8'),
@@ -130,7 +102,7 @@ if __name__ == "__main__":
     # system_id by system_name (ignoring duplicate names)
     system_ids = {
         str(s['name']) : k
-        for k,s in systems.iteritems() if s['is_populated'] or ((inbubble(s['x'], s['y'], s['z']) or around_jaques(s['x'], s['y'], s['z'])) and all(ord(c) < 128 for c in s['name']))	# skip unpopulated systems outside the bubble and those with a bogus name
+        for k,s in systems.iteritems() if s['is_populated'] or inbubble(s['x'], s['y'], s['z']) or around_jaques(s['x'], s['y'], s['z'])	# skip unpopulated systems outside the bubble and those with a bogus name
     }
 
     print '\n%d systems around Jacques' % len([s for s in systems.itervalues() if around_jaques(s['x'], s['y'], s['z'])])
@@ -145,9 +117,9 @@ if __name__ == "__main__":
         ox, oy, oz = o['x'], o['y'], o['z']
         extra = {
             str(s['name']) : k
-            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])
+            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z'])
         }
-        print '%-30s%7d %11.5f %11.5f %11.5f %3d' % (o['name'], k1, ox, oy, oz, len(extra))
+        print '%-30s%7d %11.5f %11.5f %11.5f %4d' % (o['name'], k1, ox, oy, oz, len(extra))
         extra_ids.update(extra)
     print '\n%d systems around outliers' % len(extra_ids)
     system_ids.update(extra_ids)
@@ -157,9 +129,9 @@ if __name__ == "__main__":
     for name,ox,oy,oz in POIS:
         extra = {
             str(s['name']) : k
-            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z']) and all(ord(c) < 128 for c in s['name'])
+            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z'])
         }
-        print '%-37s %11.5f %11.5f %11.5f %3d' % (name, ox, oy, oz, len(extra))
+        print '%-37s %11.5f %11.5f %11.5f %4d' % (name, ox, oy, oz, len(extra))
         extra_ids.update(extra)
     print '\n%d systems around POIs' % len(extra_ids)
     system_ids.update(extra_ids)
@@ -178,26 +150,27 @@ if __name__ == "__main__":
     }
     print '\n%d duplicate systems inside bubble calculation:' % len(cut)
     for k,s in sorted(cut.iteritems()):
-        print '%-22s%7d %7d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
+        print '%-20s%8d %8d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
-    system_ids['Aarti'] = 3616854	# bogus data from EDSM
     system_ids['Almar'] = 750
     system_ids['Amo'] = 866
     system_ids['Arti'] = 60342
-    system_ids['Futhark'] = 4901	# bogus data from ED-IBE
-    system_ids['K Carinae'] = 375886	# both unpopulated
     system_ids['Ogmar'] = 14915		# in bubble, not Colonia
     system_ids['Ratri'] = 16001		#   "
+    system_ids['K Carinae'] = 375886	# both unpopulated
 
     # Some extra interesting systems
-    system_ids['Sagittarius A*']       = 21276
-    system_ids["Thor's Eye"]           = 34950
-    system_ids['Great Annihilator']    = 35985
-    system_ids['Beagle Point']         = 47005
-    system_ids['Rendezvous Point']     = 91161
-    system_ids['Myeia Thaa ZE-R d4-0'] = 125069
-    system_ids['Iorant FR-C c26-0']    = 141581
+    system_ids['Sagittarius A*']       =   21276
+    system_ids["Thor's Eye"]           =   34950
+    system_ids['Great Annihilator']    =   35985
+    system_ids['Beagle Point']         =   47005
+    system_ids['Rendezvous Point']     =   91161
+    system_ids['Myeia Thaa ZE-R d4-0'] =  125069	# Podar
+    system_ids['Iorant FR-C c26-0']    =  141581	# The Treehouse
+    system_ids['Phae Phlai AA-A h0']   =  144202	# Explorer's End
+    system_ids['Oevasy SG-Y d0']       =  145249	# Salomé's Reach / Semotus Beacon / Ishum's Reach
+    system_ids['Syreadiae JX-F c0']    = 8538488	# Zurara
 
     with open('systems.p',  'wb') as h:
         cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
@@ -211,7 +184,8 @@ if __name__ == "__main__":
          (EDDB.HAS_MARKET     if x['has_market']     else 0) |
          (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
          (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0))
-        for x in stations if x['max_landing_pad_size'] and all(ord(c) < 128 for c in x['name']) }
+        for x in stations if x['max_landing_pad_size']
+    }
 
     cut = [ x for x in stations if any(ord(c) >= 128 for c in x['name']) ]
     print '\n%d dropped stations:' % len(cut)
