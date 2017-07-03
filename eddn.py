@@ -30,8 +30,8 @@ replayfile = None	# For delayed messages
 
 class EDDN:
 
-    ### SERVER = 'http://localhost:8081/'	# testing
-    SERVER = 'http://eddn-gateway.elite-markets.net:8080'
+    ### SERVER = 'http://localhost:8081'	# testing
+    SERVER = 'https://eddn.edcd.io:4430'
     UPLOAD = '%s/upload/' % SERVER
     HEALTH = '%s/health_check/' % SERVER
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
@@ -173,7 +173,7 @@ class EDDN:
         # Don't send empty commodities list - schema won't allow it
         if commodities:
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/commodity/3' + (is_beta and '/test' or ''),
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
@@ -185,7 +185,7 @@ class EDDN:
         # Don't send empty modules list - schema won't allow it
         if data['lastStarport'].get('modules'):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/outfitting/2' + (is_beta and '/test' or ''),
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
@@ -197,7 +197,7 @@ class EDDN:
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if data['lastStarport'].get('ships'):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'http://schemas.elite-markets.net/eddn/shipyard/2' + (is_beta and '/test' or ''),
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
                 'message'    : {
                     'systemName'  : data['lastSystem']['name'],
                     'stationName' : data['lastStarport']['name'],
@@ -207,7 +207,7 @@ class EDDN:
 
     def export_journal_entry(self, cmdr, is_beta, entry):
         msg = {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/journal/1' + (is_beta and '/test' or ''),
+            '$schemaRef' : 'https://eddn.edcd.io/schemas/journal/1' + (is_beta and '/test' or ''),
             'message'    : entry
         }
         if replayfile or self.load():
@@ -227,6 +227,6 @@ class EDDN:
 
     def export_blackmarket(self, cmdr, is_beta, msg):
         self.send(cmdr, {
-            '$schemaRef' : 'http://schemas.elite-markets.net/eddn/blackmarket/1' + (is_beta and '/test' or ''),
+            '$schemaRef' : 'https://eddn.edcd.io/schemas/blackmarket/1' + (is_beta and '/test' or ''),
             'message'    : msg
         })

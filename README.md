@@ -166,7 +166,7 @@ EDMC supports this scenario if you run the second instance of E:D in a *differen
 EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
 
 ### Error: Can't connect to EDDN
-EDMC needs to talk to eddn-gateway.elite-markets.net on port 8080. If you consistently receive this error check that your router or VPN configuration allows port 8080 / tcp outbound.
+EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound.
 
 ### Import failed: No ship loadout found
 Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
@@ -264,7 +264,7 @@ Acknowledgements
 * Thanks to Cmdr Mila Strelok for the Spanish translation.
 * Thanks to Taras Velychko for the Ukranian translation.
 * Thanks to [Ian Norton](https://github.com/inorton) for plugin support.
-* Thanks to [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/jamesremuscat/EDDN/wiki) and to [Cmdr Anthor](https://github.com/AnthorNet) for the [stats](http://eddn-gateway.elite-markets.net/).
+* Thanks to [Cmdr Anthor](https://github.com/EDSM-NET) and [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/EDSM-NET/EDDN/wiki).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
 * Uses [Python Keyring Lib](https://github.com/jaraco/keyring) by Jason R. Coombs, Kang Zhang, et al.
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
