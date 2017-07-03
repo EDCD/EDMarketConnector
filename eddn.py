@@ -137,6 +137,9 @@ class EDDN:
                 print_exc()
             self.replaylog.pop(0)	# Discard and continue
         else:
+            # Rewrite old schema name
+            if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
+                msg['$schemaRef'] = 'https://eddn.edcd.io/schemas/' + msg['$schemaRef'][38:]
             try:
                 self.send(cmdr, msg)
                 self.replaylog.pop(0)
