@@ -119,7 +119,10 @@ If EDMC is started while the game is already running EDMC will send the last few
 ```
 def interaction(cmdr, entry):
     # Log type of interaction, Cmdr name, and local time
-    sys.stderr.write("{} Cmdr {}\n".format(', '.join(entry['Interactions']), entry['Name'].encode('utf-8'), time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(entry['Epoch'] - 11644473600))))
+    sys.stderr.write("{} Cmdr {} at {}\n".format(', '.join(entry['Interactions']),
+                                                 entry['Name'].encode('utf-8'),
+                                                 time.strftime('%Y-%m-%dT%H:%M:%S',
+                                                               time.localtime(entry['Epoch'] - 11644473600))))
 ```
 
 ### Getting Commander Data
