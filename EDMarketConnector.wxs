@@ -136,6 +136,9 @@
 						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
 					</Component>
 					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\eddb.py" />
+					</Component>
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\es.strings" />
 					</Component>
 					<Component Guid="*">
@@ -443,6 +446,7 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
+			<ComponentRef Id="eddb.py" />
 			<ComponentRef Id="es.strings" />
 			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />

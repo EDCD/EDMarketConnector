@@ -56,7 +56,6 @@ import td
 import eddn
 import edsm
 import coriolis
-import eddb
 import edshipyard
 import loadout
 import stats
@@ -67,7 +66,6 @@ from monitor import monitor
 from interactions import interactions
 from theme import theme
 
-EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EDSM_POLL = 0.1
@@ -79,8 +77,6 @@ CLOCK_THRESHOLD = 11 * 60 * 60 + TZ_THRESHOLD
 
 
 class AppWindow:
-
-    STATION_UNDOCKED = u'×'	# "Station" name to display when not docked = U+00D7
 
     # Tkinter Event types
     EVENT_KEYPRESS = 2
@@ -118,22 +114,18 @@ class AppWindow:
         self.cmdr_label = tk.Label(frame)
         self.ship_label = tk.Label(frame)
         self.system_label = tk.Label(frame)
-        self.station_label = tk.Label(frame)
 
         self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
         self.ship_label.grid(row=2, column=0, sticky=tk.W)
         self.system_label.grid(row=3, column=0, sticky=tk.W)
-        self.station_label.grid(row=4, column=0, sticky=tk.W)
 
         self.cmdr    = tk.Label(frame, anchor=tk.W)
         self.ship    = HyperlinkLabel(frame, url = self.shipyard_url)
         self.system  = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
-        self.station = HyperlinkLabel(frame, url = self.station_url, popup_copy = lambda x: x!=self.STATION_UNDOCKED)
 
         self.cmdr.grid(row=1, column=1, sticky=tk.EW)
         self.ship.grid(row=2, column=1, sticky=tk.EW)
         self.system.grid(row=3, column=1, sticky=tk.EW)
-        self.station.grid(row=4, column=1, sticky=tk.EW)
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
@@ -355,7 +347,6 @@ class AppWindow:
         self.ship_label['text']    = (monitor.captain and _('Role') or	# Multicrew role label in main window
                                       _('Ship')) + ':'	# Main window
         self.system_label['text']  = _('System') + ':'	# Main window
-        self.station_label['text'] = _('Station') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
         if platform == 'darwin':
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
@@ -480,7 +471,6 @@ class AppWindow:
                 if not monitor.system:
                     self.system['text'] = data['lastSystem']['name']
                     self.system['image'] = ''
-                self.station['text'] = data['commander'].get('docked') and data.get('lastStarport') and data['lastStarport'].get('name') or (EDDB.system(self.system['text']) and self.STATION_UNDOCKED or '')
                 self.status['text'] = ''
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
 
@@ -515,7 +505,6 @@ class AppWindow:
 
                 else:
                     # Finally - the data looks sane and we're docked at a station
-                    (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
 
                     # No EDDN output?
                     if (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
@@ -544,7 +533,7 @@ class AppWindow:
                             self.w.update_idletasks()
                             self.eddn.export_commodities(data, monitor.is_beta)
                             self.eddn.export_outfitting(data, monitor.is_beta)
-                            if has_shipyard and not data['lastStarport'].get('ships'):
+                            if monitor.stationtype != 'Outpost' and not data['lastStarport'].get('ships'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
                                 self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
                             else:
@@ -634,7 +623,6 @@ class AppWindow:
                 return
 
             system_changed  = monitor.system  and self.system['text']  != monitor.system
-            station_changed = monitor.station and self.station['text'] != monitor.station
 
             # Update main window
             if monitor.cmdr and monitor.captain:
@@ -656,7 +644,6 @@ class AppWindow:
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
                 self.ship['text'] = ''
 
-            self.station['text'] = monitor.station or (EDDB.system(monitor.system) and self.STATION_UNDOCKED or '')
             if self.system['text'] != monitor.system:
                 self.system['text'] = monitor.system or ''
                 self.edsm.link(monitor.system)
@@ -747,7 +734,7 @@ class AppWindow:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
-            if station_changed and monitor.mode and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            if monitor.mode and monitor.station and entry['event'] in ['StartUp', 'Location', 'Docked'] and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             # Send interesting events to EDDN
@@ -863,18 +850,6 @@ class AppWindow:
     def system_url(self, text):
         return text and self.edsm.result['url']
 
-    def station_url(self, text):
-        if text:
-            (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(self.system['text'], self.station['text'])
-            if station_id:
-                return 'https://eddb.io/station/%d' % station_id
-
-            system_id = EDDB.system(self.system['text'])
-            if system_id:
-                return 'https://eddb.io/system/%d' % system_id
-
-        return None
-
     def cooldown(self):
         if time() < self.holdofftime:
             self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS = int(self.holdofftime - time()))	# Update button in main window
@@ -888,9 +863,9 @@ class AppWindow:
         self.w.wm_attributes('-topmost', self.always_ontop.get())
 
     def copy(self, event=None):
-        if self.system['text']:
+        if monitor.system:
             self.w.clipboard_clear()
-            self.w.clipboard_append(self.station['text'] == self.STATION_UNDOCKED and self.system['text'] or '%s,%s' % (self.system['text'], self.station['text']))
+            self.w.clipboard_append(monitor.station and '%s,%s' % (monitor.system, monitor.station) or monitor.system)
 
     def help_general(self, event=None):
         webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')

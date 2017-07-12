@@ -24,14 +24,11 @@ import loadout
 import edshipyard
 import coriolis
 import shipyard
-import eddb
 import eddn
 import stats
 import prefs
 from config import appcmdname, appversion, update_feed, config
 
-
-EDDB = eddb.EDDB()
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_NOT_DOCKED, EXIT_SYS_ERR = range(6)
@@ -127,7 +124,6 @@ try:
 
     # Finally - the data looks sane and we're docked at a station
     print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
-    (station_id, has_market, has_outfitting, has_shipyard) = EDDB.station(data['lastSystem']['name'], data['lastStarport']['name'])
 
     if (args.m or args.o or args.s) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
         sys.stderr.write("Station doesn't have anything!\n")
@@ -155,13 +151,11 @@ try:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
     if args.s:
-        if has_shipyard and not data['lastStarport'].get('ships') and not args.j:
+        if not data['lastStarport'].get('ships') and not args.j:
             sleep(SERVER_RETRY)
             data = session.query()
         if data['lastStarport'].get('ships'):
             shipyard.export(data, args.s)
-        elif has_shipyard:
-            sys.stderr.write("Couldn't retrieve shipyard info\n")
         else:
             sys.stderr.write("Station doesn't have a shipyard\n")
 

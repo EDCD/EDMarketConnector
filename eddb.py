@@ -1,47 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# eddb.io station database
+# build databases from files systems.csv and stations.json from http://eddb.io/api
 #
 
 import cPickle
 import csv
-import os
-from os.path import dirname, join, normpath
-import sys
-from sys import platform
+import json
+import requests
 
-from config import config
-
-class EDDB:
-
-    HAS_MARKET = 1
-    HAS_OUTFITTING = 2
-    HAS_SHIPYARD = 4
-
-    def __init__(self):
-        with open(join(config.respath, 'systems.p'),  'rb') as h:
-            self.system_ids  = cPickle.load(h)
-        with open(join(config.respath, 'stations.p'), 'rb') as h:
-            self.station_ids = cPickle.load(h)
-
-    # system_name -> system_id or 0
-    def system(self, system_name):
-        return self.system_ids.get(system_name, 0)	# return 0 on failure (0 is not a valid id)
-
-    # (system_name, station_name) -> (station_id, has_market, has_outfitting, has_shipyard)
-    def station(self, system_name, station_name):
-        (station_id, flags) = self.station_ids.get((self.system_ids.get(system_name), station_name), (0,0))
-        return (station_id, bool(flags & EDDB.HAS_MARKET), bool(flags & EDDB.HAS_OUTFITTING), bool(flags & EDDB.HAS_SHIPYARD))
-
-
-#
-# build databases from files systems.csv and stations.json from http://eddb.io/api
-#
 if __name__ == "__main__":
 
-    import json
-    import requests
 
     def download(filename):
         r = requests.get('https://eddb.io/archive/v5/' + filename, stream=True)
@@ -153,9 +122,7 @@ if __name__ == "__main__":
         print '%-20s%8d %8d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
-    system_ids['Almar'] = 750
     system_ids['Amo'] = 866
-    system_ids['Arti'] = 60342
     system_ids['Ogmar'] = 14915		# in bubble, not Colonia
     system_ids['Ratri'] = 16001		#   "
     system_ids['K Carinae'] = 375886	# both unpopulated
@@ -179,11 +146,7 @@ if __name__ == "__main__":
     # station_id by (system_id, station_name)
     stations = json.loads(download('stations.json').content)	# let json do the utf-8 decode
     station_ids = {
-        (x['system_id'], str(x['name'])) :
-        (x['id'],
-         (EDDB.HAS_MARKET     if x['has_market']     else 0) |
-         (EDDB.HAS_OUTFITTING if x['has_outfitting'] else 0) |
-         (EDDB.HAS_SHIPYARD   if x['has_shipyard']   else 0))
+        (x['system_id'], str(x['name'])) : x['id']
         for x in stations if x['max_landing_pad_size']
     }
 

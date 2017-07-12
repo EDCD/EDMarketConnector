@@ -65,6 +65,7 @@ if sys.platform=='darwin':
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
+PLUGINS = [ 'plugins/eddb.py' ]
 
 if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
@@ -74,6 +75,7 @@ if sys.platform=='darwin':
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'certifi', 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
+                  'extra_scripts': PLUGINS,
                   'resources': ['snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
@@ -117,6 +119,7 @@ elif sys.platform=='win32':
                          'systems.p',
                          '%s.VisualElementsManifest.xml' % APPNAME,
                          '%s.ico' % APPNAME ] +
+                    PLUGINS +
                     [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')] ) ]
 
 setup(

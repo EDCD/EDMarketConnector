@@ -457,7 +457,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "Station";
 
 /* [EDMarketConnector.py] */
