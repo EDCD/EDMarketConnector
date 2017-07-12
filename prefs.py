@@ -211,10 +211,10 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(edsmframe, text='EDSM')		# Not translated
 
         # build plugin prefs tabs
-        for plugname in plug.PLUGINS:
-            plugframe = plug.get_plugin_prefs(plugname, notebook)
+        for plugin in plug.PLUGINS:
+            plugframe = plugin.get_prefs(notebook)
             if plugframe:
-                notebook.add(plugframe, text=plugname)
+                notebook.add(plugframe, text=plugin.name)
 
         configframe = nb.Frame(notebook)
         configframe.columnconfigure(1, weight=1)
@@ -326,11 +326,8 @@ class PreferencesDialog(tk.Toplevel):
         plugdir = tk.StringVar()
         plugdir.set(config.plugin_dir)
 
-        plugnames, disabled_plugins = plug.find_plugins()
-
         nb.Label(plugsframe, text=_('Plugins folder')+':').grid(padx=PADX, sticky=tk.W)	# Section heading in settings
-        plugdirentry = nb.Entry(plugsframe,
-                                justify=tk.LEFT)
+        plugdirentry = nb.Entry(plugsframe, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
         plugdirentry.grid(row=10, padx=PADX, sticky=tk.EW)
 
@@ -340,16 +337,23 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name").format(EXT='.disabled')).grid(	# Help text in settings
             columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
 
-        if len(plugnames):
+        enabled_plugins = [x for x in plug.PLUGINS if x.folder and x.module]
+        if len(enabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
             nb.Label(plugsframe, text=_('Enabled Plugins')+':').grid(padx=PADX, sticky=tk.W)	# List of plugins in settings
-            for plugname in plugnames:
-                nb.Label(plugsframe, text=plugname).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+            for plugin in enabled_plugins:
+                if plugin.name == plugin.folder:
+                    label = nb.Label(plugsframe, text=plugin.name)
+                else:
+                    label = nb.Label(plugsframe, text='%s (%s)' % (plugin.folder, plugin.name))
+                label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+
+        disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
         if len(disabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
             nb.Label(plugsframe, text=_('Disabled Plugins')+':').grid(padx=PADX, sticky=tk.W)	# List of plugins in settings
-            for plugname in disabled_plugins:
-                nb.Label(plugsframe, text=plugname).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+            for plugin in disabled_plugins:
+                nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
 
         notebook.add(plugsframe, text=_('Plugins'))		# Tab heading in settings
 

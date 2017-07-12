@@ -1,107 +1,112 @@
 """
-Plugin hooks for EDMC - Ian Norton
+Plugin hooks for EDMC - Ian Norton, Jonathan Harris
 """
 import os
 import imp
 import sys
+import operator
+import threading	# We don't use it, but plugins might
+from traceback import print_exc
 
-if __debug__:
-    from traceback import print_exc
+from config import config, appname
 
-from config import config
-
-"""
-Dictionary of loaded plugin modules.
-"""
-PLUGINS = dict()
+# List of loaded Plugins
+PLUGINS = []
 
 
-def find_plugins():
-    """
-    Look for plugin entry points.
-    :return:
-    """
-    found = dict()
-    disabled = list()
-    plug_folders = os.listdir(config.plugin_dir)
-    for name in plug_folders:
-        if name.endswith(".disabled"):
-            name, discard = name.rsplit(".", 1)
-            disabled.append(name)
-            continue
-        loadfile = os.path.join(config.plugin_dir, name, "load.py")
-        if os.path.isfile(loadfile):
-            found[name] = loadfile
-    return found, disabled
+class Plugin(object):
+
+    def __init__(self, name, loadfile):
+        """
+        Load a single plugin
+        :param name: module name
+        :param loadfile: the main .py file
+        :raises Exception: Typically ImportError or OSError
+        """
+
+        self.name = name	# Display name.
+        self.folder = name	# basename of plugin folder. None for internal plugins.
+        self.module = None	# None for disabled plugins.
+
+        if loadfile:
+            sys.stdout.write('loading plugin %s\n' % name)
+            with open(loadfile, 'rb') as plugfile:
+                module = imp.load_module(name, plugfile, loadfile.encode(sys.getfilesystemencoding()),
+                                         ('.py', 'r', imp.PY_SOURCE))
+                newname = module.plugin_start()
+                self.name = newname and unicode(newname) or name
+                self.module = module
+        else:
+            sys.stdout.write('plugin %s disabled\n' % name)
+
+    def _get_func(self, funcname):
+        """
+        Get a function from a plugin, else return None if it isn't implemented.
+        :param funcname:
+        :return:
+        """
+        return getattr(self.module, funcname, None)
+
+    def get_app(self, parent):
+        """
+        If the plugin provides mainwindow content create and return it.
+        :param parent: the parent frame for this entry.
+        :return:
+        """
+        try:
+            plugin_app = self._get_func('plugin_app')
+            return plugin_app and plugin_app(parent)
+        except:
+            print_exc()
+            return None
+
+    def get_prefs(self, parent):
+        """
+        If the plugin provides a prefs frame, create and return it.
+        :param parent: the parent frame for this preference tab.
+        :return:
+        """
+        try:
+            plugin_prefs = self._get_func('plugin_prefs')
+            return plugin_prefs and plugin_prefs(parent)
+        except:
+            print_exc()
+            return None
 
 
 def load_plugins():
     """
-    Load all found plugins
+    Find and load all plugins
     :return:
     """
-    found, disabled = find_plugins()
     imp.acquire_lock()
-    for plugname in disabled:
-        sys.stdout.write("plugin {} disabled\n".format(plugname))
 
-    for plugname, loadfile in found.iteritems():
-        try:
-            sys.stdout.write("loading plugin {}\n".format(plugname))
-
-            # Add plugin's folder to Python's load path in case plugin has dependencies.
-            sys.path.append(os.path.dirname(loadfile))
-
-            with open(loadfile, "rb") as plugfile:
-                plugmod = imp.load_module(plugname, plugfile, loadfile.encode(sys.getfilesystemencoding()),
-                                          (".py", "r", imp.PY_SOURCE))
-                if hasattr(plugmod, "plugin_start"):
-                    newname = plugmod.plugin_start()
-                    PLUGINS[newname and unicode(newname) or plugname] = plugmod
-
-        except Exception as plugerr:
-            if __debug__:
+    internal = []
+    for name in os.listdir(config.internal_plugin_dir):
+        if name.endswith('.py') and not name[0] in ['.', '_'] and not name.startswith(appname):
+            try:
+                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
+                plugin.folder = None	# Suppress listing in Plugins prefs tab
+                internal.append(plugin)
+            except:
                 print_exc()
-            else:
-                sys.stderr.write('%s: %s\n' % (plugname, plugerr))	# appears in %TMP%/EDMarketConnector.log in packaged Windows app
+    PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
+
+    found = []
+    for name in os.listdir(config.plugin_dir):
+        if name[0] == '.':
+            pass
+        elif name.endswith('.disabled'):
+            name, discard = name.rsplit('.', 1)
+            found.append(Plugin(name, None))
+        else:
+            try:
+                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
+            except:
+                print_exc()
+    PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
 
     imp.release_lock()
-
-
-def _get_plugin_func(plugname, funcname):
-    """
-    Get a function from a plugin, else return None if it isn't implemented.
-    :param plugname:
-    :param funcname:
-    :return:
-    """
-    return getattr(PLUGINS[plugname], funcname, None)
-
-
-def get_plugin_app(plugname, parent):
-    """
-    If the plugin provides mainwindow content create and return it.
-    :param plugname: name of the plugin
-    :param parent: the parent frame for this entry.
-    :return:
-    """
-    plugin_app = _get_plugin_func(plugname, "plugin_app")
-    if plugin_app:
-        return plugin_app(parent)
-    return None
-
-
-def get_plugin_prefs(plugname, parent):
-    """
-    If the plugin provides a prefs frame, create and return it.
-    :param plugname: name of the plugin
-    :param parent: the parent frame for this preference tab.
-    :return:
-    """
-    plugin_prefs = _get_plugin_func(plugname, "plugin_prefs")
-    if plugin_prefs:
-        return plugin_prefs(parent)
-    return None
 
 
 def notify_prefs_changed():
@@ -109,42 +114,38 @@ def notify_prefs_changed():
     Notify each plugin that the settings dialog has been closed.
     :return:
     """
-    for plugname in PLUGINS:
-        prefs_changed = _get_plugin_func(plugname, "prefs_changed")
+    for plugin in PLUGINS:
+        prefs_changed = plugin._get_func('prefs_changed')
         if prefs_changed:
             try:
                 prefs_changed()
-            except Exception as plugerr:
-                if __debug__:
-                    print_exc()
-                else:
-                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+            except:
+                print_exc()
 
 
-def notify_journal_entry(cmdr, system, station, entry, state):
+def notify_journal_entry(cmdr, system, station, entry, cmdr_state):
     """
     Send a journal entry to each plugin.
     :param cmdr: The Cmdr name, or None if not yet known
     :param system: The current system, or None if not yet known
     :param station: The current station, or None if not docked or not yet known
     :param entry: The journal entry as a dictionary
-    :param state: A dictionary containing info about the Cmdr, current ship and cargo
-    :return:
+    :param cmdr_state: A dictionary containing info about the Cmdr, current ship and cargo
+    :return: Error message from the first plugin that returns one (if any)
     """
-    for plugname in PLUGINS:
-        journal_entry = _get_plugin_func(plugname, "journal_entry")
+    error = None
+    for plugin in PLUGINS:
+        journal_entry = plugin._get_func('journal_entry')
         if journal_entry:
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
                 if journal_entry.func_code.co_argcount == 4:
-                    journal_entry(cmdr, system, station, dict(entry))
+                    error = error or journal_entry(cmdr, system, station, dict(entry))
                 else:
-                    journal_entry(cmdr, system, station, dict(entry), dict(state))
-            except Exception as plugerr:
-                if __debug__:
-                    print_exc()
-                else:
-                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+                    error = error or journal_entry(cmdr, system, station, dict(entry), dict(cmdr_state))
+            except:
+                print_exc()
+    return error
 
 
 def notify_interaction(cmdr, entry):
@@ -152,19 +153,18 @@ def notify_interaction(cmdr, entry):
     Send an interaction entry to each plugin.
     :param cmdr: The piloting Cmdr name
     :param entry: The interaction entry as a dictionary
-    :return:
+    :return: Error message from the first plugin that returns one (if any)
     """
-    for plugname in PLUGINS:
-        interaction = _get_plugin_func(plugname, "interaction")
+    error = None
+    for plugin in PLUGINS:
+        interaction = plugin._get_func('interaction')
         if interaction:
             try:
                 # Pass a copy of the interaction entry in case the callee modifies it
-                interaction(cmdr, dict(entry))
-            except Exception as plugerr:
-                if __debug__:
-                    print_exc()
-                else:
-                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+                error = error or interaction(cmdr, dict(entry))
+            except:
+                print_exc()
+    return error
 
 
 def notify_system_changed(timestamp, system, coordinates):
@@ -176,34 +176,30 @@ def notify_system_changed(timestamp, system, coordinates):
     deprecated:: 2.2
     Use :func:`journal_entry` with the 'FSDJump' event.
     """
-    for plugname in PLUGINS:
-        system_changed = _get_plugin_func(plugname, "system_changed")
+    for plugin in PLUGINS:
+        system_changed = plugin._get_func('system_changed')
         if system_changed:
             try:
                 if system_changed.func_code.co_argcount == 2:
                     system_changed(timestamp, system)
                 else:
                     system_changed(timestamp, system, coordinates)
-            except Exception as plugerr:
-                if __debug__:
-                    print_exc()
-                else:
-                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+            except:
+                print_exc()
 
 
 def notify_newdata(data):
     """
     Send the latest EDMC data from the FD servers to each plugin
     :param data:
-    :return:
+    :return: Error message from the first plugin that returns one (if any)
     """
-    for plugname in PLUGINS:
-        cmdr_data = _get_plugin_func(plugname, "cmdr_data")
+    error = None
+    for plugin in PLUGINS:
+        cmdr_data = plugin._get_func('cmdr_data')
         if cmdr_data:
             try:
-                cmdr_data(data)
-            except Exception as plugerr:
-                if __debug__:
-                    print_exc()
-                else:
-                    sys.stderr.write('%s: %s\n' % (plugname, plugerr))
+                error = error or cmdr_data(data)
+            except:
+                print_exc()
+    return error

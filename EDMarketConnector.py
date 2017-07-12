@@ -135,8 +135,8 @@ class AppWindow:
         self.system.grid(row=3, column=1, sticky=tk.EW)
         self.station.grid(row=4, column=1, sticky=tk.EW)
 
-        for plugname in plug.PLUGINS:
-            appitem = plug.get_plugin_app(plugname, frame)
+        for plugin in plug.PLUGINS:
+            appitem = plugin.get_app(frame)
             if appitem:
                 if isinstance(appitem, tuple) and len(appitem)==2:
                     row = frame.grid_size()[1]
@@ -489,7 +489,7 @@ class AppWindow:
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
 
                 # stuff we can do when not docked
-                plug.notify_newdata(data)
+                self.status['text'] = plug.notify_newdata(data) or ''
                 if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
 
@@ -733,7 +733,9 @@ class AppWindow:
                 return	# Startup or in CQC
 
             # Plugins
-            plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
+            err = plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
+            if err:
+                self.status['text'] = err
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
                 # Can start interaction monitoring
@@ -814,7 +816,9 @@ class AppWindow:
                 return
 
             # Currently we don't do anything with these events
-            plug.notify_interaction(monitor.cmdr, entry)
+            err = plug.notify_interaction(monitor.cmdr, entry)
+            if err:
+                self.status['text'] = err
 
     def edsmpoll(self):
         result = self.edsm.result

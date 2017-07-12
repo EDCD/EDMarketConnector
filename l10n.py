@@ -6,7 +6,7 @@
 import codecs
 from collections import OrderedDict
 import os
-from os.path import dirname, isfile, join, normpath
+from os.path import basename, dirname, isfile, join, normpath
 import re
 import sys
 from sys import platform
@@ -166,14 +166,15 @@ if __name__ == "__main__":
     import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')	# match a single line python literal
     seen = {}
-    for f in sorted([x for x in os.listdir('.') if x.endswith('.py')]):
+    for f in sorted([x for x in os.listdir('.') if x.endswith('.py')] +
+                    [join('plugins', x) for x in os.listdir('plugins') if x.endswith('.py')]):
         with codecs.open(f, 'r', 'utf-8') as h:
             lineno = 0
             for line in h:
                 lineno += 1
                 match = regexp.search(line)
                 if match and not seen.get(match.group(2)):	# only record first commented instance of a string
-                    seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % f
+                    seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
     if seen:
         template = codecs.open('L10n/en.template', 'w', 'utf-8')
         template.write('/* Language name */\n"%s" = "%s";\n\n' % (LANGUAGE_ID, 'English'))
