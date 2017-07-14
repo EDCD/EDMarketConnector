@@ -228,7 +228,7 @@ class AppWindow:
             # Alternate title bar and menu for dark theme
             self.theme_menubar = tk.Frame(frame)
             self.theme_menubar.columnconfigure(2, weight=1)
-            theme_titlebar = tk.Label(self.theme_menubar, text=applongname, image=self.theme_icon, anchor=tk.W, compound=tk.LEFT)
+            theme_titlebar = tk.Label(self.theme_menubar, text=applongname, image=self.theme_icon, cursor='fleur', anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
             self.drag_offset = None
             theme_titlebar.bind('<Button-1>', self.drag_start)
@@ -250,7 +250,6 @@ class AppWindow:
             self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
             self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
             theme.button_bind(self.theme_help_menu, lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
-            theme.register_highlight(theme_titlebar)
             theme.register(self.theme_minimize)	# images aren't automatically registered
             theme.register(self.theme_close)
             self.blank_menubar = tk.Frame(frame)
@@ -279,9 +278,6 @@ class AppWindow:
         self.w.resizable(tk.TRUE, tk.FALSE)
 
         theme.register(frame)
-        theme.register_highlight(self.ship)
-        theme.register_highlight(self.system)
-        theme.register_highlight(self.station)
         theme.apply(self.w)
 
         self.w.bind('<Map>', self.onmap)			# Special handling for overrideredict

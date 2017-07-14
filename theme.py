@@ -20,7 +20,6 @@ class _Theme:
         self.active = None	# Starts out with no theme
         self.minwidth = None
         self.widgets = set()
-        self.widgets_highlight = set()
         self.widgets_pair = []
 
     def register(self, widget):
@@ -29,12 +28,6 @@ class _Theme:
             for child in widget.winfo_children():
                 self.register(child)
         self.widgets.add(widget)
-
-    def register_highlight(self, widget):
-        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
-        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
-            self.register_highlight(widget.winfo_children())
-        self.widgets_highlight.add(widget)
 
     def register_alternate(self, pair, gridopts):
         self.widgets_pair.append((pair, gridopts))
@@ -128,6 +121,10 @@ class _Theme:
                 # not a widget
                 widget.configure(foreground = self.current['foreground'],
                                  background = self.current['background'])
+            elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
+                # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
+                widget.configure(foreground = self.current['highlight'],
+                                 background = self.current['background'])
             elif 'activeforeground' in widget.keys():
                 # e.g. tk.Button, tk.Label, tk.Menu
                 widget.configure(foreground = self.current['foreground'],
@@ -145,10 +142,6 @@ class _Theme:
             elif 'background' in widget.keys():
                 # e.g. Frame
                 widget.configure(background = self.current['background'])
-
-        for widget in self.widgets_highlight:
-            widget.configure(foreground = self.current['highlight'],
-                             background = self.current['background'])
 
         for pair, gridopts in self.widgets_pair:
             for widget in pair:

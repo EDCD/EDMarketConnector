@@ -95,12 +95,13 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
             self.font_u.configure(underline = True)
             kw['font'] = self.underline is True and self.font_u or self.font_n
 
-        # Hover cursor only if widget is enabled and text is non-empty
-        if ('text' in kw or 'state' in kw) and 'cursor' not in kw:
-            if self.url and (kw['text'] if 'text' in kw else self['text']) and (kw['state'] if 'state' in kw else str(self['state']))!=tk.DISABLED:
+        if 'cursor' not in kw:
+            if (kw['state'] if 'state' in kw else str(self['state'])) == tk.DISABLED:
+                kw['cursor'] = 'arrow'	# System default
+            elif self.url and (kw['text'] if 'text' in kw else self['text']):
                 kw['cursor'] = platform=='darwin' and 'pointinghand' or 'hand2'
             else:
-                kw['cursor'] = 'arrow'	# System default
+                kw['cursor'] = (platform=='darwin' and 'notallowed') or (platform=='win32' and 'no') or 'circle'
 
         super(HyperlinkLabel, self).configure(cnf, **kw)
 
