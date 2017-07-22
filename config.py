@@ -315,9 +315,9 @@ class Config:
             try:
                 val = self.config.get(self.SECTION, key)
                 if u'\n' in val:
-                    return val.split(u'\n')[:-1]
+                    return [self._unescape(x) for x in val.split(u'\n')[:-1]]
                 else:
-                    return val
+                    return self._unescape(val)
             except:
                 return None
 
@@ -329,9 +329,9 @@ class Config:
 
         def set(self, key, val):
             if isinstance(val, basestring) or isinstance(val, numbers.Integral):
-                self.config.set(self.SECTION, key, val)
+                self.config.set(self.SECTION, key, self._escape(val))
             elif hasattr(val, '__iter__'):	# iterable
-                self.config.set(self.SECTION, key, u'\n'.join([unicode(x) for x in val] + [u';']))
+                self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
             else:
                 raise NotImplementedError()
 
@@ -345,6 +345,20 @@ class Config:
         def close(self):
             self.save()
             self.config = None
+
+        def _escape(self, val):
+            return unicode(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
+
+        def _unescape(self, val):
+            chars = list(val)
+            i = 0
+            while i < len(chars):
+                if chars[i] == '\\':
+                    chars.pop(i)
+                    if chars[i] == 'n':
+                        chars[i] = '\n'
+                i += 1
+            return u''.join(chars)
 
     else:	# ???
 
