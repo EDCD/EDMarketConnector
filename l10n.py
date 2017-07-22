@@ -22,7 +22,7 @@ class Translations:
     FALLBACK = 'en'	# strings in this code are in English
     FALLBACK_NAME = 'English'
 
-    TRANS_RE   = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
+    TRANS_RE   = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
     COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
 
 
@@ -32,7 +32,7 @@ class Translations:
     def install_dummy(self):
         # For when translation is not desired or not available
         self.translations = {}	# not used
-        __builtin__.__dict__['_'] = lambda x: unicode(x).replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
+        __builtin__.__dict__['_'] = lambda x: unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
     def install(self, lang=None):
         available = self.available()
@@ -65,23 +65,18 @@ class Translations:
                 if line.strip():
                     match = Translations.TRANS_RE.match(line)
                     if match:
-                        translations[match.group(1)] = match.group(2).replace(u'{CR}', u'\n')
+                        translations[match.group(1).replace(ur'\"', u'"')] = match.group(2).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
                         print 'Bad translation: %s' % line.strip()
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = unicode(lang)	# Replace language name with code if missing
         return translations
 
-    if __debug__:
-        def translate(self, x):
-            if not self.translations.get(x):
+    def translate(self, x):
+        if __debug__:
+            if x not in self.translations:
                 print 'Missing translation: "%s"' % x
-                return unicode(x).replace(u'{CR}', u'\n')
-            else:
-                return self.translations.get(x) or unicode(x).replace(u'{CR}', u'\n')
-    else:
-        def translate(self, x):
-            return self.translations.get(x) or unicode(x).replace(u'{CR}', u'\n')
+        return self.translations.get(x) or unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
 
     # Returns list of available language codes
     def available(self):
