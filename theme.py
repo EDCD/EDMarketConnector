@@ -161,39 +161,35 @@ class _Theme:
             self.active = theme
 
         if platform == 'darwin':
-            from AppKit import NSApplication, NSAppearance, NSColor
+            from AppKit import NSApplication, NSAppearance, NSMiniaturizableWindowMask, NSResizableWindowMask
             root.update_idletasks()	# need main window to be created
             appearance = NSAppearance.appearanceNamed_(theme and
                                                        'NSAppearanceNameVibrantDark' or
                                                        'NSAppearanceNameAqua')
             for window in NSApplication.sharedApplication().windows():
+                window.setStyleMask_(window.styleMask() & ~(NSMiniaturizableWindowMask | NSResizableWindowMask))	# disable zoom
                 window.setAppearance_(appearance)
 
-            if not self.minwidth:
-                self.minwidth = root.winfo_width()	# Minimum width = width on first creation
-                # resizable(0,0) doesn't do anything on OSX
-                root.minsize(self.minwidth, root.winfo_height())
-                root.maxsize(-1, root.winfo_height())
-
         elif platform == 'win32':
-            # tk8.5.9/win/tkWinWm.c:342
             import ctypes
+            GWL_STYLE = -16
+            WS_MAXIMIZEBOX   = 0x00010000
+            # tk8.5.9/win/tkWinWm.c:342
             GWL_EXSTYLE = -20
             WS_EX_APPWINDOW  = 0x00040000
             WS_EX_LAYERED    = 0x00080000
+            GetWindowLongW = ctypes.windll.user32.GetWindowLongW
+            SetWindowLongW = ctypes.windll.user32.SetWindowLongW
 
             root.overrideredirect(theme and 1 or 0)
             root.attributes("-transparentcolor", theme > 1 and 'grey4' or '')
             root.withdraw()
             root.update_idletasks()	# Size and windows styles get recalculated here
             hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, theme > 1 and WS_EX_APPWINDOW|WS_EX_LAYERED or WS_EX_APPWINDOW)	# Add to taskbar
+            SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)	# disable maximize
+            SetWindowLongW(hwnd, GWL_EXSTYLE, theme > 1 and WS_EX_APPWINDOW|WS_EX_LAYERED or WS_EX_APPWINDOW)	# Add to taskbar
             root.deiconify()
             root.wait_visibility()	# need main window to be displayed before returning
-
-            if not self.minwidth:
-                self.minwidth = root.winfo_width()	# Minimum width = width on first creation
-                root.minsize(self.minwidth, -1)
 
         else:
             root.overrideredirect(theme and 1 or 0)
@@ -202,9 +198,9 @@ class _Theme:
             root.deiconify()
             root.wait_visibility()	# need main window to be displayed before returning
 
-            if not self.minwidth:
-                self.minwidth = root.winfo_width()	# Minimum width = width on first creation
-                root.minsize(self.minwidth, -1)
+        if not self.minwidth:
+            self.minwidth = root.winfo_width()	# Minimum width = width on first creation
+            root.minsize(self.minwidth, -1)
 
 # singleton
 theme = _Theme()

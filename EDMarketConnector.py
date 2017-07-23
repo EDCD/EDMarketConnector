@@ -156,7 +156,7 @@ class AppWindow:
         if platform=='darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
             # http://wiki.tcl.tk/13428 and p15 of https://developer.apple.com/legacy/library/documentation/Carbon/Conceptual/HandlingWindowsControls/windowscontrols.pdf
-            root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox horizontalZoom resizable')
+            root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox resizable')
 
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             self.system_menu = tk.Menu(self.menubar, name='apple')
@@ -187,6 +187,7 @@ class AppWindow:
             self.w.createcommand("::tk::mac::ShowPreferences", lambda:prefs.PreferencesDialog(self.w, self.postprefs))
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)	# click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)	# close button shouldn't quit app
+            self.w.resizable(tk.FALSE, tk.FALSE)	# Can't be only resizable on one axis
         else:
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.file_menu.add_command(command=lambda:stats.StatsDialog(self))
@@ -248,6 +249,7 @@ class AppWindow:
             tk.Label(self.blank_menubar).grid()
             tk.Label(self.blank_menubar).grid()
             theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
+            self.w.resizable(tk.TRUE, tk.FALSE)
 
         # update geometry
         if config.get('geometry'):
@@ -267,7 +269,6 @@ class AppWindow:
                 else:
                     self.w.geometry(config.get('geometry'))
         self.w.attributes('-topmost', config.getint('always_ontop') and 1 or 0)
-        self.w.resizable(tk.TRUE, tk.FALSE)
 
         theme.register(frame)
         theme.apply(self.w)
@@ -310,7 +311,7 @@ class AppWindow:
             tkMessageBox.showerror(applongname,
                                    _('This app requires accurate timestamps.') + '\n' +	# Error message shown if system time is wrong
                                    (TZ_THRESHOLD < drift < CLOCK_THRESHOLD and
-                                    _("Check your system's Time Zone setting.") or		# Error message shown if system time is wrong
+                                    _("Check your system's Time Zone setting.") or	# Error message shown if system time is wrong
                                     _("Check your system's Date and Time settings.")),	# Error message shown if system time is wrong
                                    parent = self.w)
             self.w.destroy()
