@@ -5,6 +5,7 @@
 
 import codecs
 from collections import OrderedDict
+import numbers
 import os
 from os.path import basename, dirname, isfile, join, normpath
 import re
@@ -12,9 +13,35 @@ import sys
 from sys import platform
 import __builtin__
 
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
 # Language name
 LANGUAGE_ID = '!Language'
+
+
+if platform == 'darwin':
+    from Foundation import NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
+
+elif platform == 'win32':
+    import ctypes
+    from ctypes.wintypes import *
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd318124%28v=vs.85%29.aspx
+    MUI_LANGUAGE_ID = 4
+    MUI_LANGUAGE_NAME = 8
+    GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
+    GetUserPreferredUILanguages.argtypes = [ DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong) ]
+    GetUserPreferredUILanguages.restype = BOOL
+
+    LOCALE_NAME_USER_DEFAULT = None
+    GetNumberFormatEx = ctypes.windll.kernel32.GetNumberFormatEx
+    GetNumberFormatEx.argtypes = [LPCWSTR, DWORD, LPCWSTR, LPCVOID, LPWSTR, ctypes.c_int]
+    GetNumberFormatEx.restype = ctypes.c_int
+
+
+else:	# POSIX
+    import locale
 
 
 class Translations:
@@ -40,7 +67,7 @@ class Translations:
 
         if not lang:
             # Choose the default language
-            for preferred in self.preferred():
+            for preferred in Locale.preferredLanguages():
                 components = preferred.split('-')
                 if preferred in available:
                     lang = preferred
@@ -97,46 +124,6 @@ class Translations:
                             key=lambda x: x[1]))	# Sort by name
         return names
 
-    # Returns list of preferred language codes in RFC4646 format i.e. "lang[-script][-region]"
-    # Where lang is a lowercase 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
-    # script is a capitalized 4 alpha ISO 15924 code and region is an uppercase 2 alpha ISO 3166 code
-    def preferred(self):
-
-        if platform=='darwin':
-            from Foundation import NSLocale
-            return NSLocale.preferredLanguages() or None
-
-        elif platform=='win32':
-
-            def wszarray_to_list(array):
-                offset = 0
-                while offset < len(array):
-                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                    if sz:
-                        yield sz
-                        offset += len(sz)+1
-                    else:
-                        break
-
-            # https://msdn.microsoft.com/en-us/library/windows/desktop/dd318124%28v=vs.85%29.aspx
-            import ctypes
-            MUI_LANGUAGE_ID = 4
-            MUI_LANGUAGE_NAME = 8
-            GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
-
-            num = ctypes.c_ulong()
-            size = ctypes.c_ulong(0)
-            if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value):
-                buf = ctypes.create_unicode_buffer(size.value)
-                if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
-                    return wszarray_to_list(buf)
-            return None
-
-        else:	# POSIX
-            import locale
-            lang = locale.getdefaultlocale()[0]
-            return lang and [lang.replace('_','-')]
-
     def respath(self):
         if getattr(sys, 'frozen', False):
             if platform=='darwin':
@@ -153,6 +140,86 @@ class Translations:
             return codecs.open(join(self.respath(), '%s.lproj' % lang, 'Localizable.strings'), 'r', 'utf-16')
         else:
             return codecs.open(join(self.respath(), '%s.strings' % lang), 'r', 'utf-8')
+
+
+class Locale:
+
+    def __init__(self):
+        if platform=='darwin':
+            self.int_formatter = NSNumberFormatter.alloc().init()
+            self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
+            self.float_formatter = NSNumberFormatter.alloc().init()
+            self.float_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
+            self.float_formatter.setMinimumFractionDigits_(5)
+            self.float_formatter.setMaximumFractionDigits_(5)
+
+    def stringFromNumber(self, number, decimals=None):
+        # Uses the current system locale, irrespective of language choice.
+        # Unless `decimals` is specified, the number will be formatted with 5 decimal
+        # places if the input is a float, or none if the input is an int.
+        if decimals == 0 and not isinstance(number, numbers.Integral):
+            number = int(round(number))
+        if platform == 'darwin':
+            if not decimals and isinstance(number, numbers.Integral):
+                return self.int_formatter.stringFromNumber_(number)
+            else:
+                self.float_formatter.setMinimumFractionDigits_(decimals or 5)
+                self.float_formatter.setMaximumFractionDigits_(decimals or 5)
+                return self.float_formatter.stringFromNumber_(number)
+        else:
+            if not decimals and isinstance(number, numbers.Integral):
+                return locale.format('%d', number, True)
+            else:
+                return locale.format('%.*f', (decimals or 5, number), True)
+
+    def numberFromString(self, string):
+        # Uses the current system locale, irrespective of language choice.
+        # Returns None if the string is not parsable, otherwise an integer or float.
+        if platform=='darwin':
+            return self.float_formatter.numberFromString_(string)
+        else:
+            try:
+                return locale.atoi(string)
+            except:
+                try:
+                    return locale.atof(string)
+                except:
+                    return None
+
+    # Returns list of preferred language codes in RFC4646 format i.e. "lang[-script][-region]"
+    # Where lang is a lowercase 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
+    # script is a capitalized 4 alpha ISO 15924 code and region is an uppercase 2 alpha ISO 3166 code
+    def preferredLanguages(self):
+
+        if platform=='darwin':
+            return NSLocale.preferredLanguages() or None
+
+        elif platform=='win32':
+
+            def wszarray_to_list(array):
+                offset = 0
+                while offset < len(array):
+                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
+                    if sz:
+                        yield sz
+                        offset += len(sz)+1
+                    else:
+                        break
+
+            num = ctypes.c_ulong()
+            size = ctypes.c_ulong(0)
+            if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value):
+                buf = ctypes.create_unicode_buffer(size.value)
+                if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
+                    return wszarray_to_list(buf)
+            return None
+
+        else:	# POSIX
+            lang = locale.getlocale()[0]
+            return lang and [lang.replace('_','-')]
+
+# singleton
+Locale = Locale()
 
 
 # generate template strings file - like xgettext
@@ -178,3 +245,4 @@ if __name__ == "__main__":
                 template.write('/* %s */\n' % (seen[thing]))
             template.write('"%s" = "%s";\n\n' % (thing, thing))
         template.close()
+

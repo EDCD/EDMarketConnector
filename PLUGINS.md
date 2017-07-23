@@ -39,6 +39,8 @@ If you want your plugin to be configurable via the GUI you can define a frame (p
 
 You can use `set()`, `get()` and `getint()` from EDMC's config object to retrieve your plugin's settings in a platform-independent way.
 
+Use `numberFromString()` from EDMC's Locale object to parse input numbers in a locale-independent way.
+
 ```
 import Tkinter as tk
 import myNotebook as nb
@@ -72,6 +74,8 @@ def prefs_changed():
 ## Display
 
 You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
+
+You can use `stringFromNumber()` from EDMC's Locale object to format numbers in a locale-independent way.
 
 ```
 this = sys.modules[__name__]	# For holding module globals
