@@ -125,8 +125,6 @@ class EDLogs(FileSystemEventHandler):
         self.mode = None
         self.group = None
         self.cmdr = None
-        self.captain = None	# On a crew
-        self.role = None	# Crew role - None, FireCon, FighterCon
         self.body = None
         self.system = None
         self.station = None
@@ -136,6 +134,7 @@ class EDLogs(FileSystemEventHandler):
 
         # Cmdr state shared with EDSM and plugins
         self.state = {
+            'Captain'      : None,	# On a crew
             'Cargo'        : defaultdict(int),
             'Credits'      : None,
             'Loan'         : None,
@@ -144,6 +143,7 @@ class EDLogs(FileSystemEventHandler):
             'Encoded'      : defaultdict(int),
             'PaintJob'     : None,
             'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+            'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
             'ShipID'       : None,
             'ShipIdent'    : None,
             'ShipName'     : None,
@@ -302,8 +302,6 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = None
                 self.mode = None
                 self.group = None
-                self.captain = None
-                self.role = None
                 self.body = None
                 self.system = None
                 self.station = None
@@ -311,6 +309,7 @@ class EDLogs(FileSystemEventHandler):
                 self.coordinates = None
                 self.started = None
                 self.state = {
+                    'Captain'      : None,
                     'Cargo'        : defaultdict(int),
                     'Credits'      : None,
                     'Loan'         : None,
@@ -319,6 +318,7 @@ class EDLogs(FileSystemEventHandler):
                     'Encoded'      : defaultdict(int),
                     'PaintJob'     : None,
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Role'         : None,
                     'ShipID'       : None,
                     'ShipIdent'    : None,
                     'ShipName'     : None,
@@ -329,8 +329,6 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
-                self.captain = None
-                self.role = None
                 self.body = None
                 self.system = None
                 self.station = None
@@ -338,9 +336,11 @@ class EDLogs(FileSystemEventHandler):
                 self.coordinates = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self.state.update({
+                    'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Role'         : None,
                 })
             elif entry['event'] == 'NewCommander':
                 self.cmdr = entry['Name']
@@ -454,18 +454,18 @@ class EDLogs(FileSystemEventHandler):
                                 self.state[category].pop(material)
 
             elif entry['event'] == 'JoinACrew':
-                self.captain = entry['Captain']
-                self.role = None
+                self.state['Captain'] = entry['Captain']
+                self.state['Role'] = 'Idle'
                 self.body = None
                 self.system = None
                 self.station = None
                 self.stationtype = None
                 self.coordinates = None
             elif entry['event'] == 'ChangeCrewRole':
-                self.role = entry['Role'] != 'Idle' and entry['Role'] or None
+                self.state['Role'] = entry['Role']
             elif entry['event'] == 'QuitACrew':
-                self.captain = None
-                self.role = None
+                self.state['Captain'] = None
+                self.state['Role'] = None
                 self.body = None
                 self.system = None
                 self.station = None

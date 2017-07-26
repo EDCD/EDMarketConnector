@@ -345,7 +345,7 @@ class AppWindow:
     # set main window labels, e.g. after language change
     def set_labels(self):
         self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
-        self.ship_label['text']    = (monitor.captain and _('Role') or	# Multicrew role label in main window
+        self.ship_label['text']    = (monitor.state['Captain'] and _('Role') or	# Multicrew role label in main window
                                       _('Ship')) + ':'	# Main window
         self.system_label['text']  = _('System') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
@@ -415,7 +415,7 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
         play_bad = False
 
-        if not monitor.cmdr or not monitor.mode or monitor.captain:
+        if not monitor.cmdr or not monitor.mode or monitor.state['Captain']:
             return	# In CQC or on crew - do nothing
 
         if auto_update and monitor.carrying_rares():
@@ -626,10 +626,10 @@ class AppWindow:
             system_changed  = monitor.system  and self.system['text']  != monitor.system
 
             # Update main window
-            if monitor.cmdr and monitor.captain:
-                self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.captain)
+            if monitor.cmdr and monitor.state['Captain']:
+                self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.state['Captain'])
                 self.ship_label['text'] = _('Role') + ':'	# Multicrew role label in main window
-                self.ship.configure(state = tk.NORMAL, text = crewroletext(monitor.role), url = None)
+                self.ship.configure(state = tk.NORMAL, text = crewroletext(monitor.state['Role']), url = None)
             elif monitor.cmdr:
                 if monitor.group:
                     self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.group)
@@ -727,7 +727,7 @@ class AppWindow:
                     self.status['text'] = 'Error: Check %s' % _('E:D interaction log location')	# Setting for the log file that contains recent interactions with other Cmdrs
 
             # Don't send to EDDN while on crew
-            if monitor.captain:
+            if monitor.state['Captain']:
                 return
 
             # Plugin backwards compatibility
