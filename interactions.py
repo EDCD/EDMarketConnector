@@ -59,6 +59,9 @@ class Interactions(FileSystemEventHandler):
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
+        elif polling and self.observer:
+            self.observer.stop()
+            self.observer = None
 
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
