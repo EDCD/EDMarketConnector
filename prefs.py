@@ -82,6 +82,8 @@ class PreferencesDialog(tk.Toplevel):
         self.resizable(tk.FALSE, tk.FALSE)
 
         self.cmdr = False	# Note if Cmdr changes in the Journal
+        self.is_beta = False	# Note if Beta status changes in the Journal
+        self.cmdrchanged_alarm = None
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
@@ -98,7 +100,7 @@ class PreferencesDialog(tk.Toplevel):
 
         nb.Label(credframe, text=_('Credentials')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
         ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        self.cred_label = nb.Label(credframe, text=_('Please log in with your Elite: Dangerous account details'))	# Use same text as E:D Launcher's login dialog
+        self.cred_label = nb.Label(credframe)
         self.cred_label.grid(padx=PADX, columnspan=2, sticky=tk.W)
         self.cmdr_label = nb.Label(credframe, text=_('Cmdr'))	# Main window
         self.cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
@@ -212,7 +214,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # build plugin prefs tabs
         for plugin in plug.PLUGINS:
-            plugframe = plugin.get_prefs(notebook)
+            plugframe = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
             if plugframe:
                 notebook.add(plugframe, text=plugin.name)
 
@@ -371,7 +373,7 @@ class PreferencesDialog(tk.Toplevel):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         # Selectively disable buttons depending on output settings
-        self.outvarchanged()
+        self.cmdrchanged()
         self.themevarchanged()
 
         # disable hotkey for the duration
@@ -390,11 +392,16 @@ class PreferencesDialog(tk.Toplevel):
                                             0x10000, None, position):
                 self.geometry("+%d+%d" % (position.left, position.top))
 
-    def outvarchanged(self, event=None):
-        self.cmdr_text['state'] = self.edsm_cmdr_text['state'] = tk.NORMAL	# must be writable to update
-        self.cmdr_text['text']  = self.edsm_cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
-        if self.cmdr != monitor.cmdr:
+    def cmdrchanged(self, event=None):
+        if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
+            if monitor.cmdr:
+                self.cred_label['text'] = _('Please log in with your Elite: Dangerous account details')	# Use same text as E:D Launcher's login dialog
+            else:
+                self.cred_label['text'] = _('Not available while E:D is at the main menu')	# Displayed when credentials settings are greyed out
+
+            self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = self.cmdr_text['state'] = self.username['state'] = self.password['state'] = monitor.cmdr and tk.NORMAL or tk.DISABLED
+            self.cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
             self.username['state'] = tk.NORMAL
             self.username.delete(0, tk.END)
             self.password['state'] = tk.NORMAL
@@ -415,18 +422,23 @@ class PreferencesDialog(tk.Toplevel):
                 self.password.insert(0, config.get('password') or '')
                 self.edsm_user.insert(0,config.get('edsm_cmdrname') or '')
                 self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
+            if self.cmdr is not False:		# Don't notify on first run
+                plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
             self.cmdr = monitor.cmdr
+            self.is_beta = monitor.is_beta
 
-        cmdr_state = monitor.cmdr and tk.NORMAL or tk.DISABLED
-        self.cred_label['state'] = self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = cmdr_state
-        self.cmdr_text['state'] = self.username['state'] = self.password['state'] = cmdr_state
+        # Poll
+        self.cmdrchanged_alarm = self.after(1000, self.cmdrchanged)
 
+    def outvarchanged(self, event=None):
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
         self.displaypath(self.interactiondir, self.interactiondir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
+        if not logvalid:
+            self.cred_label['text'] = 'Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
         self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = tk.NORMAL or tk.DISABLED
         local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
@@ -613,7 +625,7 @@ class PreferencesDialog(tk.Toplevel):
             config.set('journaldir', logdir)
 
         interactiondir = self.interactiondir.get()
-        if config.default_journal_dir and interactiondir.lower() == config.default_interaction_dir.lower():
+        if config.default_interaction_dir and interactiondir.lower() == config.default_interaction_dir.lower():
             config.set('interactiondir', '')	# default location
         else:
             config.set('interactiondir', interactiondir)
@@ -637,13 +649,16 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set('anonymous', self.out_anon.get())
 
-        plug.notify_prefs_changed()
+        plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
         if self.callback:
             self.callback()
 
     def _destroy(self):
+        if self.cmdrchanged_alarm is not None:
+            self.after_cancel(self.cmdrchanged_alarm)
+            self.cmdrchanged_alarm = None
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 

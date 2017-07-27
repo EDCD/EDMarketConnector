@@ -476,7 +476,11 @@ class AppWindow:
                 self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
 
                 # stuff we can do when not docked
-                self.status['text'] = plug.notify_newdata(data) or ''
+                err = plug.notify_newdata(data, monitor.is_beta)
+                self.status['text'] = err and err or ''
+                if err:
+                    play_bad = True
+
                 if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
 
@@ -717,9 +721,11 @@ class AppWindow:
                 return	# Startup or in CQC
 
             # Plugins
-            err = plug.notify_journal_entry(monitor.cmdr, monitor.system, monitor.station, entry, monitor.state)
+            err = plug.notify_journal_entry(monitor.cmdr, monitor.is_beta, monitor.system, monitor.station, entry, monitor.state)
             if err:
                 self.status['text'] = err
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
                 # Can start interaction monitoring
@@ -800,9 +806,11 @@ class AppWindow:
                 return
 
             # Currently we don't do anything with these events
-            err = plug.notify_interaction(monitor.cmdr, entry)
+            err = plug.notify_interaction(monitor.cmdr, monitor.is_beta, entry)
             if err:
                 self.status['text'] = err
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
 
     def edsmpoll(self):
         result = self.edsm.result

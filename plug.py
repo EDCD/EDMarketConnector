@@ -8,7 +8,11 @@ import operator
 import threading	# We don't use it, but plugins might
 from traceback import print_exc
 
+import Tkinter as tk
+import myNotebook as nb
+
 from config import config, appname
+
 
 # List of loaded Plugins
 PLUGINS = []
@@ -53,25 +57,42 @@ class Plugin(object):
         :param parent: the parent frame for this entry.
         :return:
         """
-        try:
-            plugin_app = self._get_func('plugin_app')
-            return plugin_app and plugin_app(parent)
-        except:
-            print_exc()
-            return None
+        plugin_app = self._get_func('plugin_app')
+        if plugin_app:
+            try:
+                appitem = plugin_app(parent)
+                if isinstance(appitem, tuple):
+                    if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
+                        raise AssertionError
+                elif not isinstance(appitem, tk.Widget):
+                    raise AssertionError
+                return appitem
+            except:
+                print_exc()
+        return None
 
-    def get_prefs(self, parent):
+    def get_prefs(self, parent, cmdr, is_beta):
         """
         If the plugin provides a prefs frame, create and return it.
         :param parent: the parent frame for this preference tab.
+        :param cmdr: current Cmdr name (or None). Relevant if you want to have
+           different settings for different user accounts.
+        :param is_beta: whether the player is in a Beta universe.
         :return:
         """
-        try:
-            plugin_prefs = self._get_func('plugin_prefs')
-            return plugin_prefs and plugin_prefs(parent)
-        except:
-            print_exc()
-            return None
+        plugin_prefs = self._get_func('plugin_prefs')
+        if plugin_prefs:
+            try:
+                if plugin_prefs.func_code.co_argcount == 1:
+                    frame = plugin_prefs(parent)
+                else:
+                    frame = plugin_prefs(parent, cmdr, is_beta)
+                if not isinstance(frame, nb.Frame):
+                    raise AssertionError
+                return frame
+            except:
+                print_exc()
+        return None
 
 
 def load_plugins():
@@ -109,28 +130,54 @@ def load_plugins():
     imp.release_lock()
 
 
-def notify_prefs_changed():
+def notify_prefs_cmdr_changed(cmdr, is_beta):
+    """
+    Notify each plugin that the Cmdr has been changed while the settings dialog is open.
+    Relevant if you want to have different settings for different user accounts.
+    :param cmdr: current Cmdr name (or None).
+    :param is_beta: whether the player is in a Beta universe.
+    :return:
+    """
+    for plugin in PLUGINS:
+        prefs_cmdr_changed = plugin._get_func('prefs_cmdr_changed')
+        if prefs_cmdr_changed:
+            try:
+                prefs_cmdr_changed(cmdr, is_beta)
+            except:
+                print_exc()
+
+
+def notify_prefs_changed(cmdr, is_beta):
     """
     Notify each plugin that the settings dialog has been closed.
+    The prefs frame and any widgets you created in your `get_prefs()` callback
+    will be destroyed on return from this function, so take a copy of any
+    values that you want to save.
+    :param cmdr: current Cmdr name (or None).
+    :param is_beta: whether the player is in a Beta universe.
     :return:
     """
     for plugin in PLUGINS:
         prefs_changed = plugin._get_func('prefs_changed')
         if prefs_changed:
             try:
-                prefs_changed()
+                if prefs_changed.func_code.co_argcount == 0:
+                    prefs_changed()
+                else:
+                    prefs_changed(cmdr, is_beta)
             except:
                 print_exc()
 
 
-def notify_journal_entry(cmdr, system, station, entry, cmdr_state):
+def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     """
     Send a journal entry to each plugin.
     :param cmdr: The Cmdr name, or None if not yet known
     :param system: The current system, or None if not yet known
     :param station: The current station, or None if not docked or not yet known
     :param entry: The journal entry as a dictionary
-    :param cmdr_state: A dictionary containing info about the Cmdr, current ship and cargo
+    :param state: A dictionary containing info about the Cmdr, current ship and cargo
+    :param is_beta: whether the player is in a Beta universe.
     :return: Error message from the first plugin that returns one (if any)
     """
     error = None
@@ -141,18 +188,21 @@ def notify_journal_entry(cmdr, system, station, entry, cmdr_state):
                 # Pass a copy of the journal entry in case the callee modifies it
                 if journal_entry.func_code.co_argcount == 4:
                     error = error or journal_entry(cmdr, system, station, dict(entry))
+                elif journal_entry.func_code.co_argcount == 5:
+                    error = error or journal_entry(cmdr, system, station, dict(entry), dict(state))
                 else:
-                    error = error or journal_entry(cmdr, system, station, dict(entry), dict(cmdr_state))
+                    error = error or journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
             except:
                 print_exc()
     return error
 
 
-def notify_interaction(cmdr, entry):
+def notify_interaction(cmdr, is_beta, entry):
     """
     Send an interaction entry to each plugin.
     :param cmdr: The piloting Cmdr name
     :param entry: The interaction entry as a dictionary
+    :param is_beta: whether the player is in a Beta universe.
     :return: Error message from the first plugin that returns one (if any)
     """
     error = None
@@ -161,7 +211,10 @@ def notify_interaction(cmdr, entry):
         if interaction:
             try:
                 # Pass a copy of the interaction entry in case the callee modifies it
-                error = error or interaction(cmdr, dict(entry))
+                if interaction.func_code.co_argcount == 2:
+                    error = error or interaction(cmdr, dict(entry))
+                else:
+                    error = error or interaction(cmdr, is_beta, dict(entry))
             except:
                 print_exc()
     return error
@@ -188,10 +241,11 @@ def notify_system_changed(timestamp, system, coordinates):
                 print_exc()
 
 
-def notify_newdata(data):
+def notify_newdata(data, is_beta):
     """
     Send the latest EDMC data from the FD servers to each plugin
     :param data:
+    :param is_beta: whether the player is in a Beta universe.
     :return: Error message from the first plugin that returns one (if any)
     """
     error = None
@@ -199,7 +253,10 @@ def notify_newdata(data):
         cmdr_data = plugin._get_func('cmdr_data')
         if cmdr_data:
             try:
-                error = error or cmdr_data(data)
+                if cmdr_data.func_code.co_argcount == 1:
+                    error = error or cmdr_data(data)
+                else:
+                    error = error or cmdr_data(data, is_beta)
             except:
                 print_exc()
     return error

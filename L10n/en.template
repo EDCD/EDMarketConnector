@@ -301,6 +301,9 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normal text";
 
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 

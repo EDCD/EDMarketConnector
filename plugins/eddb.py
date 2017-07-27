@@ -57,12 +57,12 @@ def plugin_app(parent):
     this.station = HyperlinkLabel(parent, url = station_url, popup_copy = lambda x: x != STATION_UNDOCKED)
     return (this.station_label, this.station)
 
-def prefs_changed():
+def prefs_changed(cmdr, is_beta):
     this.station_label['text'] = _('Station') + ':'
 
-def journal_entry(cmdr, system, station, entry, state):
+def journal_entry(cmdr, is_beta, system, station, entry, state):
     this.system = system
     this.station['text'] = station or (system_id(system) and STATION_UNDOCKED or '')
 
-def cmdr_data(data):
+def cmdr_data(data, is_beta):
     this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_id(data['lastSystem']['name']) and STATION_UNDOCKED or '')

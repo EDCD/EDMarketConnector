@@ -41,14 +41,14 @@ You can use `set()`, `get()` and `getint()` from EDMC's config object to retriev
 
 Use `numberFromString()` from EDMC's Locale object to parse input numbers in a locale-independent way.
 
-```
+```python
 import Tkinter as tk
 import myNotebook as nb
 from config import config
 
 this = sys.modules[__name__]	# For holding module globals
 
-def plugin_prefs(parent):
+def plugin_prefs(parent, cmdr, is_beta):
    """
    Return a TK Frame for adding to the EDMC settings dialog.
    """
@@ -63,8 +63,8 @@ def plugin_prefs(parent):
 
 This gets called when the user dismisses the settings dialog:
 
-```
-def prefs_changed():
+```python
+def prefs_changed(cmdr, is_beta):
    """
    Save settings.
    """
@@ -77,7 +77,7 @@ You can also have your plugin add an item to the EDMC main window and update it 
 
 You can use `stringFromNumber()` from EDMC's Locale object to format numbers in a locale-independent way.
 
-```
+```python
 this = sys.modules[__name__]	# For holding module globals
 
 def plugin_app(parent):
@@ -104,8 +104,8 @@ This gets called when EDMC sees a new entry in the game's journal. `state` is a 
 
 A special 'StartUp' entry is sent if EDMC is started while the game is already running. In this case you won't receive initial events such as "LoadGame", "Rank", "Location", etc. However the `state` dictionary will reflect the cumulative effect of these missed events.
 
-```
-def journal_entry(cmdr, system, station, entry, state):
+```python
+def journal_entry(cmdr, is_beta, system, station, entry, state):
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
@@ -120,8 +120,8 @@ This gets called when the player interacts with another Cmdr in-game.
 
 If EDMC is started while the game is already running EDMC will send the last few interaction events from the current game session.
 
-```
-def interaction(cmdr, entry):
+```python
+def interaction(cmdr, is_beta, entry):
     # Log type of interaction, Cmdr name, and local time
     sys.stderr.write("{} Cmdr {} at {}\n".format(', '.join(entry['Interactions']),
                                                  entry['Name'].encode('utf-8'),
@@ -133,8 +133,8 @@ def interaction(cmdr, entry):
 
 This gets called when EDMC has just fetched fresh Cmdr and station data from Frontier's servers.
 
-```
-def cmdr_data(data):
+```python
+def cmdr_data(data, is_beta):
    """
    We have new data on our commander
    """
