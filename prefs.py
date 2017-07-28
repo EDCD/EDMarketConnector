@@ -167,7 +167,7 @@ class PreferencesDialog(tk.Toplevel):
 
         eddnframe = nb.Frame(notebook)
 
-        HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/jamesremuscat/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
+        HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
         self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
         self.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged)	# Output setting
         self.eddn_station_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)

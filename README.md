@@ -5,7 +5,7 @@ Elite: Dangerous Market Connector (EDMC)
 
 This app downloads your Cmdr's details and system, faction, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/jamesremuscat/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/EDSM-NET/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
 * saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
 * sends your Cmdr's details, ship details, materials and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
@@ -78,9 +78,9 @@ Some options work by reading the Elite: Dangerous game's log files. If you're ru
 ### EDDN
 
 * Station data
-  * Sends station commodity market, outfitting and shipyard data to “[EDDN](https://github.com/jamesremuscat/EDDN/wiki)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+  * Sends station commodity market, outfitting and shipyard data to “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” from where you and others can use it via online trading tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Thrudd's Trading Tools](http://www.elitetradingtool.co.uk/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
 * System and scan data
-  * Sends system and faction information and the results of your planet scans to “[EDDN](https://github.com/jamesremuscat/EDDN/wiki)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
+  * Sends system and faction information and the results of your planet scans to “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” from where you and others can use it via online prospecting tools such as [eddb](http://eddb.io/), [Inara](http://inara.cz), etc.
   * You can choose to delay sending this information to EDDN until you're next safely docked at a station. Otherwise the information is sent as soon as you enter a system or perform a scan.
 
 ### EDSM
@@ -248,7 +248,7 @@ This app uses the “Companion” web API that Frontier originally supplied for 
 
 Acknowledgements
 --------
-* “Elite: Dangerous” is © 1984 - 2016 Frontier Developments plc.
+* “Elite: Dangerous” is © 1984 - 2017 Frontier Developments plc.
 * Thanks to Cmdrs CatfoodCZ, Mike Stix & DaraCZ for the Czech translation.
 * Thanks to Cmdr CoolBreeze for the Dutch translation.
 * Thanks to Cmdr FreezeFIN for the Finnish translation.
