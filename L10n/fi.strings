@@ -1,3 +1,6 @@
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Ei saatavissa Elite:Dangerousin ollessa päävalikossa";
+
 /* Language name */
 "!Language" = "Suomi";
 
@@ -19,7 +22,7 @@
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "API Key" = "API avain";
 
 /* Tab heading in settings. [prefs.py] */
@@ -52,11 +55,11 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Tarkista päivitykset...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"Check your system's Date and Time settings." = "Tarkista tietokoneesi kellonaika ja päivämäärä";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"Check your system's Time Zone setting." = "Tarkista tietokoneesi aikavyöhykkeen asetus";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
@@ -68,9 +71,9 @@
 "Cmdr name" = "Komentajanimelläsi";
 
 /* Ranking. [stats.py] */
-"Combat" = "Taistelija -tasosi";
+"Combat" = "Taistelija -ranking";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "Commander Name" = "Komentajanimi";
 
 /* Combat rank. [stats.py] */
@@ -139,7 +142,7 @@
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
-/* Section heading in settings. [prefs.py] */
+/* Section heading in settings. [edsm.py] */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
 
 /* Ranking. [stats.py] */
@@ -166,7 +169,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Virhe: Frontierin palvelin ei vastaa";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Virhe: Frontierin palvelin vastaa vanhoilla tiedoilla";
 
 /* [companion.py] */
@@ -427,7 +430,7 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [prefs.py] */
+/* [edsm.py] */
 "Send flight log to Elite Dangerous Star Map" = "Lähetä lentoloki Elite Dangerous Star Map -palveluun";
 
 /* Output setting. [prefs.py] */
@@ -457,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "Asema";
 
 /* [EDMarketConnector.py] */
@@ -472,14 +475,14 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [edsm.py] */
 "System" = "Järjestelmä";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Teema";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"This app requires accurate timestamps." = "This app requires accurate timestamps.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"This app requires accurate timestamps." = "Tämä sovellus tarvitsee tarkat aikaleimat";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";

@@ -1,3 +1,6 @@
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+
 /* Language name */
 "!Language" = "Українська";
 
@@ -19,7 +22,7 @@
 /* CQC rank. [stats.py] */
 "Amateur" = "Аматор";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "API Key" = "API Ключ";
 
 /* Tab heading in settings. [prefs.py] */
@@ -52,11 +55,11 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Перевірка оновлень...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"Check your system's Date and Time settings." = "Перевірте налаштування Дати і Часу!";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"Check your system's Time Zone setting." = "Перевірте часовий пояс встановлений в системі!";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Старший Унтер Офіцер";
@@ -70,7 +73,7 @@
 /* Ranking. [stats.py] */
 "Combat" = "Бойовий";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "Commander Name" = "Ім`я пілота";
 
 /* Combat rank. [stats.py] */
@@ -125,7 +128,7 @@
 "Duke" = "Герцог";
 
 /* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
+"E:D interaction log location" = "Росташування журналу взаємодії пілотів E:D";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Розташування файлу-журналу E:D";
@@ -139,7 +142,7 @@
 /* Top rank. [stats.py] */
 "Elite" = "Еліта";
 
-/* Section heading in settings. [prefs.py] */
+/* Section heading in settings. [edsm.py] */
 "Elite Dangerous Star Map credentials" = "Дані Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
@@ -166,7 +169,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
 
 /* [companion.py] */
@@ -427,7 +430,7 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Напів-професійний";
 
-/* [prefs.py] */
+/* [edsm.py] */
 "Send flight log to Elite Dangerous Star Map" = "Надсилати штурманський журнал до Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
@@ -457,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Зброєносець";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "Станція";
 
 /* [EDMarketConnector.py] */
@@ -472,14 +475,14 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Геодезист";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [edsm.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
 
-/* Error message shown if system time is wrong. [ntp.py] */
-"This app requires accurate timestamps." = "This app requires accurate timestamps.";
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
+"This app requires accurate timestamps." = "Ця программа вимагає точного налаштування \"міток часу\"";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Підказка: Ви можете відключити плагін через{CR}додання '{EXT}' до назви папки";

@@ -1,3 +1,6 @@
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "No disponible mientras E:D está en el menú principal";
+
 /* Language name */
 "!Language" = "Español";
 
@@ -19,7 +22,7 @@
 /* CQC rank. [stats.py] */
 "Amateur" = "Aficionado";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "API Key" = "Llave API";
 
 /* Tab heading in settings. [prefs.py] */
@@ -52,10 +55,10 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Buscar Actualizaciones...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Date and Time settings." = "Compruebe la configuración de Fecha y Hora de su sistema.";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Time Zone setting." = "Compruebe la configuración de Zona Horaria de su sistema.";
 
 /* Federation rank. [stats.py] */
@@ -70,7 +73,7 @@
 /* Ranking. [stats.py] */
 "Combat" = "Combate";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "Commander Name" = "Nombre de Comandante";
 
 /* Combat rank. [stats.py] */
@@ -139,7 +142,7 @@
 /* Top rank. [stats.py] */
 "Elite" = "Élite";
 
-/* Section heading in settings. [prefs.py] */
+/* Section heading in settings. [edsm.py] */
 "Elite Dangerous Star Map credentials" = "Credenciales de Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
@@ -166,7 +169,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Error: El servidor de Frontier está caído";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Error: El servidor de Frontier está retrasado";
 
 /* [companion.py] */
@@ -427,7 +430,7 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semiprofessional";
 
-/* [prefs.py] */
+/* [edsm.py] */
 "Send flight log to Elite Dangerous Star Map" = "Enviar registro de vuelo a Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
@@ -457,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Escudero";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "Estación";
 
 /* [EDMarketConnector.py] */
@@ -472,13 +475,13 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Topógrafo";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [edsm.py] */
 "System" = "Sistema";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "This app requires accurate timestamps." = "Esta aplicación requiere marcas de tiempo precisas.";
 
 /* Help text in settings. [prefs.py] */

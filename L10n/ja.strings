@@ -1,3 +1,6 @@
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "メインメニューが表示されている間は編集できません";
+
 /* Language name */
 "!Language" = "日本語";
 
@@ -19,7 +22,7 @@
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "API Key" = "APIキー";
 
 /* Tab heading in settings. [prefs.py] */
@@ -52,10 +55,10 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "更新の確認...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Date and Time settings." = "お使いの機器の日付と時刻の設定が間違っていないか確認してください。";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Time Zone setting." = "お使いの機器のタイムゾーンの設定が間違っていないか確認してください。";
 
 /* Federation rank. [stats.py] */
@@ -70,7 +73,7 @@
 /* Ranking. [stats.py] */
 "Combat" = "戦闘ランク";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "Commander Name" = "コマンダー名";
 
 /* Combat rank. [stats.py] */
@@ -139,7 +142,7 @@
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
-/* Section heading in settings. [prefs.py] */
+/* Section heading in settings. [edsm.py] */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Mapの認証情報";
 
 /* Ranking. [stats.py] */
@@ -166,7 +169,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "エラー: Frontier社のサーバがダウンしています";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "エラー: Frontier社のサーバが混雑しています";
 
 /* [companion.py] */
@@ -427,7 +430,7 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [prefs.py] */
+/* [edsm.py] */
 "Send flight log to Elite Dangerous Star Map" = "Elite Dangerous Star Mapにフライトログを送信する";
 
 /* Output setting. [prefs.py] */
@@ -457,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "ステーション";
 
 /* [EDMarketConnector.py] */
@@ -472,13 +475,13 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [edsm.py] */
 "System" = "星系";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "テーマ";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "This app requires accurate timestamps." = "このアプリケーションの動作には正確なタイムスタンプが必要です。";
 
 /* Help text in settings. [prefs.py] */

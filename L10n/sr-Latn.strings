@@ -1,3 +1,6 @@
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+
 /* Language name */
 "!Language" = "Srpski (Latinica)";
 
@@ -19,7 +22,7 @@
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "API Key" = "API Ključ";
 
 /* Tab heading in settings. [prefs.py] */
@@ -52,10 +55,10 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Proveri da li postoje izmene...";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Date and Time settings." = "Proverite podešavanje datuma i vremena u svom sistemu.";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "Check your system's Time Zone setting." = "Proverite podešavanje vremenske zone u svom sistemu.";
 
 /* Federation rank. [stats.py] */
@@ -70,7 +73,7 @@
 /* Ranking. [stats.py] */
 "Combat" = "Borba (Combat)";
 
-/* EDSM setting. [prefs.py] */
+/* EDSM setting. [edsm.py] */
 "Commander Name" = "Ime komandira";
 
 /* Combat rank. [stats.py] */
@@ -139,7 +142,7 @@
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
-/* Section heading in settings. [prefs.py] */
+/* Section heading in settings. [edsm.py] */
 "Elite Dangerous Star Map credentials" = "Kredencijali za Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
@@ -166,7 +169,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
 
 /* [companion.py] */
@@ -427,7 +430,7 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [prefs.py] */
+/* [edsm.py] */
 "Send flight log to Elite Dangerous Star Map" = "Slanje dnevnika leta (flight log) na Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
@@ -457,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [eddb.py] */
 "Station" = "Stanica";
 
 /* [EDMarketConnector.py] */
@@ -472,13 +475,13 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [EDMarketConnector.py] */
+/* Main window. [edsm.py] */
 "System" = "Sistem";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
 
-/* Error message shown if system time is wrong. [ntp.py] */
+/* Error message shown if system time is wrong. [EDMarketConnector.py] */
 "This app requires accurate timestamps." = "Ova aplikacija zahteva precizno podešeno vreme.";
 
 /* Help text in settings. [prefs.py] */
