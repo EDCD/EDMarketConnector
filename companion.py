@@ -1,5 +1,4 @@
 import requests
-from collections import defaultdict
 from cookielib import LWPCookieJar
 import hashlib
 import numbers
