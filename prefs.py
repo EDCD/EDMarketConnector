@@ -157,13 +157,13 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir = tk.StringVar()
         self.outdir.set(config.get('outdir'))
         self.outdir_label = nb.Label(outframe, text=_('File location')+':')	# Section heading in settings
-        self.outdir_label.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
+        self.outdir_label.grid(padx=PADX, pady=(5,0), sticky=tk.W)
         self.outdir_entry = nb.Entry(outframe, takefocus=False)
-        self.outdir_entry.grid(row=20, padx=(PADX,0), sticky=tk.EW)
+        self.outdir_entry.grid(columnspan=2, padx=PADX, pady=(0,PADY), sticky=tk.EW)
         self.outbutton = nb.Button(outframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                    _('Browse...')),	# Folder selection button on Windows
                                    command = lambda:self.filebrowse(_('File location'), self.outdir))
-        self.outbutton.grid(row=20, column=1, padx=PADX, sticky=tk.NSEW)
+        self.outbutton.grid(column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         nb.Frame(outframe).grid(pady=5)	# bottom spacer
 
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
@@ -205,26 +205,26 @@ class PreferencesDialog(tk.Toplevel):
 
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
-            nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
-            self.logdir_entry.grid(row=10, columnspan=2, padx=(PADX,0), sticky=tk.EW)
+            nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
+            self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
             self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                           _('Browse...')),	# Folder selection button on Windows
                                        command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
-            self.logbutton.grid(row=10, column=2, padx=PADX, sticky=tk.EW)
+            self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
             if config.default_journal_dir:
-                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
+                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
-            nb.Label(configframe, text = _('E:D interaction log location')+':').grid(columnspan=3, padx=PADX, sticky=tk.W)	# Setting for the log file that contains recent interactions with other Cmdrs
-            self.interactiondir_entry.grid(row=15, columnspan=2, padx=(PADX,0), sticky=tk.EW)
+            nb.Label(configframe, text = _('E:D interaction log location')+':').grid(columnspan=4, padx=PADX, pady=(PADY, 0), sticky=tk.W)	# Setting for the log file that contains recent interactions with other Cmdrs
+            self.interactiondir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
             self.interactionbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
                                                                   _('Browse...')),	# Folder selection button on Windows
                                                command = lambda:self.filebrowse(_('E:D interaction log location'), self.interactiondir))
-            self.interactionbutton.grid(row=15, column=2, padx=PADX, sticky=tk.EW)
+            self.interactionbutton.grid(row=15, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
             if config.default_interaction_dir:
-                nb.Button(configframe, text=_('Default'), command=self.interactiondir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(column=2, padx=PADX, pady=(5,0), sticky=tk.EW)	# Appearance theme and language setting
+                nb.Button(configframe, text=_('Default'), command=self.interactiondir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=15, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
         if platform == 'win32':
-            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
 
         if platform in ['darwin','win32']:
             self.hotkey_code = config.getint('hotkey_code')
@@ -239,8 +239,8 @@ class PreferencesDialog(tk.Toplevel):
                 if AXIsProcessTrusted():
                     nb.Label(configframe, text = _('Re-start {APP} to use shortcuts').format(APP=applongname), foreground='firebrick').grid(padx=PADX, sticky=tk.W)	# Shortcut settings prompt on OSX
                 else:
-                    nb.Label(configframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname), foreground='firebrick').grid(columnspan=3, padx=PADX, sticky=tk.W)		# Shortcut settings prompt on OSX
-                    nb.Button(configframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(column=2, padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
+                    nb.Label(configframe, text = _('{APP} needs permission to use shortcuts').format(APP=applongname), foreground='firebrick').grid(columnspan=4, padx=PADX, sticky=tk.W)		# Shortcut settings prompt on OSX
+                    nb.Button(configframe, text = _('Open System Preferences'), command = self.enableshortcuts).grid(padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
             else:
                 self.hotkey_text = nb.Entry(configframe, width = (platform == 'darwin' and 20 or 30), justify=tk.CENTER)
                 self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
@@ -248,12 +248,12 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=20, column=1, columnspan=2, padx=PADX, pady=(5,0), sticky=tk.W)
                 self.hotkey_only_btn = nb.Checkbutton(configframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
-                self.hotkey_only_btn.grid(columnspan=3, padx=PADX, pady=(5,0), sticky=tk.W)
+                self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5,0), sticky=tk.W)
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
-                self.hotkey_play_btn.grid(columnspan=3, padx=PADX, sticky=tk.W)
+                self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
-        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
-        nb.Label(configframe, text=_('Preferred Shipyard')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        nb.Label(configframe, text=_('Preferred Shipyard')).grid(columnspan=4, padx=PADX, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.
         self.shipyard = tk.IntVar(value = config.getint('shipyard'))
         nb.Radiobutton(configframe, text='E:D Shipyard', variable=self.shipyard, value=config.SHIPYARD_EDSHIPYARD).grid(columnspan=3, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         nb.Radiobutton(configframe, text='Coriolis',     variable=self.shipyard, value=config.SHIPYARD_CORIOLIS  ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
@@ -275,7 +275,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(themeframe, text=_('Language')).grid(row=10, padx=PADX, sticky=tk.W)	# Appearance setting prompt
         self.lang_button = nb.OptionMenu(themeframe, self.lang, self.lang.get(), *self.languages.values())
         self.lang_button.grid(row=10, column=1, columnspan=2, padx=PADX, sticky=tk.W)
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)	# Appearance setting
         nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance theme setting
@@ -289,7 +289,7 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
         self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='grey4', command=lambda:self.themecolorbrowse(1))	# Do not translate
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*8, sticky=tk.EW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
         self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
         self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
         nb.Label(themeframe).grid(sticky=tk.W)	# big spacer
