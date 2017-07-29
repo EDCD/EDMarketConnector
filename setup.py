@@ -85,8 +85,8 @@ if sys.platform=='darwin':
                       'CFBundleLocalizations': sorted(set([x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]) | set([x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')])),	# https://github.com/sparkle-project/Sparkle/issues/238
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
-                      'LSMinimumSystemVersion': '10.9',
-                      'NSHumanReadableCopyright': u'© 2015 Jonathan Harris',
+                      'LSMinimumSystemVersion': '10.10',
+                      'NSHumanReadableCopyright': u'© 2015-2017 Jonathan Harris',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -129,14 +129,14 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'copyright': u'© 2015 Jonathan Harris',
+                 'copyright': u'© 2015-2017 Jonathan Harris',
                  'name': APPNAME,		# WinSparkle
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
-                 'copyright': u'© 2015 Jonathan Harris',
+                 'copyright': u'© 2015-2017 Jonathan Harris',
                  'name': APPNAME,
                  'company_name': 'Marginal',
              } ],
