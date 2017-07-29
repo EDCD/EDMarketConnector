@@ -182,36 +182,6 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(eddnframe, text='EDDN')		# Not translated
 
-
-        edsmframe = nb.Frame(notebook)
-        edsmframe.columnconfigure(1, weight=1)
-
-        HyperlinkLabel(edsmframe, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
-        self.edsm_log = tk.IntVar(value = (output & config.OUT_SYS_EDSM) and 1)
-        self.edsm_log_button = nb.Checkbutton(edsmframe, text=_('Send flight log to Elite Dangerous Star Map'), variable=self.edsm_log, command=self.outvarchanged)
-        self.edsm_log_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
-
-        nb.Label(edsmframe).grid(sticky=tk.W)	# big spacer
-        self.edsm_label = HyperlinkLabel(edsmframe, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)	# Section heading in settings
-        self.edsm_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
-
-        self.edsm_cmdr_label = nb.Label(edsmframe, text=_('Cmdr'))	# Main window
-        self.edsm_cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
-        self.edsm_cmdr_text = nb.Label(edsmframe)
-        self.edsm_cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
-
-        self.edsm_user_label = nb.Label(edsmframe, text=_('Commander Name'))	# EDSM setting
-        self.edsm_user_label.grid(row=11, padx=PADX, sticky=tk.W)
-        self.edsm_user = nb.Entry(edsmframe)
-        self.edsm_user.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        self.edsm_apikey_label = nb.Label(edsmframe, text=_('API Key'))	# EDSM setting
-        self.edsm_apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
-        self.edsm_apikey = nb.Entry(edsmframe)
-        self.edsm_apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        notebook.add(edsmframe, text='EDSM')		# Not translated
-
         # build plugin prefs tabs
         for plugin in plug.PLUGINS:
             plugframe = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
@@ -406,22 +376,14 @@ class PreferencesDialog(tk.Toplevel):
             self.username.delete(0, tk.END)
             self.password['state'] = tk.NORMAL
             self.password.delete(0, tk.END)
-            self.edsm_user['state'] = tk.NORMAL
-            self.edsm_user.delete(0, tk.END)
-            self.edsm_apikey['state'] = tk.NORMAL
-            self.edsm_apikey.delete(0, tk.END)
             if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
                 config_idx = config.get('cmdrs').index(monitor.cmdr)
                 self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
                 self.password.insert(0, config.get_password(config.get('fdev_usernames')[config_idx]) or '')
-                self.edsm_user.insert(0, config.get('edsm_usernames')[config_idx] or '')
-                self.edsm_apikey.insert(0, config.get('edsm_apikeys')[config_idx] or '')
             elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
                 # migration from <= 2.25
                 self.username.insert(0, config.get('username') or '')
                 self.password.insert(0, config.get('password') or '')
-                self.edsm_user.insert(0,config.get('edsm_cmdrname') or '')
-                self.edsm_apikey.insert(0, config.get('edsm_apikey') or '')
             if self.cmdr is not False:		# Don't notify on first run
                 plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
             self.cmdr = monitor.cmdr
@@ -451,11 +413,6 @@ class PreferencesDialog(tk.Toplevel):
         self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
         self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
-
-        self.edsm_log_button['state']   = logvalid and tk.NORMAL or tk.DISABLED
-        edsm_state = logvalid and monitor.cmdr and self.edsm_log.get() and tk.NORMAL or tk.DISABLED
-        self.edsm_label['state'] = self.edsm_cmdr_label['state'] = self.edsm_user_label['state'] = self.edsm_apikey_label['state'] = edsm_state
-        self.edsm_cmdr_text['state'] = self.edsm_user['state'] = self.edsm_apikey['state'] = edsm_state
 
     def filebrowse(self, title, pathvar):
         if platform != 'win32':
@@ -598,14 +555,10 @@ class PreferencesDialog(tk.Toplevel):
             if not config.get('cmdrs'):
                 config.set('cmdrs', [self.cmdr])
                 config.set('fdev_usernames', [self.username.get().strip()])
-                config.set('edsm_usernames', [self.edsm_user.get().strip()])
-                config.set('edsm_apikeys',   [self.edsm_apikey.get().strip()])
             else:
                 idx = config.get('cmdrs').index(self.cmdr) if self.cmdr in config.get('cmdrs') else -1
                 _putfirst('cmdrs', idx, self.cmdr)
                 _putfirst('fdev_usernames', idx, self.username.get().strip())
-                _putfirst('edsm_usernames', idx, self.edsm_user.get().strip())
-                _putfirst('edsm_apikeys',   idx, self.edsm_apikey.get().strip())
 
         config.set('output',
                    (self.out_td.get()            and config.OUT_MKT_TD) +
@@ -614,8 +567,7 @@ class PreferencesDialog(tk.Toplevel):
                    (self.out_ship.get()          and config.OUT_SHIP) +
                    (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
                    (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
-                   (self.eddn_delay.get()        and config.OUT_SYS_DELAY) +
-                   (self.edsm_log.get()          and config.OUT_SYS_EDSM))
+                   (self.eddn_delay.get()        and config.OUT_SYS_DELAY))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         logdir = self.logdir.get()
@@ -764,12 +716,8 @@ def migrate(current_cmdr):
         config.set_password(config.get('username'), config.get('password'))	# Can fail on Linux
         config.set('cmdrs', [current_cmdr])
         config.set('fdev_usernames', [config.get('username')])
-        config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
-        config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
         config.delete('username')
         config.delete('password')
-        config.delete('edsm_cmdrname')
-        config.delete('edsm_apikey')
 
 # Put current Cmdr first in the lists
 def make_current(current_cmdr):
@@ -777,8 +725,6 @@ def make_current(current_cmdr):
         idx = config.get('cmdrs').index(current_cmdr)
         _putfirst('cmdrs', idx)
         _putfirst('fdev_usernames', idx)
-        _putfirst('edsm_usernames', idx)
-        _putfirst('edsm_apikeys',   idx)
 
 def _putfirst(setting, config_idx, new_value=None):
     assert config_idx>=0 or new_value is not None, (setting, config_idx, new_value)

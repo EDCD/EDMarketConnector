@@ -54,7 +54,6 @@ import commodity
 from commodity import COMMODITY_CSV
 import td
 import eddn
-import edsm
 import coriolis
 import edshipyard
 import loadout
@@ -68,7 +67,6 @@ from theme import theme
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
-EDSM_POLL = 0.1
 
 # Limits on local clock drift from EDDN gateway
 DRIFT_THRESHOLD = 3 * 60
@@ -87,7 +85,6 @@ class AppWindow:
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
         self.session = companion.Session()
-        self.edsm = edsm.EDSM()
         self.eddn = eddn.EDDN(self)
 
         self.w = master
@@ -113,19 +110,15 @@ class AppWindow:
 
         self.cmdr_label = tk.Label(frame)
         self.ship_label = tk.Label(frame)
-        self.system_label = tk.Label(frame)
 
         self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
         self.ship_label.grid(row=2, column=0, sticky=tk.W)
-        self.system_label.grid(row=3, column=0, sticky=tk.W)
 
         self.cmdr    = tk.Label(frame, anchor=tk.W)
         self.ship    = HyperlinkLabel(frame, url = self.shipyard_url)
-        self.system  = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True)
 
         self.cmdr.grid(row=1, column=1, sticky=tk.EW)
         self.ship.grid(row=2, column=1, sticky=tk.EW)
-        self.system.grid(row=3, column=1, sticky=tk.EW)
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
@@ -347,7 +340,6 @@ class AppWindow:
         self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
         self.ship_label['text']    = (monitor.state['Captain'] and _('Role') or	# Multicrew role label in main window
                                       _('Ship')) + ':'	# Main window
-        self.system_label['text']  = _('System') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
         if platform == 'darwin':
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
@@ -434,7 +426,6 @@ class AppWindow:
                 hotkeymgr.play_good()
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
-            self.edit_menu.entryconfigure(0, state=tk.DISABLED)	# Copy
             self.w.update_idletasks()
 
         try:
@@ -469,11 +460,10 @@ class AppWindow:
                     self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] =   data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
-                if not monitor.system:
-                    self.system['text'] = data['lastSystem']['name']
-                    self.system['image'] = ''
-                self.status['text'] = ''
-                self.edit_menu.entryconfigure(0, state=tk.NORMAL)	# Copy
+
+                if data['commander'].get('credits') is not None:
+                    monitor.state['Credits'] = data['commander']['credits']
+                    monitor.state['Loan'] = data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
                 err = plug.notify_newdata(data, monitor.is_beta)
@@ -483,16 +473,6 @@ class AppWindow:
 
                 if config.getint('output') & config.OUT_SHIP:
                     loadout.export(data)
-
-                # Send flightlog EDSM if FSDJump failed to do so
-                if config.getint('output') & config.OUT_SYS_EDSM and self.edsm.result['img'] == self.edsm._IMG_ERROR and not monitor.is_beta and not monitor.captain and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
-                    try:
-                        self.edsm.writelog(querytime, monitor.system, monitor.coordinates, monitor.state['ShipID'])
-                    except Exception as e:
-                        if __debug__: print_exc()
-                        self.status['text'] = unicode(e)
-                        play_bad = True
-                    self.edsmpoll()
 
                 if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
                     # no station data requested - we're done
@@ -545,27 +525,6 @@ class AppWindow:
                                 self.eddn.export_shipyard(data, monitor.is_beta)
                             if not old_status:
                                 self.status['text'] = ''
-
-                    # Update credits and ship info and send to EDSM
-                    if not monitor.is_beta and config.getint('output') & config.OUT_SYS_EDSM:
-                        try:
-                            if data['commander'].get('credits') is not None:
-                                monitor.state['Credits'] = data['commander']['credits']
-                                monitor.state['Loan'] = data['commander'].get('debt', 0)
-                                self.edsm.setcredits(monitor.state['Credits'], monitor.state['Loan'])
-                            ship = companion.ship(data)
-                            if ship != self.edsm.lastship:
-                                self.edsm.updateship(monitor.state['ShipID'],
-                                                     monitor.state['ShipType'],
-                                                     [
-                                                         ('linkToCoriolis',   coriolis.url(data, monitor.is_beta)),
-                                                         ('linkToEDShipyard', edshipyard.url(data, monitor.is_beta)),
-                                                     ])
-                                self.edsm.lastship = ship
-                        except Exception as e:
-                            # Not particularly important so silent on failure
-                            if __debug__: print_exc()
-
 
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
@@ -627,7 +586,6 @@ class AppWindow:
             if not entry:
                 return
 
-            system_changed  = monitor.system  and self.system['text']  != monitor.system
 
             # Update main window
             if monitor.cmdr and monitor.state['Captain']:
@@ -649,63 +607,13 @@ class AppWindow:
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
                 self.ship['text'] = ''
 
-            if self.system['text'] != monitor.system:
-                self.system['text'] = monitor.system or ''
-                self.edsm.link(monitor.system)
-                self.edsmpoll()
+            self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)	# Copy
+
             if entry['event'] in ['Undocked', 'StartJump', 'SetUserShipName', 'ShipyardBuy', 'ShipyardSell', 'ShipyardSwap', 'ModuleBuy', 'ModuleSell', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis', 'JoinACrew']:
                 self.status['text'] = ''	# Periodically clear any old error
             self.w.update_idletasks()
 
-            # Send interesting events to EDSM
-            if config.getint('output') & config.OUT_SYS_EDSM and not monitor.is_beta and not monitor.captain and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs') and config.get('edsm_usernames')[config.get('cmdrs').index(monitor.cmdr)]:
-                try:
-                    # Update system status on startup
-                    if entry['event'] in [None, 'StartUp'] and monitor.mode and monitor.system:
-                        self.edsm.lookup(monitor.system)
-
-                    # Send credits to EDSM on new game (but not on startup - data might be old)
-                    if entry['event'] == 'LoadGame':
-                        self.edsm.setcredits(monitor.state['Credits'], monitor.state['Loan'])
-
-                    # Send rank info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'Progress', 'Promotion'] and monitor.state['Rank']:
-                        self.edsm.setranks(monitor.state['Rank'])
-
-                    # Send ship info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'Loadout', 'LoadGame', 'SetUserShipName'] and monitor.cmdr and monitor.state['ShipID']:
-                        self.edsm.setshipid(monitor.state['ShipID'])
-                        props = []
-                        if monitor.state['ShipIdent'] is not None:
-                            props.append(('shipIdent', monitor.state['ShipIdent']))
-                        if monitor.state['ShipName'] is not None:
-                            props.append(('shipName', monitor.state['ShipName']))
-                        if monitor.state['PaintJob'] is not None:
-                            props.append(('paintJob', monitor.state['PaintJob']))
-                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], props)
-                    elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
-                        self.edsm.sellship(entry.get('SellShipID'))
-
-                    # Send materials info to EDSM on startup or change
-                    if entry['event'] in ['StartUp', 'LoadGame', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
-                        self.edsm.setmaterials(monitor.state['Raw'], monitor.state['Manufactured'], monitor.state['Encoded'])
-
-                    # Send paintjob info to EDSM on change
-                    if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                        self.edsm.updateship(monitor.state['ShipID'], monitor.state['ShipType'], [('paintJob', monitor.state['PaintJob'])])
-
-                    # Write EDSM log on change
-                    if monitor.mode and entry['event'] in ['Location', 'FSDJump']:
-                        self.edsm.writelog(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates, monitor.state['ShipID'])
-
-                except Exception as e:
-                    if __debug__: print_exc()
-                    self.status['text'] = unicode(e)
-                    if not config.getint('hotkey_mute'):
-                        hotkeymgr.play_bad()
-            self.edsmpoll()
-
-            # Companion login - do this after EDSM so any EDSM errors don't mask login errors
+            # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
                 if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
                     prefs.make_current(monitor.cmdr)
@@ -737,7 +645,7 @@ class AppWindow:
                 return
 
             # Plugin backwards compatibility
-            if system_changed:
+            if monitor.mode and entry['event'] in ['StartUp', 'Location', 'FSDJump']:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
 
             # Auto-Update after docking
@@ -812,13 +720,6 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-    def edsmpoll(self):
-        result = self.edsm.result
-        if result['done']:
-            self.system['image'] = result['img']
-        else:
-            self.w.after(int(EDSM_POLL * 1000), self.edsmpoll)
-
     def shipyard_url(self, shipname=None):
 
         if not monitor.cmdr or not monitor.mode:
@@ -855,9 +756,6 @@ class AppWindow:
             else:
                 assert False, config.getint('shipyard')
                 return False
-
-    def system_url(self, text):
-        return text and self.edsm.result['url']
 
     def cooldown(self):
         if time() < self.holdofftime:
