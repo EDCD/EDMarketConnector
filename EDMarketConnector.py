@@ -297,6 +297,9 @@ class AppWindow:
                 prefs.migrate(data['commander']['name'])
             except:
                 if __debug__: print_exc()
+        config.delete('username')
+        config.delete('password')
+        config.delete('logdir')
 
         # Check system time
         drift = abs(time() - self.eddn.time())
