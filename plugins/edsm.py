@@ -64,7 +64,7 @@ def plugin_start():
 
 def plugin_app(parent):
     this.system_label = tk.Label(parent, text = _('System') + ':')	# Main window
-    this.system = HyperlinkLabel(parent, compound=tk.RIGHT, url = None, popup_copy = True)
+    this.system = HyperlinkLabel(parent, compound=tk.RIGHT, popup_copy = True)
     return (this.system_label, this.system)
 
 def plugin_prefs(parent, cmdr, is_beta):

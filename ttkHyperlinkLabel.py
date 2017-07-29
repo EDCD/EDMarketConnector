@@ -43,7 +43,7 @@ if platform == 'win32':
 class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
     def __init__(self, master=None, **kw):
-        self.url = kw.pop('url')
+        self.url = 'url' in kw and kw.pop('url') or None
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)	# override ttk.Label's underline
         self.foreground = kw.get('foreground') or 'blue'
