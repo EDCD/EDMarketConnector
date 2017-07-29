@@ -53,6 +53,10 @@ elif platform=='win32':
     class BROWSEINFO(ctypes.Structure):
         _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
+    GetParent = ctypes.windll.user32.GetParent
+    GetParent.argtypes = [HWND]
+    GetWindowRect = ctypes.windll.user32.GetWindowRect
+    GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
     CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
     CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
 
@@ -357,8 +361,9 @@ class PreferencesDialog(tk.Toplevel):
         # Ensure fully on-screen
         if platform == 'win32':
             position = RECT()
+            GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                                            SIZE(self.winfo_width(), self.winfo_height()),
+                                            SIZE(position.right - position.left, position.bottom - position.top),
                                             0x10000, None, position):
                 self.geometry("+%d+%d" % (position.left, position.top))
 
@@ -684,7 +689,15 @@ class AuthenticationDialog(tk.Toplevel):
         self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
         self.wait_visibility()
         self.grab_set()
-        #self.wait_window(self)	# causes duplicate events on OSX
+
+        # Ensure fully on-screen
+        if platform == 'win32':
+            position = RECT()
+            GetWindowRect(GetParent(self.winfo_id()), position)
+            if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
+                                            SIZE(position.right - position.left, position.bottom - position.top),
+                                            0x10000, None, position):
+                self.geometry("+%d+%d" % (position.left, position.top))
 
         self.bind('<Return>', self.apply)
 
