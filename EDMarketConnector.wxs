@@ -73,7 +73,7 @@
 		</Feature>
 
 		<!-- Launch app after upgrade -->
-		<Property Id="LAUNCH" Value="no" />
+		<Property Id="LAUNCH" Value="yes" />
 		<CustomAction Id="DoLaunch"
 					  Directory="INSTALLDIR"
 					  ExeCommand='"[INSTALLDIR]EDMarketConnector.exe"'
