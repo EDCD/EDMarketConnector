@@ -129,11 +129,13 @@ def prefs_changed(cmdr, is_beta):
 
     if cmdr and not is_beta:
         cmdrs = config.get('edsm_cmdrs')
-        usernames = config.get('edsm_usernames')
-        apikeys = config.get('edsm_apikeys')
+        usernames = config.get('edsm_usernames') or []
+        apikeys = config.get('edsm_apikeys') or []
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
+            usernames.extend([''] * (1 + idx - len(usernames)))
             usernames[idx] = this.user.get().strip()
+            apikeys.extend([''] * (1 + idx - len(apikeys)))
             apikeys[idx] = this.apikey.get().strip()
         else:
             config.set('edsm_cmdrs', cmdrs + [cmdr])
@@ -154,7 +156,7 @@ def credentials(cmdr):
         cmdrs = [cmdr]
         config.set('edsm_cmdrs', cmdrs)
 
-    if cmdr in cmdrs:
+    if cmdr in cmdrs and config.get('edsm_usernames') and config.get('edsm_apikeys'):
         idx = cmdrs.index(cmdr)
         return (config.get('edsm_usernames')[idx], config.get('edsm_apikeys')[idx])
     else:
