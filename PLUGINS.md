@@ -21,7 +21,7 @@ Plugins are python files. The plugin folder must have a file named `load.py` tha
 
 EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
 
-```
+```python
 def plugin_start():
    """
    Load this plugin into EDMC
@@ -37,9 +37,9 @@ Any errors or print statements from your plugin will appear in `%TMP%\EDMarketCo
 
 If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. The tab title will be the value that you returned from `plugin_start`. Use widgets from EDMC's myNotebook.py for the correct look-and-feel. You can be notified when the settings dialog is closed so you can save your settings.
 
-You can use `set()`, `get()` and `getint()` from EDMC's config object to retrieve your plugin's settings in a platform-independent way.
+You can use `set()`, `get()` and `getint()` from EDMC's `config.config` object to retrieve your plugin's settings in a platform-independent way.
 
-Use `numberFromString()` from EDMC's Locale object to parse input numbers in a locale-independent way.
+Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input numbers in a locale-independent way.
 
 ```python
 import Tkinter as tk
@@ -73,16 +73,16 @@ def prefs_changed(cmdr, is_beta):
 
 ## Display
 
-You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a ttk.Frame widget and populate it with other ttk widgets.
+You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a tk.Frame widget and populate it with other ttk widgets.
 
-You can use `stringFromNumber()` from EDMC's Locale object to format numbers in a locale-independent way.
+You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numbers in a locale-independent way.
 
 ```python
 this = sys.modules[__name__]	# For holding module globals
 
 def plugin_app(parent):
    """
-   Create a TK widget for the EDMC main window
+   Create a pair of TK widgets for the EDMC main window
    """
    label = tk.Label(parent, text="Status:")
    this.status = tk.Label(parent, anchor=tk.W, text="")
