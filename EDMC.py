@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #
 # Command-line interface. Requires prior setup through the GUI.
 #
@@ -52,6 +52,7 @@ try:
     parser.add_argument('-t', metavar='FILE', help='write player status to FILE in CSV format')
     parser.add_argument('-d', metavar='FILE', help='write raw JSON data to FILE')
     parser.add_argument('-n', action='store_true', help='send data to EDDN')
+    parser.add_argument('-p', metavar='CMDR', help='Returns data from the specified player account')
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
@@ -79,7 +80,19 @@ try:
         config.set('querytime', getmtime(args.j))
     else:
         session = companion.Session()
-        if config.get('cmdrs'):
+        if args.p:
+            cmdrs = config.get('cmdrs') or []
+            if args.p in cmdrs:
+                idx = cmdrs.index(args.p)
+            else:
+                for idx, cmdr in enumerate(cmdrs):
+                    if cmdr.lower() == args.p.lower():
+                        break
+                else:
+                    raise companion.CredentialsError
+            username = config.get('fdev_usernames')[idx]
+            session.login(username, config.get_password(username))
+        elif config.get('cmdrs'):
             username = config.get('fdev_usernames')[0]
             session.login(username, config.get_password(username))
         else:	# <= 2.25 not yet migrated
@@ -171,7 +184,7 @@ try:
 
 except companion.ServerError as e:
     sys.stderr.write('Server is down\n')
-    sys.exit(EXIT_SERVER_DOWN)
+    sys.exit(EXIT_SERVER)
 except companion.CredentialsError as e:
     sys.stderr.write('Invalid Credentials\n')
     sys.exit(EXIT_CREDENTIALS)
