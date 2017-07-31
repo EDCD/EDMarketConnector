@@ -121,7 +121,7 @@ def prefs_cmdr_changed(cmdr, is_beta):
     this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = cmdr and not is_beta and this.log.get() and tk.NORMAL or tk.DISABLED
 
 def prefsvarchanged():
-    this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.log.get() and tk.NORMAL or tk.DISABLED
+    this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
 
 def prefs_changed(cmdr, is_beta):
     this.system_label['text']  = _('System') + ':'	# Main window
