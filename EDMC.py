@@ -174,9 +174,10 @@ try:
 
     if args.n:
         try:
-            eddn.export_commodities(data)
-            eddn.export_outfitting(data)
-            eddn.export_shipyard(data)
+            eddn_sender = eddn.EDDN(None)
+            eddn_sender.export_commodities(data, False)
+            eddn_sender.export_outfitting(data, False)
+            eddn_sender.export_shipyard(data, False)
         except Exception as e:
             sys.stderr.write("Failed to send data to EDDN: %s\n" % unicode(e).encode('ascii', 'replace'))
 
