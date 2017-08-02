@@ -115,13 +115,15 @@ def load_plugins():
 
     found = []
     for name in os.listdir(config.plugin_dir):
-        if name[0] == '.':
+        if name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
             found.append(Plugin(name, None))
         else:
             try:
+                # Add plugin's folder to Python's load path in case plugin has dependencies.
+                sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
             except:
                 print_exc()
