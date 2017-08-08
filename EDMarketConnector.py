@@ -658,19 +658,21 @@ class AppWindow:
             # Send interesting events to EDDN
             try:
                 if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and monitor.mode and
-                    (entry['event'] == 'FSDJump' or
+                    (entry['event'] == 'Location' or
+                     entry['event'] == 'FSDJump' or
                      entry['event'] == 'Docked'  or
                      entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
                     # strip out properties disallowed by the schema
-                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist']:
+                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude']:
                         entry.pop(thing, None)
                     for thing in entry.keys():
                         if thing.endswith('_Localised'):
                             entry.pop(thing, None)
 
                     # add planet to Docked event for planetary stations if known
-                    if entry['event'] == 'Docked' and monitor.body:
-                        entry['BodyName'] = monitor.body
+                    if entry['event'] == 'Docked' and monitor.planet:
+                        entry['Body'] = monitor.planet
+                        entry['BodyType'] = 'Planet'
 
                     # add mandatory StarSystem and StarPos properties to Scan events
                     if 'StarSystem' not in entry:

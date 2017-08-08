@@ -218,9 +218,10 @@ class EDDN:
             self.replaylog.append(json.dumps([cmdr.encode('utf-8'), msg]))
             replayfile.write('%s\n' % self.replaylog[-1])
 
-            if entry['event'] == 'Docked' or not (config.getint('output') & config.OUT_SYS_DELAY):
-                # Try to send this and previous entries
-                self.sendreplay()
+            if (entry['event'] == 'Docked' or
+                (entry['event'] == 'Location' and entry['Docked']) or
+                not (config.getint('output') & config.OUT_SYS_DELAY)):
+                self.sendreplay()	# Try to send this and previous entries
         else:
             # Can't access replay file! Send immediately.
             self.parent.status['text'] = _('Sending data to EDDN...')

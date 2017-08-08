@@ -125,7 +125,7 @@ class EDLogs(FileSystemEventHandler):
         self.mode = None
         self.group = None
         self.cmdr = None
-        self.body = None
+        self.planet = None
         self.system = None
         self.station = None
         self.stationtype = None
@@ -201,7 +201,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring Journal'
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.body = self.system = self.station = self.stationtype = self.coordinates = None
+        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.coordinates = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -305,7 +305,7 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = None
                 self.mode = None
                 self.group = None
-                self.body = None
+                self.planet = None
                 self.system = None
                 self.station = None
                 self.stationtype = None
@@ -332,7 +332,7 @@ class EDLogs(FileSystemEventHandler):
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
-                self.body = None
+                self.planet = None
                 self.system = None
                 self.station = None
                 self.stationtype = None
@@ -382,8 +382,10 @@ class EDLogs(FileSystemEventHandler):
                 self.station = None
                 self.stationtype = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
-                if entry['event'] != 'Docked':
-                    self.body = None
+                if entry['event'] == 'Location':
+                    self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+                elif entry['event'] == 'FSDJump':
+                    self.planet = None
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])
                 elif self.system != entry['StarSystem']:
@@ -392,9 +394,9 @@ class EDLogs(FileSystemEventHandler):
                 self.station = entry.get('StationName')	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
             elif entry['event'] == 'SupercruiseExit':
-                self.body = entry.get('BodyType') == 'Planet' and entry.get('Body')
+                self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
             elif entry['event'] == 'SupercruiseEntry':
-                self.body = None
+                self.planet = None
             elif entry['event'] in ['Rank', 'Promotion']:
                 for k,v in entry.iteritems():
                     if k in self.state['Rank']:
@@ -459,7 +461,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'JoinACrew':
                 self.state['Captain'] = entry['Captain']
                 self.state['Role'] = 'Idle'
-                self.body = None
+                self.planet = None
                 self.system = None
                 self.station = None
                 self.stationtype = None
@@ -469,7 +471,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'QuitACrew':
                 self.state['Captain'] = None
                 self.state['Role'] = None
-                self.body = None
+                self.planet = None
                 self.system = None
                 self.station = None
                 self.stationtype = None
