@@ -204,6 +204,12 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
                     sellship(cmdr, entry.get('SellShipID'))
 
+            # Send cargo to EDSM on startup or change
+            if entry['event'] in (['StartUp', 'LoadGame', 'CollectCargo', 'EjectCargo', 'MarketBuy', 'MarketSell',
+                                   'MiningRefined', 'EngineerContribution'] or
+                                  (entry['event'] == 'MissionCompleted' and entry.get('CommodityReward'))):
+                setcargo(cmdr, state['Cargo'])
+
             # Send materials info to EDSM on startup or change
             if entry['event'] in ['StartUp', 'LoadGame', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
                 setmaterials(cmdr, state['Raw'], state['Manufactured'], state['Encoded'])
@@ -335,6 +341,9 @@ def setranks(cmdr, ranks):
 def setcredits(cmdr, balance, loan):
     if balance is not None:
         call(cmdr, 'api-commander-v1/set-credits', '&balance=%d&loan=%d' % (balance, loan))
+
+def setcargo(cmdr, cargo):
+    call(cmdr, 'api-commander-v1/set-materials', "&type=cargo&values=%s" % json.dumps(cargo, separators = (',', ':')))
 
 def setmaterials(cmdr, raw, manufactured, encoded):
     call(cmdr, 'api-commander-v1/set-materials', "&type=data&values=%s" % json.dumps(encoded, separators = (',', ':')))
