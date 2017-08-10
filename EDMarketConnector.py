@@ -410,7 +410,7 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
         play_bad = False
 
-        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system or not monitor.station:
+        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return	# In CQC or on crew - do nothing
 
         if auto_update and monitor.carrying_rares():
@@ -447,7 +447,7 @@ class AppWindow:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
             elif ((auto_update and not data['commander'].get('docked')) or
                   (data['lastSystem']['name'] != monitor.system) or
-                  (monitor.station and data['lastStarport']['name'] != monitor.station) or
+                  ((monitor.station or data['commander']['docked']) and data['lastStarport']['name'] != monitor.station) or
                   (data['ship']['id'] != monitor.state['ShipID']) or
                   (data['ship']['name'].lower() != monitor.state['ShipType'])):
                 raise companion.ServerLagging()
@@ -772,7 +772,6 @@ class AppWindow:
                                                                  monitor.mode and
                                                                  not monitor.state['Captain'] and
                                                                  monitor.system and
-                                                                 monitor.station and
                                                                  tk.NORMAL or tk.DISABLED)
 
     def ontop_changed(self, event=None):
