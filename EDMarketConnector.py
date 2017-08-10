@@ -410,7 +410,7 @@ class AppWindow:
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
         play_bad = False
 
-        if not monitor.cmdr or not monitor.mode or monitor.state['Captain']:
+        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system or not monitor.station:
             return	# In CQC or on crew - do nothing
 
         if auto_update and monitor.carrying_rares():
@@ -446,10 +446,10 @@ class AppWindow:
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
             elif ((auto_update and not data['commander'].get('docked')) or
-                  (monitor.system and data['lastSystem']['name'] != monitor.system) or
+                  (data['lastSystem']['name'] != monitor.system) or
                   (monitor.station and data['lastStarport']['name'] != monitor.station) or
-                  (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or
-                  (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType'])):
+                  (data['ship']['id'] != monitor.state['ShipID']) or
+                  (data['ship']['name'].lower() != monitor.state['ShipType'])):
                 raise companion.ServerLagging()
 
             else:
@@ -589,8 +589,8 @@ class AppWindow:
             if not entry:
                 return
 
-
             # Update main window
+            self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
                 self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.state['Captain'])
                 self.ship_label['text'] = _('Role') + ':'	# Multicrew role label in main window
@@ -768,7 +768,12 @@ class AppWindow:
             self.w.after(1000, self.cooldown)
         else:
             self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
-            self.button['state'] = self.theme_button['state'] = tk.NORMAL
+            self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
+                                                                 monitor.mode and
+                                                                 not monitor.state['Captain'] and
+                                                                 monitor.system and
+                                                                 monitor.station and
+                                                                 tk.NORMAL or tk.DISABLED)
 
     def ontop_changed(self, event=None):
         config.set('always_ontop', self.always_ontop.get())
