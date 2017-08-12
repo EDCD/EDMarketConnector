@@ -189,11 +189,12 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
                 if journal_entry.func_code.co_argcount == 4:
-                    error = error or journal_entry(cmdr, system, station, dict(entry))
+                    newerror = journal_entry(cmdr, system, station, dict(entry))
                 elif journal_entry.func_code.co_argcount == 5:
-                    error = error or journal_entry(cmdr, system, station, dict(entry), dict(state))
+                    newerror = journal_entry(cmdr, system, station, dict(entry), dict(state))
                 else:
-                    error = error or journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
+                    newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
+                error = error or newerror
             except:
                 print_exc()
     return error
@@ -203,8 +204,8 @@ def notify_interaction(cmdr, is_beta, entry):
     """
     Send an interaction entry to each plugin.
     :param cmdr: The piloting Cmdr name
-    :param entry: The interaction entry as a dictionary
     :param is_beta: whether the player is in a Beta universe.
+    :param entry: The interaction entry as a dictionary
     :return: Error message from the first plugin that returns one (if any)
     """
     error = None
@@ -214,9 +215,10 @@ def notify_interaction(cmdr, is_beta, entry):
             try:
                 # Pass a copy of the interaction entry in case the callee modifies it
                 if interaction.func_code.co_argcount == 2:
-                    error = error or interaction(cmdr, dict(entry))
+                    newerror = interaction(cmdr, dict(entry))
                 else:
-                    error = error or interaction(cmdr, is_beta, dict(entry))
+                    newerror = interaction(cmdr, is_beta, dict(entry))
+                error = error or newerror
             except:
                 print_exc()
     return error
@@ -256,9 +258,10 @@ def notify_newdata(data, is_beta):
         if cmdr_data:
             try:
                 if cmdr_data.func_code.co_argcount == 1:
-                    error = error or cmdr_data(data)
+                    newerror = cmdr_data(data)
                 else:
-                    error = error or cmdr_data(data, is_beta)
+                    newerror = cmdr_data(data, is_beta)
+                error = error or newerror
             except:
                 print_exc()
     return error
