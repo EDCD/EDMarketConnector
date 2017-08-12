@@ -32,6 +32,18 @@ def plugin_start():
 
 Any errors or print statements from your plugin will appear in `%TMP%\EDMarketConnector.log` on Windows or `$TMPDIR/EDMarketConnector.log` on Mac.
 
+This gets called when the user closes the program:
+
+```python
+def plugin_stop():
+    """
+    EDMC is closing
+    """
+    print "Farewell cruel world!"
+```
+
+If your plugin uses one or more threads to handle Events then stop and join() the threads before returning from this function.
+
 # Plugin Hooks
 ## Configuration 
 
@@ -94,7 +106,7 @@ this.status["text"] = "Happy!"
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there are four other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `interaction()`, `cmdr_data()` and `prefs_changed()`.
+Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `interaction()` and `cmdr_data()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 

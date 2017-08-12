@@ -819,6 +819,7 @@ class AppWindow:
         hotkeymgr.unregister()
         interactions.close()
         monitor.close()
+        plug.notify_stop()
         self.eddn.close()
         self.updater.close()
         self.session.close()

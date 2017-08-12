@@ -132,6 +132,24 @@ def load_plugins():
     imp.release_lock()
 
 
+def notify_stop():
+    """
+    Notify each plugin that the program is closing.
+    If your plugin uses threads then stop and join() them before returning.
+    versionadded:: 2.3.7
+    """
+    error = None
+    for plugin in PLUGINS:
+        plugin_stop = plugin._get_func('plugin_stop')
+        if plugin_stop:
+            try:
+                newerror = plugin_stop()
+                error = error or newerror
+            except:
+                print_exc()
+    return error
+
+
 def notify_prefs_cmdr_changed(cmdr, is_beta):
     """
     Notify each plugin that the Cmdr has been changed while the settings dialog is open.
