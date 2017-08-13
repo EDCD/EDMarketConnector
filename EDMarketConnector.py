@@ -92,7 +92,7 @@ class AppWindow:
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
-        plug.load_plugins()
+        plug.load_plugins(master)
 
         if platform != 'darwin':
             if platform == 'win32':
@@ -276,6 +276,7 @@ class AppWindow:
         self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
         self.w.bind_all('<<InteractionEvent>>', self.interaction_event)	# cmdrHistory monitoring
+        self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
         # Load updater after UI creation (for WinSparkle)
@@ -724,6 +725,15 @@ class AppWindow:
                 self.status['text'] = err
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
+
+    # Display asynchronous error from plugin
+    def plugin_error(self, event=None):
+        if plug.last_error['msg']:
+            self.status['text'] = plug.last_error
+            self.w.update_idletasks()
+            if not config.getint('hotkey_mute'):
+                hotkeymgr.play_bad()
+        plug.last_error = None
 
     def shipyard_url(self, shipname=None):
 

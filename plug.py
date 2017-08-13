@@ -17,6 +17,12 @@ from config import config, appname
 # List of loaded Plugins
 PLUGINS = []
 
+# For asynchronous error display
+last_error = {
+    'msg':  None,
+    'root': None,
+}
+
 
 class Plugin(object):
 
@@ -95,11 +101,13 @@ class Plugin(object):
         return None
 
 
-def load_plugins():
+def load_plugins(master):
     """
     Find and load all plugins
     :return:
     """
+    last_error['root'] = master
+
     imp.acquire_lock()
 
     internal = []
@@ -283,3 +291,14 @@ def notify_newdata(data, is_beta):
             except:
                 print_exc()
     return error
+
+
+def show_error(err):
+    """
+    Display an error message in the status line of the main window.
+    :param err:
+    versionadded:: 2.3.7
+    """
+    if err and last_error['root']:
+        last_error['msg'] = unicode(err)
+        last_error['root'].event_generate('<<PluginError>>', when="tail")

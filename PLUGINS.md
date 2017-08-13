@@ -155,6 +155,12 @@ def cmdr_data(data, is_beta):
 
 The data is a dictionary and full of lots of wonderful stuff!
 
+## Error messages
+
+You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `interaction()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
+
+The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
+
 # Distributing a Plugin
 
 To package your plugin for distribution simply create a `.zip` archive of your plugin's folder:
