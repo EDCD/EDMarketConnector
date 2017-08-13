@@ -8,6 +8,8 @@ import sys
 import time
 import urllib2
 from calendar import timegm
+from Queue import Queue
+from threading import Thread
 
 import Tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -17,18 +19,19 @@ from config import appname, applongname, appversion, config
 import companion
 import coriolis
 import edshipyard
+import plug
 
 if __debug__:
     from traceback import print_exc
 
 EDSM_POLL = 0.1
-_TIMEOUT = 10
+_TIMEOUT = 20
 FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
 
 this = sys.modules[__name__]	# For holding module globals
-this.syscache = set()	# Cache URLs of systems with known coordinates
 this.session = requests.Session()
+this.queue = Queue()	# Items to be sent to EDSM by worker thread
 this.lastship = None	# Description of last ship that we sent to EDSM
 this.lastlookup = False	# whether the last lookup succeeded
 
@@ -60,12 +63,23 @@ def plugin_start():
     config.delete('edsm_autoopen')
     config.delete('edsm_historical')
 
+    this.thread = Thread(target = worker, name = 'EDSM worker')
+    this.thread.daemon = True
+    this.thread.start()
+
     return 'EDSM'
 
 def plugin_app(parent):
     this.system_label = tk.Label(parent, text = _('System') + ':')	# Main window
     this.system = HyperlinkLabel(parent, compound=tk.RIGHT, popup_copy = True)
+    this.system.bind_all('<<EDSMStatus>>', update_status)
     return (this.system_label, this.system)
+
+def plugin_close():
+    # Signal thread to close and wait for it
+    this.queue.put(None)
+    this.thread.join()
+    this.thread = None
 
 def plugin_prefs(parent, cmdr, is_beta):
 
@@ -201,7 +215,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     if state['PaintJob'] is not None:
                         props.append(('paintJob', state['PaintJob']))
                     updateship(cmdr, state['ShipID'], state['ShipType'], props)
-                elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
+                elif entry['event'] in ['ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy']:
                     sellship(cmdr, entry.get('SellShipID'))
 
             # Send cargo to EDSM on startup or change
@@ -222,8 +236,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             if system and entry['event'] in ['Location', 'FSDJump']:
                 this.lastlookup = False
                 writelog(cmdr, timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), system, 'StarPos' in entry and tuple(entry['StarPos']), state['ShipID'])
-                this.lastlookup = True
-                this.system.update_idletasks()
 
         except Exception as e:
             if __debug__: print_exc()
@@ -249,10 +261,7 @@ def cmdr_data(data, is_beta):
         # Send flightlog to EDSM if FSDJump failed to do so
         if not this.lastlookup:
             try:
-                this.lastlookup = False
                 this.writelog(data['commander']['name'], int(time.time()), system, None, data['ship']['id'])
-                this.lastlookup = True
-                this.system.update_idletasks()
             except Exception as e:
                 if __debug__: print_exc()
                 return unicode(e)
@@ -276,32 +285,51 @@ def cmdr_data(data, is_beta):
             if __debug__: print_exc()
 
 
-# Call an EDSM endpoint with args (which should be quoted)
-def call(cmdr, endpoint, args, check_msgnum=True):
-    try:
-        (username, apikey) = credentials(cmdr)
-        url = 'https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
+# Worker thread
+def worker():
+    while True:
+        item = this.queue.get()
+        if not item:
+            return	# Closing
+        else:
+            (url, callback) = item
+
+        retrying = 0
+        while retrying < 3:
+            try:
+                r = this.session.get(url, timeout=_TIMEOUT)
+                r.raise_for_status()
+                reply = r.json()
+                (msgnum, msg) = reply['msgnum'], reply['msg']
+                break
+            except:
+                retrying += 1
+        else:
+            if callback:
+                callback(None)
+            else:
+                plug.show_error(_("Error: Can't connect to EDSM"))
+            return
+
+        # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
+        if callback:
+            callback(reply)
+        elif msgnum // 100 != 1:
+            plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+
+
+# Queue a call an EDSM endpoint with args (which should be quoted)
+def call(cmdr, endpoint, args, callback=None):
+    (username, apikey) = credentials(cmdr)
+    this.queue.put(
+        ('https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
             endpoint,
             urllib2.quote(username.encode('utf-8')),
             urllib2.quote(apikey),
             urllib2.quote(applongname),
             urllib2.quote(appversion),
-        ) + args
-        r = this.session.get(url, timeout=_TIMEOUT)
-        r.raise_for_status()
-        reply = r.json()
-        if not check_msgnum:
-            return reply
-        (msgnum, msg) = reply['msgnum'], reply['msg']
-    except:
-        if __debug__: print_exc()
-        raise Exception(_("Error: Can't connect to EDSM"))
-
-    # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
-    if msgnum // 100 not in (1,4):
-        raise Exception(_('Error: EDSM {MSG}').format(MSG=msg))
-    else:
-        return reply
+        ) + args,
+         callback))
 
 
 # Send flight log and also do lookup
@@ -318,16 +346,31 @@ def writelog(cmdr, timestamp, system_name, coordinates, shipid = None):
         args += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
     if shipid is not None:
         args += '&shipId=%d' % shipid
-    try:
-        reply = call(cmdr, 'api-logs-v1/set-log', args)
-        if reply.get('systemCreated'):
-            this.system['image'] = this._IMG_NEW
-        else:
-            this.system['image'] = this._IMG_KNOWN
-        this.syscache.add(system_name)
-    except:
+    call(cmdr, 'api-logs-v1/set-log', args, writelog_callback)
+
+def writelog_callback(reply):
+    this.lastlookup = reply
+    this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
+
+def update_status(event=None):
+    reply = this.lastlookup
+    if not reply or not reply.get('msgnum'):
         this.system['image'] = this._IMG_ERROR
-        raise
+        plug.show_error(_("Error: Can't connect to EDSM"))
+    elif reply['msgnum'] // 100 not in (1,4):
+        this.system['image'] = this._IMG_ERROR
+        plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
+    elif reply.get('systemCreated'):
+        this.system['image'] = this._IMG_NEW
+    else:
+        this.system['image'] = this._IMG_KNOWN
+
+
+# When we don't care about return msgnum from EDSM
+def null_callback(reply):
+    if not reply or not reply.get('msgnum'):
+        plug.show_error(_("Error: Can't connect to EDSM"))
+
 
 def setranks(cmdr, ranks):
     args = ''
@@ -365,4 +408,4 @@ def updateship(cmdr, shipid, shiptype, props=[]):
 
 def sellship(cmdr, shipid):
     if shipid is not None:
-        call(cmdr, 'api-commander-v1/sell-ship', '&shipId=%d' % shipid)
+        call(cmdr, 'api-commander-v1/sell-ship', '&shipId=%d' % shipid, null_callback)
