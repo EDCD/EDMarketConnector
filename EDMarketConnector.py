@@ -728,8 +728,8 @@ class AppWindow:
 
     # Display asynchronous error from plugin
     def plugin_error(self, event=None):
-        if plug.last_error['msg']:
-            self.status['text'] = plug.last_error
+        if plug.last_error.get('msg'):
+            self.status['text'] = plug.last_error['msg']
             self.w.update_idletasks()
             if not config.getint('hotkey_mute'):
                 hotkeymgr.play_bad()
