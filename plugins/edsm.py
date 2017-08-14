@@ -301,6 +301,10 @@ def worker():
                 r.raise_for_status()
                 reply = r.json()
                 (msgnum, msg) = reply['msgnum'], reply['msg']
+                if callback:
+                    callback(reply)
+                elif msgnum // 100 != 1:	# 1xx = OK, 2xx = fatal error
+                    plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                 break
             except:
                 retrying += 1
@@ -309,16 +313,9 @@ def worker():
                 callback(None)
             else:
                 plug.show_error(_("Error: Can't connect to EDSM"))
-            return
-
-        # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
-        if callback:
-            callback(reply)
-        elif msgnum // 100 != 1:
-            plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
 
 
-# Queue a call an EDSM endpoint with args (which should be quoted)
+# Queue a call to an EDSM endpoint with args (which should be quoted)
 def call(cmdr, endpoint, args, callback=None):
     (username, apikey) = credentials(cmdr)
     this.queue.put(
@@ -354,7 +351,8 @@ def writelog_callback(reply):
 
 def update_status(event=None):
     reply = this.lastlookup
-    if not reply or not reply.get('msgnum'):
+    # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
+    if not reply:
         this.system['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
     elif reply['msgnum'] // 100 not in (1,4):
@@ -368,7 +366,7 @@ def update_status(event=None):
 
 # When we don't care about return msgnum from EDSM
 def null_callback(reply):
-    if not reply or not reply.get('msgnum'):
+    if not reply:
         plug.show_error(_("Error: Can't connect to EDSM"))
 
 
