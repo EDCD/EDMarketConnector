@@ -733,7 +733,6 @@ class AppWindow:
             self.w.update_idletasks()
             if not config.getint('hotkey_mute'):
                 hotkeymgr.play_bad()
-        plug.last_error = None
 
     def shipyard_url(self, shipname=None):
 
