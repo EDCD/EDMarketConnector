@@ -84,7 +84,7 @@ class EDDN:
         # Assumes that the gateway returns a strictly compliant Date - https://tools.ietf.org/html/rfc7231#section-7.1.1.1
         try:
             r = self.session.get(self.HEALTH, timeout=timeout)
-            return timegm(time.strptime(r.headers['Date'], "%a, %d %b %Y %H:%M:%S GMT"))
+            return timegm(time.strptime(r.headers['Date'].split(',')[1].strip(), "%d %b %Y %H:%M:%S GMT"))
         except:
             # On any error assume that we're good
             if __debug__: print_exc()
