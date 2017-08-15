@@ -228,8 +228,8 @@ if __name__ == "__main__":
     import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')	# match a single line python literal
     seen = {}
-    for f in sorted([x for x in os.listdir('.') if x.endswith('.py')] +
-                    [join('plugins', x) for x in os.listdir('plugins') if x.endswith('.py')]):
+    for f in (sorted([x for x in os.listdir('.') if x.endswith('.py')]) +
+              sorted([join('plugins', x) for x in os.listdir('plugins') if x.endswith('.py')])):
         with codecs.open(f, 'r', 'utf-8') as h:
             lineno = 0
             for line in h:

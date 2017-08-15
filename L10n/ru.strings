@@ -460,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Оруженосец";
 
-/* Main window. [eddb.py] */
+/* Main window. [prefs.py] */
 "Station" = "Станция";
 
 /* [EDMarketConnector.py] */
@@ -475,7 +475,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Изыскатель";
 
-/* Main window. [edsm.py] */
+/* Main window. [stats.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */
@@ -485,7 +485,7 @@
 "This app requires accurate timestamps." = "Приложению необходимо точное время.";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговый";

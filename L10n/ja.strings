@@ -460,7 +460,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [eddb.py] */
+/* Main window. [prefs.py] */
 "Station" = "ステーション";
 
 /* [EDMarketConnector.py] */
@@ -475,7 +475,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [edsm.py] */
+/* Main window. [stats.py] */
 "System" = "星系";
 
 /* Appearance setting. [prefs.py] */
@@ -485,7 +485,7 @@
 "This app requires accurate timestamps." = "このアプリケーションの動作には正確なタイムスタンプが必要です。";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name" = "ヒント: プラグインを無効にするには{CR}フォルダ名に '{EXT}' を追加してください";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "ヒント: プラグインを無効にするには{CR}フォルダ名に '{EXT}' を追加してください";
 
 /* Ranking. [stats.py] */
 "Trade" = "交易ランク";

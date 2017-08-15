@@ -310,7 +310,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Button(plugsframe, text=_('Open'),	# Button that opens a folder in Explorer/Finder
                   command=lambda: webbrowser.open('file:///%s' % plugdir.get())).grid(row=10, column=1, padx=(0,PADX), sticky=tk.NSEW)
 
-        nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to it's folder name").format(EXT='.disabled')).grid(	# Help text in settings
+        nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(	# Help text in settings
             columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
 
         enabled_plugins = [x for x in plug.PLUGINS if x.folder and x.module]

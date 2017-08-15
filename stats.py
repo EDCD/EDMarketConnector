@@ -249,7 +249,7 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook, [
             _('Ship'),		# Status dialog subtitle
-            _('System'),	# Status dialog subtitle
+            _('System'),	# Main window
             _('Station'),	# Status dialog subtitle
             _('Value'),		# Status dialog subtitle - CR value of ship
         ])
