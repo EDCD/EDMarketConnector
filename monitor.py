@@ -372,7 +372,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipName']  = entry['ShipName']
                 self.state['ShipType']  = self.canonicalise(entry['Ship'])
                 # Ignore other Modules since they're missing Engineer modification details
-                self.state['PaintJob'] = ''
+                self.state['PaintJob'] = 'paintjob_%s_default_defaultpaintjob' % self.state['ShipType']
                 for module in entry['Modules']:
                     if module.get('Slot') == 'PaintJob' and module.get('Item'):
                         self.state['PaintJob'] = self.canonicalise(module['Item'])
