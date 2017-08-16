@@ -75,7 +75,7 @@ if sys.platform=='darwin':
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'certifi', 'PIL', 'simplejson' ],
                   'iconfile': '%s.icns' % APPNAME,
-                  'extra_scripts': PLUGINS,
+                  'include_plugins': [('plugins', x) for x in PLUGINS],
                   'resources': ['snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
@@ -108,19 +108,23 @@ elif sys.platform=='win32':
     }
 
     import requests
-    DATA_FILES = [ ('', [requests.certs.where(),
-                         'WinSparkle.dll',
-                         'WinSparkle.pdb',	# For debugging - don't include in package
-                         'snd_good.wav',
-                         'snd_bad.wav',
-                         'modules.p',
-                         'ships.p',
-                         'stations.p',
-                         'systems.p',
-                         '%s.VisualElementsManifest.xml' % APPNAME,
-                         '%s.ico' % APPNAME ] +
-                    PLUGINS +
-                    [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')] ) ]
+    DATA_FILES = [
+        ('', [
+            requests.certs.where(),
+            'WinSparkle.dll',
+            'WinSparkle.pdb',	# For debugging - don't include in package
+            'snd_good.wav',
+            'snd_bad.wav',
+            'modules.p',
+            'ships.p',
+            'stations.p',
+            'systems.p',
+            '%s.VisualElementsManifest.xml' % APPNAME,
+            '%s.ico' % APPNAME
+        ]),
+        ('L10n', [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')]),
+        ('plugins', PLUGINS),
+    ]
 
 setup(
     name = APPLONGNAME,

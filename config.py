@@ -123,7 +123,7 @@ class Config:
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Resources')) or join(dirname(__file__), 'plugins')
+            self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Library', 'plugins')) or join(dirname(__file__), 'plugins')
 
             self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
 
@@ -185,7 +185,7 @@ class Config:
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = getattr(sys, 'frozen', False) and dirname(sys.executable) or join(dirname(__file__), 'plugins')
+            self.internal_plugin_dir = join(dirname(getattr(sys, 'frozen', False) and sys.executable or __file__), 'plugins')
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
             self.home = KnownFolderPath(FOLDERID_Profile) or u'\\'

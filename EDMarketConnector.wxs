@@ -120,12 +120,6 @@
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\cs.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\de.strings" />
-					</Component>
 					<Component Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
 					</Component>
@@ -135,41 +129,11 @@
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\eddb.py" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\edsm.py" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\es.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\fi.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\fr.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\it.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\ja.strings" />
-					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
 					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\lv.strings" />
-					</Component>
-					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\modules.p" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\nl.strings" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\pl.strings" />
 					</Component>
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
@@ -177,17 +141,11 @@
 					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
 						<File KeyPath="yes" Source="SourceDir\python27.dll" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\ru.strings" />
-					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
 						<File KeyPath="yes" Source="SourceDir\select.pyd" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\ships.p" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\sr-Latn.strings" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\snd_good.wav" />
@@ -207,9 +165,6 @@
 					<Component Guid="{CE5A6F3A-8F6B-4C16-BCDC-F1BB89C9F1AF}">
 						<File KeyPath="yes" Source="SourceDir\tk85.dll" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\uk.strings" />
-					</Component>
 					<Component Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
 						<File KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
 					</Component>
@@ -219,6 +174,55 @@
 					<Component Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
 						<File KeyPath="yes" Source="SourceDir\WinSparkle.dll" />
 					</Component>
+					<Directory Id="L10n" Name="L10n">
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\cs.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\de.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\es.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\fi.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\fr.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\it.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\ja.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\lv.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\nl.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\pl.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\ru.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\sr-Latn.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\uk.strings" />
+						</Component>
+					</Directory>
+					<Directory Id="plugins" Name="plugins">
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
+						</Component>
+					</Directory>
 					<Directory Id="tcl" Name="tcl">
 						<Directory Id="tcl8.5" Name="tcl8.5">
 							<Component Guid="{C085794D-6644-4915-B1C3-3060BE9E3F3B}">

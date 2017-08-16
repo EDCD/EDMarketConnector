@@ -11,7 +11,7 @@ from traceback import print_exc
 import Tkinter as tk
 import myNotebook as nb
 
-from config import config, appname
+from config import config
 
 
 # List of loaded Plugins
@@ -41,7 +41,7 @@ class Plugin(object):
         if loadfile:
             sys.stdout.write('loading plugin %s from "%s"\n' % (name, loadfile.encode('utf-8')))
             with open(loadfile, 'rb') as plugfile:
-                module = imp.load_module(name, plugfile, loadfile.encode(sys.getfilesystemencoding()),
+                module = imp.load_module('plugin_%s' % name, plugfile, loadfile.encode(sys.getfilesystemencoding()),
                                          ('.py', 'r', imp.PY_SOURCE))
                 newname = module.plugin_start()
                 self.name = newname and unicode(newname) or name
@@ -112,7 +112,7 @@ def load_plugins(master):
 
     internal = []
     for name in os.listdir(config.internal_plugin_dir):
-        if name.endswith('.py') and not name[0] in ['.', '_'] and not name.startswith(appname):
+        if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
                 plugin.folder = None	# Suppress listing in Plugins prefs tab

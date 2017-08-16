@@ -129,7 +129,7 @@ class Translations:
             if platform=='darwin':
                 return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
             else:
-                return dirname(sys.executable)
+                return join(dirname(sys.executable), 'L10n')
         elif __file__:
             return join(dirname(__file__), 'L10n')
         else:
