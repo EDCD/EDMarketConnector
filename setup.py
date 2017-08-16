@@ -73,7 +73,7 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'certifi', 'PIL', 'simplejson' ],
+                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
                   'resources': ['snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
@@ -103,7 +103,7 @@ elif sys.platform=='win32':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
-                  'excludes': [ 'PIL', 'simplejson' ],
+                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
     }
 
