@@ -39,7 +39,7 @@ class Plugin(object):
         self.module = None	# None for disabled plugins.
 
         if loadfile:
-            sys.stdout.write('loading plugin %s\n' % name)
+            sys.stdout.write('loading plugin %s from "%s"\n' % (name, loadfile.encode('utf-8')))
             with open(loadfile, 'rb') as plugfile:
                 module = imp.load_module(name, plugfile, loadfile.encode(sys.getfilesystemencoding()),
                                          ('.py', 'r', imp.PY_SOURCE))
