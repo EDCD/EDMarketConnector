@@ -41,8 +41,7 @@ class Plugin(object):
         if loadfile:
             sys.stdout.write('loading plugin %s from "%s"\n' % (name, loadfile.encode('utf-8')))
             with open(loadfile, 'rb') as plugfile:
-                module = imp.load_module('plugin_%s' % name, plugfile, loadfile.encode(sys.getfilesystemencoding()),
-                                         ('.py', 'r', imp.PY_SOURCE))
+                module = imp.load_module('plugin_%s' % name, plugfile, '', ('.py', 'r', imp.PY_SOURCE))
                 newname = module.plugin_start()
                 self.name = newname and unicode(newname) or name
                 self.module = module
