@@ -170,6 +170,8 @@ To package your plugin for distribution simply create a `.zip` archive of your p
 
 If there are any external dependencies then include them in the plugin's folder.
 
+Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive.
+
 # Disable a plugin
 
 EDMC now lets you disable a plugin without deleting it, simply rename the plugin folder to append ".disabled". Eg,
