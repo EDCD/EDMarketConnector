@@ -243,6 +243,7 @@ internal_map = {
     'passengercabin'    : 'Passenger Cabin',
     'prospector'        : 'Prospector Limpet Controller',
     'refinery'          : 'Refinery',
+    'repair'            : 'Repair Limpet Controller',
     'repairer'          : 'Auto Field-Maintenance Unit',
     'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
     'shieldcellbank'    : 'Shield Cell Bank',
