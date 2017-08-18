@@ -110,6 +110,7 @@ ship_map = {
     'type6'                       : 'Type-6 Transporter',
     'type7'                       : 'Type-7 Transporter',
     'type9'                       : 'Type-9 Heavy',
+    'type10'                      : 'Type-10 Defender',
     'viper'                       : 'Viper MkIII',
     'viper_mkiv'                  : 'Viper MkIV',
     'vulture'                     : 'Vulture',
