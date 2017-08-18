@@ -123,6 +123,9 @@ Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
 Troubleshooting
 --------
 
+### This app requires accurate timestamps
+The app requires that your clock is accurate to within a minute or two. The easiest way to do this is to check “Set time automatically” and maybe “Set time zone automatically” in your system's Date & Time settings.
+
 ### Shipyard data not reported
 The Frontier server that supplies the data to this app sometimes fails to supply shipyard data. Visit the shipyard in-game and try “Updating” again.
 
