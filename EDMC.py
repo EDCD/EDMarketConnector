@@ -22,7 +22,6 @@ from commodity import COMMODITY_DEFAULT
 import outfitting
 import loadout
 import edshipyard
-import coriolis
 import shipyard
 import eddn
 import stats
@@ -43,7 +42,6 @@ try:
     parser = argparse.ArgumentParser(prog=appcmdname, description='Prints the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file. Requires prior setup through the accompanying GUI app.')
     parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
     parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
-    parser.add_argument('-c', metavar='FILE', help='write ship loadout to FILE in Coriolis json format')
     parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
     parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
     parser.add_argument('-m', metavar='FILE', help='write station commodity market data to FILE in CSV format')
@@ -118,8 +116,6 @@ try:
             h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
     if args.a:
         loadout.export(data, args.a)
-    if args.c:
-        coriolis.export(data, args.c)
     if args.e:
         edshipyard.export(data, args.e)
     if args.l:

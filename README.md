@@ -206,7 +206,6 @@ Arguments:
  -h, --help     show this help message and exit
  -v, --version  print program version and exit
  -a FILE        write ship loadout to FILE in Companion API json format
- -c FILE        write ship loadout to FILE in Coriolis json format
  -e FILE        write ship loadout to FILE in E:D Shipyard plain text format
  -l FILE        write ship locations to FILE in CSV format
  -m FILE        write station commodity market data to FILE in CSV format
