@@ -50,7 +50,7 @@ elif sys.platform=='darwin':
 
         def __init__(self, master):
             try:
-                objc.loadBundle('Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework'))
+                objc.loadBundle('Sparkle', globals(), join(dirname(sys.executable.decode(sys.getfilesystemencoding())), os.pardir, 'Frameworks', 'Sparkle.framework'))
                 self.updater = SUUpdater.sharedUpdater()
             except:
                 # can't load framework - not frozen or not included in app bundle?

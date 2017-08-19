@@ -123,7 +123,7 @@ class Config:
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Library', 'plugins')) or join(dirname(__file__), 'plugins')
+            self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable.decode(sys.getfilesystemencoding())), pardir, 'Library', 'plugins')) or join(dirname(__file__), 'plugins')
 
             self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
 
@@ -131,7 +131,7 @@ class Config:
 
             self.home = expanduser('~')
 
-            self.respath = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Resources')) or dirname(__file__)
+            self.respath = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable.decode(sys.getfilesystemencoding())), pardir, 'Resources')) or dirname(__file__)
 
             if not getattr(sys, 'frozen', False):
                 # Don't use Python's settings if interactive
@@ -185,7 +185,7 @@ class Config:
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = join(dirname(getattr(sys, 'frozen', False) and sys.executable or __file__), 'plugins')
+            self.internal_plugin_dir = join(dirname(getattr(sys, 'frozen', False) and sys.executable.decode(sys.getfilesystemencoding()) or __file__), u'plugins')
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
             self.home = KnownFolderPath(FOLDERID_Profile) or u'\\'
@@ -195,7 +195,7 @@ class Config:
 
             self.default_interaction_dir = join(KnownFolderPath(FOLDERID_LocalAppData), 'Frontier Developments', 'Elite Dangerous', 'CommanderHistory')
 
-            self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
+            self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable.decode(sys.getfilesystemencoding()) or __file__)
 
             self.identifier = applongname
 
