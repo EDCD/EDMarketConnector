@@ -108,6 +108,9 @@
 					<Component Guid="{52019FB5-952D-4BA4-A6E0-F3E214F14923}">
 						<File KeyPath="yes" Source="SourceDir\_socket.pyd" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_sqlite3.pyd" />
+					</Component>
 					<Component Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
 						<File KeyPath="yes" Source="SourceDir\_ssl.pyd" />
 					</Component>
@@ -152,6 +155,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\snd_bad.wav" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\sqlite3.dll" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\stations.p" />
@@ -444,6 +450,7 @@
 			<ComponentRef Id="_ctypes.pyd" />
 			<ComponentRef Id="_hashlib.pyd" />
 			<ComponentRef Id="_socket.pyd" />
+			<ComponentRef Id="_sqlite3.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
@@ -473,6 +480,7 @@
 			<ComponentRef Id="sr_Latn.strings" />
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
+			<ComponentRef Id="sqlite3.dll" />
 			<ComponentRef Id="stations.p" />
 			<ComponentRef Id="systems.p" />
 			<ComponentRef Id="tcl85.dll" />

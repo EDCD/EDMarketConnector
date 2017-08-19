@@ -102,8 +102,11 @@ elif sys.platform=='win32':
     OPTIONS =  { 'py2exe':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests', 'keyring.backends' ],
-                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'packages': [
+                      'requests', 'keyring.backends',
+                      'shutil', 'sqlite3', 'zipfile',	# Included for plugins
+                  ],
+                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
     }
 
