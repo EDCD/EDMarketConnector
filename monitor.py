@@ -392,8 +392,8 @@ class EDLogs(FileSystemEventHandler):
                     self.coordinates = tuple(entry['StarPos'])
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None	# Docked event doesn't include coordinates
-                self.system = entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem']
-                self.station = entry.get('StationName')	# May be None
+                (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
+                                               entry.get('StationName'))	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
             elif entry['event'] == 'SupercruiseExit':
                 self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None

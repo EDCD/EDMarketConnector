@@ -448,7 +448,7 @@ class AppWindow:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
             elif ((auto_update and not data['commander'].get('docked')) or
                   (data['lastSystem']['name'] != monitor.system) or
-                  ((monitor.station or data['commander']['docked']) and data['lastStarport']['name'] != monitor.station) or
+                  ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
                   (data['ship']['id'] != monitor.state['ShipID']) or
                   (data['ship']['name'].lower() != monitor.state['ShipType'])):
                 raise companion.ServerLagging()
@@ -483,7 +483,7 @@ class AppWindow:
                     pass
 
                 elif not data['commander'].get('docked'):
-                    if not event and not retrying:
+                    if auto_update and not retrying:
                         # Silently retry if we got here by 'Automatically update on docking' and the server hasn't caught up
                         self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                         return	# early exit to avoid starting cooldown count
@@ -536,6 +536,7 @@ class AppWindow:
         # Companion API problem
         except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
+                print 'Lagging: %s,%s != %s,%s' % (data['lastSystem']['name'], data['commander']['docked'] and data['lastStarport']['name'] or 'undocked', monitor.system, monitor.station)
                 self.status['text'] = unicode(e)
                 play_bad = True
             else:
