@@ -223,7 +223,7 @@ The program returns one of the following exit codes. Further information may be 
   <li>Server is down.</li>
   <li>Invalid Credentials.</li>
   <li>Verification Required.</li>
-  <li>Not docked. You have requested station data but the user is not docked at a station.</li>
+  <li>Server is lagging.</li>
   <li>I/O or other OS error.</li>
 </ol>
 

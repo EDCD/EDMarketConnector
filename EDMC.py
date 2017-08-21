@@ -25,12 +25,12 @@ import edshipyard
 import shipyard
 import eddn
 import stats
-import prefs
 from config import appcmdname, appversion, update_feed, config
+from monitor import monitor
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
-EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_NOT_DOCKED, EXIT_SYS_ERR = range(6)
+EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR = range(6)
 
 # quick and dirty version comparison assuming "strict" numeric only version numbers
 def versioncmp(versionstring):
@@ -54,11 +54,12 @@ try:
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
+    if sys.platform=='win32' and getattr(sys, 'frozen', False):
+        os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
+
     if args.version:
         latest = ''
         try:
-            if sys.platform=='win32' and getattr(sys, 'frozen', False):
-                os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
             # Copied from update.py - probably should refactor
             r = requests.get(update_feed, timeout = 10)
             feed = ElementTree.fromstring(r.text)
@@ -77,6 +78,24 @@ try:
         data = json.load(open(args.j))
         config.set('querytime', getmtime(args.j))
     else:
+        # Get state from latest Journal file
+        try:
+            logdir = config.get('journaldir') or config.default_journal_dir
+            logfiles = sorted([x for x in os.listdir(logdir) if x.startswith('Journal') and x.endswith('.log')],
+                              key=lambda x: x.split('.')[1:])
+            logfile = join(logdir, logfiles[-1])
+            with open(logfile, 'r') as loghandle:
+                for line in loghandle:
+                    try:
+                        monitor.parse_entry(line)
+                    except:
+                        if __debug__:
+                            print 'Invalid journal entry "%s"' % repr(line)
+        except Exception as e:
+            sys.stderr.write("Can't read Journal file: %s\n" % unicode(e).encode('ascii', 'replace'))
+            sys.exit(EXIT_SYS_ERR)
+
+        # Get data from Companion API
         session = companion.Session()
         if args.p:
             cmdrs = config.get('cmdrs') or []
@@ -89,12 +108,12 @@ try:
                 else:
                     raise companion.CredentialsError
             username = config.get('fdev_usernames')[idx]
-            session.login(username, config.get_password(username))
+            session.login(username, config.get_password(username), monitor.is_beta)
         elif config.get('cmdrs'):
             username = config.get('fdev_usernames')[0]
-            session.login(username, config.get_password(username))
+            session.login(username, config.get_password(username), monitor.is_beta)
         else:	# <= 2.25 not yet migrated
-            session.login(config.get('username'), config.get('password'))
+            session.login(config.get('username'), config.get('password'), monitor.is_beta)
         querytime = int(time())
         data = session.query()
         config.set('querytime', querytime)
@@ -109,6 +128,17 @@ try:
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
         sys.stderr.write('What are you flying?!\n')	# Shouldn't happen
         sys.exit(EXIT_SERVER)
+    elif args.j:
+        pass	# Skip further validation
+    elif data['commander']['name'] != monitor.cmdr:
+        sys.stderr.write('Wrong Cmdr\n')				# Companion API return doesn't match Journal
+        sys.exit(EXIT_CREDENTIALS)
+    elif ((data['lastSystem']['name'] != monitor.system) or
+          ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
+          (data['ship']['id'] != monitor.state['ShipID']) or
+          (data['ship']['name'].lower() != monitor.state['ShipType'])):
+        sys.stderr.write('Frontier server is lagging\n')
+        sys.exit(EXIT_LAGGING)
 
     # stuff we can do when not docked
     if args.d:
@@ -123,20 +153,22 @@ try:
     if args.t:
         stats.export_status(data, args.t)
 
-    if not data['commander'].get('docked'):
+    if data['commander'].get('docked'):
+        print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
+    else:
         print data['lastSystem']['name']
-        if (args.m or args.o or args.s):
+
+    if (args.m or args.o or args.s or args.n):
+        if not data['commander'].get('docked'):
             sys.stderr.write("You're not docked at a station!\n")
-            sys.exit(EXIT_NOT_DOCKED)
-        else:
             sys.exit(EXIT_SUCCESS)
+        elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
+            sys.stderr.write("Station doesn't have anything!\n")
+            sys.exit(EXIT_SUCCESS)
+    else:
+        sys.exit(EXIT_SUCCESS)
 
     # Finally - the data looks sane and we're docked at a station
-    print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
-
-    if (args.m or args.o or args.s) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
-        sys.stderr.write("Station doesn't have anything!\n")
-        sys.exit(EXIT_SUCCESS)
 
     # Fixup anomalies in the commodity data
     fixed = companion.fixup(data)
@@ -171,9 +203,9 @@ try:
     if args.n:
         try:
             eddn_sender = eddn.EDDN(None)
-            eddn_sender.export_commodities(data, False)
-            eddn_sender.export_outfitting(data, False)
-            eddn_sender.export_shipyard(data, False)
+            eddn_sender.export_commodities(data, monitor.is_beta)
+            eddn_sender.export_outfitting(data, monitor.is_beta)
+            eddn_sender.export_shipyard(data, monitor.is_beta)
         except Exception as e:
             sys.stderr.write("Failed to send data to EDDN: %s\n" % unicode(e).encode('ascii', 'replace'))
 
