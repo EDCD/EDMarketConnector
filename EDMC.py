@@ -95,6 +95,10 @@ try:
             sys.stderr.write("Can't read Journal file: %s\n" % unicode(e).encode('ascii', 'replace'))
             sys.exit(EXIT_SYS_ERR)
 
+        if not monitor.cmdr:
+            sys.stderr.write('Not available while E:D is at the main menu\n')
+            sys.exit(EXIT_SYS_ERR)
+
         # Get data from Companion API
         session = companion.Session()
         if args.p:
@@ -110,7 +114,10 @@ try:
             username = config.get('fdev_usernames')[idx]
             session.login(username, config.get_password(username), monitor.is_beta)
         elif config.get('cmdrs'):
-            username = config.get('fdev_usernames')[0]
+            cmdrs = config.get('cmdrs') or []
+            if monitor.cmdr not in cmdrs:
+                raise companion.CredentialsError
+            username = config.get('fdev_usernames')[cmdrs.index(monitor.cmdr)]
             session.login(username, config.get_password(username), monitor.is_beta)
         else:	# <= 2.25 not yet migrated
             session.login(config.get('username'), config.get('password'), monitor.is_beta)
