@@ -198,12 +198,20 @@ try:
         else:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
+    if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and monitor.stationservices and 'Shipyard' in monitor.stationservices:
+        # Retry for shipyard
+        sleep(SERVER_RETRY)
+        data2 = session.query()
+        if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
+            data2['lastSystem']['name'] == monitor.system and
+            data2['lastStarport']['name'] == monitor.station):
+            data = data2
+
     if args.s:
-        if not data['lastStarport'].get('ships') and not args.j:
-            sleep(SERVER_RETRY)
-            data = session.query()
         if data['lastStarport'].get('ships'):
             shipyard.export(data, args.s)
+        elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
+            sys.stderr.write("Failed to get shipyard data\n")
         else:
             sys.stderr.write("Station doesn't have a shipyard\n")
 

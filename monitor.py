@@ -202,7 +202,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring Journal'
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.coordinates = None
+        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -311,6 +311,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.stationtype = None
+                self.stationservices = None
                 self.coordinates = None
                 self.started = None
                 self.state = {
@@ -338,6 +339,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.stationtype = None
+                self.stationservices = None
                 self.coordinates = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self.state.update({
@@ -383,6 +385,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] in ['Undocked']:
                 self.station = None
                 self.stationtype = None
+                self.stationservices = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
                 if entry['event'] == 'Location':
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
@@ -395,6 +398,7 @@ class EDLogs(FileSystemEventHandler):
                 (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
                                                entry.get('StationName'))	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
+                self.stationservices = entry.get('StationServices')	# None under E:D < 2.4
             elif entry['event'] == 'SupercruiseExit':
                 self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
             elif entry['event'] == 'SupercruiseEntry':
@@ -467,6 +471,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.stationtype = None
+                self.stationservices = None
                 self.coordinates = None
             elif entry['event'] == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
@@ -477,6 +482,7 @@ class EDLogs(FileSystemEventHandler):
                 self.system = None
                 self.station = None
                 self.stationtype = None
+                self.stationservices = None
                 self.coordinates = None
 
             return entry

@@ -483,11 +483,7 @@ class AppWindow:
                     pass
 
                 elif not data['commander'].get('docked'):
-                    if auto_update and not retrying:
-                        # Silently retry if we got here by 'Automatically update on docking' and the server hasn't caught up
-                        self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
-                        return	# early exit to avoid starting cooldown count
-                    elif not self.status['text']:
+                    if not self.status['text']:
                         # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
                         self.status['text'] = _("You're not docked at a station!")
                         play_bad = True
@@ -522,11 +518,14 @@ class AppWindow:
                             self.w.update_idletasks()
                             self.eddn.export_commodities(data, monitor.is_beta)
                             self.eddn.export_outfitting(data, monitor.is_beta)
-                            if monitor.stationtype != 'Outpost' and not data['lastStarport'].get('ships'):
-                                # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
-                                self.w.after(int(SERVER_RETRY * 1000), self.retry_for_shipyard)
-                            else:
+                            if data['lastStarport'].get('ships'):
                                 self.eddn.export_shipyard(data, monitor.is_beta)
+                            elif monitor.stationservices is not None and 'Shipyard' in monitor.stationservices:
+                                # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
+                                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(2))
+                            elif monitor.stationservices is None and monitor.stationtype != 'Outpost':
+                                # Pre E:D 2.4 we don't know if we should have shipyard info. Retry once.
+                                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(1))
                             if not old_status:
                                 self.status['text'] = ''
 
@@ -536,7 +535,6 @@ class AppWindow:
         # Companion API problem
         except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
-                print 'Lagging: %s,%s != %s,%s' % (data['lastSystem']['name'], data['commander']['docked'] and data['lastStarport']['name'] or 'undocked', monitor.system, monitor.station)
                 self.status['text'] = unicode(e)
                 play_bad = True
             else:
@@ -562,14 +560,20 @@ class AppWindow:
         self.holdofftime = querytime + companion.holdoff
         self.cooldown()
 
-    def retry_for_shipyard(self):
+    def retry_for_shipyard(self, tries):
         # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
         try:
             data = self.session.query()
             if __debug__:
                 print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
-            if data['commander'].get('docked'):	# might have undocked while we were waiting for retry in which case station data is unreliable
+            if not data['commander'].get('docked'):
+                pass	# might have undocked while we were waiting for retry in which case station data is unreliable
+            elif (data['lastStarport'].get('ships') and
+                  data['lastSystem']['name'] == monitor.system and
+                  data['lastStarport']['name'] == monitor.station):
                 self.eddn.export_shipyard(data, monitor.is_beta)
+            elif tries > 1:	# bogus data - retry
+                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(tries-1))
         except:
             pass
 
