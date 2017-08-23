@@ -7,7 +7,7 @@ from collections import OrderedDict
 from functools import partial
 import json
 import keyring
-from os import chdir, mkdir, environ
+from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
 import requests
@@ -456,9 +456,9 @@ class AppWindow:
             else:
 
                 if __debug__:	# Recording
-                    if not isdir('dump'): mkdir('dump')
-                    with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
-                        h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+                    if isdir('dump'):
+                        with open('dump/%s%s.%s.json' % (data['lastSystem']['name'], data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wt') as h:
+                            h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
 
                 if not monitor.state['ShipType']:	# Started game in SRV or fighter
                     self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
