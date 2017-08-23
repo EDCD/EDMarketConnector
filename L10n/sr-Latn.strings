@@ -1,5 +1,5 @@
 /* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+"Not available while E:D is at the main menu" = "Nedostupno dok je E:D u glavnom meniju";
 
 /* Language name */
 "!Language" = "Srpski (Latinica)";
