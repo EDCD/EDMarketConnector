@@ -154,7 +154,7 @@ def export(data, filename=None):
 # Return a URL for the current ship
 def url(data, is_beta):
 
-    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':'))	# most compact representation
+    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
 
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:

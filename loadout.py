@@ -11,7 +11,7 @@ import companion
 # Export ship loadout in Companion API json format
 def export(data, filename=None):
 
-    string = json.dumps(companion.ship(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))	# pretty print
+    string = json.dumps(companion.ship(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8')	# pretty print
 
     if filename:
         with open(filename, 'wt') as h:

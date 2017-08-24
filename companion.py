@@ -381,20 +381,27 @@ def ship(data):
     # subset of "ship" that's not noisy
     description = {}
     for props in [
-            ('cargo', 'capacity'),
-            ('free',),
-            ('fuel', 'main', 'capacity'),
-            ('fuel', 'reserve', 'capacity'),
-            ('id',),
-            ('name',),
-            ('value', 'hull'),
-            ('value', 'modules'),
-            ('value', 'unloaned'),
+        ('cargo', 'capacity'),
+        ('free',),
+        ('fuel', 'main', 'capacity'),
+        ('fuel', 'reserve', 'capacity'),
+        ('id',),
+        ('launchBays',),
+        ('name',),
+        ('shipID',),
+        ('shipName',),
+        ('value', 'hull'),
+        ('value', 'modules'),
+        ('value', 'unloaned'),
     ]: addleaf(data['ship'], description, props)
 
     description['modules'] = {}
     for slot in data['ship'].get('modules', {}):
-        for prop in ['free', 'id', 'modifiers', 'name', 'on', 'priority', 'recipeLevel', 'recipeName', 'recipeValue', 'unloaned', 'value']:
-            addleaf(data['ship']['modules'], description['modules'], (slot, 'module', prop))
+        for prop in data['ship']['modules'][slot]:
+            if prop == 'module':
+                for prop2 in ['free', 'id', 'name', 'on', 'priority', 'value', 'unloaned']:
+                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, prop2))
+            else:
+                addleaf(data['ship']['modules'], description['modules'], (slot, prop))
 
     return description
