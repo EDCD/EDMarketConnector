@@ -386,7 +386,6 @@ def ship(data):
         ('fuel', 'main', 'capacity'),
         ('fuel', 'reserve', 'capacity'),
         ('id',),
-        ('launchBays',),
         ('name',),
         ('shipID',),
         ('shipName',),
@@ -395,12 +394,28 @@ def ship(data):
         ('value', 'unloaned'),
     ]: addleaf(data['ship'], description, props)
 
+    if data['ship'].get('launchBays'):
+        description['launchBays'] = {}
+        for slot in data['ship'].get('launchBays', {}):
+            for subslot in data['ship']['launchBays'].get(slot, {}):
+                for prop in ['loadout', 'loadoutName', 'name']:
+                    addleaf(data['ship']['launchBays'], description['launchBays'], (slot, subslot, prop))
+
     description['modules'] = {}
     for slot in data['ship'].get('modules', {}):
         for prop in data['ship']['modules'][slot]:
             if prop == 'module':
                 for prop2 in ['free', 'id', 'name', 'on', 'priority', 'value', 'unloaned']:
                     addleaf(data['ship']['modules'], description['modules'], (slot, prop, prop2))
+            elif prop == 'engineer':
+                for prop2 in ['engineerName', 'recipeLevel', 'recipeName']:
+                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, prop2))
+            elif prop in ['modifications', 'WorkInProgress_modifications']:
+                for mod in data['ship']['modules'][slot].get(prop, {}):
+                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, mod, 'value'))
+            elif prop == 'specialModifications':
+                if data['ship']['modules'][slot][prop]:
+                    addleaf(data['ship']['modules'], description['modules'], (slot, prop))
             else:
                 addleaf(data['ship']['modules'], description['modules'], (slot, prop))
 
