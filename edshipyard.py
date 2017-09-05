@@ -76,7 +76,11 @@ def export(data, filename=None):
             if not module: continue
 
             cr = class_rating(module)
-            mass += module.get('mass', 0)
+            mods = v.get('modifications') or v.get('WorkInProgress_modifications') or {}
+            if mods.get('OutfittingFieldType_Mass'):
+                mass += (module.get('mass', 0) * mods['OutfittingFieldType_Mass']['value'])
+            else:
+                mass += module.get('mass', 0)
 
             # Specials
             if 'Fuel Tank'in module['name']:
@@ -90,6 +94,11 @@ def export(data, filename=None):
 
             if name == 'Frame Shift Drive':
                 fsd = module	# save for range calculation
+                if mods.get('OutfittingFieldType_FSDOptimalMass'):
+                    fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
+                if mods.get('OutfittingFieldType_MaxFuelPerJump'):
+                    fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
+
 
             for s in slot_map:
                 if slot.lower().startswith(s):
