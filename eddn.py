@@ -221,7 +221,7 @@ class EDDN:
             if (entry['event'] == 'Docked' or
                 (entry['event'] == 'Location' and entry['Docked']) or
                 not (config.getint('output') & config.OUT_SYS_DELAY)):
-                self.sendreplay()	# Try to send this and previous entries
+                self.parent.w.after(self.REPLAYPERIOD, self.sendreplay)	# Try to send this and previous entries
         else:
             # Can't access replay file! Send immediately.
             self.parent.status['text'] = _('Sending data to EDDN...')
