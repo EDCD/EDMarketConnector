@@ -205,7 +205,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 setranks(cmdr, state['Rank'])
 
             # Send ship info to EDSM on startup or change
-            if entry['event'] in ['StartUp', 'Loadout', 'LoadGame', 'SetUserShipName'] and cmdr and state['ShipID']:
+            if entry['event'] in ['StartUp', 'Loadout', 'LoadGame', 'SetUserShipName'] and cmdr and state['ShipID'] is not None:
                 setshipid(cmdr, state['ShipID'])
                 props = []
                 if state['ShipIdent'] is not None:
