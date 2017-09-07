@@ -349,74 +349,22 @@ def fixup(data):
 # Return a subset of the received data describing the current ship
 def ship(data):
 
-    # Add a leaf to a dictionary, creating empty dictionaries along the branch if necessary
-    def addleaf(data, to, props):
-
-        # special handling for completely empty trees
-        p = props[0]
-        if p in data and not data[p]:
-            to[p] = data[p]
-            return
-
-        # Does the leaf exist ?
-        tail = data
-        for p in props:
-            if not hasattr(data, 'get') or p not in tail:
-                return
+    def filter_ship(d):
+        filtered = {}
+        for k, v in d.iteritems():
+            if v == []:
+                pass	# just skip empty fields for brevity
+            elif k in ['alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining', 'rebuilds', 'starsystem', 'station']:
+                pass	# noisy
+            elif k in ['locDescription', 'locName'] or k.endswith('LocDescription') or k.endswith('LocName'):
+                pass	# also noisy, and redundant
+            elif k in ['dir', 'LessIsGood']:
+                pass	# dir is not ASCII - remove to simplify handling
+            elif hasattr(v, 'iteritems'):
+                filtered[k] = filter_ship(v)
             else:
-                tail = tail[p]
-
-        for p in props[:-1]:
-            if not hasattr(data, 'get') or p not in data:
-                return
-            elif p not in to:
-                to[p] = {}
-            elif not hasattr(to, 'get'):
-                return	# intermediate is not a dictionary - inconsistency!
-            data = data[p]
-            to = to[p]
-        p = props[-1]
-        to[p] = data[p]
+                filtered[k] = v
+        return filtered
 
     # subset of "ship" that's not noisy
-    description = {}
-    for props in [
-        ('cargo', 'capacity'),
-        ('free',),
-        ('fuel', 'main', 'capacity'),
-        ('fuel', 'reserve', 'capacity'),
-        ('id',),
-        ('name',),
-        ('shipID',),
-        ('shipName',),
-        ('value', 'hull'),
-        ('value', 'modules'),
-        ('value', 'unloaned'),
-    ]: addleaf(data['ship'], description, props)
-
-    if data['ship'].get('launchBays'):
-        description['launchBays'] = {}
-        for slot in data['ship'].get('launchBays', {}):
-            for subslot in data['ship']['launchBays'].get(slot, {}):
-                for prop in ['loadout', 'loadoutName', 'name']:
-                    addleaf(data['ship']['launchBays'], description['launchBays'], (slot, subslot, prop))
-
-    description['modules'] = {}
-    for slot in data['ship'].get('modules', {}):
-        for prop in data['ship']['modules'][slot]:
-            if prop == 'module':
-                for prop2 in ['free', 'id', 'name', 'on', 'priority', 'value', 'unloaned']:
-                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, prop2))
-            elif prop == 'engineer':
-                for prop2 in ['engineerName', 'recipeLevel', 'recipeName']:
-                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, prop2))
-            elif prop in ['modifications', 'WorkInProgress_modifications']:
-                for mod in data['ship']['modules'][slot].get(prop, {}):
-                    addleaf(data['ship']['modules'], description['modules'], (slot, prop, mod, 'value'))
-            elif prop == 'specialModifications':
-                if data['ship']['modules'][slot][prop]:
-                    addleaf(data['ship']['modules'], description['modules'], (slot, prop))
-            else:
-                addleaf(data['ship']['modules'], description['modules'], (slot, prop))
-
-    return description
+    return filter_ship(data['ship'])
