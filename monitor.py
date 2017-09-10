@@ -386,10 +386,10 @@ class EDLogs(FileSystemEventHandler):
                 self.live = True	# First event in 2.3
                 self.state['Cargo'] = defaultdict(int)
                 self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
-            elif entry['event'] in ['CollectCargo', 'MarketBuy', 'MiningRefined']:
+            elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
-            elif entry['event'] in ['EjectCargo', 'MarketSell']:
+            elif entry['event'] in ['EjectCargo', 'MarketSell', 'SellDrones']:
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] -= entry.get('Count', 1)
                 if self.state['Cargo'][commodity] <= 0:
