@@ -131,13 +131,6 @@ The Frontier server that supplies the data to this app sometimes fails to supply
 
 This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConnector/issues/86).
 
-### Didn't update: Carrying Rares
-Due to a bug in the server that supplies the data to this app, profit on any Rare cargo in your hold may be wiped out when you visit the in-game Commodity Market after having “Updated”.
-
-This app will not auto-update when you dock if you're carrying Rares. Visit the in-game Commodity Market at a station where you intend to sell Rares **before** hitting “Update”.
-
-This problem is tracked as [Issue #92](https://github.com/Marginal/EDMarketConnector/issues/92).
-
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” and “E:D interaction log location” settings on the Configuration tab to point to the game's log files.
 

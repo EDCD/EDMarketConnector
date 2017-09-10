@@ -71,36 +71,6 @@ class EDLogs(FileSystemEventHandler):
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile('\$(.+)_name;')
 
-    # Mostly taken from http://elite-dangerous.wikia.com/wiki/List_of_Rare_Commodities
-    RARES = set([
-        'cetiaepyornisegg', 'aganipperush', 'alacarakmoskinart', 'albinoquechuamammoth', 'altairianskin', 'alyabodilysoap',
-        'anduligafireworks', 'anynacoffee', 'aroucaconventualsweets', 'azcancriformula42', 'bluemilk',
-        'baltahsinevacuumkrill', 'bakedgreebles', 'bankiamphibiousleather', 'bastsnakegin', 'belalansrayleather',
-        'borasetanipathogenetics', 'burnhambiledistillate', 'cd75catcoffee', 'centaurimegagin', 'ceremonialheiketea',
-        'cetirabbits', 'chameleoncloth', 'chateaudeaegaeon', 'cherbonesbloodcrystals', 'chieridanimarinepaste',
-        'coquimspongiformvictuals', 'cromsilverfesh', 'crystallinespheres', 'damnacarapaces', 'deltaphoenicispalms',
-        'deuringastruffles', 'disomacorn', 'aerialedenapple', 'eleuthermals', 'eraninpearlwhisky', 'eshuumbrellas',
-        'esusekucaviar', 'ethgrezeteabuds', 'fujintea', 'galactictravelguide', 'geawendancedust', 'gerasiangueuzebeer',
-        'giantirukamasnails', 'giantverrix', 'gilyasignatureweapons', 'gomanyauponcoffee', 'haidneblackbrew',
-        'havasupaidreamcatcher', 'helvetitjpearls', 'hip10175bushmeat', 'hip118311swarm', 'hiporganophosphates',
-        'hip41181squid', 'holvaduellingblades', 'honestypills', 'hr7221wheat', 'indibourbon', 'jaquesquinentianstill',
-        'jaradharrepuzzlebox', 'jarouarice', 'jotunmookah', 'kachiriginleaches', 'kamitracigars', 'kamorinhistoricweapons',
-        'karetiicouture', 'karsukilocusts', 'kinagoinstruments', 'konggaale', 'korrokungpellets', 'lavianbrandy',
-        'alieneggs', 'leestianeviljuice', 'livehecateseaworms', 'ltthypersweet', 'lyraeweed', 'transgeniconionhead',
-        'masterchefs', 'mechucoshightea', 'medbstarlube', 'mokojingbeastfeast', 'momusbogspaniel', 'motronaexperiencejelly',
-        'mukusubiichitinos', 'mulachigiantfungus', 'neritusberries', 'ngadandarifireopals', 'ngunamodernantiques',
-        'njangarisaddles', 'noneuclidianexotanks', 'ochoengchillies', 'onionhead', 'onionheada', 'onionheadb', 'onionheadc',
-        'onionheadd', 'onionheade', 'onionheadderivatives', 'onionheadsamples', 'ophiuchiexinoartefacts',
-        'orrerianviciousbrew', 'pantaaprayersticks', 'pavoniseargrubs', 'personalgifts', 'rajukrustoves',
-        'rapabaosnakeskins', 'rusanioldsmokey', 'sanumameat', 'saxonwine', 'shanscharisorchid', 'soontillrelics',
-        'sothiscrystallinegold', 'tanmarktranquiltea', 'tarachtorspice', 'taurichimes', 'terramaterbloodbores',
-        'thehuttonmug', 'thrutiscream', 'tiegfriessynthsilk', 'tiolcewaste2pasteunits', 'toxandjivirocide', 'advert1',
-        'uszaiantreegrub', 'utgaroarmillenialeggs', 'uzumokulowgwings', 'vherculisbodyrub', 'vacuumkrill',
-        'vanayequirhinofur', 'vegaslimweed', 'vidavantianlace', 'lftvoidextractcoffee', 'voidworms', 'volkhabbeedrones',
-        'watersofshintara', 'wheemetewheatcakes', 'witchhaulkobebeef', 'wolf1301fesh', 'wulpahyperboresystems',
-        'wuthielokufroth', 'xihecompanions', 'yasokondileaf', 'zeesszeantglue', 'buckyballbeermats',
-    ])
-
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
         self.root = None
@@ -510,12 +480,6 @@ class EDLogs(FileSystemEventHandler):
                 self.live = True
                 self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
             return entry
-
-    def carrying_rares(self):
-        for commodity in self.state['Cargo']:
-            if commodity in self.RARES:
-                return True
-        return False
 
     def game_running(self):
 
