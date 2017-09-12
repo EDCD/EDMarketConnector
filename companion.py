@@ -32,49 +32,6 @@ category_map = {
     'NonMarketable' : False,	# Don't appear in the in-game market so don't report
 }
 
-commodity_map= {
-    'Agricultural Medicines'             : 'Agri-Medicines',
-    'Ai Relics'                          : 'AI Relics',
-    'Animalmeat'                         : 'Animal Meat',
-    'Atmospheric Extractors'             : 'Atmospheric Processors',
-    'Auto Fabricators'                   : 'Auto-Fabricators',
-    'Basic Narcotics'                    : 'Narcotics',
-    'Bio Reducing Lichen'                : 'Bioreducing Lichen',
-    'C M M Composite'                    : 'CMM Composite',
-    'Cooling Hoses'                      : 'Micro-Weave Cooling Hoses',
-    'Comercial Samples'                  : 'Commercial Samples',
-    'Diagnostic Sensor'                  : 'Hardware Diagnostic Sensor',
-    'Drones'                             : 'Limpet',
-    'Encripted Data Storage'             : 'Encrypted Data Storage',
-    'H N Shock Mount'                    : 'HN Shock Mount',
-    'Hafnium178'                         : 'Hafnium 178',
-    'Hazardous Environment Suits'        : 'H.E. Suits',
-    'Heliostatic Furnaces'               : 'Microbial Furnaces',
-    'Ion Distributor'                    :('Machinery', 'Ion Distributor'),
-    'Low Temperature Diamond'            : 'Low Temperature Diamonds',
-    'Marine Supplies'                    : 'Marine Equipment',
-    'Meta Alloys'                        : 'Meta-Alloys',
-    'Methanol Monohydrate Crystals'      : 'Methanol Monohydrate',
-    'Mu Tom Imager'                      : 'Muon Imager',
-    'Non Lethal Weapons'                 : 'Non-Lethal Weapons',
-    'Power Grid Assembly'                : 'Energy Grid Assembly',
-    'Power Transfer Conduits'            : 'Power Transfer Bus',
-    'S A P8 Core Container'              : 'SAP 8 Core Container',	# Not seen in E:D 1.4 or later?
-    'Skimer Components'                  : 'Skimmer Components',
-    'Terrain Enrichment Systems'         : 'Land Enrichment Systems',
-    'Trinkets Of Fortune'                :('Consumer Items', 'Trinkets Of Hidden Fortune'),
-    'Unknown Artifact'                   : 'Unknown Artefact',
-    'Unknown Artifact2'                  : 'Unknown Probe',	# untested
-    'U S S Cargo Ancient Artefact'       : 'Ancient Artefact',
-    'U S S Cargo Experimental Chemicals' : 'Experimental Chemicals',
-    'U S S Cargo Military Plans'         : 'Military Plans',
-    'U S S Cargo Prototype Tech'         : 'Prototype Tech',
-    'U S S Cargo Rebel Transmissions'    : 'Rebel Transmissions',
-    'U S S Cargo Technical Blueprints'   : 'Technical Blueprints',
-    'U S S Cargo Trade Data'             : 'Trade Data',
-    'Wreckage Components'                : 'Salvageable Wreckage',
-}
-
 ship_map = {
     'adder'                       : 'Adder',
     'anaconda'                    : 'Anaconda',
@@ -110,7 +67,7 @@ ship_map = {
     'type6'                       : 'Type-6 Transporter',
     'type7'                       : 'Type-7 Transporter',
     'type9'                       : 'Type-9 Heavy',
-    'type10'                      : 'Type-10 Defender',
+    'type9_military'              : 'Type-10 Defender',
     'viper'                       : 'Viper MkIII',
     'viper_mkiv'                  : 'Viper MkIV',
     'vulture'                     : 'Vulture',
@@ -323,11 +280,6 @@ def fixup(data):
                 # Rewrite text fields
                 new = dict(commodity)	# shallow copy
                 new['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
-                fixed = commodity_map.get(commodity['name'])
-                if type(fixed) == tuple:
-                    (new['categoryname'], new['name']) = fixed
-                elif fixed:
-                    new['name'] = fixed
 
                 # Force demand and stock to zero if their corresponding bracket is zero
                 # Fixes spurious "demand": 1 in ED 1.3
