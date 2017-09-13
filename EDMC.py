@@ -165,7 +165,7 @@ try:
     else:
         print data['lastSystem']['name']
 
-    if (args.m or args.o or args.s or args.n):
+    if (args.m or args.o or args.s or args.n or args.j):
         if not data['commander'].get('docked'):
             sys.stderr.write("You're not docked at a station!\n")
             sys.exit(EXIT_SUCCESS)

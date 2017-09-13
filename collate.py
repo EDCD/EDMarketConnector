@@ -36,14 +36,11 @@ def addcommodities(data):
         new = {
             'id'       : commodity['id'],
             'category' : commodity['categoryname'],
-            'average'  : commodity['cost_mean'].split('.')[0]
         }
         old = commodities.get(key)
         if old:
             if new['id'] != old['id'] or new['category'] != old['category']:
                 raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
-            elif new['average'] != old['average']:
-                size_pre -= 1
         commodities[key] = new
 
     if len(commodities) > size_pre:
@@ -54,7 +51,7 @@ def addcommodities(data):
             os.rename(commodityfile, commodityfile+'.bak')
 
         with open(commodityfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id','category', 'name', 'average'])
+            writer = csv.DictWriter(csvfile, ['id','category', 'name'])
             writer.writeheader()
             for key in commodities:
                 commodities[key]['name'] = key
