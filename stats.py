@@ -187,7 +187,7 @@ class StatsDialog():
         self.parent.update_idletasks()
 
         try:
-            data = self.session.query()
+            data = self.session.profile()
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.showstats))
         except companion.ServerError as e:

@@ -21,6 +21,8 @@ SERVER_BETA = 'https://pts-companion.orerve.net'
 URL_LOGIN   = '/user/login'
 URL_CONFIRM = '/user/confirm'
 URL_QUERY   = '/profile'
+URL_MARKET  = '/market'
+URL_SHIPYARD= '/shipyard'
 
 
 # Map values reported by the Companion interface to names displayed in-game
@@ -205,7 +207,7 @@ class Session:
         self.session.cookies.save()	# Save cookies now for use by command-line app
         self.login()
 
-    def query(self):
+    def query(self, endpoint):
         if self.state == Session.STATE_NONE:
             raise Exception('General error')	# Shouldn't happen - don't bother localizing
         elif self.state == Session.STATE_INIT:
@@ -213,7 +215,7 @@ class Session:
         elif self.state == Session.STATE_AUTH:
             raise VerificationRequired()
         try:
-            r = self.session.get(self.server + URL_QUERY, timeout=timeout)
+            r = self.session.get(self.server + endpoint, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
@@ -221,7 +223,7 @@ class Session:
         if r.status_code == requests.codes.forbidden or r.url == self.server + URL_LOGIN:
             # Start again - maybe our session cookie expired?
             self.state = Session.STATE_INIT
-            return self.query()
+            return self.query(endpoint)
 
         if r.status_code != requests.codes.ok:
             self.dump(r)
@@ -233,6 +235,28 @@ class Session:
             self.dump(r)
             raise ServerError()
 
+        return data
+
+    def profile(self):
+        return self.query(URL_QUERY)
+
+    def station(self):
+        data = self.query(URL_QUERY)
+        if data.get('docked'):
+            if data['lastStarport']['services'].get('commodities'):
+                marketdata = self.query(URL_MARKET)
+                if (data['lastStarport']['name'] != marketdata['name'] or
+                    data['lastStarport']['id'] != marketdata['id']):
+                    raise ServerLagging()
+                else:
+                    data['lastStarport'].update(marketdata)
+            if data['lastStarport']['services'].get('outfitting') or data['lastStarport']['services'].get('shipyard'):
+                shipdata = self.query(URL_SHIPYARD)
+                if (data['lastStarport']['name'] != shipdata['name'] or
+                    data['lastStarport']['id'] != shipdata['id']):
+                    raise ServerLagging()
+                else:
+                    data['lastStarport'].update(shipdata)
         return data
 
     def close(self):

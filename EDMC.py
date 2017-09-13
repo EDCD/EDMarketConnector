@@ -122,7 +122,7 @@ try:
         else:	# <= 2.25 not yet migrated
             session.login(config.get('username'), config.get('password'), monitor.is_beta)
         querytime = int(time())
-        data = session.query()
+        data = session.station()
         config.set('querytime', querytime)
 
     # Validation
@@ -198,10 +198,10 @@ try:
         else:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
-    if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and monitor.stationservices and 'Shipyard' in monitor.stationservices:
+    if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and data['lastStarport']['services'].get('shipyard'):
         # Retry for shipyard
         sleep(SERVER_RETRY)
-        data2 = session.query()
+        data2 = session.station()
         if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
             data2['lastSystem']['name'] == monitor.system and
             data2['lastStarport']['name'] == monitor.station):

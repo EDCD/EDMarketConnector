@@ -294,7 +294,7 @@ class AppWindow:
         if not config.get('cmdrs') and config.get('username') and config.get('password'):
             try:
                 self.session.login(config.get('username'), config.get('password'), False)
-                data = self.session.query()
+                data = self.session.profile()
                 prefs.migrate(data['commander']['name'])
             except:
                 if __debug__: print_exc()
@@ -428,7 +428,7 @@ class AppWindow:
 
         try:
             querytime = int(time())
-            data = self.session.query()
+            data = self.session.station()
             config.set('querytime', querytime)
 
             # Validation
@@ -514,12 +514,9 @@ class AppWindow:
                             self.eddn.export_outfitting(data, monitor.is_beta)
                             if data['lastStarport'].get('ships'):
                                 self.eddn.export_shipyard(data, monitor.is_beta)
-                            elif monitor.stationservices is not None and 'Shipyard' in monitor.stationservices:
+                            elif data['lastStarport']['services'].get('shipyard'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
                                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(2))
-                            elif monitor.stationservices is None and monitor.stationtype != 'Outpost':
-                                # Pre E:D 2.4 we don't know if we should have shipyard info. Retry once.
-                                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(1))
                             if not old_status:
                                 self.status['text'] = ''
 
@@ -557,7 +554,7 @@ class AppWindow:
     def retry_for_shipyard(self, tries):
         # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
         try:
-            data = self.session.query()
+            data = self.session.station()
             if __debug__:
                 print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
             if not data['commander'].get('docked'):
@@ -741,7 +738,7 @@ class AppWindow:
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
         try:
-            data = self.session.query()
+            data = self.session.profile()
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.w, partial(self.verify, self.shipyard_url))
         except companion.ServerError as e:
@@ -802,7 +799,7 @@ class AppWindow:
         self.w.update_idletasks()
 
         try:
-            data = self.session.query()
+            data = self.session.station()
             self.status['text'] = ''
             f = tkFileDialog.asksaveasfilename(parent = self.w,
                                                defaultextension = platform=='darwin' and '.json' or '',
