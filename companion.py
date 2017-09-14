@@ -292,6 +292,8 @@ def fixup(data):
         else:
             if not category_map.get(commodity['categoryname'], True):	# Check marketable
                 pass
+            elif commodity.get('legality'):	# Check not prohibited
+                pass
             elif not commodity.get('categoryname'):
                 if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
             elif not commodity.get('name'):

@@ -159,7 +159,8 @@ class EDDN:
     def export_commodities(self, data, is_beta):
         commodities = []
         for commodity in data['lastStarport'].get('commodities') or []:
-            if category_map.get(commodity['categoryname'], True):	# Check marketable
+            if (category_map.get(commodity['categoryname'], True) and	# Check marketable
+                not commodity.get('legality')):	# check not prohibited
                 commodities.append(OrderedDict([
                     ('name',          commodity['name']),
                     ('meanPrice',     int(commodity['meanPrice'])),
