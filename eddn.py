@@ -228,9 +228,3 @@ class EDDN:
             self.parent.w.update_idletasks()
             self.send(cmdr, msg)
             self.parent.status['text'] = ''
-
-    def export_blackmarket(self, cmdr, is_beta, msg):
-        self.send(cmdr, {
-            '$schemaRef' : 'https://eddn.edcd.io/schemas/blackmarket/1' + (is_beta and '/test' or ''),
-            'message'    : msg
-        })

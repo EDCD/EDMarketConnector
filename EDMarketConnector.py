@@ -679,23 +679,6 @@ class AppWindow:
 
                     self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
 
-                elif (config.getint('output') & config.OUT_MKT_EDDN and monitor.cmdr and
-                      entry['event'] == 'MarketSell' and entry.get('BlackMarket')):
-                    # Construct blackmarket message
-                    msg = OrderedDict([
-                        ('systemName',  monitor.system),
-                        ('stationName', monitor.station),
-                        ('timestamp',   entry['timestamp']),
-                        ('name',        entry['Type']),
-                        ('sellPrice',   entry['SellPrice']),
-                        ('prohibited' , entry.get('IllegalGoods', False)),
-                    ])
-
-                    self.status['text'] = _('Sending data to EDDN...')
-                    self.w.update_idletasks()
-                    self.eddn.export_blackmarket(monitor.cmdr, monitor.is_beta, msg)
-                    self.status['text'] = ''
-
             except requests.exceptions.RequestException as e:
                 if __debug__: print_exc()
                 self.status['text'] = _("Error: Can't connect to EDDN")
