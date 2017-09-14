@@ -177,17 +177,16 @@ try:
 
     # Finally - the data looks sane and we're docked at a station
 
-    # Fixup anomalies in the commodity data
-    fixed = companion.fixup(data)
-
     if args.j:
         # Collate from JSON dump
-        collate.addcommodities(fixed)
-        collate.addmodules(fixed)
-        collate.addships(fixed)
+        collate.addcommodities(data)
+        collate.addmodules(data)
+        collate.addships(data)
 
     if args.m:
         if data['lastStarport'].get('commodities'):
+            # Fixup anomalies in the commodity data
+            fixed = companion.fixup(data)
             commodity.export(fixed, COMMODITY_DEFAULT, args.m)
         else:
             sys.stderr.write("Station doesn't have a market\n")

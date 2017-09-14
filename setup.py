@@ -76,7 +76,7 @@ if sys.platform=='darwin':
                   'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': ['snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
+                  'resources': ['commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -116,6 +116,7 @@ elif sys.platform=='win32':
             requests.certs.where(),
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
+            'commodity.csv',
             'snd_good.wav',
             'snd_bad.wav',
             'modules.p',

@@ -27,19 +27,20 @@ def addcommodities(data):
         with open(commodityfile) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                key = row.pop('name')
-                commodities[key] = row
+                commodities[int(row['id'])] = row	# index by int for easier lookup and sorting
     size_pre = len(commodities)
 
     for commodity in data['lastStarport'].get('commodities'):
-        key = commodity['name']
+        key = int(commodity['id'])
         new = {
             'id'       : commodity['id'],
+            'symbol'   : commodity['name'],
             'category' : commodity['categoryname'],
+            'name'     : commodity['locName'],
         }
         old = commodities.get(key)
         if old:
-            if new['id'] != old['id'] or new['category'] != old['category']:
+            if new['symbol'] != old['symbol'] or new['name'] != old['name']:
                 raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
         commodities[key] = new
 
@@ -51,12 +52,10 @@ def addcommodities(data):
             os.rename(commodityfile, commodityfile+'.bak')
 
         with open(commodityfile, 'wb') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id','category', 'name'])
+            writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
             writer.writeheader()
-            for key in commodities:
-                commodities[key]['name'] = key
-            for row in sorted(commodities.values(), key = lambda x: (x['category'], x['name'])):
-                writer.writerow(row)
+            for key in sorted(commodities):
+                writer.writerow(commodities[key])
 
         print 'Added %d new commodities' % (len(commodities) - size_pre)
 
@@ -172,8 +171,7 @@ if __name__ == "__main__":
                     print 'No starport!'
                 else:
                     if data['lastStarport'].get('commodities'):
-                        fixed = companion.fixup(data)
-                        addcommodities(fixed)
+                        addcommodities(data)
                     else:
                         print 'No market'
                     if data['lastStarport'].get('modules'):

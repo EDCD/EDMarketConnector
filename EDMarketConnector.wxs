@@ -123,6 +123,9 @@
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\commodity.csv" />
+					</Component>
 					<Component Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
 						<File KeyPath="yes" Source="SourceDir\EDMarketConnector.ico" />
 					</Component>
@@ -455,6 +458,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="commodity.csv" />
 			<ComponentRef Id="cs.strings" />
 			<ComponentRef Id="de.strings" />
 			<ComponentRef Id="EDMarketConnector.ico" />

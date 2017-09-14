@@ -1,3 +1,4 @@
+import csv
 import requests
 from cookielib import LWPCookieJar
 import hashlib
@@ -33,6 +34,8 @@ category_map = {
     'Waste '        : 'Waste',
     'NonMarketable' : False,	# Don't appear in the in-game market so don't report
 }
+
+commodity_map = {}
 
 ship_map = {
     'adder'                       : 'Adder',
@@ -277,8 +280,16 @@ class Session:
             print ('Content:\n%s' % r.text).encode('utf-8')
 
 
-# Returns a shallow copy of the received data with anomalies in the commodity data fixed up
+# Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
 def fixup(data):
+
+    if not commodity_map:
+        # Lazily populate
+        with open(join(config.respath, 'commodity.csv'), 'rb') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                commodity_map[row['symbol']] = (row['category'], row['name'])
+
     commodities = []
     for commodity in data['lastStarport'].get('commodities') or []:
 
@@ -305,7 +316,10 @@ def fixup(data):
             else:
                 # Rewrite text fields
                 new = dict(commodity)	# shallow copy
-                new['categoryname'] = category_map.get(commodity['categoryname'], commodity['categoryname'])
+                if commodity['name'] in commodity_map:
+                    (new['categoryname'], new['name']) = commodity_map[commodity['name']]
+                elif commodity['categoryname'] in category_map:
+                    new['categoryname'] = category_map[commodity['categoryname']]
 
                 # Force demand and stock to zero if their corresponding bracket is zero
                 # Fixes spurious "demand": 1 in ED 1.3
