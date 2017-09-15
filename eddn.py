@@ -99,13 +99,15 @@ class EDDN:
         else:
             uploaderID = cmdr.encode('utf-8')
 
-        msg['header'] = {
-            'softwareName'    : '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system()),
-            'softwareVersion' : appversion,
-            'uploaderID'      : uploaderID,
-        }
-        if not msg['message'].get('timestamp'):	# already present in journal messages
-            msg['message']['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(config.getint('querytime') or int(time.time())))
+        msg = OrderedDict([
+            ('$schemaRef', msg['$schemaRef']),
+            ('header',     OrderedDict([
+                ('softwareName',    '%s [%s]' % (applongname, platform=='darwin' and "Mac OS" or system())),
+                ('softwareVersion', appversion),
+                ('uploaderID',      uploaderID),
+            ])),
+            ('message',    msg['message']),
+        ])
 
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=timeout)
         if __debug__ and r.status_code != requests.codes.ok:
@@ -178,11 +180,13 @@ class EDDN:
         if commodities:
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
-                'message'    : {
-                    'systemName'  : data['lastSystem']['name'],
-                    'stationName' : data['lastStarport']['name'],
-                    'commodities' : commodities,
-                }
+                'message'    : OrderedDict([
+                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
+                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
+                    ('systemName',  data['lastSystem']['name']),
+                    ('stationName', data['lastStarport']['name']),
+                    ('commodities', commodities),
+                ]),
             })
 
     def export_outfitting(self, data, is_beta):
@@ -190,11 +194,13 @@ class EDDN:
         if data['lastStarport'].get('modules'):
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
-                'message'    : {
-                    'systemName'  : data['lastSystem']['name'],
-                    'stationName' : data['lastStarport']['name'],
-                    'modules'     : sorted([module['name'] for module in data['lastStarport']['modules'].itervalues() if module_re.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite']),
-                }
+                'message'    : OrderedDict([
+                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
+                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
+                    ('systemName',  data['lastSystem']['name']),
+                    ('stationName', data['lastStarport']['name']),
+                    ('modules',     sorted([module['name'] for module in data['lastStarport']['modules'].itervalues() if module_re.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])),
+                ]),
             })
 
     def export_shipyard(self, data, is_beta):
@@ -202,11 +208,13 @@ class EDDN:
         if data['lastStarport'].get('ships'):
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
-                'message'    : {
-                    'systemName'  : data['lastSystem']['name'],
-                    'stationName' : data['lastStarport']['name'],
-                    'ships'       : sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']]),
-                }
+                'message'    : OrderedDict([
+                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
+                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
+                    ('systemName',  data['lastSystem']['name']),
+                    ('stationName', data['lastStarport']['name']),
+                    ('ships',       sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']])),
+                ]),
             })
 
     def export_journal_entry(self, cmdr, is_beta, entry):
