@@ -186,6 +186,8 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('commodities', commodities),
+                    ('economies',   sorted([x for x in data['lastStarport'].get('economies',  {}).itervalues()])),
+                    ('prohibited',  sorted([x for x in data['lastStarport'].get('prohibited', {}).itervalues()])),
                 ]),
             })
 
