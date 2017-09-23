@@ -246,14 +246,14 @@ class Session:
             if data['lastStarport']['services'].get('commodities'):
                 marketdata = self.query(URL_MARKET)
                 if (data['lastStarport']['name'] != marketdata['name'] or
-                    data['lastStarport']['id'] != marketdata['id']):
+                    int(data['lastStarport']['id']) != int(marketdata['id'])):
                     raise ServerLagging()
                 else:
                     data['lastStarport'].update(marketdata)
             if data['lastStarport']['services'].get('outfitting') or data['lastStarport']['services'].get('shipyard'):
                 shipdata = self.query(URL_SHIPYARD)
                 if (data['lastStarport']['name'] != shipdata['name'] or
-                    data['lastStarport']['id'] != shipdata['id']):
+                    int(data['lastStarport']['id']) != int(shipdata['id'])):
                     raise ServerLagging()
                 else:
                     data['lastStarport'].update(shipdata)
