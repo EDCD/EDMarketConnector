@@ -178,17 +178,20 @@ class EDDN:
 
         # Don't send empty commodities list - schema won't allow it
         if commodities:
+            message = OrderedDict([
+                ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
+                                              time.gmtime(config.getint('querytime') or int(time.time())))),
+                ('systemName',  data['lastSystem']['name']),
+                ('stationName', data['lastStarport']['name']),
+                ('commodities', commodities),
+            ])
+            if 'economies' in data['lastStarport']:
+                message['economies']  = sorted([x for x in data['lastStarport'].get('economies',  {}).itervalues()])
+            if 'prohibited' in data['lastStarport']:
+                message['prohibited'] = sorted([x for x in data['lastStarport'].get('prohibited', {}).itervalues()])
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
-                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
-                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
-                    ('systemName',  data['lastSystem']['name']),
-                    ('stationName', data['lastStarport']['name']),
-                    ('commodities', commodities),
-                    ('economies',   sorted([x for x in data['lastStarport'].get('economies',  {}).itervalues()])),
-                    ('prohibited',  sorted([x for x in data['lastStarport'].get('prohibited', {}).itervalues()])),
-                ]),
+                'message'    : message,
             })
 
     def export_outfitting(self, data, is_beta):
