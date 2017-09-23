@@ -176,6 +176,7 @@ utility_map = {
 }
 
 cabin_map = {
+    '0': 'Prisoner Cells',
     '1': 'Economy Class Passenger Cabin',
     '2': 'Business Class Passenger Cabin',
     '3': 'First Class Passenger Cabin',
