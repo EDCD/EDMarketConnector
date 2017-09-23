@@ -1,6 +1,3 @@
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
-
 /* Language name */
 "!Language" = "Українська";
 
@@ -114,9 +111,6 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";
-
-/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
-"Didn't update: Carrying Rares" = "Не оновлено: Перевозиться Рідкісний товар";
 
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Вимкнені плагіни";
@@ -304,6 +298,9 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Нормальний текст";
 
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Не доступно (поки гра E:D в головному меню)";
+
 /* Combat rank. [stats.py] */
 "Novice" = "Новачок";
 
@@ -485,7 +482,7 @@
 "This app requires accurate timestamps." = "Ця программа вимагає точного налаштування \"міток часу\"";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Підказка: Ви можете відключити плагін через{CR}додання '{EXT}' до назви папки";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Підказка: Ви можете відключити плагін через {CR} додання '{EXT}' до назви папки";
 
 /* Ranking. [stats.py] */
 "Trade" = "Торговий";

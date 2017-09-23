@@ -1,6 +1,3 @@
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
-
 /* Language name */
 "!Language" = "Italiano";
 
@@ -114,9 +111,6 @@
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
-
-/* Status text displayed when auto-update is suppressed - https://github.com/Marginal/EDMarketConnector/issues/92. [EDMarketConnector.py] */
-"Didn't update: Carrying Rares" = "Non aggiorna: Portando Rares";
 
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Disabled Plugins";
@@ -303,6 +297,9 @@
 
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Testo normale";
+
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
