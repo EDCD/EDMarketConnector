@@ -245,15 +245,16 @@ class Session:
 
     def station(self):
         data = self.query(URL_QUERY)
-        if data.get('docked'):
-            if data['lastStarport']['services'].get('commodities'):
+        if data['commander'].get('docked'):
+            services = data['lastStarport'].get('services', {})
+            if services.get('commodities'):
                 marketdata = self.query(URL_MARKET)
                 if (data['lastStarport']['name'] != marketdata['name'] or
                     int(data['lastStarport']['id']) != int(marketdata['id'])):
                     raise ServerLagging()
                 else:
                     data['lastStarport'].update(marketdata)
-            if data['lastStarport']['services'].get('outfitting') or data['lastStarport']['services'].get('shipyard'):
+            if services.get('outfitting') or services.get('shipyard'):
                 shipdata = self.query(URL_SHIPYARD)
                 if (data['lastStarport']['name'] != shipdata['name'] or
                     int(data['lastStarport']['id']) != int(shipdata['id'])):

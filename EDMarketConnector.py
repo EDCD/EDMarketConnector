@@ -514,7 +514,7 @@ class AppWindow:
                             self.eddn.export_outfitting(data, monitor.is_beta)
                             if data['lastStarport'].get('ships'):
                                 self.eddn.export_shipyard(data, monitor.is_beta)
-                            elif data['lastStarport']['services'].get('shipyard'):
+                            elif data['lastStarport'].get('services', {}).get('shipyard'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
                                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(2))
                             if not old_status:
