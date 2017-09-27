@@ -167,6 +167,17 @@ EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive thi
 ### Import failed: No ship loadout found
 Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
 
+### Location of configuration files
+If your configuration has been corrupted, or badly set, such that you can't run the program to fix it, or you otherwise need to directly access the configuration then these are the locations of the configuration:
+
+* Mac: You can use the 'defaults' command to interact with the stored settings, i.e.
+
+    `defaults read uk.org.marginal.edmarketconnector`
+
+to show the current settings and appropriate 'write' commands to change them.  See https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html
+* Windows: Configuration is stored in the registry under `HKEY_CURRENT_USER\Software\Marginal\EDMarketConnector` . There are also some non-configuration files at `%LOCALAPPDATA%\EDMarketConnector\` in your user profile.
+* Linux: Configuration is stored in the file `${HOME}/.config/EDMarketConnector/EDMarketConnector.ini`
+
 Running from source
 --------
 
