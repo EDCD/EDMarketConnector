@@ -19,6 +19,7 @@ armour_map = OrderedDict([
 
 weapon_map = {
     'advancedtorppylon'              : 'Torpedo Pylon',
+    'atdumbfiremissile'              : 'AX Missile Rack',
     'basicmissilerack'               : 'Missile Rack',
     'beamlaser'                      : 'Beam Laser',
     ('beamlaser','heat')             : 'Retributor Beam Laser',
@@ -70,6 +71,8 @@ weaponclass_map = {
 weaponrating_map = {
     'hpt_advancedtorppylon_fixed_small' : 'I',
     'hpt_advancedtorppylon_fixed_medium': 'I',
+    'hpt_atdumbfiremissile_fixed_medium': 'B',
+    'hpt_atdumbfiremissile_turret_medium': 'B',
     'hpt_basicmissilerack_fixed_small'  : 'B',
     'hpt_basicmissilerack_fixed_medium' : 'B',
     'hpt_beamlaser_fixed_small'         : 'E',
@@ -166,6 +169,7 @@ countermeasure_map = {
     'electroniccountermeasure' : ('Electronic Countermeasure', 'F'),
     'heatsinklauncher'         : ('Heat Sink Launcher', 'I'),
     'plasmapointdefence'       : ('Point Defence', 'I'),
+    'xenoscanner'              : ('Xeno Scanner', 'E'),
 }
 
 utility_map = {
@@ -251,6 +255,7 @@ internal_map = {
     'shieldgenerator'   : 'Shield Generator',
     ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
+    'unkvesselresearch' : 'Research Limpet Controller',
 }
 
 
@@ -372,12 +377,15 @@ def lookup(module, ship_map, entitled=False):
         else:
             raise AssertionError('%s: Unknown module "%s"' % (module['id'], name[1]))
 
-        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = str(name[2][4:])
-        new['rating'] = (name[1]=='buggybay' and planet_rating_map or
-                         name[1]=='fighterbay' and fighter_rating_map or
-                         name[1]=='corrosionproofcargorack' and corrosion_rating_map or
-                         rating_map)[name[3][5:]]
+        if len(name) < 4 and name[1] == 'unkvesselresearch':	# Hack! No size or class.
+            (new['class'], new['rating']) = ('1', 'E')
+        else:
+            if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+            new['class'] = str(name[2][4:])
+            new['rating'] = (name[1]=='buggybay' and planet_rating_map or
+                             name[1]=='fighterbay' and fighter_rating_map or
+                             name[1]=='corrosionproofcargorack' and corrosion_rating_map or
+                             rating_map)[name[3][5:]]
 
     # Disposition of fitted modules
     if 'on' in module and 'priority' in module:

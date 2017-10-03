@@ -8,6 +8,7 @@ import json
 import os
 from os.path import exists, isfile
 import sys
+from traceback import print_exc
 
 import companion
 import outfitting
@@ -36,7 +37,7 @@ def addcommodities(data):
             'id'       : commodity['id'],
             'symbol'   : commodity['name'],
             'category' : commodity['categoryname'],
-            'name'     : commodity['locName'],
+            'name'     : commodity.get('locName') or 'Limpets',
         }
         old = commodities.get(key)
         if old:
@@ -79,7 +80,12 @@ def addmodules(data):
     for key,module in data['lastStarport'].get('modules').iteritems():
         # sanity check
         if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
-        new = outfitting.lookup(module, companion.ship_map, True)
+        try:
+            new = outfitting.lookup(module, companion.ship_map, True)
+        except:
+            print '%d, %s:' % (module['id'], module['name'])
+            print_exc(0)
+            new = None
         if new:
             old = modules.get(int(key))
             if old:
