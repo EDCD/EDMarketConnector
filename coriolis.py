@@ -163,10 +163,16 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
-    # Repair Limpet Controller not yet present in coriolis-data. Same masses as Prospector
+    # Repair and Research Limpet Controller not yet present in coriolis-data. Same masses as Prospector.
+    # (Note only seen 1E Research).
     for k in modules.keys():
         if k[0] == 'Prospector Limpet Controller':
             modules[('Repair Limpet Controller',) + k[1:]] = modules[k]
+            modules[('Research Limpet Controller',) + k[1:]] = modules[k]
+
+    # Other 2.4 additions not yet present in coriolis-data
+    modules[('AX Missile Rack', None, '2', 'B')] = {'mass': 4}
+    modules[('Xeno Scanner', None, '0', 'E')] = {'mass': 1.3}
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
