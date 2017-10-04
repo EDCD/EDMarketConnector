@@ -432,11 +432,12 @@ class AppWindow:
             config.set('querytime', querytime)
 
             # Validation
-            if not data.get('commander') or not data['commander'].get('name','').strip():
+            if not data.get('commander', {}).get('name'):
                 self.status['text'] = _("Who are you?!")		# Shouldn't happen
-            elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
+            elif (not data.get('lastSystem', {}).get('name') or
+                  (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):	# Only care if docked
                 self.status['text'] = _("Where are you?!")		# Shouldn't happen
-            elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
+            elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
                 self.status['text'] = _("What are you flying?!")	# Shouldn't happen
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 raise companion.CmdrError()				# Companion API return doesn't match Journal
@@ -556,12 +557,12 @@ class AppWindow:
         try:
             data = self.session.station()
             if __debug__:
-                print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data['lastStarport'].get('ships') and 'Success' or 'Failure') or 'Undocked!')
+                print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!')
             if not data['commander'].get('docked'):
                 pass	# might have undocked while we were waiting for retry in which case station data is unreliable
-            elif (data['lastStarport'].get('ships') and
-                  data['lastSystem']['name'] == monitor.system and
-                  data['lastStarport']['name'] == monitor.station):
+            elif (data.get('lastSystem',   {}).get('name') == monitor.system and
+                  data.get('lastStarport', {}).get('name') == monitor.station and
+                  data.get('lastStarport', {}).get('ships')):
                 self.eddn.export_shipyard(data, monitor.is_beta)
             elif tries > 1:	# bogus data - retry
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(tries-1))
@@ -732,11 +733,12 @@ class AppWindow:
             self.status['text'] = str(e)
             return
 
-        if not data.get('commander') or not data['commander'].get('name','').strip():
+        if not data.get('commander', {}).get('name'):
             self.status['text'] = _("Who are you?!")		# Shouldn't happen
-        elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
+        elif (not data.get('lastSystem', {}).get('name') or
+              (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):	# Only care if docked
             self.status['text'] = _("Where are you?!")		# Shouldn't happen
-        elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
+        elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
         elif (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
             self.status['text'] = _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
@@ -788,7 +790,7 @@ class AppWindow:
                                                defaultextension = platform=='darwin' and '.json' or '',
                                                filetypes = [('JSON', '.json'), ('All Files', '*')],
                                                initialdir = config.get('outdir'),
-                                               initialfile = '%s%s.%s.json' % (data['lastSystem'].get('name', 'Unknown'), data['commander'].get('docked') and '.'+data['lastStarport'].get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
+                                               initialfile = '%s%s.%s.json' % (data.get('lastSystem', {}).get('name', 'Unknown'), data['commander'].get('docked') and '.'+data.get('lastStarport', {}).get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
             if f:
                 with open(f, 'wt') as h:
                     h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
