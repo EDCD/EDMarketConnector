@@ -161,14 +161,17 @@ try:
         stats.export_status(data, args.t)
 
     if data['commander'].get('docked'):
-        print '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
+        print '%s,%s' % (data.get('lastSystem', {}).get('name', 'Unknown'), data.get('lastStarport', {}).get('name', 'Unknown'))
     else:
-        print data['lastSystem']['name']
+        print data.get('lastSystem', {}).get('name', 'Unknown')
 
     if (args.m or args.o or args.s or args.n or args.j):
         if not data['commander'].get('docked'):
             sys.stderr.write("You're not docked at a station!\n")
             sys.exit(EXIT_SUCCESS)
+        elif not (data.get('lastStarport', {}).get('name'):
+            sys.stderr.write("Unknown station!\n")
+            sys.exit(EXIT_LAGGING)
         elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
             sys.stderr.write("Station doesn't have anything!\n")
             sys.exit(EXIT_SUCCESS)
@@ -202,8 +205,8 @@ try:
         sleep(SERVER_RETRY)
         data2 = session.station()
         if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
-            data2['lastSystem']['name'] == monitor.system and
-            data2['lastStarport']['name'] == monitor.station):
+            data2.get('lastSystem',   {}).get('name') == monitor.system and
+            data2.get('lastStarport', {}).get('name') == monitor.station):
             data = data2
 
     if args.s:
