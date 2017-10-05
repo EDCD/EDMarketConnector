@@ -20,6 +20,7 @@ armour_map = OrderedDict([
 weapon_map = {
     'advancedtorppylon'              : 'Torpedo Pylon',
     'atdumbfiremissile'              : 'AX Missile Rack',
+    'atmulticannon'                  : 'AX Multi-Cannon',
     'basicmissilerack'               : 'Missile Rack',
     'beamlaser'                      : 'Beam Laser',
     ('beamlaser','heat')             : 'Retributor Beam Laser',
@@ -73,6 +74,8 @@ weaponrating_map = {
     'hpt_advancedtorppylon_fixed_medium': 'I',
     'hpt_atdumbfiremissile_fixed_medium': 'B',
     'hpt_atdumbfiremissile_turret_medium': 'B',
+    'hpt_atmulticannon_fixed_medium'    : 'E',
+    'hpt_atmulticannon_turret_medium'   : 'F',
     'hpt_basicmissilerack_fixed_small'  : 'B',
     'hpt_basicmissilerack_fixed_medium' : 'B',
     'hpt_beamlaser_fixed_small'         : 'E',
