@@ -172,6 +172,8 @@ if __name__ == "__main__":
 
     # Other 2.4 additions not yet present in coriolis-data
     modules[('AX Missile Rack', None, '2', 'B')] = {'mass': 4}
+    modules[('AX Multi-Cannon', None, '2', 'E')] = {'mass': 4}
+    modules[('AX Multi-Cannon', None, '2', 'F')] = {'mass': 4}
     modules[('Xeno Scanner', None, '0', 'E')] = {'mass': 1.3}
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
