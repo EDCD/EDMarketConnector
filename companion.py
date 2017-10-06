@@ -114,6 +114,12 @@ class ServerLagging(Exception):
     def __str__(self):
         return unicode(self).encode('utf-8')
 
+class SKUError(Exception):
+    def __unicode__(self):
+        return _('Error: Frontier server SKU problem')	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
 class CredentialsError(Exception):
     def __unicode__(self):
         return _('Error: Invalid Credentials')
@@ -193,7 +199,10 @@ class Session:
             raise ServerError()
         elif r.url == self.server + URL_LOGIN:		# would have redirected away if success
             self.dump(r)
-            raise CredentialsError()
+            if 'purchase' in r.text.lower():
+                raise SKUError()
+            else:
+                raise CredentialsError()
         elif r.url == self.server + URL_CONFIRM:	# redirected to verification page
             self.state = Session.STATE_AUTH
             raise VerificationRequired()

@@ -232,6 +232,9 @@ try:
 except companion.ServerError as e:
     sys.stderr.write('Server is down\n')
     sys.exit(EXIT_SERVER)
+except companion.SKUError as e:
+    sys.stderr.write('Server SKU problem\n')
+    sys.exit(EXIT_SERVER)
 except companion.CredentialsError as e:
     sys.stderr.write('Invalid Credentials\n')
     sys.exit(EXIT_CREDENTIALS)
