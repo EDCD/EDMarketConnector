@@ -311,7 +311,9 @@ def fixup(data):
                 if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
                 break
         else:
-            if not category_map.get(commodity['categoryname'], True):	# Check marketable
+            if not category_map.get(commodity['categoryname'], True):	# Check not marketable i.e. Limpets
+                pass
+            elif commodity['demandBracket'] == 0 and commodity['stockBracket'] == 0:	# Check not normally stocked e.g. Salvage
                 pass
             elif commodity.get('legality'):	# Check not prohibited
                 pass
