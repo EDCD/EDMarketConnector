@@ -166,6 +166,9 @@
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Error: El servidor de Frontier está retrasado";
 
+/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
+"Error: Frontier server SKU problem" = "Error: Problema de SKU en el servidor de Frontier";
+
 /* [companion.py] */
 "Error: Invalid Credentials" = "Error: Credenciales Inválidas";
 
