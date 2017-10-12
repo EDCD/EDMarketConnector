@@ -297,6 +297,7 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
+                print("GET EDSM: url = '%s'" % (url))
                 r = this.session.get(url, timeout=_TIMEOUT)
                 r.raise_for_status()
                 reply = r.json()
@@ -307,6 +308,7 @@ def worker():
                     plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                 break
             except:
+                print("GET EDSM failed: %s" % (r.status_code))
                 retrying += 1
         else:
             if callback:
