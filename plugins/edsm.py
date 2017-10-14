@@ -292,12 +292,12 @@ def worker():
         if not item:
             return	# Closing
         else:
-            (url, callback) = item
+            (url, data, callback) = item
 
         retrying = 0
         while retrying < 3:
             try:
-                r = this.session.get(url, timeout=_TIMEOUT)
+                r = this.session.post(url, data=data, timeout=_TIMEOUT)
                 r.raise_for_status()
                 reply = r.json()
                 (msgnum, msg) = reply['msgnum'], reply['msg']
@@ -318,15 +318,12 @@ def worker():
 # Queue a call to an EDSM endpoint with args (which should be quoted)
 def call(cmdr, endpoint, args, callback=None):
     (username, apikey) = credentials(cmdr)
-    this.queue.put(
-        ('https://www.edsm.net/%s?commanderName=%s&apiKey=%s&fromSoftware=%s&fromSoftwareVersion=%s' % (
-            endpoint,
-            urllib2.quote(username.encode('utf-8')),
-            urllib2.quote(apikey),
-            urllib2.quote(applongname),
-            urllib2.quote(appversion),
-        ) + args,
-         callback))
+    args = dict(args)
+    args['commanderName'] = username
+    args['apiKey'] = apikey
+    args['fromSoftware'] = applongname
+    args['fromSoftwareVersion'] =appversion
+    this.queue.put(('https://www.edsm.net/%s' % endpoint, args, callback))
 
 
 # Send flight log and also do lookup
@@ -335,14 +332,16 @@ def writelog(cmdr, timestamp, system_name, coordinates, shipid = None):
     if system_name in FAKE:
         return
 
-    args = '&systemName=%s&dateVisited=%s' % (
-        urllib2.quote(system_name),
-        urllib2.quote(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp))),
-    )
+    args = {
+        'systemName': system_name,
+        'dateVisited': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp)),
+    }
     if coordinates:
-        args += '&x=%.3f&y=%.3f&z=%.3f' % coordinates
+        args['x'] = '%.3f' % coordinates[0]
+        args['y'] = '%.3f' % coordinates[1]
+        args['z'] = '%.3f' % coordinates[2]
     if shipid is not None:
-        args += '&shipId=%d' % shipid
+        args['shipId'] = '%d' % shipid
     call(cmdr, 'api-logs-v1/set-log', args, writelog_callback)
 
 def writelog_callback(reply):
@@ -371,39 +370,56 @@ def null_callback(reply):
 
 
 def setranks(cmdr, ranks):
-    args = ''
+    args = {}
     if ranks:
         for k,v in ranks.iteritems():
             if v is not None:
-                args += '&%s=%s' % (k, urllib2.quote('%d;%d' % v))
+                args[k] = '%d;%d' % v
     if args:
         call(cmdr, 'api-commander-v1/set-ranks', args)
 
 def setcredits(cmdr, balance, loan):
     if balance is not None:
-        call(cmdr, 'api-commander-v1/set-credits', '&balance=%d&loan=%d' % (balance, loan))
+        args = {
+            'balance': '%d' % balance,
+            'loan': '%d' % loan,
+        }
+        call(cmdr, 'api-commander-v1/set-credits', args)
 
 def setcargo(cmdr, cargo):
-    call(cmdr, 'api-commander-v1/set-materials', "&type=cargo&values=%s" % json.dumps(cargo, separators = (',', ':')))
+    args = {
+        'type': 'cargo',
+        'values': json.dumps(cargo, separators = (',', ':')),
+    }
+    call(cmdr, 'api-commander-v1/set-materials', args)
 
 def setmaterials(cmdr, raw, manufactured, encoded):
-    call(cmdr, 'api-commander-v1/set-materials', "&type=data&values=%s" % json.dumps(encoded, separators = (',', ':')))
+    args = {
+        'type': 'data',
+        'values': json.dumps(encoded, separators = (',', ':')),
+    }
+    call(cmdr, 'api-commander-v1/set-materials', args)
+
     materials = {}
     materials.update(raw)
     materials.update(manufactured)
-    call(cmdr, 'api-commander-v1/set-materials', "&type=materials&values=%s" % json.dumps(materials, separators = (',', ':')))
+    args = {
+        'type': 'materials',
+        'values': json.dumps(materials, separators = (',', ':')),
+    }
+    call(cmdr, 'api-commander-v1/set-materials', args)
 
 def setshipid(cmdr, shipid):
     if shipid is not None:
-        call(cmdr, 'api-commander-v1/set-ship-id', '&shipId=%d' % shipid)
+        call(cmdr, 'api-commander-v1/set-ship-id', { 'shipId': '%d' % shipid })
 
-def updateship(cmdr, shipid, shiptype, props=[]):
+def updateship(cmdr, shipid, shiptype, args={}):
     if shipid is not None and shiptype:
-        args = '&shipId=%d&type=%s' % (shipid, shiptype)
-        for (slot, thing) in props:
-            args += '&%s=%s' % (slot, urllib2.quote(unicode(thing)))
+        args = dict(args)
+        args['shipId'] = '%d' % shipid
+        args['type'] = shiptype
         call(cmdr, 'api-commander-v1/update-ship', args)
 
 def sellship(cmdr, shipid):
     if shipid is not None:
-        call(cmdr, 'api-commander-v1/sell-ship', '&shipId=%d' % shipid, null_callback)
+        call(cmdr, 'api-commander-v1/sell-ship', { 'shipId': '%d' % shipid }, null_callback)
