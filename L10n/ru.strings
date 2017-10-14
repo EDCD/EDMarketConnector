@@ -167,7 +167,7 @@
 "Error: Frontier server is lagging" = "Ошибка: Сервер Фронтир лаг'ает";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
+"Error: Frontier server SKU problem" = "Ошибка сервера аутентификации Frontier";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Ошибка: неверное имя пользователя или пароль";
@@ -302,7 +302,7 @@
 "Normal text" = "Обычный текст";
 
 /* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+"Not available while E:D is at the main menu" = "Недоступно в главном меню E:D";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Новичок";

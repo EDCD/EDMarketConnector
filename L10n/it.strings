@@ -52,12 +52,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Controlla aggiornamenti...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -112,17 +106,11 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
 
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Disabled Plugins";
-
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentazione";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
-
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "locazione del file E:D journal";
@@ -141,9 +129,6 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Impero";
-
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Enabled Plugins";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -301,9 +286,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Testo normale";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -354,12 +336,6 @@
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Si prega di loggarsi con le proprie credenziali di Elite: Dangerous";
-
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "Plugins";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Plugins folder";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -480,12 +456,6 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "This app requires accurate timestamps.";
-
-/* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";
