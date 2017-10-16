@@ -19,6 +19,7 @@ from config import appname, applongname, appversion, config
 import companion
 import coriolis
 import edshipyard
+import outfitting
 import plug
 
 if __debug__:
@@ -272,13 +273,26 @@ def cmdr_data(data, is_beta):
                 setcredits(data['commander']['name'], data['commander']['credits'], data['commander'].get('debt', 0))
             ship = companion.ship(data)
             if ship != this.lastship:
+                cargo = 0
+                fuel = 0
+                for v in data['ship']['modules'].itervalues():
+                    module = outfitting.lookup(v['module'], companion.ship_map)
+                    if not module:
+                        pass
+                    elif 'Fuel Tank'in module['name']:
+                        fuel += 2**int(module['class'])
+                    elif 'Cargo Rack' in module['name']:
+                        cargo += 2**int(module['class'])
+
                 updateship(data['commander']['name'],
                            data['ship']['id'],
                            data['ship']['name'].lower(),
-                           [
-                               ('linkToCoriolis',   coriolis.url(data, is_beta)),
-                               ('linkToEDShipyard', edshipyard.url(data, is_beta)),
-                           ])
+                           {
+                               'cargoCapacity':    cargo,
+                               'fuelMainCapacity': fuel,
+                               'linkToCoriolis':   coriolis.url(data, is_beta),
+                               'linkToEDShipyard': edshipyard.url(data, is_beta),
+                           })
                 this.lastship = ship
         except Exception as e:
             # Not particularly important so silent on failure
