@@ -65,4 +65,5 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     this.station['text'] = station or (system_id(system) and STATION_UNDOCKED or '')
 
 def cmdr_data(data, is_beta):
+    this.system = data['lastSystem']['name']
     this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_id(data['lastSystem']['name']) and STATION_UNDOCKED or '')

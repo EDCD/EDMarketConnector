@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # Sphere around Jaques
     JX, JY, JZ = -9530.50000, -910.28125, 19808.12500
-    RJ2 = 50 * 50	# Furthest populated system is Eol Prou IW-W e1-1456 at 49.47 Ly
+    RJ2 = 75 * 75	# Furthest populated system is Pekoe at 50.16 Ly
 
     def around_jaques(x, y, z):
         return ((x - JX) * (x - JX) + (y - JY) * (y - JY) + (z - JZ) * (z - JZ)) <= RJ2
@@ -123,25 +123,7 @@ if __name__ == "__main__":
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
     system_ids['Amo'] = 866
-    system_ids['Ogma'] = 14915		# in bubble, not Colonia
-    system_ids['Ratri'] = 16001		#   "
     system_ids['K Carinae'] = 375886	# both unpopulated
-
-    # 2.4 Colonia renames - https://github.com/themroc5/eddb.io/issues/136
-    system_ids['Poe'] = 2751046
-    system_ids['White Sun'] = 2277522
-    system_ids['Chrysus'] = 2911665
-    system_ids['Juniper'] = 692229
-    system_ids['Rodentia'] = 1481196
-    system_ids['Kajuku'] = 1937790
-    system_ids['Lycanthrope'] = 2221090
-    system_ids['Ogmar'] = 10931086
-    system_ids['Ratraii'] = 10918695
-    system_ids['Farwell'] = 9132855
-    system_ids['Carlota'] = 1218013
-    system_ids['Morpheus'] = 684221
-    system_ids['Earth Expeditionary Fleet'] = 8262285
-    system_ids['Centralis'] = 1581643
 
     # Some extra interesting systems
     system_ids['Sagittarius A*']       =   21276
