@@ -171,6 +171,7 @@ weaponoldvariant_map = {
 }
 
 countermeasure_map = {
+    'antiunknownshutdown'      : ('Shutdown Field Neutraliser', 'F'),
     'chafflauncher'            : ('Chaff Launcher', 'I'),
     'electroniccountermeasure' : ('Electronic Countermeasure', 'F'),
     'heatsinklauncher'         : ('Heat Sink Launcher', 'I'),
