@@ -49,6 +49,7 @@ weapon_map = {
 
 missiletype_map = {
     'advancedtorppylon'   : 'Seeker',
+    'atdumbfiremissile'   : 'Dumbfire',
     'basicmissilerack'    : 'Seeker',
     'drunkmissilerack'    : 'Swarm',
     'dumbfiremissilerack' : 'Dumbfire',
