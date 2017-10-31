@@ -148,6 +148,7 @@ def export_status(data, filename):
     h.close()
 
 
+# Returns id,name,shipName,system,station,value
 def ships(data):
 
     ships = companion.listify(data.get('ships'))
@@ -158,13 +159,14 @@ def ships(data):
 
         if not data['commander'].get('docked'):
             # Set current system, not last docked
-            return [ (ship_map.get(ships[0]['name'].lower(), ships[0]['name']), data['lastSystem']['name'], '') ] + [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship]
+            return ([ (str(ships[0]['id']), ship_map.get(ships[0]['name'].lower(), ships[0]['name']), ships[0].get('shipName', ''), data['lastSystem']['name'], '', str(ships[0]['value']['total'])) ] +
+                    [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship])
 
-    return [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
+    return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
 
 def export_ships(data, filename):
     h = open(filename, 'wt')
-    h.write('Ship,System,Station,Value\n')
+    h.write('Id,Ship,Name,System,Station,Value\n')
     for thing in ships(data):
         h.write(','.join(thing) + '\n')
     h.close()
@@ -249,13 +251,14 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook, [
             _('Ship'),		# Status dialog subtitle
+            '',
             _('System'),	# Main window
             _('Station'),	# Status dialog subtitle
             _('Value'),		# Status dialog subtitle - CR value of ship
         ])
         shiplist = ships(data)
         for thing in shiplist:
-            self.addpagerow(page, thing)
+            self.addpagerow(page, thing[1:])		# skip id
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 

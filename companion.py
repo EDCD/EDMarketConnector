@@ -86,7 +86,7 @@ def listify(thing):
     if thing is None:
         return []	# data is not present
     elif isinstance(thing, list):
-        return thing	# array is not sparse
+        return list(thing)	# array is not sparse
     elif isinstance(thing, dict):
         retval = []
         for k,v in thing.iteritems():
