@@ -9,6 +9,7 @@ This app downloads your Cmdr's details and system, faction, scan and station dat
 * saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
 * sends your Cmdr's details, ship details, materials and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
+* sends your Cmdr's details, ship details, materials and flight log to [Inara](https://inara.cz).
 
 You can run the app on the same machine on which you're running Elite: Dangerous or on another machine connected via a network share.
 
@@ -85,7 +86,11 @@ Some options work by reading the Elite: Dangerous game's log files. If you're ru
 
 ### EDSM
 
-You can send a record of your Cmdr's details, ship details, materials and flight log to [Elite: Dangerous Star Map](http://www.edsm.net/). You will need to register for an account and then follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
+You can send a record of your Cmdr's details, ship details, cargo, materials and flight log to [Elite: Dangerous Star Map](http://www.edsm.net/). You will need to register for an account and then follow the “[Elite Dangerous Star Map credentials](http://www.edsm.net/settings/api)” link to obtain your API key.
+
+### Inara
+
+You can send a record of your Cmdr's details, ship details, cargo, materials and flight log to [Inara](https://inara.cz/). You will need to register for an account and then follow the “[Inara credentials](https://inara.cz/settings-api/)” link to obtain your API key.
 
 
 Uninstall

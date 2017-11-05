@@ -93,7 +93,7 @@ def plugin_prefs(parent, cmdr, is_beta):
 
     HyperlinkLabel(frame, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)	# Don't translate
     this.log = tk.IntVar(value = config.getint('edsm_out') and 1)
-    this.log_button = nb.Checkbutton(frame, text=_('Send flight log to Elite Dangerous Star Map'), variable=this.log, command=prefsvarchanged)
+    this.log_button = nb.Checkbutton(frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged)
     this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)	# big spacer

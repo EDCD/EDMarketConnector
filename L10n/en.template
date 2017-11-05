@@ -157,6 +157,9 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Error: Can't connect to EDSM";
 
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Error: Can't connect to Inara";
+
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
 
@@ -168,6 +171,9 @@
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Error: Inara {MSG}";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Error: Invalid Credentials";
@@ -234,6 +240,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identity";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara credentials";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
@@ -431,7 +440,10 @@
 "Semi Professional" = "Semi Professional";
 
 /* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Send flight log to Elite Dangerous Star Map";
+"Send flight log and Cmdr status to EDSM" = "Send flight log and Cmdr status to EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Send flight log and Cmdr status to Inara";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
