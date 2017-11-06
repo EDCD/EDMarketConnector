@@ -34,8 +34,9 @@ this.queue = Queue()	# Items to be sent to Inara by worker thread
 
 # Cached Cmdr state
 this.events = []	# Unsent events
+this.cmdr = None
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
-this.location = None
+this.started_docked = False	# Skip Docked event after Location if started docked
 this.cargo = None
 this.materials = None
 this.needcredits = True	# Send credit update soon after Startup / new game
@@ -46,7 +47,10 @@ def plugin_start():
     this.thread.start()
     return 'Inara'
 
-def plugin_close():
+def plugin_stop():
+    # Send any unsent events
+    if this.events:
+        call()
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
@@ -124,12 +128,17 @@ def credentials(cmdr):
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
 
+    # Send any unsent events when switching accounts
+    if cmdr and cmdr != this.cmdr and this.events:
+        call()
+
+    this.cmdr = cmdr
     this.multicrew = bool(state['Role'])
 
     if entry['event'] == 'LoadGame':
         # clear cached state
         this.events = []
-        this.location = None
+        this.started_docked = False
         this.cargo = None
         this.materials = None
         this.needcredits = True
@@ -202,43 +211,43 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             # Update location
             if entry['event'] == 'Location':
-                if entry.get('Docked'):
+                this.started_docked = entry.get('Docked')
+                if this.started_docked:
                     add_event('setCommanderTravelLocation', entry['timestamp'],
                               OrderedDict([
-                                  ('starsystemName', entry['StarSystem']),
-                                  ('stationName', entry['StationName']),
+                                  ('starsystemName', system),
+                                  ('stationName', station),
                                   ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
                                   ('shipGameID', state['ShipID']),
                               ]))
-                    this.location = (entry['StarSystem'], entry['StationName'])
                 else:
                     add_event('setCommanderTravelLocation', entry['timestamp'],
                               OrderedDict([
-                                  ('starsystemName', entry['StarSystem']),
+                                  ('starsystemName', system),
                                   ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
                                   ('shipGameID', state['ShipID']),
                               ]))
-                    this.location = (entry['StarSystem'], None)
 
-            elif entry['event'] == 'Docked' and this.location != (entry['StarSystem'], entry['StationName']):
-                # Don't send docked event on new game - i.e. following 'Location' event
-                add_event('addCommanderTravelDock', entry['timestamp'],
-                          OrderedDict([
-                              ('starsystemName', entry['StarSystem']),
-                              ('stationName', entry['StationName']),
-                              ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
-                              ('shipGameID', state['ShipID']),
-                          ]))
-                this.location = (entry['StarSystem'], entry['StationName'])
+            elif entry['event'] == 'Docked':
+                if this.started_docked:
+                    # Don't send Docked event on new game - i.e. following 'Location' event
+                    this.started_docked = False
+                else:
+                    add_event('addCommanderTravelDock', entry['timestamp'],
+                              OrderedDict([
+                                  ('starsystemName', system),
+                                  ('stationName', station),
+                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
+                                  ('shipGameID', state['ShipID']),
+                              ]))
 
-            elif entry['event'] == 'Undocked' and this.location:
+            elif entry['event'] == 'Undocked':
                 add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
-                              ('starsystemName', this.location[0]),
+                              ('starsystemName', system),
                               ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
                               ('shipGameID', state['ShipID']),
                           ]))
-                this.location = (this.location[0], None)
 
             elif entry['event'] == 'FSDJump':
                 add_event('addCommanderTravelFSDJump', entry['timestamp'],
@@ -248,7 +257,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
                               ('shipGameID', state['ShipID']),
                           ]))
-                this.location = (entry['StarSystem'], None)
 
             if len(this.events) > old_events:
                 # We have new event(s) so send to Inara
@@ -266,7 +274,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     this.materials = materials
 
                 # Queue a call to Inara
-                call(cmdr)
+                call()
 
         except Exception as e:
             if __debug__: print_exc()
@@ -275,7 +283,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 def cmdr_data(data, is_beta):
 
-    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
+    this.cmdr = data['commander']['name']
+
+    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
 
         if this.needcredits:
             assets = (data['commander']['credits'] +
@@ -302,14 +312,14 @@ def add_event(name, timestamp, data):
 
 
 # Queue a call to Inara, handled in Worker thread
-def call(cmdr, callback=None):
+def call(callback=None):
     data = json.dumps(OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
             ('appVersion', appversion),
             ('isDeveloped', True),	# TODO: Remove before release
-            ('APIkey', credentials(cmdr)),
-            ('commanderName', cmdr.encode('utf-8')),
+            ('APIkey', credentials(this.cmdr)),
+            ('commanderName', this.cmdr.encode('utf-8')),
         ])),
         ('events', this.events),
     ]), separators = (',', ':'))

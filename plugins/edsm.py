@@ -76,7 +76,7 @@ def plugin_app(parent):
     this.system.bind_all('<<EDSMStatus>>', update_status)
     return (this.system_label, this.system)
 
-def plugin_close():
+def plugin_stop():
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
