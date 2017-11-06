@@ -195,7 +195,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     this.multicrew = bool(state['Role'])
 
     # Send interesting events to EDSM
-    if config.getint('edsm_out') and not is_beta and not multicrew and credentials(cmdr):
+    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr):
         try:
             # Send credits to EDSM on new game (but not on startup - data might be old)
             if entry['event'] == 'LoadGame':
@@ -258,7 +258,7 @@ def cmdr_data(data, is_beta):
             this.lastlookup = False
         this.system.update_idletasks()
 
-    if config.getint('edsm_out') and not is_beta and not multicrew and credentials(data['commander']['name']):
+    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
         # Send flightlog to EDSM if FSDJump failed to do so
         if not this.lastlookup:
             try:

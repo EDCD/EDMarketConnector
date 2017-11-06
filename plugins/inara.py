@@ -7,8 +7,6 @@ import json
 import requests
 import sys
 import time
-import urllib2
-from calendar import timegm
 from Queue import Queue
 from threading import Thread
 
@@ -34,37 +32,18 @@ this = sys.modules[__name__]	# For holding module globals
 this.session = requests.Session()
 this.queue = Queue()	# Items to be sent to Inara by worker thread
 
-# Game state
-this.multicrew = False	# don't send captain's ship info to Inara while on a crew
-
 # Cached Cmdr state
+this.events = []	# Unsent events
+this.multicrew = False	# don't send captain's ship info to Inara while on a crew
 this.location = None
 this.cargo = None
 this.materials = None
+this.needcredits = True	# Send credit update soon after Startup / new game
 
 def plugin_start():
-
-    # Migrate old settings
-    if not config.get('inara_cmdrs'):
-        if isinstance(config.get('cmdrs'), list) and config.get('inara_usernames') and config.get('inara_apikeys'):
-            # Migrate <= 2.34 settings
-            config.set('inara_cmdrs', config.get('cmdrs'))
-        elif config.get('inara_cmdrname'):
-            # Migrate <= 2.25 settings. inara_cmdrs is unknown at this time
-            config.set('inara_usernames', [config.get('inara_cmdrname') or ''])
-            config.set('inara_apikeys',   [config.get('inara_apikey') or ''])
-        config.delete('inara_cmdrname')
-        config.delete('inara_apikey')
-    if config.getint('output') & 256:
-        # Migrate <= 2.34 setting
-        config.set('inara_out', 1)
-    config.delete('inara_autoopen')
-    config.delete('inara_historical')
-
     this.thread = Thread(target = worker, name = 'Inara worker')
     this.thread.daemon = True
     this.thread.start()
-
     return 'Inara'
 
 def plugin_close():
@@ -149,32 +128,28 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     if entry['event'] == 'LoadGame':
         # clear cached state
+        this.events = []
         this.location = None
         this.cargo = None
         this.materials = None
+        this.needcredits = True
+    elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
+        # Events that mean a significant change in credits so we should send credits after next "Update"
+        this.needcredits = True
 
     # Send location and status on new game or StartUp. Assumes Location is the last event on a new game (other than Docked).
     # Always send an update on Docked, Undocked, FSDJump, Promotion and EngineerProgress.
     # Also send material and cargo (if changed) whenever we send an update.
 
-    if config.getint('inara_out') and not is_beta and not multicrew and credentials(cmdr):
+    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         try:
-            events = []
-
-            # Send credits to Inara on new game (but not on startup - data might be old)
-            if entry['event'] == 'Location':
-                # TODO: 'commanderAssets'
-                add_event(events, 'setCommanderCredits', entry['timestamp'],
-                          OrderedDict([
-                              ('commanderCredits', state['Credits']),
-                              ('commanderLoan', state['Loan']),
-                          ]))
+            old_events = len(this.events)	# Will only send existing events if we add a new event below
 
             # Send rank info to Inara on startup or change
             if entry['event'] in ['StartUp', 'Location'] and state['Rank']:
                 for k,v in state['Rank'].iteritems():
                     if v is not None:
-                        add_event(events, 'setCommanderRankPilot', entry['timestamp'],
+                        add_event('setCommanderRankPilot', entry['timestamp'],
                                   OrderedDict([
                                       ('rankName', k.lower()),
                                       ('rankValue', v[0]),
@@ -183,7 +158,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             elif entry['event'] == 'Promotion':
                 for k,v in state['Rank'].iteritems():
                     if k in entry:
-                        add_event(events, 'setCommanderRankPilot', entry['timestamp'],
+                        add_event('setCommanderRankPilot', entry['timestamp'],
                                   OrderedDict([
                                       ('rankName', k.lower()),
                                       ('rankValue', v[0]),
@@ -193,13 +168,13 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             # Send engineer status to Inara on change (not available on startup)
             if entry['event'] == 'EngineerProgress':
                 if 'Rank' in entry:
-                    add_event(events, 'setCommanderRankEngineer', entry['timestamp'],
+                    add_event('setCommanderRankEngineer', entry['timestamp'],
                               OrderedDict([
                                   ('engineerName', entry['Engineer']),
                                   ('rankValue', entry['Rank']),
                               ]))
                 else:
-                    add_event(events, 'setCommanderRankEngineer', entry['timestamp'],
+                    add_event('setCommanderRankEngineer', entry['timestamp'],
                               OrderedDict([
                                   ('engineerName', entry['Engineer']),
                                   ('rankStage', entry['Progress']),
@@ -207,19 +182,19 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             # Send PowerPlay status to Inara on change (not available on startup, and promotion not available at all)
             if entry['event'] == 'PowerplayJoin':
-                add_event(events, 'setCommanderRankPower', entry['timestamp'],
+                add_event('setCommanderRankPower', entry['timestamp'],
                           OrderedDict([
                               ('powerName', entry['Power']),
                               ('rankValue', 1),
                           ]))
             elif entry['event'] == 'PowerplayLeave':
-                add_event(events, 'setCommanderRankPower', entry['timestamp'],
+                add_event('setCommanderRankPower', entry['timestamp'],
                           OrderedDict([
                               ('powerName', entry['Power']),
                               ('rankValue', 0),
                           ]))
             elif entry['event'] == 'PowerplayDefect':
-                add_event(events, 'setCommanderRankPower', entry['timestamp'],
+                add_event('setCommanderRankPower', entry['timestamp'],
                           OrderedDict([
                               ('powerName', entry['ToPower']),
                               ('rankValue', 1),
@@ -228,7 +203,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             # Update location
             if entry['event'] == 'Location':
                 if entry.get('Docked'):
-                    add_event(events, 'setCommanderTravelLocation', entry['timestamp'],
+                    add_event('setCommanderTravelLocation', entry['timestamp'],
                               OrderedDict([
                                   ('starsystemName', entry['StarSystem']),
                                   ('stationName', entry['StationName']),
@@ -237,7 +212,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ]))
                     this.location = (entry['StarSystem'], entry['StationName'])
                 else:
-                    add_event(events, 'setCommanderTravelLocation', entry['timestamp'],
+                    add_event('setCommanderTravelLocation', entry['timestamp'],
                               OrderedDict([
                                   ('starsystemName', entry['StarSystem']),
                                   ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
@@ -247,7 +222,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             elif entry['event'] == 'Docked' and this.location != (entry['StarSystem'], entry['StationName']):
                 # Don't send docked event on new game - i.e. following 'Location' event
-                add_event(events, 'addCommanderTravelDock', entry['timestamp'],
+                add_event('addCommanderTravelDock', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
                               ('stationName', entry['StationName']),
@@ -257,7 +232,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.location = (entry['StarSystem'], entry['StationName'])
 
             elif entry['event'] == 'Undocked' and this.location:
-                add_event(events, 'setCommanderTravelLocation', entry['timestamp'],
+                add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', this.location[0]),
                               ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
@@ -266,7 +241,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.location = (this.location[0], None)
 
             elif entry['event'] == 'FSDJump':
-                add_event(events, 'addCommanderTravelFSDJump', entry['timestamp'],
+                add_event('addCommanderTravelFSDJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
                               ('jumpDistance', entry['JumpDist']),
@@ -275,28 +250,51 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
                 this.location = (entry['StarSystem'], None)
 
-            if events:
-                # Send cargo and materials to Inara if changed and if we're sending any other kind of update
+            if len(this.events) > old_events:
+                # We have new event(s) so send to Inara
+
+                # Send cargo and materials if changed
                 cargo = [ OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo']) ]
                 if this.cargo != cargo:
-                    add_event(events, 'setCommanderInventoryCargo', entry['timestamp'], cargo)
+                    add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                     this.cargo = cargo
                 materials = []
                 for category in ['Raw', 'Manufactured', 'Encoded']:
                     materials.extend([ OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category]) ])
                 if this.materials != materials:
-                    add_event(events, 'setCommanderInventoryMaterials', entry['timestamp'],  materials)
+                    add_event('setCommanderInventoryMaterials', entry['timestamp'],  materials)
                     this.materials = materials
 
                 # Queue a call to Inara
-                call(cmdr, events)
+                call(cmdr)
 
         except Exception as e:
             if __debug__: print_exc()
             return unicode(e)
 
-def add_event(events, name, timestamp, data):
-    events.append(OrderedDict([
+
+def cmdr_data(data, is_beta):
+
+    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
+
+        if this.needcredits:
+            assets = (data['commander']['credits'] +
+                      -data['commander'].get('debt', 0) +
+                      sum([x['value']['total'] for x in companion.listify(data.get('ships', [])) if x]))
+            this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
+            add_event('setCommanderCredits', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                      OrderedDict([
+                          ('commanderCredits', data['commander']['credits']),
+                          ('commanderAssets', assets),
+                          ('commanderLoan', data['commander'].get('debt', 0)),
+                      ]))
+            this.needcredits = False
+
+        # *Don't* queue a call to Inara - wait for next event (probably Undocked)
+
+
+def add_event(name, timestamp, data):
+    this.events.append(OrderedDict([
         ('eventName', name),
         ('eventTimestamp', timestamp),
         ('eventData', data),
@@ -304,18 +302,19 @@ def add_event(events, name, timestamp, data):
 
 
 # Queue a call to Inara, handled in Worker thread
-def call(cmdr, events, callback=None):
-    args = OrderedDict([
+def call(cmdr, callback=None):
+    data = json.dumps(OrderedDict([
         ('header', OrderedDict([
-        ('appName', applongname),
+            ('appName', applongname),
             ('appVersion', appversion),
             ('isDeveloped', True),	# TODO: Remove before release
             ('APIkey', credentials(cmdr)),
             ('commanderName', cmdr.encode('utf-8')),
         ])),
-        ('events', events),
-    ])
-    this.queue.put(('https://inara.cz/inapi/v1/', json.dumps(args, separators = (',', ':')), None))
+        ('events', this.events),
+    ]), separators = (',', ':'))
+    this.events = []
+    this.queue.put(('https://inara.cz/inapi/v1/', data, None))
 
 # Worker thread
 def worker():
