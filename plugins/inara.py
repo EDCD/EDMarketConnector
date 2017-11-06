@@ -99,20 +99,24 @@ def prefsvarchanged():
 def prefs_changed(cmdr, is_beta):
     config.set('inara_out', this.log.get())
 
-    print 'prefs_changed', cmdr, is_beta
-
     if cmdr and not is_beta:
+        this.cmdr = cmdr
         cmdrs = config.get('inara_cmdrs') or []
         apikeys = config.get('inara_apikeys') or []
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             apikeys.extend([''] * (1 + idx - len(apikeys)))
+            changed = (apikeys[idx] != this.apikey.get().strip())
             apikeys[idx] = this.apikey.get().strip()
         else:
             config.set('inara_cmdrs', cmdrs + [cmdr])
+            changed = True
             apikeys.append(this.apikey.get().strip())
         config.set('inara_apikeys', apikeys)
-    # TODO: schedule a call with callback if changed
+
+        if changed:
+            add_event('getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), { 'searchName': cmdr })
+            call()
 
 def credentials(cmdr):
     # Credentials for cmdr
