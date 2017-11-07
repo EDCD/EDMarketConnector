@@ -300,6 +300,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         #
         # Events that don't need to be sent immediately but will be sent on the next mandatory event
         #
+
+        # Missions
         if entry['event'] == 'MissionAccepted':
             data = OrderedDict([
                 ('missionName', entry['Name']),
@@ -353,6 +355,38 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         elif entry['event'] == 'MissionFailed':
             add_event('setCommanderMissionFailed', entry['timestamp'], { 'missionGameID': entry['MissionID'] })
+
+        # Community Goals
+        if entry['event'] == 'CommunityGoal':
+            this.events = [x for x in this.events if x['eventName'] not in ['setCommunityGoal', 'setCommanderCommunityGoalProgress']]	# Remove any unsent
+            for goal in entry['CurrentGoals']:
+
+                data = OrderedDict([
+                    ('communitygoalGameID', goal['CGID']),
+                    ('communitygoalName', goal['Title']),
+                    ('starsystemName', goal['SystemName']),
+                    ('stationName', goal['MarketName']),
+                    ('goalExpiry', goal['Expiry']),
+                    ('isCompleted', goal['IsComplete']),
+                    ('contributorsNum', goal['NumContributors']),
+                    ('contributionsTotal', goal['CurrentTotal']),
+                ])
+                if 'TierReached' in goal:
+                    data['tierReached'] = int(goal['TierReached'].split()[-1])
+                if 'TopRankSize' in goal:
+                    data['topRankSize'] = goal['TopRankSize']
+                add_event('setCommunityGoal', entry['timestamp'], data)
+
+                data = OrderedDict([
+                    ('communitygoalGameID', goal['CGID']),
+                    ('contribution', goal['PlayerContribution']),
+                    ('percentileBand', goal['PlayerPercentileBand']),
+                ])
+                if 'Bonus' in goal:
+                    data['percentileBandReward'] = goal['Bonus']
+                if 'PlayerInTopRank' in goal:
+                    data['isTopRank'] = goal['PlayerInTopRank']
+                add_event('setCommanderCommunityGoalProgress', entry['timestamp'], data)
 
 
 def cmdr_data(data, is_beta):

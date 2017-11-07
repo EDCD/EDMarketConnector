@@ -6,10 +6,10 @@ Elite: Dangerous Market Connector (EDMC)
 This app downloads your Cmdr's details and system, faction, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
 * sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/EDSM-NET/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](http://eddb.io/), [Elite Trade Net](http://etn.io/), [Inara](http://inara.cz), [ED-TD](http://ed-td.space/), [Roguey's](http://roguey.co.uk/elite-dangerous/), etc.
+* sends your Cmdr's details, ship details, cargo, materials and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
+* sends your Cmdr's details, ship details, cargo, materials, missions, community goal progress, and flight log to [Inara](https://inara.cz).
 * saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Inara](http://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](http://coriolis.io) or [Elite Trade Net](http://etn.io/).
-* sends your Cmdr's details, ship details, materials and flight log to [Elite:&nbsp;Dangerous Star Map](http://www.edsm.net/).
-* sends your Cmdr's details, ship details, materials, missions and flight log to [Inara](https://inara.cz).
 
 You can run the app on the same machine on which you're running Elite: Dangerous or on another machine connected via a network share.
 
@@ -90,7 +90,7 @@ You can send a record of your Cmdr's details, ship details, cargo, materials and
 
 ### Inara
 
-You can send a record of your Cmdr's details, ship details, cargo, materials, missions and flight log to [Inara](https://inara.cz/). You will need to register for an account and then follow the “[Inara credentials](https://inara.cz/settings-api/)” link to obtain your API key. Your flight log on Inara is updated in real-time. Other information is updated less frequently - typically on leaving a station.
+You can send a record of your Cmdr's details, ship details, cargo, materials, missions, community goal progress, and flight log to [Inara](https://inara.cz/). You will need to register for an account and then follow the “[Inara credentials](https://inara.cz/settings-api/)” link to obtain your API key. Your flight log on Inara is updated in real-time. Other information is updated on startup and then less frequently - typically on leaving a station.
 
 
 Uninstall
