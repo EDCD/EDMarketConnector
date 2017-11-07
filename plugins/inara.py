@@ -337,13 +337,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             add_event('setCommanderMissionAbandoned', entry['timestamp'], { 'missionGameID': entry['MissionID'] })
 
         elif entry['event'] == 'MissionCompleted':
+            for x in entry.get('PermitsAwarded', []):
+                add_event('addCommanderPermit', entry['timestamp'], { 'starsystemName': x })
+
             data = OrderedDict([ ('missionGameID', entry['MissionID']) ])
             if 'Donation' in entry:
                 data['donationCredits'] = entry['Donation']
             if 'Reward' in entry:
                 data['rewardCredits'] = entry['Reward']
-            if 'Permits' in entry:
-                data['rewardPermits'] = [{ 'starsystemName': x } for x in entry['Permits']]
+            if 'PermitsAwarded' in entry:
+                data['rewardPermits'] = [{ 'starsystemName': x } for x in entry['PermitsAwarded']]
             if 'CommodityReward' in entry:
                 data['rewardCommodities'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['CommodityReward']]
             add_event('setCommanderMissionCompleted', entry['timestamp'], data)
