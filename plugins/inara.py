@@ -284,6 +284,63 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             if __debug__: print_exc()
             return unicode(e)
 
+        #
+        # Events that don't need to be sent immediately but will be sent on the next mandatory event (probably Undocked)
+        #
+        if entry['event'] == 'MissionAccepted':
+            data = OrderedDict([
+                ('missionName', entry['Name']),
+                ('missionGameID', entry['MissionID']),
+                ('influenceGain', entry['Influence']),
+                ('reputationGain', entry['Reputation']),
+                ('starsystemNameOrigin', system),
+                ('stationNameOrigin', station),
+                ('minorfactionNameOrigin', entry['Faction']),
+            ])
+            # optional mission-specific properties
+            for (iprop, prop) in [
+                    ('missionExpiry', 'Expiry'),	# Listed as optional in the docs, but always seems to be present
+                    ('starsystemNameTarget', 'DestinationSystem'),
+                    ('stationNameTarget', 'DestinationStation'),
+                    ('minorfactionNameTarget', 'TargetFaction'),
+                    ('commodityName', 'Commodity'),
+                    ('commodityCount', 'Count'),
+                    ('targetName', 'Target'),
+                    ('targetType', 'TargetType'),
+                    ('killCount', 'KillCount'),
+                    ('passengerType', 'PassengerType'),
+                    ('passengerCount', 'PassengerCount'),
+                    ('passengerIsVIP', 'PassengerVIPs'),
+                    ('passengerIsWanted', 'PassengerWanted'),
+            ]:
+                if prop in entry:
+                    data[iprop] = entry[prop]
+            add_event('addCommanderMission', entry['timestamp'], data)
+
+        elif entry['event'] == 'MissionAbandoned':
+            add_event('setCommanderMissionAbandoned', entry['timestamp'], { 'missionGameID': entry['MissionID'] })
+
+        elif entry['event'] == 'MissionCompleted':
+            data = OrderedDict([ ('missionGameID', entry['MissionID']) ])
+            if 'Donation' in entry:
+                data['donationCredits'] = entry['Donation']
+            if 'Reward' in entry:
+                data['rewardCredits'] = entry['Reward']
+            if 'Permits' in entry:
+                data['rewardPermits'] = [{ 'starsystemName': x } for x in entry['Permits']]
+            if 'CommodityReward' in entry:
+                data['rewardCommodities'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['CommodityReward']]
+            add_event('setCommanderMissionCompleted', entry['timestamp'], data)
+
+        # Journal doesn't list rewarded materials directly, just as 'MaterialCollected'
+        elif (entry['event'] == 'MaterialCollected' and this.events and
+              this.events[-1]['eventName'] == 'setCommanderMissionCompleted' and
+              this.events[-1]['eventTimestamp'] == entry['timestamp']):
+            this.events[-1]['eventData']['rewardMaterials'] = [{ 'itemName': entry['Name'], 'itemCount': entry['Count'] }]
+
+        elif entry['event'] == 'MissionFailed':
+            add_event('setCommanderMissionFailed', entry['timestamp'], { 'missionGameID': entry['MissionID'] })
+
 
 def cmdr_data(data, is_beta):
 
@@ -304,7 +361,7 @@ def cmdr_data(data, is_beta):
                       ]))
             this.needcredits = False
 
-        # *Don't* queue a call to Inara - wait for next event (probably Undocked)
+        # *Don't* queue a call to Inara - wait for next mandatory event (probably Undocked)
 
 
 def add_event(name, timestamp, data):
