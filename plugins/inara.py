@@ -26,6 +26,7 @@ if __debug__:
 
 _TIMEOUT = 20
 FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to Inara
+CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
 
 
 this = sys.modules[__name__]	# For holding module globals
@@ -40,7 +41,7 @@ this.undocked = False	# just undocked
 this.started_docked = False	# Skip Docked event after Location if started docked
 this.cargo = None
 this.materials = None
-this.needcredits = True	# Send credit update soon after Startup / new game
+this.lastcredits = 0	# Send credit update soon after Startup / new game
 
 def plugin_start():
     this.thread = Thread(target = worker, name = 'Inara worker')
@@ -147,10 +148,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.started_docked = False
         this.cargo = None
         this.materials = None
-        this.needcredits = True
-    elif entry['event'] in ['ShipyardBuy', 'ShipyardSell']:
+        this.lastcredits = 0
+    elif entry['event'] in ['Resurrect', 'ShipyardBuy', 'ShipyardSell']:
         # Events that mean a significant change in credits so we should send credits after next "Update"
-        this.needcredits = True
+        this.lastcredits = 0
 
     # Send location and status on new game or StartUp. Assumes Location is the last event on a new game (other than Docked).
     # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion and EngineerProgress.
@@ -395,7 +396,7 @@ def cmdr_data(data, is_beta):
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
 
-        if this.needcredits:
+        if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             assets = (data['commander']['credits'] +
                       -data['commander'].get('debt', 0) +
                       sum([x['value']['total'] for x in companion.listify(data.get('ships', [])) if x]))
@@ -406,7 +407,7 @@ def cmdr_data(data, is_beta):
                           ('commanderAssets', assets),
                           ('commanderLoan', data['commander'].get('debt', 0)),
                       ]))
-            this.needcredits = False
+            this.lastcredits = float(data['commander']['credits'])
 
         # *Don't* queue a call to Inara - wait for next mandatory event
 
