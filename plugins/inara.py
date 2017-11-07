@@ -36,6 +36,7 @@ this.queue = Queue()	# Items to be sent to Inara by worker thread
 this.events = []	# Unsent events
 this.cmdr = None
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
+this.undocked = False	# just undocked
 this.started_docked = False	# Skip Docked event after Location if started docked
 this.cargo = None
 this.materials = None
@@ -142,6 +143,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     if entry['event'] == 'LoadGame':
         # clear cached state
         this.events = []
+        this.undocked = False
         this.started_docked = False
         this.cargo = None
         this.materials = None
@@ -151,7 +153,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.needcredits = True
 
     # Send location and status on new game or StartUp. Assumes Location is the last event on a new game (other than Docked).
-    # Always send an update on Docked, Undocked, FSDJump, Promotion and EngineerProgress.
+    # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion and EngineerProgress.
     # Also send material and cargo (if changed) whenever we send an update.
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
@@ -215,6 +217,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             # Update location
             if entry['event'] == 'Location':
+                this.undocked = False
                 this.started_docked = entry.get('Docked')
                 if this.started_docked:
                     add_event('setCommanderTravelLocation', entry['timestamp'],
@@ -233,7 +236,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ]))
 
             elif entry['event'] == 'Docked':
-                if this.started_docked:
+                if this.undocked:
+                    # Undocked and now docking again. Don't send.
+                    this.undocked = False
+                elif this.started_docked:
                     # Don't send Docked event on new game - i.e. following 'Location' event
                     this.started_docked = False
                 else:
@@ -246,6 +252,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ]))
 
             elif entry['event'] == 'Undocked':
+                this.undocked = True
+
+            elif entry['event'] == 'SupercruiseEntry' and this.undocked:
+                # Staying in system after undocking
+                this.undocked = False
                 add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', system),
@@ -254,6 +265,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
 
             elif entry['event'] == 'FSDJump':
+                this.undocked = False
                 add_event('addCommanderTravelFSDJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
@@ -261,6 +273,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
                               ('shipGameID', state['ShipID']),
                           ]))
+
 
             if len(this.events) > old_events:
                 # We have new event(s) so send to Inara
@@ -285,7 +298,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return unicode(e)
 
         #
-        # Events that don't need to be sent immediately but will be sent on the next mandatory event (probably Undocked)
+        # Events that don't need to be sent immediately but will be sent on the next mandatory event
         #
         if entry['event'] == 'MissionAccepted':
             data = OrderedDict([
@@ -361,7 +374,7 @@ def cmdr_data(data, is_beta):
                       ]))
             this.needcredits = False
 
-        # *Don't* queue a call to Inara - wait for next mandatory event (probably Undocked)
+        # *Don't* queue a call to Inara - wait for next mandatory event
 
 
 def add_event(name, timestamp, data):
