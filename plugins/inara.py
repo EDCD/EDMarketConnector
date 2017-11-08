@@ -37,6 +37,7 @@ this.queue = Queue()	# Items to be sent to Inara by worker thread
 this.events = []	# Unsent events
 this.cmdr = None
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
+this.newuser = False	# just entered API Key
 this.undocked = False	# just undocked
 this.started_docked = False	# Skip Docked event after Location if started docked
 this.cargo = None
@@ -117,6 +118,7 @@ def prefs_changed(cmdr, is_beta):
         config.set('inara_apikeys', apikeys)
 
         if changed:
+            this.newuser = True	# Send basic info at next Journal event
             add_event('getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), { 'searchName': cmdr })
             call()
 
@@ -162,7 +164,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             old_events = len(this.events)	# Will only send existing events if we add a new event below
 
             # Send rank info to Inara on startup or change
-            if entry['event'] in ['StartUp', 'Location'] and state['Rank']:
+            if (entry['event'] in ['StartUp', 'Location'] or this.newuser) and state['Rank']:
                 for k,v in state['Rank'].iteritems():
                     if v is not None:
                         add_event('setCommanderRankPilot', entry['timestamp'],
@@ -217,7 +219,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
 
             # Update location
-            if entry['event'] == 'Location':
+            if (entry['event'] == 'Location' or this.newuser) and system:
+                this.newuser = False
                 this.undocked = False
                 this.started_docked = entry.get('Docked')
                 if this.started_docked:
