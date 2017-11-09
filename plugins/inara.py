@@ -363,6 +363,45 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         elif entry['event'] == 'MissionFailed':
             add_event('setCommanderMissionFailed', entry['timestamp'], { 'missionGameID': entry['MissionID'] })
 
+        # Combat
+        if entry['event'] == 'Died':
+            if 'Killers' in entry:
+                add_event('addCommanderCombatDeath', entry['timestamp'],
+                          OrderedDict([('starsystemName', system),
+                                       ('wingOpponentNames', [x['Name'] for x in entry['Killers']]),
+                          ]))
+            else:
+                add_event('addCommanderCombatDeath', entry['timestamp'],
+                          OrderedDict([('starsystemName', system),
+                                       ('opponentName', entry['KillerName']),
+                          ]))
+
+        elif entry['event'] == 'Interdicted':
+            add_event('addCommanderCombatInterdicted', entry['timestamp'],
+                      OrderedDict([('starsystemName', system),
+                                   ('opponentName', entry['Interdictor']),
+                                   ('isSubmit', entry['Submitted']),
+                          ]))
+
+        elif entry['event'] == 'Interdiction':
+            add_event('addCommanderCombatInterdiction', entry['timestamp'],
+                      OrderedDict([('starsystemName', system),
+                                   ('opponentName', entry['Interdictor']),
+                                   ('isSuccess', entry['Success']),
+                      ]))
+
+        elif entry['event'] == 'EscapeInterdiction':
+            add_event('addCommanderCombatInterdictionEscape', entry['timestamp'],
+                      OrderedDict([('starsystemName', system),
+                                   ('opponentName', entry['Interdictor']),
+                      ]))
+
+        elif entry['event'] == 'PVPKill':
+            add_event('addCommanderCombatKill', entry['timestamp'],
+                      OrderedDict([('starsystemName', system),
+                                   ('opponentName', entry['Victim']),
+                      ]))
+
         # Community Goals
         if entry['event'] == 'CommunityGoal':
             this.events = [x for x in this.events if x['eventName'] not in ['setCommunityGoal', 'setCommanderCommunityGoalProgress']]	# Remove any unsent
