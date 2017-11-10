@@ -258,15 +258,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             elif entry['event'] == 'Undocked':
                 this.undocked = True
 
-            elif entry['event'] == 'SupercruiseEntry' and this.undocked:
-                # Staying in system after undocking
+            elif entry['event'] == 'SupercruiseEntry':
+                if this.undocked:
+                    # Staying in system after undocking - send any pending events from in-station action
+                    add_event('setCommanderTravelLocation', entry['timestamp'],
+                              OrderedDict([
+                                  ('starsystemName', system),
+                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
+                                  ('shipGameID', state['ShipID']),
+                              ]))
                 this.undocked = False
-                add_event('setCommanderTravelLocation', entry['timestamp'],
-                          OrderedDict([
-                              ('starsystemName', system),
-                              ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
-                              ('shipGameID', state['ShipID']),
-                          ]))
 
             elif entry['event'] == 'FSDJump':
                 this.undocked = False
