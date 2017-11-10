@@ -365,16 +365,12 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         # Combat
         if entry['event'] == 'Died':
+            data = OrderedDict([ ('starsystemName', system) ])
             if 'Killers' in entry:
-                add_event('addCommanderCombatDeath', entry['timestamp'],
-                          OrderedDict([('starsystemName', system),
-                                       ('wingOpponentNames', [x['Name'] for x in entry['Killers']]),
-                          ]))
-            else:
-                add_event('addCommanderCombatDeath', entry['timestamp'],
-                          OrderedDict([('starsystemName', system),
-                                       ('opponentName', entry['KillerName']),
-                          ]))
+                data['wingOpponentNames'] = [x['Name'] for x in entry['Killers']]
+            elif 'KillerName' in entry:
+                data['opponentName'] = entry['KillerName']
+            add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif entry['event'] == 'Interdicted':
             add_event('addCommanderCombatInterdicted', entry['timestamp'],
