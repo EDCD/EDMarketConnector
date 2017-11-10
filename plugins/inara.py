@@ -376,20 +376,28 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             add_event('addCommanderCombatInterdicted', entry['timestamp'],
                       OrderedDict([('starsystemName', system),
                                    ('opponentName', entry['Interdictor']),
+                                   ('isPlayer', entry['IsPlayer']),
                                    ('isSubmit', entry['Submitted']),
-                          ]))
+                      ]))
 
         elif entry['event'] == 'Interdiction':
-            add_event('addCommanderCombatInterdiction', entry['timestamp'],
-                      OrderedDict([('starsystemName', system),
-                                   ('opponentName', entry['Interdictor']),
-                                   ('isSuccess', entry['Success']),
-                      ]))
+            data = OrderedDict([('starsystemName', system),
+                                ('isPlayer', entry['IsPlayer']),
+                                ('isSuccess', entry['Success']),
+            ])
+            if 'Interdictor' in entry:
+                data['opponentName'] = entry['Interdictor']
+            elif 'Faction' in entry:
+                data['opponentName'] = entry['Faction']
+            elif 'Power' in entry:
+                data['opponentName'] = entry['Power']
+            add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif entry['event'] == 'EscapeInterdiction':
             add_event('addCommanderCombatInterdictionEscape', entry['timestamp'],
                       OrderedDict([('starsystemName', system),
                                    ('opponentName', entry['Interdictor']),
+                                   ('isPlayer', entry['IsPlayer']),
                       ]))
 
         elif entry['event'] == 'PVPKill':
