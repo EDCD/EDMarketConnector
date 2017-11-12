@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Error: No se puede conectar con Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Error: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Credenciales de Inara";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Enviar Registro de Vuelo y estado del CMDT a EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Enviar Registro de Vuelo y estado del CMDT a Inara";
+
 /* Language name */
 "!Language" = "Español";
 
@@ -429,9 +444,6 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semiprofessional";
-
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Enviar registro de vuelo a Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Enviar datos de la estación a Elite Dangerous Data Network";

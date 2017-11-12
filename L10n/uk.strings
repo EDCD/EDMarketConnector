@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Обліковий запис Inara";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
+
 /* Language name */
 "!Language" = "Українська";
 
@@ -165,6 +180,9 @@
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
 "Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
+
+/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
+"Error: Frontier server SKU problem" = "Помилка! Проблема SKU сервера Frontier";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
@@ -426,9 +444,6 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Напів-професійний";
-
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Надсилати штурманський журнал до Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";

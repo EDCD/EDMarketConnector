@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje na Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Greška: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara kredencijali";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
+
 /* Language name */
 "!Language" = "Srpski (Latinica)";
 
@@ -429,9 +444,6 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Slanje dnevnika leta (flight log) na Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Slanje podataka o stanici na Elite Dangerous Data Network";

@@ -388,9 +388,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Sūtīt lidojumu ierakstus uz Elite Dangerous zvaigžņu karti";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
 

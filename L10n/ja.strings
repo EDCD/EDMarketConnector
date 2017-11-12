@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "エラー: Inaraに接続できません";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "エラー: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara認証情報";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "フライトログとCMDRステータスをEDSMへ送信する";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "フライトログとCMDRステータスをInaraへ送信する";
+
 /* Language name */
 "!Language" = "日本語";
 
@@ -430,9 +445,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Elite Dangerous Star Mapにフライトログを送信する";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Networkにステーションデータを送信する";
 
@@ -470,7 +482,7 @@
 "Station doesn't have anything!" = "このステーションには何も商品がありません！";
 
 /* Menu item. [EDMarketConnector.py] */
-"Status" = "現在の状態";
+"Status" = "ステータス";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";

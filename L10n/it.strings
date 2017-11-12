@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Errore: Non riesco a connettermi a Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Errore: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Credenziali per Inara";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Manda il flight log e lo stato Cmdr a EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Manda il flight log e lo stato Cmdr a Inara";
+
 /* Language name */
 "!Language" = "Italiano";
 
@@ -111,6 +126,9 @@
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
+
+/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
+"E:D interaction log location" = "locazione del file E:D interazione";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "locazione del file E:D journal";
@@ -337,6 +355,9 @@
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Si prega di loggarsi con le proprie credenziali di Elite: Dangerous";
 
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Plugins";
+
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
 
@@ -405,9 +426,6 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Manda il flight log a Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";

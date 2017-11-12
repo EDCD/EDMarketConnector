@@ -430,9 +430,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Stuur vlucht log naar Elite Dangerous Star Map";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Stuur station gegevens naar het Elite Dangerous Data Network";
 

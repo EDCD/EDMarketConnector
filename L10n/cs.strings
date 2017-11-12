@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Chyba: Nelze se připojit k Inaře";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Chyba: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Přihlašovací údaje k Inaře";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Odesílat letový log a status CMDRa do EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Odesílat letový log a status CMDRa na Inaru";
+
 /* Language name */
 "!Language" = "Čeština";
 
@@ -429,9 +444,6 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Odeslat letový záznam do Elite Dangerous Star Map";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Odeslat data o stanici do Elite Dangerous Data Network";
