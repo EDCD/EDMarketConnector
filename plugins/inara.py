@@ -325,7 +325,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             if entry['event'] == 'ShipyardSwap':
                 this.shipswap = True	# Don't know new ship name and ident 'til the following Loadout event
             if 'StoreShipID' in entry:
-                add_event('setCommanderShipDock', entry['timestamp'],
+                add_event('setCommanderShip', entry['timestamp'],
                           OrderedDict([
                               ('shipType', entry['StoreOldShip']),
                               ('shipGameID', entry['StoreShipID']),
@@ -350,7 +350,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                       ]))
 
         elif entry['event'] == 'ShipyardTransfer':
-            add_event('setCommanderShipDock', entry['timestamp'],
+            add_event('setCommanderShipTransfer', entry['timestamp'],
                       OrderedDict([
                           ('shipType', entry['ShipType']),
                           ('shipGameID', entry['ShipID']),
@@ -507,25 +507,29 @@ def cmdr_data(data, is_beta):
             if ship:
                 assets += ship['value']['total']
                 if this.needfleet:
-                    add_event('setCommanderShip', timestamp,
-                              OrderedDict([
-                                  ('shipType', ship['name']),
-                                  ('shipGameID', ship['id']),
-                                  ('shipName', ship.get('shipName')),	# Can be None
-                                  ('shipIdent', ship.get('shipID')),	# Can be None
-                                  ('isCurrentShip', ship['id'] == data['commander']['currentShipId']),
-                                  ('shipHullValue', ship['value']['hull']),
-                                  ('shipModulesValue', ship['value']['modules']),
-                              ]))
                     if ship['id'] != data['commander']['currentShipId']:
-                        add_event('setCommanderShipDock', timestamp,
+                        add_event('setCommanderShip', timestamp,
                                   OrderedDict([
                                       ('shipType', ship['name']),
                                       ('shipGameID', ship['id']),
+                                      ('shipName', ship.get('shipName')),	# Can be None
+                                      ('shipIdent', ship.get('shipID')),	# Can be None
+                                      ('shipHullValue', ship['value']['hull']),
+                                      ('shipModulesValue', ship['value']['modules']),
                                       ('starsystemName', ship['starsystem']['name']),
                                       ('stationName', ship['station']['name']),
                                   ]))
-        this.needfleet = False
+                    else:
+                        add_event('setCommanderShip', timestamp,
+                                  OrderedDict([
+                                      ('shipType', ship['name']),
+                                      ('shipGameID', ship['id']),
+                                      ('shipName', ship.get('shipName')),	# Can be None
+                                      ('shipIdent', ship.get('shipID')),	# Can be None
+                                      ('isCurrentShip', True),
+                                      ('shipHullValue', ship['value']['hull']),
+                                      ('shipModulesValue', ship['value']['modules']),
+                                  ]))
 
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
@@ -537,7 +541,10 @@ def cmdr_data(data, is_beta):
                       ]))
             this.lastcredits = float(data['commander']['credits'])
 
-        # *Don't* queue a call to Inara - wait for next mandatory event
+        # *Don't* queue a call to Inara if we're just updating credits - wait for next mandatory event
+        if this.needfleet:
+            call()
+            this.needfleet = False
 
 
 def add_event(name, timestamp, data):
