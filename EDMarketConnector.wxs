@@ -234,6 +234,9 @@
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
 						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\inara.py" />
+						</Component>
 					</Directory>
 					<Directory Id="tcl" Name="tcl">
 						<Directory Id="tcl8.5" Name="tcl8.5">
@@ -472,6 +475,7 @@
 			<ComponentRef Id="es.strings" />
 			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />
+			<ComponentRef Id="inara.py" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />
 			<ComponentRef Id="library.zip" />

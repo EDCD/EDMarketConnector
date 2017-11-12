@@ -554,7 +554,6 @@ def call(callback=None):
         ('header', OrderedDict([
             ('appName', applongname),
             ('appVersion', appversion),
-            ('isDeveloped', True),	# TODO: Remove before release
             ('APIkey', credentials(this.cmdr)),
             ('commanderName', this.cmdr.encode('utf-8')),
         ])),
