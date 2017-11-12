@@ -16,9 +16,6 @@ import myNotebook as nb
 
 from config import appname, applongname, appversion, config
 import companion
-import coriolis
-import edshipyard
-import outfitting
 import plug
 
 if __debug__:
@@ -39,10 +36,12 @@ this.cmdr = None
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
 this.newuser = False	# just entered API Key
 this.undocked = False	# just undocked
-this.started_docked = False	# Skip Docked event after Location if started docked
+this.suppress_docked = False	# Skip Docked event after Location if started docked
 this.cargo = None
 this.materials = None
 this.lastcredits = 0	# Send credit update soon after Startup / new game
+this.needfleet = True	# Send full fleet update soon after Startup / new game
+this.shipswap = False	# just swapped ship
 
 def plugin_start():
     this.thread = Thread(target = worker, name = 'Inara worker')
@@ -147,13 +146,18 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         # clear cached state
         this.events = []
         this.undocked = False
-        this.started_docked = False
+        this.suppress_docked = False
         this.cargo = None
         this.materials = None
         this.lastcredits = 0
-    elif entry['event'] in ['Resurrect', 'ShipyardBuy', 'ShipyardSell']:
+        this.needfleet = True
+        this.shipswap = False
+    elif entry['event'] in ['Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy']:
         # Events that mean a significant change in credits so we should send credits after next "Update"
         this.lastcredits = 0
+    elif entry['event'] in ['ShipyardNew', 'ShipyardSwap'] or (entry['event'] == 'Location' and entry['Docked']):
+        this.suppress_docked = True
+
 
     # Send location and status on new game or StartUp. Assumes Location is the last event on a new game (other than Docked).
     # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion and EngineerProgress.
@@ -218,40 +222,50 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ('rankValue', 1),
                           ]))
 
+            # Update ship
+            if (entry['event'] in ['StartUp', 'Location', 'ShipyardNew'] or
+                (entry['event'] == 'Loadout' and this.shipswap) or
+                this.newuser):
+                if entry['event'] == 'ShipyardNew':
+                    add_event('addCommanderShip', entry['timestamp'],
+                              OrderedDict([
+                                  ('shipType', state['ShipType']),
+                                  ('shipGameID', state['ShipID']),
+                              ]))
+                add_event('setCommanderShip', entry['timestamp'],
+                          OrderedDict([
+                              ('shipType', state['ShipType']),
+                              ('shipGameID', state['ShipID']),
+                              ('shipName', state['ShipName']),		# Can be None
+                              ('shipIdent', state['ShipIdent']),	# Can be None
+                              ('isCurrentShip', True),
+                ]))
+                this.shipswap = False
+
             # Update location
             if (entry['event'] == 'Location' or this.newuser) and system:
-                this.newuser = False
                 this.undocked = False
-                this.started_docked = entry.get('Docked')
-                if this.started_docked:
-                    add_event('setCommanderTravelLocation', entry['timestamp'],
-                              OrderedDict([
-                                  ('starsystemName', system),
-                                  ('stationName', station),
-                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
-                                  ('shipGameID', state['ShipID']),
-                              ]))
-                else:
-                    add_event('setCommanderTravelLocation', entry['timestamp'],
-                              OrderedDict([
-                                  ('starsystemName', system),
-                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
-                                  ('shipGameID', state['ShipID']),
-                              ]))
+                add_event('setCommanderTravelLocation', entry['timestamp'],
+                          OrderedDict([
+                              ('starsystemName', system),
+                              ('stationName', station),		# Can be None
+                              ('shipType', state['ShipType']),
+                              ('shipGameID', state['ShipID']),
+                          ]))
 
             elif entry['event'] == 'Docked':
                 if this.undocked:
                     # Undocked and now docking again. Don't send.
                     this.undocked = False
-                elif this.started_docked:
+                elif this.suppress_docked:
                     # Don't send Docked event on new game - i.e. following 'Location' event
-                    this.started_docked = False
+                    this.suppress_docked = False
                 else:
                     add_event('addCommanderTravelDock', entry['timestamp'],
                               OrderedDict([
                                   ('starsystemName', system),
                                   ('stationName', station),
-                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
+                                  ('shipType', state['ShipType']),
                                   ('shipGameID', state['ShipID']),
                               ]))
 
@@ -264,7 +278,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     add_event('setCommanderTravelLocation', entry['timestamp'],
                               OrderedDict([
                                   ('starsystemName', system),
-                                  ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
+                                  ('shipType', state['ShipType']),
                                   ('shipGameID', state['ShipID']),
                               ]))
                 this.undocked = False
@@ -275,7 +289,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
                               ('jumpDistance', entry['JumpDist']),
-                              ('shipType', companion.ship_map.get(state['ShipType'], state['ShipType'])),
+                              ('shipType', state['ShipType']),
                               ('shipGameID', state['ShipID']),
                           ]))
 
@@ -305,6 +319,45 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         #
         # Events that don't need to be sent immediately but will be sent on the next mandatory event
         #
+
+        # Selling / swapping ships
+        if entry['event'] in ['ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy', 'ShipyardSwap']:
+            if entry['event'] == 'ShipyardSwap':
+                this.shipswap = True	# Don't know new ship name and ident 'til the following Loadout event
+            if 'StoreShipID' in entry:
+                add_event('setCommanderShipDock', entry['timestamp'],
+                          OrderedDict([
+                              ('shipType', entry['StoreOldShip']),
+                              ('shipGameID', entry['StoreShipID']),
+                              ('starsystemName', system),
+                              ('stationName', station),
+                          ]))
+            elif 'SellShipID' in entry:
+                add_event('delCommanderShip', entry['timestamp'],
+                          OrderedDict([
+                              ('shipType', entry.get('SellOldShip', entry['ShipType'])),
+                              ('shipGameID', entry['SellShipID']),
+                          ]))
+
+        elif entry['event'] == 'SetUserShipName':
+            add_event('setCommanderShip', entry['timestamp'],
+                      OrderedDict([
+                          ('shipType', state['ShipType']),
+                          ('shipGameID', state['ShipID']),
+                          ('shipName', state['ShipName']),	# Can be None
+                          ('shipIdent', state['ShipIdent']),	# Can be None
+                          ('isCurrentShip', True),
+                      ]))
+
+        elif entry['event'] == 'ShipyardTransfer':
+            add_event('setCommanderShipDock', entry['timestamp'],
+                      OrderedDict([
+                          ('shipType', entry['ShipType']),
+                          ('shipGameID', entry['ShipID']),
+                          ('starsystemName', system),
+                          ('stationName', station),
+                          ('transferTime', entry['TransferTime']),
+                      ]))
 
         # Missions
         if entry['event'] == 'MissionAccepted':
@@ -439,6 +492,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     data['isTopRank'] = goal['PlayerInTopRank']
                 add_event('setCommanderCommunityGoalProgress', entry['timestamp'], data)
 
+        this.newuser = False
 
 def cmdr_data(data, is_beta):
 
@@ -446,12 +500,36 @@ def cmdr_data(data, is_beta):
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
 
+        timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        assets = data['commander']['credits'] - data['commander'].get('debt', 0)
+
+        for ship in companion.listify(data.get('ships', [])):
+            if ship:
+                assets += ship['value']['total']
+                if this.needfleet:
+                    add_event('setCommanderShip', timestamp,
+                              OrderedDict([
+                                  ('shipType', ship['name']),
+                                  ('shipGameID', ship['id']),
+                                  ('shipName', ship.get('shipName')),	# Can be None
+                                  ('shipIdent', ship.get('shipID')),	# Can be None
+                                  ('isCurrentShip', ship['id'] == data['commander']['currentShipId']),
+                                  ('shipHullValue', ship['value']['hull']),
+                                  ('shipModulesValue', ship['value']['modules']),
+                              ]))
+                    if ship['id'] != data['commander']['currentShipId']:
+                        add_event('setCommanderShipDock', timestamp,
+                                  OrderedDict([
+                                      ('shipType', ship['name']),
+                                      ('shipGameID', ship['id']),
+                                      ('starsystemName', ship['starsystem']['name']),
+                                      ('stationName', ship['station']['name']),
+                                  ]))
+        this.needfleet = False
+
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
-            assets = (data['commander']['credits'] +
-                      -data['commander'].get('debt', 0) +
-                      sum([x['value']['total'] for x in companion.listify(data.get('ships', [])) if x]))
             this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
-            add_event('setCommanderCredits', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            add_event('setCommanderCredits', timestamp,
                       OrderedDict([
                           ('commanderCredits', data['commander']['credits']),
                           ('commanderAssets', assets),
