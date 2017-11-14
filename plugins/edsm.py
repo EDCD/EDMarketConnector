@@ -216,7 +216,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     if state['PaintJob'] is not None:
                         props.append(('paintJob', state['PaintJob']))
                     updateship(cmdr, state['ShipID'], state['ShipType'], props)
-                elif entry['event'] in ['ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy']:
+                elif entry['event'] in ['ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy', 'ShipyardSwap']:
                     sellship(cmdr, entry.get('SellShipID'))
 
             # Send cargo to EDSM on startup or change
