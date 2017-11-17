@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import csv
 from sys import platform
 from functools import partial
 import time
@@ -141,11 +142,10 @@ def status(data):
 
 
 def export_status(data, filename):
-    h = open(filename, 'wt')
-    h.write('Category,Value\n')
+    h = csv.writer(open(filename, 'wb'))
+    h.writerow(['Category', 'Value'])
     for thing in status(data):
-        h.write(','.join(thing) + '\n')
-    h.close()
+        h.writerow([x.encode('utf-8') for x in thing])
 
 
 # Returns id,name,shipName,system,station,value
@@ -165,11 +165,10 @@ def ships(data):
     return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
 
 def export_ships(data, filename):
-    h = open(filename, 'wt')
-    h.write('Id,Ship,Name,System,Station,Value\n')
+    h = csv.writer(open(filename, 'wb'))
+    h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
     for thing in ships(data):
-        h.write(','.join(thing) + '\n')
-    h.close()
+        h.writerow([x.encode('utf-8') for x in thing])
 
 
 class StatsDialog():
