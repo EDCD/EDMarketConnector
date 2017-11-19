@@ -144,7 +144,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     if entry['event'] == 'LoadGame':
         # clear cached state
-        this.events = []
         this.undocked = False
         this.suppress_docked = False
         this.cargo = None
