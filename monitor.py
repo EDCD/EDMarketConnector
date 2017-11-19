@@ -114,6 +114,7 @@ class EDLogs(FileSystemEventHandler):
             'PaintJob'     : None,
             'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
             'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
+            'Friends'      : set(),	# Online friends
             'ShipID'       : None,
             'ShipIdent'    : None,
             'ShipName'     : None,
@@ -295,6 +296,7 @@ class EDLogs(FileSystemEventHandler):
                     'PaintJob'     : None,
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
                     'Role'         : None,
+                    'Friends'      : set(),
                     'ShipID'       : None,
                     'ShipIdent'    : None,
                     'ShipName'     : None,
@@ -460,6 +462,12 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+
+            elif entry['event'] == 'Friends':
+                if entry['Status'] in ['Online', 'Added']:
+                    self.state['Friends'].add(entry['Name'])
+                else:
+                    self.state['Friends'].discard(entry['Name'])
 
             return entry
         except:
