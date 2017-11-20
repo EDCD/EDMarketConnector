@@ -235,7 +235,7 @@ class Config:
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                 return None
             elif typ.value == REG_MULTI_SZ:
-                return [x.strip() for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
+                return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
             else:
                 return buf.value
 
