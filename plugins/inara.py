@@ -556,15 +556,15 @@ def add_event(name, timestamp, data):
 
 # Queue a call to Inara, handled in Worker thread
 def call(callback=None):
-    data = json.dumps(OrderedDict([
+    data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
             ('appVersion', appversion),
             ('APIkey', credentials(this.cmdr)),
             ('commanderName', this.cmdr.encode('utf-8')),
         ])),
-        ('events', this.events),
-    ]), separators = (',', ':'))
+        ('events', list(this.events)),	# shallow copy
+    ])
     this.events = []
     this.queue.put(('https://inara.cz/inapi/v1/', data, None))
 
@@ -580,15 +580,24 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
-                r = this.session.post(url, data=data, timeout=_TIMEOUT)
+                r = this.session.post(url, data=json.dumps(data, separators = (',', ':')), timeout=_TIMEOUT)
                 r.raise_for_status()
                 reply = r.json()
                 status = reply['header']['eventStatus']
                 if callback:
                     callback(reply)
                 elif status // 100 != 2:	# 2xx == OK (maybe with warnings)
+                    # Log fatal errors
+                    print 'Inara\t%s %s' % (reply['header']['eventStatus'], reply['header'].get('eventStatusText', ''))
+                    print json.dumps(data, indent=2, separators = (',', ': '))
                     plug.show_error(_('Error: Inara {MSG}').format(MSG = reply['header'].get('eventStatusText', status)))
-                    if __debug__: print r.content
+                else:
+                    # Log individual errors and warnings
+                    for data_event, reply_event in zip(data['events'], reply['events']):
+                        if reply_event['eventStatus'] != 200:
+                            print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event, separators = (',', ': ')))
+                            if reply_event['eventStatus'] // 100 != 2:
+                                plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
                 break
             except:
                 if __debug__: print_exc()
