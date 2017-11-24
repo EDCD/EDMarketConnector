@@ -199,10 +199,6 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
-        self.interactiondir = tk.StringVar()
-        self.interactiondir.set(config.get('interactiondir') or config.default_interaction_dir or '')
-        self.interactiondir_entry = nb.Entry(configframe, takefocus=False)
-
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
             nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
@@ -213,15 +209,6 @@ class PreferencesDialog(tk.Toplevel):
             self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
             if config.default_journal_dir:
                 nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
-
-            nb.Label(configframe, text = _('E:D interaction log location')+':').grid(columnspan=4, padx=PADX, pady=(PADY, 0), sticky=tk.W)	# Setting for the log file that contains recent interactions with other Cmdrs
-            self.interactiondir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
-            self.interactionbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
-                                                                  _('Browse...')),	# Folder selection button on Windows
-                                               command = lambda:self.filebrowse(_('E:D interaction log location'), self.interactiondir))
-            self.interactionbutton.grid(row=15, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
-            if config.default_interaction_dir:
-                nb.Button(configframe, text=_('Default'), command=self.interactiondir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=15, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
         if platform == 'win32':
             ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
@@ -400,7 +387,6 @@ class PreferencesDialog(tk.Toplevel):
     def outvarchanged(self, event=None):
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
-        self.displaypath(self.interactiondir, self.interactiondir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
@@ -484,11 +470,6 @@ class PreferencesDialog(tk.Toplevel):
     def logdir_reset(self):
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
-        self.outvarchanged()
-
-    def interactiondir_reset(self):
-        if config.default_interaction_dir:
-            self.interactiondir.set(config.default_interaction_dir)
         self.outvarchanged()
 
     def themecolorbrowse(self, index):
@@ -580,12 +561,6 @@ class PreferencesDialog(tk.Toplevel):
             config.set('journaldir', '')	# default location
         else:
             config.set('journaldir', logdir)
-
-        interactiondir = self.interactiondir.get()
-        if config.default_interaction_dir and interactiondir.lower() == config.default_interaction_dir.lower():
-            config.set('interactiondir', '')	# default location
-        else:
-            config.set('interactiondir', interactiondir)
 
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)

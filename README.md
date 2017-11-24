@@ -74,7 +74,7 @@ This app can save a variety of data in a variety of formats:
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
 
-Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” and “E:D interaction log location” settings on the Configuration tab to point to the game's log files.
+Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
 ### EDDN
 
@@ -137,12 +137,9 @@ The Frontier server that supplies the data to this app sometimes fails to supply
 This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConnector/issues/86).
 
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
-This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” and “E:D interaction log location” settings on the Configuration tab to point to the game's log files.
+This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
-The default settings on Windows are typically:
-
-- `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous` and
-- `C:\Users\you\AppData\Local\Frontier Developments\EliteDangerous\CommanderHistory` respectively.
+The default location on Windows is typically `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous`.
 
 ### Credentials settings are greyed out
 You can't edit your Username/Password or EDSM Commander Name/API Key if:

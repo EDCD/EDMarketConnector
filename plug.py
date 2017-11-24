@@ -226,30 +226,6 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     return error
 
 
-def notify_interaction(cmdr, is_beta, entry):
-    """
-    Send an interaction entry to each plugin.
-    :param cmdr: The piloting Cmdr name
-    :param is_beta: whether the player is in a Beta universe.
-    :param entry: The interaction entry as a dictionary
-    :return: Error message from the first plugin that returns one (if any)
-    """
-    error = None
-    for plugin in PLUGINS:
-        interaction = plugin._get_func('interaction')
-        if interaction:
-            try:
-                # Pass a copy of the interaction entry in case the callee modifies it
-                if interaction.func_code.co_argcount == 2:
-                    newerror = interaction(cmdr, dict(entry))
-                else:
-                    newerror = interaction(cmdr, is_beta, dict(entry))
-                error = error or newerror
-            except:
-                print_exc()
-    return error
-
-
 def notify_system_changed(timestamp, system, coordinates):
     """
     Send notification data to each plugin when we arrive at a new system.

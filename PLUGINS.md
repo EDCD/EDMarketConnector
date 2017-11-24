@@ -106,7 +106,7 @@ this.status["text"] = "Happy!"
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `interaction()` and `cmdr_data()`.
+Once you have created your plugin and EDMC has loaded it there are two other functions you can define to be notified by EDMC when something happens: `journal_entry()` and `cmdr_data()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
@@ -126,21 +126,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
-### Player Interaction
-
-This gets called when the player interacts with another Cmdr in-game.
-
-If EDMC is started while the game is already running EDMC will send the last few interaction events from the current game session.
-
-```python
-def interaction(cmdr, is_beta, entry):
-    # Log type of interaction, Cmdr name, and local time
-    sys.stderr.write("{} Cmdr {} at {}\n".format(', '.join(entry['Interactions']),
-                                                 entry['Name'].encode('utf-8'),
-                                                 time.strftime('%Y-%m-%dT%H:%M:%S',
-                                                               time.localtime(entry['Epoch'] - 11644473600))))
-```
-
 ### Getting Commander Data
 
 This gets called when EDMC has just fetched fresh Cmdr and station data from Frontier's servers.
@@ -157,7 +142,7 @@ The data is a dictionary and full of lots of wonderful stuff!
 
 ## Error messages
 
-You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `interaction()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
+You can display an error in EDMC's status area by returning a string from your `journal_entry()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
 
 The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
 
