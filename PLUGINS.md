@@ -114,7 +114,9 @@ Your events all get called on the main tkinter loop so be sure not to block for 
 
 This gets called when EDMC sees a new entry in the game's journal. `state` is a dictionary containing information about the Cmdr and their ship and cargo (including the effect of the current journal entry).
 
-A special 'StartUp' entry is sent if EDMC is started while the game is already running. In this case you won't receive initial events such as "LoadGame", "Rank", "Location", etc. However the `state` dictionary will reflect the cumulative effect of these missed events.
+A special "StartUp" entry is sent if EDMC is started while the game is already running. In this case you won't receive initial events such as "LoadGame", "Rank", "Location", etc. However the `state` dictionary will reflect the cumulative effect of these missed events.
+
+Similarly, a special "ShutDown" entry is sent when the game is quitted while EDMC is running. This event is not sent when EDMC is running on a different machine or when quitting to the main menu, so you should not *rely* on receiving this event.
 
 ```python
 def journal_entry(cmdr, is_beta, system, station, entry, state):

@@ -89,6 +89,8 @@ class EDLogs(FileSystemEventHandler):
         # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
         self.live = False
 
+        self.game_was_running = False	# For generation the "ShutDown" event
+
         # Context for journal handling
         self.version = None
         self.is_beta = False
@@ -217,8 +219,10 @@ class EDLogs(FileSystemEventHandler):
         else:
             loghandle = None
 
+        self.game_was_running = self.game_running()
+
         if self.live:
-            if self.game_running():
+            if self.game_was_running:
                 self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
             else:
                 self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
@@ -263,6 +267,15 @@ class EDLogs(FileSystemEventHandler):
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
                 return	# Terminate
+
+            if self.game_was_running:
+                if not self.game_running():
+                    self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    self.game_was_running = False
+            else:
+                self.game_was_running = self.game_running()
+
 
     def parse_entry(self, line):
         if line is None:

@@ -51,8 +51,7 @@ def plugin_start():
 
 def plugin_stop():
     # Send any unsent events
-    if this.events:
-        call()
+    call()
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
@@ -136,7 +135,7 @@ def credentials(cmdr):
 def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # Send any unsent events when switching accounts
-    if cmdr and cmdr != this.cmdr and this.events:
+    if cmdr and cmdr != this.cmdr:
         call()
 
     this.cmdr = cmdr
@@ -293,7 +292,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
 
 
-            if len(this.events) > old_events:
+            if entry['event'] == 'ShutDown' or len(this.events) > old_events:
                 # We have new event(s) so send to Inara
 
                 # Send cargo and materials if changed
@@ -556,6 +555,9 @@ def add_event(name, timestamp, data):
 
 # Queue a call to Inara, handled in Worker thread
 def call(callback=None):
+    if not this.events:
+        return
+
     data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
