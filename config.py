@@ -149,7 +149,7 @@ class Config:
             if hasattr(val, '__iter__'):
                 return list(val)	# make writeable
             else:
-                return val
+                return unicode(val)
 
         def getint(self, key):
             try:
@@ -233,7 +233,7 @@ class Config:
             elif typ.value == REG_MULTI_SZ:
                 return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
             else:
-                return buf.value
+                return unicode(buf.value)
 
         def getint(self, key):
             typ  = DWORD()
