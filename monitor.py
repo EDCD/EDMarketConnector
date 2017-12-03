@@ -506,6 +506,8 @@ class EDLogs(FileSystemEventHandler):
             if not self.live and entry['event'] not in [None, 'Fileheader']:
                 self.live = True
                 self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+            elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
+                self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
             return entry
 
     def game_running(self):
