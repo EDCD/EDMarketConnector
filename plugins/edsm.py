@@ -25,20 +25,19 @@ import plug
 if __debug__:
     from traceback import print_exc
 
-EDSM_POLL = 0.1
-_TIMEOUT = 20
-FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
+EDSM_POLL               = 0.1
+_TIMEOUT                = 20
+FAKE                    = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
 
-this = sys.modules[__name__]	# For holding module globals
-this.session = requests.Session()
-this.queue = Queue()	# Items to be sent to EDSM by worker thread
-this.lastship = None	# Description of last ship that we sent to EDSM
-this.lastlookup = False	# whether the last lookup succeeded
+this                    = sys.modules[__name__]	# For holding module globals
+this.session            = requests.Session()
+this.queue              = Queue()	# Items to be sent to EDSM by worker thread
+this.discardedEvents    = [] # List discarded events from EDSM
+this.lastlookup         = False	# whether the last lookup succeeded
 
 # Game state
-this.multicrew = False	# don't send captain's ship info to EDSM while on a crew
-
+this.multicrew          = False	# don't send captain's ship info to EDSM while on a crew
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -67,6 +66,10 @@ def plugin_start():
     this.thread = Thread(target = worker, name = 'EDSM worker')
     this.thread.daemon = True
     this.thread.start()
+    
+    # Get the last Discarded events from EDSM
+    if __debug__: print('Calling Discarded Events API endpoint')
+    this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
 
     return 'EDSM'
 
@@ -193,56 +196,24 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system.update_idletasks()
 
     this.multicrew = bool(state['Role'])
+    
+    # If Discarded events still emtpy, retry
+    if not this.discardedEvents:
+        this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
 
     # Send interesting events to EDSM
     if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr):
         try:
-            # Send credits to EDSM on new game (but not on startup - data might be old)
-            if entry['event'] == 'LoadGame':
-                setcredits(cmdr, state['Credits'], state['Loan'])
-
-            # Send rank info to EDSM on startup or change
-            if entry['event'] in ['StartUp', 'Progress', 'Promotion'] and state['Rank']:
-                setranks(cmdr, state['Rank'])
-
-            # Send ship info to EDSM on startup or change
-            if entry['event'] in ['StartUp', 'Loadout', 'LoadGame', 'SetUserShipName'] and cmdr and state['ShipID'] is not None:
-                setshipid(cmdr, state['ShipID'])
-                props = []
-                if state['ShipIdent'] is not None:
-                    props.append(('shipIdent', state['ShipIdent']))
-                    if state['ShipName'] is not None:
-                        props.append(('shipName', state['ShipName']))
-                    if state['PaintJob'] is not None:
-                        props.append(('paintJob', state['PaintJob']))
-                    updateship(cmdr, state['ShipID'], state['ShipType'], props)
-                elif entry['event'] in ['ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy', 'ShipyardSwap']:
-                    sellship(cmdr, entry.get('SellShipID'))
-
-            # Send cargo to EDSM on startup or change
-            if entry['event'] in (['StartUp', 'LoadGame', 'CollectCargo', 'EjectCargo', 'MarketBuy', 'MarketSell',
-                                   'MiningRefined', 'EngineerContribution'] or
-                                  (entry['event'] == 'MissionCompleted' and entry.get('CommodityReward'))):
-                setcargo(cmdr, state['Cargo'])
-
-            # Send materials info to EDSM on startup or change
-            if entry['event'] in ['StartUp', 'LoadGame', 'MaterialCollected', 'MaterialDiscarded', 'ScientificResearch', 'EngineerCraft', 'Synthesis']:
-                setmaterials(cmdr, state['Raw'], state['Manufactured'], state['Encoded'])
-
-            # Send paintjob info to EDSM on change
-            if entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                updateship(cmdr, state['ShipID'], state['ShipType'], [('paintJob', state['PaintJob'])])
-
-            # Write EDSM log on startup and change
-            if system and entry['event'] in ['Location', 'FSDJump']:
-                this.lastlookup = False
-                writelog(cmdr, timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), system, 'StarPos' in entry and tuple(entry['StarPos']), state['ShipID'])
+            # Send the journal entry if not in the discarded events
+            if entry['event'] not in this.discardedEvents:
+                sendEntry(cmdr, system, station, entry, state)
 
         except Exception as e:
             if __debug__: print_exc()
             return unicode(e)
 
 
+# Update system data
 def cmdr_data(data, is_beta):
 
     system = data['lastSystem']['name']
@@ -258,46 +229,6 @@ def cmdr_data(data, is_beta):
             this.lastlookup = False
         this.system.update_idletasks()
 
-    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
-        # Send flightlog to EDSM if FSDJump failed to do so
-        if not this.lastlookup:
-            try:
-                this.writelog(data['commander']['name'], int(time.time()), system, None, data['ship']['id'])
-            except Exception as e:
-                if __debug__: print_exc()
-                return unicode(e)
-
-        # Update credits and ship info and send to EDSM
-        try:
-            if data['commander'].get('credits') is not None:
-                setcredits(data['commander']['name'], data['commander']['credits'], data['commander'].get('debt', 0))
-            ship = companion.ship(data)
-            if ship != this.lastship:
-                cargo = 0
-                fuel = 0
-                for v in data['ship']['modules'].itervalues():
-                    module = outfitting.lookup(v['module'], companion.ship_map)
-                    if not module:
-                        pass
-                    elif 'Fuel Tank'in module['name']:
-                        fuel += 2**int(module['class'])
-                    elif 'Cargo Rack' in module['name']:
-                        cargo += 2**int(module['class'])
-
-                updateship(data['commander']['name'],
-                           data['ship']['id'],
-                           data['ship']['name'].lower(),
-                           {
-                               'cargoCapacity':    cargo,
-                               'fuelMainCapacity': fuel,
-                               'linkToCoriolis':   coriolis.url(data, is_beta),
-                               'linkToEDShipyard': edshipyard.url(data, is_beta),
-                           })
-                this.lastship = ship
-        except Exception as e:
-            # Not particularly important so silent on failure
-            if __debug__: print_exc()
-
 
 # Worker thread
 def worker():
@@ -311,16 +242,21 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
+                #if __debug__: print(data)            
                 r = this.session.post(url, data=data, timeout=_TIMEOUT)
                 r.raise_for_status()
                 reply = r.json()
-                (msgnum, msg) = reply['msgnum'], reply['msg']
+                
                 if callback:
                     callback(reply)
-                elif msgnum // 100 != 1:	# 1xx = OK, 2xx = fatal error
-                    plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+                else:
+                    (msgnum, msg) = reply['msgnum'], reply['msg']
+                    if msgnum // 100 not in (1,4):
+                        if __debug__: print(_('Error: EDSM {MSG}').format(MSG=msg))
+                        plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                 break
             except:
+                if __debug__: print_exc()
                 retrying += 1
         else:
             if callback:
@@ -329,37 +265,46 @@ def worker():
                 plug.show_error(_("Error: Can't connect to EDSM"))
 
 
-# Queue a call to an EDSM endpoint with args (which should be quoted)
-def call(cmdr, endpoint, args, callback=None):
-    (username, apikey) = credentials(cmdr)
-    args = dict(args)
-    args['commanderName'] = username
-    args['apiKey'] = apikey
-    args['fromSoftware'] = applongname
-    args['fromSoftwareVersion'] =appversion
-    this.queue.put(('https://www.edsm.net/%s' % endpoint, args, callback))
+# Queue a call to the EDSM journal API with args (which should be quoted)
+def call(cmdr, args, callback=None):
+    (username, apikey)              = credentials(cmdr)
+    
+    args                            = dict(args)
+    args['commanderName']           = username
+    args['apiKey']                  = apikey
+    args['fromSoftware']            = applongname
+    args['fromSoftwareVersion']     = appversion
+    
+    this.queue.put(('https://www.edsm.net/api-journal-v1', args, callback))
 
 
-# Send flight log and also do lookup
-def writelog(cmdr, timestamp, system_name, coordinates, shipid = None):
-
-    if system_name in FAKE:
+# Send journal entry
+def sendEntry(cmdr, system, station, entry, state):
+    if entry['event'] in this.discardedEvents:
         return
+        
+    if entry['event'] in ['Location', 'FSDJump'] and entry['StarSystem'] in FAKE:
+        return
+    
+    # Update callback on needed events
+    if entry['event'] in ['Location', 'FSDJump']:
+        eventCallback = writelog_callback
+    else:
+        eventCallback = null_callback
+        
+    # Introduce transient states into the event
+    entry['_systemName']        = system;
+    #entry['_systemCoordinates']  = gameStatus.coordinates; #TODO: Track system coordinates
+    entry['_stationName']        = station;
+    entry['_shipId']             = state['ShipID'];
+    
+    # Make the API call
+    call(cmdr, { 'message': json.dumps(entry) }, eventCallback)
 
-    args = {
-        'systemName': system_name,
-        'dateVisited': time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(timestamp)),
-    }
-    if coordinates:
-        args['x'] = '%.3f' % coordinates[0]
-        args['y'] = '%.3f' % coordinates[1]
-        args['z'] = '%.3f' % coordinates[2]
-    if shipid is not None:
-        args['shipId'] = '%d' % shipid
-    call(cmdr, 'api-logs-v1/set-log', args, writelog_callback)
 
 def writelog_callback(reply):
-    this.lastlookup = reply
+    #if __debug__: print(reply)
+    this.lastlookup = reply['events'][0] # Get first response while we send events one by one
     this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
 
 def update_status(event=None):
@@ -380,60 +325,11 @@ def update_status(event=None):
 # When we don't care about return msgnum from EDSM
 def null_callback(reply):
     if not reply:
-        plug.show_error(_("Error: Can't connect to EDSM"))
+        plug.show_error(_("Error: Can't connect to EDSM"))# When we don't care about return msgnum from EDSM
 
-
-def setranks(cmdr, ranks):
-    args = {}
-    if ranks:
-        for k,v in ranks.iteritems():
-            if v is not None:
-                args[k] = '%d;%d' % v
-    if args:
-        call(cmdr, 'api-commander-v1/set-ranks', args)
-
-def setcredits(cmdr, balance, loan):
-    if balance is not None:
-        args = {
-            'balance': '%d' % balance,
-            'loan': '%d' % loan,
-        }
-        call(cmdr, 'api-commander-v1/set-credits', args)
-
-def setcargo(cmdr, cargo):
-    args = {
-        'type': 'cargo',
-        'values': json.dumps(cargo, separators = (',', ':')),
-    }
-    call(cmdr, 'api-commander-v1/set-materials', args)
-
-def setmaterials(cmdr, raw, manufactured, encoded):
-    args = {
-        'type': 'data',
-        'values': json.dumps(encoded, separators = (',', ':')),
-    }
-    call(cmdr, 'api-commander-v1/set-materials', args)
-
-    materials = {}
-    materials.update(raw)
-    materials.update(manufactured)
-    args = {
-        'type': 'materials',
-        'values': json.dumps(materials, separators = (',', ':')),
-    }
-    call(cmdr, 'api-commander-v1/set-materials', args)
-
-def setshipid(cmdr, shipid):
-    if shipid is not None:
-        call(cmdr, 'api-commander-v1/set-ship-id', { 'shipId': '%d' % shipid })
-
-def updateship(cmdr, shipid, shiptype, args={}):
-    if shipid is not None and shiptype:
-        args = dict(args)
-        args['shipId'] = '%d' % shipid
-        args['type'] = shiptype
-        call(cmdr, 'api-commander-v1/update-ship', args)
-
-def sellship(cmdr, shipid):
-    if shipid is not None:
-        call(cmdr, 'api-commander-v1/sell-ship', { 'shipId': '%d' % shipid }, null_callback)
+# Grab the discarded list
+def discarded_callback(reply):
+    if not reply:
+        plug.show_error(_("Error: Can't get EDSM DIscarded Events"))
+    else:
+        this.discardedEvents = reply
