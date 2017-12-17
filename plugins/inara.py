@@ -98,6 +98,7 @@ def prefsvarchanged():
     this.label['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
 
 def prefs_changed(cmdr, is_beta):
+    changed = config.getint('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
     if cmdr and not is_beta:
@@ -107,7 +108,7 @@ def prefs_changed(cmdr, is_beta):
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             apikeys.extend([''] * (1 + idx - len(apikeys)))
-            changed = (apikeys[idx] != this.apikey.get().strip())
+            changed |= (apikeys[idx] != this.apikey.get().strip())
             apikeys[idx] = this.apikey.get().strip()
         else:
             config.set('inara_cmdrs', cmdrs + [cmdr])
@@ -115,7 +116,7 @@ def prefs_changed(cmdr, is_beta):
             apikeys.append(this.apikey.get().strip())
         config.set('inara_apikeys', apikeys)
 
-        if changed:
+        if this.log.get() and changed:
             this.newuser = True	# Send basic info at next Journal event
             add_event('getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), { 'searchName': cmdr })
             call()
