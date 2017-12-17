@@ -25,19 +25,19 @@ import plug
 if __debug__:
     from traceback import print_exc
 
-EDSM_POLL               = 0.1
-_TIMEOUT                = 20
-FAKE                    = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
+EDSM_POLL = 0.1
+_TIMEOUT = 20
+FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
 
-this                    = sys.modules[__name__]	# For holding module globals
-this.session            = requests.Session()
-this.queue              = Queue()	# Items to be sent to EDSM by worker thread
-this.discardedEvents    = [] # List discarded events from EDSM
-this.lastlookup         = False	# whether the last lookup succeeded
+this = sys.modules[__name__]	# For holding module globals
+this.session = requests.Session()
+this.queue = Queue()		# Items to be sent to EDSM by worker thread
+this.discardedEvents = []	# List discarded events from EDSM
+this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
-this.multicrew          = False	# don't send captain's ship info to EDSM while on a crew
+this.multicrew = False		# don't send captain's ship info to EDSM while on a crew
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -66,9 +66,8 @@ def plugin_start():
     this.thread = Thread(target = worker, name = 'EDSM worker')
     this.thread.daemon = True
     this.thread.start()
-    
+
     # Get the last Discarded events from EDSM
-    if __debug__: print('Calling Discarded Events API endpoint')
     this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
 
     return 'EDSM'
@@ -196,7 +195,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system.update_idletasks()
 
     this.multicrew = bool(state['Role'])
-    
+
     # If Discarded events still emtpy, retry
     if not this.discardedEvents:
         this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
@@ -242,11 +241,10 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
-                #if __debug__: print(data)            
                 r = this.session.post(url, data=data, timeout=_TIMEOUT)
                 r.raise_for_status()
                 reply = r.json()
-                
+
                 if callback:
                     callback(reply)
                 else:
@@ -267,14 +265,12 @@ def worker():
 
 # Queue a call to the EDSM journal API with args (which should be quoted)
 def call(cmdr, args, callback=None):
-    (username, apikey)              = credentials(cmdr)
-    
-    args                            = dict(args)
-    args['commanderName']           = username
-    args['apiKey']                  = apikey
-    args['fromSoftware']            = applongname
-    args['fromSoftwareVersion']     = appversion
-    
+    (username, apikey) = credentials(cmdr)
+    args = dict(args)
+    args['commanderName'] = username
+    args['apiKey'] = apikey
+    args['fromSoftware'] = applongname
+    args['fromSoftwareVersion'] = appversion
     this.queue.put(('https://www.edsm.net/api-journal-v1', args, callback))
 
 
@@ -282,28 +278,27 @@ def call(cmdr, args, callback=None):
 def sendEntry(cmdr, system, station, entry, state):
     if entry['event'] in this.discardedEvents:
         return
-        
+
     if entry['event'] in ['Location', 'FSDJump'] and entry['StarSystem'] in FAKE:
         return
-    
+
     # Update callback on needed events
     if entry['event'] in ['Location', 'FSDJump']:
         eventCallback = writelog_callback
     else:
         eventCallback = null_callback
-        
+
     # Introduce transient states into the event
-    entry['_systemName']        = system;
-    #entry['_systemCoordinates']  = gameStatus.coordinates; #TODO: Track system coordinates
-    entry['_stationName']        = station;
-    entry['_shipId']             = state['ShipID'];
-    
+    entry['_systemName'] = system
+    #entry['_systemCoordinates'] = gameStatus.coordinates	#TODO: Track system coordinates
+    entry['_stationName'] = station
+    entry['_shipId'] = state['ShipID']
+
     # Make the API call
     call(cmdr, { 'message': json.dumps(entry) }, eventCallback)
 
 
 def writelog_callback(reply):
-    #if __debug__: print(reply)
     this.lastlookup = reply['events'][0] # Get first response while we send events one by one
     this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
 
@@ -325,11 +320,11 @@ def update_status(event=None):
 # When we don't care about return msgnum from EDSM
 def null_callback(reply):
     if not reply:
-        plug.show_error(_("Error: Can't connect to EDSM"))# When we don't care about return msgnum from EDSM
+        plug.show_error(_("Error: Can't connect to EDSM"))
 
 # Grab the discarded list
 def discarded_callback(reply):
     if not reply:
-        plug.show_error(_("Error: Can't get EDSM DIscarded Events"))
+        plug.show_error(_("Error: Can't connect to EDSM"))
     else:
         this.discardedEvents = reply
