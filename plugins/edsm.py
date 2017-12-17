@@ -267,7 +267,7 @@ def worker():
 def call(cmdr, args, callback=None):
     (username, apikey) = credentials(cmdr)
     args = dict(args)
-    args['commanderName'] = username
+    args['commanderName'] = username.encode('utf-8')
     args['apiKey'] = apikey
     args['fromSoftware'] = applongname
     args['fromSoftwareVersion'] = appversion
@@ -295,7 +295,7 @@ def sendEntry(cmdr, system, station, entry, state):
     entry['_shipId'] = state['ShipID']
 
     # Make the API call
-    call(cmdr, { 'message': json.dumps(entry) }, eventCallback)
+    call(cmdr, { 'message': json.dumps(entry, ensure_ascii=False).encode('utf-8') }, eventCallback)
 
 
 def writelog_callback(reply):
