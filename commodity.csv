@@ -91,7 +91,7 @@ id,symbol,category,name
 128666760,USSCargoPrototypeTech,Salvage,Prototype Tech
 128666761,USSCargoTechnicalBlueprints,Salvage,Technical Blueprints
 128667728,ImperialSlaves,Slavery,Imperial Slaves
-128668547,UnknownArtifact,Salvage,Unknown Artefact
+128668547,UnknownArtifact,Salvage,Thargoid Sensor
 128668548,AiRelics,Salvage,AI Relics
 128668549,Hafnium178,Metals,Hafnium 178
 128668550,Painite,Minerals,Painite
@@ -177,7 +177,7 @@ id,symbol,category,name
 128673873,MicroControllers,Technology,Micro Controllers
 128673874,IonDistributor,Machinery,Ion Distributor
 128673875,DiagnosticSensor,Technology,Hardware Diagnostic Sensor
-128673876,UnknownArtifact2,Salvage,Unknown Probe
+128673876,UnknownArtifact2,Salvage,Thargoid Probe
 128682044,ConductiveFabrics,Textiles,Conductive Fabrics
 128682045,MilitaryGradeFabrics,Textiles,Military Grade Fabrics
 128682046,AdvancedMedicines,Medicines,Advanced Medicines
@@ -200,4 +200,7 @@ id,symbol,category,name
 128737288,UnknownBiologicalMatter,Salvage,Thargoid Biological Matter
 128737289,UnknownTechnologySamples,Salvage,Thargoid Technology Samples
 128740752,UnknownArtifact3,Salvage,Thargoid Link
-128793114,PlatinumAloy,Metals,Platinum Aloy
+128793127,ThargoidHeart,Salvage,Thargoid Heart
+128793128,ThargoidTissueSampleType1,Salvage,Thargoid Cyclops Tissue Sample
+128793129,ThargoidTissueSampleType2,Salvage,Thargoid Basilisk Tissue Sample
+128793130,ThargoidTissueSampleType3,Salvage,Thargoid Medusa Tissue Sample
