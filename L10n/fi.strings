@@ -1,3 +1,18 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Inaran virhe: {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inaran kirjautuminen";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
+
 /* Language name */
 "!Language" = "Suomi";
 
