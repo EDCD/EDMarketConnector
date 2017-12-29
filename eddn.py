@@ -186,9 +186,9 @@ class EDDN:
                 ('commodities', commodities),
             ])
             if 'economies' in data['lastStarport']:
-                message['economies']  = sorted([x for x in data['lastStarport'].get('economies',  {}).itervalues()])
+                message['economies']  = sorted([x for x in (data['lastStarport']['economies']  or {}).itervalues()])
             if 'prohibited' in data['lastStarport']:
-                message['prohibited'] = sorted([x for x in data['lastStarport'].get('prohibited', {}).itervalues()])
+                message['prohibited'] = sorted([x for x in (data['lastStarport']['prohibited'] or {}).itervalues()])
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : message,
