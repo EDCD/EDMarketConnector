@@ -332,7 +332,7 @@ class AppWindow:
         if not monitor.start(self.w):
             self.status['text'] = 'Error: Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
-        if dologin:
+        if dologin and monitor.cmdr:
             self.login()	# Login if not already logged in with this Cmdr
 
     # set main window labels, e.g. after language change
