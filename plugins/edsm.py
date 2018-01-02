@@ -201,6 +201,27 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             '_shipId': state['ShipID'],
         }
         entry.update(transient)
+
+        if entry['event'] == 'LoadGame':
+            # Synthesise Cargo and Materials events on LoadGame since we will have missed them because Cmdr was unknown
+            cargo = {
+                'timestamp': entry['timestamp'],
+                'event': 'Cargo',
+                'Inventory': [ { 'Name': k, 'Count': v } for k,v in state['Cargo'].iteritems() ],
+            }
+            cargo.update(transient)
+            this.queue.put((cmdr, cargo))
+
+            materials = {
+                'timestamp': entry['timestamp'],
+                'event': 'Materials',
+                'Raw':          [ { 'Name': k, 'Count': v } for k,v in state['Raw'].iteritems() ],
+                'Manufactured': [ { 'Name': k, 'Count': v } for k,v in state['Manufactured'].iteritems() ],
+                'Encoded':      [ { 'Name': k, 'Count': v } for k,v in state['Encoded'].iteritems() ],
+            }
+            materials.update(transient)
+            this.queue.put((cmdr, materials))
+
         this.queue.put((cmdr, entry))
 
 
