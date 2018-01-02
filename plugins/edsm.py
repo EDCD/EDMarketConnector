@@ -318,10 +318,10 @@ def worker():
 # Whether any of the entries should be sent immediately
 def should_send(entries):
     for entry in entries:
-        # Skip entries that will be soon followed by a 'Docked' event
-        if (entry['event'] not in ['Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',
-                                   'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'] and
-            not (entry['event'] == 'Location' and entry.get('Docked'))):
+        if (entry['event'] not in ['CommunityGoal',	# Spammed periodically
+                                   'Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',	# Will be followed by 'Docked'
+                                   'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'] and			#  "
+            not (entry['event'] == 'Location' and entry.get('Docked'))):				#  "
             return True
     return False
 
