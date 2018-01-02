@@ -67,9 +67,6 @@ def plugin_start():
     this.thread.daemon = True
     this.thread.start()
 
-    # Get the last Discarded events from EDSM
-    this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
-
     return 'EDSM'
 
 def plugin_app(parent):
@@ -194,22 +191,17 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             this.lastlookup = False
         this.system.update_idletasks()
 
-    this.multicrew = bool(state['Role'])
-
-    # If Discarded events still emtpy, retry
-    if not this.discardedEvents:
-        this.queue.put(('https://www.edsm.net/api-journal-v1/discard', {}, discarded_callback))
-
     # Send interesting events to EDSM
-    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr):
-        try:
-            # Send the journal entry if not in the discarded events
-            if entry['event'] not in this.discardedEvents:
-                sendEntry(cmdr, system, station, entry, state)
-
-        except Exception as e:
-            if __debug__: print_exc()
-            return unicode(e)
+    if config.getint('edsm_out') and not is_beta and not state['Role'] and credentials(cmdr) and entry['event'] not in this.discardedEvents:
+        # Introduce transient states into the event
+        transient = {
+            '_systemName': system,
+            #'_systemCoordinates': state['coordinates'],	#TODO: Track system coordinates
+            '_stationName': station,
+            '_shipId': state['ShipID'],
+        }
+        entry.update(transient)
+        this.queue.put((cmdr, entry))
 
 
 # Update system data
@@ -231,27 +223,57 @@ def cmdr_data(data, is_beta):
 
 # Worker thread
 def worker():
+
+    pending = []	# Unsent events
+
     while True:
         item = this.queue.get()
         if not item:
             return	# Closing
         else:
-            (url, data, callback) = item
+            (cmdr, entry) = item
 
         retrying = 0
         while retrying < 3:
             try:
-                r = this.session.post(url, data=data, timeout=_TIMEOUT)
-                r.raise_for_status()
-                reply = r.json()
+                if entry['event'] not in this.discardedEvents:
+                    pending.append(entry)
 
-                if callback:
-                    callback(reply)
-                else:
+                # Get list of events to discard
+                if not this.discardedEvents:
+                    r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
+                    r.raise_for_status()
+                    this.discardedEvents = set(r.json())
+                    this.discardedEvents.discard('Docked')	# should_send() assumes that we send 'Docked' events
+                    assert this.discardedEvents			# wouldn't expect this to be empty
+                    pending = [x for x in pending if x['event'] not in this.discardedEvents]	# Filter out unwanted events
+
+                if should_send(pending):
+                    (username, apikey) = credentials(cmdr)
+                    data = {
+                        'commanderName': username.encode('utf-8'),
+                        'apiKey': apikey,
+                        'fromSoftware': applongname,
+                        'fromSoftwareVersion': appversion,
+                        'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
+                    }
+                    r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
+                    r.raise_for_status()
+                    reply = r.json()
                     (msgnum, msg) = reply['msgnum'], reply['msg']
-                    if msgnum // 100 not in (1,4):
-                        if __debug__: print(_('Error: EDSM {MSG}').format(MSG=msg))
+                    if msgnum // 100 != 1:	# 1xx == OK
+                        print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+                    else:
+                        # Update main window's system status
+                        for i in range(len(pending) - 1, -1, -1):
+                            if pending[i]['event'] in ['Location', 'FSDJump']:
+                                this.lastlookup = reply['events'][i]
+                                this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
+                                break
+
+                        pending = []
+
                 break
             except:
                 if __debug__: print_exc()
@@ -263,44 +285,16 @@ def worker():
                 plug.show_error(_("Error: Can't connect to EDSM"))
 
 
-# Queue a call to the EDSM journal API with args (which should be quoted)
-def call(cmdr, args, callback=None):
-    (username, apikey) = credentials(cmdr)
-    args = dict(args)
-    args['commanderName'] = username.encode('utf-8')
-    args['apiKey'] = apikey
-    args['fromSoftware'] = applongname
-    args['fromSoftwareVersion'] = appversion
-    this.queue.put(('https://www.edsm.net/api-journal-v1', args, callback))
+# Whether any of the entries should be sent immediately
+def should_send(entries):
+    for entry in entries:
+        # Skip entries that will be soon followed by a 'Docked' event
+        if (entry['event'] not in ['Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',
+                                   'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'] and
+            not (entry['event'] == 'Location' and entry.get('Docked'))):
+            return True
+    return False
 
-
-# Send journal entry
-def sendEntry(cmdr, system, station, entry, state):
-    if entry['event'] in this.discardedEvents:
-        return
-
-    if entry['event'] in ['Location', 'FSDJump'] and entry['StarSystem'] in FAKE:
-        return
-
-    # Update callback on needed events
-    if entry['event'] in ['Location', 'FSDJump']:
-        eventCallback = writelog_callback
-    else:
-        eventCallback = null_callback
-
-    # Introduce transient states into the event
-    entry['_systemName'] = system
-    #entry['_systemCoordinates'] = gameStatus.coordinates	#TODO: Track system coordinates
-    entry['_stationName'] = station
-    entry['_shipId'] = state['ShipID']
-
-    # Make the API call
-    call(cmdr, { 'message': json.dumps(entry, ensure_ascii=False).encode('utf-8') }, eventCallback)
-
-
-def writelog_callback(reply):
-    this.lastlookup = reply['events'][0] # Get first response while we send events one by one
-    this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
 
 def update_status(event=None):
     reply = this.lastlookup
@@ -316,15 +310,3 @@ def update_status(event=None):
     else:
         this.system['image'] = this._IMG_KNOWN
 
-
-# When we don't care about return msgnum from EDSM
-def null_callback(reply):
-    if not reply:
-        plug.show_error(_("Error: Can't connect to EDSM"))
-
-# Grab the discarded list
-def discarded_callback(reply):
-    if not reply:
-        plug.show_error(_("Error: Can't connect to EDSM"))
-    else:
-        this.discardedEvents = reply
