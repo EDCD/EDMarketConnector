@@ -7,7 +7,6 @@ import requests
 import sys
 import time
 import urllib2
-from calendar import timegm
 from Queue import Queue
 from threading import Thread
 
@@ -34,6 +33,7 @@ this = sys.modules[__name__]	# For holding module globals
 this.session = requests.Session()
 this.queue = Queue()		# Items to be sent to EDSM by worker thread
 this.discardedEvents = []	# List discarded events from EDSM
+this.lastship = None		# Description of last ship that we sent to EDSM
 this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
@@ -240,6 +240,15 @@ def cmdr_data(data, is_beta):
             this.system['url'] = 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system)
             this.lastlookup = False
         this.system.update_idletasks()
+
+    # Send ship info to EDSM
+    ship = companion.ship(data)
+    if ship != this.lastship:
+        cmdr = data['commander']['name']
+        timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        this.queue.put((cmdr, { 'event': 'Coriolis',   'timestamp': timestamp, 'url': coriolis.url(data, is_beta) } ))
+        this.queue.put((cmdr, { 'event': 'EDShipyard', 'timestamp': timestamp, 'url': edshipyard.url(data, is_beta) } ))
+        this.lastship = ship
 
 
 # Worker thread
