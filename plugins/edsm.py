@@ -246,8 +246,12 @@ def cmdr_data(data, is_beta):
     if ship != this.lastship:
         cmdr = data['commander']['name']
         timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-        this.queue.put((cmdr, { 'event': 'Coriolis',   'timestamp': timestamp, 'url': coriolis.url(data, is_beta) } ))
-        this.queue.put((cmdr, { 'event': 'EDShipyard', 'timestamp': timestamp, 'url': edshipyard.url(data, is_beta) } ))
+        this.queue.put((cmdr, {
+            'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
+        }))
+        this.queue.put((cmdr, {
+            'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
+        }))
         this.lastship = ship
 
 
