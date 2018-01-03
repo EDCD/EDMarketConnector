@@ -295,7 +295,8 @@ def worker():
                     r.raise_for_status()
                     reply = r.json()
                     (msgnum, msg) = reply['msgnum'], reply['msg']
-                    if msgnum // 100 != 1:	# 1xx == OK
+                    # 1xx = OK, 2xx = fatal error, 3&4xx not generated at top-level, 5xx = error but events saved for later processing
+                    if msgnum // 100 == 2:
                         print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                     else:
