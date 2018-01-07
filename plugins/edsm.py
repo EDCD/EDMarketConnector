@@ -38,6 +38,7 @@ this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
 this.multicrew = False		# don't send captain's ship info to EDSM while on a crew
+this.coordinates = None
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -192,13 +193,17 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system.update_idletasks()
 
     this.multicrew = bool(state['Role'])
+    if 'StarPos' in entry:
+        this.coordinates = entry['StarPos']
+    elif entry['event'] == 'LoadGame':
+        this.coordinates = None
 
     # Send interesting events to EDSM
     if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and entry['event'] not in this.discardedEvents:
         # Introduce transient states into the event
         transient = {
             '_systemName': system,
-            #'_systemCoordinates': state['coordinates'],	#TODO: Track system coordinates
+            '_systemCoordinates': this.coordinates,
             '_stationName': station,
             '_shipId': state['ShipID'],
         }
