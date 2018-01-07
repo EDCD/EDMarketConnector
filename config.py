@@ -146,7 +146,9 @@ class Config:
 
         def get(self, key):
             val = self.settings.get(key)
-            if hasattr(val, '__iter__'):
+            if val is None:
+                return None
+            elif hasattr(val, '__iter__'):
                 return list(val)	# make writeable
             else:
                 return unicode(val)
