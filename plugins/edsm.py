@@ -310,7 +310,7 @@ def worker():
                     else:
                         # Update main window's system status
                         for i in range(len(pending) - 1, -1, -1):
-                            if pending[i]['event'] in ['Location', 'FSDJump']:
+                            if pending[i]['event'] in ['StartUp', 'Location', 'FSDJump']:
                                 this.lastlookup = reply['events'][i]
                                 this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
                                 break
