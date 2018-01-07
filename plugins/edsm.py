@@ -191,8 +191,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             this.lastlookup = False
         this.system.update_idletasks()
 
+    this.multicrew = bool(state['Role'])
+
     # Send interesting events to EDSM
-    if config.getint('edsm_out') and not is_beta and not state['Role'] and credentials(cmdr) and entry['event'] not in this.discardedEvents:
+    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and entry['event'] not in this.discardedEvents:
         # Introduce transient states into the event
         transient = {
             '_systemName': system,
@@ -242,17 +244,18 @@ def cmdr_data(data, is_beta):
         this.system.update_idletasks()
 
     # Send ship info to EDSM
-    ship = companion.ship(data)
-    if ship != this.lastship:
-        cmdr = data['commander']['name']
-        timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-        this.queue.put((cmdr, {
-            'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
-        }))
-        this.queue.put((cmdr, {
-            'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
-        }))
-        this.lastship = ship
+    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
+        ship = companion.ship(data)
+        if ship != this.lastship:
+            cmdr = data['commander']['name']
+            timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            this.queue.put((cmdr, {
+                'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
+            }))
+            this.queue.put((cmdr, {
+                'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
+            }))
+            this.lastship = ship
 
 
 # Worker thread
