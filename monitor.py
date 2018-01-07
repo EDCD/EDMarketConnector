@@ -223,7 +223,26 @@ class EDLogs(FileSystemEventHandler):
 
         if self.live:
             if self.game_was_running:
-                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                # Game is running locally
+                if self.station:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', True),
+                        ('StationName', self.station),
+                        ('StationType', self.stationtype),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                    ])
+                else:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', False),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                    ])
+                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             else:
                 self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
                 self.live = False
@@ -504,8 +523,27 @@ class EDLogs(FileSystemEventHandler):
         else:
             entry = self.parse_entry(self.event_queue.pop(0))
             if not self.live and entry['event'] not in [None, 'Fileheader']:
+                # Game not running locally, but Journal has been updated
                 self.live = True
-                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                if self.station:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', True),
+                        ('StationName', self.station),
+                        ('StationType', self.stationtype),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                    ])
+                else:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', False),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                    ])
+                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
                 self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
             return entry
