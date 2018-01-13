@@ -103,6 +103,7 @@ if __name__ == "__main__":
         'pcm' : 'First Class Passenger Cabin',
         'pcq' : 'Luxury Passenger Cabin',
         'cc'  : 'Collector Limpet Controller',
+        'rpl' : 'Repair Limpet Controller',
 
         # Hard Points
         'bl'  : 'Beam Laser',
@@ -167,7 +168,6 @@ if __name__ == "__main__":
     # (Note only seen 1E Research).
     for k in modules.keys():
         if k[0] == 'Prospector Limpet Controller':
-            modules[('Repair Limpet Controller',) + k[1:]] = modules[k]
             modules[('Research Limpet Controller',) + k[1:]] = modules[k]
 
     # Other 2.4 additions not yet present in coriolis-data

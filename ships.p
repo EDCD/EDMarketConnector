@@ -154,40 +154,46 @@ a(dp78
 g6
 I25
 saa(lp79
-S'Type-6 Transporter'
+S'Type-10 Defender'
 p80
 a(dp81
 g6
-I155
+I1200
 saa(lp82
-S'Type-7 Transporter'
+S'Type-6 Transporter'
 p83
 a(dp84
 g6
-I420
+I155
 saa(lp85
-S'Type-9 Heavy'
+S'Type-7 Transporter'
 p86
 a(dp87
 g6
-I1000
+I420
 saa(lp88
-S'Viper MkIII'
+S'Type-9 Heavy'
 p89
 a(dp90
 g6
-I50
+I1000
 saa(lp91
-S'Viper MkIV'
+S'Viper MkIII'
 p92
 a(dp93
 g6
-I190
+I50
 saa(lp94
-S'Vulture'
+S'Viper MkIV'
 p95
 a(dp96
 g6
+I190
+saa(lp97
+S'Vulture'
+p98
+a(dp99
+g6
 I230
-saatRp97
+saatRp100
 .
