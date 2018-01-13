@@ -242,7 +242,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.shipswap = False
 
             # Update location
-            if (entry['event'] == 'Location' or this.newuser) and system:
+            if (entry['event'] in ['StartUp', 'Location'] or this.newuser) and system:
                 this.undocked = False
                 add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
