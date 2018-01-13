@@ -222,7 +222,7 @@ class Config:
                     RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
-                self.set('outdir', KnownFolderPath(FOLDERID_Documents))
+                self.set('outdir', KnownFolderPath(FOLDERID_Documents) or self.home)
 
         def get(self, key):
             typ  = DWORD()
