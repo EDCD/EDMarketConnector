@@ -269,18 +269,19 @@ def cmdr_data(data, is_beta):
 def worker():
 
     pending = []	# Unsent events
+    closing = False
 
     while True:
         item = this.queue.get()
-        if not item:
-            return	# Closing
-        else:
+        if item:
             (cmdr, entry) = item
+        else:
+            closing = True	# Try to send any unsent events before we close
 
         retrying = 0
         while retrying < 3:
             try:
-                if entry['event'] not in this.discardedEvents:
+                if item and entry['event'] not in this.discardedEvents:
                     pending.append(entry)
 
                 # Get list of events to discard
@@ -309,7 +310,7 @@ def worker():
                     if msgnum // 100 == 2:
                         print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
-                    else:
+                    elif not closing:
                         # Update main window's system status
                         for i in range(len(pending) - 1, -1, -1):
                             if pending[i]['event'] in ['StartUp', 'Location', 'FSDJump']:
@@ -328,6 +329,9 @@ def worker():
                 callback(None)
             else:
                 plug.show_error(_("Error: Can't connect to EDSM"))
+
+        if closing:
+            return
 
 
 # Whether any of the entries should be sent immediately
