@@ -251,6 +251,7 @@ internal_map = {
     'cargorack'         : 'Cargo Rack',
     'collection'        : 'Collector Limpet Controller',
     'corrosionproofcargorack' : 'Corrosion Resistant Cargo Rack',
+    'decontamination'   : 'Decontamination Limpet Controller',
     'fighterbay'        : 'Fighter Hangar',
     'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
     'fuelscoop'         : 'Fuel Scoop',

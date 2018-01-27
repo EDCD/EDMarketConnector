@@ -81,7 +81,6 @@ if __name__ == "__main__":
         # Internal
         'fs'  : 'Fuel Scoop',
         'sc'  : 'Scanner',
-        'ss'  : 'Detailed Surface Scanner',
         'am'  : 'Auto Field-Maintenance Unit',
         'bsg' : 'Bi-Weave Shield Generator',
         'cr'  : 'Cargo Rack',
@@ -104,6 +103,7 @@ if __name__ == "__main__":
         'pcq' : 'Luxury Passenger Cabin',
         'cc'  : 'Collector Limpet Controller',
         'rpl' : 'Repair Limpet Controller',
+        'ss'  : 'Detailed Surface Scanner',
 
         # Hard Points
         'bl'  : 'Beam Laser',
@@ -114,19 +114,24 @@ if __name__ == "__main__":
         'cm'  : 'Countermeasure',
         'ec'  : 'Electronic Countermeasure',
         'fc'  : 'Fragment Cannon',
+        'rfl' : 'Remote Release Flak Launcher',
         'hs'  : 'Heat Sink Launcher',
         'ws'  : 'Frame Shift Wake Scanner',
         'kw'  : 'Kill Warrant Scanner',
         'nl'  : 'Mine Launcher',
         'ml'  : 'Mining Laser',
         'mr'  : 'Missile Rack',
+        'axmr': 'AX Missile Rack',
         'pa'  : 'Plasma Accelerator',
         'po'  : 'Point Defence',
         'mc'  : 'Multi-cannon',
+        'axmc': 'AX Multi-Cannon',
         'pl'  : 'Pulse Laser',
         'rg'  : 'Rail Gun',
         'sb'  : 'Shield Booster',
-        'tp'  : 'Torpedo Pylon'
+        'tp'  : 'Torpedo Pylon',
+        'sfn' : 'Shutdown Field Neutraliser',
+        'xs'  : 'Xeno Scanner',
     };
 
     ships = {}
@@ -164,19 +169,11 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
-    # Repair and Research Limpet Controller not yet present in coriolis-data. Same masses as Prospector.
-    # (Note only seen 1E Research).
-    for k in modules.keys():
-        if k[0] == 'Prospector Limpet Controller':
-            modules[('Research Limpet Controller',) + k[1:]] = modules[k]
-
-    # Other 2.4 additions not yet present in coriolis-data
-    modules[('AX Missile Rack', None, '2', 'B')] = {'mass': 4}
-    modules[('AX Multi-Cannon', None, '2', 'E')] = {'mass': 4}
-    modules[('AX Multi-Cannon', None, '2', 'F')] = {'mass': 4}
-    modules[('Remote Release Flak Launcher', None, '2', 'B')] = {'mass': 4}
-    modules[('Shutdown Field Neutraliser', None, '0', 'F')] = {'mass': 1.3}
-    modules[('Xeno Scanner', None, '0', 'E')] = {'mass': 1.3}
+    # 2.5 additions not yet present in coriolis-data
+    modules[('Decontamination Limpet Controller', None, '1', 'E')] = {'mass': 1.3}
+    modules[('Decontamination Limpet Controller', None, '3', 'E')] = {'mass': 2}
+    modules[('Decontamination Limpet Controller', None, '5', 'E')] = {'mass': 20}
+    modules[('Decontamination Limpet Controller', None, '7', 'E')] = {'mass': 128}
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
