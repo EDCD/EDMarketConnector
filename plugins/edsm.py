@@ -254,12 +254,14 @@ def cmdr_data(data, is_beta):
         if ship != this.lastship:
             cmdr = data['commander']['name']
             timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-            this.queue.put((cmdr, {
-                'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
-            }))
-            this.queue.put((cmdr, {
-                'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
-            }))
+            if 'Coriolis' not in this.discardedEvents:
+                this.queue.put((cmdr, {
+                    'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
+                }))
+            if 'EDShipyard' not in this.discardedEvents:
+                this.queue.put((cmdr, {
+                    'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
+                }))
             this.lastship = ship
 
 
@@ -332,7 +334,7 @@ def worker():
 def should_send(entries):
     for entry in entries:
         if (entry['event'] not in ['CommunityGoal',	# Spammed periodically
-                                   'Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',	# Will be followed by 'Docked'
+                                   'Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',	# Will be followed by 'Docked' or 'Location'
                                    'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'] and			#  "
             not (entry['event'] == 'Location' and entry.get('Docked'))):				#  "
             return True
