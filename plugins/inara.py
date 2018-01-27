@@ -43,6 +43,11 @@ this.lastcredits = 0	# Send credit update soon after Startup / new game
 this.needfleet = True	# Send full fleet update soon after Startup / new game
 this.shipswap = False	# just swapped ship
 
+# URLs
+this.system = None
+this.station = None
+
+
 def plugin_start():
     this.thread = Thread(target = worker, name = 'Inara worker')
     this.thread.daemon = True
@@ -601,6 +606,10 @@ def worker():
                             print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event, separators = (',', ': ')))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
+                            if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                                eventData = reply_event.get('eventData', {})
+                                this.system  = eventData.get('starsystemInaraURL')
+                                this.station = eventData.get('stationInaraURL')
                 break
             except:
                 if __debug__: print_exc()
