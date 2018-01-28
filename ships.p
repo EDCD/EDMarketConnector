@@ -10,190 +10,196 @@ S'hullMass'
 p6
 I35
 saa(lp7
-S'Anaconda'
+S'Alliance Chieftain'
 p8
 a(dp9
 g6
-I400
+I420
 saa(lp10
-S'Asp Explorer'
+S'Anaconda'
 p11
 a(dp12
 g6
-I280
+I400
 saa(lp13
-S'Asp Scout'
+S'Asp Explorer'
 p14
 a(dp15
 g6
-I150
+I280
 saa(lp16
-S'Beluga Liner'
+S'Asp Scout'
 p17
 a(dp18
 g6
-I950
+I150
 saa(lp19
-S'Cobra MkIII'
+S'Beluga Liner'
 p20
 a(dp21
 g6
-I180
+I950
 saa(lp22
-S'Cobra MkIV'
+S'Cobra MkIII'
 p23
 a(dp24
 g6
-I210
+I180
 saa(lp25
-S'Diamondback Explorer'
+S'Cobra MkIV'
 p26
 a(dp27
 g6
-I260
+I210
 saa(lp28
-S'Diamondback Scout'
+S'Diamondback Explorer'
 p29
 a(dp30
 g6
-I170
+I260
 saa(lp31
-S'Dolphin'
+S'Diamondback Scout'
 p32
 a(dp33
 g6
-I140
+I170
 saa(lp34
-S'Eagle'
+S'Dolphin'
 p35
 a(dp36
 g6
-I50
+I140
 saa(lp37
-S'Federal Assault Ship'
+S'Eagle'
 p38
 a(dp39
 g6
-I480
+I50
 saa(lp40
-S'Federal Corvette'
+S'Federal Assault Ship'
 p41
 a(dp42
 g6
-I900
+I480
 saa(lp43
-S'Federal Dropship'
+S'Federal Corvette'
 p44
 a(dp45
 g6
-I580
+I900
 saa(lp46
-S'Federal Gunship'
+S'Federal Dropship'
 p47
 a(dp48
 g6
 I580
 saa(lp49
-S'Fer-de-Lance'
+S'Federal Gunship'
 p50
 a(dp51
 g6
-I250
+I580
 saa(lp52
-S'Hauler'
+S'Fer-de-Lance'
 p53
 a(dp54
 g6
-I14
+I250
 saa(lp55
-S'Imperial Clipper'
+S'Hauler'
 p56
 a(dp57
 g6
-I400
+I14
 saa(lp58
-S'Imperial Courier'
+S'Imperial Clipper'
 p59
 a(dp60
 g6
-I35
+I400
 saa(lp61
-S'Imperial Cutter'
+S'Imperial Courier'
 p62
 a(dp63
 g6
-I1100
+I35
 saa(lp64
-S'Imperial Eagle'
+S'Imperial Cutter'
 p65
 a(dp66
 g6
-I50
+I1100
 saa(lp67
-S'Keelback'
+S'Imperial Eagle'
 p68
 a(dp69
 g6
-I180
+I50
 saa(lp70
-S'Orca'
+S'Keelback'
 p71
 a(dp72
 g6
-I290
+I180
 saa(lp73
-S'Python'
+S'Orca'
 p74
 a(dp75
 g6
-I350
+I290
 saa(lp76
-S'Sidewinder'
+S'Python'
 p77
 a(dp78
 g6
-I25
+I350
 saa(lp79
-S'Type-10 Defender'
+S'Sidewinder'
 p80
 a(dp81
 g6
-I1200
+I25
 saa(lp82
-S'Type-6 Transporter'
+S'Type-10 Defender'
 p83
 a(dp84
 g6
-I155
+I1200
 saa(lp85
-S'Type-7 Transporter'
+S'Type-6 Transporter'
 p86
 a(dp87
 g6
-I420
+I155
 saa(lp88
-S'Type-9 Heavy'
+S'Type-7 Transporter'
 p89
 a(dp90
 g6
-I1000
+I420
 saa(lp91
-S'Viper MkIII'
+S'Type-9 Heavy'
 p92
 a(dp93
 g6
-I50
+I850
 saa(lp94
-S'Viper MkIV'
+S'Viper MkIII'
 p95
 a(dp96
 g6
-I190
+I50
 saa(lp97
-S'Vulture'
+S'Viper MkIV'
 p98
 a(dp99
 g6
+I190
+saa(lp100
+S'Vulture'
+p101
+a(dp102
+g6
 I230
-saatRp100
+saatRp103
 .
