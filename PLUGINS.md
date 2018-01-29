@@ -128,12 +128,12 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
-### Player Status
+### Player Dashboard
 
-This gets called periodically - typically about once a second - whith the players live status
+This gets called when something on the player's cockpit display changes - typically about once a second when in orbital flight
 
 ```python
-def status(cmdr, is_beta, entry):
+def dashboard_entry(cmdr, is_beta, entry):
     deployed = entry['Flags'] & 1<<6
     sys.stderr.write("Hardpoints {}\n", deployed and "deployed" or "stowed")
 ```
@@ -154,7 +154,7 @@ The data is a dictionary and full of lots of wonderful stuff!
 
 ## Error messages
 
-You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `status()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
+You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `status_entry()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
 
 The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
 

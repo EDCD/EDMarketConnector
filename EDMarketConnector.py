@@ -57,7 +57,7 @@ import prefs
 import plug
 from hotkey import hotkeymgr
 from monitor import monitor
-from status import status
+from dashboard import dashboard
 from theme import theme
 
 
@@ -270,7 +270,7 @@ class AppWindow:
         self.w.bind('<KP_Enter>', self.getandsend)
         self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
-        self.w.bind_all('<<StatusEvent>>', self.status_event)	# Cmdr Status monitoring
+        self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)	# Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
@@ -630,8 +630,8 @@ class AppWindow:
                     hotkeymgr.play_bad()
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
-                # Can start status monitoring
-                if not status.start(self.w, monitor.started):
+                # Can start dashboard monitoring
+                if not dashboard.start(self.w, monitor.started):
                     print "Can't start Status monitoring"
 
             # Don't send to EDDN while on crew
@@ -686,11 +686,11 @@ class AppWindow:
                     hotkeymgr.play_bad()
 
     # Handle Status event
-    def status_event(self, event):
-        entry = status.status
+    def dashboard_event(self, event):
+        entry = dashboard.status
         if entry:
             # Currently we don't do anything with these events
-            err = plug.notify_status(monitor.cmdr, monitor.is_beta, entry)
+            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
             if err:
                 self.status['text'] = err
                 if not config.getint('hotkey_mute'):
@@ -797,7 +797,7 @@ class AppWindow:
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         hotkeymgr.unregister()
-        status.close()
+        dashboard.close()
         monitor.close()
         plug.notify_stop()
         self.eddn.close()

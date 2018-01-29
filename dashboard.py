@@ -2,7 +2,7 @@ import json
 from calendar import timegm
 from operator import itemgetter
 from os import listdir, stat
-from os.path import getmtime, isdir, join
+from os.path import isdir, join
 from sys import platform
 import time
 
@@ -26,7 +26,7 @@ else:
 
 
 # Status.json handler
-class Status(FileSystemEventHandler):
+class Dashboard(FileSystemEventHandler):
 
     _POLL = 1		# Fallback polling interval
 
@@ -55,7 +55,7 @@ class Status(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = bool(config.get('statusdir')) and platform != 'win32'
+        polling = bool(config.get('journaldir')) and platform != 'win32'
         if not polling and not self.observer:
             self.observer = Observer()
             self.observer.daemon = True
@@ -68,7 +68,7 @@ class Status(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print '%s status "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
+            print '%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
@@ -79,7 +79,7 @@ class Status(FileSystemEventHandler):
 
     def stop(self):
         if __debug__:
-            print 'Stopping monitoring Status'
+            print 'Stopping monitoring Dashboard'
         self.currentdir = None
         if self.observed:
             self.observed = None
@@ -123,9 +123,9 @@ class Status(FileSystemEventHandler):
             # Status file is shared between beta and live. So filter out status not in this game session.
             if  timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start and self.status != entry:
                 self.status = entry
-                self.root.event_generate('<<StatusEvent>>', when="tail")
+                self.root.event_generate('<<DashboardEvent>>', when="tail")
         except:
             if __debug__: print_exc()
 
 # singleton
-status = Status()
+dashboard = Dashboard()

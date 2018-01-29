@@ -226,7 +226,7 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     return error
 
 
-def notify_status(cmdr, is_beta, entry):
+def notify_dashboard_entry(cmdr, is_beta, entry):
     """
     Send a status entry to each plugin.
     :param cmdr: The piloting Cmdr name
@@ -236,7 +236,7 @@ def notify_status(cmdr, is_beta, entry):
     """
     error = None
     for plugin in PLUGINS:
-        status = plugin._get_func('status')
+        status = plugin._get_func('dashboard_entry')
         if status:
             try:
                 # Pass a copy of the status entry in case the callee modifies it
