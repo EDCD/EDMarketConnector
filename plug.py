@@ -226,6 +226,27 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     return error
 
 
+def notify_status(cmdr, is_beta, entry):
+    """
+    Send a status entry to each plugin.
+    :param cmdr: The piloting Cmdr name
+    :param is_beta: whether the player is in a Beta universe.
+    :param entry: The status entry as a dictionary
+    :return: Error message from the first plugin that returns one (if any)
+    """
+    error = None
+    for plugin in PLUGINS:
+        status = plugin._get_func('status')
+        if status:
+            try:
+                # Pass a copy of the status entry in case the callee modifies it
+                newerror = status(cmdr, is_beta, dict(entry))
+                error = error or newerror
+            except:
+                print_exc()
+    return error
+
+
 def notify_system_changed(timestamp, system, coordinates):
     """
     Send notification data to each plugin when we arrive at a new system.
