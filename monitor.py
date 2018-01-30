@@ -230,8 +230,8 @@ class EDLogs(FileSystemEventHandler):
                     ('StarSystem', self.system),
                     ('StarPos', self.coordinates),
                 ])
-                if self.body:
-                    entry['Body'] = self.body
+                if self.planet:
+                    entry['Body'] = self.planet
                 entry['Docked'] = bool(self.station)
                 if self.station:
                     entry['StationName'] = self.station
