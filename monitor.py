@@ -224,24 +224,18 @@ class EDLogs(FileSystemEventHandler):
         if self.live:
             if self.game_was_running:
                 # Game is running locally
+                entry = OrderedDict([
+                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                    ('event', 'StartUp'),
+                    ('StarSystem', self.system),
+                    ('StarPos', self.coordinates),
+                ])
+                if self.body:
+                    entry['Body'] = self.body
+                entry['Docked'] = bool(self.station)
                 if self.station:
-                    entry = OrderedDict([
-                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                        ('event', 'StartUp'),
-                        ('Docked', True),
-                        ('StationName', self.station),
-                        ('StationType', self.stationtype),
-                        ('StarSystem', self.system),
-                        ('StarPos', self.coordinates),
-                    ])
-                else:
-                    entry = OrderedDict([
-                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                        ('event', 'StartUp'),
-                        ('Docked', False),
-                        ('StarSystem', self.system),
-                        ('StarPos', self.coordinates),
-                    ])
+                    entry['StationName'] = self.station
+                    entry['StationType'] = self.stationtype
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             else:
                 self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
@@ -403,9 +397,11 @@ class EDLogs(FileSystemEventHandler):
                                                entry.get('StationName'))	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
                 self.stationservices = entry.get('StationServices')	# None under E:D < 2.4
+            elif entry['event'] == 'ApproachBody':
+                self.planet = entry['Body']
             elif entry['event'] == 'SupercruiseExit':
                 self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
-            elif entry['event'] == 'SupercruiseEntry':
+            elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
                 self.planet = None
             elif entry['event'] in ['Rank', 'Promotion']:
                 for k,v in entry.iteritems():
