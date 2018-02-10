@@ -2,7 +2,7 @@ import json
 from calendar import timegm
 from operator import itemgetter
 from os import listdir, stat
-from os.path import isdir, join
+from os.path import isdir, isfile, join
 from sys import platform
 import time
 
@@ -111,7 +111,7 @@ class Dashboard(FileSystemEventHandler):
 
     def on_modified(self, event):
         # watchdog callback - DirModifiedEvent on macOS, FileModifiedEvent on Windows
-        if event.is_directory or stat(event.src_path).st_size:	# Can get on_modified events when the file is emptied
+        if event.is_directory or (isfile(event.src_path) and stat(event.src_path).st_size):	# Can get on_modified events when the file is emptied
             self.process(event.src_path if not event.is_directory else None)
 
     # Can be called either in watchdog thread or, if polling, in main thread.
