@@ -709,6 +709,14 @@ class AppWindow:
         if not monitor.cmdr or not monitor.mode:
             return False	# In CQC - do nothing
 
+        if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
+            return edshipyard.url(monitor.is_beta)
+        elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
+            pass	# Fall through
+        else:
+            assert False, config.getint('shipyard')
+            return False
+
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
         try:
@@ -734,13 +742,7 @@ class AppWindow:
             self.status['text'] = _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
-            if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
-                return edshipyard.url(data, monitor.is_beta)
-            elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
-                return coriolis.url(data, monitor.is_beta)
-            else:
-                assert False, config.getint('shipyard')
-                return False
+            return coriolis.url(data, monitor.is_beta)
 
     def cooldown(self):
         if time() < self.holdofftime:

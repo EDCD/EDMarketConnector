@@ -34,6 +34,7 @@ this.session = requests.Session()
 this.queue = Queue()		# Items to be sent to EDSM by worker thread
 this.discardedEvents = []	# List discarded events from EDSM
 this.lastship = None		# Description of last ship that we sent to EDSM
+this.lastloadout = None		# Description of last ship that we sent to EDSM
 this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
@@ -235,6 +236,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         this.queue.put((cmdr, entry))
 
+        if entry['event'] == 'Loadout' and 'EDShipyard' not in this.discardedEvents:
+            url = edshipyard.url(is_beta)
+            if this.lastloadout != url:
+                this.lastloadout = url
+                this.queue.put((cmdr, {
+                    'event': 'EDShipyard', 'timestamp': entry['timestamp'], '_shipId': state['ShipID'], 'url': this.lastloadout
+                }))
+
 
 # Update system data
 def cmdr_data(data, is_beta):
@@ -261,10 +270,6 @@ def cmdr_data(data, is_beta):
             if 'Coriolis' not in this.discardedEvents:
                 this.queue.put((cmdr, {
                     'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
-                }))
-            if 'EDShipyard' not in this.discardedEvents:
-                this.queue.put((cmdr, {
-                    'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
                 }))
             this.lastship = ship
 

@@ -625,5 +625,24 @@ class EDLogs(FileSystemEventHandler):
         return False
 
 
+    # Return a subset of the received data describing the current ship as a Loadout event
+    def ship(self):
+        if not self.state['Modules']:
+            return None
+
+        d = OrderedDict([
+            ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+            ('event',     'Loadout'),
+            ('Ship',      self.state['ShipType']),
+            ('ShipID',    self.state['ShipID']),
+        ])
+        for thing in ['ShipName', 'ShipIdent', 'HullValue', 'ModulesValue', 'Rebuy']:
+            if self.state[thing]:
+                d[thing] = self.state[thing]
+        d['Modules'] = self.state['Modules'].values()
+
+        return d
+
+
 # singleton
 monitor = EDLogs()
