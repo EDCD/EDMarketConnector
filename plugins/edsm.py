@@ -310,14 +310,14 @@ def worker():
                     if msgnum // 100 == 2:
                         print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
-                    elif not closing:
-                        # Update main window's system status
-                        for i in range(len(pending) - 1, -1, -1):
-                            if pending[i]['event'] in ['StartUp', 'Location', 'FSDJump']:
-                                this.lastlookup = reply['events'][i]
+                    else:
+                        for e, r in zip(pending, reply):
+                            if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump']:
+                                # Update main window's system status
+                                this.lastlookup = r
                                 this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
-                                break
-
+                            elif r['msgnum'] // 100 != 1:
+                                print('EDSM\t%s %s\t%s' % (r['msgnum'], r['msg'], json.dumps(e, separators = (',', ': '))))
                         pending = []
 
                 break
