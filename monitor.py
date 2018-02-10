@@ -113,7 +113,6 @@ class EDLogs(FileSystemEventHandler):
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
             'Encoded'      : defaultdict(int),
-            'PaintJob'     : None,
             'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
             'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
             'Friends'      : set(),	# Online friends
@@ -121,6 +120,10 @@ class EDLogs(FileSystemEventHandler):
             'ShipIdent'    : None,
             'ShipName'     : None,
             'ShipType'     : None,
+            'HullValue'    : None,
+            'ModulesValue' : None,
+            'Rebuy'        : None,
+            'Modules'      : None,
         }
 
     def start(self, root):
@@ -319,7 +322,6 @@ class EDLogs(FileSystemEventHandler):
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
                     'Encoded'      : defaultdict(int),
-                    'PaintJob'     : None,
                     'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
                     'Role'         : None,
                     'Friends'      : set(),
@@ -327,6 +329,10 @@ class EDLogs(FileSystemEventHandler):
                     'ShipIdent'    : None,
                     'ShipName'     : None,
                     'ShipType'     : None,
+                    'HullValue'    : None,
+                    'ModulesValue' : None,
+                    'Rebuy'        : None,
+                    'Modules'      : None,
                 }
             elif entry['event'] == 'Commander':
                 self.live = True	# First event in 3.0
@@ -362,25 +368,45 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['PaintJob'] = None
+                self.state['HullValue'] = None
+                self.state['ModulesValue'] = None
+                self.state['Rebuy'] = None
+                self.state['Modules'] = None
             elif entry['event'] == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['PaintJob'] = None
+                self.state['HullValue'] = None
+                self.state['ModulesValue'] = None
+                self.state['Rebuy'] = None
+                self.state['Modules'] = None
             elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, ShipyardNew, follows ShipyardSwap, ShipyardBuy
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
                 self.state['ShipType']  = self.canonicalise(entry['Ship'])
-                # Ignore other Modules since they're missing Engineer modification details
-                self.state['PaintJob'] = 'paintjob_%s_default_defaultpaintjob' % self.state['ShipType']
-                for module in entry['Modules']:
-                    if module.get('Slot') == 'PaintJob' and module.get('Item'):
-                        self.state['PaintJob'] = self.canonicalise(module['Item'])
-            elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                self.state['PaintJob'] = self.canonicalise(entry.get('BuyItem'))
+                self.state['HullValue'] = entry.get('HullValue')	# not present on exiting Outfitting
+                self.state['ModulesValue'] = entry.get('ModulesValue')	#   "
+                self.state['Rebuy'] = entry.get('Rebuy')
+                self.state['Modules'] = dict([(thing['Slot'], thing) for thing in entry['Modules']])
+            elif entry['event'] == 'ModuleBuy':
+                self.state['Modules'][entry['Slot']] = { 'Slot'     : entry['Slot'],
+                                                         'Item'     : self.canonicalise(entry['BuyItem']),
+                                                         'On'       : True,
+                                                         'Priority' : 1,
+                                                         'Health'   : 1.0,
+                                                         'Value'    : entry['BuyPrice'],
+                }
+            elif entry['event'] == 'ModuleSell':
+                self.state['Modules'].pop(entry['Slot'], None)
+            elif entry['event'] == 'ModuleSwap':
+                toitem = self.state['Modules'].get(entry['ToSlot'])
+                self.state['Modules'][entry['ToSlot']] = self.state['Modules'][entry['FromSlot']]
+                if toitem:
+                    self.state['Modules'][entry['FromSlot']] = toitem
+                else:
+                    self.state['Modules'].pop(entry['FromSlot'], None)
             elif entry['event'] in ['Undocked']:
                 self.station = None
                 self.stationtype = None
@@ -447,15 +473,39 @@ class EDLogs(FileSystemEventHandler):
                 self.state[entry['Category']][material] -= entry['Count']
                 if self.state[entry['Category']][material] <= 0:
                     self.state[entry['Category']].pop(material)
-            elif entry['event'] in ['EngineerCraft', 'Synthesis']:
+            elif entry['event'] == 'Synthesis':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
-                    for x in entry[entry['event'] == 'EngineerCraft' and 'Ingredients' or 'Materials']:
+                    for x in entry['Materials']:
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
                             self.state[category][material] -= x['Count']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
 
+            elif entry['event'] == 'EngineerCraft' or (entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')):
+                for category in ['Raw', 'Manufactured', 'Encoded']:
+                    for x in entry.get('Ingredients', []):
+                        material = self.canonicalise(x['Name'])
+                        if material in self.state[category]:
+                            self.state[category][material] -= x['Count']
+                            if self.state[category][material] <= 0:
+                                self.state[category].pop(material)
+                module = self.state['Modules'][entry['Slot']]
+                module['Engineering'] = {
+                    'Engineer'      : entry['Engineer'],
+                    'EngineerID'    : entry['EngineerID'],
+                    'BlueprintName' : entry['BlueprintName'],
+                    'BlueprintID'   : entry['BlueprintID'],
+                    'Level'         : entry['Level'],
+                    'Quality'       : entry['Quality'],
+                    'Modifiers'     : entry['Modifiers'],
+                    }
+                if 'ExperimentalEffect' in entry:
+                    module['Engineering']['ExperimentalEffect'] = entry['ExperimentalEffect']
+                    module['Engineering']['ExperimentalEffect_Localised'] = entry['ExperimentalEffect_Localised']
+                else:
+                    module['Engineering'].pop('ExperimentalEffect', None)
+                    module['Engineering'].pop('ExperimentalEffect_Localised', None)
             elif entry['event'] == 'EngineerContribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
                 if commodity:
