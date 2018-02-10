@@ -36,7 +36,7 @@ this.cmdr = None
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
 this.newuser = False	# just entered API Key
 this.undocked = False	# just undocked
-this.suppress_docked = False	# Skip Docked event after Location if started docked
+this.suppress_docked = False	# Skip initial Docked event if started docked
 this.cargo = None
 this.materials = None
 this.lastcredits = 0	# Send credit update soon after Startup / new game
@@ -163,7 +163,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.suppress_docked = True
 
 
-    # Send location and status on new game or StartUp. Assumes Location is the last event on a new game (other than Docked).
+    # Send location and status on new game or StartUp. Assumes Cargo is the last event on a new game (other than Docked).
     # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion and EngineerProgress.
     # Also send material and cargo (if changed) whenever we send an update.
 
@@ -172,7 +172,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             old_events = len(this.events)	# Will only send existing events if we add a new event below
 
             # Send rank info to Inara on startup or change
-            if (entry['event'] in ['StartUp', 'Location'] or this.newuser) and state['Rank']:
+            if (entry['event'] in ['StartUp', 'Cargo'] or this.newuser):
                 for k,v in state['Rank'].iteritems():
                     if v is not None:
                         add_event('setCommanderRankPilot', entry['timestamp'],
@@ -227,7 +227,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
 
             # Update ship
-            if (entry['event'] in ['StartUp', 'Location', 'ShipyardNew'] or
+            if (entry['event'] in ['StartUp', 'Cargo'] or
                 (entry['event'] == 'Loadout' and this.shipswap) or
                 this.newuser):
                 if entry['event'] == 'ShipyardNew':
@@ -247,7 +247,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.shipswap = False
 
             # Update location
-            if (entry['event'] in ['StartUp', 'Location'] or this.newuser) and system:
+            if (entry['event'] in ['StartUp', 'Cargo'] or this.newuser) and system:
                 this.undocked = False
                 add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
@@ -262,7 +262,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     # Undocked and now docking again. Don't send.
                     this.undocked = False
                 elif this.suppress_docked:
-                    # Don't send Docked event on new game - i.e. following 'Location' event
+                    # Don't send initial Docked event on new game
                     this.suppress_docked = False
                 else:
                     add_event('addCommanderTravelDock', entry['timestamp'],
@@ -603,7 +603,7 @@ def worker():
                     # Log individual errors and warnings
                     for data_event, reply_event in zip(data['events'], reply['events']):
                         if reply_event['eventStatus'] != 200:
-                            print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event, separators = (',', ': ')))
+                            print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
                             if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:

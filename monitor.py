@@ -328,8 +328,9 @@ class EDLogs(FileSystemEventHandler):
                     'ShipName'     : None,
                     'ShipType'     : None,
                 }
+            elif entry['event'] == 'Commander':
+                self.live = True	# First event in 3.0
             elif entry['event'] == 'LoadGame':
-                self.live = True
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
@@ -413,7 +414,6 @@ class EDLogs(FileSystemEventHandler):
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
 
             elif entry['event'] == 'Cargo':
-                self.live = True	# First event in 2.3
                 self.state['Cargo'] = defaultdict(int)
                 self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
             elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
