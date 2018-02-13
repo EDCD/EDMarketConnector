@@ -325,10 +325,7 @@ def worker():
                 if __debug__: print_exc()
                 retrying += 1
         else:
-            if callback:
-                callback(None)
-            else:
-                plug.show_error(_("Error: Can't connect to EDSM"))
+            plug.show_error(_("Error: Can't connect to EDSM"))
 
         if closing:
             return
