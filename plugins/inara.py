@@ -176,6 +176,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         try:
             old_events = len(this.events)	# Will only send existing events if we add a new event below
 
+            # Send credits to Inara on startup only - otherwise may be out of date
+            if entry['event'] == 'Cargo':
+                add_event('setCommanderCredits', entry['timestamp'],
+                          OrderedDict([
+                              ('commanderCredits', state['Credits']),
+                              ('commanderLoan', state['Loan']),
+                          ]))
+                this.lastcredits = state['Credits']
+
             # Send rank info to Inara on startup or change
             if (entry['event'] in ['StartUp', 'Cargo'] or this.newuser):
                 for k,v in state['Rank'].iteritems():
