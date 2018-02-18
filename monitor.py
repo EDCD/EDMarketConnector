@@ -113,7 +113,9 @@ class EDLogs(FileSystemEventHandler):
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
             'Encoded'      : defaultdict(int),
-            'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+            'Rank'         : {},
+            'Reputation'   : {},
+            'Statistics'   : {},
             'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
             'Friends'      : set(),	# Online friends
             'ShipID'       : None,
@@ -322,7 +324,9 @@ class EDLogs(FileSystemEventHandler):
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
                     'Encoded'      : defaultdict(int),
-                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Rank'         : {},
+                    'Reputation'   : {},
+                    'Statistics'   : {},
                     'Role'         : None,
                     'Friends'      : set(),
                     'ShipID'       : None,
@@ -351,7 +355,9 @@ class EDLogs(FileSystemEventHandler):
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
-                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Rank'         : {},
+                    'Reputation'   : {},
+                    'Statistics'   : {},
                     'Role'         : None,
                 })
             elif entry['event'] == 'NewCommander':
@@ -430,14 +436,22 @@ class EDLogs(FileSystemEventHandler):
                 self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
             elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
                 self.planet = None
+
             elif entry['event'] in ['Rank', 'Promotion']:
-                for k,v in entry.iteritems():
-                    if k in self.state['Rank']:
-                        self.state['Rank'][k] = (v,0)
+                payload = dict(entry)
+                payload.pop('event')
+                payload.pop('timestamp')
+                for k,v in payload.iteritems():
+                    self.state['Rank'][k] = (v,0)
             elif entry['event'] == 'Progress':
                 for k,v in entry.iteritems():
-                    if self.state['Rank'].get(k) is not None:
+                    if k in self.state['Rank']:
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
+            elif entry['event'] in ['Reputation', 'Statistics']:
+                payload = dict(entry)
+                payload.pop('event')
+                payload.pop('timestamp')
+                self.state[entry['event']] = payload
 
             elif entry['event'] == 'Cargo':
                 self.state['Cargo'] = defaultdict(int)

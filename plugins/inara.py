@@ -181,6 +181,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                       ('rankValue', v[0]),
                                       ('rankProgress', v[1] / 100.0),
                                   ]))
+                for k,v in state['Reputation'].iteritems():
+                    if v is not None:
+                        add_event('setCommanderReputationMajorFaction', entry['timestamp'],
+                                  OrderedDict([
+                                      ('majorfactionName', k.lower()),
+                                      ('majorfactionReputation', v / 100.0),
+                                  ]))
+                add_event('setCommanderGameStatistics', entry['timestamp'], state['Statistics'])	# may be out of date
+
             elif entry['event'] == 'Promotion':
                 for k,v in state['Rank'].iteritems():
                     if k in entry:
