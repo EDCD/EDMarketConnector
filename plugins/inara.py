@@ -419,13 +419,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 data['rewardPermits'] = [{ 'starsystemName': x } for x in entry['PermitsAwarded']]
             if 'CommodityReward' in entry:
                 data['rewardCommodities'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['CommodityReward']]
+            if 'MaterialsReward' in entry:
+                data['rewardMaterials'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['MaterialsReward']]
             add_event('setCommanderMissionCompleted', entry['timestamp'], data)
-
-        # Journal doesn't list rewarded materials directly, just as 'MaterialCollected'
-        elif (entry['event'] == 'MaterialCollected' and this.events and
-              this.events[-1]['eventName'] == 'setCommanderMissionCompleted' and
-              this.events[-1]['eventTimestamp'] == entry['timestamp']):
-            this.events[-1]['eventData']['rewardMaterials'] = [{ 'itemName': entry['Name'], 'itemCount': entry['Count'] }]
 
         elif entry['event'] == 'MissionFailed':
             add_event('setCommanderMissionFailed', entry['timestamp'], { 'missionGameID': entry['MissionID'] })

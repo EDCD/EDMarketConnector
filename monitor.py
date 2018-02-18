@@ -468,6 +468,11 @@ class EDLogs(FileSystemEventHandler):
                 for reward in entry.get('CommodityReward', []):
                     commodity = self.canonicalise(reward['Name'])
                     self.state['Cargo'][commodity] += reward.get('Count', 1)
+                for reward in entry.get('MaterialsReward', []):
+                    if 'Category' in reward:	# FIXME: Category not present in E:D 3.0
+                        material = self.canonicalise(reward['Name'])
+                        self.state[reward['Category']][material] += reward.get('Count', 1)
+
             elif entry['event'] == 'SearchAndRescue':
                 for item in entry.get('Items', []):
                     commodity = self.canonicalise(item['Name'])
