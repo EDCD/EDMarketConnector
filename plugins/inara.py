@@ -580,6 +580,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     data['tierReached'] = int(goal['TierReached'].split()[-1])
                 if 'TopRankSize' in goal:
                     data['topRankSize'] = goal['TopRankSize']
+                if 'TopTier' in goal:
+                    data['tierMax'] = int(goal['TopTier']['Name'].split()[-1])
+                    data['completionBonus'] = goal['TopTier']['Bonus']
                 add_event('setCommunityGoal', entry['timestamp'], data)
 
                 data = OrderedDict([
