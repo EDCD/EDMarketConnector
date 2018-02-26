@@ -13,6 +13,7 @@ import gzip
 from config import config
 import companion
 import outfitting
+from monitor import monitor
 
 # Map API ship names to E:D Shipyard ship names
 ship_map = dict(companion.ship_map)
@@ -162,9 +163,11 @@ def export(data, filename=None):
 
 
 # Return a URL for the current ship
-def url(data, is_beta):
+def url(is_beta):
 
-    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
+    string = json.dumps(monitor.ship(), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
+    if not string:
+        return False
 
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:

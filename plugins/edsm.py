@@ -34,11 +34,14 @@ this.session = requests.Session()
 this.queue = Queue()		# Items to be sent to EDSM by worker thread
 this.discardedEvents = []	# List discarded events from EDSM
 this.lastship = None		# Description of last ship that we sent to EDSM
+this.lastloadout = None		# Description of last ship that we sent to EDSM
 this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
 this.multicrew = False		# don't send captain's ship info to EDSM while on a crew
 this.coordinates = None
+this.newgame = False		# starting up - batch initial burst of events
+this.newgame_docked = False	# starting up while docked
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -198,6 +201,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     elif entry['event'] == 'LoadGame':
         this.coordinates = None
 
+    if entry['event'] in ['LoadGame', 'Commander', 'NewCommander']:
+        this.newgame = True
+        this.newgame_docked = False
+    elif entry['event'] == 'StartUp':
+        this.newgame = False
+        this.newgame_docked = False
+    elif entry['event'] == 'Location':
+        this.newgame = True
+        this.newgame_docked = entry.get('Docked', False)
+
     # Send interesting events to EDSM
     if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and entry['event'] not in this.discardedEvents:
         # Introduce transient states into the event
@@ -210,15 +223,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         entry.update(transient)
 
         if entry['event'] == 'LoadGame':
-            # Synthesise Cargo and Materials events on LoadGame since we will have missed them because Cmdr was unknown
-            cargo = {
-                'timestamp': entry['timestamp'],
-                'event': 'Cargo',
-                'Inventory': [ { 'Name': k, 'Count': v } for k,v in state['Cargo'].iteritems() ],
-            }
-            cargo.update(transient)
-            this.queue.put((cmdr, cargo))
-
+            # Synthesise Materials events on LoadGame since we will have missed it
             materials = {
                 'timestamp': entry['timestamp'],
                 'event': 'Materials',
@@ -230,6 +235,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             this.queue.put((cmdr, materials))
 
         this.queue.put((cmdr, entry))
+
+        if entry['event'] == 'Loadout' and 'EDShipyard' not in this.discardedEvents:
+            url = edshipyard.url(is_beta)
+            if this.lastloadout != url:
+                this.lastloadout = url
+                this.queue.put((cmdr, {
+                    'event': 'EDShipyard', 'timestamp': entry['timestamp'], '_shipId': state['ShipID'], 'url': this.lastloadout
+                }))
 
 
 # Update system data
@@ -257,10 +270,6 @@ def cmdr_data(data, is_beta):
             if 'Coriolis' not in this.discardedEvents:
                 this.queue.put((cmdr, {
                     'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
-                }))
-            if 'EDShipyard' not in this.discardedEvents:
-                this.queue.put((cmdr, {
-                    'event': 'EDShipyard', 'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': edshipyard.url(data, is_beta)
                 }))
             this.lastship = ship
 
@@ -310,14 +319,14 @@ def worker():
                     if msgnum // 100 == 2:
                         print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
-                    elif not closing:
-                        # Update main window's system status
-                        for i in range(len(pending) - 1, -1, -1):
-                            if pending[i]['event'] in ['StartUp', 'Location', 'FSDJump']:
-                                this.lastlookup = reply['events'][i]
+                    else:
+                        for e, r in zip(pending, reply['events']):
+                            if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump']:
+                                # Update main window's system status
+                                this.lastlookup = r
                                 this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
-                                break
-
+                            elif r['msgnum'] // 100 != 1:
+                                print('EDSM\t%s %s\t%s' % (r['msgnum'], r['msg'], json.dumps(e, separators = (',', ': '))))
                         pending = []
 
                 break
@@ -334,10 +343,16 @@ def worker():
 # Whether any of the entries should be sent immediately
 def should_send(entries):
     for entry in entries:
-        if (entry['event'] not in ['CommunityGoal',	# Spammed periodically
-                                   'Cargo', 'Loadout', 'Materials', 'LoadGame', 'Rank', 'Progress',	# Will be followed by 'Docked' or 'Location'
-                                   'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'] and			#  "
-            not (entry['event'] == 'Location' and entry.get('Docked'))):				#  "
+        if (entry['event'] == 'Cargo' and not this.newgame_docked) or entry['event'] == 'Docked':
+            # Cargo is the last event on startup, unless starting when docked in which case Docked is the last event
+            this.newgame = False
+            this.newgame_docked = False
+            return True
+        elif this.newgame:
+            pass
+        elif entry['event'] not in ['CommunityGoal',	# Spammed periodically
+                                    'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
+                                    'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap']:	#   "
             return True
     return False
 

@@ -57,6 +57,7 @@ import prefs
 import plug
 from hotkey import hotkeymgr
 from monitor import monitor
+from dashboard import dashboard
 from theme import theme
 
 
@@ -269,6 +270,7 @@ class AppWindow:
         self.w.bind('<KP_Enter>', self.getandsend)
         self.w.bind_all('<<Invoke>>', self.getandsend)		# Hotkey monitoring
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
+        self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)	# Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
@@ -627,6 +629,11 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
+            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Can start dashboard monitoring
+                if not dashboard.start(self.w, monitor.started):
+                    print "Can't start Status monitoring"
+
             # Don't send to EDDN while on crew
             if monitor.state['Captain']:
                 return
@@ -678,6 +685,17 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
+    # Handle Status event
+    def dashboard_event(self, event):
+        entry = dashboard.status
+        if entry:
+            # Currently we don't do anything with these events
+            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+            if err:
+                self.status['text'] = err
+                if not config.getint('hotkey_mute'):
+                    hotkeymgr.play_bad()
+
     # Display asynchronous error from plugin
     def plugin_error(self, event=None):
         if plug.last_error.get('msg'):
@@ -690,6 +708,14 @@ class AppWindow:
 
         if not monitor.cmdr or not monitor.mode:
             return False	# In CQC - do nothing
+
+        if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
+            return edshipyard.url(monitor.is_beta)
+        elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
+            pass	# Fall through
+        else:
+            assert False, config.getint('shipyard')
+            return False
 
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
@@ -716,13 +742,7 @@ class AppWindow:
             self.status['text'] = _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
         else:
             self.status['text'] = ''
-            if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
-                return edshipyard.url(data, monitor.is_beta)
-            elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
-                return coriolis.url(data, monitor.is_beta)
-            else:
-                assert False, config.getint('shipyard')
-                return False
+            return coriolis.url(data, monitor.is_beta)
 
     def cooldown(self):
         if time() < self.holdofftime:
@@ -779,6 +799,7 @@ class AppWindow:
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         hotkeymgr.unregister()
+        dashboard.close()
         monitor.close()
         plug.notify_stop()
         self.eddn.close()
