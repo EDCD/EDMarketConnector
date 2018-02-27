@@ -14,6 +14,46 @@ import myNotebook as nb
 from config import config
 
 
+# Dashboard Flags constants
+FlagsDocked = 1<<0		# on a landing pad
+FlagsLanded = 1<<1		# on planet surface
+FlagsLandingGearDown = 1<<2
+FlagsShieldsUp = 1<<3
+FlagsSupercruise = 1<<4
+FlagsFlightAssistOff = 1<<5
+FlagsHardpointsDeployed = 1<<6
+FlagsInWing = 1<<7
+FlagsLightsOn = 1<<8
+FlagsCargoScoopDeployed = 1<<9
+FlagsSilentRunning = 1<<10
+FlagsScoopingFuel = 1<<11
+FlagsSrvHandbrake = 1<<12
+FlagsSrvTurret = 1<<13
+FlagsSrvUnderShip = 1<<14
+FlagsSrvDriveAssist = 1<<15
+FlagsFsdMassLocked = 1<<16
+FlagsFsdCharging = 1<<17
+FlagsFsdCooldown = 1<<18
+FlagsLowFuel = 1<<19		# <25%
+FlagsOverHeating = 1<<20	# > 100%
+FlagsHasLatLong = 1<<21
+FlagsIsInDanger = 1<<22
+FlagsBeingInterdicted = 1<<23
+FlagsInMainShip = 1<<24
+FlagsInFighter = 1<<25
+FlagsInSRV = 1<<26
+
+# Dashboard GuiFocus constants
+GuiFocusNoFocus = 0
+GuiFocusInternalPanel = 1	# right hand side
+GuiFocusExternalPanel = 2	# left hand side
+GuiFocusCommsPanel = 3		# top
+GuiFocusRolePanel = 4		# bottom
+GuiFocusStationServices = 5
+GuiFocusGalaxyMap = 6
+GuiFocusSystemMap = 7
+
+
 # List of loaded Plugins
 PLUGINS = []
 

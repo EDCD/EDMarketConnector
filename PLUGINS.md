@@ -133,9 +133,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 This gets called when something on the player's cockpit display changes - typically about once a second when in orbital flight
 
 ```python
+import plug
+
 def dashboard_entry(cmdr, is_beta, entry):
-    deployed = entry['Flags'] & 1<<6
-    sys.stderr.write("Hardpoints {}\n", deployed and "deployed" or "stowed")
+    is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
+    sys.stderr.write("Hardpoints {}\n", is_deployed and "deployed" or "stowed")
 ```
 
 ### Getting Commander Data
