@@ -102,6 +102,7 @@ class EDLogs(FileSystemEventHandler):
         self.station = None
         self.stationtype = None
         self.coordinates = None
+        self.systemaddress = None
         self.started = None	# Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
@@ -180,7 +181,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring Journal'
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = None
+        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -234,6 +235,7 @@ class EDLogs(FileSystemEventHandler):
                     ('event', 'StartUp'),
                     ('StarSystem', self.system),
                     ('StarPos', self.coordinates),
+                    ('SystemAddress', self.systemaddress),
                 ])
                 if self.planet:
                     entry['Body'] = self.planet
@@ -315,6 +317,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
                 self.started = None
                 self.state = {
                     'Captain'      : None,
@@ -350,6 +353,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self.state.update({
                     'Captain'      : None,
@@ -426,6 +430,7 @@ class EDLogs(FileSystemEventHandler):
                     self.coordinates = tuple(entry['StarPos'])
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None	# Docked event doesn't include coordinates
+                self.systemaddress = entry.get('SystemAddress')
                 (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
                                                entry.get('StationName'))	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
@@ -548,6 +553,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
             elif entry['event'] == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
             elif entry['event'] == 'QuitACrew':
@@ -559,6 +565,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
 
             elif entry['event'] == 'Friends':
                 if entry['Status'] in ['Online', 'Added']:
@@ -599,6 +606,7 @@ class EDLogs(FileSystemEventHandler):
                         ('StationType', self.stationtype),
                         ('StarSystem', self.system),
                         ('StarPos', self.coordinates),
+                        ('SystemAddress', self.systemaddress),
                     ])
                 else:
                     entry = OrderedDict([
@@ -607,6 +615,7 @@ class EDLogs(FileSystemEventHandler):
                         ('Docked', False),
                         ('StarSystem', self.system),
                         ('StarPos', self.coordinates),
+                        ('SystemAddress', self.systemaddress),
                     ])
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':

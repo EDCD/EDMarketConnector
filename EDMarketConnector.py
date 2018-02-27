@@ -665,11 +665,13 @@ class AppWindow:
                         entry['Body'] = monitor.planet
                         entry['BodyType'] = 'Planet'
 
-                    # add mandatory StarSystem and StarPos properties to Scan events
+                    # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
                     if 'StarSystem' not in entry:
                         entry['StarSystem'] = monitor.system
                     if 'StarPos' not in entry:
                         entry['StarPos'] = list(monitor.coordinates)
+                    if 'SystemAddress' not in entry and monitor.systemaddress:
+                        entry['SystemAddress'] = monitor.systemaddress
 
                     self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
 
