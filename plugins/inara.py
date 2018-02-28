@@ -267,11 +267,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 data['shipRebuyCost'] = state['Rebuy']
                 add_event('setCommanderShip', entry['timestamp'], data)
 
-                this.loadout = OrderedDict([
-                    ('shipType', state['ShipType']),
-                    ('shipGameID', state['ShipID']),
-                    ('shipLoadout', state['Modules'].values()),
-                ])
+                this.loadout = make_loadout(state)
                 add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
                 this.shipswap = False
 
@@ -430,11 +426,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         # Loadout
         if entry['event'] == 'Loadout':
-            loadout = OrderedDict([
-                ('shipType', state['ShipType']),
-                ('shipGameID', state['ShipID']),
-                ('shipLoadout', state['Modules'].values()),
-            ])
+            loadout = make_loadout(state)
             if this.loadout != loadout:
                 this.loadout = loadout
                 this.events = [x for x in this.events if x['eventName'] != 'setCommanderShipLoadout' or x['shipGameID'] != this.loadout['shipGameID']]	# Remove any unsent for this ship
@@ -620,6 +612,53 @@ def cmdr_data(data, is_beta):
                           ('commanderLoan', data['commander'].get('debt', 0)),
                       ]))
             this.lastcredits = float(data['commander']['credits'])
+
+
+def make_loadout(state):
+    modules = []
+    for m in state['Modules'].itervalues():
+        module = OrderedDict([
+            ('slotName', m['Slot']),
+            ('itemName', m['Item']),
+            ('itemHealth', m['Health']),
+            ('isOn', m['On']),
+            ('itemPriority', m['Priority']),
+        ])
+        if 'AmmoInClip' in m:
+            module['itemAmmoClip'] = m['AmmoInClip']
+        if 'AmmoInHopper' in m:
+            module['itemAmmoHopper'] = m['AmmoInHopper']
+        if 'Value' in m:
+            module['itemValue'] = m['Value']
+        if 'Hot' in m:
+            module['isHot'] = m['Hot']
+        if 'Engineering' in m:
+            engineering = OrderedDict([
+                ('blueprintName', m['Engineering']['BlueprintName']),
+                ('blueprintLevel', m['Engineering']['Level']),
+                ('blueprintQuality', m['Engineering']['Quality']),
+            ])
+            if 'ExperimentalEffect' in m['Engineering']:
+                engineering['experimentalEffect'] = m['Engineering']['ExperimentalEffect']
+            engineering['modifiers'] = []
+            for mod in m['Engineering']['Modifiers']:
+                modifier = OrderedDict([
+                    ('name', mod['Label']),
+                    ('value', mod['Value']),
+                ])
+                if 'OriginalValue' in mod:
+                    modifier['originalValue'] = mod['OriginalValue']
+                    modifier['lessIsGood'] = mod['LessIsGood']
+                engineering['modifiers'].append(modifier)
+            module['engineering'] = engineering
+
+        modules.append(module)
+
+    return OrderedDict([
+        ('shipType', state['ShipType']),
+        ('shipGameID', state['ShipID']),
+        ('shipLoadout', modules),
+    ])
 
 def add_event(name, timestamp, data):
     this.events.append(OrderedDict([
