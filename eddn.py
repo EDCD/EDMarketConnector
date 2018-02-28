@@ -183,6 +183,7 @@ class EDDN:
                                               time.gmtime(config.getint('querytime') or int(time.time())))),
                 ('systemName',  data['lastSystem']['name']),
                 ('stationName', data['lastStarport']['name']),
+                ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
             ])
             if 'economies' in data['lastStarport']:
@@ -204,6 +205,7 @@ class EDDN:
                                                   time.gmtime(config.getint('querytime') or int(time.time())))),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
+                    ('marketId',    data['lastStarport']['id']),
                     ('modules',     sorted([module['name'] for module in data['lastStarport']['modules'].itervalues() if module_re.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])),
                 ]),
             })
@@ -218,6 +220,7 @@ class EDDN:
                                                   time.gmtime(config.getint('querytime') or int(time.time())))),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
+                    ('marketId',    data['lastStarport']['id']),
                     ('ships',       sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']])),
                 ]),
             })
