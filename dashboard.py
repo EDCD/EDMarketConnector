@@ -55,7 +55,7 @@ class Dashboard(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = bool(config.get('journaldir')) and platform != 'win32'
+        polling = platform != 'win32'
         if not polling and not self.observer:
             self.observer = Observer()
             self.observer.daemon = True
