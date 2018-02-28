@@ -25,10 +25,14 @@ weapon_map = {
     'beamlaser'                      : 'Beam Laser',
     ('beamlaser','heat')             : 'Retributor Beam Laser',
     'cannon'                         : 'Cannon',
+    'causticmissile'                 : 'Enzyme Missile Rack',
     'drunkmissilerack'               : 'Pack-Hound Missile Rack',
     'dumbfiremissilerack'            : 'Missile Rack',
     ('dumbfiremissilerack', 'lasso') : 'Rocket Propelled FSD Disruptor',
     'flakmortar'                     : 'Remote Release Flak Launcher',
+    'flechettelauncher'              : 'Remote Release Flechette Launcher',
+    ('guardian', 'gausscannon')      : 'Guardian Gauss Cannon',
+    ('guardian', 'plasmalauncher')   : 'Guardian Plasma Charger',
     'minelauncher'                   : 'Mine Launcher',
     ('minelauncher','impulse')       : 'Shock Mine Launcher',
     'mininglaser'                    : 'Mining Laser',
@@ -51,6 +55,7 @@ missiletype_map = {
     'advancedtorppylon'   : 'Seeker',
     'atdumbfiremissile'   : 'Dumbfire',
     'basicmissilerack'    : 'Seeker',
+    'causticmissile'      : 'Dumbfire',
     'drunkmissilerack'    : 'Swarm',
     'dumbfiremissilerack' : 'Dumbfire',
 }
@@ -106,11 +111,17 @@ weaponrating_map = {
     'hpt_cannon_turret_small': 'F',
     'hpt_cannon_turret_medium': 'E',
     'hpt_cannon_turret_large': 'D',
+    'hpt_causticmissile_fixed_medium': 'B',
     'hpt_drunkmissilerack_fixed_medium': 'B',
     'hpt_dumbfiremissilerack_fixed_small': 'B',
     'hpt_dumbfiremissilerack_fixed_medium': 'B',
     'hpt_flakmortar_fixed_medium': 'B',
     'hpt_flakmortar_turret_medium': 'B',
+    'hpt_flechettelauncher_fixed_medium': 'B',
+    'hpt_flechettelauncher_turret_medium': 'B',
+    'hpt_guardian_gausscannon_fixed_medium': 'A',	# guess
+    'hpt_guardian_plasmalauncher_fixed_medium': 'A',	# guess
+    'hpt_guardian_plasmalauncher_turret_medium': 'A',	# guess
     'hpt_minelauncher_fixed_small': 'I',
     'hpt_minelauncher_fixed_medium': 'I',
     'hpt_mininglaser_fixed_small': 'D',
@@ -233,43 +244,44 @@ misc_internal_map = {
 }
 
 standard_map = {
-    # 'armour'         : handled separately
-    'engine'           : 'Thrusters',
-    ('engine','fast')  : 'Enhanced Performance Thrusters',
-    'fueltank'         : 'Fuel Tank',
-    'hyperdrive'       : 'Frame Shift Drive',
-    'lifesupport'      : 'Life Support',
+    # 'armour'              : handled separately
+    'engine'                : 'Thrusters',
+    ('engine','fast')       : 'Enhanced Performance Thrusters',
+    'fueltank'              : 'Fuel Tank',
+    'guardianpowerplant'    : 'Guardian Power Plant',
+    'hyperdrive'            : 'Frame Shift Drive',
+    'lifesupport'           : 'Life Support',
     # 'planetapproachsuite' : handled separately
-    'powerdistributor' : 'Power Distributor',
-    'powerplant'       : 'Power Plant',
-    ('powerplant', 'highheatweight') : 'Enhanced Power Plant',	# Not seen
-    'sensors'          : 'Sensors',
+    'powerdistributor'      : 'Power Distributor',
+    'powerplant'            : 'Power Plant',
+    'sensors'               : 'Sensors',
 }
 
 internal_map = {
-    'buggybay'          : 'Planetary Vehicle Hangar',
-    'cargorack'         : 'Cargo Rack',
-    'collection'        : 'Collector Limpet Controller',
-    'corrosionproofcargorack' : 'Corrosion Resistant Cargo Rack',
-    'decontamination'   : 'Decontamination Limpet Controller',
-    'fighterbay'        : 'Fighter Hangar',
-    'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
-    'fuelscoop'         : 'Fuel Scoop',
-    'fueltransfer'      : 'Fuel Transfer Limpet Controller',
-    'hullreinforcement' : 'Hull Reinforcement Package',
-    'modulereinforcement' : 'Module Reinforcement Package',
-    'passengercabin'    : 'Passenger Cabin',
-    'prospector'        : 'Prospector Limpet Controller',
-    'refinery'          : 'Refinery',
-    'recon'             : 'Recon Limpet Controller',
-    'repair'            : 'Repair Limpet Controller',
-    'repairer'          : 'Auto Field-Maintenance Unit',
-    'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
-    'shieldcellbank'    : 'Shield Cell Bank',
-    'shieldgenerator'   : 'Shield Generator',
+    'buggybay'                   : 'Planetary Vehicle Hangar',
+    'cargorack'                  : 'Cargo Rack',
+    'collection'                 : 'Collector Limpet Controller',
+    'corrosionproofcargorack'    : 'Corrosion Resistant Cargo Rack',
+    'decontamination'            : 'Decontamination Limpet Controller',
+    'fighterbay'                 : 'Fighter Hangar',
+    'fsdinterdictor'             : 'Frame Shift Drive Interdictor',
+    'fuelscoop'                  : 'Fuel Scoop',
+    'fueltransfer'               : 'Fuel Transfer Limpet Controller',
+    'hullreinforcement'          : 'Hull Reinforcement Package',
+    'metaalloyhullreinforcement' : 'Meta Alloy Hull Reinforcement',
+    'modulereinforcement'        : 'Module Reinforcement Package',
+    'passengercabin'             : 'Passenger Cabin',
+    'prospector'                 : 'Prospector Limpet Controller',
+    'refinery'                   : 'Refinery',
+    'recon'                      : 'Recon Limpet Controller',
+    'repair'                     : 'Repair Limpet Controller',
+    'repairer'                   : 'Auto Field-Maintenance Unit',
+    'resourcesiphon'             : 'Hatch Breaker Limpet Controller',
+    'shieldcellbank'             : 'Shield Cell Bank',
+    'shieldgenerator'            : 'Shield Generator',
     ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
-    'unkvesselresearch' : 'Research Limpet Controller',
+    'unkvesselresearch'          : 'Research Limpet Controller',
 }
 
 
@@ -393,6 +405,8 @@ def lookup(module, ship_map, entitled=False):
 
         if len(name) < 4 and name[1] == 'unkvesselresearch':	# Hack! No size or class.
             (new['class'], new['rating']) = ('1', 'E')
+        elif len(name) < 4 and name[1] == 'guardianpowerplant':	# Hack! No class.
+            (new['class'], new['rating']) = (str(name[2][4:]), 'A')
         else:
             if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
             new['class'] = str(name[2][4:])

@@ -170,6 +170,9 @@ if __name__ == "__main__":
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
     # 3.0 additions not yet present in coriolis-data
+    for k in modules.keys():
+        if k[0] == 'Module Reinforcement Package':
+            modules[('Meta Alloy Hull Reinforcement',) + k[1:]] = modules[k]
     modules[('Decontamination Limpet Controller', None, '1', 'E')] = {'mass': 1.3}
     modules[('Decontamination Limpet Controller', None, '3', 'E')] = {'mass': 2}
     modules[('Decontamination Limpet Controller', None, '5', 'E')] = {'mass': 20}
@@ -179,6 +182,16 @@ if __name__ == "__main__":
     modules[('Recon Limpet Controller', None, '5', 'E')] = {'mass': 20}
     modules[('Recon Limpet Controller', None, '7', 'E')] = {'mass': 128}
     modules[('Research Limpet Controller', None, '1', 'E')] = {'mass': 1.3}
+    modules[('Guardian Power Plant', None, '2', 'A')] = {'mass': 1.5}
+    modules[('Guardian Power Plant', None, '3', 'A')] = {'mass': 2.9}
+    modules[('Guardian Power Plant', None, '4', 'A')] = {'mass': 5.9}
+    modules[('Guardian Power Plant', None, '5', 'A')] = {'mass': 11.7}
+    modules[('Guardian Power Plant', None, '6', 'A')] = {'mass': 23.4}
+    modules[('Guardian Power Plant', None, '7', 'A')] = {'mass': 46.8}
+    modules[('Guardian Power Plant', None, '8', 'A')] = {'mass': 93.6}
+    modules[('Bi-Weave Shield Generator', None, '8', 'C')] = {'mass': 160}
+    modules[('Enzyme Missile Rack', None, '2', 'B')] = {'mass': 4}
+    modules[('Remote Release Flechette Launcher', None, '2', 'B')] = {'mass': 4}
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
