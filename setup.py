@@ -213,7 +213,7 @@ appcast.write('''
 '''.format(float(SHORTVERSION)/100,
            SHORTVERSION,
            PKG,
-           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'osx',
+           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos',
            VERSION,
            os.stat(PKG).st_size,
            sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' or 'h2 { font-size: 105%; }'))
