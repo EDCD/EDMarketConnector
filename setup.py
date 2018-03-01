@@ -16,6 +16,7 @@ import re
 import shutil
 import sys
 from tempfile import gettempdir
+import requests
 
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
 from config import update_feed, update_interval
@@ -73,10 +74,10 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': ['commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
+                  'resources': [ requests.certs.where(), 'commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -106,11 +107,10 @@ elif sys.platform=='win32':
                       'requests', 'keyring.backends',
                       'shutil', 'sqlite3', 'zipfile',	# Included for plugins
                   ],
-                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
     }
 
-    import requests
     DATA_FILES = [
         ('', [
             requests.certs.where(),

@@ -157,8 +157,8 @@ class Session:
             from requests.packages import urllib3
             urllib3.disable_warnings()
 
-        if platform=='win32' and getattr(sys, 'frozen', False):
-            os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
+        if getattr(sys, 'frozen', False):
+            os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
     def login(self, username=None, password=None, is_beta=False):
         if (not username or not password):

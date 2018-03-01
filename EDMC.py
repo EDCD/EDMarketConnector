@@ -54,8 +54,8 @@ try:
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
-    if sys.platform=='win32' and getattr(sys, 'frozen', False):
-        os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
+    if getattr(sys, 'frozen', False):
+        os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
     if args.version:
         latest = ''
