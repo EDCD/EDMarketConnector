@@ -469,15 +469,6 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'][commodity] -= entry.get('Count', 1)
                 if self.state['Cargo'][commodity] <= 0:
                     self.state['Cargo'].pop(commodity)
-            elif entry['event'] == 'MissionCompleted':
-                for reward in entry.get('CommodityReward', []):
-                    commodity = self.canonicalise(reward['Name'])
-                    self.state['Cargo'][commodity] += reward.get('Count', 1)
-                for reward in entry.get('MaterialsReward', []):
-                    if 'Category' in reward:	# FIXME: Category not present in E:D 3.0
-                        material = self.canonicalise(reward['Name'])
-                        self.state[reward['Category']][material] += reward.get('Count', 1)
-
             elif entry['event'] == 'SearchAndRescue':
                 for item in entry.get('Items', []):
                     commodity = self.canonicalise(item['Name'])
@@ -505,6 +496,12 @@ class EDLogs(FileSystemEventHandler):
                             self.state[category][material] -= x['Count']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
+            elif entry['event'] == 'MaterialTrade':
+                category = entry['TraderType'].capitalize()
+                self.state[category][entry['Paid']['Material']] -= entry['Paid']['Quantity']
+                if self.state[category][entry['Paid']['Material']] <= 0:
+                    self.state[category].pop(entry['Paid']['Material'])
+                self.state[category][entry['Received']['Material']] += entry['Received']['Quantity']
 
             elif entry['event'] == 'EngineerCraft' or (entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')):
                 for category in ['Raw', 'Manufactured', 'Encoded']:
@@ -530,6 +527,15 @@ class EDLogs(FileSystemEventHandler):
                 else:
                     module['Engineering'].pop('ExperimentalEffect', None)
                     module['Engineering'].pop('ExperimentalEffect_Localised', None)
+
+            elif entry['event'] == 'MissionCompleted':
+                for reward in entry.get('CommodityReward', []):
+                    commodity = self.canonicalise(reward['Name'])
+                    self.state['Cargo'][commodity] += reward.get('Count', 1)
+                for reward in entry.get('MaterialsReward', []):
+                    if 'Category' in reward:	# Category not present in E:D 3.0
+                        material = self.canonicalise(reward['Name'])
+                        self.state[self.canonicalise(reward['Category']).capitalize()][material] += reward.get('Count', 1)
             elif entry['event'] == 'EngineerContribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
                 if commodity:
@@ -543,6 +549,13 @@ class EDLogs(FileSystemEventHandler):
                             self.state[category][material] -= entry['Quantity']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
+            elif entry['event'] == 'TechnologyBroker':
+                for thing in entry['Ingredients']:
+                    for category in ['Cargo', 'Raw', 'Manufactured', 'Encoded']:
+                        if thing['Name'] in self.state[category]:
+                            self.state[category][thing['Name']] -= entry['Count']
+                            if self.state[category][thing['Name']] <= 0:
+                                self.state[category].pop(thing['Name'])
 
             elif entry['event'] == 'JoinACrew':
                 self.state['Captain'] = entry['Captain']
