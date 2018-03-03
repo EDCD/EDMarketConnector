@@ -2,16 +2,18 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
+from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import basename, isdir, join
 from sys import platform
-from time import gmtime, sleep, strftime, strptime
+from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
 
 if __debug__:
     from traceback import print_exc
 
 from config import config
+from companion import ship_map
 
 
 if platform=='darwin':
@@ -394,7 +396,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ModulesValue'] = None
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
-            elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, ShipyardNew, follows ShipyardSwap, ShipyardBuy
+            elif entry['event'] == 'Loadout':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
@@ -402,7 +404,17 @@ class EDLogs(FileSystemEventHandler):
                 self.state['HullValue'] = entry.get('HullValue')	# not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')	#   "
                 self.state['Rebuy'] = entry.get('Rebuy')
-                self.state['Modules'] = dict([(thing['Slot'], thing) for thing in entry['Modules']])
+                # Remove spurious differences between initial Loadout event and subsequent
+                self.state['Modules'] = {}
+                for module in entry['Modules']:
+                    module = dict(module)
+                    module['Item'] = self.canonicalise(module['Item'])
+                    if ('Hardpoint' in module['Slot'] and
+                        not module['Slot'].startswith('TinyHardpoint') and
+                        module.get('AmmoInClip') == module.get('AmmoInHopper') == 1):	# lasers
+                        module.pop('AmmoInClip')
+                        module.pop('AmmoInHopper')
+                    self.state['Modules'][module['Slot']] = module
             elif entry['event'] == 'ModuleBuy':
                 self.state['Modules'][entry['Slot']] = { 'Slot'     : entry['Slot'],
                                                          'Item'     : self.canonicalise(entry['BuyItem']),
@@ -522,6 +534,7 @@ class EDLogs(FileSystemEventHandler):
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
                 module = self.state['Modules'][entry['Slot']]
+                assert(module['Item'] == self.canonicalise(entry['Module']))
                 module['Engineering'] = {
                     'Engineer'      : entry['Engineer'],
                     'EngineerID'    : entry['EngineerID'],
@@ -683,22 +696,53 @@ class EDLogs(FileSystemEventHandler):
 
 
     # Return a subset of the received data describing the current ship as a Loadout event
-    def ship(self):
+    def ship(self, timestamped=True):
         if not self.state['Modules']:
             return None
 
-        d = OrderedDict([
-            ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-            ('event',     'Loadout'),
-            ('Ship',      self.state['ShipType']),
-            ('ShipID',    self.state['ShipID']),
-        ])
-        for thing in ['ShipName', 'ShipIdent', 'HullValue', 'ModulesValue', 'Rebuy']:
-            if self.state[thing]:
-                d[thing] = self.state[thing]
-        d['Modules'] = self.state['Modules'].values()
+        standard_order = ['ShipCockpit', 'CargoHatch', 'Armour', 'PowerPlant', 'MainEngines', 'FrameShiftDrive', 'LifeSupport', 'PowerDistributor', 'Radar', 'FuelTank']
 
+        d = OrderedDict()
+        if timestamped:
+            d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+        d['event'] = 'Loadout'
+        d['Ship'] = self.state['ShipType']
+        d['ShipID'] = self.state['ShipID']
+        if self.state['ShipName']:
+            d['ShipName'] = self.state['ShipName']
+        if self.state['ShipIdent']:
+            d['ShipIdent'] = self.state['ShipIdent']
+        # sort modules by slot - hardpoints, standard, internal
+        d['Modules'] = []
+        for slot in sorted(self.state['Modules'], key=lambda x: ('Hardpoint' not in x, x not in standard_order and len(standard_order) or standard_order.index(x), 'Slot' not in x, x)):
+            module = dict(self.state['Modules'][slot])
+            module.pop('Health', None)
+            module.pop('Value', None)
+            d['Modules'].append(module)
         return d
+
+
+    # Export ship loadout as a Loadout event
+    def export_ship(self, filename=None):
+        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': ')).encode('utf-8')	# pretty print
+
+        if filename:
+            with open(filename, 'wt') as h:
+                h.write(string)
+            return
+
+        ship = self.state['ShipName'] or ship_map.get(self.state['ShipType'], self.state['ShipType'])
+        regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
+        oldfiles = sorted([x for x in listdir(config.get('outdir')) if regexp.match(x)])
+        if oldfiles:
+            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
+                if h.read() == string:
+                    return	# same as last time - don't write
+
+        # Write
+        filename = join(config.get('outdir'), '%s.%s.txt' % (ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))))
+        with open(filename, 'wt') as h:
+            h.write(string)
 
 
 # singleton

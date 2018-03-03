@@ -463,8 +463,9 @@ class AppWindow:
                 if err:
                     play_bad = True
 
+                # Export ship for backwards compatibility even 'though it's no longer derived from cAPI
                 if config.getint('output') & config.OUT_SHIP:
-                    loadout.export(data)
+                    monitor.export_ship()
 
                 if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
                     # no station data requested - we're done
@@ -641,6 +642,10 @@ class AppWindow:
             # Plugin backwards compatibility
             if monitor.mode and entry['event'] in ['StartUp', 'Location', 'FSDJump']:
                 plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
+
+            # Export loadout
+            if monitor.mode and entry['event'] == 'Loadout' and config.getint('output') & config.OUT_SHIP:
+                monitor.export_ship()
 
             # Auto-Update after docking
             if monitor.mode and monitor.station and entry['event'] in ['StartUp', 'Location', 'Docked'] and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
