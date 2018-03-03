@@ -104,6 +104,7 @@ class EDLogs(FileSystemEventHandler):
         self.coordinates = None
         self.systemaddress = None
         self.started = None	# Timestamp of the LoadGame event
+        self.missioncargo = {}	# For tracking cargo in wing missions
 
         # Cmdr state shared with EDSM and plugins
         self.state = {
@@ -319,6 +320,7 @@ class EDLogs(FileSystemEventHandler):
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = None
+                self.missioncargo = {}
                 self.state = {
                     'Captain'      : None,
                     'Cargo'        : defaultdict(int),
@@ -354,6 +356,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+                self.missioncargo = {}
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self.state.update({
                     'Captain'      : None,
@@ -475,6 +478,13 @@ class EDLogs(FileSystemEventHandler):
                     self.state['Cargo'][commodity] -= item.get('Count', 1)
                     if self.state['Cargo'][commodity] <= 0:
                         self.state['Cargo'].pop(commodity)
+            elif entry['event'] == 'CargoDepot':
+                if entry['MissionID'] in self.missioncargo:
+                    commodity = self.missioncargo[entry['MissionID']]
+                    self.state['Cargo'][commodity] += entry.get('ItemsCollected', 0)
+                    self.state['Cargo'][commodity] -= entry.get('ItemsDelivered', 0)
+                    if self.state['Cargo'][commodity] <= 0:
+                        self.state['Cargo'].pop(commodity)
 
             elif entry['event'] == 'Materials':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
@@ -528,6 +538,11 @@ class EDLogs(FileSystemEventHandler):
                     module['Engineering'].pop('ExperimentalEffect', None)
                     module['Engineering'].pop('ExperimentalEffect_Localised', None)
 
+            elif entry['event'] == 'MissionAccepted':
+                if 'Commodity' in entry:
+                    self.missioncargo[entry['MissionID']] = self.canonicalise(entry['Commodity'])
+            elif entry['event'] == 'MissionAbandoned':
+                self.missioncargo.pop(entry['MissionID'], None)
             elif entry['event'] == 'MissionCompleted':
                 for reward in entry.get('CommodityReward', []):
                     commodity = self.canonicalise(reward['Name'])
@@ -536,6 +551,7 @@ class EDLogs(FileSystemEventHandler):
                     if 'Category' in reward:	# Category not present in E:D 3.0
                         material = self.canonicalise(reward['Name'])
                         self.state[self.canonicalise(reward['Category']).capitalize()][material] += reward.get('Count', 1)
+                self.missioncargo.pop(entry['MissionID'], None)
             elif entry['event'] == 'EngineerContribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
                 if commodity:
