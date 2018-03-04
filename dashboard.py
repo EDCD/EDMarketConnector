@@ -118,12 +118,15 @@ class Dashboard(FileSystemEventHandler):
     def process(self, logfile=None):
         try:
             with open(join(self.currentdir, 'Status.json'), 'rb') as h:
-                entry = json.load(h)
+                data = h.read().strip()
+                if data:	# Can be empty if polling while the file is being re-written
+                    entry = json.loads(data)
 
-            # Status file is shared between beta and live. So filter out status not in this game session.
-            if  timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start and self.status != entry:
-                self.status = entry
-                self.root.event_generate('<<DashboardEvent>>', when="tail")
+                    # Status file is shared between beta and live. So filter out status not in this game session.
+                    if (timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start and
+                        self.status != entry):
+                        self.status = entry
+                        self.root.event_generate('<<DashboardEvent>>', when="tail")
         except:
             if __debug__: print_exc()
 
