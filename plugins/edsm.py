@@ -42,6 +42,7 @@ this.multicrew = False		# don't send captain's ship info to EDSM while on a crew
 this.coordinates = None
 this.newgame = False		# starting up - batch initial burst of events
 this.newgame_docked = False	# starting up while docked
+this.navbeaconscan = 0		# batch up burst of Scan events after NavBeaconScan
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -204,12 +205,17 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     if entry['event'] in ['LoadGame', 'Commander', 'NewCommander']:
         this.newgame = True
         this.newgame_docked = False
+        this.navbeaconscan = 0
     elif entry['event'] == 'StartUp':
         this.newgame = False
         this.newgame_docked = False
+        this.navbeaconscan = 0
     elif entry['event'] == 'Location':
         this.newgame = True
         this.newgame_docked = entry.get('Docked', False)
+        this.navbeaconscan = 0
+    elif entry['event'] == 'NavBeaconScan':
+        this.navbeaconscan = entry['NumBodies']
 
     # Send interesting events to EDSM
     if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and entry['event'] not in this.discardedEvents:
@@ -342,6 +348,17 @@ def worker():
 
 # Whether any of the entries should be sent immediately
 def should_send(entries):
+
+    # batch up burst of Scan events after NavBeaconScan
+    if this.navbeaconscan:
+        if entries and entries[-1]['event'] == 'Scan':
+            this.navbeaconscan -= 1
+            if this.navbeaconscan:
+                return False
+        else:
+            assert(False)
+            this.navbeaconscan = 0
+
     for entry in entries:
         if (entry['event'] == 'Cargo' and not this.newgame_docked) or entry['event'] == 'Docked':
             # Cargo is the last event on startup, unless starting when docked in which case Docked is the last event
