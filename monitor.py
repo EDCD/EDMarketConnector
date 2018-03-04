@@ -360,7 +360,7 @@ class EDLogs(FileSystemEventHandler):
                 self.systemaddress = None
                 self.missioncargo = {}
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                self.state.update({
+                self.state.update({	# Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
@@ -396,7 +396,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ModulesValue'] = None
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
-            elif entry['event'] == 'Loadout':
+            elif entry['event'] == 'Loadout':	# Not generated if in Fighter or SRV
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']

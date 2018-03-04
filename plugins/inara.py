@@ -250,13 +250,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           ]))
 
             # Update ship
-            if (entry['event'] in ['StartUp', 'Cargo'] or
-                (entry['event'] == 'Loadout' and this.shipswap) or
-                this.newuser):
+            if (state['ShipID'] and	# Unknown if started in Fighter or SRV
+                (entry['event'] in ['StartUp', 'Cargo'] or
+                 (entry['event'] == 'Loadout' and this.shipswap) or
+                 this.newuser)):
                 data = OrderedDict([
                     ('shipType', state['ShipType']),
                     ('shipGameID', state['ShipID']),
-                    ('shipName', state['ShipName']),		# Can be None
+                    ('shipName', state['ShipName']),	# Can be None
                     ('shipIdent', state['ShipIdent']),	# Can be None
                     ('isCurrentShip', True),
                 ])
@@ -278,8 +279,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                           OrderedDict([
                               ('starsystemName', system),
                               ('stationName', station),		# Can be None
-                              ('shipType', state['ShipType']),
-                              ('shipGameID', state['ShipID']),
                           ]))
 
             elif entry['event'] == 'Docked':
