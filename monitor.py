@@ -579,12 +579,24 @@ class EDLogs(FileSystemEventHandler):
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
             elif entry['event'] == 'TechnologyBroker':
-                for thing in entry['Ingredients']:
+                for thing in entry.get('Ingredients', []):	# 3.01
                     for category in ['Cargo', 'Raw', 'Manufactured', 'Encoded']:
-                        if thing['Name'] in self.state[category]:
-                            self.state[category][thing['Name']] -= entry['Count']
-                            if self.state[category][thing['Name']] <= 0:
-                                self.state[category].pop(thing['Name'])
+                        item = self.canonicalise(thing['Name'])
+                        if item in self.state[category]:
+                            self.state[category][item] -= thing['Count']
+                            if self.state[category][item] <= 0:
+                                self.state[category].pop(item)
+                for thing in entry.get('Commodities', []):	# 3.02
+                    commodity = self.canonicalise(thing['Name'])
+                    self.state['Cargo'][commodity] -= thing['Count']
+                    if self.state['Cargo'][commodity] <= 0:
+                        self.state['Cargo'].pop(commodity)
+                for thing in entry.get('Materials', []):	# 3.02
+                    material = self.canonicalise(thing['Name'])
+                    category = thing['Category']
+                    self.state[category][material] -= thing['Count']
+                    if self.state[category][material] <= 0:
+                        self.state[category].pop(material)
 
             elif entry['event'] == 'JoinACrew':
                 self.state['Captain'] = entry['Captain']
