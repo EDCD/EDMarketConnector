@@ -35,7 +35,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
         rowheader = sep.join([(config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest()) or (sep in cmdr and '"%s"' % cmdr) or cmdr, data['lastSystem']['name'], data['lastStarport']['name']])
     else:
         sep = ','
-        header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Average','Date\n'])
+        header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Average','FDevID','Date\n'])
         rowheader = sep.join([data['lastSystem']['name'], data['lastStarport']['name']])
 
     h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required
@@ -53,7 +53,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
             bracketmap[commodity['stockBracket']]
         ])
         if kind==COMMODITY_DEFAULT:
-            line = sep.join([line, str(int(commodity['meanPrice'])), timestamp+'\n'])
+            line = sep.join([line, str(int(commodity['meanPrice'])), str(commodity['id']), timestamp+'\n'])
         else:
             line = sep.join([line, timestamp, '\n'])
         h.write(line.encode('utf-8'))

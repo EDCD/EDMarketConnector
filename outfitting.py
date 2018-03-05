@@ -457,7 +457,7 @@ def export(data, filename):
     assert data['lastStarport'].get('name')
 
     timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
-    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,Date\n'
+    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
     rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
 
     h = open(filename, 'wt')
@@ -466,7 +466,7 @@ def export(data, filename):
         try:
             m = lookup(v, companion.ship_map)
             if m:
-                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], timestamp))
+                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], timestamp))
         except AssertionError as e:
             if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
         except:
