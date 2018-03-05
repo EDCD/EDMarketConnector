@@ -352,8 +352,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         if entry['event'] == 'ShipyardNew':
             add_event('addCommanderShip', entry['timestamp'],
                       OrderedDict([
-                          ('shipType', state['ShipType']),
-                          ('shipGameID', state['NewShipID']),
+                          ('shipType', entry['ShipType']),
+                          ('shipGameID', entry['NewShipID']),
                       ]))
             this.shipswap = True	# Want subsequent Loadout event to be sent immediately
 
