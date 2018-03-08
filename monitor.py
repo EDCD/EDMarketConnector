@@ -393,7 +393,9 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ModulesValue'] = None
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
-            elif entry['event'] == 'Loadout':	# Not generated if in Fighter or SRV
+            elif (entry['event'] == 'Loadout' and
+                  not self.canonicalise(entry['Ship']).endswith('fighter') and
+                  not self.canonicalise(entry['Ship']).endswith('buggy')):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
@@ -413,12 +415,13 @@ class EDLogs(FileSystemEventHandler):
                         module.pop('AmmoInHopper')
                     self.state['Modules'][module['Slot']] = module
             elif entry['event'] == 'ModuleBuy':
-                self.state['Modules'][entry['Slot']] = { 'Slot'     : entry['Slot'],
-                                                         'Item'     : self.canonicalise(entry['BuyItem']),
-                                                         'On'       : True,
-                                                         'Priority' : 1,
-                                                         'Health'   : 1.0,
-                                                         'Value'    : entry['BuyPrice'],
+                self.state['Modules'][entry['Slot']] = {
+                    'Slot'     : entry['Slot'],
+                    'Item'     : self.canonicalise(entry['BuyItem']),
+                    'On'       : True,
+                    'Priority' : 1,
+                    'Health'   : 1.0,
+                    'Value'    : entry['BuyPrice'],
                 }
             elif entry['event'] == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
