@@ -71,7 +71,7 @@ else:
 class EDLogs(FileSystemEventHandler):
 
     _POLL = 1		# Polling is cheap, so do it often
-    _RE_CANONICALISE = re.compile('\$(.+)_name;')
+    _RE_CANONICALISE = re.compile('\$(microresource_category_)?(.+?)(_name)?;')
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
@@ -628,7 +628,7 @@ class EDLogs(FileSystemEventHandler):
         if not item: return ''
         item = item.lower()
         match = self._RE_CANONICALISE.match(item)
-        return match and match.group(1) or item
+        return match and match.group(2) or item
 
     def get_entry(self):
         if not self.event_queue:
