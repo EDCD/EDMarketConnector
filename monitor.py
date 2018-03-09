@@ -71,7 +71,8 @@ else:
 class EDLogs(FileSystemEventHandler):
 
     _POLL = 1		# Polling is cheap, so do it often
-    _RE_CANONICALISE = re.compile('\$(.+)_name;')
+    _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
+    _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
@@ -512,10 +513,11 @@ class EDLogs(FileSystemEventHandler):
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
             elif entry['event'] == 'MaterialTrade':
-                category = entry['TraderType'].capitalize()
+                category = self.category(entry['Paid']['Category'])
                 self.state[category][entry['Paid']['Material']] -= entry['Paid']['Quantity']
                 if self.state[category][entry['Paid']['Material']] <= 0:
                     self.state[category].pop(entry['Paid']['Material'])
+                category = self.category(entry['Received']['Category'])
                 self.state[category][entry['Received']['Material']] += entry['Received']['Quantity']
 
             elif entry['event'] == 'EngineerCraft' or (entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')):
@@ -550,8 +552,9 @@ class EDLogs(FileSystemEventHandler):
                     self.state['Cargo'][commodity] += reward.get('Count', 1)
                 for reward in entry.get('MaterialsReward', []):
                     if 'Category' in reward:	# Category not present in E:D 3.0
+                        category = self.category(reward['Category'])
                         material = self.canonicalise(reward['Name'])
-                        self.state[self.canonicalise(reward['Category']).capitalize()][material] += reward.get('Count', 1)
+                        self.state[category][material] += reward.get('Count', 1)
             elif entry['event'] == 'EngineerContribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
                 if commodity:
@@ -629,6 +632,10 @@ class EDLogs(FileSystemEventHandler):
         item = item.lower()
         match = self._RE_CANONICALISE.match(item)
         return match and match.group(1) or item
+
+    def category(self, item):
+        match = self._RE_CATEGORY.match(item)
+        return (match and match.group(1) or item).capitalize()
 
     def get_entry(self):
         if not self.event_queue:
