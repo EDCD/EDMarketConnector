@@ -659,7 +659,7 @@ class AppWindow:
                      entry['event'] == 'Docked'  or
                      entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
                     # strip out properties disallowed by the schema
-                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude']:
+                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
                         entry.pop(thing, None)
                     for thing in entry.keys():
                         if thing.endswith('_Localised'):
