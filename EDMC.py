@@ -211,7 +211,7 @@ try:
             data = data2
 
     if args.s:
-        if data['lastStarport'].get('ships'):
+        if data['lastStarport'].get('ships', {}).get('shipyard_list'):
             shipyard.export(data, args.s)
         elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
             sys.stderr.write("Failed to get shipyard data\n")

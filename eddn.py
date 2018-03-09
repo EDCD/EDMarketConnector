@@ -212,7 +212,7 @@ class EDDN:
 
     def export_shipyard(self, data, is_beta):
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
-        if data['lastStarport'].get('ships'):
+        if data['lastStarport'].get('ships', {}).get('shipyard_list'):
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([

@@ -507,7 +507,7 @@ class AppWindow:
                             self.w.update_idletasks()
                             self.eddn.export_commodities(data, monitor.is_beta)
                             self.eddn.export_outfitting(data, monitor.is_beta)
-                            if data['lastStarport'].get('ships'):
+                            if data['lastStarport'].get('ships', {}).get('shipyard_list'):
                                 self.eddn.export_shipyard(data, monitor.is_beta)
                             elif data['lastStarport'].get('services', {}).get('shipyard'):
                                 # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
@@ -556,7 +556,7 @@ class AppWindow:
                 pass	# might have undocked while we were waiting for retry in which case station data is unreliable
             elif (data.get('lastSystem',   {}).get('name') == monitor.system and
                   data.get('lastStarport', {}).get('name') == monitor.station and
-                  data.get('lastStarport', {}).get('ships')):
+                  data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
                 self.eddn.export_shipyard(data, monitor.is_beta)
             elif tries > 1:	# bogus data - retry
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(tries-1))
