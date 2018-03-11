@@ -661,9 +661,6 @@ class AppWindow:
                     # strip out properties disallowed by the schema
                     for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
                         entry.pop(thing, None)
-                    for thing in entry.keys():
-                        if thing.endswith('_Localised'):
-                            entry.pop(thing, None)
 
                     # add planet to Docked event for planetary stations if known
                     if entry['event'] == 'Docked' and monitor.planet:
@@ -678,7 +675,7 @@ class AppWindow:
                     if 'SystemAddress' not in entry and monitor.systemaddress:
                         entry['SystemAddress'] = monitor.systemaddress
 
-                    self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, entry)
+                    self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, self.filter_localised(entry))
 
             except requests.exceptions.RequestException as e:
                 if __debug__: print_exc()
@@ -750,6 +747,18 @@ class AppWindow:
         else:
             self.status['text'] = ''
             return coriolis.url(data, monitor.is_beta)
+
+    # Recursively filter '*_Localised' keys from dict
+    def filter_localised(self, d):
+        filtered = OrderedDict()
+        for k, v in d.iteritems():
+            if k.endswith('_Localised'):
+                pass
+            elif hasattr(v, 'iteritems'):
+                filtered[k] = self.filter_localised(v)
+            else:
+                filtered[k] = v
+        return filtered
 
     def cooldown(self):
         if time() < self.holdofftime:
