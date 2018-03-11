@@ -196,8 +196,6 @@ class EDLogs(FileSystemEventHandler):
         self.stop()
         if self.observer:
             self.observer.stop()
-        if thread:
-            thread.join()
         if self.observer:
             self.observer.join()
             self.observer = None

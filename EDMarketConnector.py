@@ -873,7 +873,7 @@ if __name__ == "__main__":
         GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
         GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
         SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
-        ShowWindow             = ctypes.windll.user32.ShowWindow
+        ShowWindowAsync        = ctypes.windll.user32.ShowWindowAsync
 
         def WindowTitle(h):
             if h:
@@ -888,7 +888,7 @@ if __name__ == "__main__":
             cls = ctypes.create_unicode_buffer(257)
             if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                ShowWindow(hWnd, 9)	# SW_RESTORE
+                ShowWindowAsync(hWnd, 9)	# SW_RESTORE
                 SetForegroundWindow(hWnd)
                 sys.exit(0)
             return True
