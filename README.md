@@ -131,11 +131,6 @@ Troubleshooting
 ### This app requires accurate timestamps
 The app requires that your clock is accurate to within a minute or two. The easiest way to do this is to check “Set time automatically” and maybe “Set time zone automatically” in your system's Date & Time settings.
 
-### Shipyard data not reported
-The Frontier server that supplies the data to this app sometimes fails to supply shipyard data. Visit the shipyard in-game and try “Updating” again.
-
-This problem is tracked as [Issue #86](https://github.com/Marginal/EDMarketConnector/issues/86).
-
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
@@ -144,6 +139,7 @@ The default location on Windows is typically `C:\Users\you\Saved Games\Frontier 
 ### Credentials settings are greyed out
 You can't edit your Username/Password or EDSM Commander Name/API Key if:
 - Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
+- The last time you ran Elite: Dangerous you didn't enter the game. You will be able to edit these values once you've entered the game.
 - Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
 
 ### Error: Wrong Cmdr
@@ -174,11 +170,20 @@ If your configuration has been corrupted, or badly set, such that you can't run 
 
 * Mac: You can use the 'defaults' command to interact with the stored settings, i.e.
 
-    `defaults read uk.org.marginal.edmarketconnector`
+  `defaults read uk.org.marginal.edmarketconnector`
 
-to show the current settings and appropriate 'write' commands to change them.  See https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html
+  to show the current settings and appropriate '[write](https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html)' commands to change them.
 * Windows: Configuration is stored in the registry under `HKEY_CURRENT_USER\Software\Marginal\EDMarketConnector` . There are also some non-configuration files at `%LOCALAPPDATA%\EDMarketConnector\` in your user profile.
 * Linux: Configuration is stored in the file `${HOME}/.config/EDMarketConnector/EDMarketConnector.ini`
+
+### Installing on a different drive
+* In Control Panel uninstall "Elite Dangerous Market Connector".
+* At a Command Prompt type:
+
+  `msiexec /i "X:\path\to\EDMarketConnector_win_NNN.msi" INSTALLDIR="Y:\destination\EDMarketConnector"`
+
+Future updates will also be installed to this location.
+
 
 Running from source
 --------
