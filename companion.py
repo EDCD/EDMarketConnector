@@ -373,3 +373,15 @@ def ship(data):
 
     # subset of "ship" that's not noisy
     return filter_ship(data['ship'])
+
+
+# Ship name suitable for writing to a file
+def ship_file_name(ship_name, ship_type):
+    name = unicode(ship_name or ship_map.get(ship_type.lower(), ship_type)).strip()
+    if name.endswith('.'):
+        name = name[:-1]
+    if name.lower() in ['con', 'prn', 'aux', 'nul',
+                        'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+                        'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9']:
+        name = name + '_'
+    return name.translate({ ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*'] })

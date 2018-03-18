@@ -13,7 +13,7 @@ if __debug__:
     from traceback import print_exc
 
 from config import config
-from companion import ship_map
+from companion import ship_file_name
 
 
 if platform=='darwin':
@@ -735,7 +735,7 @@ class EDLogs(FileSystemEventHandler):
                 h.write(string)
             return
 
-        ship = self.state['ShipName'] or ship_map.get(self.state['ShipType'], self.state['ShipType'])
+        ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted([x for x in listdir(config.get('outdir')) if regexp.match(x)])
         if oldfiles:

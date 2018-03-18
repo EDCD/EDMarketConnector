@@ -19,7 +19,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
-    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
+    ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:
