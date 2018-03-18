@@ -8,6 +8,7 @@ from os.path import basename, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
+from filenames import slugify
 
 if __debug__:
     from traceback import print_exc
@@ -744,7 +745,7 @@ class EDLogs(FileSystemEventHandler):
                     return	# same as last time - don't write
 
         # Write
-        filename = join(config.get('outdir'), '%s.%s.txt' % (ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))))
+        filename = join(config.get('outdir'), '%s.%s.txt' % (slugify(ship), strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))))
         with open(filename, 'wt') as h:
             h.write(string)
 
