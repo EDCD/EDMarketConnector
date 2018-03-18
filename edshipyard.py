@@ -14,6 +14,8 @@ from config import config
 import companion
 import outfitting
 from monitor import monitor
+from filenames import slugify
+
 
 # Map API ship names to E:D Shipyard ship names
 ship_map = dict(companion.ship_map)
@@ -157,10 +159,9 @@ def export(data, filename=None):
                 return	# same as last time - don't write
 
     # Write
-    filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get('outdir'), '%s.%s.txt' % (slugify(ship), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
         h.write(string)
-
 
 # Return a URL for the current ship
 def url(is_beta):

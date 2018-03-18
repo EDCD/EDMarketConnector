@@ -6,6 +6,7 @@ import time
 
 from config import config
 import companion
+from filenames import slugify
 
 
 # Export ship loadout in Companion API json format
@@ -30,6 +31,6 @@ def export(data, filename=None):
     querytime = config.getint('querytime') or int(time.time())
 
     # Write
-    filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get('outdir'), '%s.%s.txt' % (slugify(ship), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
         h.write(string)
