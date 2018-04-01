@@ -451,8 +451,6 @@ class EDLogs(FileSystemEventHandler):
                 self.stationservices = entry.get('StationServices')	# None under E:D < 2.4
             elif entry['event'] == 'ApproachBody':
                 self.planet = entry['Body']
-            elif entry['event'] == 'SupercruiseExit':
-                self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
             elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
                 self.planet = None
 
