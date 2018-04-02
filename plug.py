@@ -91,9 +91,9 @@ class Plugin(object):
 
     def _get_func(self, funcname):
         """
-        Get a function from a plugin, else return None if it isn't implemented.
+        Get a function from a plugin
         :param funcname:
-        :return:
+        :returns: The function, or None if it isn't implemented.
         """
         return getattr(self.module, funcname, None)
 
@@ -101,7 +101,7 @@ class Plugin(object):
         """
         If the plugin provides mainwindow content create and return it.
         :param parent: the parent frame for this entry.
-        :return:
+        :returns: None, a tk Widget, or a pair of tk.Widgets
         """
         plugin_app = self._get_func('plugin_app')
         if plugin_app:
@@ -127,7 +127,7 @@ class Plugin(object):
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
         :param is_beta: whether the player is in a Beta universe.
-        :return:
+        :returns: a myNotebook Frame
         """
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
@@ -147,7 +147,6 @@ class Plugin(object):
 def load_plugins(master):
     """
     Find and load all plugins
-    :return:
     """
     last_error['root'] = master
 
@@ -182,12 +181,39 @@ def load_plugins(master):
 
     imp.release_lock()
 
+def provides(fn_name):
+    """
+    Find plugins that provide a function
+    :param fn_name:
+    :returns: list of names of plugins that provide this function
+    .. versionadded:: 3.0.2
+    """
+    return [p.name for p in PLUGINS if p._get_func(fn_name)]
+
+def invoke(plugin_name, fallback, fn_name, *args):
+    """
+    Invoke a function on a named plugin
+    :param plugin_name: preferred plugin on which to invoke the function
+    :param fallback: fallback plugin on which to invoke the function, or None
+    :param fn_name:
+    :param *args: arguments passed to the function
+    :returns: return value from the function, or None if the function was not found
+    .. versionadded:: 3.0.2
+    """
+    for plugin in PLUGINS:
+        if plugin.name == plugin_name and plugin._get_func(fn_name):
+            return plugin._get_func(fn_name)(*args)
+    for plugin in PLUGINS:
+        if plugin.name == fallback:
+            assert plugin._get_func(fn_name), plugin.name	# fallback plugin should provide the function
+            return plugin._get_func(fn_name)(*args)
+
 
 def notify_stop():
     """
     Notify each plugin that the program is closing.
     If your plugin uses threads then stop and join() them before returning.
-    versionadded:: 2.3.7
+    .. versionadded:: 2.3.7
     """
     error = None
     for plugin in PLUGINS:
@@ -207,7 +233,6 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
     Relevant if you want to have different settings for different user accounts.
     :param cmdr: current Cmdr name (or None).
     :param is_beta: whether the player is in a Beta universe.
-    :return:
     """
     for plugin in PLUGINS:
         prefs_cmdr_changed = plugin._get_func('prefs_cmdr_changed')
@@ -226,7 +251,6 @@ def notify_prefs_changed(cmdr, is_beta):
     values that you want to save.
     :param cmdr: current Cmdr name (or None).
     :param is_beta: whether the player is in a Beta universe.
-    :return:
     """
     for plugin in PLUGINS:
         prefs_changed = plugin._get_func('prefs_changed')
@@ -249,7 +273,7 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     :param entry: The journal entry as a dictionary
     :param state: A dictionary containing info about the Cmdr, current ship and cargo
     :param is_beta: whether the player is in a Beta universe.
-    :return: Error message from the first plugin that returns one (if any)
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
@@ -275,7 +299,7 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
     :param cmdr: The piloting Cmdr name
     :param is_beta: whether the player is in a Beta universe.
     :param entry: The status entry as a dictionary
-    :return: Error message from the first plugin that returns one (if any)
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
@@ -295,8 +319,7 @@ def notify_system_changed(timestamp, system, coordinates):
     Send notification data to each plugin when we arrive at a new system.
     :param timestamp:
     :param system:
-    :return:
-    deprecated:: 2.2
+    .. deprecated:: 2.2
     Use :func:`journal_entry` with the 'FSDJump' event.
     """
     for plugin in PLUGINS:
@@ -316,7 +339,7 @@ def notify_newdata(data, is_beta):
     Send the latest EDMC data from the FD servers to each plugin
     :param data:
     :param is_beta: whether the player is in a Beta universe.
-    :return: Error message from the first plugin that returns one (if any)
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
@@ -337,7 +360,7 @@ def show_error(err):
     """
     Display an error message in the status line of the main window.
     :param err:
-    versionadded:: 2.3.7
+    .. versionadded:: 2.3.7
     """
     if err and last_error['root']:
         last_error['msg'] = unicode(err)
