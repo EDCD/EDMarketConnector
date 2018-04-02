@@ -107,12 +107,15 @@ class Plugin(object):
         if plugin_app:
             try:
                 appitem = plugin_app(parent)
-                if isinstance(appitem, tuple):
+                if appitem is None:
+                    return None
+                elif isinstance(appitem, tuple):
                     if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
                         raise AssertionError
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
-                return appitem
+                else:
+                    return appitem
             except:
                 print_exc()
         return None

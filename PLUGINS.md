@@ -85,9 +85,9 @@ def prefs_changed(cmdr, is_beta):
 
 ## Display
 
-You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a tk.Frame widget and populate it with other ttk widgets.
+You can also have your plugin add an item to the EDMC main window and update from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a tk.Frame widget and populate it with other ttk widgets. Return `None` if you just want to use this as a callback after the main window and all other plugins are initialised.
 
-You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numbers in a locale-independent way.
+You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numbers in your widgets in a locale-independent way.
 
 ```python
 this = sys.modules[__name__]	# For holding module globals
