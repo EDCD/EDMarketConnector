@@ -597,8 +597,6 @@ class AppWindow:
             elif monitor.cmdr:
                 if monitor.group:
                     self.cmdr['text'] = '%s / %s' % (monitor.cmdr, monitor.group)
-                elif monitor.mode.lower() == 'solo':
-                    self.cmdr['text'] = '%s / %s' % (monitor.cmdr, 'Solo')	# Game mode - not Open or Group. Don't translate
                 else:
                     self.cmdr['text'] = monitor.cmdr
                 self.ship_label['text'] = _('Ship') + ':'	# Main window
