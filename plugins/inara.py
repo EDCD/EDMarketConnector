@@ -55,7 +55,7 @@ def system_url(system_name):
     return this.system
 
 def station_url(system_name, station_name):
-    return this.station
+    return this.station or this.system
 
 
 def plugin_start():
@@ -168,6 +168,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.loadout = None
         this.fleet = None
         this.shipswap = False
+        this.system = None
+        this.station = None
     elif entry['event'] in ['Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy']:
         # Events that mean a significant change in credits so we should send credits after next "Update"
         this.lastcredits = 0
@@ -272,6 +274,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             # Update location
             if (entry['event'] in ['StartUp', 'Cargo'] or this.newuser) and system:
                 this.undocked = False
+                this.system = None
+                this.station = None
                 add_event('setCommanderTravelLocation', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', system),
@@ -296,6 +300,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             elif entry['event'] == 'Undocked':
                 this.undocked = True
+                this.station = None
 
             elif entry['event'] == 'SupercruiseEntry':
                 if this.undocked:
@@ -310,6 +315,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             elif entry['event'] == 'FSDJump':
                 this.undocked = False
+                this.system = None
                 add_event('addCommanderTravelFSDJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
@@ -722,7 +728,7 @@ def worker():
                             print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
-                        elif data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                        if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
                             eventData = reply_event.get('eventData', {})
                             this.system  = eventData.get('starsystemInaraURL')
                             this.station = eventData.get('stationInaraURL')
