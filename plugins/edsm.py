@@ -269,7 +269,7 @@ def cmdr_data(data, is_beta):
                     'event': 'Coriolis',
                     'timestamp': timestamp,
                     '_shipId': data['ship']['id'],
-                    'url': plug.invoke('Coriolis', None, 'shipyard_url', entry, is_beta, data)
+                    'url': plug.invoke('Coriolis', None, 'shipyard_url', {}, is_beta, data)
                 }))
             this.lastship = ship
 

@@ -37,7 +37,7 @@ def shipyard_url(loadout, is_beta, data=None):
         plug.show_error(_("Where are you?!"))		# Shouldn't happen
     elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
         plug.show_error(_("What are you flying?!"))	# Shouldn't happen
-    elif (loadout['ShipID'] is not None and data['ship']['id'] != loadout['ShipID']) or (loadout['Ship'] and data['ship']['name'].lower() != loadout['Ship']):
+    elif (loadout.get('ShipID') is not None and data['ship']['id'] != loadout['ShipID']) or (loadout.get('Ship') and data['ship']['name'].lower() != loadout['Ship']):
         plug.show_error(_('Error: Frontier server is lagging'))	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
     else:
         string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
