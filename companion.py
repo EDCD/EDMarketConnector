@@ -385,3 +385,7 @@ def ship_file_name(ship_name, ship_type):
                         'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9']:
         name = name + '_'
     return name.translate({ ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*'] })
+
+
+# singleton
+session = Session()

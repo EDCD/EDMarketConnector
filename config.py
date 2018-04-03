@@ -108,10 +108,6 @@ class Config:
     OUT_SYS_EDDN      = 2048
     OUT_SYS_DELAY     = 4096
 
-    # shipyard setting
-    SHIPYARD_EDSHIPYARD = 0
-    SHIPYARD_CORIOLIS   = 1
-
     if platform=='darwin':
 
         def __init__(self):

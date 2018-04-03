@@ -66,7 +66,7 @@ if sys.platform=='darwin':
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
-PLUGINS = [ 'plugins/eddb.py', 'plugins/edsm.py', 'plugins/inara.py' ]
+PLUGINS = [ 'plugins/coriolis.py', 'plugins/eddb.py', 'plugins/edsm.py', 'plugins/edsy.py', 'plugins/inara.py' ]
 
 if sys.platform=='darwin':
     OPTIONS =  { 'py2app':

@@ -49,9 +49,6 @@ import commodity
 from commodity import COMMODITY_CSV
 import td
 import eddn
-import coriolis
-import edshipyard
-import loadout
 import stats
 import prefs
 import plug
@@ -79,7 +76,6 @@ class AppWindow:
     def __init__(self, master):
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
-        self.session = companion.Session()
         self.eddn = eddn.EDDN(self)
 
         self.w = master
@@ -108,15 +104,23 @@ class AppWindow:
 
         self.cmdr_label = tk.Label(frame)
         self.ship_label = tk.Label(frame)
+        self.system_label = tk.Label(frame)
+        self.station_label = tk.Label(frame)
 
         self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
         self.ship_label.grid(row=2, column=0, sticky=tk.W)
+        self.system_label.grid(row=3, column=0, sticky=tk.W)
+        self.station_label.grid(row=4, column=0, sticky=tk.W)
 
-        self.cmdr    = tk.Label(frame, anchor=tk.W)
-        self.ship    = HyperlinkLabel(frame, url = self.shipyard_url)
+        self.cmdr    = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name = 'cmdr')
+        self.ship    = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.shipyard_url, name = 'ship')
+        self.system  = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.system_url, popup_copy = True, name = 'system')
+        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url = self.station_url, name = 'station')
 
         self.cmdr.grid(row=1, column=1, sticky=tk.EW)
         self.ship.grid(row=2, column=1, sticky=tk.EW)
+        self.system.grid(row=3, column=1, sticky=tk.EW)
+        self.station.grid(row=4, column=1, sticky=tk.EW)
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
@@ -291,8 +295,8 @@ class AppWindow:
         # Migration from <= 2.25
         if not config.get('cmdrs') and config.get('username') and config.get('password'):
             try:
-                self.session.login(config.get('username'), config.get('password'), False)
-                data = self.session.profile()
+                companion.session.login(config.get('username'), config.get('password'), False)
+                data = companion.session.profile()
                 prefs.migrate(data['commander']['name'])
             except:
                 if __debug__: print_exc()
@@ -341,6 +345,8 @@ class AppWindow:
         self.cmdr_label['text']    = _('Cmdr') + ':'	# Main window
         self.ship_label['text']    = (monitor.state['Captain'] and _('Role') or	# Multicrew role label in main window
                                       _('Ship')) + ':'	# Main window
+        self.system_label['text']  = _('System') + ':'	# Main window
+        self.station_label['text'] = _('Station') + ':'	# Main window
         self.button['text'] = self.theme_button['text'] = _('Update')	# Update button in main window
         if platform == 'darwin':
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
@@ -379,7 +385,7 @@ class AppWindow:
                 raise companion.CredentialsError()
             idx = config.get('cmdrs').index(monitor.cmdr)
             username = config.get('fdev_usernames')[idx]
-            self.session.login(username, config.get_password(username), monitor.is_beta)
+            companion.session.login(username, config.get_password(username), monitor.is_beta)
             self.status['text'] = ''
         except companion.VerificationRequired:
             if not self.authdialog:
@@ -395,7 +401,7 @@ class AppWindow:
     def verify(self, callback, code):
         self.authdialog = None
         try:
-            self.session.verify(code)
+            companion.session.verify(code)
             config.save()	# Save settings now for use by command-line app
         except Exception as e:
             if __debug__: print_exc()
@@ -427,7 +433,7 @@ class AppWindow:
 
         try:
             querytime = int(time())
-            data = self.session.station()
+            data = companion.session.station()
             config.set('querytime', querytime)
 
             # Validation
@@ -556,7 +562,7 @@ class AppWindow:
     def retry_for_shipyard(self, tries):
         # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
         try:
-            data = self.session.station()
+            data = companion.session.station()
             if __debug__:
                 print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!')
             if not data['commander'].get('docked'):
@@ -713,46 +719,15 @@ class AppWindow:
             if not config.getint('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname=None):
+    def shipyard_url(self, shipname):
+        return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
 
-        if not monitor.cmdr or not monitor.mode:
-            return False	# In CQC - do nothing
+    def system_url(self, system):
+        return plug.invoke(config.get('system_provider'),   'EDSM', 'system_url', monitor.system)
 
-        if config.getint('shipyard') == config.SHIPYARD_EDSHIPYARD:
-            return edshipyard.url(monitor.is_beta)
-        elif config.getint('shipyard') == config.SHIPYARD_CORIOLIS:
-            pass	# Fall through
-        else:
-            assert False, config.getint('shipyard')
-            return False
+    def station_url(self, station):
+        return plug.invoke(config.get('station_provider'),  'eddb', 'station_url', monitor.system, monitor.station)
 
-        self.status['text'] = _('Fetching data...')
-        self.w.update_idletasks()
-        try:
-            data = self.session.profile()
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.shipyard_url))
-        except companion.ServerError as e:
-            self.status['text'] = str(e)
-            return
-        except Exception as e:
-            if __debug__: print_exc()
-            self.status['text'] = str(e)
-            return
-
-        if not data.get('commander', {}).get('name'):
-            self.status['text'] = _("Who are you?!")		# Shouldn't happen
-        elif (not data.get('lastSystem', {}).get('name') or
-              (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):	# Only care if docked
-            self.status['text'] = _("Where are you?!")		# Shouldn't happen
-        elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
-            self.status['text'] = _("What are you flying?!")	# Shouldn't happen
-        elif (monitor.state['ShipID'] is not None and data['ship']['id'] != monitor.state['ShipID']) or (monitor.state['ShipType'] and data['ship']['name'].lower() != monitor.state['ShipType']):
-            self.status['text'] = _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
-        else:
-            self.status['text'] = ''
-            return coriolis.url(data, monitor.is_beta)
 
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(self, d):
@@ -798,7 +773,7 @@ class AppWindow:
         self.w.update_idletasks()
 
         try:
-            data = self.session.station()
+            data = companion.session.station()
             self.status['text'] = ''
             f = tkFileDialog.asksaveasfilename(parent = self.w,
                                                defaultextension = platform=='darwin' and '.json' or '',
@@ -827,7 +802,7 @@ class AppWindow:
         plug.notify_stop()
         self.eddn.close()
         self.updater.close()
-        self.session.close()
+        companion.session.close()
         config.close()
         self.w.destroy()
 

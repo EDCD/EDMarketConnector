@@ -3,15 +3,11 @@
 # Station display and eddb.io lookup
 #
 
-
 import cPickle
 import csv
 import os
-from os.path import dirname, join, normpath
+from os.path import join
 import sys
-
-import Tkinter as tk
-from ttkHyperlinkLabel import HyperlinkLabel
 
 from config import config
 
@@ -19,7 +15,6 @@ from config import config
 STATION_UNDOCKED = u'×'	# "Station" name to display when not docked = U+00D7
 
 this = sys.modules[__name__]	# For holding module globals
-this.system = None	# name of current system
 
 with open(join(config.respath, 'systems.p'),  'rb') as h:
     this.system_ids  = cPickle.load(h)
@@ -27,6 +22,15 @@ with open(join(config.respath, 'systems.p'),  'rb') as h:
 with open(join(config.respath, 'stations.p'), 'rb') as h:
     this.station_ids = cPickle.load(h)
 
+
+# Main window clicks
+def station_url(system_name, station_name):
+    if station_id(system_name, station_name):
+        return 'https://eddb.io/station/%d' % station_id(system_name, station_name)
+    elif system_id(system_name):
+        return 'https://eddb.io/system/%d' % system_id(system_name)
+    else:
+        return None
 
 # system_name -> system_id or 0
 def system_id(system_name):
@@ -36,34 +40,20 @@ def system_id(system_name):
 def station_id(system_name, station_name):
     return this.station_ids.get((this.system_ids.get(system_name), station_name), 0)
 
-def station_url(text):
-    if text:
-        station = station_id(this.system, text)
-        if station:
-            return 'https://eddb.io/station/%d' % station
-
-        system = system_id(this.system)
-        if system:
-            return 'https://eddb.io/system/%d' % system
-
-    return None
-
 
 def plugin_start():
-    return '~eddb'
+    return 'eddb'
 
 def plugin_app(parent):
-    this.station_label = tk.Label(parent, text = _('Station') + ':')	# Main window
-    this.station = HyperlinkLabel(parent, url = station_url, popup_copy = lambda x: x != STATION_UNDOCKED)
-    return (this.station_label, this.station)
-
-def prefs_changed(cmdr, is_beta):
-    this.station_label['text'] = _('Station') + ':'
+    this.station = parent.children['station']	# station label in main window
+    this.station.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     this.system = system
     this.station['text'] = station or (system_id(system) and STATION_UNDOCKED or '')
+    this.station.update_idletasks()
 
 def cmdr_data(data, is_beta):
     this.system = data['lastSystem']['name']
     this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_id(data['lastSystem']['name']) and STATION_UNDOCKED or '')
+    this.station.update_idletasks()

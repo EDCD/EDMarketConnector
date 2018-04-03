@@ -1,3 +1,5 @@
+# Export ship loadout in Companion API json format
+
 import json
 import os
 from os.path import join
@@ -8,7 +10,6 @@ from config import config
 import companion
 
 
-# Export ship loadout in Companion API json format
 def export(data, filename=None):
 
     string = json.dumps(companion.ship(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8')	# pretty print

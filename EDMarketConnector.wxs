@@ -229,10 +229,16 @@
 					</Directory>
 					<Directory Id="plugins" Name="plugins">
 						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\coriolis.py" />
+						</Component>
+						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\edsy.py" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\inara.py" />

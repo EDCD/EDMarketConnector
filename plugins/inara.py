@@ -46,9 +46,16 @@ this.loadout = None
 this.fleet = None
 this.shipswap = False	# just swapped ship
 
-# URLs
+
+# Main window clicks
 this.system = None
 this.station = None
+
+def system_url(system_name):
+    return this.system
+
+def station_url(system_name, station_name):
+    return this.station
 
 
 def plugin_start():
@@ -715,10 +722,10 @@ def worker():
                             print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
-                            if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
-                                eventData = reply_event.get('eventData', {})
-                                this.system  = eventData.get('starsystemInaraURL')
-                                this.station = eventData.get('stationInaraURL')
+                        elif data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                            eventData = reply_event.get('eventData', {})
+                            this.system  = eventData.get('starsystemInaraURL')
+                            this.station = eventData.get('stationInaraURL')
                 break
             except:
                 if __debug__: print_exc()

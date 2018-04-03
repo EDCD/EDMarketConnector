@@ -1,34 +1,18 @@
 #!/usr/bin/python
 #
-# Export ship loadout in Coriolis format
+# build ship and module databases from https://github.com/EDCD/coriolis-data/
 #
 
 import base64
 from collections import OrderedDict
 import cPickle
 import json
-import StringIO
-import gzip
 
 from config import config
 import outfitting
 import companion
 
 
-# Return a URL for the current ship
-def url(data, is_beta):
-
-    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
-
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode='w') as f:
-        f.write(string)
-    return (is_beta and 'https://beta.coriolis.edcd.io/import?data=' or 'https://coriolis.edcd.io/import?data=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
-
-
-#
-# build ship and module databases from https://github.com/EDCD/coriolis-data/
-#
 if __name__ == "__main__":
     data = json.load(open('coriolis-data/dist/index.json'))
 

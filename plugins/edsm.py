@@ -16,8 +16,6 @@ import myNotebook as nb
 
 from config import appname, applongname, appversion, config
 import companion
-import coriolis
-import edshipyard
 import outfitting
 import plug
 
@@ -26,7 +24,6 @@ if __debug__:
 
 EDSM_POLL = 0.1
 _TIMEOUT = 20
-FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to EDSM
 
 
 this = sys.modules[__name__]	# For holding module globals
@@ -43,6 +40,15 @@ this.coordinates = None
 this.newgame = False		# starting up - batch initial burst of events
 this.newgame_docked = False	# starting up while docked
 this.navbeaconscan = 0		# batch up burst of Scan events after NavBeaconScan
+
+
+# Main window clicks
+def system_url(system_name):
+    return 'https://www.edsm.net/en/system?systemName=%s' % urllib2.quote(system_name)
+
+def station_url(system_name, station_name):
+    return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib2.quote(system_name), urllib2.quote(station_name))
+
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
@@ -75,10 +81,8 @@ def plugin_start():
     return 'EDSM'
 
 def plugin_app(parent):
-    this.system_label = tk.Label(parent, text = _('System') + ':')	# Main window
-    this.system = HyperlinkLabel(parent, compound=tk.RIGHT, popup_copy = True)
+    this.system = parent.children['system']	# system label in main window
     this.system.bind_all('<<EDSMStatus>>', update_status)
-    return (this.system_label, this.system)
 
 def plugin_stop():
     # Signal thread to close and wait for it
@@ -143,7 +147,6 @@ def prefsvarchanged():
     this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
 
 def prefs_changed(cmdr, is_beta):
-    this.system_label['text']  = _('System') + ':'	# Main window
     config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
@@ -188,12 +191,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     if this.system['text'] != system:
         this.system['text'] = system or ''
         this.system['image'] = ''
-        if not system or system in FAKE:
-            this.system['url'] = None
-            this.lastlookup = True
-        else:
-            this.system['url'] = 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system)
-            this.lastlookup = False
         this.system.update_idletasks()
 
     this.multicrew = bool(state['Role'])
@@ -243,7 +240,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.queue.put((cmdr, entry))
 
         if entry['event'] == 'Loadout' and 'EDShipyard' not in this.discardedEvents:
-            url = edshipyard.url(is_beta)
+            url = plug.invoke('EDSY', None, 'shipyard_url', entry, is_beta)
             if this.lastloadout != url:
                 this.lastloadout = url
                 this.queue.put((cmdr, {
@@ -259,12 +256,6 @@ def cmdr_data(data, is_beta):
     if not this.system['text']:
         this.system['text'] = system
         this.system['image'] = ''
-        if not system or system in FAKE:
-            this.system['url'] = None
-            this.lastlookup = True
-        else:
-            this.system['url'] = 'https://www.edsm.net/show-system?systemName=%s' % urllib2.quote(system)
-            this.lastlookup = False
         this.system.update_idletasks()
 
     # Send ship info to EDSM
@@ -275,7 +266,10 @@ def cmdr_data(data, is_beta):
             timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
             if 'Coriolis' not in this.discardedEvents:
                 this.queue.put((cmdr, {
-                    'event': 'Coriolis',   'timestamp': timestamp, '_shipId': data['ship']['id'], 'url': coriolis.url(data, is_beta)
+                    'event': 'Coriolis',
+                    'timestamp': timestamp,
+                    '_shipId': data['ship']['id'],
+                    'url': plug.invoke('Coriolis', None, 'shipyard_url', entry, is_beta, data)
                 }))
             this.lastship = ship
 

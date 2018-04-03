@@ -100,7 +100,6 @@ try:
             sys.exit(EXIT_SYS_ERR)
 
         # Get data from Companion API
-        session = companion.Session()
         if args.p:
             cmdrs = config.get('cmdrs') or []
             if args.p in cmdrs:
@@ -112,17 +111,17 @@ try:
                 else:
                     raise companion.CredentialsError
             username = config.get('fdev_usernames')[idx]
-            session.login(username, config.get_password(username), monitor.is_beta)
+            companion.session.login(username, config.get_password(username), monitor.is_beta)
         elif config.get('cmdrs'):
             cmdrs = config.get('cmdrs') or []
             if monitor.cmdr not in cmdrs:
                 raise companion.CredentialsError
             username = config.get('fdev_usernames')[cmdrs.index(monitor.cmdr)]
-            session.login(username, config.get_password(username), monitor.is_beta)
+            companion.session.login(username, config.get_password(username), monitor.is_beta)
         else:	# <= 2.25 not yet migrated
-            session.login(config.get('username'), config.get('password'), monitor.is_beta)
+            companion.session.login(config.get('username'), config.get('password'), monitor.is_beta)
         querytime = int(time())
-        data = session.station()
+        data = companion.session.station()
         config.set('querytime', querytime)
 
     # Validation
@@ -204,7 +203,7 @@ try:
     if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and data['lastStarport']['services'].get('shipyard'):
         # Retry for shipyard
         sleep(SERVER_RETRY)
-        data2 = session.station()
+        data2 = companion.session.station()
         if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
             data2.get('lastSystem',   {}).get('name') == monitor.system and
             data2.get('lastStarport', {}).get('name') == monitor.station):

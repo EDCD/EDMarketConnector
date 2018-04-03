@@ -233,20 +233,37 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
-                self.hotkey_text.grid(row=20, column=1, columnspan=2, padx=PADX, pady=(5,0), sticky=tk.W)
+                self.hotkey_text.grid(row=20, column=1, columnspan=2, pady=(5,0), sticky=tk.W)
                 self.hotkey_only_btn = nb.Checkbutton(configframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5,0), sticky=tk.W)
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(configframe, text=_('Preferred Shipyard')).grid(columnspan=4, padx=PADX, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.
-        self.shipyard = tk.IntVar(value = config.getint('shipyard'))
-        nb.Radiobutton(configframe, text='E:D Shipyard', variable=self.shipyard, value=config.SHIPYARD_EDSHIPYARD).grid(columnspan=3, padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        nb.Radiobutton(configframe, text='Coriolis',     variable=self.shipyard, value=config.SHIPYARD_CORIOLIS  ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
+        nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)	# Settings prompt for preferred ship loadout, system and station info websites
+
+        self.shipyard_provider = tk.StringVar(value = config.get('shipyard_provider') in plug.provides('shipyard_url') and config.get('shipyard_provider') or 'EDSY')
+        nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
+        self.shipyard_button = nb.OptionMenu(configframe, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url'))
+        self.shipyard_button.configure(width = 15)
+        self.shipyard_button.grid(row=31, column=1, sticky=tk.W)
+
+        self.system_provider = tk.StringVar(value = config.get('system_provider') in plug.provides('system_url') and config.get('system_provider') or 'EDSM')
+        nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.system_button = nb.OptionMenu(configframe, self.system_provider, self.system_provider.get(), *plug.provides('system_url'))
+        self.system_button.configure(width = 15)
+        self.system_button.grid(row=32, column=1, sticky=tk.W)
+
+        self.station_provider = tk.StringVar(value = config.get('station_provider') in plug.provides('station_url') and config.get('station_provider') or 'eddb')
+        nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.station_button = nb.OptionMenu(configframe, self.station_provider, self.station_provider.get(), *plug.provides('station_url'))
+        self.station_button.configure(width = 15)
+        self.station_button.grid(row=33, column=1, sticky=tk.W)
+
         nb.Label(configframe).grid(sticky=tk.W)	# big spacer
 
         notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
+
 
         self.languages = Translations().available_names()
         self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
@@ -567,7 +584,9 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
-        config.set('shipyard', self.shipyard.get())
+        config.set('shipyard_provider', self.shipyard_provider.get())
+        config.set('system_provider', self.system_provider.get())
+        config.set('station_provider', self.station_provider.get())
 
         lang_codes = { v: k for k, v in self.languages.iteritems() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
