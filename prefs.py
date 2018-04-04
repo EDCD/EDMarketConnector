@@ -600,11 +600,12 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set('anonymous', self.out_anon.get())
 
+        # Notify
+        if self.callback:
+            self.callback()
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
-        if self.callback:
-            self.callback()
 
     def _destroy(self):
         if self.cmdrchanged_alarm is not None:

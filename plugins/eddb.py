@@ -55,15 +55,22 @@ def plugin_start():
     return 'eddb'
 
 def plugin_app(parent):
-    this.station = parent.children['station']	# station label in main window
-    this.station.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
+    this.system_link  = parent.children['system']	# system label in main window
+    this.station_link = parent.children['station']	# station label in main window
+    this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
+
+def prefs_changed(cmdr, is_beta):
+    if config.get('system_provider') == 'eddb':
+        this.system_link['url'] = system_url(system_link['text'])	# Override standard URL function
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
-    this.system = system
-    this.station['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
-    this.station.update_idletasks()
+    if config.get('system_provider') == 'eddb':
+        this.system_link['url'] = system_url(system)	# Override standard URL function
+    this.station_link['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
+    this.station_link.update_idletasks()
 
 def cmdr_data(data, is_beta):
-    this.system = data['lastSystem']['name']
-    this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
-    this.station.update_idletasks()
+    if config.get('system_provider') == 'eddb':
+        this.system_link['url'] = system_url(data['lastSystem']['name'])	# Override standard URL function
+    this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
+    this.station_link.update_idletasks()

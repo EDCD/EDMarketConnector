@@ -330,6 +330,11 @@ class AppWindow:
         self.prefsdialog = None
         self.set_labels()	# in case language has changed
 
+        # Reset links in case plugins changed them
+        self.ship.configure(url = self.shipyard_url)
+        self.system.configure(url = self.system_url)
+        self.station.configure(url = self.station_url)
+
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 

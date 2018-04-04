@@ -47,8 +47,10 @@ def system_url(system_name):
     return 'https://www.edsm.net/en/system?systemName=%s' % urllib2.quote(system_name)
 
 def station_url(system_name, station_name):
-    return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib2.quote(system_name), urllib2.quote(station_name))
-
+    if station_name:
+        return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib2.quote(system_name), urllib2.quote(station_name))
+    else:
+        return system_url(system_name)
 
 def plugin_start():
     # Can't be earlier since can only call PhotoImage after window is created
