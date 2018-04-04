@@ -16,29 +16,39 @@ STATION_UNDOCKED = u'×'	# "Station" name to display when not docked = U+00D7
 
 this = sys.modules[__name__]	# For holding module globals
 
+# (system_id, is_populated) by system_name
 with open(join(config.respath, 'systems.p'),  'rb') as h:
     this.system_ids  = cPickle.load(h)
 
+# station_id by (system_id, station_name)
 with open(join(config.respath, 'stations.p'), 'rb') as h:
     this.station_ids = cPickle.load(h)
 
 
 # Main window clicks
-def station_url(system_name, station_name):
-    if station_id(system_name, station_name):
-        return 'https://eddb.io/station/%d' % station_id(system_name, station_name)
-    elif system_id(system_name):
+def system_url(system_name):
+    if system_id(system_name):
         return 'https://eddb.io/system/%d' % system_id(system_name)
     else:
         return None
 
+def station_url(system_name, station_name):
+    if station_id(system_name, station_name):
+        return 'https://eddb.io/station/%d' % station_id(system_name, station_name)
+    else:
+        return system_url(system_name)
+
 # system_name -> system_id or 0
 def system_id(system_name):
-    return this.system_ids.get(system_name, 0)	# return 0 on failure (0 is not a valid id)
+    return this.system_ids.get(system_name, [0, False])[0]
+
+# system_name -> is_populated
+def system_populated(system_name):
+    return this.system_ids.get(system_name, [0, False])[1]
 
 # (system_name, station_name) -> station_id or 0
 def station_id(system_name, station_name):
-    return this.station_ids.get((this.system_ids.get(system_name), station_name), 0)
+    return this.station_ids.get((system_id(system_name), station_name), 0)
 
 
 def plugin_start():
@@ -50,10 +60,10 @@ def plugin_app(parent):
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     this.system = system
-    this.station['text'] = station or (system_id(system) and STATION_UNDOCKED or '')
+    this.station['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
     this.station.update_idletasks()
 
 def cmdr_data(data, is_beta):
     this.system = data['lastSystem']['name']
-    this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_id(data['lastSystem']['name']) and STATION_UNDOCKED or '')
+    this.station['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
     this.station.update_idletasks()
