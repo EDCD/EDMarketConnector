@@ -13,6 +13,9 @@
 /* [inara.py] */
 "Send flight log and Cmdr status to Inara" = "フライトログとCMDRステータスをInaraへ送信する";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "造船所";
+
 /* Language name */
 "!Language" = "日本語";
 
@@ -175,7 +178,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "エラー: Frontier社のサーバがダウンしています";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "エラー: Frontier社のサーバが混雑しています";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -385,9 +388,6 @@
 /* [prefs.py] */
 "Preferences" = "環境設定";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "行きつけの造船所";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -469,7 +469,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "ステーション";
 
 /* [EDMarketConnector.py] */
@@ -484,7 +484,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "星系";
 
 /* Appearance setting. [prefs.py] */

@@ -148,7 +148,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Kļūda: Frontier serveris nav aktīvs";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Kļūda: Frontier serveris aizkavējas";
 
 /* [companion.py] */
@@ -415,7 +415,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Stacija";
 
 /* [EDMarketConnector.py] */
@@ -430,7 +430,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Sistēma";
 
 /* Appearance setting. [prefs.py] */

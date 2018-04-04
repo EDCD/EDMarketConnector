@@ -13,6 +13,9 @@
 /* [inara.py] */
 "Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Сайт спорядження";
+
 /* Language name */
 "!Language" = "Українська";
 
@@ -175,7 +178,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -385,9 +388,6 @@
 /* [prefs.py] */
 "Preferences" = "Уподобання";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Сайт спорядження";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Принц";
 
@@ -469,7 +469,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Зброєносець";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Станція";
 
 /* [EDMarketConnector.py] */
@@ -484,7 +484,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Геодезист";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */

@@ -1,3 +1,6 @@
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Верфи";
+
 /* Language name */
 "!Language" = "Русский";
 
@@ -160,7 +163,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Ошибка: Сервер Фронтир выключен";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Ошибка: Сервер Фронтир лаг'ает";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -370,9 +373,6 @@
 /* [prefs.py] */
 "Preferences" = "Настройки";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Предпочтительные верфи";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Принц";
 
@@ -454,7 +454,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Оруженосец";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Станция";
 
 /* [EDMarketConnector.py] */
@@ -469,7 +469,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Изыскатель";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */

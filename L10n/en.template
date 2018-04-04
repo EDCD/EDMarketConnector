@@ -163,7 +163,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Error: Frontier server is down";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Error: Frontier server is lagging";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -379,8 +379,8 @@
 /* [prefs.py] */
 "Preferences" = "Preferences";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Preferred Shipyard";
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Preferred websites";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
@@ -466,10 +466,13 @@
 /* Status dialog title. [stats.py] */
 "Ships" = "Ships";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Shipyard";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Station";
 
 /* [EDMarketConnector.py] */
@@ -484,7 +487,7 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "System";
 
 /* Appearance setting. [prefs.py] */
