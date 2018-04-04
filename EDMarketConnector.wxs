@@ -470,6 +470,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="coriolis.py" />
 			<ComponentRef Id="commodity.csv" />
 			<ComponentRef Id="cs.strings" />
 			<ComponentRef Id="de.strings" />
@@ -478,6 +479,7 @@
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="eddb.py" />
 			<ComponentRef Id="edsm.py" />
+			<ComponentRef Id="edsy.py" />
 			<ComponentRef Id="es.strings" />
 			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />
