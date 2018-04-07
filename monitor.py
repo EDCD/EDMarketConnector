@@ -465,7 +465,7 @@ class EDLogs(FileSystemEventHandler):
                     if k in self.state['Rank']:
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
             elif entry['event'] in ['Reputation', 'Statistics']:
-                payload = dict(entry)
+                payload = OrderedDict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
                 self.state[entry['event']] = payload
