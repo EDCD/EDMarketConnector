@@ -114,8 +114,7 @@ class Plugin(object):
                         raise AssertionError
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
-                else:
-                    return appitem
+                return appitem
             except:
                 print_exc()
         return None
