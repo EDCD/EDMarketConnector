@@ -178,3 +178,33 @@ EDMC now lets you disable a plugin without deleting it, simply rename the plugin
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
+
+# Python Package Plugins
+
+EDMC supports writing plugins that provide features and python code for others plugins to call. These plugins are
+loaded before any others.
+
+A _Package Plugin_ is simply one that also contains a `__init__.py` file.
+
+This should also contain a standard `load.py` file containing a `plugin_start()` function even if the function is empty
+otherwise the plugin will not appear in the EDMC plugins tab.
+
+Eg,
+
+```
+plugins\Fish
+  __init__.py
+  load.py
+  fingers.py
+  cakes.py
+
+plugins\Cook
+  load.py
+```
+
+Given the above, the `Cook` plugin would be able to do:
+
+```
+from Fish import fingers, cakes
+```
+
