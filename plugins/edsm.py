@@ -30,8 +30,8 @@ this = sys.modules[__name__]	# For holding module globals
 this.session = requests.Session()
 this.queue = Queue()		# Items to be sent to EDSM by worker thread
 this.discardedEvents = []	# List discarded events from EDSM
-this.lastship = None		# Description of last ship that we sent to EDSM
-this.lastloadout = None		# Description of last ship that we sent to EDSM
+this.last_edsy = None		# URL of last ship that we sent to EDSM
+this.last_coriolis = None	# URL of last ship that we sent to EDSM
 this.lastlookup = False		# whether the last lookup succeeded
 
 # Game state
@@ -242,13 +242,21 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         this.queue.put((cmdr, entry))
 
-        if entry['event'] == 'Loadout' and 'EDShipyard' not in this.discardedEvents:
-            url = plug.invoke('EDSY', None, 'shipyard_url', entry, is_beta)
-            if this.lastloadout != url:
-                this.lastloadout = url
-                this.queue.put((cmdr, {
-                    'event': 'EDShipyard', 'timestamp': entry['timestamp'], '_shipId': state['ShipID'], 'url': this.lastloadout
-                }))
+        if entry['event'] == 'Loadout':
+            if 'EDShipyard' not in this.discardedEvents:
+                url = plug.invoke('EDSY', None, 'shipyard_url', entry, is_beta)
+                if this.last_edsy != url:
+                    this.last_edsy = url
+                    this.queue.put((cmdr, {
+                        'event': 'EDShipyard', 'timestamp': entry['timestamp'], '_shipId': state['ShipID'], 'url': url
+                    }))
+            if 'Coriolis' not in this.discardedEvents:
+                url = plug.invoke('Coriolis', None, 'shipyard_url', entry, is_beta)
+                if this.last_coriolis != url:
+                    this.last_coriolis = url
+                    this.queue.put((cmdr, {
+                        'event': 'Coriolis', 'timestamp': entry['timestamp'], '_shipId': state['ShipID'], 'url': url
+                    }))
 
 
 # Update system data
@@ -260,21 +268,6 @@ def cmdr_data(data, is_beta):
         this.system['text'] = system
         this.system['image'] = ''
         this.system.update_idletasks()
-
-    # Send ship info to EDSM
-    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(data['commander']['name']):
-        ship = companion.ship(data)
-        if ship != this.lastship:
-            cmdr = data['commander']['name']
-            timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-            if 'Coriolis' not in this.discardedEvents:
-                this.queue.put((cmdr, {
-                    'event': 'Coriolis',
-                    'timestamp': timestamp,
-                    '_shipId': data['ship']['id'],
-                    'url': plug.invoke('Coriolis', None, 'shipyard_url', {}, is_beta, data)
-                }))
-            this.lastship = ship
 
 
 # Worker thread
