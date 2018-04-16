@@ -160,13 +160,10 @@ def ships(data):
 
         if not data['commander'].get('docked'):
             # Set current system, not last docked
-            return ([ (str(ships[0]['id']), ship_map.get(ships[0]['name'].lower(), ships[0]['name']), ships[0].get('shipName', ''), data['lastSystem']['name'], '', credits(ships[0]['value']['total'])) ] +
-                    [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], credits(ship['value']['total'])) for ship in ships[1:] if ship])
+            return ([ (str(ships[0]['id']), ship_map.get(ships[0]['name'].lower(), ships[0]['name']), ships[0].get('shipName', ''), data['lastSystem']['name'], '', str(ships[0]['value']['total'])) ] +
+                    [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship])
 
-    return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], credits(ship['value']['total'])) for ship in ships if ship]
-
-def credits(value):
-    return Locale.stringFromNumber(value, 0) + ' Cr'
+    return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
 
 def export_ships(data, filename):
     h = csv.writer(open(filename, 'wb'))
@@ -245,7 +242,7 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook)
         for thing in stats[1:3]:
-            self.addpagerow(page, [thing[0], credits(int(thing[1]))])	# assumes things two and three are money
+            self.addpagerow(page, [thing[0], self.credits(int(thing[1]))])	# assumes things two and three are money
         for thing in stats[3:]:
             self.addpagerow(page, thing)
         ttk.Frame(page).grid(pady=5)			# bottom spacer
@@ -260,7 +257,7 @@ class StatsResults(tk.Toplevel):
         ])
         shiplist = ships(data)
         for thing in shiplist:
-            self.addpagerow(page, thing[1:])		# skip id
+            self.addpagerow(page, list(thing[1:-1]) + [self.credits(int(thing[-1]))])	# skip id, last item is money
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 
@@ -309,3 +306,7 @@ class StatsResults(tk.Toplevel):
                 label.grid(row=row, column=i, padx=10, sticky=tk.E)
             else:
                 label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
+
+    def credits(self, value):
+        return Locale.stringFromNumber(value, 0) + ' Cr'
+
