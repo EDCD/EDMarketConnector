@@ -23,7 +23,6 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
     if not filename:
         filename = join(config.get('outdir'), '%s.%s.%s.%s' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)), kind==COMMODITY_BPC and 'bpc' or 'csv'))
 
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
     if kind == COMMODITY_CSV:
         sep = ';'
         header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Date','\n'])
@@ -53,9 +52,9 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
             bracketmap[commodity['stockBracket']]
         ])
         if kind==COMMODITY_DEFAULT:
-            line = sep.join([line, str(int(commodity['meanPrice'])), str(commodity['id']), timestamp+'\n'])
+            line = sep.join([line, str(int(commodity['meanPrice'])), str(commodity['id']), data['timestamp'] + '\n'])
         else:
-            line = sep.join([line, timestamp, '\n'])
+            line = sep.join([line, data['timestamp'] + '\n'])
         h.write(line.encode('utf-8'))
 
     h.close()

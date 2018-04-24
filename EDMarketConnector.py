@@ -304,18 +304,6 @@ class AppWindow:
         config.delete('password')
         config.delete('logdir')
 
-        # Check system time
-        drift = abs(time() - self.eddn.time())
-        if drift > DRIFT_THRESHOLD:
-            tkMessageBox.showerror(applongname,
-                                   _('This app requires accurate timestamps.') + '\n' +	# Error message shown if system time is wrong
-                                   (TZ_THRESHOLD < drift < CLOCK_THRESHOLD and
-                                    _("Check your system's Time Zone setting.") or	# Error message shown if system time is wrong
-                                    _("Check your system's Date and Time settings.")),	# Error message shown if system time is wrong
-                                   parent = self.w)
-            self.w.destroy()
-            return
-
         self.postprefs(False)	# Companion login happens in callback from monitor
 
         if keyring.get_keyring().priority < 1:

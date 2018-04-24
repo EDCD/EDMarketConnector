@@ -14,12 +14,11 @@ def export(data, filename):
     assert data['lastStarport'].get('name')
     assert data['lastStarport'].get('ships')
 
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
     header = 'System,Station,Ship,FDevID,Date\n'
     rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
 
     h = open(filename, 'wt')
     h.write(header)
     for (name,fdevid) in [(ship_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list')]:
-        h.write('%s,%s,%s,%s\n' % (rowheader, name, fdevid, timestamp))
+        h.write('%s,%s,%s,%s\n' % (rowheader, name, fdevid, data['timestamp']))
     h.close()

@@ -244,6 +244,8 @@ class Session:
 
         try:
             data = r.json()
+            if 'timestamp' not in data:
+                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(r.headers['Date'].split(',')[1].strip(), "%d %b %Y %H:%M:%S %Z"))
         except:
             self.dump(r)
             raise ServerError()
