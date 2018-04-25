@@ -53,6 +53,7 @@ GuiFocusStationServices = 5
 GuiFocusGalaxyMap = 6
 GuiFocusSystemMap = 7
 
+PluginLoaderFile = "load.py"
 
 # List of loaded Plugins
 PLUGINS = []
@@ -143,42 +144,121 @@ class Plugin(object):
         return None
 
 
+def contains_plugin(item, internal=False):
+    """
+    Returns True if the given file or folder contains a plugin
+    """
+    if os.path.isdir(item):
+        loader = os.path.join(item, PluginLoaderFile)
+        return os.path.isfile(loader)
+    if internal and item.endswith(".py"):
+        return os.path.isfile(item)
+    return False
+
+
+def is_ignored_plugin_file(filename):
+    """
+    Return True if the given filename is one we should ignore
+    """
+    return filename[0] in ['.', '_']
+
+
+def load_internal_plugin(item):
+    """
+    Load an internal plugin and return it
+    """
+    if not is_ignored_plugin_file(item):
+        itempath = os.path.join(config.internal_plugin_dir, item)
+        if contains_plugin(itempath, internal=True):
+            try:
+                plugin = Plugin(item[:-3], itempath)
+                plugin.folder = None  # Suppress listing in Plugins prefs tab
+                return plugin
+            except Exception:
+                print("Problem loading internal plugin '{}':".format(itempath))
+                print_exc()
+    return None
+
+
+def load_user_plugin(folder, item):
+    """
+    Load a user installed plugin from the given folder and return it
+    """
+    if not is_ignored_plugin_file(item):
+        itempath = os.path.join(folder, item)
+        if contains_plugin(itempath, internal=False):
+            if item.endswith('.disabled'):
+                # Return a disabled plugin so it can be listed
+                name, discard = item.rsplit('.', 1)
+                return Plugin(name, None)
+            try:
+                # Add plugin's folder to Python's load path in case plugin has dependencies.
+                sys.path.append(itempath)
+                return Plugin(item, os.path.join(itempath, PluginLoaderFile))
+            except Exception:
+                print("Problem loading user plugin '{}':".format(itempath))
+                print_exc()
+    return None
+
+
 def load_plugins(master):
     """
     Find and load all plugins
+
+    There are two types of plugins:
+    "internal" - those shipped with EDMC
+    "user" - normal user plugins installed in "plugins"
     """
+
+    print("Loading EDMC Plugins..")
+
     last_error['root'] = master
 
     imp.acquire_lock()
 
     internal = []
-    for name in os.listdir(config.internal_plugin_dir):
-        if name.endswith('.py') and not name[0] in ['.', '_']:
-            try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
-                plugin.folder = None	# Suppress listing in Plugins prefs tab
-                internal.append(plugin)
-            except:
-                print_exc()
-    PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
+    print("Loading internal plugins from {}".format(config.internal_plugin_dir))
+    for name in sorted(os.listdir(config.internal_plugin_dir)):
+        plugin = load_internal_plugin(name)
+        if plugin:
+            internal.append(plugin)
+    PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
-    found = []
-    for name in os.listdir(config.plugin_dir):
-        if name[0] in ['.', '_']:
-            pass
-        elif name.endswith('.disabled'):
-            name, discard = name.rsplit('.', 1)
-            found.append(Plugin(name, None))
-        else:
-            try:
-                # Add plugin's folder to Python's load path in case plugin has dependencies.
-                sys.path.append(os.path.join(config.plugin_dir, name))
-                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
-            except:
-                print_exc()
-    PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
+    plugin_folder = config.plugin_dir
+
+    # make it possible to treat plugins as packages by adding the plugin folder to
+    # the import path
+    sys.path.append(plugin_folder)
+
+    if os.path.isdir(plugin_folder):
+        found = []
+        print("Loading user plugins from {}".format(plugin_folder))
+        folders = sorted(os.listdir(plugin_folder))
+        load_order = []
+
+        # load any package plugins first
+        for name in folders:
+            if os.path.isfile(os.path.join(plugin_folder, name, "__init__.py")):
+                load_order.append(name)
+
+        # load remaining plugins
+        for name in folders:
+            if name not in load_order:
+                load_order.append(name)
+
+        print("Will load user plugins in order: {}".format(load_order))
+
+        for name in load_order:
+            plugin = load_user_plugin(plugin_folder, name)
+            if plugin:
+                found.append(plugin)
+
+        PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
 
     imp.release_lock()
+
+    print("Loaded EDMC Plugins.")
+
 
 def provides(fn_name):
     """
@@ -188,6 +268,7 @@ def provides(fn_name):
     .. versionadded:: 3.0.2
     """
     return [p.name for p in PLUGINS if p._get_func(fn_name)]
+
 
 def invoke(plugin_name, fallback, fn_name, *args):
     """
