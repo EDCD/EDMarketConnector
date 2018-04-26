@@ -162,8 +162,13 @@ def load_plugins(master):
                 print_exc()
     PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
 
+    # Add plugin folder to load path so packages can be loaded from plugin folder
+    sys.path.append(config.plugin_dir)
+
     found = []
-    for name in os.listdir(config.plugin_dir):
+    # Load any plugins that are also packages first
+    for name in sorted(os.listdir(config.plugin_dir),
+                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir, n, '__init__.py')), n.lower())):
         if name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
@@ -171,7 +176,7 @@ def load_plugins(master):
             found.append(Plugin(name, None))
         else:
             try:
-                # Add plugin's folder to Python's load path in case plugin has dependencies.
+                # Add plugin's folder to load path in case plugin has internal package dependencies
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
             except:

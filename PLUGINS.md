@@ -160,6 +160,12 @@ You can display an error in EDMC's status area by returning a string from your `
 
 The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
 
+# Python Package Plugins
+
+A _Package Plugin_ is both a standard Python package (i.e. contains an `__init__.py` file) and an EDMC plugin (i.e. contains a `load.py` file providing at minimum a `plugin_start()` function). These plugins are loaded before any non-Package plugins.
+
+Other plugins can access features in a Package Plugin by `import`ing the package by name in the usual way.
+
 # Distributing a Plugin
 
 To package your plugin for distribution simply create a `.zip` archive of your plugin's folder:
