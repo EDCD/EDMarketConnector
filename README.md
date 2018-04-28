@@ -128,9 +128,6 @@ Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
 Troubleshooting
 --------
 
-### This app requires accurate timestamps
-The app requires that your clock is accurate to within a minute or two. The easiest way to do this is to check “Set time automatically” and maybe “Set time zone automatically” in your system's Date & Time settings.
-
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
