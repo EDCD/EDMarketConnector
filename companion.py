@@ -1,6 +1,7 @@
 import csv
 import requests
 from cookielib import LWPCookieJar
+from email.utils import parsedate
 import hashlib
 import numbers
 import os
@@ -8,9 +9,7 @@ from os.path import dirname, isfile, join
 import sys
 from sys import platform
 import time
-
-if __debug__:
-    from traceback import print_exc
+from traceback import print_exc
 
 from config import config
 
@@ -245,7 +244,7 @@ class Session:
         try:
             data = r.json()
             if 'timestamp' not in data:
-                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(r.headers['Date'].split(',')[1].strip(), "%d %b %Y %H:%M:%S %Z"))
+                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
         except:
             self.dump(r)
             raise ServerError()
@@ -286,11 +285,8 @@ class Session:
         self.session = None
 
     def dump(self, r):
-        if __debug__:
-            print 'Status\t%s'  % r.status_code
-            print 'URL\t%s' % r.url
-            print 'Headers\t%s' % r.headers
-            print ('Content:\n%s' % r.text).encode('utf-8')
+        print_exc()
+        print 'cAPI\t' + r.url, r.status_code, r.headers, r.text.encode('utf-8')
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
