@@ -11,7 +11,7 @@ This app downloads your Cmdr's details and system, faction, scan and station dat
 * saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Inara](https://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
 
-You can run the app on the same machine on which you're running Elite: Dangerous or on another machine connected via a network share.
+You can run the app on the same PC or Mac on which you're running Elite: Dangerous or on another PC connected via a network share. PS4 and Xbox are not supported, sorry.
 
 Usage
 --------
@@ -180,6 +180,10 @@ If your configuration has been corrupted, or badly set, such that you can't run 
   `msiexec /i "X:\path\to\EDMarketConnector_win_NNN.msi" INSTALLDIR="Y:\destination\EDMarketConnector"`
 
 Future updates will also be installed to this location.
+
+### PS4 and Xbox support
+
+This app doesn't work with PS4 or Xbox Elite: Dangerous accounts. On these platforms the game lacks support for the API and Journal files that this app relies on.
 
 
 Running from source
