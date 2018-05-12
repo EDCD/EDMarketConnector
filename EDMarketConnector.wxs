@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1035,1036,1040,1041,1043,1045,1046,1049,1058,1062,2074,0" />
-				 <!--        en   cs,  de   es   fi   fr   it   ja   nl   pl  pt-Br ru   uk   lv  sr-Latn neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2074,0" />
+				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-Br ru   uk   lv  sr-Latn neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -198,6 +198,9 @@
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\fr.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\hu.strings" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\it.strings" />
@@ -483,6 +486,7 @@
 			<ComponentRef Id="es.strings" />
 			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />
+			<ComponentRef Id="hu.strings" />
 			<ComponentRef Id="inara.py" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />

@@ -1,0 +1,543 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Hiba:Nem lehet kapcsolódni az Inarához";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Hiba:Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara hitelesitő adatok";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Repülési napló és Parancsnok státusz küldése az EDSM-nek";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Repülési napló és Parancsnok státusz küldése az Inarának";
+
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Preferált weboldalak";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Hajógyár";
+
+/* Language name */
+"!Language" = "Magyar";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Egy megerősítő kód el lett küldve a e-mail címre ami{CR}megegyezik az Elite fiókod regisztrációs címével";
+
+/* App menu entry on OSX. [EDMarketConnector.py] */
+"About {APP}" = "Az {APP} névjegye";
+
+/* Federation rank. [stats.py] */
+"Admiral" = "Admirális";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Céltalan";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Always on top" = "Mindig felül";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "Amatőr";
+
+/* EDSM setting. [edsm.py] */
+"API Key" = "API kulcs";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Megjelenés";
+
+/* Output setting. [prefs.py] */
+"Automatically update on docking" = "Automatikusan frissit dokkolásnál";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Egyenleg";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Báró";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Bróker";
+
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Böngész";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Kadét";
+
+/* CQC rank. [stats.py] */
+"Champion" = "Bajnok";
+
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Módosítás...";
+
+/* Menu item. [EDMarketConnector.py] */
+"Check for Updates..." = "Frissítések keresése";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Törzs zászlós";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Parancsnok";
+
+/* Privacy setting. [prefs.py] */
+"Cmdr name" = "Paramcsnok név";
+
+/* Ranking. [stats.py] */
+"Combat" = "Harc";
+
+/* EDSM setting. [edsm.py] */
+"Commander Name" = "Parancsnok név";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Képesített";
+
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Konfiguráció";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "Lehűl {SS} másodperc";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Másol";
+
+/* Empire rank. [stats.py] */
+"Count" = "Számol";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Section heading in settings. [prefs.py] */
+"Credentials" = "Hitelesítés";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "Veszélyes";
+
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Sötét";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Halálos";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Kereskedő";
+
+/* Appearance theme and language setting. [l10n.py] */
+"Default" = "Alap";
+
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+"Delay sending until docked" = "Küldés késletetése amig dokkolsz";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Plugin kikapcsolása";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Dokumentáció";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Herceg";
+
+/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
+"E:D journal file location" = "E:D journal fájl helye";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Gróf";
+
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Szerkeszt";
+
+/* Top rank. [stats.py] */
+"Elite" = "Elit";
+
+/* Section heading in settings. [edsm.py] */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Csillag térkép hitelesítése";
+
+/* Ranking. [stats.py] */
+"Empire" = "Birodalom";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Pluginok engedélyezése";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Zászlós";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Vállalkozó";
+
+/* [EDMarketConnector.py] */
+"Error: Can't connect to EDDN" = "Hiba:Nem lehet kapcsolódni az EDDN-hez";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Hiba:nem lehet kapcsólodni az EDSM-hez";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Hiba:EDSM {MSG}";
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier server is down" = "Hiba:Frontier szerver nem elérhető";
+
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+"Error: Frontier server is lagging" = "Hiba:Frontier szerver laggol";
+
+/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
+"Error: Frontier server SKU problem" = "Hiba:Frontier szerver SKU probléma";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
+
+/* [companion.py] */
+"Error: Verification failed" = "Hiba:Hítelesités nem sikerült";
+
+/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
+"Error: Wrong Cmdr" = "Hiba:Rossz parancsnok";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Kilépés";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Szakértő";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Felfedező";
+
+/* Ranking. [stats.py] */
+"Federation" = "Föderáció";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Adatok lekérése";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Vadászgép";
+
+/* Menu title. [EDMarketConnector.py] */
+"File" = "Fájl";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Fálj helye";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "Gladiátor";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Lövész";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "ártalmatlan";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Kormányos";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Segítség";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "tehetetlen";
+
+/* CQC rank. [stats.py] */
+"Hero" = "Hős";
+
+/* Dark theme color setting. [prefs.py] */
+"Highlighted text" = "Kiemelt szöveg";
+
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
+"Hotkey" = "Gyorsgomb";
+
+/* [prefs.py] */
+"How do you want to be identified in the saved data" = "Hogyan szeretné azonosítani a mentett adatokat";
+
+/* Tab heading in settings. [prefs.py] */
+"Identity" = "Személyazonnoság";
+
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
+"Keyboard shortcut" = "Billentyűparancsok";
+
+/* Empire rank. [stats.py] */
+"King" = "Király";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Lovag";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Nyelv";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Utoljára frissítve {HH}:{MM}:{SS}";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "Hadnagy";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Főhadnagy";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Kölcsön";
+
+/* [EDMarketConnector.py] */
+"Logging in..." = "Bejelentkezés";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Lord";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Piaci adat CSV fájlban";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Piaci adat Trade Dangerous fájlban";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Őrgróf";
+
+/* Combat rank. [stats.py] */
+"Master" = "Mester";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Kereskedő";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Tengerészkadét";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Tøbnyire céltalan";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "Többnyire ártalmatlan";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "Többnyire  tehetetlen";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Többnyire nincstelen";
+
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Egyik sem";
+
+/* Dark theme color setting. [prefs.py] */
+"Normal text" = "Normál txt";
+
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Nem elérhető amíg az E:D a főmenüben van";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Kezdő";
+
+/* [prefs.py] */
+"OK" = "Ok";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Csak ha az Elite Dangerous fut";
+
+/* Button that opens a folder in Explorer/Finder. [prefs.py] */
+"Open" = "Nyisd ki";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Rendszerbeállítások megnyitáss";
+
+/* Tab heading in settings. [prefs.py] */
+"Output" = "Kimenet";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Kivűlálló";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Password" = "Jelszó";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Útkereső";
+
+/* Trade rank. [stats.py] */
+"Peddler" = "Házaló ügynők";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Nincstelen";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Tizedes";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Utász";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Zene be";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Kérem válassza ki a menteni kivánt adatokat.";
+
+/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
+"Please enter the code into the box below." = "Kérem írja be a kódot a szöveg alart lévő rublikába";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Please log in with your Elite: Dangerous account details" = "Kérlek jelentkez be az Elite Dangerous fiókoddal";
+
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Pluginok";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Plugin mappa";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Ellentengernagy";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Ezredes";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Powerplay";
+
+/* [prefs.py] */
+"Preferences" = "Beállítások";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Herceg";
+
+/* Section heading in settings. [prefs.py] */
+"Privacy" = "Titkosítás";
+
+/* CQC rank. [stats.py] */
+"Professional" = "Szakember";
+
+/* Privacy setting. [prefs.py] */
+"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Vándor";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Osztákgozás 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Osztályozás 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Osztályozás 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Osztályozás 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Osztályozás 5";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Újranidítás {APP} parancsikonok használatával";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "FőEllentengernagy";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Újonc";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Kiadási megjegyzések";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Szerep";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Nyers adat elmentése";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Felderítő";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "Fél profi";
+
+/* Output setting. [prefs.py] */
+"Send station data to the Elite Dangerous Data Network" = "Állomás adatok küldése az EDDN-nek";
+
+/* Output setting new in E:D 2.2. [prefs.py] */
+"Send system and scan data to the Elite Dangerous Data Network" = "Rendszer és szken adatok küldése az EDDN-nek";
+
+/* [EDMarketConnector.py] */
+"Sending data to EDDN..." = "Adatok küldése az EDDN-nek...";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Jobbágy";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Beállítások";
+
+/* Main window. [EDMarketConnector.py] */
+"Ship" = "Hajó";
+
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Hajó felszerelése";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Hajók";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Földesúr";
+
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Állomás";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "Nincs piac az állomáson!";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "Az állomáson nincs semmi!";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "Státusz";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Megfigyelő";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Rendszer";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Téma";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp:a pluginokat kikapcsolhatod hozzà{CR}adsz a mappa nevében egy '{EXT}'";
+
+/* Ranking. [stats.py] */
+"Trade" = "Kereskedés";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Útkereső";
+
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Átlárható";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Iparmágnás";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Frissítés";
+
+/* Use same text as E:D Launcher's login dialog. [prefs.py] */
+"Username (Email)" = "Felhasználónév (Email)";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Érték";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Altengernagy";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Nézet";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Vicomte";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Tiszthelyettes";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "Mivel repülsz?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Hol vagy?";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Ki vagy?";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Ablak";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = " Nem dokkoltál az állomáson";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} engedély szükséges a parancsikon használatához";
+
