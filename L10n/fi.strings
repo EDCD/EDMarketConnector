@@ -70,12 +70,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Tarkista päivitykset...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Tarkista tietokoneesi kellonaika ja päivämäärä";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Tarkista tietokoneesi aikavyöhykkeen asetus";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -489,9 +483,6 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Teema";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Tämä sovellus tarvitsee tarkat aikaleimat";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";

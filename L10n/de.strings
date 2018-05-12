@@ -70,12 +70,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Auf Aktualisierungen überprüfen...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Prüfe die Zeit- und Datumseinstellungen deines Systems.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Prüfe die Zeitzoneneinstellung deines Systems.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Obermaat";
 
@@ -489,9 +483,6 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Dieses Programm benötigt genaue Zeitstempel.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";

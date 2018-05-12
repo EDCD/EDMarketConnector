@@ -70,12 +70,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Proveri da li postoje izmene...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Proverite podešavanje datuma i vremena u svom sistemu.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Proverite podešavanje vremenske zone u svom sistemu.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -489,9 +483,6 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Ova aplikacija zahteva precizno podešeno vreme.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: Možete deaktivirati dodatak (plugin) dodavanjem{CR}'{EXT}' na ime njegovog foldera";

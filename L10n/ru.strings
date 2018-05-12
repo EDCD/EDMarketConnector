@@ -55,12 +55,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Поиск обновлений...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Уточните настройки даты и времени системы.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Уточните настройки часового пояса.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Главный старшина";
 
@@ -474,9 +468,6 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Приложению необходимо точное время.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";
