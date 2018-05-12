@@ -42,7 +42,7 @@ if __debug__:
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
 from l10n import Translations
-Translations().install(config.get('language') or None)
+Translations.install(config.get('language') or None)
 
 import companion
 import commodity

@@ -265,7 +265,7 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
 
 
-        self.languages = Translations().available_names()
+        self.languages = Translations.available_names()
         self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
         self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
         self.theme = tk.IntVar(value = config.getint('theme'))
@@ -590,7 +590,7 @@ class PreferencesDialog(tk.Toplevel):
 
         lang_codes = { v: k for k, v in self.languages.iteritems() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
-        Translations().install(config.get('language') or None)
+        Translations.install(config.get('language') or None)
 
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())

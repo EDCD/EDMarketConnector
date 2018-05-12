@@ -160,11 +160,35 @@ You can display an error in EDMC's status area by returning a string from your `
 
 The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
 
+## Localisation
+
+You can localise your plugin to one of the languages that EDMC itself supports. Add the following boilerplate near the top of each source file that contains strings that needs translating:
+
+```python
+import l10n
+import functools
+_ = functools.partial(l10n.Translations.translate, context=__file__)
+```
+
+Wrap each string that needs translating with the `_()` function, e.g.:
+
+```python
+    this.status["text"] = _('Happy!')	# Main window status
+```
+
+If you display localized strings in EDMC's main window you should refresh them in your `prefs_changed` function in case the user has changed their preferred language.
+
+Translation files should reside in folder named `L10n` inside your plugin's folder. Files must be in macOS/iOS ".strings" format, encoded as UTF-8. You can generate a starting template file for your translations by invoking `l10n.py` in your plugin's folder. This extracts all the translatable strings from Python files in your plugin's folder and places them in a file named `en.template` in the `L10n` folder. Rename this file as `<language_code>.strings` and edit it.
+
+See EDMC's own [`L10n`](https://github.com/Marginal/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
+
+
 # Python Package Plugins
 
 A _Package Plugin_ is both a standard Python package (i.e. contains an `__init__.py` file) and an EDMC plugin (i.e. contains a `load.py` file providing at minimum a `plugin_start()` function). These plugins are loaded before any non-Package plugins.
 
 Other plugins can access features in a Package Plugin by `import`ing the package by name in the usual way.
+
 
 # Distributing a Plugin
 
