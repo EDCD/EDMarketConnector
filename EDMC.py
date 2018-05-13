@@ -13,7 +13,7 @@ from time import time, sleep
 from xml.etree import ElementTree
 
 import l10n
-l10n.Translations().install_dummy()
+l10n.Translations.install_dummy()
 
 import collate
 import companion
