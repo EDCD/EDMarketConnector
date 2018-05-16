@@ -130,7 +130,7 @@ class AppWindow:
                     appitem[0].grid(row=row, column=0, sticky=tk.W)
                     appitem[1].grid(row=row, column=1, sticky=tk.EW)
                 else:
-                    appitem.grid(columnspan=2, sticky=tk.W)
+                    appitem.grid(columnspan=2, sticky=tk.EW)
 
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)
