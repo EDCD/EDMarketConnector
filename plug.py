@@ -169,7 +169,7 @@ def load_plugins(master):
     # Load any plugins that are also packages first
     for name in sorted(os.listdir(config.plugin_dir),
                        key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir, n, '__init__.py')), n.lower())):
-        if name[0] in ['.', '_']:
+        if not os.path.isdir(os.path.join(config.plugin_dir, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
