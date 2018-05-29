@@ -54,11 +54,11 @@ class Translations:
 
 
     def __init__(self):
-        self.translations = {}
+        self.translations = { None: {} }
 
     def install_dummy(self):
         # For when translation is not desired or not available
-        self.translations = {}	# not used
+        self.translations = { None: {} }
         __builtin__.__dict__['_'] = lambda x: unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
     def install(self, lang=None):
@@ -110,12 +110,12 @@ class Translations:
         if context:
             context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
             if __debug__:
-                if context not in self.translations:
+                if self.translations[None] and context not in self.translations:
                     print 'No translations for "%s"' % context
             return self.translations.get(context, {}).get(x) or self.translate(x)
         else:
             if __debug__:
-                if x not in self.translations[None]:
+                if self.translations[None] and x not in self.translations[None]:
                     print 'Missing translation: "%s"' % x
             return self.translations[None].get(x) or unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
 
