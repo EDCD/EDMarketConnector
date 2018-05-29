@@ -15,7 +15,7 @@ You can run the app on the same PC or Mac on which you're running Elite: Dangero
 
 Usage
 --------
-The user-interface is deliberately minimal - your choice of data is automatically downloaded, transmitted and/or saved when you land at a station, jump to a system or scan a body.
+The user-interface is deliberately minimal - your choice of data is automatically downloaded, transmitted and/or saved when you start Elite: Dangerous, land at a station, jump to a system or scan a body. Start the app before entering the game to ensure that you don't miss any data - some data is only available at game start.
 
 Click on the ship name to view its loadout on [E:D&nbsp;Shipyard](http://www.edshipyard.com) (“EDSY”) or [Coriolis](https://coriolis.edcd.io) in your web browser.
 
