@@ -644,7 +644,7 @@ def cmdr_data(data, is_beta):
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
-            add_event('setCommanderCredits', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            add_event('setCommanderCredits', data['timestamp'],
                       OrderedDict([
                           ('commanderCredits', data['commander']['credits']),
                           ('commanderLoan', data['commander'].get('debt', 0)),
