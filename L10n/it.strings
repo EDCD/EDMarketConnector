@@ -13,8 +13,11 @@
 /* [inara.py] */
 "Send flight log and Cmdr status to Inara" = "Manda il flight log e lo stato Cmdr a Inara";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Sito web preferito";
+
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Cantiere navale";
+"Shipyard" = "Spazioporto";
 
 /* Language name */
 "!Language" = "Italiano";
@@ -124,6 +127,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
 
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Plugin disabilitati";
+
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Documentazione";
 
@@ -147,6 +153,9 @@
 
 /* Ranking. [stats.py] */
 "Empire" = "Impero";
+
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Plugin abilitati";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
@@ -215,7 +224,7 @@
 "Harmless" = "Harmless";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Timone";
+"Helm" = "Timoniere";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Guida";
@@ -304,6 +313,9 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Testo normale";
 
+/* Displayed when credentials settings are greyed out. [prefs.py] */
+"Not available while E:D is at the main menu" = "Non disponibile quando E:D è nel menù principale";
+
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -357,6 +369,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Plugins";
+
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Cartella dei plugins";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -443,7 +458,7 @@
 "Ship" = "Nave";
 
 /* Output setting. [prefs.py] */
-"Ship loadout" = "Fit della nave";
+"Ship loadout" = "Equipaggiamento della nave";
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Navi";
@@ -471,6 +486,9 @@
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
+
+/* Help text in settings. [prefs.py] */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";
