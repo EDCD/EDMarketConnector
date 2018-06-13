@@ -7,11 +7,10 @@ import numbers
 import os
 from os.path import dirname, isfile, join
 import sys
-from sys import platform
 import time
 from traceback import print_exc
 
-from config import config
+from config import appname, appversion, config
 
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
@@ -175,7 +174,7 @@ class Session:
             # changed account
             self.close()
             self.session = requests.Session()
-            self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257'
+            self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
             cookiefile = join(config.app_dir, 'cookies-%s.txt' % hashlib.md5(credentials['email']).hexdigest())
             if not isfile(cookiefile) and isfile(join(config.app_dir, 'cookies.txt')):
                 os.rename(join(config.app_dir, 'cookies.txt'), cookiefile)	# migration from <= 2.25
