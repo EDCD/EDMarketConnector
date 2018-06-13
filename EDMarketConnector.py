@@ -125,6 +125,7 @@ class AppWindow:
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
             if appitem:
+                tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)	# separator
                 if isinstance(appitem, tuple) and len(appitem)==2:
                     row = frame.grid_size()[1]
                     appitem[0].grid(row=row, column=0, sticky=tk.W)
@@ -145,7 +146,7 @@ class AppWindow:
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform!='win32' and 2 or 0))
+            child.grid_configure(padx=5, pady=(platform!='win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         self.menubar = tk.Menu()
         if platform=='darwin':
@@ -238,11 +239,13 @@ class AppWindow:
             self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
             self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
             theme.button_bind(self.theme_help_menu, lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(), e.widget.winfo_rooty() + e.widget.winfo_height()))
+            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=5, sticky=tk.EW)
             theme.register(self.theme_minimize)	# images aren't automatically registered
             theme.register(self.theme_close)
             self.blank_menubar = tk.Frame(frame)
             tk.Label(self.blank_menubar).grid()
             tk.Label(self.blank_menubar).grid()
+            tk.Frame(self.blank_menubar, height=2).grid()
             theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar), {'row':0, 'columnspan':2, 'sticky':tk.NSEW})
             self.w.resizable(tk.TRUE, tk.FALSE)
 
