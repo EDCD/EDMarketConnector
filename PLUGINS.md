@@ -137,7 +137,7 @@ import plug
 
 def dashboard_entry(cmdr, is_beta, entry):
     is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
-    sys.stderr.write("Hardpoints {}\n", is_deployed and "deployed" or "stowed")
+    sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
 ### Getting Commander Data
