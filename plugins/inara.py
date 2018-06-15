@@ -682,11 +682,13 @@ def make_loadout(state):
             for mod in m['Engineering']['Modifiers']:
                 modifier = OrderedDict([
                     ('name', mod['Label']),
-                    ('value', mod['Value']),
                 ])
                 if 'OriginalValue' in mod:
+                    modifier['value'] = mod['Value']
                     modifier['originalValue'] = mod['OriginalValue']
                     modifier['lessIsGood'] = mod['LessIsGood']
+                else:
+                    modifier['value'] = mod['ValueStr']
                 engineering['modifiers'].append(modifier)
             module['engineering'] = engineering
 
