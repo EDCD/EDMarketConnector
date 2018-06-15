@@ -130,7 +130,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 ### Player Dashboard
 
-This gets called when something on the player's cockpit display changes - typically about once a second when in orbital flight
+This gets called when something on the player's cockpit display changes - typically about once a second when in orbital flight. See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available constants.
 
 ```python
 import plug
