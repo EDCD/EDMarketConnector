@@ -185,6 +185,17 @@ Future updates will also be installed to this location.
 
 This app doesn't work with PS4 or Xbox Elite: Dangerous accounts. On these platforms the game lacks support for the API and Journal files that this app relies on.
 
+### Reporting a problem
+Please report a problem as a new GitHub [issue](https://github.com/Marginal/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
+
+Mac:
+
+* `$TMPDIR/EDMarketConnector.log`
+
+Windows:
+
+* `%TMP%\EDMarketConnector.log`
+
 
 Running from source
 --------
