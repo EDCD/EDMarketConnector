@@ -13,8 +13,11 @@
 /* [inara.py] */
 "Send flight log and Cmdr status to Inara" = "Enviar dados de voo e status do cmdt para o Inara";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Website preferido";
+
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Simulador de naves";
+"Shipyard" = "Estaleiro";
 
 /* Language name */
 "!Language" = "Português (Brasil)";
