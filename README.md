@@ -286,7 +286,8 @@ Acknowledgements
 * Thanks to Cmdr magni1200s for the Japanese translation.
 * Thanks to Cmdr bubis7 for the Latvian translation.
 * Thanks to Cmdr Amarok 73 for the Polish translation.
-* Thanks to Cmdrs Pivatto (@rafaelpivatto), Moraes (@wesleymoura), Wladimir JRC, and Warlord from Cobra Wing for the Portugese translation.
+* Thanks to Cmdrs Pivatto (@rafaelpivatto), Moraes (@wesleymoura), Wladimir JRC, and Warlord from Cobra Wing for the Portuguese (Brazil) translation.
+* Thanks to Carlos Oliveira (@idontcare1996) for the Portuguese (Portugal) translation.
 * Thanks to Shadow Panther for keeping the Russian translation up to date.
 * Thanks to Cmdr SuperBrain for the Serbian translation.
 * Thanks to Armando Ota for the Slovenian translation.
