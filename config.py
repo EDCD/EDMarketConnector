@@ -97,11 +97,11 @@ class Config:
     OUT_MKT_TD        = 4
     OUT_MKT_CSV       = 8
     OUT_SHIP          = 16
-    OUT_SHIP_EDS      = 16	# Replaced by OUT_SHIP
+    # OUT_SHIP_EDS    = 16	# Replaced by OUT_SHIP
     # OUT_SYS_FILE    = 32	# No longer supported
     # OUT_STAT        = 64	# No longer available
-    OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV|OUT_SHIP|OUT_SHIP_EDS|OUT_SHIP_CORIOLIS
+    # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
+    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV
     # OUT_SYS_EDSM      = 256	# Now a plugin
     # OUT_SYS_AUTO    = 512	# Now always automatic
     OUT_MKT_MANUAL    = 1024

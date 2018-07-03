@@ -147,7 +147,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
         self.out_td_button = nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged)
         self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_ship= tk.IntVar(value = (output & (config.OUT_SHIP|config.OUT_SHIP_EDS|config.OUT_SHIP_CORIOLIS) and 1))
+        self.out_ship= tk.IntVar(value = (output & config.OUT_SHIP and 1))
         self.out_ship_button = nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged)	# Output setting
         self.out_ship_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MKT_MANUAL else 1)	# inverted
