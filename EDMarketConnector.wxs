@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2070,2074,0" />
-				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk   lv pt-PT sr-Latn neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0" />
+				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk  lv zh-CN pt-PT sr-Latn neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -231,6 +231,9 @@
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\uk.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\zh-Hans.strings" Name="zh-CN.strings" />
 						</Component>
 					</Directory>
 					<Directory Id="plugins" Name="plugins">
@@ -517,6 +520,7 @@
 			<ComponentRef Id="unicodedata.pyd" />
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />
+			<ComponentRef Id="zh_CN.strings" />
 			<ComponentRef Id="auto.tcl" />
 			<ComponentRef Id="clock.tcl" />
 			<ComponentRef Id="history.tcl" />
