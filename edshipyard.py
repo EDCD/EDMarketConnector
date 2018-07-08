@@ -63,6 +63,7 @@ def export(data, filename=None):
     fuel = 0
     cargo = 0
     fsd = None
+    jumpboost = 0
 
     for slot in sorted(data['ship']['modules']):
 
@@ -96,7 +97,7 @@ def export(data, filename=None):
                     fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
                 if mods.get('OutfittingFieldType_MaxFuelPerJump'):
                     fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
-
+            jumpboost += module.get('jumpboost', 0)
 
             for s in slot_map:
                 if slot.lower().startswith(s):
@@ -134,8 +135,8 @@ def export(data, filename=None):
         string += 'Mass  : %.2f T empty\n        %.2f T full\n' % (mass, mass + fuel + cargo)
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
         string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
-            multiplier / (mass + fuel),
-            multiplier / (mass + fuel + cargo))
+            multiplier / (mass + fuel) + jumpboost,
+            multiplier / (mass + fuel + cargo) + jumpboost)
     except:
         if __debug__: raise
 

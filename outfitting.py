@@ -31,8 +31,9 @@ weapon_map = {
     ('dumbfiremissilerack', 'lasso') : 'Rocket Propelled FSD Disruptor',
     'flakmortar'                     : 'Remote Release Flak Launcher',
     'flechettelauncher'              : 'Remote Release Flechette Launcher',
-    ('guardian', 'gausscannon')      : 'Guardian Gauss Cannon',
-    ('guardian', 'plasmalauncher')   : 'Guardian Plasma Charger',
+    'guardian_gausscannon'           : 'Guardian Gauss Cannon',
+    'guardian_plasmalauncher'        : 'Guardian Plasma Charger',
+    'guardian_shardcannon'           : 'Guardian Shard Cannon',
     'minelauncher'                   : 'Mine Launcher',
     ('minelauncher','impulse')       : 'Shock Mine Launcher',
     'mininglaser'                    : 'Mining Laser',
@@ -41,6 +42,7 @@ weapon_map = {
     ('multicannon','strong')         : 'Enforcer Cannon',
     'plasmaaccelerator'              : 'Plasma Accelerator',
     ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
+    'plasmashockcannon'              : 'Shock Cannon',
     'pulselaser'                     : 'Pulse Laser',
     ('pulselaser','disruptor')       : 'Pulse Disruptor Laser',
     'pulselaserburst'                : 'Burst Laser',
@@ -119,9 +121,15 @@ weaponrating_map = {
     'hpt_flakmortar_turret_medium': 'B',
     'hpt_flechettelauncher_fixed_medium': 'B',
     'hpt_flechettelauncher_turret_medium': 'B',
-    'hpt_guardian_gausscannon_fixed_medium': 'A',	# guess
-    'hpt_guardian_plasmalauncher_fixed_medium': 'A',	# guess
-    'hpt_guardian_plasmalauncher_turret_medium': 'A',	# guess
+    'hpt_guardian_gausscannon_fixed_medium': 'B',	# guess
+    'hpt_guardian_plasmalauncher_fixed_medium': 'B',
+    'hpt_guardian_plasmalauncher_fixed_large': 'C',
+    'hpt_guardian_plasmalauncher_turret_medium': 'E',
+    'hpt_guardian_plasmalauncher_turret_large': 'D',
+    'hpt_guardian_shardcannon_fixed_medium': 'A',
+    'hpt_guardian_shardcannon_fixed_large': 'C',
+    'hpt_guardian_shardcannon_turret_medium': 'D',
+    'hpt_guardian_shardcannon_turret_large': 'D',
     'hpt_minelauncher_fixed_small': 'I',
     'hpt_minelauncher_fixed_medium': 'I',
     'hpt_mininglaser_fixed_small': 'D',
@@ -141,6 +149,12 @@ weaponrating_map = {
     'hpt_plasmaaccelerator_fixed_medium': 'C',
     'hpt_plasmaaccelerator_fixed_large': 'B',
     'hpt_plasmaaccelerator_fixed_huge': 'A',
+    'hpt_plasmashockcannon_fixed_medium': 'D',
+    'hpt_plasmashockcannon_fixed_large': 'C',
+    'hpt_plasmashockcannon_gimbal_medium': 'D',
+    'hpt_plasmashockcannon_gimbal_large': 'C',
+    'hpt_plasmashockcannon_turret_medium': 'E',
+    'hpt_plasmashockcannon_turret_large': 'D',
     'hpt_pulselaser_fixed_small': 'F',
     'hpt_pulselaser_fixed_smallfree': 'F',
     'hpt_pulselaser_fixed_medium': 'E',
@@ -244,17 +258,18 @@ misc_internal_map = {
 }
 
 standard_map = {
-    # 'armour'              : handled separately
-    'engine'                : 'Thrusters',
-    ('engine','fast')       : 'Enhanced Performance Thrusters',
-    'fueltank'              : 'Fuel Tank',
-    'guardianpowerplant'    : 'Guardian Power Plant',
-    'hyperdrive'            : 'Frame Shift Drive',
-    'lifesupport'           : 'Life Support',
-    # 'planetapproachsuite' : handled separately
-    'powerdistributor'      : 'Power Distributor',
-    'powerplant'            : 'Power Plant',
-    'sensors'               : 'Sensors',
+    # 'armour'                   : handled separately
+    'engine'                     : 'Thrusters',
+    ('engine','fast')            : 'Enhanced Performance Thrusters',
+    'fueltank'                   : 'Fuel Tank',
+    'guardianpowerdistributor'   : 'Guardian Hybrid Power Distributor',
+    'guardianpowerplant'         : 'Guardian Hybrid Power Plant',
+    'hyperdrive'                 : 'Frame Shift Drive',
+    'lifesupport'                : 'Life Support',
+    # 'planetapproachsuite'      : handled separately
+    'powerdistributor'           : 'Power Distributor',
+    'powerplant'                 : 'Power Plant',
+    'sensors'                    : 'Sensors',
 }
 
 internal_map = {
@@ -267,6 +282,10 @@ internal_map = {
     'fsdinterdictor'             : 'Frame Shift Drive Interdictor',
     'fuelscoop'                  : 'Fuel Scoop',
     'fueltransfer'               : 'Fuel Transfer Limpet Controller',
+    'guardianfsdbooster'         : 'Guardian FSD Booster',
+    'guardianhullreinforcement'  : 'Guardian Hull Reinforcement',
+    'guardianmodulereinforcement': 'Guardian Module Reinforcement',
+    'guardianshieldreinforcement': 'Guardian Shield Reinforcement',
     'hullreinforcement'          : 'Hull Reinforcement Package',
     'metaalloyhullreinforcement' : 'Meta Alloy Hull Reinforcement',
     'modulereinforcement'        : 'Module Reinforcement Package',
@@ -303,6 +322,11 @@ def lookup(module, ship_map, entitled=False):
 
     name = module['name'].lower().split('_')
     new = { 'id': module['id'], 'symbol': module['name'] }
+
+    # Hack 'Guardian used as a prefix'
+    if name[1] == 'guardian':
+        name.pop(1)
+        name[1] = 'guardian_%s' % name[1]
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
@@ -405,8 +429,10 @@ def lookup(module, ship_map, entitled=False):
 
         if len(name) < 4 and name[1] == 'unkvesselresearch':	# Hack! No size or class.
             (new['class'], new['rating']) = ('1', 'E')
-        elif len(name) < 4 and name[1] == 'guardianpowerplant':	# Hack! No class.
+        elif len(name) < 4 and name[1] in ['guardianpowerdistributor', 'guardianpowerplant']:	# Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'A')
+        elif len(name) < 4 and name[1] in ['guardianfsdbooster']:	# Hack! No class.
+            (new['class'], new['rating']) = (str(name[2][4:]), 'H')
         else:
             if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
             new['class'] = str(name[2][4:])
@@ -429,16 +455,19 @@ def lookup(module, ship_map, entitled=False):
         new['entitlement'] = 'horizons'
 
     # Extra module data
-    key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
+    if module['name'].endswith('_free'):
+        key = module['name'][:-5].lower()	# starter modules - treated like vanilla modules
+    else:
+        key = module['name'].lower()
     if __debug__:
         m = moduledata.get(key, {})
         if not m:
-            print 'No data for module %s' % str(key)
+            print 'No data for module %s' % key
         elif new['name'] == 'Frame Shift Drive':
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
         else:
             assert 'mass' in m, m
-    new.update(moduledata.get(key, {}))
+    new.update(moduledata.get(module['name'].lower(), {}))
 
     # check we've filled out mandatory fields
     for thing in ['id', 'symbol', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
