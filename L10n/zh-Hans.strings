@@ -5,7 +5,7 @@
 "Error: Inara {MSG}" = "错误：Inara {MSG}";
 
 /* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inara 凭证";
+"Inara credentials" = "Inara 授权凭证";
 
 /* [edsm.py] */
 "Send flight log and Cmdr status to EDSM" = "发送航行日志和指挥官状态到 EDSM";
@@ -20,10 +20,10 @@
 "Shipyard" = "配船";
 
 /* Language name */
-"!Language" = "English";
+"!Language" = "简体中文";
 
 /* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "一封包含验证码的邮件已发送到与你的{CR}Elite 账户关联的电子邮件地址";
+"A verification code has now been sent to the{CR}email address associated with your Elite account." = "一封包含验证码的邮件已发送到与你的{CR}Elite 账号关联的电子邮件地址";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "关于 {APP}";
@@ -47,7 +47,7 @@
 "Appearance" = "外观";
 
 /* Output setting. [prefs.py] */
-"Automatically update on docking" = "当停靠时自动更新";
+"Automatically update on docking" = "靠站时自动更新";
 
 /* Cmdr stats. [stats.py] */
 "Balance" = "资金结余";
@@ -92,7 +92,7 @@
 "Competent" = "Competent";
 
 /* Tab heading in settings. [prefs.py] */
-"Configuration" = "配置";
+"Configuration" = "通用";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "cooldown {SS}s" = "距离下次更新还有 {SS} 秒";
@@ -107,7 +107,7 @@
 "CQC" = "竞技场等级";
 
 /* Section heading in settings. [prefs.py] */
-"Credentials" = "凭证";
+"Credentials" = "登录凭证";
 
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
@@ -125,7 +125,7 @@
 "Default" = "默认";
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
-"Delay sending until docked" = "延迟发送数据，直到停靠";
+"Delay sending until docked" = "延时更新，靠站时再发送";
 
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "已禁用插件";
@@ -149,7 +149,7 @@
 "Elite" = "Elite";
 
 /* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 凭证";
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 授权凭证";
 
 /* Ranking. [stats.py] */
 "Empire" = "帝国头衔";
@@ -182,7 +182,7 @@
 "Error: Frontier server SKU problem" = "错误：Frontier 服务器检测到 SKU 不匹配";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "错误：无效的凭证";
+"Error: Invalid Credentials" = "错误：无效的登录凭证";
 
 /* [companion.py] */
 "Error: Verification failed" = "错误：账号验证失败";
@@ -236,7 +236,7 @@
 "Hero" = "Hero";
 
 /* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "重点文字的颜色";
+"Highlighted text" = "重点文本";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "快捷键";
@@ -245,7 +245,7 @@
 "How do you want to be identified in the saved data" = "你想要如何在已保存的数据中被识别出来？";
 
 /* Tab heading in settings. [prefs.py] */
-"Identity" = "身份";
+"Identity" = "用户";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "键盘快捷键";
@@ -311,7 +311,7 @@
 "None" = "无";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "普通文字的颜色";
+"Normal text" = "普通文本";
 
 /* Displayed when credentials settings are greyed out. [prefs.py] */
 "Not available while E:D is at the main menu" = "当 E:D 在主菜单界面时不可用";
@@ -365,7 +365,7 @@
 "Please enter the code into the box below." = "请在下框中输入验证码";
 
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "请用你的 Elite: Dangerous  账号进行登录";
+"Please log in with your Elite: Dangerous account details" = "请使用你的 Elite: Dangerous 账号信息进行登录";
 
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "插件";
@@ -488,7 +488,7 @@
 "Theme" = "主题";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "提示：想要禁用某一项插件，{CR}你可以添加”{EXT}“到其文件夹名称中";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "提示：想要禁用某一项插件，{CR}你可以添加 {EXT} 到其文件夹名称中";
 
 /* Ranking. [stats.py] */
 "Trade" = "贸易等级";
