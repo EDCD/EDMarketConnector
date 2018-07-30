@@ -731,8 +731,10 @@ class AppWindow:
         for k, v in d.iteritems():
             if k.endswith('_Localised'):
                 pass
-            elif hasattr(v, 'iteritems'):
+            elif hasattr(v, 'iteritems'):	# dict -> recurse
                 filtered[k] = self.filter_localised(v)
+            elif isinstance(v, list) and len(v) and hasattr(v[0], 'iteritems'):	# list of dicts -> recurse
+                filtered[k] = [self.filter_localised(x) for x in v]
             else:
                 filtered[k] = v
         return filtered
