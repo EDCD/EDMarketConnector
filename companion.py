@@ -295,10 +295,11 @@ def fixup(data):
 
     if not commodity_map:
         # Lazily populate
-        with open(join(config.respath, 'commodity.csv'), 'rb') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                commodity_map[row['symbol']] = (row['category'], row['name'])
+        for f in ['commodity.csv', 'rare_commodity.csv']:
+            with open(join(config.respath, f), 'rb') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    commodity_map[row['symbol']] = (row['category'], row['name'])
 
     commodities = []
     for commodity in data['lastStarport'].get('commodities') or []:

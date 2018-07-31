@@ -77,7 +77,7 @@ if sys.platform=='darwin':
                   'excludes': [ 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': [ requests.certs.where(), 'commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
+                  'resources': [ requests.certs.where(), 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -117,6 +117,7 @@ elif sys.platform=='win32':
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
             'commodity.csv',
+            'rare_commodity.csv',
             'snd_good.wav',
             'snd_bad.wav',
             'modules.p',

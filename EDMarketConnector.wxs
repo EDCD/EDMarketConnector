@@ -147,6 +147,9 @@
 					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
 						<File KeyPath="yes" Source="SourceDir\python27.dll" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />
+					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
 						<File KeyPath="yes" Source="SourceDir\select.pyd" />
 					</Component>
@@ -505,6 +508,7 @@
 			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
+			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="ships.p" />
