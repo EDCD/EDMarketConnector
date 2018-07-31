@@ -733,8 +733,8 @@ class AppWindow:
                 pass
             elif hasattr(v, 'iteritems'):	# dict -> recurse
                 filtered[k] = self.filter_localised(v)
-            elif isinstance(v, list) and len(v) and hasattr(v[0], 'iteritems'):	# list of dicts -> recurse
-                filtered[k] = [self.filter_localised(x) for x in v]
+            elif isinstance(v, list):	# list of dicts -> recurse
+                filtered[k] = [self.filter_localised(x) if hasattr(x, 'iteritems') else x for x in v]
             else:
                 filtered[k] = v
         return filtered
