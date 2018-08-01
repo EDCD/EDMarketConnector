@@ -337,16 +337,11 @@ def lookup(module, ship_map, entitled=False):
         new['class'] = '1'
         new['rating'] = 'I'
 
-    # Skip uninteresting stuff
+    # Skip uninteresting stuff - no longer present in ED 3.1 cAPI data
     elif name[0] in ['bobble', 'decal', 'nameplate', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
         return None
 
-    # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
-    # Arghh - Bi-Weave Shield generators are incorrectly listed as 'powerplay' !
-    # elif 'category' in module and module['category'].lower() == 'powerplay':
-    #     return None
-
-    # Shouldn't be listing player-specific paid stuff in outfitting, other than Horizons
+    # Shouldn't be listing player-specific paid stuff or broker/powerplay-specific modules in outfitting, other than Horizons
     elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
         return None
 
@@ -448,11 +443,8 @@ def lookup(module, ship_map, entitled=False):
     # Entitlements
     if not module.get('sku'):
         pass
-    elif module['sku'].startswith('ELITE_SPECIFIC_V_POWER'):
-        new['entitlement'] = 'powerplay'
     else:
-        assert module['sku'] == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS', '%s: Unknown sku "%s"' % (module['id'], module['sku'])
-        new['entitlement'] = 'horizons'
+        new['entitlement'] = module['sku']
 
     # Extra module data
     if module['name'].endswith('_free'):

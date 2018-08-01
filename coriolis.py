@@ -14,12 +14,20 @@ import companion
 
 
 if __name__ == "__main__":
+
+    def add(modules, name, attributes):
+        assert name not in modules or modules[name] == attributes, '%s: %s!=%s' % (name, modules.get(name), attributes)
+        assert name not in modules, name
+        modules[name] = attributes
+
+
     data = json.load(open('coriolis-data/dist/index.json'))
 
     # Map Coriolis's names to names displayed in the in-game shipyard
     coriolis_ship_map = {
         'Cobra Mk III' : 'Cobra MkIII',
         'Cobra Mk IV'  : 'Cobra MkIV',
+        'Krait Mk II'  : 'Krait MkII',
         'Viper'        : 'Viper MkIII',
         'Viper Mk IV'  : 'Viper MkIV',
     }
@@ -66,33 +74,32 @@ if __name__ == "__main__":
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
     # 3.0 / 3.1 additions not yet present in coriolis-data
-    for k in modules.keys():
-        if k.startswith('int_hullreinforcement_'):
-            modules['int_guardianhullreinforcement_' + k[22:]] = modules[k]
-            modules['int_metaalloyhullreinforcement_' + k[22:]] = modules[k]
-            modules['int_guardianmodulereinforcement_' + k[22:]] = modules[k]
-    modules['hpt_causticmissile_fixed_medium'] = {'mass': 4}
-    modules['hpt_flechettelauncher_fixed_medium'] = {'mass': 4}
-    modules['hpt_flechettelauncher_turret_medium'] = {'mass': 4}
-    modules['hpt_guardian_plasmalauncher_fixed_medium'] = {'mass': 4}
-    modules['hpt_guardian_plasmalauncher_fixed_large'] = {'mass': 8}
-    modules['hpt_guardian_plasmalauncher_turret_medium'] = {'mass': 4}
-    modules['hpt_guardian_plasmalauncher_turret_large'] = {'mass': 8}
-    modules['hpt_guardian_shardcannon_fixed_medium'] = {'mass': 4}
-    modules['hpt_guardian_shardcannon_fixed_large'] = {'mass': 8}
-    modules['hpt_guardian_shardcannon_turret_medium'] = {'mass': 4}
-    modules['hpt_guardian_shardcannon_turret_large'] = {'mass': 8}
-    modules['hpt_plasmashockcannon_fixed_medium'] = {'mass': 4}
-    modules['hpt_plasmashockcannon_fixed_large'] = {'mass': 8}	# ???
-    modules['hpt_plasmashockcannon_gimbal_medium'] = {'mass': 4}
-    modules['hpt_plasmashockcannon_gimbal_large'] = {'mass': 8}	# ???
-    modules['hpt_plasmashockcannon_turret_medium'] = {'mass': 4}
-    modules['hpt_plasmashockcannon_turret_large'] = {'mass': 8}	# ???
-    modules['int_dronecontrol_decontamination_size1_class1'] = {'mass': 1.3}
-    modules['int_dronecontrol_decontamination_size3_class1'] = {'mass': 2}
-    modules['int_dronecontrol_decontamination_size5_class1'] = {'mass': 20}
-    modules['int_dronecontrol_decontamination_size7_class1'] = {'mass': 128}
-    modules['int_dronecontrol_unkvesselresearch'] = {'mass': 1.3}
+    add(modules, 'hpt_causticmissile_fixed_medium', {'mass': 4})
+    add(modules, 'hpt_flechettelauncher_fixed_medium', {'mass': 4})
+    add(modules, 'hpt_flechettelauncher_turret_medium', {'mass': 4})
+    add(modules, 'hpt_guardian_plasmalauncher_fixed_large', {'mass': 8})
+    add(modules, 'hpt_guardian_plasmalauncher_turret_large', {'mass': 8})
+    add(modules, 'hpt_guardian_shardcannon_turret_medium', {'mass': 4})
+    add(modules, 'hpt_guardian_shardcannon_turret_large', {'mass': 8})
+    add(modules, 'hpt_plasmashockcannon_fixed_medium', {'mass': 4})
+    add(modules, 'hpt_plasmashockcannon_gimbal_large', {'mass': 8})	# ???
+    add(modules, 'hpt_plasmashockcannon_turret_medium', {'mass': 4})
+    add(modules, 'hpt_plasmashockcannon_turret_large', {'mass': 8})	# ???
+    add(modules, 'int_dronecontrol_decontamination_size1_class1', {'mass': 1.3})
+    add(modules, 'int_dronecontrol_decontamination_size3_class1', {'mass': 2})
+    add(modules, 'int_dronecontrol_decontamination_size5_class1', {'mass': 20})
+    add(modules, 'int_dronecontrol_decontamination_size7_class1', {'mass': 128})
+    add(modules, 'int_dronecontrol_unkvesselresearch', {'mass': 1.3})
+    add(modules, 'int_metaalloyhullreinforcement_size1_class1', { 'mass': 2 })
+    add(modules, 'int_metaalloyhullreinforcement_size1_class2', { 'mass': 2 })	# anomaly
+    add(modules, 'int_metaalloyhullreinforcement_size2_class1', { 'mass': 4 })
+    add(modules, 'int_metaalloyhullreinforcement_size2_class2', { 'mass': 2 })
+    add(modules, 'int_metaalloyhullreinforcement_size3_class1', { 'mass': 8 })
+    add(modules, 'int_metaalloyhullreinforcement_size3_class2', { 'mass': 4 })
+    add(modules, 'int_metaalloyhullreinforcement_size4_class1', { 'mass': 16 })
+    add(modules, 'int_metaalloyhullreinforcement_size4_class2', { 'mass': 8 })
+    add(modules, 'int_metaalloyhullreinforcement_size5_class1', { 'mass': 32 })
+    add(modules, 'int_metaalloyhullreinforcement_size5_class2', { 'mass': 16 })
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
