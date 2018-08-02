@@ -8,7 +8,7 @@ This app downloads your Cmdr's details and system, faction, scan and station dat
 * sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/EDSM-NET/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](https://eddb.io/), [EDSM](https://www.edsm.net/), [Elite Trade Net](http://etn.io/), [Inara](https://inara.cz), [Roguey's](https://roguey.co.uk/elite-dangerous/), etc.
 * sends your Cmdr's details, ship details, cargo, materials and flight log to [Elite Dangerous Star Map](https://www.edsm.net/) (“EDSM”).
 * sends your Cmdr's details, ship details, cargo, materials, missions, community goal progress, and flight log to [Inara](https://inara.cz).
-* saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Inara](https://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
+* saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://github.com/eyeonus/Trade-Dangerous/wiki), [Inara](https://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
 
 You can run the app on the same PC or Mac on which you're running Elite: Dangerous or on another PC connected via a network share. PS4 and Xbox are not supported, sorry.
@@ -67,6 +67,7 @@ This app can save a variety of data in a variety of formats:
 
 * Market data
   * Trade Dangerous format file - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
+    * Note that if you send your data to EDDN, it will be automatically be read by [Tromador's mirror for Trade Dangerous](http://elite.ripz.org/) (the spiritual succesor to maddavo) and can be imported into your own database using the [eddblink plugin](https://github.com/eyeonus/EDDBlink)—which now comes pre-installed with TD—so there is no need to save .prices data for manual input.
   * CSV format file - saves commodity market data as files that you can upload to [Inara](https://inara.cz) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
 
 * Ship loadout
