@@ -5,10 +5,10 @@ Elite: Dangerous Market Connector (EDMC)
 
 This app downloads your Cmdr's details and system, faction, scan and station data from the game [Elite: Dangerous](https://www.elitedangerous.com/) and, at your choice, either:
 
-* sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/EDSM-NET/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](https://eddb.io/), [EDSM](https://www.edsm.net/), [Elite Trade Net](http://etn.io/), [Inara](https://inara.cz), [Roguey's](https://roguey.co.uk/elite-dangerous/), etc.
+* sends station commodity market prices, other station data, system and faction information and body scan data to the [Elite Dangerous Data Network](https://github.com/EDSM-NET/EDDN/wiki) (“EDDN”) from where you and others can use it via online trading, prospecting and shopping tools such as [eddb](https://eddb.io/), [EDSM](https://www.edsm.net/), [Elite Trade Net](http://etn.io/), [Inara](https://inara.cz), [Roguey's](https://roguey.co.uk/elite-dangerous/), [Trade Dangerous](https://github.com/eyeonus/Trade-Dangerous/wiki), etc.
 * sends your Cmdr's details, ship details, cargo, materials and flight log to [Elite Dangerous Star Map](https://www.edsm.net/) (“EDSM”).
 * sends your Cmdr's details, ship details, cargo, materials, missions, community goal progress, and flight log to [Inara](https://inara.cz).
-* saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home), [Inara](https://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), etc.
+* saves station commodity market prices to files on your computer that you can load into trading tools such as [Trade Dangerous](https://github.com/eyeonus/Trade-Dangerous/wiki) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
 * saves a record of your ship loadout to files on your computer that you can load into outfitting tools such as [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
 
 You can run the app on the same PC or Mac on which you're running Elite: Dangerous or on another PC connected via a network share. PS4 and Xbox are not supported, sorry.
@@ -66,8 +66,10 @@ option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) an
 This app can save a variety of data in a variety of formats:
 
 * Market data
-  * Trade Dangerous format file - saves commodity market data as files that you can load into [Trade Dangerous](https://bitbucket.org/kfsone/tradedangerous/wiki/Home).
-  * CSV format file - saves commodity market data as files that you can upload to [Inara](https://inara.cz) or [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
+  * Trade Dangerous format file - saves commodity market data as files that you can load into [Trade Dangerous](https://github.com/eyeonus/Trade-Dangerous/wiki).
+  * CSV format file - saves commodity market data as files that you can upload to [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools).
+
+  Note that the above tools can be configured to consume data from the “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” data feed (see below). You may find using the EDDN feed easier and more productive than using these data files.
 
 * Ship loadout
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
@@ -79,7 +81,7 @@ Some options work by reading the Elite: Dangerous game's log files. If you're ru
 ### EDDN
 
 * Station data
-  * Sends station commodity market, outfitting and shipyard data to “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” from where you and others can use it via online trading tools such as [eddb](http://eddbs.io/), [EDSM](https://www.edsm.net/), [Elite Trade Net](http://etn.io/), [Inara](https://inara.cz), [Roguey's](https://roguey.co.uk/elite-dangerous/), etc.
+  * Sends station commodity market, outfitting and shipyard data to “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” from where you and others can use it via trading tools such as [eddb](http://eddbs.io/), [EDSM](https://www.edsm.net/), [Elite Trade Net](http://etn.io/), [Inara](https://inara.cz), [mEDI's Elite Tools](https://github.com/mEDI-S/mEDI_s-Elite-Tools), [Roguey's](https://roguey.co.uk/elite-dangerous/), [Trade Dangerous](https://github.com/eyeonus/Trade-Dangerous/wiki) with the [EDDBlink](https://github.com/eyeonus/Trade-Dangerous/wiki/Plugin-Options#eddblink) plugin, etc.
 * System and scan data
   * Sends system and faction information and the results of your planet scans to “[EDDN](https://github.com/EDSM-NET/EDDN/wiki)” from where you and others can use it via online prospecting tools such as [eddb](https://eddb.io/), [EDSM](https://www.edsm.net/), [Inara](https://inara.cz), etc.
   * You can choose to delay sending this information to EDDN until you're next safely docked at a station. Otherwise the information is sent as soon as you enter a system or perform a scan.
