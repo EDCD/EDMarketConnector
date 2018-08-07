@@ -27,4 +27,4 @@ def shipyard_url(loadout, is_beta):
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
-    return (is_beta and 'https://beta.coriolis.edcd.io/import?data=' or 'https://coriolis.edcd.io/import?data=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
+    return (is_beta and 'https://beta.coriolis.io/import?data=' or 'https://coriolis.io/import?data=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
