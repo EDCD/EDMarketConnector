@@ -83,7 +83,10 @@ class Plugin(object):
             with open(loadfile, 'rb') as plugfile:
                 module = imp.load_module('plugin_%s' % name.encode('ascii', 'replace').replace('.', '_'), plugfile, loadfile.encode(sys.getfilesystemencoding()),
                                          ('.py', 'r', imp.PY_SOURCE))
-                newname = module.plugin_start()
+                if module.plugin_start.func_code.co_argcount == 0:
+                    newname = module.plugin_start()
+                else:
+                    newname = module.plugin_start(os.path.dirname(loadfile))
                 self.name = newname and unicode(newname) or name
                 self.module = module
         else:

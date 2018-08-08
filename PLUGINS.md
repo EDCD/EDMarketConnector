@@ -22,11 +22,11 @@ Plugins are python files. The plugin folder must have a file named `load.py` tha
 EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
 
 ```python
-def plugin_start():
+def plugin_start(plugin_dir):
    """
    Load this plugin into EDMC
    """
-   print "I am loaded!"
+   print "I am loaded! My plugin folder is {}".format(plugin_dir.encode("utf-8"))
    return "Test"
 ```
 
