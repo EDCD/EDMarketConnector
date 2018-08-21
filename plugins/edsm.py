@@ -16,7 +16,6 @@ import myNotebook as nb
 
 from config import appname, applongname, appversion, config
 import companion
-import outfitting
 import plug
 
 if __debug__:
