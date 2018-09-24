@@ -21,7 +21,7 @@ weapon_map = {
     'advancedtorppylon'              : 'Torpedo Pylon',
     'atdumbfiremissile'              : 'AX Missile Rack',
     'atmulticannon'                  : 'AX Multi-Cannon',
-    'basicmissilerack'               : 'Missile Rack',
+    'basicmissilerack'               : 'Seeker Missile Rack',
     'beamlaser'                      : 'Beam Laser',
     ('beamlaser','heat')             : 'Retributor Beam Laser',
     'cannon'                         : 'Cannon',
@@ -81,6 +81,7 @@ weaponclass_map = {
 weaponrating_map = {
     'hpt_advancedtorppylon_fixed_small' : 'I',
     'hpt_advancedtorppylon_fixed_medium': 'I',
+    'hpt_advancedtorppylon_fixed_large' : 'I',
     'hpt_atdumbfiremissile_fixed_medium': 'B',
     'hpt_atdumbfiremissile_fixed_large' : 'A',
     'hpt_atdumbfiremissile_turret_medium': 'B',
@@ -91,6 +92,7 @@ weaponrating_map = {
     'hpt_atmulticannon_turret_large'    : 'E',
     'hpt_basicmissilerack_fixed_small'  : 'B',
     'hpt_basicmissilerack_fixed_medium' : 'B',
+    'hpt_basicmissilerack_fixed_large'  : 'A',
     'hpt_beamlaser_fixed_small'         : 'E',
     'hpt_beamlaser_fixed_medium'        : 'D',
     'hpt_beamlaser_fixed_large': 'C',
@@ -117,17 +119,23 @@ weaponrating_map = {
     'hpt_drunkmissilerack_fixed_medium': 'B',
     'hpt_dumbfiremissilerack_fixed_small': 'B',
     'hpt_dumbfiremissilerack_fixed_medium': 'B',
+    'hpt_dumbfiremissilerack_fixed_large': 'A',
     'hpt_flakmortar_fixed_medium': 'B',
     'hpt_flakmortar_turret_medium': 'B',
     'hpt_flechettelauncher_fixed_medium': 'B',
     'hpt_flechettelauncher_turret_medium': 'B',
-    'hpt_guardian_gausscannon_fixed_medium': 'B',	# guess
+    'hpt_guardian_gausscannon_fixed_small': 'D',
+    'hpt_guardian_gausscannon_fixed_medium': 'B',
+    'hpt_guardian_plasmalauncher_fixed_small': 'D',
     'hpt_guardian_plasmalauncher_fixed_medium': 'B',
     'hpt_guardian_plasmalauncher_fixed_large': 'C',
+    'hpt_guardian_plasmalauncher_turret_small': 'F',
     'hpt_guardian_plasmalauncher_turret_medium': 'E',
     'hpt_guardian_plasmalauncher_turret_large': 'D',
+    'hpt_guardian_shardcannon_fixed_small': 'D',
     'hpt_guardian_shardcannon_fixed_medium': 'A',
     'hpt_guardian_shardcannon_fixed_large': 'C',
+    'hpt_guardian_shardcannon_turret_small': 'F',
     'hpt_guardian_shardcannon_turret_medium': 'D',
     'hpt_guardian_shardcannon_turret_large': 'D',
     'hpt_minelauncher_fixed_small': 'I',
@@ -146,13 +154,17 @@ weaponrating_map = {
     'hpt_multicannon_gimbal_huge': 'A',
     'hpt_multicannon_turret_small': 'G',
     'hpt_multicannon_turret_medium': 'F',
+    'hpt_multicannon_turret_large': 'E',
     'hpt_plasmaaccelerator_fixed_medium': 'C',
     'hpt_plasmaaccelerator_fixed_large': 'B',
     'hpt_plasmaaccelerator_fixed_huge': 'A',
+    'hpt_plasmashockcannon_fixed_small': 'D',
     'hpt_plasmashockcannon_fixed_medium': 'D',
     'hpt_plasmashockcannon_fixed_large': 'C',
+    'hpt_plasmashockcannon_gimbal_small': 'E',
     'hpt_plasmashockcannon_gimbal_medium': 'D',
     'hpt_plasmashockcannon_gimbal_large': 'C',
+    'hpt_plasmashockcannon_turret_small': 'F',
     'hpt_plasmashockcannon_turret_medium': 'E',
     'hpt_plasmashockcannon_turret_large': 'D',
     'hpt_pulselaser_fixed_small': 'F',
@@ -305,7 +317,7 @@ internal_map = {
 
 
 # Module mass, FSD data etc
-moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
+moduledata = OrderedDict()
 
 
 # Given a module description from the Companion API returns a description of the module in the form of a
@@ -316,6 +328,10 @@ moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 # Returns None if the module is user-specific (i.e. decal, paintjob, kit) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
 def lookup(module, ship_map, entitled=False):
+
+    # Lazily populate
+    if not moduledata:
+        moduledata.update(cPickle.load(open(join(config.respath, 'modules.p'),  'rb')))
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
@@ -358,9 +374,13 @@ def lookup(module, ship_map, entitled=False):
             if name[4] in weaponoldvariant_map:		# Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
                 new['name'] =  weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
                 new['rating'] = '?'
+            elif '_'.join(name[:4]) not in weaponrating_map:
+                raise AssertionError('%s: Unknown weapon rating "%s"' % (module['id'], module['name']))
             else:			# PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
                 new['name'] =  weapon_map[(name[1],name[4])]
                 new['rating'] = weaponrating_map['_'.join(name[:4])]	# assumes same rating as base weapon
+        elif module['name'].lower() not in weaponrating_map:
+            raise AssertionError('%s: Unknown weapon rating "%s"' % (module['id'], module['name']))
         else:
             new['name'] =  weapon_map[name[1]]
             new['rating'] = weaponrating_map[module['name'].lower()]	# no obvious rule - needs lookup table

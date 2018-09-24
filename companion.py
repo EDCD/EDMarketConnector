@@ -73,6 +73,7 @@ ship_map = {
     'type9'                       : 'Type-9 Heavy',
     'type9_military'              : 'Type-10 Defender',
     'typex'                       : 'Alliance Chieftain',
+    'typex_2'                     : 'Alliance Crusader',
     'typex_3'                     : 'Alliance Challenger',
     'viper'                       : 'Viper MkIII',
     'viper_mkiv'                  : 'Viper MkIV',

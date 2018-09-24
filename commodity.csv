@@ -111,8 +111,8 @@ id,symbol,category,name
 128672131,DiplomaticBag,Salvage,Diplomatic Bag
 128672132,ScientificResearch,Salvage,Scientific Research
 128672133,ScientificSamples,Salvage,Scientific Samples
-128672134,PoliticalPrisoner,Salvage,Political Prisoner
-128672135,Hostage,Salvage,Hostage
+128672134,PoliticalPrisoner,Salvage,Political Prisoners
+128672135,Hostage,Salvage,Hostages
 128672136,LargeExplorationDataCash,Salvage,Large Survey Data Cache
 128672137,SmallExplorationDataCash,Salvage,Small Survey Data Cache
 128672159,AntiqueJewellery,Salvage,Antique Jewellery
@@ -204,3 +204,5 @@ id,symbol,category,name
 128793129,ThargoidTissueSampleType2,Salvage,Thargoid Basilisk Tissue Sample
 128793130,ThargoidTissueSampleType3,Salvage,Thargoid Medusa Tissue Sample
 128824468,ThargoidScoutTissueSample,Salvage,Thargoid Scout Tissue Sample
+128888499,AncientKey,Salvage,Ancient Key
+128902652,ThargoidTissueSampleType4,Salvage,Thargoid Hydra Tissue Sample

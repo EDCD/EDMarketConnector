@@ -3,10 +3,12 @@
 # build ship and module databases from https://github.com/EDCD/coriolis-data/
 #
 
+import csv
 import base64
 from collections import OrderedDict
 import cPickle
 import json
+from traceback import print_exc
 
 from config import config
 import outfitting
@@ -73,33 +75,15 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
-    # 3.0 / 3.1 additions not yet present in coriolis-data
-    add(modules, 'hpt_causticmissile_fixed_medium', {'mass': 4})
-    add(modules, 'hpt_flechettelauncher_fixed_medium', {'mass': 4})
-    add(modules, 'hpt_flechettelauncher_turret_medium', {'mass': 4})
-    add(modules, 'hpt_guardian_plasmalauncher_fixed_large', {'mass': 8})
-    add(modules, 'hpt_guardian_plasmalauncher_turret_large', {'mass': 8})
-    add(modules, 'hpt_guardian_shardcannon_turret_medium', {'mass': 4})
-    add(modules, 'hpt_guardian_shardcannon_turret_large', {'mass': 8})
-    add(modules, 'hpt_plasmashockcannon_fixed_medium', {'mass': 4})
-    add(modules, 'hpt_plasmashockcannon_gimbal_large', {'mass': 8})	# ???
-    add(modules, 'hpt_plasmashockcannon_turret_medium', {'mass': 4})
-    add(modules, 'hpt_plasmashockcannon_turret_large', {'mass': 8})	# ???
-    add(modules, 'int_dronecontrol_decontamination_size1_class1', {'mass': 1.3})
-    add(modules, 'int_dronecontrol_decontamination_size3_class1', {'mass': 2})
-    add(modules, 'int_dronecontrol_decontamination_size5_class1', {'mass': 20})
-    add(modules, 'int_dronecontrol_decontamination_size7_class1', {'mass': 128})
-    add(modules, 'int_dronecontrol_unkvesselresearch', {'mass': 1.3})
-    add(modules, 'int_metaalloyhullreinforcement_size1_class1', { 'mass': 2 })
-    add(modules, 'int_metaalloyhullreinforcement_size1_class2', { 'mass': 2 })	# anomaly
-    add(modules, 'int_metaalloyhullreinforcement_size2_class1', { 'mass': 4 })
-    add(modules, 'int_metaalloyhullreinforcement_size2_class2', { 'mass': 2 })
-    add(modules, 'int_metaalloyhullreinforcement_size3_class1', { 'mass': 8 })
-    add(modules, 'int_metaalloyhullreinforcement_size3_class2', { 'mass': 4 })
-    add(modules, 'int_metaalloyhullreinforcement_size4_class1', { 'mass': 16 })
-    add(modules, 'int_metaalloyhullreinforcement_size4_class2', { 'mass': 8 })
-    add(modules, 'int_metaalloyhullreinforcement_size5_class1', { 'mass': 32 })
-    add(modules, 'int_metaalloyhullreinforcement_size5_class2', { 'mass': 16 })
-
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
+
+    # Check data is present for all modules
+    with open('outfitting.csv') as csvfile:
+        reader = csv.DictReader(csvfile, restval='')
+        for row in reader:
+            try:
+                module = outfitting.lookup({ 'id': row['id'], 'name': row['symbol'] }, companion.ship_map)
+            except:
+                print row['symbol']
+                print_exc()
