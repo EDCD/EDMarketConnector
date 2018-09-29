@@ -164,6 +164,15 @@ EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive thi
 ### Import failed: No ship loadout found
 Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
 
+### Very long "cooldown" period
+You'll see a very long cooldown period if your system's time of day changes while you're running the app. To fix this:
+
+- Quit the app.
+- Double-check your system's Date and Time settings.
+- Windows: Run the RegEdit program and locate and delete the key `HKEY_CURRENT_USER\Software\Marginal\EDMarketConnector\querytime`.
+- Mac: Copy and paste the following into a Terminal app window: `defaults write uk.org.marginal.edmarketconnector querytime -int 0` and press Enter.
+- Re-start the app.
+
 ### Location of configuration files
 If your configuration has been corrupted, or badly set, such that you can't run the program to fix it, or you otherwise need to directly access the configuration then these are the locations of the configuration:
 
