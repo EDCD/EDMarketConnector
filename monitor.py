@@ -393,8 +393,8 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
             elif (entry['event'] == 'Loadout' and
-                  not self.canonicalise(entry['Ship']).endswith('fighter') and
-                  not self.canonicalise(entry['Ship']).endswith('buggy')):
+                  not 'fighter' in self.canonicalise(entry['Ship']) and
+                  not 'buggy' in self.canonicalise(entry['Ship'])):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
