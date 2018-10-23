@@ -1,3 +1,24 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje na Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Greška: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara kredencijali";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
+
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Željeni web sajtovi";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Shipyard";
+
 /* Language name */
 "!Language" = "Srpski (Latinica)";
 
@@ -51,12 +72,6 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Proveri da li postoje izmene...";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Proverite podešavanje datuma i vremena u svom sistemu.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Proverite podešavanje vremenske zone u svom sistemu.";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
@@ -121,9 +136,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "Lokacija loga o E:D interakcijama";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Lokacija E:D Journal fajlova";
 
@@ -163,7 +175,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -373,9 +385,6 @@
 /* [prefs.py] */
 "Preferences" = "Podešavanja";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Željeno Brodogradilište";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -430,9 +439,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Slanje dnevnika leta (flight log) na Elite Dangerous Star Map";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Slanje podataka o stanici na Elite Dangerous Data Network";
 
@@ -460,7 +466,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Stanica";
 
 /* [EDMarketConnector.py] */
@@ -475,14 +481,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Sistem";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Ova aplikacija zahteva precizno podešeno vreme.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: Možete deaktivirati dodatak (plugin) dodavanjem{CR}'{EXT}' na ime njegovog foldera";

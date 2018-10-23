@@ -36,7 +36,7 @@ def addcommodities(data):
         new = {
             'id'       : commodity['id'],
             'symbol'   : commodity['name'],
-            'category' : commodity['categoryname'],
+            'category' : companion.category_map.get(commodity['categoryname']) or commodity['categoryname'],
             'name'     : commodity.get('locName') or 'Limpets',
         }
         old = commodities.get(key)

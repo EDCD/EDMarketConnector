@@ -1,18 +1,16 @@
-import cPickle
+# Export ship loadout in E:D Shipyard plain text format
 
-import base64
+import cPickle
 from collections import defaultdict
-import json
 import os
 from os.path import join
 import re
-import StringIO
 import time
-import gzip
 
 from config import config
 import companion
 import outfitting
+
 
 # Map API ship names to E:D Shipyard ship names
 ship_map = dict(companion.ship_map)
@@ -65,6 +63,7 @@ def export(data, filename=None):
     fuel = 0
     cargo = 0
     fsd = None
+    jumpboost = 0
 
     for slot in sorted(data['ship']['modules']):
 
@@ -98,7 +97,7 @@ def export(data, filename=None):
                     fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
                 if mods.get('OutfittingFieldType_MaxFuelPerJump'):
                     fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
-
+            jumpboost += module.get('jumpboost', 0)
 
             for s in slot_map:
                 if slot.lower().startswith(s):
@@ -117,7 +116,8 @@ def export(data, filename=None):
             if __debug__: raise
 
     # Construct description
-    string = '[%s]\n' % ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+    ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+    string = '[%s]\n' % (data['ship'].get('shipName') and ', '.join([ship, data['ship']['shipName'].encode('utf-8')]) or ship)
     for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
@@ -132,11 +132,11 @@ def export(data, filename=None):
     try:
         # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
-        string += 'Mass  : %.1f T empty\n        %.1f T full\n' % (mass, mass + fuel + cargo)
+        string += 'Mass  : %.2f T empty\n        %.2f T full\n' % (mass, mass + fuel + cargo)
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
         string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
-            multiplier / (mass + fuel),
-            multiplier / (mass + fuel + cargo))
+            multiplier / (mass + fuel) + jumpboost,
+            multiplier / (mass + fuel + cargo) + jumpboost)
     except:
         if __debug__: raise
 
@@ -146,7 +146,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
-    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
+    ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:
@@ -158,14 +158,3 @@ def export(data, filename=None):
     filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
     with open(filename, 'wt') as h:
         h.write(string)
-
-
-# Return a URL for the current ship
-def url(data, is_beta):
-
-    string = json.dumps(companion.ship(data), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')	# most compact representation
-
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode='w') as f:
-        f.write(string)
-    return (is_beta and 'http://www.edshipyard.com/beta/#/I=' or 'http://www.edshipyard.com/#/I=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')

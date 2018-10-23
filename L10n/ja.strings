@@ -1,3 +1,24 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "エラー: Inaraに接続できません";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "エラー: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara認証情報";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "フライトログとCMDRステータスをEDSMへ送信する";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "フライトログとCMDRステータスをInaraへ送信する";
+
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "お気に入りのウェブサイト";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "造船所";
+
 /* Language name */
 "!Language" = "日本語";
 
@@ -51,12 +72,6 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "更新の確認...";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "お使いの機器の日付と時刻の設定が間違っていないか確認してください。";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "お使いの機器のタイムゾーンの設定が間違っていないか確認してください。";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
@@ -121,9 +136,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:Dゲームクライアントのインタラクションログ出力先";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:Dゲームクライアントのジャーナルファイル出力先";
 
@@ -163,7 +175,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "エラー: Frontier社のサーバがダウンしています";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "エラー: Frontier社のサーバが混雑しています";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -373,9 +385,6 @@
 /* [prefs.py] */
 "Preferences" = "環境設定";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "行きつけの造船所";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
@@ -430,9 +439,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Elite Dangerous Star Mapにフライトログを送信する";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Networkにステーションデータを送信する";
 
@@ -460,7 +466,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "ステーション";
 
 /* [EDMarketConnector.py] */
@@ -470,19 +476,16 @@
 "Station doesn't have anything!" = "このステーションには何も商品がありません！";
 
 /* Menu item. [EDMarketConnector.py] */
-"Status" = "現在の状態";
+"Status" = "ステータス";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "星系";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "テーマ";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "このアプリケーションの動作には正確なタイムスタンプが必要です。";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "ヒント: プラグインを無効にするには{CR}フォルダ名に '{EXT}' を追加してください";

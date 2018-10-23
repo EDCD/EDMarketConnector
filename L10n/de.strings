@@ -1,3 +1,24 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Fehler: Verbindung zu Inara fehlgeschlagen";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Fehler: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara-Anmeldedaten";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Sende Fluglog und CMDR-Status an EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Sende Fluglog und CMDR-Status an Inara";
+
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Favorisierte Webseiten";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Werft";
+
 /* Language name */
 "!Language" = "Deutsch";
 
@@ -51,12 +72,6 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Auf Aktualisierungen überprüfen...";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Prüfe die Zeit- und Datumseinstellungen deines Systems.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Prüfe die Zeitzoneneinstellung deines Systems.";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Obermaat";
@@ -121,9 +136,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Herzog";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D Speicherort Interaktions-Log";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D Journal Dateispeicherort";
 
@@ -163,7 +175,7 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Fehler: Frontier-Server ist offline";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Fehler: Frontier-Server ist überlastet";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
@@ -373,9 +385,6 @@
 /* [prefs.py] */
 "Preferences" = "Einstellungen";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Favorisierte Werft";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Prinz";
 
@@ -430,9 +439,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Halbprofi";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Schicke Fluglogbuch zu Elite Dangerous Star Map";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Schicke Stationsdaten an das Elite Dangerous Data Netzwerk";
 
@@ -460,7 +466,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Knappe";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Station";
 
 /* [EDMarketConnector.py] */
@@ -475,14 +481,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Landkundiger";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "System";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Dieses Programm benötigt genaue Zeitstempel.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";

@@ -7,17 +7,21 @@ import codecs
 from collections import OrderedDict
 import numbers
 import os
-from os.path import basename, dirname, isfile, join, normpath
+from os.path import basename, dirname, exists, isfile, isdir, join, normpath
 import re
 import sys
 from sys import platform
+from traceback import print_exc
 import __builtin__
 
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
+from config import config
+
 # Language name
 LANGUAGE_ID = '!Language'
+LOCALISATION_DIR = 'L10n'
 
 
 if platform == 'darwin':
@@ -40,10 +44,6 @@ elif platform == 'win32':
     GetNumberFormatEx.restype = ctypes.c_int
 
 
-else:	# POSIX
-    import locale
-
-
 class Translations:
 
     FALLBACK = 'en'	# strings in this code are in English
@@ -54,11 +54,11 @@ class Translations:
 
 
     def __init__(self):
-        self.translations = {}
+        self.translations = { None: {} }
 
     def install_dummy(self):
         # For when translation is not desired or not available
-        self.translations = {}	# not used
+        self.translations = { None: {} }
         __builtin__.__dict__['_'] = lambda x: unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
     def install(self, lang=None):
@@ -81,13 +81,20 @@ class Translations:
         if lang not in self.available():
             self.install_dummy()
         else:
-            self.translations = self.contents(lang)
+            self.translations = { None: self.contents(lang) }
+            for plugin in os.listdir(config.plugin_dir):
+                plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
+                if isdir(plugin_path):
+                    self.translations[plugin] = self.contents(lang, plugin_path)
             __builtin__.__dict__['_'] = self.translate
 
-    def contents(self, lang):
+    def contents(self, lang, plugin_path=None):
         assert lang in self.available()
         translations = {}
-        with self.file(lang) as h:
+        h = self.file(lang, plugin_path)
+        if not h:
+            return {}
+        else:
             for line in h:
                 if line.strip():
                     match = Translations.TRANS_RE.match(line)
@@ -99,11 +106,18 @@ class Translations:
             translations[LANGUAGE_ID] = unicode(lang)	# Replace language name with code if missing
         return translations
 
-    def translate(self, x):
-        if __debug__:
-            if x not in self.translations:
-                print 'Missing translation: "%s"' % x
-        return self.translations.get(x) or unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
+    def translate(self, x, context=None):
+        if context:
+            context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
+            if __debug__:
+                if self.translations[None] and context not in self.translations:
+                    print 'No translations for "%s"' % context
+            return self.translations.get(context, {}).get(x) or self.translate(x)
+        else:
+            if __debug__:
+                if self.translations[None] and x not in self.translations[None]:
+                    print 'Missing translation: "%s"' % x
+            return self.translations[None].get(x) or unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
 
     # Returns list of available language codes
     def available(self):
@@ -129,14 +143,22 @@ class Translations:
             if platform=='darwin':
                 return normpath(join(dirname(sys.executable.decode(sys.getfilesystemencoding())), os.pardir, 'Resources'))
             else:
-                return join(dirname(sys.executable.decode(sys.getfilesystemencoding())), 'L10n')
+                return join(dirname(sys.executable.decode(sys.getfilesystemencoding())), LOCALISATION_DIR)
         elif __file__:
-            return join(dirname(__file__), 'L10n')
+            return join(dirname(__file__), LOCALISATION_DIR)
         else:
-            return 'L10n'
+            return LOCALISATION_DIR
 
-    def file(self, lang):
-        if getattr(sys, 'frozen', False) and platform=='darwin':
+    def file(self, lang, plugin_path=None):
+        if plugin_path:
+            f = join(plugin_path, '%s.strings' % lang)
+            if exists(f):
+                try:
+                    return codecs.open(f, 'r', 'utf-8')
+                except:
+                    print_exc()
+            return None
+        elif getattr(sys, 'frozen', False) and platform=='darwin':
             return codecs.open(join(self.respath(), '%s.lproj' % lang, 'Localizable.strings'), 'r', 'utf-16')
         else:
             return codecs.open(join(self.respath(), '%s.strings' % lang), 'r', 'utf-8')
@@ -218,8 +240,9 @@ class Locale:
             lang = locale.getlocale()[0]
             return lang and [lang.replace('_','-')]
 
-# singleton
+# singletons
 Locale = Locale()
+Translations = Translations()
 
 
 # generate template strings file - like xgettext
@@ -229,7 +252,7 @@ if __name__ == "__main__":
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')	# match a single line python literal
     seen = {}
     for f in (sorted([x for x in os.listdir('.') if x.endswith('.py')]) +
-              sorted([join('plugins', x) for x in os.listdir('plugins') if x.endswith('.py')])):
+              sorted([join('plugins', x) for x in isdir('plugins') and os.listdir('plugins') or [] if x.endswith('.py')])):
         with codecs.open(f, 'r', 'utf-8') as h:
             lineno = 0
             for line in h:
@@ -238,7 +261,9 @@ if __name__ == "__main__":
                 if match and not seen.get(match.group(2)):	# only record first commented instance of a string
                     seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
     if seen:
-        template = codecs.open('L10n/en.template', 'w', 'utf-8')
+        if not isdir(LOCALISATION_DIR):
+            os.mkdir(LOCALISATION_DIR)
+        template = codecs.open(join(LOCALISATION_DIR, 'en.template'), 'w', 'utf-8')
         template.write('/* Language name */\n"%s" = "%s";\n\n' % (LANGUAGE_ID, 'English'))
         for thing in sorted(seen, key=unicode.lower):
             if seen[thing]:

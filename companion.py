@@ -1,18 +1,16 @@
 import csv
 import requests
 from cookielib import LWPCookieJar
+from email.utils import parsedate
 import hashlib
 import numbers
 import os
 from os.path import dirname, isfile, join
 import sys
-from sys import platform
 import time
+from traceback import print_exc
 
-if __debug__:
-    from traceback import print_exc
-
-from config import config
+from config import appname, appversion, config
 
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
@@ -64,6 +62,7 @@ ship_map = {
     'hauler'                      : 'Hauler',
     'independant_trader'          : 'Keelback',
     'independent_fighter'         : 'Taipan Fighter',
+    'krait_mkii'                  : 'Krait MkII',
     'orca'                        : 'Orca',
     'python'                      : 'Python',
     'scout'                       : 'Taipan Fighter',
@@ -73,6 +72,9 @@ ship_map = {
     'type7'                       : 'Type-7 Transporter',
     'type9'                       : 'Type-9 Heavy',
     'type9_military'              : 'Type-10 Defender',
+    'typex'                       : 'Alliance Chieftain',
+    'typex_2'                     : 'Alliance Crusader',
+    'typex_3'                     : 'Alliance Challenger',
     'viper'                       : 'Viper MkIII',
     'viper_mkiv'                  : 'Viper MkIV',
     'vulture'                     : 'Vulture',
@@ -86,7 +88,7 @@ def listify(thing):
     if thing is None:
         return []	# data is not present
     elif isinstance(thing, list):
-        return thing	# array is not sparse
+        return list(thing)	# array is not sparse
     elif isinstance(thing, dict):
         retval = []
         for k,v in thing.iteritems():
@@ -156,8 +158,8 @@ class Session:
             from requests.packages import urllib3
             urllib3.disable_warnings()
 
-        if platform=='win32' and getattr(sys, 'frozen', False):
-            os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
+        if getattr(sys, 'frozen', False):
+            os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
     def login(self, username=None, password=None, is_beta=False):
         if (not username or not password):
@@ -175,7 +177,7 @@ class Session:
             # changed account
             self.close()
             self.session = requests.Session()
-            self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257'
+            self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
             cookiefile = join(config.app_dir, 'cookies-%s.txt' % hashlib.md5(credentials['email']).hexdigest())
             if not isfile(cookiefile) and isfile(join(config.app_dir, 'cookies.txt')):
                 os.rename(join(config.app_dir, 'cookies.txt'), cookiefile)	# migration from <= 2.25
@@ -243,6 +245,8 @@ class Session:
 
         try:
             data = r.json()
+            if 'timestamp' not in data:
+                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
         except:
             self.dump(r)
             raise ServerError()
@@ -283,11 +287,8 @@ class Session:
         self.session = None
 
     def dump(self, r):
-        if __debug__:
-            print 'Status\t%s'  % r.status_code
-            print 'URL\t%s' % r.url
-            print 'Headers\t%s' % r.headers
-            print ('Content:\n%s' % r.text).encode('utf-8')
+        print_exc()
+        print 'cAPI\t' + r.url, r.status_code, r.headers, r.text.encode('utf-8')
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
@@ -295,10 +296,11 @@ def fixup(data):
 
     if not commodity_map:
         # Lazily populate
-        with open(join(config.respath, 'commodity.csv'), 'rb') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                commodity_map[row['symbol']] = (row['category'], row['name'])
+        for f in ['commodity.csv', 'rare_commodity.csv']:
+            with open(join(config.respath, f), 'rb') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    commodity_map[row['symbol']] = (row['category'], row['name'])
 
     commodities = []
     for commodity in data['lastStarport'].get('commodities') or []:
@@ -372,3 +374,19 @@ def ship(data):
 
     # subset of "ship" that's not noisy
     return filter_ship(data['ship'])
+
+
+# Ship name suitable for writing to a file
+def ship_file_name(ship_name, ship_type):
+    name = unicode(ship_name or ship_map.get(ship_type.lower(), ship_type)).strip()
+    if name.endswith('.'):
+        name = name[:-1]
+    if name.lower() in ['con', 'prn', 'aux', 'nul',
+                        'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+                        'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9']:
+        name = name + '_'
+    return name.translate({ ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*'] })
+
+
+# singleton
+session = Session()

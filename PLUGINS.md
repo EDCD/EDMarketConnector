@@ -22,11 +22,11 @@ Plugins are python files. The plugin folder must have a file named `load.py` tha
 EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
 
 ```python
-def plugin_start():
+def plugin_start(plugin_dir):
    """
    Load this plugin into EDMC
    """
-   print "I am loaded!"
+   print "I am loaded! My plugin folder is {}".format(plugin_dir.encode("utf-8"))
    return "Test"
 ```
 
@@ -64,7 +64,7 @@ def plugin_prefs(parent, cmdr, is_beta):
    """
    Return a TK Frame for adding to the EDMC settings dialog.
    """
-   this.mysetting = tk.IntVar(value=config.get("MyPluginSetting"))	# Retrieve saved value from config
+   this.mysetting = tk.IntVar(value=config.getint("MyPluginSetting"))	# Retrieve saved value from config
    frame = nb.Frame(parent)
    nb.Label(frame, text="Hello").grid()
    nb.Label(frame, text="Commander").grid()
@@ -80,14 +80,14 @@ def prefs_changed(cmdr, is_beta):
    """
    Save settings.
    """
-   config.setint('MyPluginSetting', this.mysetting.get())	# Store new value in config
+   config.set('MyPluginSetting', this.mysetting.getint())	# Store new value in config
 ```
 
 ## Display
 
-You can also have your plugin add an item to the EDMC main window and update it if you need to from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a tk.Frame widget and populate it with other ttk widgets.
+You can also have your plugin add an item to the EDMC main window and update from your event hooks. This works in the same way as `plugin_prefs()`. For a simple one-line item return a tk.Label widget or a pair of widgets as a tuple. For a more complicated item create a tk.Frame widget and populate it with other ttk widgets. Return `None` if you just want to use this as a callback after the main window and all other plugins are initialised.
 
-You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numbers in a locale-independent way.
+You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numbers in your widgets in a locale-independent way.
 
 ```python
 this = sys.modules[__name__]	# For holding module globals
@@ -106,7 +106,7 @@ this.status["text"] = "Happy!"
 
 ## Events
 
-Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `interaction()` and `cmdr_data()`.
+Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `dashboard_entry()` and `cmdr_data()`.
 
 Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
 
@@ -114,7 +114,9 @@ Your events all get called on the main tkinter loop so be sure not to block for 
 
 This gets called when EDMC sees a new entry in the game's journal. `state` is a dictionary containing information about the Cmdr and their ship and cargo (including the effect of the current journal entry).
 
-A special 'StartUp' entry is sent if EDMC is started while the game is already running. In this case you won't receive initial events such as "LoadGame", "Rank", "Location", etc. However the `state` dictionary will reflect the cumulative effect of these missed events.
+A special "StartUp" entry is sent if EDMC is started while the game is already running. In this case you won't receive initial events such as "LoadGame", "Rank", "Location", etc. However the `state` dictionary will reflect the cumulative effect of these missed events.
+
+Similarly, a special "ShutDown" entry is sent when the game is quitted while EDMC is running. This event is not sent when EDMC is running on a different machine so you should not *rely* on receiving this event.
 
 ```python
 def journal_entry(cmdr, is_beta, system, station, entry, state):
@@ -126,19 +128,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
-### Player Interaction
+### Player Dashboard
 
-This gets called when the player interacts with another Cmdr in-game.
-
-If EDMC is started while the game is already running EDMC will send the last few interaction events from the current game session.
+This gets called when something on the player's cockpit display changes - typically about once a second when in orbital flight. See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available constants.
 
 ```python
-def interaction(cmdr, is_beta, entry):
-    # Log type of interaction, Cmdr name, and local time
-    sys.stderr.write("{} Cmdr {} at {}\n".format(', '.join(entry['Interactions']),
-                                                 entry['Name'].encode('utf-8'),
-                                                 time.strftime('%Y-%m-%dT%H:%M:%S',
-                                                               time.localtime(entry['Epoch'] - 11644473600))))
+import plug
+
+def dashboard_entry(cmdr, is_beta, entry):
+    is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
+    sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
 ### Getting Commander Data
@@ -157,9 +156,39 @@ The data is a dictionary and full of lots of wonderful stuff!
 
 ## Error messages
 
-You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `interaction()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
+You can display an error in EDMC's status area by returning a string from your `journal_entry()`, `dashboard_entry()` or `cmdr_data()` function, or asynchronously (e.g. from a "worker" thread that is performing a long running operation) by calling `plug.show_error()`. Either method will cause the "bad" sound to be played (unless the user has muted sound).
 
 The status area is shared between EDMC itself and all other plugins, so your message won't be displayed for very long. Create a dedicated widget if you need to display routine status information.
+
+## Localisation
+
+You can localise your plugin to one of the languages that EDMC itself supports. Add the following boilerplate near the top of each source file that contains strings that needs translating:
+
+```python
+import l10n
+import functools
+_ = functools.partial(l10n.Translations.translate, context=__file__)
+```
+
+Wrap each string that needs translating with the `_()` function, e.g.:
+
+```python
+    this.status["text"] = _('Happy!')	# Main window status
+```
+
+If you display localized strings in EDMC's main window you should refresh them in your `prefs_changed` function in case the user has changed their preferred language.
+
+Translation files should reside in folder named `L10n` inside your plugin's folder. Files must be in macOS/iOS ".strings" format, encoded as UTF-8. You can generate a starting template file for your translations by invoking `l10n.py` in your plugin's folder. This extracts all the translatable strings from Python files in your plugin's folder and places them in a file named `en.template` in the `L10n` folder. Rename this file as `<language_code>.strings` and edit it.
+
+See EDMC's own [`L10n`](https://github.com/Marginal/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
+
+
+# Python Package Plugins
+
+A _Package Plugin_ is both a standard Python package (i.e. contains an `__init__.py` file) and an EDMC plugin (i.e. contains a `load.py` file providing at minimum a `plugin_start()` function). These plugins are loaded before any non-Package plugins.
+
+Other plugins can access features in a Package Plugin by `import`ing the package by name in the usual way.
+
 
 # Distributing a Plugin
 

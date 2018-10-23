@@ -17,8 +17,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1035,1036,1040,1041,1043,1045,1049,1058,1062,2074,0" />
-				 <!--        en   cs,  de   es   fi   fr   it   ja   nl   pl   ru   uk   lv  sr-Latn neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0" />
+				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk  lv zh-CN pt-PT sr-Latn neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -147,6 +147,9 @@
 					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
 						<File KeyPath="yes" Source="SourceDir\python27.dll" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />
+					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
 						<File KeyPath="yes" Source="SourceDir\select.pyd" />
 					</Component>
@@ -200,6 +203,9 @@
 							<File KeyPath="yes" Source="SourceDir\L10n\fr.strings" />
 						</Component>
 						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\hu.strings" />
+						</Component>
+						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\it.strings" />
 						</Component>
 						<Component Guid="*">
@@ -215,6 +221,12 @@
 							<File KeyPath="yes" Source="SourceDir\L10n\pl.strings" />
 						</Component>
 						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\pt-BR.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\pt-PT.strings" />
+						</Component>
+						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\ru.strings" />
 						</Component>
 						<Component Guid="*">
@@ -223,13 +235,25 @@
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\uk.strings" />
 						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\zh-Hans.strings" Name="zh-CN.strings" />
+						</Component>
 					</Directory>
 					<Directory Id="plugins" Name="plugins">
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\coriolis.py" />
+						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\edsy.py" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\inara.py" />
 						</Component>
 					</Directory>
 					<Directory Id="tcl" Name="tcl">
@@ -458,6 +482,7 @@
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="bz2.pyd" />
 			<ComponentRef Id="cacert.pem" />
+			<ComponentRef Id="coriolis.py" />
 			<ComponentRef Id="commodity.csv" />
 			<ComponentRef Id="cs.strings" />
 			<ComponentRef Id="de.strings" />
@@ -466,9 +491,12 @@
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="eddb.py" />
 			<ComponentRef Id="edsm.py" />
+			<ComponentRef Id="edsy.py" />
 			<ComponentRef Id="es.strings" />
 			<ComponentRef Id="fi.strings" />
 			<ComponentRef Id="fr.strings" />
+			<ComponentRef Id="hu.strings" />
+			<ComponentRef Id="inara.py" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />
 			<ComponentRef Id="library.zip" />
@@ -476,8 +504,11 @@
 			<ComponentRef Id="modules.p" />
 			<ComponentRef Id="nl.strings" />
 			<ComponentRef Id="pl.strings" />
+			<ComponentRef Id="pt_BR.strings" />
+			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python27.dll" />
+			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="ships.p" />
@@ -493,6 +524,7 @@
 			<ComponentRef Id="unicodedata.pyd" />
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />
+			<ComponentRef Id="zh_CN.strings" />
 			<ComponentRef Id="auto.tcl" />
 			<ComponentRef Id="clock.tcl" />
 			<ComponentRef Id="history.tcl" />

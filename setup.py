@@ -16,6 +16,7 @@ import re
 import shutil
 import sys
 from tempfile import gettempdir
+import requests
 
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
 from config import update_feed, update_interval
@@ -65,7 +66,7 @@ if sys.platform=='darwin':
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
-PLUGINS = [ 'plugins/eddb.py', 'plugins/edsm.py' ]
+PLUGINS = [ 'plugins/coriolis.py', 'plugins/eddb.py', 'plugins/edsm.py', 'plugins/edsy.py', 'plugins/inara.py' ]
 
 if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
@@ -73,10 +74,10 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': ['commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
+                  'resources': [ requests.certs.where(), 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -86,7 +87,7 @@ if sys.platform=='darwin':
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
                       'LSMinimumSystemVersion': '10.10',
-                      'NSHumanReadableCopyright': u'© 2015-2017 Jonathan Harris',
+                      'NSHumanReadableCopyright': u'© 2015-2018 Jonathan Harris',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -106,17 +107,17 @@ elif sys.platform=='win32':
                       'requests', 'keyring.backends',
                       'shutil', 'sqlite3', 'zipfile',	# Included for plugins
                   ],
-                  'excludes': [ 'certifi', 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
     }
 
-    import requests
     DATA_FILES = [
         ('', [
             requests.certs.where(),
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
             'commodity.csv',
+            'rare_commodity.csv',
             'snd_good.wav',
             'snd_bad.wav',
             'modules.p',
@@ -137,14 +138,14 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'copyright': u'© 2015-2017 Jonathan Harris',
+                 'copyright': u'© 2015-2018 Jonathan Harris',
                  'name': APPNAME,		# WinSparkle
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
-                 'copyright': u'© 2015-2017 Jonathan Harris',
+                 'copyright': u'© 2015-2018 Jonathan Harris',
                  'name': APPNAME,
                  'company_name': 'Marginal',
              } ],
@@ -213,7 +214,7 @@ appcast.write('''
 '''.format(float(SHORTVERSION)/100,
            SHORTVERSION,
            PKG,
-           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'osx',
+           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos',
            VERSION,
            os.stat(PKG).st_size,
            sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' or 'h2 { font-size: 105%; }'))

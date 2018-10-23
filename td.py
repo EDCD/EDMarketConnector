@@ -26,7 +26,7 @@ def export(data):
 
     filename = join(config.get('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
 
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(querytime))
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
     # Format described here: https://bitbucket.org/kfsone/tradedangerous/wiki/Price%20Data
     h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required

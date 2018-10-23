@@ -91,7 +91,7 @@ id,symbol,category,name
 128666760,USSCargoPrototypeTech,Salvage,Prototype Tech
 128666761,USSCargoTechnicalBlueprints,Salvage,Technical Blueprints
 128667728,ImperialSlaves,Slavery,Imperial Slaves
-128668547,UnknownArtifact,Salvage,Unknown Artefact
+128668547,UnknownArtifact,Salvage,Thargoid Sensor
 128668548,AiRelics,Salvage,AI Relics
 128668549,Hafnium178,Metals,Hafnium 178
 128668550,Painite,Minerals,Painite
@@ -111,13 +111,13 @@ id,symbol,category,name
 128672131,DiplomaticBag,Salvage,Diplomatic Bag
 128672132,ScientificResearch,Salvage,Scientific Research
 128672133,ScientificSamples,Salvage,Scientific Samples
-128672134,PoliticalPrisoner,Salvage,Political Prisoner
-128672135,Hostage,Salvage,Hostage
+128672134,PoliticalPrisoner,Salvage,Political Prisoners
+128672135,Hostage,Salvage,Hostages
 128672136,LargeExplorationDataCash,Salvage,Large Survey Data Cache
 128672137,SmallExplorationDataCash,Salvage,Small Survey Data Cache
-128672159,AntiqueJewellery,Salvage,Antique Jewellery 
+128672159,AntiqueJewellery,Salvage,Antique Jewellery
 128672160,PreciousGems,Salvage,Precious Gems
-128672161,EarthRelics,Salvage,Earth Relics 
+128672161,EarthRelics,Salvage,Earth Relics
 128672162,GeneBank,Salvage,Gene Bank
 128672163,TimeCapsule,Salvage,Time Capsule
 128672294,Cryolite,Minerals,Cryolite
@@ -177,14 +177,13 @@ id,symbol,category,name
 128673873,MicroControllers,Technology,Micro Controllers
 128673874,IonDistributor,Machinery,Ion Distributor
 128673875,DiagnosticSensor,Technology,Hardware Diagnostic Sensor
-128673876,UnknownArtifact2,Salvage,Unknown Probe
+128673876,UnknownArtifact2,Salvage,Thargoid Probe
 128682044,ConductiveFabrics,Textiles,Conductive Fabrics
 128682045,MilitaryGradeFabrics,Textiles,Military Grade Fabrics
 128682046,AdvancedMedicines,Medicines,Advanced Medicines
 128682047,MedicalDiagnosticEquipment,Technology,Medical Diagnostic Equipment
 128682048,SurvivalEquipment,Consumer Items,Survival Equipment
 128682049,DataCore,Salvage,Data Core
-128682050,GalacticTravelGuide,Salvage,Galactic Travel Guide
 128682051,MysteriousIdol,Salvage,Mysterious Idol
 128682052,ProhibitedResearchMaterials,Salvage,Prohibited Research Materials
 128682053,AntimatterContainmentUnit,Salvage,Antimatter Containment Unit
@@ -200,4 +199,10 @@ id,symbol,category,name
 128737288,UnknownBiologicalMatter,Salvage,Thargoid Biological Matter
 128737289,UnknownTechnologySamples,Salvage,Thargoid Technology Samples
 128740752,UnknownArtifact3,Salvage,Thargoid Link
-128793114,PlatinumAloy,Metals,Platinum Aloy
+128793127,ThargoidHeart,Salvage,Thargoid Heart
+128793128,ThargoidTissueSampleType1,Salvage,Thargoid Cyclops Tissue Sample
+128793129,ThargoidTissueSampleType2,Salvage,Thargoid Basilisk Tissue Sample
+128793130,ThargoidTissueSampleType3,Salvage,Thargoid Medusa Tissue Sample
+128824468,ThargoidScoutTissueSample,Salvage,Thargoid Scout Tissue Sample
+128888499,AncientKey,Salvage,Ancient Key
+128902652,ThargoidTissueSampleType4,Salvage,Thargoid Hydra Tissue Sample

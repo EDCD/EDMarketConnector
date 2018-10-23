@@ -13,7 +13,7 @@ from time import time, sleep
 from xml.etree import ElementTree
 
 import l10n
-l10n.Translations().install_dummy()
+l10n.Translations.install_dummy()
 
 import collate
 import companion
@@ -54,8 +54,8 @@ try:
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
-    if sys.platform=='win32' and getattr(sys, 'frozen', False):
-        os.environ['REQUESTS_CA_BUNDLE'] = join(dirname(sys.executable), 'cacert.pem')
+    if getattr(sys, 'frozen', False):
+        os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
     if args.version:
         latest = ''
@@ -100,7 +100,6 @@ try:
             sys.exit(EXIT_SYS_ERR)
 
         # Get data from Companion API
-        session = companion.Session()
         if args.p:
             cmdrs = config.get('cmdrs') or []
             if args.p in cmdrs:
@@ -112,17 +111,17 @@ try:
                 else:
                     raise companion.CredentialsError
             username = config.get('fdev_usernames')[idx]
-            session.login(username, config.get_password(username), monitor.is_beta)
+            companion.session.login(username, config.get_password(username), monitor.is_beta)
         elif config.get('cmdrs'):
             cmdrs = config.get('cmdrs') or []
             if monitor.cmdr not in cmdrs:
                 raise companion.CredentialsError
             username = config.get('fdev_usernames')[cmdrs.index(monitor.cmdr)]
-            session.login(username, config.get_password(username), monitor.is_beta)
+            companion.session.login(username, config.get_password(username), monitor.is_beta)
         else:	# <= 2.25 not yet migrated
-            session.login(config.get('username'), config.get('password'), monitor.is_beta)
+            companion.session.login(config.get('username'), config.get('password'), monitor.is_beta)
         querytime = int(time())
-        data = session.station()
+        data = companion.session.station()
         config.set('querytime', querytime)
 
     # Validation
@@ -204,14 +203,14 @@ try:
     if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and data['lastStarport']['services'].get('shipyard'):
         # Retry for shipyard
         sleep(SERVER_RETRY)
-        data2 = session.station()
+        data2 = companion.session.station()
         if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
             data2.get('lastSystem',   {}).get('name') == monitor.system and
             data2.get('lastStarport', {}).get('name') == monitor.station):
             data = data2
 
     if args.s:
-        if data['lastStarport'].get('ships'):
+        if data['lastStarport'].get('ships', {}).get('shipyard_list'):
             shipyard.export(data, args.s)
         elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
             sys.stderr.write("Failed to get shipyard data\n")

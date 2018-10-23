@@ -52,12 +52,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Check for Updates...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -121,9 +115,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D journal file location";
 
@@ -157,17 +148,23 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Error: Can't connect to EDSM";
 
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Error: Can't connect to Inara";
+
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
 
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Error: Frontier server is down";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Error: Frontier server is lagging";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Error: Inara {MSG}";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Error: Invalid Credentials";
@@ -234,6 +231,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Identity" = "Identity";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara credentials";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
@@ -373,8 +373,8 @@
 /* [prefs.py] */
 "Preferences" = "Preferences";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Preferred Shipyard";
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Preferred websites";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
@@ -431,7 +431,10 @@
 "Semi Professional" = "Semi Professional";
 
 /* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Send flight log to Elite Dangerous Star Map";
+"Send flight log and Cmdr status to EDSM" = "Send flight log and Cmdr status to EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Send flight log and Cmdr status to Inara";
 
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
@@ -457,10 +460,13 @@
 /* Status dialog title. [stats.py] */
 "Ships" = "Ships";
 
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Shipyard";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Station";
 
 /* [EDMarketConnector.py] */
@@ -475,14 +481,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "System";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "This app requires accurate timestamps.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name";

@@ -142,6 +142,7 @@ class _Theme:
             elif 'background' in widget.keys():
                 # e.g. Frame
                 widget.configure(background = self.current['background'])
+                widget.configure(highlightbackground = self.current['disabledforeground'])
 
         for pair, gridopts in self.widgets_pair:
             for widget in pair:

@@ -144,6 +144,12 @@ class OptionMenu(platform == 'darwin' and tk.OptionMenu or ttk.OptionMenu):
             # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
             ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
             self['menu'].configure(background = PAGEBG)
+            # Workaround for https://bugs.python.org/issue25684
+            for i in range(0, self['menu'].index('end')+1):
+                self['menu'].entryconfig(i, variable=variable)
         else:
             ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
             self['menu'].configure(background = ttk.Style().lookup('TMenu', 'background'))
+            # Workaround for https://bugs.python.org/issue25684
+            for i in range(0, self['menu'].index('end')+1):
+                self['menu'].entryconfig(i, variable=variable)

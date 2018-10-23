@@ -1,3 +1,6 @@
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Верфи";
+
 /* Language name */
 "!Language" = "Русский";
 
@@ -51,12 +54,6 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Поиск обновлений...";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Уточните настройки даты и времени системы.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Уточните настройки часового пояса.";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Главный старшина";
@@ -121,9 +118,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "Расположение лога отношений с игроками.";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Расположение файла журнала E:D";
 
@@ -163,11 +157,11 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Ошибка: Сервер Фронтир выключен";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Ошибка: Сервер Фронтир лаг'ает";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
+"Error: Frontier server SKU problem" = "Ошибка сервера аутентификации Frontier";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Ошибка: неверное имя пользователя или пароль";
@@ -302,7 +296,7 @@
 "Normal text" = "Обычный текст";
 
 /* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
+"Not available while E:D is at the main menu" = "Недоступно в главном меню E:D";
 
 /* Combat rank. [stats.py] */
 "Novice" = "Новичок";
@@ -373,9 +367,6 @@
 /* [prefs.py] */
 "Preferences" = "Настройки";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Предпочтительные верфи";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Принц";
 
@@ -430,9 +421,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Полупрофессионал";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Отправлять журнал полета на Elite Dangerous Star Map";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Отправлять информацию о станциях на Elite Dangerous Data Network";
 
@@ -460,7 +448,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Оруженосец";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Станция";
 
 /* [EDMarketConnector.py] */
@@ -475,14 +463,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Изыскатель";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Приложению необходимо точное время.";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Подсказка: Отключить расширение можно{CR}добавив '{EXT}' к имени папки";

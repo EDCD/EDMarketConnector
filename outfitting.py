@@ -21,13 +21,19 @@ weapon_map = {
     'advancedtorppylon'              : 'Torpedo Pylon',
     'atdumbfiremissile'              : 'AX Missile Rack',
     'atmulticannon'                  : 'AX Multi-Cannon',
-    'basicmissilerack'               : 'Missile Rack',
+    'basicmissilerack'               : 'Seeker Missile Rack',
     'beamlaser'                      : 'Beam Laser',
     ('beamlaser','heat')             : 'Retributor Beam Laser',
     'cannon'                         : 'Cannon',
+    'causticmissile'                 : 'Enzyme Missile Rack',
     'drunkmissilerack'               : 'Pack-Hound Missile Rack',
     'dumbfiremissilerack'            : 'Missile Rack',
     ('dumbfiremissilerack', 'lasso') : 'Rocket Propelled FSD Disruptor',
+    'flakmortar'                     : 'Remote Release Flak Launcher',
+    'flechettelauncher'              : 'Remote Release Flechette Launcher',
+    'guardian_gausscannon'           : 'Guardian Gauss Cannon',
+    'guardian_plasmalauncher'        : 'Guardian Plasma Charger',
+    'guardian_shardcannon'           : 'Guardian Shard Cannon',
     'minelauncher'                   : 'Mine Launcher',
     ('minelauncher','impulse')       : 'Shock Mine Launcher',
     'mininglaser'                    : 'Mining Laser',
@@ -36,6 +42,7 @@ weapon_map = {
     ('multicannon','strong')         : 'Enforcer Cannon',
     'plasmaaccelerator'              : 'Plasma Accelerator',
     ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
+    'plasmashockcannon'              : 'Shock Cannon',
     'pulselaser'                     : 'Pulse Laser',
     ('pulselaser','disruptor')       : 'Pulse Disruptor Laser',
     'pulselaserburst'                : 'Burst Laser',
@@ -48,7 +55,9 @@ weapon_map = {
 
 missiletype_map = {
     'advancedtorppylon'   : 'Seeker',
+    'atdumbfiremissile'   : 'Dumbfire',
     'basicmissilerack'    : 'Seeker',
+    'causticmissile'      : 'Dumbfire',
     'drunkmissilerack'    : 'Swarm',
     'dumbfiremissilerack' : 'Dumbfire',
 }
@@ -72,12 +81,18 @@ weaponclass_map = {
 weaponrating_map = {
     'hpt_advancedtorppylon_fixed_small' : 'I',
     'hpt_advancedtorppylon_fixed_medium': 'I',
+    'hpt_advancedtorppylon_fixed_large' : 'I',
     'hpt_atdumbfiremissile_fixed_medium': 'B',
+    'hpt_atdumbfiremissile_fixed_large' : 'A',
     'hpt_atdumbfiremissile_turret_medium': 'B',
+    'hpt_atdumbfiremissile_turret_large' : 'A',
     'hpt_atmulticannon_fixed_medium'    : 'E',
+    'hpt_atmulticannon_fixed_large'     : 'C',
     'hpt_atmulticannon_turret_medium'   : 'F',
+    'hpt_atmulticannon_turret_large'    : 'E',
     'hpt_basicmissilerack_fixed_small'  : 'B',
     'hpt_basicmissilerack_fixed_medium' : 'B',
+    'hpt_basicmissilerack_fixed_large'  : 'A',
     'hpt_beamlaser_fixed_small'         : 'E',
     'hpt_beamlaser_fixed_medium'        : 'D',
     'hpt_beamlaser_fixed_large': 'C',
@@ -100,9 +115,29 @@ weaponrating_map = {
     'hpt_cannon_turret_small': 'F',
     'hpt_cannon_turret_medium': 'E',
     'hpt_cannon_turret_large': 'D',
+    'hpt_causticmissile_fixed_medium': 'B',
     'hpt_drunkmissilerack_fixed_medium': 'B',
     'hpt_dumbfiremissilerack_fixed_small': 'B',
     'hpt_dumbfiremissilerack_fixed_medium': 'B',
+    'hpt_dumbfiremissilerack_fixed_large': 'A',
+    'hpt_flakmortar_fixed_medium': 'B',
+    'hpt_flakmortar_turret_medium': 'B',
+    'hpt_flechettelauncher_fixed_medium': 'B',
+    'hpt_flechettelauncher_turret_medium': 'B',
+    'hpt_guardian_gausscannon_fixed_small': 'D',
+    'hpt_guardian_gausscannon_fixed_medium': 'B',
+    'hpt_guardian_plasmalauncher_fixed_small': 'D',
+    'hpt_guardian_plasmalauncher_fixed_medium': 'B',
+    'hpt_guardian_plasmalauncher_fixed_large': 'C',
+    'hpt_guardian_plasmalauncher_turret_small': 'F',
+    'hpt_guardian_plasmalauncher_turret_medium': 'E',
+    'hpt_guardian_plasmalauncher_turret_large': 'D',
+    'hpt_guardian_shardcannon_fixed_small': 'D',
+    'hpt_guardian_shardcannon_fixed_medium': 'A',
+    'hpt_guardian_shardcannon_fixed_large': 'C',
+    'hpt_guardian_shardcannon_turret_small': 'F',
+    'hpt_guardian_shardcannon_turret_medium': 'D',
+    'hpt_guardian_shardcannon_turret_large': 'D',
     'hpt_minelauncher_fixed_small': 'I',
     'hpt_minelauncher_fixed_medium': 'I',
     'hpt_mininglaser_fixed_small': 'D',
@@ -119,9 +154,19 @@ weaponrating_map = {
     'hpt_multicannon_gimbal_huge': 'A',
     'hpt_multicannon_turret_small': 'G',
     'hpt_multicannon_turret_medium': 'F',
+    'hpt_multicannon_turret_large': 'E',
     'hpt_plasmaaccelerator_fixed_medium': 'C',
     'hpt_plasmaaccelerator_fixed_large': 'B',
     'hpt_plasmaaccelerator_fixed_huge': 'A',
+    'hpt_plasmashockcannon_fixed_small': 'D',
+    'hpt_plasmashockcannon_fixed_medium': 'D',
+    'hpt_plasmashockcannon_fixed_large': 'C',
+    'hpt_plasmashockcannon_gimbal_small': 'E',
+    'hpt_plasmashockcannon_gimbal_medium': 'D',
+    'hpt_plasmashockcannon_gimbal_large': 'C',
+    'hpt_plasmashockcannon_turret_small': 'F',
+    'hpt_plasmashockcannon_turret_medium': 'E',
+    'hpt_plasmashockcannon_turret_large': 'D',
     'hpt_pulselaser_fixed_small': 'F',
     'hpt_pulselaser_fixed_smallfree': 'F',
     'hpt_pulselaser_fixed_medium': 'E',
@@ -168,6 +213,7 @@ weaponoldvariant_map = {
 }
 
 countermeasure_map = {
+    'antiunknownshutdown'      : ('Shutdown Field Neutraliser', 'F'),
     'chafflauncher'            : ('Chaff Launcher', 'I'),
     'electroniccountermeasure' : ('Electronic Countermeasure', 'F'),
     'heatsinklauncher'         : ('Heat Sink Launcher', 'I'),
@@ -224,46 +270,54 @@ misc_internal_map = {
 }
 
 standard_map = {
-    # 'armour'         : handled separately
-    'engine'           : 'Thrusters',
-    ('engine','fast')  : 'Enhanced Performance Thrusters',
-    'fueltank'         : 'Fuel Tank',
-    'hyperdrive'       : 'Frame Shift Drive',
-    'lifesupport'      : 'Life Support',
-    # 'planetapproachsuite' : handled separately
-    'powerdistributor' : 'Power Distributor',
-    'powerplant'       : 'Power Plant',
-    ('powerplant', 'highheatweight') : 'Enhanced Power Plant',	# Not seen
-    'sensors'          : 'Sensors',
+    # 'armour'                   : handled separately
+    'engine'                     : 'Thrusters',
+    ('engine','fast')            : 'Enhanced Performance Thrusters',
+    'fueltank'                   : 'Fuel Tank',
+    'guardianpowerdistributor'   : 'Guardian Hybrid Power Distributor',
+    'guardianpowerplant'         : 'Guardian Hybrid Power Plant',
+    'hyperdrive'                 : 'Frame Shift Drive',
+    'lifesupport'                : 'Life Support',
+    # 'planetapproachsuite'      : handled separately
+    'powerdistributor'           : 'Power Distributor',
+    'powerplant'                 : 'Power Plant',
+    'sensors'                    : 'Sensors',
 }
 
 internal_map = {
-    'buggybay'          : 'Planetary Vehicle Hangar',
-    'cargorack'         : 'Cargo Rack',
-    'collection'        : 'Collector Limpet Controller',
-    'corrosionproofcargorack' : 'Corrosion Resistant Cargo Rack',
-    'fighterbay'        : 'Fighter Hangar',
-    'fsdinterdictor'    : 'Frame Shift Drive Interdictor',
-    'fuelscoop'         : 'Fuel Scoop',
-    'fueltransfer'      : 'Fuel Transfer Limpet Controller',
-    'hullreinforcement' : 'Hull Reinforcement Package',
-    'modulereinforcement' : 'Module Reinforcement Package',
-    'passengercabin'    : 'Passenger Cabin',
-    'prospector'        : 'Prospector Limpet Controller',
-    'refinery'          : 'Refinery',
-    'repair'            : 'Repair Limpet Controller',
-    'repairer'          : 'Auto Field-Maintenance Unit',
-    'resourcesiphon'    : 'Hatch Breaker Limpet Controller',
-    'shieldcellbank'    : 'Shield Cell Bank',
-    'shieldgenerator'   : 'Shield Generator',
+    'buggybay'                   : 'Planetary Vehicle Hangar',
+    'cargorack'                  : 'Cargo Rack',
+    'collection'                 : 'Collector Limpet Controller',
+    'corrosionproofcargorack'    : 'Corrosion Resistant Cargo Rack',
+    'decontamination'            : 'Decontamination Limpet Controller',
+    'fighterbay'                 : 'Fighter Hangar',
+    'fsdinterdictor'             : 'Frame Shift Drive Interdictor',
+    'fuelscoop'                  : 'Fuel Scoop',
+    'fueltransfer'               : 'Fuel Transfer Limpet Controller',
+    'guardianfsdbooster'         : 'Guardian FSD Booster',
+    'guardianhullreinforcement'  : 'Guardian Hull Reinforcement',
+    'guardianmodulereinforcement': 'Guardian Module Reinforcement',
+    'guardianshieldreinforcement': 'Guardian Shield Reinforcement',
+    'hullreinforcement'          : 'Hull Reinforcement Package',
+    'metaalloyhullreinforcement' : 'Meta Alloy Hull Reinforcement',
+    'modulereinforcement'        : 'Module Reinforcement Package',
+    'passengercabin'             : 'Passenger Cabin',
+    'prospector'                 : 'Prospector Limpet Controller',
+    'refinery'                   : 'Refinery',
+    'recon'                      : 'Recon Limpet Controller',
+    'repair'                     : 'Repair Limpet Controller',
+    'repairer'                   : 'Auto Field-Maintenance Unit',
+    'resourcesiphon'             : 'Hatch Breaker Limpet Controller',
+    'shieldcellbank'             : 'Shield Cell Bank',
+    'shieldgenerator'            : 'Shield Generator',
     ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
     ('shieldgenerator','strong') : 'Prismatic Shield Generator',
-    'unkvesselresearch' : 'Research Limpet Controller',
+    'unkvesselresearch'          : 'Research Limpet Controller',
 }
 
 
 # Module mass, FSD data etc
-moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
+moduledata = OrderedDict()
 
 
 # Given a module description from the Companion API returns a description of the module in the form of a
@@ -275,11 +329,20 @@ moduledata = cPickle.load(open(join(config.respath, 'modules.p'),  'rb'))
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
 def lookup(module, ship_map, entitled=False):
 
+    # Lazily populate
+    if not moduledata:
+        moduledata.update(cPickle.load(open(join(config.respath, 'modules.p'),  'rb')))
+
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
 
     name = module['name'].lower().split('_')
     new = { 'id': module['id'], 'symbol': module['name'] }
+
+    # Hack 'Guardian used as a prefix'
+    if name[1] == 'guardian':
+        name.pop(1)
+        name[1] = 'guardian_%s' % name[1]
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
@@ -290,16 +353,11 @@ def lookup(module, ship_map, entitled=False):
         new['class'] = '1'
         new['rating'] = 'I'
 
-    # Skip uninteresting stuff
+    # Skip uninteresting stuff - no longer present in ED 3.1 cAPI data
     elif name[0] in ['bobble', 'decal', 'nameplate', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
         return None
 
-    # Skip PP-specific modules in outfitting which have an sku like ELITE_SPECIFIC_V_POWER_100100
-    # Arghh - Bi-Weave Shield generators are incorrectly listed as 'powerplay' !
-    # elif 'category' in module and module['category'].lower() == 'powerplay':
-    #     return None
-
-    # Shouldn't be listing player-specific paid stuff in outfitting, other than Horizons
+    # Shouldn't be listing player-specific paid stuff or broker/powerplay-specific modules in outfitting, other than Horizons
     elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
         return None
 
@@ -316,9 +374,13 @@ def lookup(module, ship_map, entitled=False):
             if name[4] in weaponoldvariant_map:		# Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
                 new['name'] =  weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
                 new['rating'] = '?'
+            elif '_'.join(name[:4]) not in weaponrating_map:
+                raise AssertionError('%s: Unknown weapon rating "%s"' % (module['id'], module['name']))
             else:			# PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
                 new['name'] =  weapon_map[(name[1],name[4])]
                 new['rating'] = weaponrating_map['_'.join(name[:4])]	# assumes same rating as base weapon
+        elif module['name'].lower() not in weaponrating_map:
+            raise AssertionError('%s: Unknown weapon rating "%s"' % (module['id'], module['name']))
         else:
             new['name'] =  weapon_map[name[1]]
             new['rating'] = weaponrating_map[module['name'].lower()]	# no obvious rule - needs lookup table
@@ -382,6 +444,10 @@ def lookup(module, ship_map, entitled=False):
 
         if len(name) < 4 and name[1] == 'unkvesselresearch':	# Hack! No size or class.
             (new['class'], new['rating']) = ('1', 'E')
+        elif len(name) < 4 and name[1] in ['guardianpowerdistributor', 'guardianpowerplant']:	# Hack! No class.
+            (new['class'], new['rating']) = (str(name[2][4:]), 'A')
+        elif len(name) < 4 and name[1] in ['guardianfsdbooster']:	# Hack! No class.
+            (new['class'], new['rating']) = (str(name[2][4:]), 'H')
         else:
             if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
             new['class'] = str(name[2][4:])
@@ -397,23 +463,23 @@ def lookup(module, ship_map, entitled=False):
     # Entitlements
     if not module.get('sku'):
         pass
-    elif module['sku'].startswith('ELITE_SPECIFIC_V_POWER'):
-        new['entitlement'] = 'powerplay'
     else:
-        assert module['sku'] == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS', '%s: Unknown sku "%s"' % (module['id'], module['sku'])
-        new['entitlement'] = 'horizons'
+        new['entitlement'] = module['sku']
 
     # Extra module data
-    key = (new['name'], 'ship' in new and companion.ship_map.get(name[0]) or None, new['class'], new['rating'])
+    if module['name'].endswith('_free'):
+        key = module['name'][:-5].lower()	# starter modules - treated like vanilla modules
+    else:
+        key = module['name'].lower()
     if __debug__:
         m = moduledata.get(key, {})
         if not m:
-            print 'No data for module %s' % str(key)
+            print 'No data for module %s' % key
         elif new['name'] == 'Frame Shift Drive':
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
         else:
             assert 'mass' in m, m
-    new.update(moduledata.get(key, {}))
+    new.update(moduledata.get(module['name'].lower(), {}))
 
     # check we've filled out mandatory fields
     for thing in ['id', 'symbol', 'category', 'name', 'class', 'rating']:	# Don't consider mass etc as mandatory
@@ -431,8 +497,7 @@ def export(data, filename):
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')
 
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
-    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,Date\n'
+    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
     rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
 
     h = open(filename, 'wt')
@@ -441,7 +506,7 @@ def export(data, filename):
         try:
             m = lookup(v, companion.ship_map)
             if m:
-                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], timestamp))
+                h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], data['timestamp']))
         except AssertionError as e:
             if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
         except:

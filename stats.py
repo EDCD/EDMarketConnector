@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import csv
 from sys import platform
 from functools import partial
 import time
@@ -11,6 +12,7 @@ import myNotebook as nb
 
 import companion
 from companion import ship_map
+from l10n import Locale
 from monitor import monitor
 import prefs
 
@@ -141,13 +143,13 @@ def status(data):
 
 
 def export_status(data, filename):
-    h = open(filename, 'wt')
-    h.write('Category,Value\n')
+    h = csv.writer(open(filename, 'wb'))
+    h.writerow(['Category', 'Value'])
     for thing in status(data):
-        h.write(','.join(thing) + '\n')
-    h.close()
+        h.writerow([x.encode('utf-8') for x in thing])
 
 
+# Returns id,name,shipName,system,station,value
 def ships(data):
 
     ships = companion.listify(data.get('ships'))
@@ -158,23 +160,22 @@ def ships(data):
 
         if not data['commander'].get('docked'):
             # Set current system, not last docked
-            return [ (ship_map.get(ships[0]['name'].lower(), ships[0]['name']), data['lastSystem']['name'], '') ] + [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship]
+            return ([ (str(ships[0]['id']), ship_map.get(ships[0]['name'].lower(), ships[0]['name']), ships[0].get('shipName', ''), data['lastSystem']['name'], '', str(ships[0]['value']['total'])) ] +
+                    [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship])
 
-    return [ (ship_map.get(ship['name'].lower(), ship['name']), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
+    return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
 
 def export_ships(data, filename):
-    h = open(filename, 'wt')
-    h.write('Ship,System,Station,Value\n')
+    h = csv.writer(open(filename, 'wb'))
+    h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
     for thing in ships(data):
-        h.write(','.join(thing) + '\n')
-    h.close()
+        h.writerow([x.encode('utf-8') for x in thing])
 
 
 class StatsDialog():
 
     def __init__(self, app):
         self.parent = app.w
-        self.session = app.session
         self.status = app.status
         self.verify = app.verify
         self.showstats()
@@ -187,7 +188,7 @@ class StatsDialog():
         self.parent.update_idletasks()
 
         try:
-            data = self.session.profile()
+            data = companion.session.profile()
         except companion.VerificationRequired:
             return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.showstats))
         except companion.ServerError as e:
@@ -241,7 +242,7 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook)
         for thing in stats[1:3]:
-            self.addpagerow(page, [thing[0], thing[1] + ' CR'])	# assumes things two and three are money
+            self.addpagerow(page, [thing[0], self.credits(int(thing[1]))])	# assumes things two and three are money
         for thing in stats[3:]:
             self.addpagerow(page, thing)
         ttk.Frame(page).grid(pady=5)			# bottom spacer
@@ -249,13 +250,14 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook, [
             _('Ship'),		# Status dialog subtitle
+            '',
             _('System'),	# Main window
             _('Station'),	# Status dialog subtitle
             _('Value'),		# Status dialog subtitle - CR value of ship
         ])
         shiplist = ships(data)
         for thing in shiplist:
-            self.addpagerow(page, thing)
+            self.addpagerow(page, list(thing[1:-1]) + [self.credits(int(thing[-1]))])	# skip id, last item is money
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 
@@ -304,3 +306,7 @@ class StatsResults(tk.Toplevel):
                 label.grid(row=row, column=i, padx=10, sticky=tk.E)
             else:
                 label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
+
+    def credits(self, value):
+        return Locale.stringFromNumber(value, 0) + ' Cr'
+

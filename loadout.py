@@ -1,3 +1,5 @@
+# Export ship loadout in Companion API json format
+
 import json
 import os
 from os.path import join
@@ -8,7 +10,6 @@ from config import config
 import companion
 
 
-# Export ship loadout in Companion API json format
 def export(data, filename=None):
 
     string = json.dumps(companion.ship(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8')	# pretty print
@@ -19,7 +20,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
-    ship = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])	# Use in-game name
+    ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:

@@ -52,12 +52,6 @@
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Pārbaudīt atjauninājumus...";
 
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Check your system's Date and Time settings.";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Check your system's Time Zone setting.";
-
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Chief Petty Officer";
 
@@ -112,17 +106,11 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
 "Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
 
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Disabled Plugins";
-
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentācija";
 
 /* Empire rank. [stats.py] */
 "Duke" = "Duke";
-
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "E:D interaction log location";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D žurnāla faila atrašanās vieta";
@@ -142,9 +130,6 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Enabled Plugins";
-
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
@@ -163,20 +148,14 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Kļūda: Frontier serveris nav aktīvs";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Kļūda: Frontier serveris aizkavējas";
-
-/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Kļūda: Nederīga lietotāja informācija";
 
 /* [companion.py] */
 "Error: Verification failed" = "Kļūda: Apstiprināšana nav izdevusies";
-
-/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Error: Wrong Cmdr";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Iziet";
@@ -193,9 +172,6 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Iegūst datus...";
 
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
-
 /* Menu title. [EDMarketConnector.py] */
 "File" = "Fails";
 
@@ -205,14 +181,8 @@
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiators";
 
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
-
 /* Combat rank. [stats.py] */
 "Harmless" = "Nekaitīgs";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Palīdzība";
@@ -301,9 +271,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normālais teksts";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Not available while E:D is at the main menu";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -355,12 +322,6 @@
 /* Use same text as E:D Launcher's login dialog. [prefs.py] */
 "Please log in with your Elite: Dangerous account details" = "Lūdzu autorizējaties ar Jūsu Elite: Dangerous profila informāciju";
 
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "Plugins";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Plugins folder";
-
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
 
@@ -372,9 +333,6 @@
 
 /* [prefs.py] */
 "Preferences" = "Iestatījumi";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Preferred Shipyard";
 
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
@@ -430,9 +388,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Sūtīt lidojumu ierakstus uz Elite Dangerous zvaigžņu karti";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
 
@@ -460,7 +415,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Stacija";
 
 /* [EDMarketConnector.py] */
@@ -475,17 +430,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Sistēma";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Dizains";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "This app requires accurate timestamps.";
-
-/* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name";
 
 /* Ranking. [stats.py] */
 "Trade" = "Trade";

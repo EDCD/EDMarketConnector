@@ -14,6 +14,46 @@ import myNotebook as nb
 from config import config
 
 
+# Dashboard Flags constants
+FlagsDocked = 1<<0		# on a landing pad
+FlagsLanded = 1<<1		# on planet surface
+FlagsLandingGearDown = 1<<2
+FlagsShieldsUp = 1<<3
+FlagsSupercruise = 1<<4
+FlagsFlightAssistOff = 1<<5
+FlagsHardpointsDeployed = 1<<6
+FlagsInWing = 1<<7
+FlagsLightsOn = 1<<8
+FlagsCargoScoopDeployed = 1<<9
+FlagsSilentRunning = 1<<10
+FlagsScoopingFuel = 1<<11
+FlagsSrvHandbrake = 1<<12
+FlagsSrvTurret = 1<<13
+FlagsSrvUnderShip = 1<<14
+FlagsSrvDriveAssist = 1<<15
+FlagsFsdMassLocked = 1<<16
+FlagsFsdCharging = 1<<17
+FlagsFsdCooldown = 1<<18
+FlagsLowFuel = 1<<19		# <25%
+FlagsOverHeating = 1<<20	# > 100%
+FlagsHasLatLong = 1<<21
+FlagsIsInDanger = 1<<22
+FlagsBeingInterdicted = 1<<23
+FlagsInMainShip = 1<<24
+FlagsInFighter = 1<<25
+FlagsInSRV = 1<<26
+
+# Dashboard GuiFocus constants
+GuiFocusNoFocus = 0
+GuiFocusInternalPanel = 1	# right hand side
+GuiFocusExternalPanel = 2	# left hand side
+GuiFocusCommsPanel = 3		# top
+GuiFocusRolePanel = 4		# bottom
+GuiFocusStationServices = 5
+GuiFocusGalaxyMap = 6
+GuiFocusSystemMap = 7
+
+
 # List of loaded Plugins
 PLUGINS = []
 
@@ -39,11 +79,14 @@ class Plugin(object):
         self.module = None	# None for disabled plugins.
 
         if loadfile:
-            sys.stdout.write(('loading plugin %s from "%s"\n' % (name, loadfile)).encode('utf-8'))
+            sys.stdout.write(('loading plugin %s from "%s"\n' % (name.replace('.', '_'), loadfile)).encode('utf-8'))
             with open(loadfile, 'rb') as plugfile:
-                module = imp.load_module('plugin_%s' % name.encode('ascii', 'replace'), plugfile, loadfile.encode(sys.getfilesystemencoding()),
+                module = imp.load_module('plugin_%s' % name.encode('ascii', 'replace').replace('.', '_'), plugfile, loadfile.encode(sys.getfilesystemencoding()),
                                          ('.py', 'r', imp.PY_SOURCE))
-                newname = module.plugin_start()
+                if module.plugin_start.func_code.co_argcount == 0:
+                    newname = module.plugin_start()
+                else:
+                    newname = module.plugin_start(os.path.dirname(loadfile))
                 self.name = newname and unicode(newname) or name
                 self.module = module
         else:
@@ -51,9 +94,9 @@ class Plugin(object):
 
     def _get_func(self, funcname):
         """
-        Get a function from a plugin, else return None if it isn't implemented.
+        Get a function from a plugin
         :param funcname:
-        :return:
+        :returns: The function, or None if it isn't implemented.
         """
         return getattr(self.module, funcname, None)
 
@@ -61,13 +104,15 @@ class Plugin(object):
         """
         If the plugin provides mainwindow content create and return it.
         :param parent: the parent frame for this entry.
-        :return:
+        :returns: None, a tk Widget, or a pair of tk.Widgets
         """
         plugin_app = self._get_func('plugin_app')
         if plugin_app:
             try:
                 appitem = plugin_app(parent)
-                if isinstance(appitem, tuple):
+                if appitem is None:
+                    return None
+                elif isinstance(appitem, tuple):
                     if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
                         raise AssertionError
                 elif not isinstance(appitem, tk.Widget):
@@ -84,7 +129,7 @@ class Plugin(object):
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
         :param is_beta: whether the player is in a Beta universe.
-        :return:
+        :returns: a myNotebook Frame
         """
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
@@ -104,7 +149,6 @@ class Plugin(object):
 def load_plugins(master):
     """
     Find and load all plugins
-    :return:
     """
     last_error['root'] = master
 
@@ -121,16 +165,21 @@ def load_plugins(master):
                 print_exc()
     PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
 
+    # Add plugin folder to load path so packages can be loaded from plugin folder
+    sys.path.append(config.plugin_dir)
+
     found = []
-    for name in os.listdir(config.plugin_dir):
-        if name[0] in ['.', '_']:
+    # Load any plugins that are also packages first
+    for name in sorted(os.listdir(config.plugin_dir),
+                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir, n, '__init__.py')), n.lower())):
+        if not os.path.isdir(os.path.join(config.plugin_dir, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
             found.append(Plugin(name, None))
         else:
             try:
-                # Add plugin's folder to Python's load path in case plugin has dependencies.
+                # Add plugin's folder to load path in case plugin has internal package dependencies
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
             except:
@@ -139,12 +188,39 @@ def load_plugins(master):
 
     imp.release_lock()
 
+def provides(fn_name):
+    """
+    Find plugins that provide a function
+    :param fn_name:
+    :returns: list of names of plugins that provide this function
+    .. versionadded:: 3.0.2
+    """
+    return [p.name for p in PLUGINS if p._get_func(fn_name)]
+
+def invoke(plugin_name, fallback, fn_name, *args):
+    """
+    Invoke a function on a named plugin
+    :param plugin_name: preferred plugin on which to invoke the function
+    :param fallback: fallback plugin on which to invoke the function, or None
+    :param fn_name:
+    :param *args: arguments passed to the function
+    :returns: return value from the function, or None if the function was not found
+    .. versionadded:: 3.0.2
+    """
+    for plugin in PLUGINS:
+        if plugin.name == plugin_name and plugin._get_func(fn_name):
+            return plugin._get_func(fn_name)(*args)
+    for plugin in PLUGINS:
+        if plugin.name == fallback:
+            assert plugin._get_func(fn_name), plugin.name	# fallback plugin should provide the function
+            return plugin._get_func(fn_name)(*args)
+
 
 def notify_stop():
     """
     Notify each plugin that the program is closing.
     If your plugin uses threads then stop and join() them before returning.
-    versionadded:: 2.3.7
+    .. versionadded:: 2.3.7
     """
     error = None
     for plugin in PLUGINS:
@@ -164,7 +240,6 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
     Relevant if you want to have different settings for different user accounts.
     :param cmdr: current Cmdr name (or None).
     :param is_beta: whether the player is in a Beta universe.
-    :return:
     """
     for plugin in PLUGINS:
         prefs_cmdr_changed = plugin._get_func('prefs_cmdr_changed')
@@ -183,7 +258,6 @@ def notify_prefs_changed(cmdr, is_beta):
     values that you want to save.
     :param cmdr: current Cmdr name (or None).
     :param is_beta: whether the player is in a Beta universe.
-    :return:
     """
     for plugin in PLUGINS:
         prefs_changed = plugin._get_func('prefs_changed')
@@ -206,7 +280,7 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     :param entry: The journal entry as a dictionary
     :param state: A dictionary containing info about the Cmdr, current ship and cargo
     :param is_beta: whether the player is in a Beta universe.
-    :return: Error message from the first plugin that returns one (if any)
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
@@ -226,24 +300,21 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     return error
 
 
-def notify_interaction(cmdr, is_beta, entry):
+def notify_dashboard_entry(cmdr, is_beta, entry):
     """
-    Send an interaction entry to each plugin.
+    Send a status entry to each plugin.
     :param cmdr: The piloting Cmdr name
     :param is_beta: whether the player is in a Beta universe.
-    :param entry: The interaction entry as a dictionary
-    :return: Error message from the first plugin that returns one (if any)
+    :param entry: The status entry as a dictionary
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
-        interaction = plugin._get_func('interaction')
-        if interaction:
+        status = plugin._get_func('dashboard_entry')
+        if status:
             try:
-                # Pass a copy of the interaction entry in case the callee modifies it
-                if interaction.func_code.co_argcount == 2:
-                    newerror = interaction(cmdr, dict(entry))
-                else:
-                    newerror = interaction(cmdr, is_beta, dict(entry))
+                # Pass a copy of the status entry in case the callee modifies it
+                newerror = status(cmdr, is_beta, dict(entry))
                 error = error or newerror
             except:
                 print_exc()
@@ -255,8 +326,7 @@ def notify_system_changed(timestamp, system, coordinates):
     Send notification data to each plugin when we arrive at a new system.
     :param timestamp:
     :param system:
-    :return:
-    deprecated:: 2.2
+    .. deprecated:: 2.2
     Use :func:`journal_entry` with the 'FSDJump' event.
     """
     for plugin in PLUGINS:
@@ -276,7 +346,7 @@ def notify_newdata(data, is_beta):
     Send the latest EDMC data from the FD servers to each plugin
     :param data:
     :param is_beta: whether the player is in a Beta universe.
-    :return: Error message from the first plugin that returns one (if any)
+    :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
@@ -297,7 +367,7 @@ def show_error(err):
     """
     Display an error message in the status line of the main window.
     :param err:
-    versionadded:: 2.3.7
+    .. versionadded:: 2.3.7
     """
     if err and last_error['root']:
         last_error['msg'] = unicode(err)

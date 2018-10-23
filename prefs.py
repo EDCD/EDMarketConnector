@@ -147,7 +147,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td  = tk.IntVar(value = (output & config.OUT_MKT_TD  ) and 1)
         self.out_td_button = nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged)
         self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_ship= tk.IntVar(value = (output & (config.OUT_SHIP|config.OUT_SHIP_EDS|config.OUT_SHIP_CORIOLIS) and 1))
+        self.out_ship= tk.IntVar(value = (output & config.OUT_SHIP and 1))
         self.out_ship_button = nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged)	# Output setting
         self.out_ship_button.grid(columnspan=2, padx=BUTTONX, pady=(5,0), sticky=tk.W)
         self.out_auto = tk.IntVar(value = 0 if output & config.OUT_MKT_MANUAL else 1)	# inverted
@@ -199,10 +199,6 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
-        self.interactiondir = tk.StringVar()
-        self.interactiondir.set(config.get('interactiondir') or config.default_interaction_dir or '')
-        self.interactiondir_entry = nb.Entry(configframe, takefocus=False)
-
         if platform != 'darwin':
             # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
             nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
@@ -213,15 +209,6 @@ class PreferencesDialog(tk.Toplevel):
             self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
             if config.default_journal_dir:
                 nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
-
-            nb.Label(configframe, text = _('E:D interaction log location')+':').grid(columnspan=4, padx=PADX, pady=(PADY, 0), sticky=tk.W)	# Setting for the log file that contains recent interactions with other Cmdrs
-            self.interactiondir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
-            self.interactionbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
-                                                                  _('Browse...')),	# Folder selection button on Windows
-                                               command = lambda:self.filebrowse(_('E:D interaction log location'), self.interactiondir))
-            self.interactionbutton.grid(row=15, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
-            if config.default_interaction_dir:
-                nb.Button(configframe, text=_('Default'), command=self.interactiondir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=15, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
         if platform == 'win32':
             ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
@@ -246,22 +233,39 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(self.hotkey_code, self.hotkey_mods) or _('None'))	# No hotkey/shortcut currently defined
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
-                self.hotkey_text.grid(row=20, column=1, columnspan=2, padx=PADX, pady=(5,0), sticky=tk.W)
+                self.hotkey_text.grid(row=20, column=1, columnspan=2, pady=(5,0), sticky=tk.W)
                 self.hotkey_only_btn = nb.Checkbutton(configframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5,0), sticky=tk.W)
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(configframe, text=_('Preferred Shipyard')).grid(columnspan=4, padx=PADX, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.
-        self.shipyard = tk.IntVar(value = config.getint('shipyard'))
-        nb.Radiobutton(configframe, text='E:D Shipyard', variable=self.shipyard, value=config.SHIPYARD_EDSHIPYARD).grid(columnspan=3, padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        nb.Radiobutton(configframe, text='Coriolis',     variable=self.shipyard, value=config.SHIPYARD_CORIOLIS  ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
+        nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)	# Settings prompt for preferred ship loadout, system and station info websites
+
+        self.shipyard_provider = tk.StringVar(value = config.get('shipyard_provider') in plug.provides('shipyard_url') and config.get('shipyard_provider') or 'EDSY')
+        nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)	# Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
+        self.shipyard_button = nb.OptionMenu(configframe, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url'))
+        self.shipyard_button.configure(width = 15)
+        self.shipyard_button.grid(row=31, column=1, sticky=tk.W)
+
+        self.system_provider = tk.StringVar(value = config.get('system_provider') in plug.provides('system_url') and config.get('system_provider') or 'EDSM')
+        nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.system_button = nb.OptionMenu(configframe, self.system_provider, self.system_provider.get(), *plug.provides('system_url'))
+        self.system_button.configure(width = 15)
+        self.system_button.grid(row=32, column=1, sticky=tk.W)
+
+        self.station_provider = tk.StringVar(value = config.get('station_provider') in plug.provides('station_url') and config.get('station_provider') or 'eddb')
+        nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.station_button = nb.OptionMenu(configframe, self.station_provider, self.station_provider.get(), *plug.provides('station_url'))
+        self.station_button.configure(width = 15)
+        self.station_button.grid(row=33, column=1, sticky=tk.W)
+
         nb.Label(configframe).grid(sticky=tk.W)	# big spacer
 
         notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
 
-        self.languages = Translations().available_names()
+
+        self.languages = Translations.available_names()
         self.lang = tk.StringVar(value = self.languages.get(config.get('language'), _('Default')))	# Appearance theme and language setting
         self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
         self.theme = tk.IntVar(value = config.getint('theme'))
@@ -400,7 +404,6 @@ class PreferencesDialog(tk.Toplevel):
     def outvarchanged(self, event=None):
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
-        self.displaypath(self.interactiondir, self.interactiondir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
@@ -484,11 +487,6 @@ class PreferencesDialog(tk.Toplevel):
     def logdir_reset(self):
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
-        self.outvarchanged()
-
-    def interactiondir_reset(self):
-        if config.default_interaction_dir:
-            self.interactiondir.set(config.default_interaction_dir)
         self.outvarchanged()
 
     def themecolorbrowse(self, index):
@@ -581,22 +579,18 @@ class PreferencesDialog(tk.Toplevel):
         else:
             config.set('journaldir', logdir)
 
-        interactiondir = self.interactiondir.get()
-        if config.default_interaction_dir and interactiondir.lower() == config.default_interaction_dir.lower():
-            config.set('interactiondir', '')	# default location
-        else:
-            config.set('interactiondir', interactiondir)
-
         if platform in ['darwin','win32']:
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
-        config.set('shipyard', self.shipyard.get())
+        config.set('shipyard_provider', self.shipyard_provider.get())
+        config.set('system_provider', self.system_provider.get())
+        config.set('station_provider', self.station_provider.get())
 
         lang_codes = { v: k for k, v in self.languages.iteritems() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
-        Translations().install(config.get('language') or None)
+        Translations.install(config.get('language') or None)
 
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
@@ -606,11 +600,12 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set('anonymous', self.out_anon.get())
 
+        # Notify
+        if self.callback:
+            self.callback()
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
-        if self.callback:
-            self.callback()
 
     def _destroy(self):
         if self.cmdrchanged_alarm is not None:

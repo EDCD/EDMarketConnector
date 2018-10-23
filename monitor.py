@@ -2,16 +2,18 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
+from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import basename, isdir, join
 from sys import platform
-from time import gmtime, sleep, strftime, strptime
+from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
 
 if __debug__:
     from traceback import print_exc
 
 from config import config
+from companion import ship_file_name
 
 
 if platform=='darwin':
@@ -69,7 +71,8 @@ else:
 class EDLogs(FileSystemEventHandler):
 
     _POLL = 1		# Polling is cheap, so do it often
-    _RE_CANONICALISE = re.compile('\$(.+)_name;')
+    _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
+    _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
@@ -89,6 +92,8 @@ class EDLogs(FileSystemEventHandler):
         # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
         self.live = False
 
+        self.game_was_running = False	# For generation the "ShutDown" event
+
         # Context for journal handling
         self.version = None
         self.is_beta = False
@@ -100,6 +105,7 @@ class EDLogs(FileSystemEventHandler):
         self.station = None
         self.stationtype = None
         self.coordinates = None
+        self.systemaddress = None
         self.started = None	# Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
@@ -111,13 +117,19 @@ class EDLogs(FileSystemEventHandler):
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
             'Encoded'      : defaultdict(int),
-            'PaintJob'     : None,
-            'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+            'Rank'         : {},
+            'Reputation'   : {},
+            'Statistics'   : {},
             'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
+            'Friends'      : set(),	# Online friends
             'ShipID'       : None,
             'ShipIdent'    : None,
             'ShipName'     : None,
             'ShipType'     : None,
+            'HullValue'    : None,
+            'ModulesValue' : None,
+            'Rebuy'        : None,
+            'Modules'      : None,
         }
 
     def start(self, root):
@@ -172,7 +184,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print 'Stopping monitoring Journal'
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = None
+        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -184,8 +196,6 @@ class EDLogs(FileSystemEventHandler):
         self.stop()
         if self.observer:
             self.observer.stop()
-        if thread:
-            thread.join()
         if self.observer:
             self.observer.join()
             self.observer = None
@@ -216,9 +226,25 @@ class EDLogs(FileSystemEventHandler):
         else:
             loghandle = None
 
+        self.game_was_running = self.game_running()
+
         if self.live:
-            if self.game_running():
-                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+            if self.game_was_running:
+                # Game is running locally
+                entry = OrderedDict([
+                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                    ('event', 'StartUp'),
+                    ('StarSystem', self.system),
+                    ('StarPos', self.coordinates),
+                    ('SystemAddress', self.systemaddress),
+                ])
+                if self.planet:
+                    entry['Body'] = self.planet
+                entry['Docked'] = bool(self.station)
+                if self.station:
+                    entry['StationName'] = self.station
+                    entry['StationType'] = self.stationtype
+                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             else:
                 self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
                 self.live = False
@@ -263,6 +289,15 @@ class EDLogs(FileSystemEventHandler):
             if threading.current_thread() != self.thread:
                 return	# Terminate
 
+            if self.game_was_running:
+                if not self.game_running():
+                    self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    self.game_was_running = False
+            else:
+                self.game_was_running = self.game_running()
+
+
     def parse_entry(self, line):
         if line is None:
             return { 'event': None }	# Fake startup event
@@ -283,6 +318,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
                 self.started = None
                 self.state = {
                     'Captain'      : None,
@@ -292,16 +328,23 @@ class EDLogs(FileSystemEventHandler):
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
                     'Encoded'      : defaultdict(int),
-                    'PaintJob'     : None,
-                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Rank'         : {},
+                    'Reputation'   : {},
+                    'Statistics'   : {},
                     'Role'         : None,
+                    'Friends'      : set(),
                     'ShipID'       : None,
                     'ShipIdent'    : None,
                     'ShipName'     : None,
                     'ShipType'     : None,
+                    'HullValue'    : None,
+                    'ModulesValue' : None,
+                    'Rebuy'        : None,
+                    'Modules'      : None,
                 }
+            elif entry['event'] == 'Commander':
+                self.live = True	# First event in 3.0
             elif entry['event'] == 'LoadGame':
-                self.live = True
                 self.cmdr = entry['Commander']
                 self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
@@ -311,12 +354,15 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                self.state.update({
+                self.state.update({	# Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
-                    'Rank'         : { 'Combat': None, 'Trade': None, 'Explore': None, 'Empire': None, 'Federation': None, 'CQC': None },
+                    'Rank'         : {},
+                    'Reputation'   : {},
+                    'Statistics'   : {},
                     'Role'         : None,
                 })
             elif entry['event'] == 'NewCommander':
@@ -333,25 +379,58 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['PaintJob'] = None
+                self.state['HullValue'] = None
+                self.state['ModulesValue'] = None
+                self.state['Rebuy'] = None
+                self.state['Modules'] = None
             elif entry['event'] == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = None
                 self.state['ShipName']  = None
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['PaintJob'] = None
-            elif entry['event'] == 'Loadout':	# Note: Precedes LoadGame, ShipyardNew, follows ShipyardSwap, ShipyardBuy
+                self.state['HullValue'] = None
+                self.state['ModulesValue'] = None
+                self.state['Rebuy'] = None
+                self.state['Modules'] = None
+            elif (entry['event'] == 'Loadout' and
+                  not self.canonicalise(entry['Ship']).endswith('fighter') and
+                  not self.canonicalise(entry['Ship']).endswith('buggy')):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
                 self.state['ShipType']  = self.canonicalise(entry['Ship'])
-                # Ignore other Modules since they're missing Engineer modification details
-                self.state['PaintJob'] = 'paintjob_%s_default_defaultpaintjob' % self.state['ShipType']
+                self.state['HullValue'] = entry.get('HullValue')	# not present on exiting Outfitting
+                self.state['ModulesValue'] = entry.get('ModulesValue')	#   "
+                self.state['Rebuy'] = entry.get('Rebuy')
+                # Remove spurious differences between initial Loadout event and subsequent
+                self.state['Modules'] = {}
                 for module in entry['Modules']:
-                    if module.get('Slot') == 'PaintJob' and module.get('Item'):
-                        self.state['PaintJob'] = self.canonicalise(module['Item'])
-            elif entry['event'] in ['ModuleBuy', 'ModuleSell'] and entry['Slot'] == 'PaintJob':
-                self.state['PaintJob'] = self.canonicalise(entry.get('BuyItem'))
+                    module = dict(module)
+                    module['Item'] = self.canonicalise(module['Item'])
+                    if ('Hardpoint' in module['Slot'] and
+                        not module['Slot'].startswith('TinyHardpoint') and
+                        module.get('AmmoInClip') == module.get('AmmoInHopper') == 1):	# lasers
+                        module.pop('AmmoInClip')
+                        module.pop('AmmoInHopper')
+                    self.state['Modules'][module['Slot']] = module
+            elif entry['event'] == 'ModuleBuy':
+                self.state['Modules'][entry['Slot']] = {
+                    'Slot'     : entry['Slot'],
+                    'Item'     : self.canonicalise(entry['BuyItem']),
+                    'On'       : True,
+                    'Priority' : 1,
+                    'Health'   : 1.0,
+                    'Value'    : entry['BuyPrice'],
+                }
+            elif entry['event'] == 'ModuleSell':
+                self.state['Modules'].pop(entry['Slot'], None)
+            elif entry['event'] == 'ModuleSwap':
+                toitem = self.state['Modules'].get(entry['ToSlot'])
+                self.state['Modules'][entry['ToSlot']] = self.state['Modules'][entry['FromSlot']]
+                if toitem:
+                    self.state['Modules'][entry['FromSlot']] = toitem
+                else:
+                    self.state['Modules'].pop(entry['FromSlot'], None)
             elif entry['event'] in ['Undocked']:
                 self.station = None
                 self.stationtype = None
@@ -365,25 +444,33 @@ class EDLogs(FileSystemEventHandler):
                     self.coordinates = tuple(entry['StarPos'])
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None	# Docked event doesn't include coordinates
+                self.systemaddress = entry.get('SystemAddress')
                 (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
                                                entry.get('StationName'))	# May be None
                 self.stationtype = entry.get('StationType')	# May be None
                 self.stationservices = entry.get('StationServices')	# None under E:D < 2.4
-            elif entry['event'] == 'SupercruiseExit':
-                self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
-            elif entry['event'] == 'SupercruiseEntry':
+            elif entry['event'] == 'ApproachBody':
+                self.planet = entry['Body']
+            elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
                 self.planet = None
+
             elif entry['event'] in ['Rank', 'Promotion']:
-                for k,v in entry.iteritems():
-                    if k in self.state['Rank']:
-                        self.state['Rank'][k] = (v,0)
+                payload = dict(entry)
+                payload.pop('event')
+                payload.pop('timestamp')
+                for k,v in payload.iteritems():
+                    self.state['Rank'][k] = (v,0)
             elif entry['event'] == 'Progress':
                 for k,v in entry.iteritems():
-                    if self.state['Rank'].get(k) is not None:
+                    if k in self.state['Rank']:
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
+            elif entry['event'] in ['Reputation', 'Statistics']:
+                payload = OrderedDict(entry)
+                payload.pop('event')
+                payload.pop('timestamp')
+                self.state[entry['event']] = payload
 
             elif entry['event'] == 'Cargo':
-                self.live = True	# First event in 2.3
                 self.state['Cargo'] = defaultdict(int)
                 self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
             elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
@@ -394,10 +481,6 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'][commodity] -= entry.get('Count', 1)
                 if self.state['Cargo'][commodity] <= 0:
                     self.state['Cargo'].pop(commodity)
-            elif entry['event'] == 'MissionCompleted':
-                for reward in entry.get('CommodityReward', []):
-                    commodity = self.canonicalise(reward['Name'])
-                    self.state['Cargo'][commodity] += reward.get('Count', 1)
             elif entry['event'] == 'SearchAndRescue':
                 for item in entry.get('Items', []):
                     commodity = self.canonicalise(item['Name'])
@@ -417,15 +500,57 @@ class EDLogs(FileSystemEventHandler):
                 self.state[entry['Category']][material] -= entry['Count']
                 if self.state[entry['Category']][material] <= 0:
                     self.state[entry['Category']].pop(material)
-            elif entry['event'] in ['EngineerCraft', 'Synthesis']:
+            elif entry['event'] == 'Synthesis':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
-                    for x in entry[entry['event'] == 'EngineerCraft' and 'Ingredients' or 'Materials']:
+                    for x in entry['Materials']:
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
                             self.state[category][material] -= x['Count']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
+            elif entry['event'] == 'MaterialTrade':
+                category = self.category(entry['Paid']['Category'])
+                self.state[category][entry['Paid']['Material']] -= entry['Paid']['Quantity']
+                if self.state[category][entry['Paid']['Material']] <= 0:
+                    self.state[category].pop(entry['Paid']['Material'])
+                category = self.category(entry['Received']['Category'])
+                self.state[category][entry['Received']['Material']] += entry['Received']['Quantity']
 
+            elif entry['event'] == 'EngineerCraft' or (entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')):
+                for category in ['Raw', 'Manufactured', 'Encoded']:
+                    for x in entry.get('Ingredients', []):
+                        material = self.canonicalise(x['Name'])
+                        if material in self.state[category]:
+                            self.state[category][material] -= x['Count']
+                            if self.state[category][material] <= 0:
+                                self.state[category].pop(material)
+                module = self.state['Modules'][entry['Slot']]
+                assert(module['Item'] == self.canonicalise(entry['Module']))
+                module['Engineering'] = {
+                    'Engineer'      : entry['Engineer'],
+                    'EngineerID'    : entry['EngineerID'],
+                    'BlueprintName' : entry['BlueprintName'],
+                    'BlueprintID'   : entry['BlueprintID'],
+                    'Level'         : entry['Level'],
+                    'Quality'       : entry['Quality'],
+                    'Modifiers'     : entry['Modifiers'],
+                    }
+                if 'ExperimentalEffect' in entry:
+                    module['Engineering']['ExperimentalEffect'] = entry['ExperimentalEffect']
+                    module['Engineering']['ExperimentalEffect_Localised'] = entry['ExperimentalEffect_Localised']
+                else:
+                    module['Engineering'].pop('ExperimentalEffect', None)
+                    module['Engineering'].pop('ExperimentalEffect_Localised', None)
+
+            elif entry['event'] == 'MissionCompleted':
+                for reward in entry.get('CommodityReward', []):
+                    commodity = self.canonicalise(reward['Name'])
+                    self.state['Cargo'][commodity] += reward.get('Count', 1)
+                for reward in entry.get('MaterialsReward', []):
+                    if 'Category' in reward:	# Category not present in E:D 3.0
+                        category = self.category(reward['Category'])
+                        material = self.canonicalise(reward['Name'])
+                        self.state[category][material] += reward.get('Count', 1)
             elif entry['event'] == 'EngineerContribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
                 if commodity:
@@ -439,6 +564,25 @@ class EDLogs(FileSystemEventHandler):
                             self.state[category][material] -= entry['Quantity']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
+            elif entry['event'] == 'TechnologyBroker':
+                for thing in entry.get('Ingredients', []):	# 3.01
+                    for category in ['Cargo', 'Raw', 'Manufactured', 'Encoded']:
+                        item = self.canonicalise(thing['Name'])
+                        if item in self.state[category]:
+                            self.state[category][item] -= thing['Count']
+                            if self.state[category][item] <= 0:
+                                self.state[category].pop(item)
+                for thing in entry.get('Commodities', []):	# 3.02
+                    commodity = self.canonicalise(thing['Name'])
+                    self.state['Cargo'][commodity] -= thing['Count']
+                    if self.state['Cargo'][commodity] <= 0:
+                        self.state['Cargo'].pop(commodity)
+                for thing in entry.get('Materials', []):	# 3.02
+                    material = self.canonicalise(thing['Name'])
+                    category = thing['Category']
+                    self.state[category][material] -= thing['Count']
+                    if self.state[category][material] <= 0:
+                        self.state[category].pop(material)
 
             elif entry['event'] == 'JoinACrew':
                 self.state['Captain'] = entry['Captain']
@@ -449,6 +593,7 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
             elif entry['event'] == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
             elif entry['event'] == 'QuitACrew':
@@ -460,6 +605,13 @@ class EDLogs(FileSystemEventHandler):
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
+                self.systemaddress = None
+
+            elif entry['event'] == 'Friends':
+                if entry['Status'] in ['Online', 'Added']:
+                    self.state['Friends'].add(entry['Name'])
+                else:
+                    self.state['Friends'].discard(entry['Name'])
 
             return entry
         except:
@@ -477,14 +629,41 @@ class EDLogs(FileSystemEventHandler):
         match = self._RE_CANONICALISE.match(item)
         return match and match.group(1) or item
 
+    def category(self, item):
+        match = self._RE_CATEGORY.match(item)
+        return (match and match.group(1) or item).capitalize()
+
     def get_entry(self):
         if not self.event_queue:
             return None
         else:
             entry = self.parse_entry(self.event_queue.pop(0))
             if not self.live and entry['event'] not in [None, 'Fileheader']:
+                # Game not running locally, but Journal has been updated
                 self.live = True
-                self.event_queue.append('{ "timestamp":"%s", "event":"StartUp" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                if self.station:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', True),
+                        ('StationName', self.station),
+                        ('StationType', self.stationtype),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                        ('SystemAddress', self.systemaddress),
+                    ])
+                else:
+                    entry = OrderedDict([
+                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                        ('event', 'StartUp'),
+                        ('Docked', False),
+                        ('StarSystem', self.system),
+                        ('StarPos', self.coordinates),
+                        ('SystemAddress', self.systemaddress),
+                    ])
+                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
+            elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
+                self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
             return entry
 
     def game_running(self):
@@ -516,6 +695,56 @@ class EDLogs(FileSystemEventHandler):
             return not EnumWindows(EnumWindowsProc(callback), 0)
 
         return False
+
+
+    # Return a subset of the received data describing the current ship as a Loadout event
+    def ship(self, timestamped=True):
+        if not self.state['Modules']:
+            return None
+
+        standard_order = ['ShipCockpit', 'CargoHatch', 'Armour', 'PowerPlant', 'MainEngines', 'FrameShiftDrive', 'LifeSupport', 'PowerDistributor', 'Radar', 'FuelTank']
+
+        d = OrderedDict()
+        if timestamped:
+            d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+        d['event'] = 'Loadout'
+        d['Ship'] = self.state['ShipType']
+        d['ShipID'] = self.state['ShipID']
+        if self.state['ShipName']:
+            d['ShipName'] = self.state['ShipName']
+        if self.state['ShipIdent']:
+            d['ShipIdent'] = self.state['ShipIdent']
+        # sort modules by slot - hardpoints, standard, internal
+        d['Modules'] = []
+        for slot in sorted(self.state['Modules'], key=lambda x: ('Hardpoint' not in x, x not in standard_order and len(standard_order) or standard_order.index(x), 'Slot' not in x, x)):
+            module = dict(self.state['Modules'][slot])
+            module.pop('Health', None)
+            module.pop('Value', None)
+            d['Modules'].append(module)
+        return d
+
+
+    # Export ship loadout as a Loadout event
+    def export_ship(self, filename=None):
+        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': ')).encode('utf-8')	# pretty print
+
+        if filename:
+            with open(filename, 'wt') as h:
+                h.write(string)
+            return
+
+        ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
+        regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
+        oldfiles = sorted([x for x in listdir(config.get('outdir')) if regexp.match(x)])
+        if oldfiles:
+            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
+                if h.read() == string:
+                    return	# same as last time - don't write
+
+        # Write
+        filename = join(config.get('outdir'), '%s.%s.txt' % (ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))))
+        with open(filename, 'wt') as h:
+            h.write(string)
 
 
 # singleton

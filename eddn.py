@@ -10,7 +10,6 @@ import re
 import requests
 from sys import platform
 import time
-from calendar import timegm
 import uuid
 
 if platform != 'win32':
@@ -33,7 +32,6 @@ class EDDN:
     ### SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
     UPLOAD = '%s/upload/' % SERVER
-    HEALTH = '%s/health_check/' % SERVER
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
 
@@ -78,17 +76,6 @@ class EDDN:
         if replayfile:
             replayfile.close()
         replayfile = None
-
-    def time(self):
-        # Returns the EDDN gateway's idea of time-of-day.
-        # Assumes that the gateway returns a strictly compliant Date - https://tools.ietf.org/html/rfc7231#section-7.1.1.1
-        try:
-            r = self.session.get(self.HEALTH, timeout=timeout)
-            return timegm(time.strptime(r.headers['Date'].split(',')[1].strip(), "%d %b %Y %H:%M:%S GMT"))
-        except:
-            # On any error assume that we're good
-            if __debug__: print_exc()
-            return time.time()
 
     def send(self, cmdr, msg):
         if config.getint('anonymous'):
@@ -179,16 +166,16 @@ class EDDN:
         # Don't send empty commodities list - schema won't allow it
         if commodities:
             message = OrderedDict([
-                ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
-                                              time.gmtime(config.getint('querytime') or int(time.time())))),
+                ('timestamp',   data['timestamp']),
                 ('systemName',  data['lastSystem']['name']),
                 ('stationName', data['lastStarport']['name']),
+                ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
             ])
             if 'economies' in data['lastStarport']:
-                message['economies']  = sorted([x for x in data['lastStarport'].get('economies',  {}).itervalues()])
+                message['economies']  = sorted([x for x in (data['lastStarport']['economies']  or {}).itervalues()])
             if 'prohibited' in data['lastStarport']:
-                message['prohibited'] = sorted([x for x in data['lastStarport'].get('prohibited', {}).itervalues()])
+                message['prohibited'] = sorted([x for x in (data['lastStarport']['prohibited'] or {}).itervalues()])
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : message,
@@ -200,24 +187,24 @@ class EDDN:
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
-                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
-                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
+                    ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
+                    ('marketId',    data['lastStarport']['id']),
                     ('modules',     sorted([module['name'] for module in data['lastStarport']['modules'].itervalues() if module_re.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])),
                 ]),
             })
 
     def export_shipyard(self, data, is_beta):
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
-        if data['lastStarport'].get('ships'):
+        if data['lastStarport'].get('ships', {}).get('shipyard_list'):
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
-                    ('timestamp',   time.strftime('%Y-%m-%dT%H:%M:%SZ',
-                                                  time.gmtime(config.getint('querytime') or int(time.time())))),
+                    ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
+                    ('marketId',    data['lastStarport']['id']),
                     ('ships',       sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']])),
                 ]),
             })

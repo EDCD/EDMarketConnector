@@ -23,7 +23,6 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
     if not filename:
         filename = join(config.get('outdir'), '%s.%s.%s.%s' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)), kind==COMMODITY_BPC and 'bpc' or 'csv'))
 
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(querytime))
     if kind == COMMODITY_CSV:
         sep = ';'
         header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Date','\n'])
@@ -35,7 +34,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
         rowheader = sep.join([(config.getint('anonymous') and hashlib.md5(cmdr.encode('utf-8')).hexdigest()) or (sep in cmdr and '"%s"' % cmdr) or cmdr, data['lastSystem']['name'], data['lastStarport']['name']])
     else:
         sep = ','
-        header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Average','Date\n'])
+        header = sep.join(['System','Station','Commodity','Sell','Buy','Demand','','Supply','','Average','FDevID','Date\n'])
         rowheader = sep.join([data['lastSystem']['name'], data['lastStarport']['name']])
 
     h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required
@@ -53,9 +52,9 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
             bracketmap[commodity['stockBracket']]
         ])
         if kind==COMMODITY_DEFAULT:
-            line = sep.join([line, str(int(commodity['meanPrice'])), timestamp+'\n'])
+            line = sep.join([line, str(int(commodity['meanPrice'])), str(commodity['id']), data['timestamp'] + '\n'])
         else:
-            line = sep.join([line, timestamp, '\n'])
+            line = sep.join([line, data['timestamp'] + '\n'])
         h.write(line.encode('utf-8'))
 
     h.close()

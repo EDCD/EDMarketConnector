@@ -1,3 +1,24 @@
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
+
+/* [inara.py] */
+"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Обліковий запис Inara";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
+
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Обрані веб-сайти";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Верф";
+
 /* Language name */
 "!Language" = "Українська";
 
@@ -51,12 +72,6 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Перевірка оновлень...";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Date and Time settings." = "Перевірте налаштування Дати і Часу!";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"Check your system's Time Zone setting." = "Перевірте часовий пояс встановлений в системі!";
 
 /* Federation rank. [stats.py] */
 "Chief Petty Officer" = "Старший Унтер Офіцер";
@@ -121,9 +136,6 @@
 /* Empire rank. [stats.py] */
 "Duke" = "Герцог";
 
-/* Setting for the log file that contains recent interactions with other Cmdrs. [EDMarketConnector.py] */
-"E:D interaction log location" = "Росташування журналу взаємодії пілотів E:D";
-
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Розташування файлу-журналу E:D";
 
@@ -163,11 +175,11 @@
 /* Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
 
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [EDMarketConnector.py] */
+/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
 "Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Error: Frontier server SKU problem";
+"Error: Frontier server SKU problem" = "Помилка! Проблема SKU сервера Frontier";
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
@@ -373,9 +385,6 @@
 /* [prefs.py] */
 "Preferences" = "Уподобання";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis.. [prefs.py] */
-"Preferred Shipyard" = "Сайт спорядження";
-
 /* Empire rank. [stats.py] */
 "Prince" = "Принц";
 
@@ -430,9 +439,6 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Напів-професійний";
 
-/* [edsm.py] */
-"Send flight log to Elite Dangerous Star Map" = "Надсилати штурманський журнал до Elite Dangerous Star Map";
-
 /* Output setting. [prefs.py] */
 "Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";
 
@@ -460,7 +466,7 @@
 /* Empire rank. [stats.py] */
 "Squire" = "Зброєносець";
 
-/* Main window. [prefs.py] */
+/* Main window. [EDMarketConnector.py] */
 "Station" = "Станція";
 
 /* [EDMarketConnector.py] */
@@ -475,14 +481,11 @@
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Геодезист";
 
-/* Main window. [stats.py] */
+/* Main window. [EDMarketConnector.py] */
 "System" = "Система";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
-
-/* Error message shown if system time is wrong. [EDMarketConnector.py] */
-"This app requires accurate timestamps." = "Ця программа вимагає точного налаштування \"міток часу\"";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Підказка: Ви можете відключити плагін через {CR} додання '{EXT}' до назви папки";

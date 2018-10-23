@@ -9,7 +9,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '2.4.4.0'
+appversion = '3.1.2.1'
 
 update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
@@ -97,20 +97,16 @@ class Config:
     OUT_MKT_TD        = 4
     OUT_MKT_CSV       = 8
     OUT_SHIP          = 16
-    OUT_SHIP_EDS      = 16	# Replaced by OUT_SHIP
+    # OUT_SHIP_EDS    = 16	# Replaced by OUT_SHIP
     # OUT_SYS_FILE    = 32	# No longer supported
     # OUT_STAT        = 64	# No longer available
-    OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV|OUT_SHIP|OUT_SHIP_EDS|OUT_SHIP_CORIOLIS
+    # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
+    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV
     # OUT_SYS_EDSM      = 256	# Now a plugin
     # OUT_SYS_AUTO    = 512	# Now always automatic
     OUT_MKT_MANUAL    = 1024
     OUT_SYS_EDDN      = 2048
     OUT_SYS_DELAY     = 4096
-
-    # shipyard setting
-    SHIPYARD_EDSHIPYARD = 0
-    SHIPYARD_CORIOLIS   = 1
 
     if platform=='darwin':
 
@@ -126,8 +122,6 @@ class Config:
             self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable.decode(sys.getfilesystemencoding())), pardir, 'Library', 'plugins')) or join(dirname(__file__), 'plugins')
 
             self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
-
-            self.default_interaction_dir = join(self.default_journal_dir, 'CommanderHistory')
 
             self.home = expanduser('~')
 
@@ -148,10 +142,12 @@ class Config:
 
         def get(self, key):
             val = self.settings.get(key)
-            if hasattr(val, '__iter__'):
+            if val is None:
+                return None
+            elif hasattr(val, '__iter__'):
                 return list(val)	# make writeable
             else:
-                return val
+                return unicode(val)
 
         def getint(self, key):
             try:
@@ -193,8 +189,6 @@ class Config:
             journaldir = KnownFolderPath(FOLDERID_SavedGames)
             self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
 
-            self.default_interaction_dir = join(KnownFolderPath(FOLDERID_LocalAppData), 'Frontier Developments', 'Elite Dangerous', 'CommanderHistory')
-
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable.decode(sys.getfilesystemencoding()) or __file__)
 
             self.identifier = applongname
@@ -224,7 +218,7 @@ class Config:
                     RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
-                self.set('outdir', KnownFolderPath(FOLDERID_Documents))
+                self.set('outdir', KnownFolderPath(FOLDERID_Documents) or self.home)
 
         def get(self, key):
             typ  = DWORD()
@@ -235,9 +229,9 @@ class Config:
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                 return None
             elif typ.value == REG_MULTI_SZ:
-                return [x.strip() for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
+                return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
             else:
-                return buf.value
+                return unicode(buf.value)
 
         def getint(self, key):
             typ  = DWORD()
@@ -289,8 +283,6 @@ class Config:
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
 
             self.default_journal_dir = None
-
-            self.default_interaction_dir = None
 
             self.home = expanduser('~')
 
