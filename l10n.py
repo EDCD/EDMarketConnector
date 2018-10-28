@@ -15,7 +15,11 @@ from traceback import print_exc
 import __builtin__
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
+    print "Can't set locale!"
 
 from config import config
 
