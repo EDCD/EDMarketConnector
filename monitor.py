@@ -21,7 +21,9 @@ if platform=='darwin':
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
- 
+    from fcntl import fcntl
+    F_GLOBAL_NOCACHE = 55
+
 elif platform=='win32':
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
@@ -216,13 +218,16 @@ class EDLogs(FileSystemEventHandler):
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
-            loghandle = open(logfile, 'r')
+            loghandle = open(logfile, 'rb', 0)	# unbuffered
+            if platform == 'darwin':
+                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
             for line in loghandle:
                 try:
                     self.parse_entry(line)	# Some events are of interest even in the past
                 except:
                     if __debug__:
                         print 'Invalid journal entry "%s"' % repr(line)
+            logpos = loghandle.tell()
         else:
             loghandle = None
 
@@ -272,16 +277,21 @@ class EDLogs(FileSystemEventHandler):
                 if loghandle:
                     loghandle.close()
                 if logfile:
-                    loghandle = open(logfile, 'r')
+                    loghandle = open(logfile, 'rb', 0)	# unbuffered
+                    if platform == 'darwin':
+                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
+                    logpos = 0
                 if __debug__:
                     print 'New logfile "%s"' % logfile
 
             if logfile:
-                loghandle.seek(0, SEEK_CUR)	# reset EOF flag
+                loghandle.seek(0, SEEK_END)		# required to make macOS notice log change over SMB
+                loghandle.seek(logpos, SEEK_SET)	# reset EOF flag
                 for line in loghandle:
                     self.event_queue.append(line)
                 if self.event_queue:
                     self.root.event_generate('<<JournalEvent>>', when="tail")
+                logpos = loghandle.tell()
 
             sleep(self._POLL)
 

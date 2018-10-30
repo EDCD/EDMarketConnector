@@ -199,21 +199,17 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
-        if platform != 'darwin':
-            # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
-            nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
-            self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
-            self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
-                                                          _('Browse...')),	# Folder selection button on Windows
-                                       command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
-            self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
-            if config.default_journal_dir:
-                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
-
-        if platform == 'win32':
-            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
+        self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
+        self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
+                                                      _('Browse...')),	# Folder selection button on Windows
+                                   command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
+        self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
+        if config.default_journal_dir:
+            nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
         if platform in ['darwin','win32']:
+            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
             self.hotkey_code = config.getint('hotkey_code')
             self.hotkey_mods = config.getint('hotkey_mods')
             self.hotkey_only = tk.IntVar(value = not config.getint('hotkey_always'))
