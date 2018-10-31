@@ -491,6 +491,9 @@ class EDLogs(FileSystemEventHandler):
 
             elif entry['event'] == 'Cargo':
                 self.state['Cargo'] = defaultdict(int)
+                if 'Inventory' not in entry:	# From 3.3 full Cargo event (after the first one) is written to a separate file
+                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:
+                        entry = json.load(h, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
                 self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
             elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
                 commodity = self.canonicalise(entry['Type'])
