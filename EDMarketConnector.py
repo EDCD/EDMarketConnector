@@ -668,6 +668,8 @@ class AppWindow:
                     # strip out properties disallowed by the schema
                     for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
                         entry.pop(thing, None)
+                    for faction in entry.get('Factions', []):
+                        faction.pop('MyReputation', None)
 
                     # add planet to Docked event for planetary stations if known
                     if entry['event'] == 'Docked' and monitor.planet:
