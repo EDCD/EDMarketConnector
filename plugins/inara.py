@@ -229,6 +229,19 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                       ('majorfactionName', k.lower()),
                                       ('majorfactionReputation', v / 100.0),
                                   ]))
+                for k,v in state['Engineers'].iteritems():
+                    if type(v) is tuple:
+                        add_event('setCommanderRankEngineer', entry['timestamp'],
+                                  OrderedDict([
+                                      ('engineerName', k),
+                                      ('rankValue', v[0]),
+                                  ]))
+                    else:
+                        add_event('setCommanderRankEngineer', entry['timestamp'],
+                                  OrderedDict([
+                                      ('engineerName', k),
+                                      ('rankStage', v),
+                                  ]))
 
                 # Update location
                 add_event('setCommanderTravelLocation', entry['timestamp'],
@@ -267,7 +280,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                       ('rankValue', v[0]),
                                       ('rankProgress', 0),
                                   ]))
-            elif entry['event'] == 'EngineerProgress':
+            elif entry['event'] == 'EngineerProgress' and 'Engineer' in entry:
                 if 'Rank' in entry:
                     add_event('setCommanderRankEngineer', entry['timestamp'],
                               OrderedDict([

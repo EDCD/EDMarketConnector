@@ -119,6 +119,7 @@ class EDLogs(FileSystemEventHandler):
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
             'Encoded'      : defaultdict(int),
+            'Engineers'    : {},
             'Rank'         : {},
             'Reputation'   : {},
             'Statistics'   : {},
@@ -338,6 +339,7 @@ class EDLogs(FileSystemEventHandler):
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
                     'Encoded'      : defaultdict(int),
+                    'Engineers'    : {},
                     'Rank'         : {},
                     'Reputation'   : {},
                     'Statistics'   : {},
@@ -370,6 +372,7 @@ class EDLogs(FileSystemEventHandler):
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'Loan'         : entry['Loan'],
+                    'Engineers'    : {},
                     'Rank'         : {},
                     'Reputation'   : {},
                     'Statistics'   : {},
@@ -479,6 +482,12 @@ class EDLogs(FileSystemEventHandler):
                 payload.pop('event')
                 payload.pop('timestamp')
                 self.state[entry['event']] = payload
+
+            elif entry['event'] == 'EngineerProgress':
+                if 'Engineers' in entry:	# Startup summary
+                    self.state['Engineers'] = { e['Engineer']: (e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'] for e in entry['Engineers'] }
+                else:	# Promotion
+                    self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0)) if 'Rank' in entry else entry['Progress']
 
             elif entry['event'] == 'Cargo':
                 self.state['Cargo'] = defaultdict(int)
