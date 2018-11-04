@@ -666,7 +666,7 @@ class AppWindow:
                      entry['event'] == 'Docked'  or
                      entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
                     # strip out properties disallowed by the schema
-                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
+                    for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
                         entry.pop(thing, None)
                     for faction in entry.get('Factions', []):
                         faction.pop('MyReputation', None)
