@@ -489,7 +489,7 @@ class EDLogs(FileSystemEventHandler):
                 else:	# Promotion
                     self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0)) if 'Rank' in entry else entry['Progress']
 
-            elif entry['event'] == 'Cargo':
+            elif entry['event'] == 'Cargo' and entry.get('Vessel') == 'Ship':
                 self.state['Cargo'] = defaultdict(int)
                 if 'Inventory' not in entry:	# From 3.3 full Cargo event (after the first one) is written to a separate file
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:
