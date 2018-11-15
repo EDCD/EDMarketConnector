@@ -115,6 +115,7 @@ class EDLogs(FileSystemEventHandler):
             'Captain'      : None,	# On a crew
             'Cargo'        : defaultdict(int),
             'Credits'      : None,
+            'FID'          : None,	# Frontier Cmdr ID
             'Loan'         : None,
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
@@ -335,6 +336,7 @@ class EDLogs(FileSystemEventHandler):
                     'Captain'      : None,
                     'Cargo'        : defaultdict(int),
                     'Credits'      : None,
+                    'FID'          : None,
                     'Loan'         : None,
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
@@ -371,6 +373,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state.update({	# Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
+                    'FID'          : entry.get('FID'),	# From 3.3
                     'Loan'         : entry['Loan'],
                     'Engineers'    : {},
                     'Rank'         : {},
