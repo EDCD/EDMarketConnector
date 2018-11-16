@@ -34,6 +34,7 @@ this.queue = Queue()	# Items to be sent to Inara by worker thread
 # Cached Cmdr state
 this.events = []	# Unsent events
 this.cmdr = None
+this.FID = None		# Frontier ID
 this.multicrew = False	# don't send captain's ship info to Inara while on a crew
 this.newuser = False	# just entered API Key - send state immediately
 this.newsession = True	# starting a new session - wait for Cargo event
@@ -131,6 +132,7 @@ def prefs_changed(cmdr, is_beta):
 
     if cmdr and not is_beta:
         this.cmdr = cmdr
+        this.FID = None
         cmdrs = config.get('inara_cmdrs') or []
         apikeys = config.get('inara_apikeys') or []
         if cmdr in cmdrs:
@@ -168,6 +170,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         call()
 
     this.cmdr = cmdr
+    this.FID = state['FID']
     this.multicrew = bool(state['Role'])
 
     if entry['event'] == 'LoadGame' or this.newuser:
@@ -214,34 +217,28 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.newsession = False
 
                 # Send rank info to Inara on startup
-                for k,v in state['Rank'].iteritems():
-                    if v is not None:
-                        add_event('setCommanderRankPilot', entry['timestamp'],
-                                  OrderedDict([
-                                      ('rankName', k.lower()),
-                                      ('rankValue', v[0]),
-                                      ('rankProgress', v[1] / 100.0),
-                                  ]))
-                for k,v in state['Reputation'].iteritems():
-                    if v is not None:
-                        add_event('setCommanderReputationMajorFaction', entry['timestamp'],
-                                  OrderedDict([
-                                      ('majorfactionName', k.lower()),
-                                      ('majorfactionReputation', v / 100.0),
-                                  ]))
-                for k,v in state['Engineers'].iteritems():
-                    if type(v) is tuple:
-                        add_event('setCommanderRankEngineer', entry['timestamp'],
-                                  OrderedDict([
-                                      ('engineerName', k),
-                                      ('rankValue', v[0]),
-                                  ]))
-                    else:
-                        add_event('setCommanderRankEngineer', entry['timestamp'],
-                                  OrderedDict([
-                                      ('engineerName', k),
-                                      ('rankStage', v),
-                                  ]))
+                add_event('setCommanderRankPilot', entry['timestamp'],
+                          [
+                              OrderedDict([
+                                  ('rankName', k.lower()),
+                                  ('rankValue', v[0]),
+                                  ('rankProgress', v[1] / 100.0),
+                              ]) for k,v in state['Rank'].iteritems() if v is not None
+                          ])
+                add_event('setCommanderReputationMajorFaction', entry['timestamp'],
+                          [
+                              OrderedDict([
+                                  ('majorfactionName', k.lower()),
+                                  ('majorfactionReputation', v / 100.0),
+                              ]) for k,v in state['Reputation'].iteritems() if v is not None
+                          ])
+                add_event('setCommanderRankEngineer', entry['timestamp'],
+                          [
+                              OrderedDict([
+                                  ('engineerName', k),
+                                  type(v) is tuple and ('rankValue', v[0]) or ('rankStage', v),
+                              ]) for k,v in state['Engineers'].iteritems()
+                          ])
 
                 # Update location
                 add_event('setCommanderTravelLocation', entry['timestamp'],
@@ -281,18 +278,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                       ('rankProgress', 0),
                                   ]))
             elif entry['event'] == 'EngineerProgress' and 'Engineer' in entry:
-                if 'Rank' in entry:
-                    add_event('setCommanderRankEngineer', entry['timestamp'],
-                              OrderedDict([
-                                  ('engineerName', entry['Engineer']),
-                                  ('rankValue', entry['Rank']),
-                              ]))
-                else:
-                    add_event('setCommanderRankEngineer', entry['timestamp'],
-                              OrderedDict([
-                                  ('engineerName', entry['Engineer']),
-                                  ('rankStage', entry['Progress']),
-                              ]))
+                add_event('setCommanderRankEngineer', entry['timestamp'],
+                          OrderedDict([
+                              ('engineerName', entry['Engineer']),
+                              'Rank' in entry and ('rankValue', entry['Rank']) or ('rankStage', entry['Progress']),
+                          ]))
 
             # PowerPlay status change
             if entry['event'] == 'PowerplayJoin':
@@ -374,6 +364,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ('shipGameID', state['ShipID']),
                           ]))
 
+                if entry.get('Factions'):
+                    add_event('setCommanderReputationMinorFaction', entry['timestamp'],
+                              [
+                                  OrderedDict([
+                                      ('minorfactionName', f['Name']),
+                                      ('minorfactionReputation', f['MyReputation']),
+                                  ]) for f in entry['Factions']
+                              ])
 
             # Override standard URL functions
             if config.get('system_provider') == 'Inara':
@@ -667,6 +665,19 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     data['isTopRank'] = goal['PlayerInTopRank']
                 add_event('setCommanderCommunityGoalProgress', entry['timestamp'], data)
 
+        # Friends
+        if entry['event'] == 'Friends':
+            if entry['Status'] in ['Added', 'Online']:
+                add_event('addCommanderFriend', entry['timestamp'],
+                          OrderedDict([('commanderName', entry['Name']),
+                                       ('gamePlatform', 'pc'),
+                          ]))
+            elif entry['Status'] in ['Declined', 'Lost']:
+                add_event('delCommanderFriend', entry['timestamp'],
+                          OrderedDict([('commanderName', entry['Name']),
+                                       ('gamePlatform', 'pc'),
+                          ]))
+
         this.newuser = False
 
 def cmdr_data(data, is_beta):
@@ -757,6 +768,7 @@ def call(callback=None):
             ('appVersion', appversion),
             ('APIkey', credentials(this.cmdr)),
             ('commanderName', this.cmdr.encode('utf-8')),
+            ('commanderFrontierID', this.FID),
         ])),
         ('events', list(this.events)),	# shallow copy
     ])
