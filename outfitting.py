@@ -264,9 +264,6 @@ fighter_rating_map = {
 misc_internal_map = {
     ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
     ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
-    ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
-    ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
-    ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
 }
 
 standard_map = {

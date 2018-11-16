@@ -63,6 +63,8 @@ ship_map = {
     'independant_trader'          : 'Keelback',
     'independent_fighter'         : 'Taipan Fighter',
     'krait_mkii'                  : 'Krait MkII',
+    'krait_light'                 : 'Krait Phantom',
+    'mamba'                       : 'Mamba',
     'orca'                        : 'Orca',
     'python'                      : 'Python',
     'scout'                       : 'Taipan Fighter',

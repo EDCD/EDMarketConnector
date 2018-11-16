@@ -160,64 +160,76 @@ a(dp81
 g6
 I320
 saa(lp82
-S'Orca'
+S'Krait Phantom'
 p83
 a(dp84
 g6
-I290
+I270
 saa(lp85
-S'Python'
+S'Mamba'
 p86
 a(dp87
 g6
-I350
+I250
 saa(lp88
-S'Sidewinder'
+S'Orca'
 p89
 a(dp90
 g6
-I25
+I290
 saa(lp91
-S'Type-10 Defender'
+S'Python'
 p92
 a(dp93
 g6
-I1200
+I350
 saa(lp94
-S'Type-6 Transporter'
+S'Sidewinder'
 p95
 a(dp96
 g6
-I155
+I25
 saa(lp97
-S'Type-7 Transporter'
+S'Type-10 Defender'
 p98
 a(dp99
 g6
-I350
+I1200
 saa(lp100
-S'Type-9 Heavy'
+S'Type-6 Transporter'
 p101
 a(dp102
 g6
-I850
+I155
 saa(lp103
-S'Viper MkIII'
+S'Type-7 Transporter'
 p104
 a(dp105
 g6
-I50
+I350
 saa(lp106
-S'Viper MkIV'
+S'Type-9 Heavy'
 p107
 a(dp108
 g6
-I190
+I850
 saa(lp109
-S'Vulture'
+S'Viper MkIII'
 p110
 a(dp111
 g6
+I50
+saa(lp112
+S'Viper MkIV'
+p113
+a(dp114
+g6
+I190
+saa(lp115
+S'Vulture'
+p116
+a(dp117
+g6
 I230
-saatRp112
+saatRp118
 .
