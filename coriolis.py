@@ -75,6 +75,26 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
+    # Pre 3.3 modules
+    add(modules, 'int_stellarbodydiscoveryscanner_standard',     { 'mass': 2 })
+    add(modules, 'int_stellarbodydiscoveryscanner_intermediate', { 'mass': 2 })
+    add(modules, 'int_stellarbodydiscoveryscanner_advanced',     { 'mass': 2 })
+
+    # 3.3 additions not yet present in coriolis-data
+    add(modules, 'hpt_mining_subsurfdispmisle_fixed_small', { 'mass': 2 })
+    add(modules, 'hpt_mining_subsurfdispmisle_turret_small', { 'mass': 2 })
+    add(modules, 'hpt_mining_subsurfdispmisle_fixed_medium', { 'mass': 4 })
+    add(modules, 'hpt_mining_subsurfdispmisle_turret_medium', { 'mass': 4 })
+    add(modules, 'hpt_mining_abrblstr_fixed_small', { 'mass': 2 })
+    add(modules, 'hpt_mining_abrblstr_turret_small', { 'mass': 2 })
+    add(modules, 'hpt_mining_seismchrgwarhd_fixed_medium', { 'mass': 4 })
+    add(modules, 'hpt_mining_seismchrgwarhd_turret_medium', { 'mass': 4 })
+    add(modules, 'hpt_mrascanner_size0_class1', { 'mass': 1.3 })
+    add(modules, 'hpt_mrascanner_size0_class2', { 'mass': 1.3 })
+    add(modules, 'hpt_mrascanner_size0_class3', { 'mass': 1.3 })
+    add(modules, 'hpt_mrascanner_size0_class4', { 'mass': 1.3 })
+    add(modules, 'hpt_mrascanner_size0_class5', { 'mass': 1.3 })
+
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
 
