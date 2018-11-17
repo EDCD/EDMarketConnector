@@ -103,7 +103,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Default";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Delay sending until docked";
 
 /* List of plugins in settings. [prefs.py] */
@@ -142,7 +142,7 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
 
 /* [edsm.py] */
@@ -436,13 +436,13 @@
 /* [inara.py] */
 "Send flight log and Cmdr status to Inara" = "Send flight log and Cmdr status to Inara";
 
-/* Output setting. [prefs.py] */
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Send system and scan data to the Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Sending data to EDDN...";
 
 /* Empire rank. [stats.py] */

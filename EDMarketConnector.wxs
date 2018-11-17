@@ -247,6 +247,9 @@
 							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
 						</Component>
 						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\eddn.py" />
+						</Component>
+						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
 						</Component>
 						<Component Guid="*">
@@ -490,6 +493,7 @@
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="eddb.py" />
+			<ComponentRef Id="eddn.py" />
 			<ComponentRef Id="edsm.py" />
 			<ComponentRef Id="edsy.py" />
 			<ComponentRef Id="es.strings" />

@@ -48,7 +48,6 @@ import companion
 import commodity
 from commodity import COMMODITY_CSV
 import td
-import eddn
 import stats
 import prefs
 import plug
@@ -59,11 +58,6 @@ from theme import theme
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
-
-# Limits on local clock drift from EDDN gateway
-DRIFT_THRESHOLD = 3 * 60
-TZ_THRESHOLD = 30 * 60
-CLOCK_THRESHOLD = 11 * 60 * 60 + TZ_THRESHOLD
 
 
 class AppWindow:
@@ -76,7 +70,6 @@ class AppWindow:
     def __init__(self, master):
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
-        self.eddn = eddn.EDDN(self)
 
         self.w = master
         self.w.title(applongname)
@@ -312,10 +305,6 @@ class AppWindow:
         if keyring.get_keyring().priority < 1:
             self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
 
-        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        if not self.eddn.load():
-            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
-
     # callback after the Preferences dialog is applied
     def postprefs(self, dologin=True):
         self.prefsdialog = None
@@ -471,57 +460,26 @@ class AppWindow:
                 if err:
                     play_bad = True
 
-                # Export ship for backwards compatibility even 'though it's no longer derived from cAPI
-                if config.getint('output') & config.OUT_SHIP:
-                    monitor.export_ship()
-
-                if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
-                    # no station data requested - we're done
-                    pass
-
-                elif not data['commander'].get('docked'):
-                    if not self.status['text']:
-                        # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                        self.status['text'] = _("You're not docked at a station!")
-                        play_bad = True
-
-                else:
-                    # Finally - the data looks sane and we're docked at a station
-
-                    # No EDDN output?
-                    if (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
+                # Export market data
+                if config.getint('output') & (config.OUT_STATION_ANY):
+                    if not data['commander'].get('docked'):
+                        if not self.status['text']:
+                            # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
+                            self.status['text'] = _("You're not docked at a station!")
+                            play_bad = True
+                    elif (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
-
-                    # No market output?
-                    elif not (config.getint('output') & config.OUT_MKT_EDDN) and not data['lastStarport'].get('commodities'):
+                    elif not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
-
-                    else:
-                        if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD):
-                            # Fixup anomalies in the commodity data
-                            fixed = companion.fixup(data)
-
-                            if config.getint('output') & config.OUT_MKT_CSV:
-                                commodity.export(fixed, COMMODITY_CSV)
-                            if config.getint('output') & config.OUT_MKT_TD:
-                                td.export(fixed)
-
-                        if config.getint('output') & config.OUT_MKT_EDDN:
-                            old_status = self.status['text']
-                            if not old_status:
-                                self.status['text'] = _('Sending data to EDDN...')
-                            self.w.update_idletasks()
-                            self.eddn.export_commodities(data, monitor.is_beta)
-                            self.eddn.export_outfitting(data, monitor.is_beta)
-                            if data['lastStarport'].get('ships', {}).get('shipyard_list'):
-                                self.eddn.export_shipyard(data, monitor.is_beta)
-                            elif data['lastStarport'].get('services', {}).get('shipyard'):
-                                # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
-                                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(2))
-                            if not old_status:
-                                self.status['text'] = ''
+                    elif config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD):
+                        # Fixup anomalies in the commodity data
+                        fixed = companion.fixup(data)
+                        if config.getint('output') & config.OUT_MKT_CSV:
+                            commodity.export(fixed, COMMODITY_CSV)
+                        if config.getint('output') & config.OUT_MKT_TD:
+                            td.export(fixed)
 
         except companion.VerificationRequired:
             if not self.authdialog:
@@ -536,11 +494,6 @@ class AppWindow:
                 # Retry once if Companion server is unresponsive
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                 return	# early exit to avoid starting cooldown count
-
-        except requests.RequestException as e:
-            if __debug__: print_exc()
-            self.status['text'] = _("Error: Can't connect to EDDN")
-            play_bad = True
 
         except Exception as e:
             if __debug__: print_exc()
@@ -630,6 +583,15 @@ class AppWindow:
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
 
+            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Can start dashboard monitoring
+                if not dashboard.start(self.w, monitor.started):
+                    print "Can't start Status monitoring"
+
+            # Export loadout
+            if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
+                monitor.export_ship()
+
             # Plugins
             err = plug.notify_journal_entry(monitor.cmdr, monitor.is_beta, monitor.system, monitor.station, entry, monitor.state)
             if err:
@@ -637,66 +599,9 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
-                # Can start dashboard monitoring
-                if not dashboard.start(self.w, monitor.started):
-                    print "Can't start Status monitoring"
-
-            # Don't send to EDDN while on crew
-            if monitor.state['Captain']:
-                return
-
-            # Plugin backwards compatibility
-            if monitor.mode and entry['event'] in ['StartUp', 'Location', 'FSDJump']:
-                plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
-
-            # Export loadout
-            if monitor.mode and entry['event'] == 'Loadout' and config.getint('output') & config.OUT_SHIP:
-                monitor.export_ship()
-
             # Auto-Update after docking
-            if monitor.mode and monitor.station and entry['event'] in ['StartUp', 'Location', 'Docked'] and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
-
-            # Send interesting events to EDDN
-            try:
-                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and monitor.mode and
-                    (entry['event'] == 'Location' or
-                     entry['event'] == 'FSDJump' or
-                     entry['event'] == 'Docked'  or
-                     entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
-                    # strip out properties disallowed by the schema
-                    for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
-                        entry.pop(thing, None)
-                    for faction in entry.get('Factions', []):
-                        faction.pop('MyReputation', None)
-
-                    # add planet to Docked event for planetary stations if known
-                    if entry['event'] == 'Docked' and monitor.planet:
-                        entry['Body'] = monitor.planet
-                        entry['BodyType'] = 'Planet'
-
-                    # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
-                    if 'StarSystem' not in entry:
-                        entry['StarSystem'] = monitor.system
-                    if 'StarPos' not in entry:
-                        entry['StarPos'] = list(monitor.coordinates)
-                    if 'SystemAddress' not in entry and monitor.systemaddress:
-                        entry['SystemAddress'] = monitor.systemaddress
-
-                    self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, self.filter_localised(entry))
-
-            except requests.exceptions.RequestException as e:
-                if __debug__: print_exc()
-                self.status['text'] = _("Error: Can't connect to EDDN")
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
-
-            except Exception as e:
-                if __debug__: print_exc()
-                self.status['text'] = unicode(e)
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
 
     # Handle Status event
     def dashboard_event(self, event):
@@ -725,21 +630,6 @@ class AppWindow:
 
     def station_url(self, station):
         return plug.invoke(config.get('station_provider'),  'eddb', 'station_url', monitor.system, monitor.station)
-
-
-    # Recursively filter '*_Localised' keys from dict
-    def filter_localised(self, d):
-        filtered = OrderedDict()
-        for k, v in d.iteritems():
-            if k.endswith('_Localised'):
-                pass
-            elif hasattr(v, 'iteritems'):	# dict -> recurse
-                filtered[k] = self.filter_localised(v)
-            elif isinstance(v, list):	# list of dicts -> recurse
-                filtered[k] = [self.filter_localised(x) if hasattr(x, 'iteritems') else x for x in v]
-            else:
-                filtered[k] = v
-        return filtered
 
     def cooldown(self):
         if time() < self.holdofftime:
@@ -800,7 +690,6 @@ class AppWindow:
         dashboard.close()
         monitor.close()
         plug.notify_stop()
-        self.eddn.close()
         self.updater.close()
         companion.session.close()
         config.close()

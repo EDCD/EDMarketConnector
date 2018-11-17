@@ -12,7 +12,6 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import applongname, config
-import eddn
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -137,7 +136,7 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP)	# default settings
+        output = config.getint('output') or config.OUT_SHIP	# default settings
 
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
@@ -167,24 +166,6 @@ class PreferencesDialog(tk.Toplevel):
         nb.Frame(outframe).grid(pady=5)	# bottom spacer
 
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
-
-
-        eddnframe = nb.Frame(notebook)
-
-        HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
-        self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-        self.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged)	# Output setting
-        self.eddn_station_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
-        self.eddn_auto_button.grid(padx=BUTTONX, sticky=tk.W)
-        self.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
-        self.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=self.eddn_system, command=self.outvarchanged)	# Output setting new in E:D 2.2
-        self.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
-        self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.eddn_delay)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-        self.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
-
-        notebook.add(eddnframe, text='EDDN')		# Not translated
 
         # build plugin prefs tabs
         for plugin in plug.PLUGINS:
@@ -413,11 +394,6 @@ class PreferencesDialog(tk.Toplevel):
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
         self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
 
-        self.eddn_station_button['state'] = tk.NORMAL or tk.DISABLED
-        self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
-        self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
-        self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
-
     def filebrowse(self, title, pathvar):
         if platform != 'win32':
             import tkFileDialog
@@ -560,13 +536,11 @@ class PreferencesDialog(tk.Toplevel):
                 _putfirst('fdev_usernames', idx, self.username.get().strip())
 
         config.set('output',
-                   (self.out_td.get()            and config.OUT_MKT_TD) +
-                   (self.out_csv.get()           and config.OUT_MKT_CSV) +
+                   (self.out_td.get()   and config.OUT_MKT_TD) +
+                   (self.out_csv.get()  and config.OUT_MKT_CSV) +
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
-                   (self.out_ship.get()          and config.OUT_SHIP) +
-                   (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
-                   (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
-                   (self.eddn_delay.get()        and config.OUT_SYS_DELAY))
+                   (self.out_ship.get() and config.OUT_SHIP) +
+                   (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY)))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         logdir = self.logdir.get()
