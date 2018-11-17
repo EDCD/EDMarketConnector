@@ -232,13 +232,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                   ('majorfactionReputation', v / 100.0),
                               ]) for k,v in state['Reputation'].iteritems() if v is not None
                           ])
-                add_event('setCommanderRankEngineer', entry['timestamp'],
-                          [
-                              OrderedDict([
-                                  ('engineerName', k),
-                                  type(v) is tuple and ('rankValue', v[0]) or ('rankStage', v),
-                              ]) for k,v in state['Engineers'].iteritems()
-                          ])
+                if state['Engineers']:	# Not populated < 3.3
+                    add_event('setCommanderRankEngineer', entry['timestamp'],
+                              [
+                                  OrderedDict([
+                                      ('engineerName', k),
+                                      type(v) is tuple and ('rankValue', v[0]) or ('rankStage', v),
+                                  ]) for k,v in state['Engineers'].iteritems()
+                              ])
 
                 # Update location
                 add_event('setCommanderTravelLocation', entry['timestamp'],
