@@ -2,14 +2,12 @@
 
 from collections import OrderedDict
 import json
-import numbers
 from os import SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import exists, join
 from platform import system
 import re
 import requests
 import sys
-import time
 import uuid
 
 import Tkinter as tk
@@ -33,6 +31,10 @@ this.systemaddress = None
 this.coordinates = None
 this.planet = None
 
+# Avoid duplicates
+this.marketId = None
+this.commodities = this.outfitting = this.shipyard = None
+
 
 class EDDN:
 
@@ -42,7 +44,8 @@ class EDDN:
     REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
     TIMEOUT= 10	# requests timeout
-    MODULE_RE = re.compile('^Hpt_|^Int_|_Armour_')
+    MODULE_RE = re.compile('^Hpt_|^Int_|Armour_', re.IGNORECASE)
+    CANONICALISE_RE = re.compile(r'\$(.+)_name;')
 
     def __init__(self, parent):
         self.parent = parent
@@ -161,7 +164,7 @@ class EDDN:
             if (category_map.get(commodity['categoryname'], True) and	# Check marketable
                 not commodity.get('legality')):	# check not prohibited
                 commodities.append(OrderedDict([
-                    ('name',          commodity['name']),
+                    ('name',          commodity['name'].lower()),
                     ('meanPrice',     int(commodity['meanPrice'])),
                     ('buyPrice',      int(commodity['buyPrice'])),
                     ('stock',         int(commodity['stock'])),
@@ -172,9 +175,9 @@ class EDDN:
                 ]))
                 if commodity['statusFlags']:
                     commodities[-1]['statusFlags'] = commodity['statusFlags']
+        commodities.sort(key = lambda c: c['name'])
 
-        # Don't send empty commodities list - schema won't allow it
-        if commodities:
+        if commodities and this.commodities != commodities:	# Don't send empty commodities list - schema won't allow it
             message = OrderedDict([
                 ('timestamp',   data['timestamp']),
                 ('systemName',  data['lastSystem']['name']),
@@ -190,10 +193,12 @@ class EDDN:
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : message,
             })
+        this.commodities = commodities
 
     def export_outfitting(self, data, is_beta):
-        # Don't send empty modules list - schema won't allow it
-        if data['lastStarport'].get('modules'):
+        modules = data['lastStarport'].get('modules') or {}
+        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
+        if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
@@ -201,13 +206,15 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('modules',     sorted([module['name'] for module in data['lastStarport']['modules'].itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])),
+                    ('modules',     outfitting),
                 ]),
             })
+        this.outfitting = outfitting
 
     def export_shipyard(self, data, is_beta):
-        # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
-        if data['lastStarport'].get('ships', {}).get('shipyard_list'):
+        ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
+        shipyard = sorted([ship['name'].lower() for ship in ships['shipyard_list'].values() + ships['unavailable_list']])
+        if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
@@ -215,9 +222,68 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('ships',       sorted([ship['name'] for ship in data['lastStarport']['ships']['shipyard_list'].values() + data['lastStarport']['ships']['unavailable_list']])),
+                    ('ships',       shipyard),
                 ]),
             })
+        this.shipyard = shipyard
+
+    def export_journal_commodities(self, cmdr, is_beta, entry):
+        items = entry.get('Items') or []
+        commodities = sorted([OrderedDict([
+            ('name',          self.canonicalise(commodity['Name'])),
+            ('meanPrice',     commodity['MeanPrice']),
+            ('buyPrice',      commodity['BuyPrice']),
+            ('stock',         commodity['Stock']),
+            ('stockBracket',  commodity['StockBracket']),
+            ('sellPrice',     commodity['SellPrice']),
+            ('demand',        commodity['Demand']),
+            ('demandBracket', commodity['DemandBracket']),
+        ]) for commodity in items], key = lambda c: c['name'])
+
+        if commodities and this.commodities != commodities:	# Don't send empty commodities list - schema won't allow it
+            self.send(cmdr, {
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
+                'message'    : OrderedDict([
+                    ('timestamp',   entry['timestamp']),
+                    ('systemName',  entry['StarSystem']),
+                    ('stationName', entry['StationName']),
+                    ('marketId',    entry['MarketID']),
+                    ('commodities', commodities),
+                ]),
+            })
+        this.commodities = commodities
+
+    def export_journal_outfitting(self, cmdr, is_beta, entry):
+        modules = entry.get('Items') or []
+        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name']) for module in modules if module['Name'] != 'int_planetapproachsuite'])
+        if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
+            self.send(data['commander']['name'], {
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
+                'message'    : OrderedDict([
+                    ('timestamp',   entry['timestamp']),
+                    ('systemName',  entry['StarSystem']),
+                    ('stationName', entry['StationName']),
+                    ('marketId',    entry['MarketID']),
+                    ('modules',     outfitting),
+                ]),
+            })
+        this.outfitting = outfitting
+
+    def export_journal_shipyard(self, cmdr, is_beta, entry):
+        ships = entry.get('PriceList') or []
+        shipyard = sorted([ship['ShipType'] for ship in ships])
+        if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
+            self.send(cmdr, {
+                '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
+                'message'    : OrderedDict([
+                    ('timestamp',   entry['timestamp']),
+                    ('systemName',  entry['StarSystem']),
+                    ('stationName', entry['StationName']),
+                    ('marketId',    entry['MarketID']),
+                    ('ships',       shipyard),
+                ]),
+            })
+        this.shipyard = shipyard
 
     def export_journal_entry(self, cmdr, is_beta, entry):
         msg = {
@@ -240,6 +306,10 @@ class EDDN:
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             status['text'] = ''
+
+    def canonicalise(self, item):
+        match = self.CANONICALISE_RE.match(item)
+        return match and match.group(1) or item
 
 
 # Plugin callbacks
@@ -358,9 +428,36 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             if __debug__: print_exc()
             return unicode(e)
 
+    elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
+          entry['event'] in ['Market', 'Outfitting', 'Shipyard']):
+        try:
+            if this.marketId != entry['MarketID']:
+                this.commodities = this.outfitting = this.shipyard = None
+                this.marketId = entry['MarketID']
+
+            with open(join(config.get('journaldir') or config.default_journal_dir, '%s.json' % entry['event']), 'rb') as h:
+                entry = json.load(h)
+                if entry['event'] == 'Market':
+                    this.eddn.export_journal_commodities(cmdr, is_beta, entry)
+                elif entry['event'] == 'Outfitting':
+                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry)
+                elif entry['event'] == 'Shipyard':
+                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry)
+
+        except requests.exceptions.RequestException as e:
+            if __debug__: print_exc()
+            return _("Error: Can't connect to EDDN")
+        except Exception as e:
+            if __debug__: print_exc()
+            return unicode(e)
+
 def cmdr_data(data, is_beta):
     if data['commander'].get('docked') & config.OUT_MKT_EDDN:
         try:
+            if this.marketId != data['lastStarport']['id']:
+                this.commodities = this.outfitting = this.shipyard = None
+                this.marketId = data['lastStarport']['id']
+
             status = this.parent.children['status']
             old_status = status['text']
             if not old_status:
