@@ -42,8 +42,8 @@ FlagsBeingInterdicted = 1<<23
 FlagsInMainShip = 1<<24
 FlagsInFighter = 1<<25
 FlagsInSRV = 1<<26
-FlagsAnalysisMode = 1<27	# Hud in Analysis mode
-FlagsNightVision = 1<28
+FlagsAnalysisMode = 1<<27	# Hud in Analysis mode
+FlagsNightVision = 1<<28
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
