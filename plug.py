@@ -42,6 +42,8 @@ FlagsBeingInterdicted = 1<<23
 FlagsInMainShip = 1<<24
 FlagsInFighter = 1<<25
 FlagsInSRV = 1<<26
+FlagsAnalysisMode = 1<27	# Hud in Analysis mode
+FlagsNightVision = 1<28
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
@@ -52,6 +54,10 @@ GuiFocusRolePanel = 4		# bottom
 GuiFocusStationServices = 5
 GuiFocusGalaxyMap = 6
 GuiFocusSystemMap = 7
+GuiFocusOrrery = 8
+GuiFocusFSS = 9
+GuiFocusSAA = 10
+GuiFocusCodex = 11
 
 
 # List of loaded Plugins
