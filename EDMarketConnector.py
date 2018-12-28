@@ -169,6 +169,7 @@ class AppWindow:
             self.menubar.add_cascade(menu=window_menu)
             self.help_menu = tk.Menu(self.menubar, name='help')
             self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
+            self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.menubar.add_cascade(menu=self.help_menu)
             self.w['menu'] = self.menubar
@@ -193,6 +194,7 @@ class AppWindow:
             self.menubar.add_cascade(menu=self.edit_menu)
             self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.help_menu.add_command(command=self.help_general)
+            self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
             self.menubar.add_cascade(menu=self.help_menu)
@@ -343,7 +345,8 @@ class AppWindow:
             self.system_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))	# Menu item
             self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
-            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))	# Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))	# Help menu item
         else:
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
             self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
@@ -356,8 +359,9 @@ class AppWindow:
             self.file_menu.entryconfigure(2, label=_('Settings'))	# Item in the File menu on Windows
             self.file_menu.entryconfigure(4, label=_('Exit'))	# Item in the File menu on Windows
             self.help_menu.entryconfigure(0, label=_('Documentation'))	# Help menu item
-            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
-            self.help_menu.entryconfigure(2, label=_("Check for Updates..."))	# Menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))	# Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))	# Help menu item
+            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))	# Menu item
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
@@ -637,6 +641,9 @@ class AppWindow:
 
     def help_general(self, event=None):
         webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')
+
+    def help_privacy(self, event=None):
+        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki/Privacy-Policy')
 
     def help_releases(self, event=None):
         webbrowser.open('https://github.com/Marginal/EDMarketConnector/releases')

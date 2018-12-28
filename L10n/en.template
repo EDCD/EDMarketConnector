@@ -356,6 +356,9 @@
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Privacy Policy";
+
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
 
