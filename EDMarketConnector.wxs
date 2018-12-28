@@ -93,8 +93,8 @@
 			<!-- http://wixtoolset.org/documentation/manual/v3/howtos/files_and_registry/write_a_registry_entry.html -->
 			<Component Id="RegistryEntries" Guid="*">
 				<RegistryKey Root="HKCR" Key="edmc">
-					<RegistryValue Type="string" Value=""/>
-					<RegistryValue Type="string" Name="URL Protocol" Value="$(var.PRODUCTLONGNAME)"/>
+					<RegistryValue Type="string" Value="$(var.PRODUCTLONGNAME)"/>
+					<RegistryValue Type="string" Name="URL Protocol" Value=""/>
 					<RegistryKey Key="DefaultIcon">
 						<RegistryValue Type="string" Value="[INSTALLDIR]EDMarketConnector.exe,0"/>
 					</RegistryKey>
@@ -105,9 +105,6 @@
 							</RegistryKey>
 							<RegistryKey Key="ddeexec">
 								<RegistryValue Type="string" Value='Open("%1")'/>
-								<!--<RegistryKey Key="application">
-									<RegistryValue Type="string" Value="$(var.PRODUCTNAME)"/>
-								</RegistryKey> -->
 							</RegistryKey>
 						</RegistryKey>
 					</RegistryKey>
