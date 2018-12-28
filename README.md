@@ -49,17 +49,7 @@ Windows:
 
 Setup
 --------
-The first time that you run the app you are prompted for your username and password. This is the same username and password
-combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at.
-
-You can also choose here what data to save (refer to the next section for details), whether to “Update” Cmdr and station data automatically on docking and/or with a hotkey, and whether to attach your Cmdr name or a [pseudo-anonymized](https://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
-
-You will be prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
-Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before
-authenticating you will need to wait for Frontier to send you a new code.
-
-If you are not prompted to authenticate, but instead see the message “Error: Invalid Credentials” then choose the menu
-option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
+The first time that you run the app you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at. Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
 
 ### Output
 
