@@ -23,10 +23,12 @@ import outfitting
 import loadout
 import edshipyard
 import shipyard
-import eddn
 import stats
 from config import appcmdname, appversion, update_feed, config
 from monitor import monitor
+
+sys.path.append(config.internal_plugin_dir)
+import eddn
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
