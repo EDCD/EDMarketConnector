@@ -177,7 +177,6 @@ class StatsDialog():
     def __init__(self, app):
         self.parent = app.w
         self.status = app.status
-        self.verify = app.verify
         self.showstats()
 
     def showstats(self):
@@ -189,8 +188,6 @@ class StatsDialog():
 
         try:
             data = companion.session.profile()
-        except companion.VerificationRequired:
-            return prefs.AuthenticationDialog(self.parent, partial(self.verify, self.showstats))
         except companion.ServerError as e:
             self.status['text'] = str(e)
             return

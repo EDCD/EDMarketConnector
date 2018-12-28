@@ -53,6 +53,7 @@ import prefs
 import plug
 from hotkey import hotkeymgr
 from monitor import monitor
+from protocol import ProtocolHandler
 from dashboard import dashboard
 from theme import theme
 
@@ -69,6 +70,9 @@ class AppWindow:
 
     def __init__(self, master):
 
+        # Start a protocol handler to handle cAPI registration
+        self.protocolhandler = ProtocolHandler(master)
+
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
         self.w = master
@@ -76,7 +80,6 @@ class AppWindow:
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
-        self.authdialog = None
         self.prefsdialog = None
 
         plug.load_plugins(master)
@@ -275,6 +278,7 @@ class AppWindow:
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)	# Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
+        self.w.bind_all('<<CompanionAuthEvent>>', self.auth)	# cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
         # Load updater after UI creation (for WinSparkle)
@@ -288,14 +292,10 @@ class AppWindow:
         except RuntimeError:
             pass
 
-        # Migration from <= 2.25
-        if not config.get('cmdrs') and config.get('username') and config.get('password'):
-            try:
-                companion.session.login(config.get('username'), config.get('password'), False)
-                data = companion.session.profile()
-                prefs.migrate(data['commander']['name'])
-            except:
-                if __debug__: print_exc()
+        # Migration from <= 3.30
+        for username in config.get('fdev_usernames') or []:
+            config.delete_password(username)
+        config.delete('fdev_usernames')
         config.delete('username')
         config.delete('password')
         config.delete('logdir')
@@ -366,34 +366,14 @@ class AppWindow:
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
         self.w.update_idletasks()
         try:
-            if not monitor.cmdr or not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
-                raise companion.CredentialsError()
-            idx = config.get('cmdrs').index(monitor.cmdr)
-            username = config.get('fdev_usernames')[idx]
-            companion.session.login(username, config.get_password(username), monitor.is_beta)
-            self.status['text'] = ''
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
+            if companion.session.login(monitor.cmdr, monitor.is_beta):
+                self.status['text'] = ''
         except companion.ServerError as e:
             self.status['text'] = unicode(e)
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
         self.cooldown()
-
-    # callback after verification code
-    def verify(self, callback, code):
-        self.authdialog = None
-        try:
-            companion.session.verify(code)
-            config.save()	# Save settings now for use by command-line app
-        except Exception as e:
-            if __debug__: print_exc()
-            self.button['state'] = self.theme_button['state'] = tk.NORMAL
-            self.status['text'] = unicode(e)
-        else:
-            return callback()	# try again
 
     def getandsend(self, event=None, retrying=False):
 
@@ -481,10 +461,6 @@ class AppWindow:
                         if config.getint('output') & config.OUT_MKT_TD:
                             td.export(fixed)
 
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
-
         # Companion API problem
         except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
@@ -570,15 +546,10 @@ class AppWindow:
 
             # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
-                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                    prefs.make_current(monitor.cmdr)
+                if not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
+                    config.set('cmdrs', (config.get('cmdrs') or []) + [monitor.cmdr])
+                if config.getint('output') & config.OUT_MKT_EDDN:
                     self.login()
-                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
-                    cmdrs = config.get('cmdrs')
-                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
-                    config.set('cmdrs', cmdrs)
-                elif not self.prefsdialog:
-                    self.prefsdialog = prefs.PreferencesDialog(self.w, self.postprefs)	# First run or failed migration
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
@@ -602,6 +573,18 @@ class AppWindow:
             # Auto-Update after docking
             if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+
+    # cAPI auth
+    def auth(self, event=None):
+        try:
+            companion.session.auth_callback(self.protocolhandler.lastpayload)
+            self.status['text'] = ''
+        except companion.ServerError as e:
+            self.status['text'] = unicode(e)
+        except Exception as e:
+            if __debug__: print_exc()
+            self.status['text'] = unicode(e)
+        self.cooldown()
 
     # Handle Status event
     def dashboard_event(self, event):
@@ -673,9 +656,6 @@ class AppWindow:
             if f:
                 with open(f, 'wt') as h:
                     h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.save_raw))
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
@@ -686,6 +666,7 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
+        self.protocolhandler.close()
         hotkeymgr.unregister()
         dashboard.close()
         monitor.close()
@@ -736,7 +717,6 @@ if __name__ == "__main__":
         import ctypes
         from ctypes.wintypes import *
         EnumWindows            = ctypes.windll.user32.EnumWindows
-        EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
         GetClassName           = ctypes.windll.user32.GetClassNameW
         GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
         GetWindowText          = ctypes.windll.user32.GetWindowTextW
@@ -754,6 +734,7 @@ if __name__ == "__main__":
                     return buf.value
             return None
 
+        @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
         def enumwindowsproc(hWnd, lParam):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
@@ -764,7 +745,7 @@ if __name__ == "__main__":
                 sys.exit(0)
             return True
 
-        EnumWindows(EnumWindowsProc(enumwindowsproc), 0)
+        EnumWindows(enumwindowsproc, 0)
 
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed

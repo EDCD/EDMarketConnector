@@ -86,7 +86,15 @@ if sys.platform=='darwin':
                       'CFBundleLocalizations': sorted(set([x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]) | set([x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')])),	# https://github.com/sparkle-project/Sparkle/issues/238
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
+                      'CFBundleURLTypes': [
+                          {
+                              'CFBundleTypeRole': 'Viewer',
+                              'CFBundleURLName': 'uk.org.marginal.%s.URLScheme' % APPNAME.lower(),
+                              'CFBundleURLSchemes': ['edmc'],
+                          }
+                      ],
                       'LSMinimumSystemVersion': '10.10',
+                      'NSAppleScriptEnabled': True,
                       'NSHumanReadableCopyright': u'© 2015-2018 Jonathan Harris',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,

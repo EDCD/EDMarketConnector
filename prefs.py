@@ -98,41 +98,6 @@ class PreferencesDialog(tk.Toplevel):
         BUTTONX = 12	# indent Checkbuttons and Radiobuttons
         PADY = 2	# close spacing
 
-        credframe = nb.Frame(notebook)
-        credframe.columnconfigure(1, weight=1)
-
-        nb.Label(credframe, text=_('Credentials')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
-        ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        self.cred_label = nb.Label(credframe)
-        self.cred_label.grid(padx=PADX, columnspan=2, sticky=tk.W)
-        self.cmdr_label = nb.Label(credframe, text=_('Cmdr'))	# Main window
-        self.cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
-        self.username_label = nb.Label(credframe, text=_('Username (Email)'))	# Use same text as E:D Launcher's login dialog
-        self.username_label.grid(row=11, padx=PADX, sticky=tk.W)
-        self.password_label = nb.Label(credframe, text=_('Password'))		# Use same text as E:D Launcher's login dialog
-        self.password_label.grid(row=12, padx=PADX, sticky=tk.W)
-
-        self.cmdr_text = nb.Label(credframe)
-        self.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
-        self.username = nb.Entry(credframe)
-        self.username.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-        if monitor.cmdr:
-            self.username.focus_set()
-        self.password = nb.Entry(credframe, show=u'•')
-        self.password.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        nb.Label(credframe).grid(sticky=tk.W)	# big spacer
-        nb.Label(credframe, text=_('Privacy')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
-        ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
-        nb.Label(credframe, text=_('How do you want to be identified in the saved data')).grid(columnspan=2, padx=PADX, sticky=tk.W)
-        nb.Radiobutton(credframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
-        nb.Radiobutton(credframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
-
-        notebook.add(credframe, text=_('Identity'))		# Tab heading in settings
-
-
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
@@ -351,25 +316,6 @@ class PreferencesDialog(tk.Toplevel):
     def cmdrchanged(self, event=None):
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
-            if monitor.cmdr:
-                self.cred_label['text'] = _('Please log in with your Elite: Dangerous account details')	# Use same text as E:D Launcher's login dialog
-            else:
-                self.cred_label['text'] = _('Not available while E:D is at the main menu')	# Displayed when credentials settings are greyed out
-
-            self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = self.cmdr_text['state'] = self.username['state'] = self.password['state'] = monitor.cmdr and tk.NORMAL or tk.DISABLED
-            self.cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
-            self.username['state'] = tk.NORMAL
-            self.username.delete(0, tk.END)
-            self.password['state'] = tk.NORMAL
-            self.password.delete(0, tk.END)
-            if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                config_idx = config.get('cmdrs').index(monitor.cmdr)
-                self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
-                self.password.insert(0, config.get_password(config.get('fdev_usernames')[config_idx]) or '')
-            elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
-                # migration from <= 2.25
-                self.username.insert(0, config.get('username') or '')
-                self.password.insert(0, config.get('password') or '')
             if self.cmdr is not False:		# Don't notify on first run
                 plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
             self.cmdr = monitor.cmdr
@@ -522,19 +468,6 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
-        if self.cmdr:
-            if self.password.get().strip():
-                config.set_password(self.username.get().strip(), self.password.get().strip())	# Can fail if keyring not unlocked
-            else:
-                config.delete_password(self.username.get().strip())	# user may have cleared the password field
-            if not config.get('cmdrs'):
-                config.set('cmdrs', [self.cmdr])
-                config.set('fdev_usernames', [self.username.get().strip()])
-            else:
-                idx = config.get('cmdrs').index(self.cmdr) if self.cmdr in config.get('cmdrs') else -1
-                _putfirst('cmdrs', idx, self.cmdr)
-                _putfirst('fdev_usernames', idx, self.username.get().strip())
-
         config.set('output',
                    (self.out_td.get()   and config.OUT_MKT_TD) +
                    (self.out_csv.get()  and config.OUT_MKT_CSV) +
@@ -567,8 +500,6 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
-
-        config.set('anonymous', self.out_anon.get())
 
         # Notify
         if self.callback:
@@ -687,27 +618,3 @@ class AuthenticationDialog(tk.Toplevel):
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
         if self.callback: self.callback(None)
-
-# migration from <= 2.25. Assumes current Cmdr corresponds to the saved credentials
-def migrate(current_cmdr):
-    if current_cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
-        config.set_password(config.get('username'), config.get('password'))	# Can fail on Linux
-        config.set('cmdrs', [current_cmdr])
-        config.set('fdev_usernames', [config.get('username')])
-        config.delete('username')
-        config.delete('password')
-
-# Put current Cmdr first in the lists
-def make_current(current_cmdr):
-    if current_cmdr and config.get('cmdrs') and current_cmdr in config.get('cmdrs'):
-        idx = config.get('cmdrs').index(current_cmdr)
-        _putfirst('cmdrs', idx)
-        _putfirst('fdev_usernames', idx)
-
-def _putfirst(setting, config_idx, new_value=None):
-    assert config_idx>=0 or new_value is not None, (setting, config_idx, new_value)
-    values = config.get(setting)
-    values.insert(0, new_value if config_idx<0 else values.pop(config_idx))
-    if new_value is not None:
-        values[0] = new_value
-    config.set(setting, values)
