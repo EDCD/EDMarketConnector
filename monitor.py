@@ -28,30 +28,7 @@ elif platform=='win32':
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
     import ctypes
-
-    # _winreg that ships with Python 2 doesn't support unicode, so do this instead
     from ctypes.wintypes import *
-
-    HKEY_CURRENT_USER       = 0x80000001
-    HKEY_LOCAL_MACHINE      = 0x80000002
-    KEY_READ                = 0x00020019
-    REG_SZ    = 1
-
-    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
-    RegOpenKeyEx.restype = LONG
-    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
-
-    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
-    RegCloseKey.restype = LONG
-    RegCloseKey.argtypes = [HKEY]
-
-    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
-    RegQueryValueEx.restype = LONG
-    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
-
-    RegEnumKeyEx = ctypes.windll.advapi32.RegEnumKeyExW
-    RegEnumKeyEx.restype = LONG
-    RegEnumKeyEx.argtypes = [HKEY, DWORD, LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(DWORD), LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(FILETIME)]
 
     EnumWindows            = ctypes.windll.user32.EnumWindows
     EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
