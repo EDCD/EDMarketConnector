@@ -86,6 +86,8 @@ elif platform == 'win32':
     RegisterClass     = windll.user32.RegisterClassW
     RegisterClass.argtypes  = [POINTER(WNDCLASS)]
     DefWindowProc     = windll.user32.DefWindowProcW
+    GetParent         = windll.user32.GetParent
+    SetForegroundWindow = windll.user32.SetForegroundWindow
 
     GetMessage        = windll.user32.GetMessageW
     TranslateMessage  = windll.user32.TranslateMessage
@@ -176,6 +178,7 @@ elif platform == 'win32':
                         GlobalUnlock(msg.lParam)
                         if args.lower().startswith('open("') and args.endswith('")'):
                             self.event(urllib2.unquote(args[6:-2]).strip())
+                            SetForegroundWindow(GetParent(self.master.winfo_id()))	# raise app window
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
                         else:
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
