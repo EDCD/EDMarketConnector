@@ -133,8 +133,10 @@ class SKUError(Exception):
         return unicode(self).encode('utf-8')
 
 class CredentialsError(Exception):
+    def __init__(self, message=None):
+        self.message = message and unicode(message) or _('Error: Invalid Credentials')
     def __unicode__(self):
-        return _('Error: Invalid Credentials')
+        return self.message
     def __str__(self):
         return unicode(self).encode('utf-8')
 
@@ -154,7 +156,7 @@ class Auth:
         self.verifier = self.state = None
 
     def refresh(self):
-        # Try refresh token
+        # Try refresh token. Returns new refresh token if successful, otherwise makes new authorization request.
         self.verifier = None
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(self.cmdr)
@@ -182,22 +184,28 @@ class Auth:
         webbrowser.open('%s%s?response_type=code&approval_prompt=auto&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=edmc://auth' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state))
 
     def authorize(self, payload):
-        if not self.verifier or not self.state or not '?' in payload:
-            raise CredentialsError()
-        try:
-            data = urlparse.parse_qs(payload[payload.index('?')+1:])
-            if data['state'][0] != self.state:
-                raise CredentialsError()
-            code = data['code'][0]
-        except:
+        # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
+        if not '?' in payload:
+            raise CredentialsError()	# Not well formed
+
+        data = urlparse.parse_qs(payload[payload.index('?')+1:])
+        if not self.state or not data.get('state') or data['state'][0] != self.state:
+            raise CredentialsError()	# Unexpected reply
+
+        if not data.get('code'):
             if __debug__: print_exc()
-            raise CredentialsError()
+            if data.get('error_description'):
+                raise CredentialsError('Error: %s' % data['error_description'][0])
+            elif data.get('error'):
+                raise CredentialsError('Error: %s' % data['error'][0])
+            else:
+                raise CredentialsError()
 
         data = {
             'grant_type': 'authorization_code',
             'client_id': CLIENT_ID,
             'code_verifier': self.verifier,
-            'code': code,
+            'code': data['code'][0],
             'redirect_uri': 'edmc://auth',
         }
         r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
@@ -211,9 +219,9 @@ class Auth:
             config.set('fdev_apikeys', tokens)
             config.save()	# Save settings now for use by command-line app
             return data.get('access_token')
-        else:
-            self.dump(r)
-            return None
+
+        self.dump(r)
+        raise CredentialsError()
 
     def dump(self, r):
         print_exc()
@@ -241,21 +249,27 @@ class Session:
         if getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
-    def login(self, cmdr, is_beta=False):
+    def login(self, cmdr=None, is_beta=None):
         if not CLIENT_ID:
             raise CredentialsError()
-        credentials = {'cmdr': cmdr, 'beta': is_beta}
-        if self.credentials == credentials and self.state == Session.STATE_OK:
-            return True	# already logged in
+        if not cmdr or is_beta is None:
+            # Use existing credentials
+            if not self.credentials:
+                raise CredentialsError()	# Shouldn't happen
+            elif self.state == Session.STATE_OK:
+                return True	# already logged in
+        else:
+            credentials = {'cmdr': cmdr, 'beta': is_beta}
+            if self.credentials == credentials and self.state == Session.STATE_OK:
+                return True	# already logged in
+            else:
+                # changed account or retrying login during auth
+                self.close()
+                self.credentials = credentials
 
-        if not self.credentials or self.credentials['cmdr'] != credentials['cmdr'] or self.credentials['beta'] != credentials['beta']:
-            # changed account
-            self.close()
-
-        self.credentials = credentials
-        self.server = credentials['beta'] and SERVER_BETA or SERVER_LIVE
+        self.server = self.credentials['beta'] and SERVER_BETA or SERVER_LIVE
         self.state = Session.STATE_INIT
-        self.auth = Auth(cmdr)
+        self.auth = Auth(self.credentials['cmdr'])
         access_token = self.auth.refresh()
         if access_token:
             self.auth = None
@@ -270,13 +284,13 @@ class Session:
     def auth_callback(self, payload):
         if self.state != Session.STATE_AUTH:
             raise CredentialsError()	# Shouldn't be getting a callback
-        access_token = self.auth.authorize(payload)
-        if access_token:
+        try:
+            self.start(self.auth.authorize(payload))
             self.auth = None
-            self.start(access_token)
-        else:
-            self.state = Session.STATE_INIT
-            raise CredentialsError()	# Bad thing happened
+        except:
+            self.state = Session.STATE_INIT	# Will try to authorize again on next login or query
+            self.auth = None
+            raise	# Bad thing happened
 
     def start(self, access_token):
         self.session = requests.Session()
@@ -301,7 +315,7 @@ class Session:
             # Start again - maybe our token expired
             self.dump(r)
             self.close()
-            if self.login(self.credentials['cmdr'], self.credentials['beta']):
+            if self.login():
                 return self.query(endpoint)
 
         try:
