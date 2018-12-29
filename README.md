@@ -49,7 +49,9 @@ Windows:
 
 Setup
 --------
-The first time that you run the app you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at. Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
+The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher. If you run the game via Steam, press the Steam button on the website and enter your Steam credentials instead. This step is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at.
+
+Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
 
 ### Output
 
@@ -126,7 +128,7 @@ This app uses Elite: Dangerous' log files to track the systems and stations that
 The default location on Windows is typically `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous`.
 
 ### Credentials settings are greyed out
-You can't edit your Username/Password or EDSM Commander Name/API Key if:
+You won't be redirected to Frontier's authentication website and can't edit your EDSM or Inara credentials if:
 - Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
 - The last time you ran Elite: Dangerous you didn't enter the game. You will be able to edit these values once you've entered the game.
 - Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
