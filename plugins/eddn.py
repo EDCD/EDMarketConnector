@@ -213,7 +213,7 @@ class EDDN:
 
     def export_shipyard(self, data, is_beta):
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
-        shipyard = sorted([ship['name'].lower() for ship in ships['shipyard_list'].values() + ships['unavailable_list']])
+        shipyard = sorted([ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values() + ships['unavailable_list']])
         if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
