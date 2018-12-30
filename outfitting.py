@@ -63,6 +63,8 @@ missiletype_map = {
     'causticmissile'      : 'Dumbfire',
     'drunkmissilerack'    : 'Swarm',
     'dumbfiremissilerack' : 'Dumbfire',
+    'mining_subsurfdispmisle' : 'Seeker',
+    'mining_seismchrgwarhd'   : 'Seeker',
 }
 
 weaponmount_map = {
