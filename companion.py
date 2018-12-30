@@ -180,7 +180,8 @@ class Auth:
 
         # New request
         self.verifier = self.base64URLEncode(os.urandom(32))
-        self.state = self.base64URLEncode(os.urandom(8))	# Keep small to stay under 256 ShellExecute limit on Windows
+        self.state = self.base64URLEncode(os.urandom(8))
+        # Won't work under IE <= 10 : https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
         webbrowser.open('%s%s?response_type=code&approval_prompt=auto&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=edmc://auth' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state))
 
     def authorize(self, payload):
@@ -222,6 +223,16 @@ class Auth:
 
         self.dump(r)
         raise CredentialsError()
+
+    @staticmethod
+    def invalidate(cmdr):
+        cmdrs = config.get('cmdrs')
+        idx = cmdrs.index(cmdr)
+        tokens = config.get('fdev_apikeys') or []
+        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+        tokens[idx] = ''
+        config.set('fdev_apikeys', tokens)
+        config.save()	# Save settings now for use by command-line app
 
     def dump(self, r):
         print_exc()
@@ -359,6 +370,11 @@ class Session:
             except:
                 if __debug__: print_exc()
         self.session = None
+
+    def invalidate(self):
+        # Force a full re-authentication
+        self.close()
+        Auth.invalidate(self.credentials['cmdr'])
 
     def dump(self, r):
         print_exc()

@@ -134,7 +134,7 @@ You won't be redirected to Frontier's authentication website and can't edit your
 - Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
 
 ### Error: Wrong Cmdr
-The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. Either:
+The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. You are redirected to Frontier's authentication website and prompted again for your username and password. Either:
 
 1. You have multiple accounts and the username/password setting is not for the account that you're currently playing; or
 2. You have reset your Cmdr but Frontier's server is still supplying data for the old Cmdr.
@@ -142,8 +142,6 @@ The Frontier server that supplies data to this app is supplying data for a diffe
 If 1 check your username/password settings.
 
 If 2 this problem may or may not resolve itself in time.
-
-This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
 
 ### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
 EDMC supports this scenario if you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.

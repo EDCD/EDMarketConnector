@@ -475,6 +475,12 @@ class AppWindow:
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                 return	# early exit to avoid starting cooldown count
 
+        except companion.CmdrError as e:	# Companion API return doesn't match Journal
+            self.status['text'] = unicode(e)
+            play_bad = True
+            companion.session.invalidate()
+            self.login()
+
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
