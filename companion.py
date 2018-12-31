@@ -163,22 +163,31 @@ class Auth:
         tokens = config.get('fdev_apikeys') or []
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
-            data = {
-                'grant_type': 'refresh_token',
-                'client_id': CLIENT_ID,
-                'refresh_token': tokens[idx],
-            }
-            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
-            if r.status_code == requests.codes.ok:
-                data = r.json()
-                tokens[idx] = data.get('refresh_token', '')
-                config.set('fdev_apikeys', tokens)
-                config.save()	# Save settings now for use by command-line app
-                return data.get('access_token')
-            else:
-                self.dump(r)
+            try:
+                data = {
+                    'grant_type': 'refresh_token',
+                    'client_id': CLIENT_ID,
+                    'refresh_token': tokens[idx],
+                }
+                r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
+                if r.status_code == requests.codes.ok:
+                    print 'Auth\tRefreshed token for %s' % self.cmdr
+                    data = r.json()
+                    tokens[idx] = data.get('refresh_token', '')
+                    config.set('fdev_apikeys', tokens)
+                    config.save()	# Save settings now for use by command-line app
+                    return data.get('access_token')
+                else:
+                    print 'Auth\tCan\'t refresh token for %s' % self.cmdr
+                    self.dump(r)
+            except:
+                print 'Auth\tCan\'t refresh token for %s' % self.cmdr
+                print_exc()
+        else:
+            print 'Auth\tNo token for %s' % self.cmdr
 
         # New request
+        print 'Auth\tNew authorization request for %s' % self.cmdr
         self.verifier = self.base64URLEncode(os.urandom(32))
         self.state = self.base64URLEncode(os.urandom(8))
         # Won't work under IE <= 10 : https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
@@ -187,14 +196,16 @@ class Auth:
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
         if not '?' in payload:
+            print 'Auth\tMalformed response "%s"' % payload.encode('utf-8')
             raise CredentialsError()	# Not well formed
 
         data = urlparse.parse_qs(payload[payload.index('?')+1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
+            print 'Auth\tUnexpected response "%s"' % payload.encode('utf-8')
             raise CredentialsError()	# Unexpected reply
 
         if not data.get('code'):
-            if __debug__: print_exc()
+            print 'Auth\tNegative response "%s"' % payload.encode('utf-8')
             if data.get('error_description'):
                 raise CredentialsError('Error: %s' % data['error_description'][0])
             elif data.get('error'):
@@ -202,30 +213,38 @@ class Auth:
             else:
                 raise CredentialsError()
 
-        data = {
-            'grant_type': 'authorization_code',
-            'client_id': CLIENT_ID,
-            'code_verifier': self.verifier,
-            'code': data['code'][0],
-            'redirect_uri': 'edmc://auth',
-        }
-        r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
-        if r.status_code == requests.codes.ok:
-            data = r.json()
-            cmdrs = config.get('cmdrs')
-            idx = cmdrs.index(self.cmdr)
-            tokens = config.get('fdev_apikeys') or []
-            tokens = tokens + [''] * (len(cmdrs) - len(tokens))
-            tokens[idx] = data.get('refresh_token', '')
-            config.set('fdev_apikeys', tokens)
-            config.save()	# Save settings now for use by command-line app
-            return data.get('access_token')
+        try:
+            data = {
+                'grant_type': 'authorization_code',
+                'client_id': CLIENT_ID,
+                'code_verifier': self.verifier,
+                'code': data['code'][0],
+                'redirect_uri': 'edmc://auth',
+            }
+            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
+            if r.status_code == requests.codes.ok:
+                print 'Auth\tNew token for %s' % self.cmdr
+                data = r.json()
+                cmdrs = config.get('cmdrs')
+                idx = cmdrs.index(self.cmdr)
+                tokens = config.get('fdev_apikeys') or []
+                tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+                tokens[idx] = data.get('refresh_token', '')
+                config.set('fdev_apikeys', tokens)
+                config.save()	# Save settings now for use by command-line app
+                return data.get('access_token')
+            else:
+                print 'Auth\tCan\'t get token for %s' % self.cmdr
+                self.dump(r)
+        except:
+            print 'Auth\tCan\'t get token for %s' % self.cmdr
+            print_exc()
 
-        self.dump(r)
         raise CredentialsError()
 
     @staticmethod
     def invalidate(cmdr):
+        print 'Auth\tInvalidated token for %s' % cmdr
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
