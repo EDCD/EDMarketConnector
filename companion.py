@@ -280,6 +280,7 @@ class Session:
             os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
     def login(self, cmdr=None, is_beta=None):
+        # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
             raise CredentialsError()
         if not cmdr or is_beta is None:
@@ -341,21 +342,20 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.status_code != requests.codes.ok:
+        try:
+            r.raise_for_status()
+            data = r.json()	# Will fail here if token expired since response is empty
+        except:
             # Start again - maybe our token expired
             self.dump(r)
             self.close()
             if self.login():
                 return self.query(endpoint)
+            else:
+                raise CredentialsError()
 
-        try:
-            data = r.json()
-            if 'timestamp' not in data:
-                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
-        except:
-            self.dump(r)
-            raise ServerError()
-
+        if 'timestamp' not in data:
+            data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
         return data
 
     def profile(self):

@@ -372,7 +372,7 @@ class AppWindow:
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 self.status['text'] = ''
-        except companion.ServerError as e:
+        except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = unicode(e)
         except Exception as e:
             if __debug__: print_exc()
