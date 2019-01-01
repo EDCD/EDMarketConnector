@@ -171,23 +171,23 @@ class Auth:
                 }
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
                 if r.status_code == requests.codes.ok:
-                    print 'Auth\tRefreshed token for %s' % self.cmdr
+                    print 'Auth\tRefreshed token for %s' % self.cmdr.encode('utf-8')
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
                     config.set('fdev_apikeys', tokens)
                     config.save()	# Save settings now for use by command-line app
                     return data.get('access_token')
                 else:
-                    print 'Auth\tCan\'t refresh token for %s' % self.cmdr
+                    print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
                     self.dump(r)
             except:
-                print 'Auth\tCan\'t refresh token for %s' % self.cmdr
+                print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
                 print_exc()
         else:
-            print 'Auth\tNo token for %s' % self.cmdr
+            print 'Auth\tNo token for %s' % self.cmdr.encode('utf-8')
 
         # New request
-        print 'Auth\tNew authorization request for %s' % self.cmdr
+        print 'Auth\tNew authorization request'
         self.verifier = self.base64URLEncode(os.urandom(32))
         self.state = self.base64URLEncode(os.urandom(8))
         # Won't work under IE <= 10 : https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
@@ -223,7 +223,7 @@ class Auth:
             }
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
             if r.status_code == requests.codes.ok:
-                print 'Auth\tNew token for %s' % self.cmdr
+                print 'Auth\tNew token for %s' % self.cmdr.encode('utf-8')
                 data = r.json()
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
@@ -234,17 +234,17 @@ class Auth:
                 config.save()	# Save settings now for use by command-line app
                 return data.get('access_token')
             else:
-                print 'Auth\tCan\'t get token for %s' % self.cmdr
+                print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
                 self.dump(r)
         except:
-            print 'Auth\tCan\'t get token for %s' % self.cmdr
+            print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
             print_exc()
 
         raise CredentialsError()
 
     @staticmethod
     def invalidate(cmdr):
-        print 'Auth\tInvalidated token for %s' % cmdr
+        print 'Auth\tInvalidated token for %s' % cmdr.encode('utf-8')
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
