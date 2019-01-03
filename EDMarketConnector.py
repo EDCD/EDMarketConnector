@@ -465,6 +465,8 @@ class AppWindow:
                         if config.getint('output') & config.OUT_MKT_TD:
                             td.export(fixed)
 
+                self.holdofftime = querytime + companion.holdoff
+
         # Companion API problem
         except (companion.ServerError, companion.ServerLagging) as e:
             if retrying:
@@ -491,7 +493,6 @@ class AppWindow:
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
-        self.holdofftime = querytime + companion.holdoff
         self.cooldown()
 
     def retry_for_shipyard(self, tries):

@@ -342,6 +342,13 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
+        if r.url.startswith(SERVER_AUTH):
+           # Redirected back to Auth server - force full re-authentication
+            self.dump(r)
+            self.invalidate()
+            self.login()
+            raise CredentialsError()
+
         try:
             r.raise_for_status()
             data = r.json()	# Will fail here if token expired since response is empty
