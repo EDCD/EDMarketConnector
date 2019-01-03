@@ -49,9 +49,9 @@ Windows:
 
 Setup
 --------
-The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher. If you run the game via Steam and **don't** have a Frontier login, press the Steam button on the website and enter your Steam credentials instead. This step is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at.
+The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher. If you run the game via Steam and **don't** have a Frontier login, press the Steam button on the website and enter your Steam credentials instead.
 
-Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
+This step is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at. Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
 
 ### Output
 
