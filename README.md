@@ -122,6 +122,18 @@ Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
 Troubleshooting
 --------
 
+### App repeatedly opens the Frontier's authentication website
+The authentication didn't complete correctly for some reason. This can be caused by:
+- Using Internet Explorer. IE is [known](https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/) to be broken. Please (temporarily) set your default browser to Edge, Chrome or Firefox and retry.
+- Entering credentials for a different Cmdr - see [Error: Wrong Cmdr](#error-wrong-cmdr).
+- Entering Steam credentials instead of Frontier credentials - see [Error: User not found](#error-user-not-found).
+
+### 500 internal server error
+Frontier's authentication website sometimes gets overloaded and displays this error. Please try again later.
+
+### Error: User not found
+Please enter your Frontier credentials into the authentication website, not your Steam credentials.
+
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
