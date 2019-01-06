@@ -403,9 +403,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         # strip out properties disallowed by the schema
         for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
             entry.pop(thing, None)
-        for faction in entry.get('Factions', []):
-            for thing in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']:
-                faction.pop(thing, None)
+        if 'Factions' in entry:
+            # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
+            entry['Factions'] = [ {k: v for k, v in f.iteritems() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
 
         # add planet to Docked event for planetary stations if known
         if entry['event'] == 'Docked' and this.planet:
