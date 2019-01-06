@@ -257,7 +257,7 @@ class EDDN:
         modules = entry.get('Items') or []
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name']) for module in modules if module['Name'] != 'int_planetapproachsuite'])
         if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
-            self.send(data['commander']['name'], {
+            self.send(cmdr, {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
                     ('timestamp',   entry['timestamp']),
