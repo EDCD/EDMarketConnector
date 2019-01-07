@@ -132,6 +132,8 @@ The authentication didn't complete correctly for some reason. This can be caused
 Frontier's authentication website sometimes gets overloaded and displays this error. Please try again later.
 
 ### Error: User not found
+Your Steam account may not be linked to your Frontier account (you can check whether you have any external accounts linked on the [Frontier store](https://www.frontierstore.net/frontier_partnerkeys/)).
+
 Please enter your Frontier credentials into the authentication website, not your Steam credentials.
 
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
