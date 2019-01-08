@@ -371,7 +371,7 @@ class AppWindow:
         self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
-                self.status['text'] = ''
+                self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = unicode(e)
         except Exception as e:
@@ -589,7 +589,7 @@ class AppWindow:
     def auth(self, event=None):
         try:
             companion.session.auth_callback(self.protocolhandler.lastpayload)
-            self.status['text'] = ''
+            self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
         except companion.ServerError as e:
             self.status['text'] = unicode(e)
         except Exception as e:

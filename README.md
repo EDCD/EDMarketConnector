@@ -124,12 +124,16 @@ Troubleshooting
 
 ### App repeatedly opens the Frontier's authentication website
 The authentication didn't complete correctly for some reason. This can be caused by:
+
 - Using Internet Explorer. IE is [known](https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/) to be broken. Please (temporarily) set your default browser to Edge, Chrome or Firefox and retry.
 - Entering credentials for a different Cmdr - see [Error: Wrong Cmdr](#error-wrong-cmdr).
 - Entering Steam credentials instead of Frontier credentials - see [Error: User not found](#error-user-not-found).
 
 ### 500 internal server error
-Frontier's authentication website sometimes gets overloaded and displays this error. Please try again later.
+Either:
+
+- You pressed the "Approve" button on Frontier's authentication website twice. This is harmless; if the app isn't displaying any error messages and isn't redirecting again to Frontier's authentication website then all is fine.
+- Frontier's authentication website sometimes gets overloaded and displays this error. Please try again later.
 
 ### Error: User not found
 Your Steam account may not be linked to your Frontier account (you can check whether you have any external accounts linked on the [Frontier store](https://www.frontierstore.net/frontier_partnerkeys/)).

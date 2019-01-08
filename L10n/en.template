@@ -1,9 +1,6 @@
 /* Language name */
 "!Language" = "English";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "A verification code has now been sent to the{CR}email address associated with your Elite account.";
-
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "About {APP}";
 
@@ -24,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Appearance";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Authentication successful";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatically update on docking";
@@ -217,7 +217,6 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
-
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara credentials";
 
@@ -328,9 +327,6 @@
 
 /* [prefs.py] */
 "Please choose what data to save" = "Please choose what data to save";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Please enter the code into the box below.";
 
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Plugins";
