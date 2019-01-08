@@ -93,6 +93,7 @@ class EDLogs(FileSystemEventHandler):
             'Cargo'        : defaultdict(int),
             'Credits'      : None,
             'FID'          : None,	# Frontier Cmdr ID
+            'Horizons'     : None,	# Does this user have Horizons?
             'Loan'         : None,
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
@@ -314,6 +315,7 @@ class EDLogs(FileSystemEventHandler):
                     'Cargo'        : defaultdict(int),
                     'Credits'      : None,
                     'FID'          : None,
+                    'Horizons'     : None,
                     'Loan'         : None,
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
@@ -351,6 +353,7 @@ class EDLogs(FileSystemEventHandler):
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
                     'FID'          : entry.get('FID'),	# From 3.3
+                    'Horizons'     : entry['Horizons'],	# From 3.0
                     'Loan'         : entry['Loan'],
                     'Engineers'    : {},
                     'Rank'         : {},

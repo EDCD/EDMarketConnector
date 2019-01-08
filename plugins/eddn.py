@@ -26,6 +26,9 @@ from companion import category_map
 
 this = sys.modules[__name__]	# For holding module globals
 
+# Per-Cmdr Horizons flag
+this.horizons = None
+
 # Track location to add to Journal events
 this.systemaddress = None
 this.coordinates = None
@@ -158,7 +161,7 @@ class EDDN:
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data, is_beta):
+    def export_commodities(self, data, is_beta, horizons):
         commodities = []
         for commodity in data['lastStarport'].get('commodities') or []:
             if (category_map.get(commodity['categoryname'], True) and	# Check marketable
@@ -195,7 +198,7 @@ class EDDN:
             })
         this.commodities = commodities
 
-    def export_outfitting(self, data, is_beta):
+    def export_outfitting(self, data, is_beta, horizons):
         modules = data['lastStarport'].get('modules') or {}
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
         if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
@@ -206,12 +209,13 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
+                    ('horizons',    horizons),
                     ('modules',     outfitting),
                 ]),
             })
         this.outfitting = outfitting
 
-    def export_shipyard(self, data, is_beta):
+    def export_shipyard(self, data, is_beta, horizons):
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
         shipyard = sorted([ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values() + ships['unavailable_list']])
         if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -222,6 +226,7 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
+                    ('horizons',    horizons),
                     ('ships',       shipyard),
                 ]),
             })
@@ -264,6 +269,7 @@ class EDDN:
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
+                    ('horizons',    entry['Horizons']),
                     ('modules',     outfitting),
                 ]),
             })
@@ -280,6 +286,7 @@ class EDDN:
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
+                    ('horizons',    entry['Horizons']),
                     ('ships',       shipyard),
                 ]),
             })
@@ -378,6 +385,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 filtered[k] = v
         return filtered
 
+    # Track Horizons
+    this.horizons = state['Horizons']
+
     # Track location
     if entry['event'] in ['Location', 'FSDJump', 'Docked']:
         if entry['event'] == 'Location':
@@ -464,9 +474,9 @@ def cmdr_data(data, is_beta):
             if not old_status:
                 status['text'] = _('Sending data to EDDN...')
                 status.update_idletasks()
-            this.eddn.export_commodities(data, is_beta)
-            this.eddn.export_outfitting(data, is_beta)
-            this.eddn.export_shipyard(data, is_beta)
+            this.eddn.export_commodities(data, is_beta, this.horizons)
+            this.eddn.export_outfitting(data, is_beta, this.horizons)
+            this.eddn.export_shipyard(data, is_beta, this.horizons)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
