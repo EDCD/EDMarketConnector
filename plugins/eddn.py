@@ -196,8 +196,9 @@ class EDDN:
         this.commodities = commodities
 
     def export_outfitting(self, data, is_beta):
+        economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
-        horizons = any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues())	# Should always hit Int_PlanetApproachSuite
+        horizons = any(economy['name'] == 'Colony' for economy in economies.itervalues()) or any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues())	# Should always hit Int_PlanetApproachSuite other than at engineer bases
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
         if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
             self.send(data['commander']['name'], {
@@ -214,9 +215,10 @@ class EDDN:
         this.outfitting = outfitting
 
     def export_shipyard(self, data, is_beta):
+        economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
-        horizons = any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues()) or any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in (ships['shipyard_list'] or {}).values())
+        horizons = any(economy['name'] == 'Colony' for economy in economies.itervalues()) or any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues()) or any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in (ships['shipyard_list'] or {}).values())
         shipyard = sorted([ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values() + ships['unavailable_list']])
         if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
             self.send(data['commander']['name'], {
