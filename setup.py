@@ -193,9 +193,9 @@ else:
         shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
         for lcid in lcids[1:]:
             shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
-            os.system(r'cscript "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
+            os.system(r'cscript /nologo "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
             os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
-            os.system(r'cscript "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+            os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
 
 # Make appcast entry
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
