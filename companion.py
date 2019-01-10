@@ -190,7 +190,7 @@ class Auth:
         self.verifier = self.base64URLEncode(os.urandom(32))
         self.state = self.base64URLEncode(os.urandom(8))
         # Won't work under IE <= 10 : https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
-        webbrowser.open('%s%s?response_type=code&audience=frontier&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=edmc://auth' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state))
+        webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=edmc://auth' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state))
 
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
