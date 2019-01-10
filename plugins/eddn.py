@@ -26,9 +26,6 @@ from companion import category_map
 
 this = sys.modules[__name__]	# For holding module globals
 
-# Per-Cmdr Horizons flag
-this.horizons = None
-
 # Track location to add to Journal events
 this.systemaddress = None
 this.coordinates = None
@@ -161,7 +158,7 @@ class EDDN:
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data, is_beta, horizons):
+    def export_commodities(self, data, is_beta):
         commodities = []
         for commodity in data['lastStarport'].get('commodities') or []:
             if (category_map.get(commodity['categoryname'], True) and	# Check marketable
@@ -198,7 +195,7 @@ class EDDN:
             })
         this.commodities = commodities
 
-    def export_outfitting(self, data, is_beta, horizons):
+    def export_outfitting(self, data, is_beta):
         modules = data['lastStarport'].get('modules') or {}
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
         if outfitting and this.outfitting != outfitting:	# Don't send empty modules list - schema won't allow it
@@ -209,13 +206,12 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
                     ('modules',     outfitting),
                 ]),
             })
         this.outfitting = outfitting
 
-    def export_shipyard(self, data, is_beta, horizons):
+    def export_shipyard(self, data, is_beta):
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
         shipyard = sorted([ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values() + ships['unavailable_list']])
         if shipyard and this.shipyard != shipyard:	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -226,7 +222,6 @@ class EDDN:
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
                     ('ships',       shipyard),
                 ]),
             })
@@ -361,7 +356,7 @@ def prefsvarchanged(event=None):
 
 def prefs_changed(cmdr, is_beta):
     config.set('output',
-               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP)) +
+               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP |config. OUT_MKT_MANUAL)) +
                (this.eddn_station.get() and config.OUT_MKT_EDDN) +
                (this.eddn_system.get() and config.OUT_SYS_EDDN) +
                (this.eddn_delay.get() and config.OUT_SYS_DELAY))
@@ -384,9 +379,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             else:
                 filtered[k] = v
         return filtered
-
-    # Track Horizons
-    this.horizons = state['Horizons']
 
     # Track location
     if entry['event'] in ['Location', 'FSDJump', 'Docked']:
@@ -474,9 +466,9 @@ def cmdr_data(data, is_beta):
             if not old_status:
                 status['text'] = _('Sending data to EDDN...')
                 status.update_idletasks()
-            this.eddn.export_commodities(data, is_beta, this.horizons)
-            this.eddn.export_outfitting(data, is_beta, this.horizons)
-            this.eddn.export_shipyard(data, is_beta, this.horizons)
+            this.eddn.export_commodities(data, is_beta)
+            this.eddn.export_outfitting(data, is_beta)
+            this.eddn.export_shipyard(data, is_beta)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()

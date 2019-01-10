@@ -171,7 +171,6 @@ class Auth:
                 }
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
                 if r.status_code == requests.codes.ok:
-                    print 'Auth\tRefreshed token for %s' % self.cmdr.encode('utf-8')
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
                     config.set('fdev_apikeys', tokens)
