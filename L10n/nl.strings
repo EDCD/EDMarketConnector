@@ -1,11 +1,5 @@
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Scheepswerf";
-
 /* Language name */
 "!Language" = "Nederlands";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Een verificatie code is zojuist verstuurd naar het{CR}e-mail adres behorende bij je Elite account";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Over {APP}";
@@ -27,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Vormgeving";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Authenticatie voltooid";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatisch bijwerken na de landing";
@@ -61,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Cmdr naam";
-
 /* Ranking. [stats.py] */
 "Combat" = "Gevechts rang";
 
@@ -88,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "CQC";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Inlog gegevens";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
@@ -106,7 +97,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Standaard";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Stel verzending uit tot na het docken";
 
 /* List of plugins in settings. [prefs.py] */
@@ -145,7 +136,7 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Fout: Kan geen verbinding maken met EDDN";
 
 /* [edsm.py] */
@@ -165,9 +156,6 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Fout: Ongeldige inlog gegevens";
-
-/* [companion.py] */
-"Error: Verification failed" = "Fout: Verificatie mislukt";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Fout: Verkeerde CMDR";
@@ -222,12 +210,6 @@
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
-
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Hoe wil je geïdentificeerd worden in de opgeslagen data";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Identiteit";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Toetscombinaties";
@@ -295,9 +277,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normale tekst";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Niet beschikbaar zolang E:D het hoofdmenu weergeeft";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -318,9 +297,6 @@
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Wachtwoord";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
@@ -343,12 +319,6 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Welke gegevens wilt u opslaan?";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Geef de authenticatie code hieronder in.";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Log in met uw Elite: Dangerous account gegevens";
-
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Plugins";
 
@@ -367,17 +337,17 @@
 /* [prefs.py] */
 "Preferences" = "Preferences";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Voorkeur websites";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Privacy";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Privacybeleid";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseudo-geanonimiseerd ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -421,13 +391,13 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* Output setting. [prefs.py] */
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Stuur station gegevens naar het Elite Dangerous Data Network";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Stuur systeem en scan gegevens naar het Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Bezig data te versturen naar EDDN...";
 
 /* Empire rank. [stats.py] */
@@ -444,6 +414,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Schepen";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Scheepswerf";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
@@ -486,9 +459,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Bijwerken";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Gebruikersnaam (e-mail)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Waarde";

@@ -1,29 +1,5 @@
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje na Inara";
-
-/* [inara.py] */
-"Error: Inara {MSG}" = "Greška: Inara {MSG}";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inara kredencijali";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Željeni web sajtovi";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Shipyard";
-
 /* Language name */
 "!Language" = "Srpski (Latinica)";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Verifikacioni kod je poslat na{CR}email adresu vezanu za vaš Elite nalog.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "O {APP}";
@@ -45,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Izgled";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Autentifikacija uspešna";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatsko slanje prilikom pristajanja";
@@ -79,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Cmdr ime";
-
 /* Ranking. [stats.py] */
 "Combat" = "Borba (Combat)";
 
@@ -106,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "CQC";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Kredencijali";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
@@ -124,7 +97,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Podrazumevano";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Odloži slanje pre pristajanja";
 
 /* List of plugins in settings. [prefs.py] */
@@ -163,11 +136,14 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Greška: Nemoguće povezivanje na EDDN";
 
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Greška: Nemoguće povezivanje na EDSM";
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje na Inara";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
@@ -181,11 +157,11 @@
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Greška: SKU problem na Frontier Serveru.";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Greška: Pogrešni kredencijali";
+/* [inara.py] */
+"Error: Inara {MSG}" = "Greška: Inara {MSG}";
 
 /* [companion.py] */
-"Error: Verification failed" = "Greška: Verifikacija nije uspela";
+"Error: Invalid Credentials" = "Greška: Pogrešni kredencijali";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Greška: Pogrešan Cmdr";
@@ -241,11 +217,8 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Skraćenica";
 
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Kako želite da budete identifikovani u snimljenim podacima";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Identitet";
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara kredencijali";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Skraćenica";
@@ -313,9 +286,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normalan tekst";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Nedostupno dok je E:D u glavnom meniju";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -336,9 +306,6 @@
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Password";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
@@ -361,12 +328,6 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Izaberite koji se podaci snimaju";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Unesite kod u polje ispod";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Prijavite se sa svojim Elite: Dangerous nalogom";
-
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Dodaci (plugins)";
 
@@ -385,17 +346,17 @@
 /* [prefs.py] */
 "Preferences" = "Podešavanja";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Željeni web sajtovi";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Privatnost";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Polisa o privatnosti";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseudo-anonimizirani ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -439,13 +400,19 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* Output setting. [prefs.py] */
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
+
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Slanje podataka o stanici na Elite Dangerous Data Network";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Slanje podataka o sistemu i skeniranju na Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Slanje podataka na EDDN...";
 
 /* Empire rank. [stats.py] */
@@ -462,6 +429,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Brodovi";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Shipyard";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
@@ -504,9 +474,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Osveži";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Username (Email)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Vrednost";
