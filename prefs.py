@@ -92,7 +92,7 @@ class PreferencesDialog(tk.Toplevel):
         frame.grid(sticky=tk.NSEW)
 
         notebook = nb.Notebook(frame)
-        notebook.bind('<<NotebookTabChanged>>', self.outvarchanged)	# Recompute on tab change
+        notebook.bind('<<NotebookTabChanged>>', self.tabchanged)	# Recompute on tab change
 
         PADX = 10
         BUTTONX = 12	# indent Checkbuttons and Radiobuttons
@@ -279,7 +279,6 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(plugsframe, text=_('Plugins'))		# Tab heading in settings
 
-
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
         else:
@@ -300,6 +299,7 @@ class PreferencesDialog(tk.Toplevel):
         hotkeymgr.unregister()
 
         # wait for window to appear on screen before calling grab_set
+        self.parent.update_idletasks()
         self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
         self.wait_visibility()
         self.grab_set()
@@ -324,14 +324,23 @@ class PreferencesDialog(tk.Toplevel):
         # Poll
         self.cmdrchanged_alarm = self.after(1000, self.cmdrchanged)
 
+    def tabchanged(self, event):
+        self.outvarchanged()
+        if platform == 'darwin':
+            # Hack to recompute size so that buttons show up under Mojave
+            notebook = event.widget
+            frame = self.nametowidget(notebook.winfo_parent())
+            temp = nb.Label(frame)
+            temp.grid()
+            temp.update_idletasks()
+            temp.destroy()
+
     def outvarchanged(self, event=None):
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
-        if not logvalid:
-            self.cred_label['text'] = 'Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
         self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = tk.NORMAL or tk.DISABLED
         local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
