@@ -3,27 +3,30 @@
 
 import threading
 import urllib2
-from sys import platform
+import sys
 
 from config import appname
 
 
 class GenericProtocolHandler:
 
-    def __init__(self, master):
-        self.master = master
+    def __init__(self):
+        self.redirect = 'edmc://auth'	# Base redirection URL
+        self.master = None
         self.lastpayload = None
+
+    def setmaster(self, master):
+        self.master = master
 
     def close(self):
         pass
 
     def event(self, url):
-        if url.startswith('edmc://'):
-            self.lastpayload = url[7:]
-            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+        self.lastpayload = url
+        self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
-if platform == 'darwin':
+if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
 
     import struct
     import objc
@@ -36,15 +39,14 @@ if platform == 'darwin':
 
         POLL = 100	# ms
 
-        def __init__(self, master):
-            GenericProtocolHandler.__init__(self, master)
+        def __init__(self):
+            GenericProtocolHandler.__init__(self)
             self.eventhandler = EventHandler.alloc().init()
-            self.eventhandler.handler = self
             self.lasturl = None
 
         def poll(self):
             # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash, so poll.
-            if self.lasturl:
+            if self.lasturl and self.lasturl.startswith(self.redirect):
                 self.event(self.lasturl)
                 self.lasturl = None
 
@@ -56,11 +58,11 @@ if platform == 'darwin':
             return self
 
         def handleEvent_withReplyEvent_(self, event, replyEvent):
-            self.handler.lasturl = urllib2.unquote(event.paramDescriptorForKeyword_(keyDirectObject).stringValue()).strip()
-            self.handler.master.after(ProtocolHandler.POLL, self.handler.poll)
+            protocolhandler.lasturl = urllib2.unquote(event.paramDescriptorForKeyword_(keyDirectObject).stringValue()).strip()
+            protocolhandler.master.after(ProtocolHandler.POLL, protocolhandler.poll)
 
 
-elif platform == 'win32':
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False):
 
     from ctypes import *
     from ctypes.wintypes import *
@@ -135,8 +137,8 @@ elif platform == 'win32':
 
     class ProtocolHandler(GenericProtocolHandler):
 
-        def __init__(self, master):
-            GenericProtocolHandler.__init__(self, master)
+        def __init__(self):
+            GenericProtocolHandler.__init__(self)
             self.thread = threading.Thread(target=self.worker, name='DDE worker')
             self.thread.daemon = True
             self.thread.start()
@@ -177,7 +179,9 @@ elif platform == 'win32':
                         args = wstring_at(GlobalLock(msg.lParam)).strip()
                         GlobalUnlock(msg.lParam)
                         if args.lower().startswith('open("') and args.endswith('")'):
-                            self.event(urllib2.unquote(args[6:-2]).strip())
+                            url = urllib2.unquote(args[6:-2]).strip()
+                            if url.startswith(self.redirect):
+                                self.event(url)
                             SetForegroundWindow(GetParent(self.master.winfo_id()))	# raise app window
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
                         else:
@@ -190,8 +194,47 @@ elif platform == 'win32':
             else:
                 print 'Failed to register DDE for cAPI'
 
-else:	# Linux
+else:	# Linux / Run from source
+
+    from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
     class ProtocolHandler(GenericProtocolHandler):
-        pass
 
+        def __init__(self):
+            GenericProtocolHandler.__init__(self)
+            self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
+            self.redirect = 'http://localhost:%d/auth' % self.httpd.server_port
+            self.thread = threading.Thread(target=self.worker, name='DDE worker')
+            self.thread.daemon = True
+            self.thread.start()
+
+        def close(self):
+            thread = self.thread
+            if thread:
+                self.thread = None
+                self.httpd.shutdown()
+                thread.join()	# Wait for it to quit
+
+        def worker(self):
+            self.httpd.serve_forever()
+
+    class HTTPRequestHandler(BaseHTTPRequestHandler):
+
+        def do_HEAD(self):
+            self.do_GET()
+
+        def do_GET(self):
+            url = urllib2.unquote(self.path)
+            if url.startswith('/auth'):
+                protocolhandler.event(url)
+                self.send_response(200)
+            else:
+                self.send_response(404)	# Not found
+            self.end_headers()
+
+        def log_request(self, code, size=None):
+            pass
+
+
+# singleton
+protocolhandler = ProtocolHandler()

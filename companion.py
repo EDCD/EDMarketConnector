@@ -16,11 +16,13 @@ import webbrowser
 import zlib
 
 from config import appname, appversion, config
+from protocol import protocolhandler
+
 
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
 
-CLIENT_ID   = None 	# Replace with FDev Client Id
+CLIENT_ID   = os.getenv('CLIENT_ID') 	# Obtain from https://auth.frontierstore.net/client/signup
 SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH    = '/auth'
 URL_TOKEN   = '/token'
@@ -189,8 +191,8 @@ class Auth:
         print 'Auth\tNew authorization request'
         self.verifier = self.base64URLEncode(os.urandom(32))
         self.state = self.base64URLEncode(os.urandom(8))
-        # Won't work under IE <= 10 : https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
-        webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=edmc://auth' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state))
+        # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
+        webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=%s' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state, protocolhandler.redirect))
 
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
@@ -218,7 +220,7 @@ class Auth:
                 'client_id': CLIENT_ID,
                 'code_verifier': self.verifier,
                 'code': data['code'][0],
-                'redirect_uri': 'edmc://auth',
+                'redirect_uri': protocolhandler.redirect,
             }
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
             if r.status_code == requests.codes.ok:
@@ -311,11 +313,11 @@ class Session:
             # Wait for callback
 
     # Callback from protocol handler
-    def auth_callback(self, payload):
+    def auth_callback(self):
         if self.state != Session.STATE_AUTH:
             raise CredentialsError()	# Shouldn't be getting a callback
         try:
-            self.start(self.auth.authorize(payload))
+            self.start(self.auth.authorize(protocolhandler.lastpayload))
             self.auth = None
         except:
             self.state = Session.STATE_INIT	# Will try to authorize again on next login or query

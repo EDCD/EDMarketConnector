@@ -219,22 +219,22 @@ Windows:
 Running from source
 --------
 
-Download and extract the source code of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+Download and extract the [latest source code](https://github.com/Marginal/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`). To use the cAPI you will need to visit the [Frontier authentication website](https://auth.frontierstore.net/), login with your Frontier credentials, register a "Developer App" and obtain the "Client Id".
 
 Mac:
 
 * Requires the Python “keyring”, “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U keyring requests watchdog py2app` .
-* Run with `python ./EDMarketConnector.py` .
+* Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX python ./EDMarketConnector.py` .
 
 Windows:
 
 * Requires Python2.7 and the Python “keyring”, “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
-* Run with `EDMarketConnector.py` .
+* Run with `set CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX && EDMarketConnector.py` .
 
 Linux:
 
 * Requires the Python “imaging-tk”, “iniparse”, “keyring” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-keyring python-requests` .
-* Run with `./EDMarketConnector.py` .
+* Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX ./EDMarketConnector.py` .
 
 Command-line
 --------

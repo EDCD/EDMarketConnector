@@ -53,7 +53,7 @@ import prefs
 import plug
 from hotkey import hotkeymgr
 from monitor import monitor
-from protocol import ProtocolHandler
+from protocol import protocolhandler
 from dashboard import dashboard
 from theme import theme
 
@@ -71,7 +71,7 @@ class AppWindow:
     def __init__(self, master):
 
         # Start a protocol handler to handle cAPI registration
-        self.protocolhandler = ProtocolHandler(master)
+        protocolhandler.setmaster(master)
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
@@ -588,7 +588,7 @@ class AppWindow:
     # cAPI auth
     def auth(self, event=None):
         try:
-            companion.session.auth_callback(self.protocolhandler.lastpayload)
+            companion.session.auth_callback()
             self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
         except companion.ServerError as e:
             self.status['text'] = unicode(e)
@@ -680,7 +680,7 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
-        self.protocolhandler.close()
+        protocolhandler.close()
         hotkeymgr.unregister()
         dashboard.close()
         monitor.close()
