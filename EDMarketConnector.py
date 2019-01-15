@@ -70,8 +70,8 @@ class AppWindow:
 
     def __init__(self, master):
 
-        # Start a protocol handler to handle cAPI registration
-        protocolhandler.setmaster(master)
+        # Start a protocol handler to handle cAPI registration. Requires main window to exist.
+        protocolhandler.start(master)
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 

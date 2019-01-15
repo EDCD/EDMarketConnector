@@ -15,7 +15,7 @@ class GenericProtocolHandler:
         self.master = None
         self.lastpayload = None
 
-    def setmaster(self, master):
+    def start(self, master):
         self.master = master
 
     def close(self):
@@ -39,10 +39,10 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
 
         POLL = 100	# ms
 
-        def __init__(self):
-            GenericProtocolHandler.__init__(self)
-            self.eventhandler = EventHandler.alloc().init()
+        def start(self, master):
+            GenericProtocolHandler.start(self, master)
             self.lasturl = None
+            self.eventhandler = EventHandler.alloc().init()
 
         def poll(self):
             # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash, so poll.
@@ -139,6 +139,10 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False):
 
         def __init__(self):
             GenericProtocolHandler.__init__(self)
+            self.thread = None
+
+        def start(self, master):
+            GenericProtocolHandler.start(self, master)
             self.thread = threading.Thread(target=self.worker, name='DDE worker')
             self.thread.daemon = True
             self.thread.start()
@@ -204,7 +208,11 @@ else:	# Linux / Run from source
             GenericProtocolHandler.__init__(self)
             self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
             self.redirect = 'http://localhost:%d/auth' % self.httpd.server_port
-            self.thread = threading.Thread(target=self.worker, name='DDE worker')
+            self.thread = None
+
+        def start(self, master):
+            GenericProtocolHandler.start(self, master)
+            self.thread = threading.Thread(target=self.worker, name='OAuth worker')
             self.thread.daemon = True
             self.thread.start()
 
@@ -212,7 +220,8 @@ else:	# Linux / Run from source
             thread = self.thread
             if thread:
                 self.thread = None
-                self.httpd.shutdown()
+                if self.httpd:
+                    self.httpd.shutdown()
                 thread.join()	# Wait for it to quit
 
         def worker(self):
@@ -220,17 +229,28 @@ else:	# Linux / Run from source
 
     class HTTPRequestHandler(BaseHTTPRequestHandler):
 
-        def do_HEAD(self):
-            self.do_GET()
-
-        def do_GET(self):
+        def parse(self):
             url = urllib2.unquote(self.path)
             if url.startswith('/auth'):
                 protocolhandler.event(url)
                 self.send_response(200)
+                return True
             else:
                 self.send_response(404)	# Not found
+                return False
+
+        def do_HEAD(self):
+            self.parse()
             self.end_headers()
+
+        def do_GET(self):
+            if self.parse():
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write('<html><head><title>%s</title></head>' % _('Authentication successful').encode('utf-8'))
+                self.wfile.write('<body><p>%s</p></body>' % _('Authentication successful').encode('utf-8'))
+            else:
+                self.end_headers()
 
         def log_request(self, code, size=None):
             pass
