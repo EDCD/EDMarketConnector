@@ -256,7 +256,7 @@ class Auth:
 
     def dump(self, r):
         print_exc()
-        print 'Auth\t' + r.url, r.status_code, r.headers, r.text.encode('utf-8')
+        print 'Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.headers
 
     def base64URLEncode(self, text):
         return base64.urlsafe_b64encode(text).replace('=', '')
@@ -349,9 +349,11 @@ class Session:
             self.invalidate()
             self.login()
             raise CredentialsError()
+        elif 500 <= r.status_code < 600:
+            self.dump(r)
+            raise ServerError()	# Typically 500 "Internal Server Error" if server is down
 
         try:
-            r.raise_for_status()
             data = r.json()	# Will fail here if token expired since response is empty
         except:
             # Start again - maybe our token expired
@@ -405,7 +407,7 @@ class Session:
 
     def dump(self, r):
         print_exc()
-        print 'cAPI\t' + r.url, r.status_code, r.headers, r.text.encode('utf-8')
+        print 'cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.headers
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
