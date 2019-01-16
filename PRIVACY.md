@@ -2,13 +2,14 @@
 
 ## What information do we collect about you?
 
-### Game State
+### Elite Commander details
 
 While this app is running it collects the following information about you:
 
-- Your username - i.e. your in-game “Cmdr” name.
+- Your in-game “Cmdr” name.
 - Your in-game location.
-- Your in-game ship(s), ship loadout, inventory, and various actions that you perform in the game - collectively your “game state”.
+- Your in-game ship(s), ship loadout and inventory.
+- Various actions that you perform in the game.
 
 ### Operating System & IP Address
 
@@ -21,7 +22,7 @@ Separately, in the course of the app automatically checking for updates we colle
 
 We temporarily record your Operating System and IP Address in our website logs for the purpose of detecting malicious usage. The information is discarded within one month.
 
-At your choice this app transmits some of your game state to third-party services as follows:
+At your choice this app transmits some of your Commander details to third-party services as follows:
 
 ### EDDN
 
@@ -29,12 +30,12 @@ By default this app transmits your Cmdr name and your in-game location to the [E
 
 ### EDSM
 
-If you have registered with the [Elite Dangerous Star Map](https://www.edsm.net/) (“EDSM”) website this app transmits your Cmdr name, in-game-location and game state to EDSM. You can control how much of this information is visible to other people [here](https://www.edsm.net/settings/public-profile).
+If you have registered with the [Elite Dangerous Star Map](https://www.edsm.net/) (“EDSM”) website this app transmits your Commander details to EDSM. You can control how much of this information is visible to other people [here](https://www.edsm.net/settings/public-profile).
 
 ### Inara
 
-If you have registered with the [Inara](https://inara.cz/) website this app transmits your Cmdr name, in-game-location and game state to Inara. You can control how much of this information is visible to other people [here](https://inara.cz/settings/).
+If you have registered with the [Inara](https://inara.cz/) website this app transmits your Commander details to Inara. You can control how much of this information is visible to other people [here](https://inara.cz/settings/).
 
 ### Plugins
 
-If you have installed any [plugins](https://github.com/Marginal/EDMarketConnector/wiki/Plugins) this app makes your Cmdr name, in-game-location and game state available to those plugins.
+If you have installed any [plugins](https://github.com/Marginal/EDMarketConnector/wiki/Plugins) this app makes your Commander details available to those plugins.
