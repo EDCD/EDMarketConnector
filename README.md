@@ -149,7 +149,7 @@ The default location on Windows is typically `C:\Users\you\Saved Games\Frontier 
 You won't be redirected to Frontier's authentication website and can't edit your EDSM or Inara credentials if:
 - Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
 - The last time you ran Elite: Dangerous you didn't enter the game. You will be able to edit these values once you've entered the game.
-- Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
+- Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-andor-persistently-gives-server-is-lagging-error).
 
 ### Error: Wrong Cmdr
 The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. You are redirected to Frontier's authentication website and prompted again for your username and password. Either:
