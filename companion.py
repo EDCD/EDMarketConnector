@@ -343,15 +343,16 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.url.startswith(SERVER_AUTH):
-           # Redirected back to Auth server - force full re-authentication
+        if 400 <= r.status_code < 500 or r.url.startswith(SERVER_AUTH):
+           # Client error or redirected back to Auth server - force full re-authentication
             self.dump(r)
             self.invalidate()
             self.login()
             raise CredentialsError()
         elif 500 <= r.status_code < 600:
+            # Server error. Typically 500 "Internal Server Error" if server is down
             self.dump(r)
-            raise ServerError()	# Typically 500 "Internal Server Error" if server is down
+            raise ServerError()
 
         try:
             data = r.json()	# Will fail here if token expired since response is empty
