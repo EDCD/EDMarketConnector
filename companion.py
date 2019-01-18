@@ -271,6 +271,7 @@ class Session:
         self.credentials = None
         self.session = None
         self.auth = None
+        self.retrying = False	# Avoid infinite loop when successful auth / unsuccessful query
 
         # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
         if sys.version_info < (2,7,9):
@@ -343,10 +344,11 @@ class Session:
             if __debug__: print_exc()
             raise ServerError()
 
-        if 400 <= r.status_code < 500 or r.url.startswith(SERVER_AUTH):
-           # Client error or redirected back to Auth server - force full re-authentication
+        if r.url.startswith(SERVER_AUTH):
+            # Redirected back to Auth server - force full re-authentication
             self.dump(r)
             self.invalidate()
+            self.retrying = False
             self.login()
             raise CredentialsError()
         elif 500 <= r.status_code < 600:
@@ -355,16 +357,24 @@ class Session:
             raise ServerError()
 
         try:
-            data = r.json()	# Will fail here if token expired since response is empty
+            r.raise_for_status()	# Typically 403 "Forbidden" on token expiry
+            data = r.json()		# May also fail here if token expired since response is empty
         except:
-            # Start again - maybe our token expired
             self.dump(r)
             self.close()
-            if self.login():
+            if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
+                self.invalidate()
+                self.retrying = False
+                self.login()
+                raise CredentialsError()
+            elif self.login():		# Maybe our token expired. Re-authorize in any case
+                self.retrying = True
                 return self.query(endpoint)
             else:
+                self.retrying = False
                 raise CredentialsError()
 
+        self.retrying = False
         if 'timestamp' not in data:
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
         return data

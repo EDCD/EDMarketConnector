@@ -468,7 +468,7 @@ class AppWindow:
                 self.holdofftime = querytime + companion.holdoff
 
         # Companion API problem
-        except (companion.ServerError, companion.ServerLagging) as e:
+        except companion.ServerLagging as e:
             if retrying:
                 self.status['text'] = unicode(e)
                 play_bad = True
@@ -483,7 +483,7 @@ class AppWindow:
             companion.session.invalidate()
             self.login()
 
-        except Exception as e:
+        except Exception as e:			# Including CredentialsError, ServerError
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
             play_bad = True
