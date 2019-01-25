@@ -167,7 +167,7 @@ EDMC supports this scenario if you run the second instance of E:D in a *differen
 EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
 
 ### Error: Can't connect to EDDN
-EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound.
+EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound. Also running a proxy can lead to this error, try adding `eddn.edcd.io` to exemption list.
 
 ### Import failed: No ship loadout found
 Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
