@@ -345,9 +345,15 @@ def should_send(entries):
     return False
 
 
+# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location' or 'FSDJump' event
 def update_status(event=None):
-    reply = this.lastlookup
-    # Message numbers: 1xx = OK, 2xx = fatal error, 3xx = error (but not generated in practice), 4xx = ignorable errors
+    for plugin in plug.provides('edsm_notify_system'):
+        plug.invoke(plugin, None, 'edsm_notify_system', this.lastlookup)
+
+
+# Called with EDSM's response to a 'StartUp', 'Location' or 'FSDJump' event. https://www.edsm.net/en/api-journal-v1
+# msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
+def edsm_notify_system(reply):
     if not reply:
         this.system['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
