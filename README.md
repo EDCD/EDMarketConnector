@@ -167,6 +167,9 @@ EDMC supports this scenario if you run the second instance of E:D in a *differen
 
 EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
 
+### I forgot to run the app - is there a way to process the missing data?
+EDMC only processes live data from E:D. But you can upload your [journal](#doesnt-auto-update-andor-persistently-gives-server-is-lagging-error) file(s) for the missing period to [EDSM](https://www.edsm.net/en/settings/import/journal) and [Inara](https://inara.cz/settings/).
+
 ### Error: Can't connect to EDDN
 EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound. If using a proxy add `eddn.edcd.io` to the exemption list, plus `www.edsm.net` and/or `inara.cz` if using EDSM and/or Inara integration.
 
