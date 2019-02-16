@@ -583,6 +583,17 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 data['rewardCommodities'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['CommodityReward']]
             if 'MaterialsReward' in entry:
                 data['rewardMaterials'] = [{ 'itemName': x['Name'], 'itemCount': x['Count'] } for x in entry['MaterialsReward']]
+            factioneffects = []
+            for faction in entry.get('FactionEffects', []):
+                effect = OrderedDict([ ('minorfactionName', faction['Faction']) ])
+                for influence in faction.get('Influence', []):
+                    if 'Influence' in influence:
+                        effect['influenceGain'] = len(effect.get('influenceGain', '')) > len(influence['Influence']) and effect['influenceGain'] or influence['Influence']	# pick highest
+                if 'Reputation' in faction:
+                    effect['reputationGain'] = faction['Reputation']
+                factioneffects.append(effect)
+            if factioneffects:
+                data['minorfactionEffects'] = factioneffects
             add_event('setCommanderMissionCompleted', entry['timestamp'], data)
 
         elif entry['event'] == 'MissionFailed':
