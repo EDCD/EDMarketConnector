@@ -737,7 +737,10 @@ if __name__ == "__main__":
         GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
         GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
         GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
+
+        SW_RESTORE = 9
         SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
+        ShowWindow             = ctypes.windll.user32.ShowWindow
         ShowWindowAsync        = ctypes.windll.user32.ShowWindowAsync
 
         COINIT_MULTITHREADED = 0
@@ -762,12 +765,13 @@ if __name__ == "__main__":
             cls = ctypes.create_unicode_buffer(257)
             if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                ShowWindowAsync(hWnd, 9)	# SW_RESTORE
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
                     # Browser invoked us directly with auth response. Forward the response to the other app instance.
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                    ShellExecute(0, None, sys.argv[1], None, None, 1)
+                    ShowWindow(hWnd, SW_RESTORE)	# Wait for it to be responsive to avoid ShellExecute recursing
+                    ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
                 else:
+                    ShowWindowAsync(hWnd, SW_RESTORE)
                     SetForegroundWindow(hWnd)
                 sys.exit(0)
             return True

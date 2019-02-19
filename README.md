@@ -126,7 +126,6 @@ Troubleshooting
 The authentication didn't complete correctly for some reason. This can be caused by:
 
 - Using Internet Explorer. IE is [known](https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/) to be broken. Please (temporarily) set your default browser to Edge, Chrome or Firefox and retry.
-- Incorrect protocol association in Firefox. In Firefox change Options &rarr; Applications &rarr; edmc to "Use&nbsp;EDMarketConnector.exe&nbsp;**(default)**".
 - Entering credentials for a different Cmdr - see [Error: Wrong Cmdr](#error-wrong-cmdr).
 - Entering Steam credentials instead of Frontier credentials - see [Error: User not found](#error-user-not-found).
 
