@@ -211,10 +211,13 @@ class Auth:
                 raise CredentialsError('Error: %s' % data['error_description'][0])
             elif data.get('error'):
                 raise CredentialsError('Error: %s' % data['error'][0])
+            elif data.get('message'):
+                raise CredentialsError('Error: %s' % data['message'][0])
             else:
                 raise CredentialsError()
 
         try:
+            r = None
             data = {
                 'grant_type': 'authorization_code',
                 'client_id': CLIENT_ID,
@@ -223,9 +226,9 @@ class Auth:
                 'redirect_uri': protocolhandler.redirect,
             }
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
+            data = r.json()
             if r.status_code == requests.codes.ok:
                 print 'Auth\tNew token for %s' % self.cmdr.encode('utf-8')
-                data = r.json()
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get('fdev_apikeys') or []
@@ -234,14 +237,22 @@ class Auth:
                 config.set('fdev_apikeys', tokens)
                 config.save()	# Save settings now for use by command-line app
                 return data.get('access_token')
-            else:
-                print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
-                self.dump(r)
         except:
             print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
             print_exc()
+            if r: self.dump(r)
+            raise CredentialsError()
 
-        raise CredentialsError()
+        print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
+        self.dump(r)
+        if data.get('error_description'):
+            raise CredentialsError('Error: %s' % data['error_description'])
+        elif data.get('error'):
+            raise CredentialsError('Error: %s' % data['error'])
+        elif data.get('message'):
+            raise CredentialsError('Error: %s' % data['message'])
+        else:
+            raise CredentialsError()
 
     @staticmethod
     def invalidate(cmdr):
@@ -255,8 +266,7 @@ class Auth:
         config.save()	# Save settings now for use by command-line app
 
     def dump(self, r):
-        print_exc()
-        print 'Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.headers
+        print 'Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8')
 
     def base64URLEncode(self, text):
         return base64.urlsafe_b64encode(text).replace('=', '')
@@ -360,6 +370,7 @@ class Session:
             r.raise_for_status()	# Typically 403 "Forbidden" on token expiry
             data = r.json()		# May also fail here if token expired since response is empty
         except:
+            print_exc()
             self.dump(r)
             self.close()
             if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
@@ -417,8 +428,7 @@ class Session:
         Auth.invalidate(self.credentials['cmdr'])
 
     def dump(self, r):
-        print_exc()
-        print 'cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.headers
+        print 'cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.text.encode('utf-8')
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up

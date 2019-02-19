@@ -126,13 +126,15 @@ Troubleshooting
 The authentication didn't complete correctly for some reason. This can be caused by:
 
 - Using Internet Explorer. IE is [known](https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/) to be broken. Please (temporarily) set your default browser to Edge, Chrome or Firefox and retry.
+- The Frontier authentication website is confused - see [Error: An error occured](#error-an-error-occured).
 - Entering credentials for a different Cmdr - see [Error: Wrong Cmdr](#error-wrong-cmdr).
 - Entering Steam credentials instead of Frontier credentials - see [Error: User not found](#error-user-not-found).
 
-If none of the above helps, visit the [Frontier authentication website](https://auth.frontierstore.net/), log in and deauthorize "Elite Dangerous Market Connector". Then restart the app.
-
 ### Error: Invalid Credentials
 See [above](#app-repeatedly-opens-the-frontier-authentication-website).
+
+### Error: An error occured
+The Frontier authentication website is confused. Visit the [Frontier authentication website](https://auth.frontierstore.net/), log in and deauthorize "Elite Dangerous Market Connector". Then restart the app.
 
 ### 500 internal server error
 Either:
