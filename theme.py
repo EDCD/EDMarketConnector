@@ -6,12 +6,23 @@
 #
 
 from sys import platform
+from os.path import join
 
 import Tkinter as tk
 import ttk
 import tkFont
 
 from config import appname, applongname, config
+
+
+if platform == 'win32':
+    import ctypes
+    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+    AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
+    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
+    FR_PRIVATE  = 0x10
+    FR_NOT_ENUM = 0x20
+    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 
 class _Theme:
@@ -56,15 +67,6 @@ class _Theme:
         style = ttk.Style()
         if platform == 'linux2':
             style.theme_use('clam')
-        elif platform == 'darwin':
-            # Default ttk font spacing looks bad on El Capitan
-            osxfont = tkFont.Font(family='TkDefaultFont', size=13, weight=tkFont.NORMAL)
-            style.configure('TLabel', font=osxfont)
-            style.configure('TButton', font=osxfont)
-            style.configure('TLabelframe.Label', font=osxfont)
-            style.configure('TCheckbutton', font=osxfont)
-            style.configure('TRadiobutton', font=osxfont)
-            style.configure('TEntry', font=osxfont)
 
         # Default dark theme colors
         if not config.get('dark_text'):
@@ -85,8 +87,9 @@ class _Theme:
                 'font'               : 'TkDefaultFont',
             }
             # Overrides
-            if platform == 'darwin':
-                self.current['font'] = osxfont
+            if theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000:
+                # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
+                self.current['font'] = tkFont.Font(family='Euro Caps', size=tkFont.Font().actual()['size'], weight=tkFont.NORMAL)
 
         else:
             # System colors
@@ -102,7 +105,6 @@ class _Theme:
             # Overrides
             if platform == 'darwin':
                 self.current['background'] = 'systemMovableModalBackground'
-                self.current['font'] = osxfont
             elif platform == 'win32':
                 # Menu colors
                 self.current['activebackground'] = 'SystemHighlight'
@@ -124,7 +126,8 @@ class _Theme:
             elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
                 widget.configure(foreground = self.current['highlight'],
-                                 background = self.current['background'])
+                                 background = self.current['background'],
+                                 font = self.current['font'])
             elif 'activeforeground' in widget.keys():
                 # e.g. tk.Button, tk.Label, tk.Menu
                 widget.configure(foreground = self.current['foreground'],
@@ -172,7 +175,6 @@ class _Theme:
                 window.setAppearance_(appearance)
 
         elif platform == 'win32':
-            import ctypes
             GWL_STYLE = -16
             WS_MAXIMIZEBOX   = 0x00010000
             # tk8.5.9/win/tkWinWm.c:342

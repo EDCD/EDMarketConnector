@@ -124,6 +124,7 @@ elif sys.platform=='win32':
             requests.certs.where(),
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
+            'EUROCAPS.TTF',
             'commodity.csv',
             'rare_commodity.csv',
             'snd_good.wav',

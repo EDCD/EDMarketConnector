@@ -156,6 +156,9 @@
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\EUROCAPS.TTF" />
+					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
@@ -514,6 +517,7 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
+			<ComponentRef Id="EUROCAPS.TTF" />
 			<ComponentRef Id="eddb.py" />
 			<ComponentRef Id="eddn.py" />
 			<ComponentRef Id="edsm.py" />
