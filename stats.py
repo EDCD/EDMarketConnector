@@ -26,101 +26,6 @@ if platform=='win32':
     CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
     CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
 
-RANKS = [	# in output order
-    (_('Combat')     , 'combat'),	# Ranking
-    (_('Trade')      , 'trade'),	# Ranking
-    (_('Explorer')   , 'explore'),	# Ranking
-    (_('CQC')        , 'cqc'),		# Ranking
-    (_('Federation') , 'federation'),	# Ranking
-    (_('Empire')     , 'empire'),	# Ranking
-    (_('Powerplay')  , 'power'),	# Ranking
-    # ???            , 'crime'),	# Ranking
-    # ???            , 'service'),	# Ranking
-]
-
-RANK_NAMES = {
-
-    # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
-    'combat'     : [_('Harmless'),		# Combat rank
-                    _('Mostly Harmless'),	# Combat rank
-                    _('Novice'),		# Combat rank
-                    _('Competent'),		# Combat rank
-                    _('Expert'),		# Combat rank
-                    _('Master'),		# Combat rank
-                    _('Dangerous'),		# Combat rank
-                    _('Deadly'),		# Combat rank
-                    _('Elite')],		# Top rank
-    'trade'      : [_('Penniless'),		# Trade rank
-                    _('Mostly Penniless'),	# Trade rank
-                    _('Peddler'),		# Trade rank
-                    _('Dealer'),		# Trade rank
-                    _('Merchant'),		# Trade rank
-                    _('Broker'),		# Trade rank
-                    _('Entrepreneur'),		# Trade rank
-                    _('Tycoon'),		# Trade rank
-                    _('Elite')],		# Top rank
-    'explore'    : [_('Aimless'),		# Explorer rank
-                    _('Mostly Aimless'),	# Explorer rank
-                    _('Scout'),			# Explorer rank
-                    _('Surveyor'),		# Explorer rank
-                    _('Trailblazer'),		# Explorer rank
-                    _('Pathfinder'),		# Explorer rank
-                    _('Ranger'),		# Explorer rank
-                    _('Pioneer'),		# Explorer rank
-                    _('Elite')],		# Top rank
-    'cqc'        : [_('Helpless'),		# CQC rank
-                    _('Mostly Helpless'),	# CQC rank
-                    _('Amateur'),		# CQC rank
-                    _('Semi Professional'),	# CQC rank
-                    _('Professional'),		# CQC rank
-                    _('Champion'),		# CQC rank
-                    _('Hero'),			# CQC rank
-                    _('Gladiator'),		# CQC rank
-                    _('Elite')],		# Top rank
-
-    # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
-    'federation' : [_('None'),			# No rank
-                    _('Recruit'),		# Federation rank
-                    _('Cadet'),			# Federation rank
-                    _('Midshipman'),		# Federation rank
-                    _('Petty Officer'),		# Federation rank
-                    _('Chief Petty Officer'),	# Federation rank
-                    _('Warrant Officer'),	# Federation rank
-                    _('Ensign'),		# Federation rank
-                    _('Lieutenant'),		# Federation rank
-                    _('Lieutenant Commander'),	# Federation rank
-                    _('Post Commander'),	# Federation rank
-                    _('Post Captain'),		# Federation rank
-                    _('Rear Admiral'),		# Federation rank
-                    _('Vice Admiral'),		# Federation rank
-                    _('Admiral')],		# Federation rank
-
-    # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
-    'empire'     : [_('None'),			# No rank
-                    _('Outsider'),		# Empire rank
-                    _('Serf'),			# Empire rank
-                    _('Master'),		# Empire rank
-                    _('Squire'),		# Empire rank
-                    _('Knight'),		# Empire rank
-                    _('Lord'),			# Empire rank
-                    _('Baron'),			# Empire rank
-                    _('Viscount'),		# Empire rank
-                    _('Count'),			# Empire rank
-                    _('Earl'),			# Empire rank
-                    _('Marquis'),		# Empire rank
-                    _('Duke'),			# Empire rank
-                    _('Prince'),		# Empire rank
-                    _('King')],			# Empire rank
-
-    # http://elite-dangerous.wikia.com/wiki/Ratings
-    'power'      : [_('None'),			# No rank
-                    _('Rating 1'),		# Power rank
-                    _('Rating 2'),		# Power rank
-                    _('Rating 3'),		# Power rank
-                    _('Rating 4'),		# Power rank
-                    _('Rating 5')],		# Power rank
-}
-
 
 def status(data):
 
@@ -129,6 +34,101 @@ def status(data):
             [_('Balance'), str(data['commander'].get('credits', 0))],	# Cmdr stats
             [_('Loan'),    str(data['commander'].get('debt', 0))],	# Cmdr stats
     ]
+
+    RANKS = [	# in output order
+        (_('Combat')     , 'combat'),		# Ranking
+        (_('Trade')      , 'trade'),		# Ranking
+        (_('Explorer')   , 'explore'),		# Ranking
+        (_('CQC')        , 'cqc'),		# Ranking
+        (_('Federation') , 'federation'),	# Ranking
+        (_('Empire')     , 'empire'),		# Ranking
+        (_('Powerplay')  , 'power'),		# Ranking
+        # ???            , 'crime'),		# Ranking
+        # ???            , 'service'),		# Ranking
+    ]
+
+    RANK_NAMES = {
+
+        # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
+        'combat'     : [_('Harmless'),		# Combat rank
+                        _('Mostly Harmless'),	# Combat rank
+                        _('Novice'),		# Combat rank
+                        _('Competent'),		# Combat rank
+                        _('Expert'),		# Combat rank
+                        _('Master'),		# Combat rank
+                        _('Dangerous'),		# Combat rank
+                        _('Deadly'),		# Combat rank
+                        _('Elite')],		# Top rank
+        'trade'      : [_('Penniless'),		# Trade rank
+                        _('Mostly Penniless'),	# Trade rank
+                        _('Peddler'),		# Trade rank
+                        _('Dealer'),		# Trade rank
+                        _('Merchant'),		# Trade rank
+                        _('Broker'),		# Trade rank
+                        _('Entrepreneur'),	# Trade rank
+                        _('Tycoon'),		# Trade rank
+                        _('Elite')],		# Top rank
+        'explore'    : [_('Aimless'),		# Explorer rank
+                        _('Mostly Aimless'),	# Explorer rank
+                        _('Scout'),		# Explorer rank
+                        _('Surveyor'),		# Explorer rank
+                        _('Trailblazer'),	# Explorer rank
+                        _('Pathfinder'),	# Explorer rank
+                        _('Ranger'),		# Explorer rank
+                        _('Pioneer'),		# Explorer rank
+                        _('Elite')],		# Top rank
+        'cqc'        : [_('Helpless'),		# CQC rank
+                        _('Mostly Helpless'),	# CQC rank
+                        _('Amateur'),		# CQC rank
+                        _('Semi Professional'),	# CQC rank
+                        _('Professional'),	# CQC rank
+                        _('Champion'),		# CQC rank
+                        _('Hero'),		# CQC rank
+                        _('Gladiator'),		# CQC rank
+                        _('Elite')],		# Top rank
+
+        # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
+        'federation' : [_('None'),		# No rank
+                        _('Recruit'),		# Federation rank
+                        _('Cadet'),		# Federation rank
+                        _('Midshipman'),	# Federation rank
+                        _('Petty Officer'),	# Federation rank
+                        _('Chief Petty Officer'),	# Federation rank
+                        _('Warrant Officer'),	# Federation rank
+                        _('Ensign'),		# Federation rank
+                        _('Lieutenant'),	# Federation rank
+                        _('Lieutenant Commander'),	# Federation rank
+                        _('Post Commander'),	# Federation rank
+                        _('Post Captain'),	# Federation rank
+                        _('Rear Admiral'),	# Federation rank
+                        _('Vice Admiral'),	# Federation rank
+                        _('Admiral')],		# Federation rank
+
+        # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
+        'empire'     : [_('None'),		# No rank
+                        _('Outsider'),		# Empire rank
+                        _('Serf'),		# Empire rank
+                        _('Master'),		# Empire rank
+                        _('Squire'),		# Empire rank
+                        _('Knight'),		# Empire rank
+                        _('Lord'),		# Empire rank
+                        _('Baron'),		# Empire rank
+                        _('Viscount'),		# Empire rank
+                        _('Count'),		# Empire rank
+                        _('Earl'),		# Empire rank
+                        _('Marquis'),		# Empire rank
+                        _('Duke'),		# Empire rank
+                        _('Prince'),		# Empire rank
+                        _('King')],		# Empire rank
+
+        # http://elite-dangerous.wikia.com/wiki/Ratings
+        'power'      : [_('None'),		# No rank
+                        _('Rating 1'),		# Power rank
+                        _('Rating 2'),		# Power rank
+                        _('Rating 3'),		# Power rank
+                        _('Rating 4'),		# Power rank
+                        _('Rating 5')],		# Power rank
+    }
 
     ranks = data['commander'].get('rank', {})
     for title, thing in RANKS:

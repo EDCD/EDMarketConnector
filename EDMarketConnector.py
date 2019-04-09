@@ -41,9 +41,6 @@ if __debug__:
         import signal
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
-from l10n import Translations
-Translations.install(config.get('language') or None)
-
 import companion
 import commodity
 from commodity import COMMODITY_CSV
@@ -52,6 +49,7 @@ import stats
 import prefs
 import plug
 from hotkey import hotkeymgr
+from l10n import Translations
 from monitor import monitor
 from protocol import protocolhandler
 from dashboard import dashboard
@@ -783,6 +781,8 @@ if __name__ == "__main__":
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
         print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
+
+    Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
     root = tk.Tk()
     app = AppWindow(root)
