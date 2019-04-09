@@ -89,7 +89,12 @@ class Translations:
             for plugin in os.listdir(config.plugin_dir):
                 plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
                 if isdir(plugin_path):
-                    self.translations[plugin] = self.contents(lang, plugin_path)
+                    try:
+                        self.translations[plugin] = self.contents(lang, plugin_path)
+                    except UnicodeDecodeError, e:
+                        print 'Malformed file %s.strings in plugin %s: %s' % (lang, plugin, e)
+                    except:
+                        print_exc()
             __builtin__.__dict__['_'] = self.translate
 
     def contents(self, lang, plugin_path=None):
