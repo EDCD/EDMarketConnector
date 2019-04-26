@@ -277,10 +277,13 @@ fighter_rating_map = {
 
 misc_internal_map = {
     ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
+    ('dockingcomputer',             'advanced')     : ('Advanced Docking Computer', 'E'),
     ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
+    'planetapproachsuite'                           : ('Planetary Approach Suite', 'I'),
     ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
     ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
     ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
+    'supercruiseassist'                             : ('Supercruise Assist', 'E'),
 }
 
 standard_map = {
@@ -421,14 +424,11 @@ def lookup(module, ship_map, entitled=False):
     elif name[0]!='int':
         raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-    # Horizons Planetary Approach Suite - only listed in outfitting if the user is *playing* Horizons
-    elif name[1] == 'planetapproachsuite':
-        new['category'] = 'standard'
-        new['name'] = 'Planetary Approach Suite'
+    # Miscellaneous Class 1 - e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
+    elif name[1] in misc_internal_map:
+        new['category'] = 'internal'
+        new['name'], new['rating'] = misc_internal_map[name[1]]
         new['class'] = '1'
-        new['rating'] = 'I'
-
-    # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
     elif len(name) > 2 and (name[1],name[2]) in misc_internal_map:
         # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
         new['category'] = 'internal'
