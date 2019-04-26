@@ -366,10 +366,22 @@ class AppWindow:
         if not self.status['text']:
             self.status['text'] = _('Logging in...')
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
+        if platform == 'darwin':
+            self.view_menu.entryconfigure(0, state=tk.DISABLED)	# Status
+            self.file_menu.entryconfigure(0, state=tk.DISABLED)	# Save Raw Data
+        else:
+            self.file_menu.entryconfigure(0, state=tk.DISABLED)	# Status
+            self.file_menu.entryconfigure(1, state=tk.DISABLED)	# Save Raw Data
         self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+                if platform == 'darwin':
+                    self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                    self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+                else:
+                    self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                    self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = unicode(e)
         except Exception as e:
@@ -385,6 +397,11 @@ class AppWindow:
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return	# In CQC or on crew - do nothing
+
+        if companion.session.state == companion.Session.STATE_AUTH:
+            # Attempt another Auth
+            self.login()
+            return
 
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
@@ -557,8 +574,7 @@ class AppWindow:
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
                 if not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
                     config.set('cmdrs', (config.get('cmdrs') or []) + [monitor.cmdr])
-                if config.getint('output') & config.OUT_MKT_EDDN:
-                    self.login()
+                self.login()
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
@@ -579,8 +595,8 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-            # Auto-Update after docking
-            if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            # Auto-Update after docking, but not if auth callback is pending
+            if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY and companion.session.state != companion.Session.STATE_AUTH:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
     # cAPI auth
@@ -588,6 +604,12 @@ class AppWindow:
         try:
             companion.session.auth_callback()
             self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+            if platform == 'darwin':
+                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+            else:
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
         except companion.ServerError as e:
             self.status['text'] = unicode(e)
         except Exception as e:
