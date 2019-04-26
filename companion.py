@@ -21,6 +21,7 @@ from protocol import protocolhandler
 
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
+auth_timeout = 30	# timeout for initial auth
 
 CLIENT_ID   = os.getenv('CLIENT_ID') 	# Obtain from https://auth.frontierstore.net/client/signup
 SERVER_AUTH = 'https://auth.frontierstore.net'
@@ -171,7 +172,7 @@ class Auth:
                     'client_id': CLIENT_ID,
                     'refresh_token': tokens[idx],
                 }
-                r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
+                r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
@@ -225,7 +226,7 @@ class Auth:
                 'code': data['code'][0],
                 'redirect_uri': protocolhandler.redirect,
             }
-            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=timeout)
+            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
                 print 'Auth\tNew token for %s' % self.cmdr.encode('utf-8')
