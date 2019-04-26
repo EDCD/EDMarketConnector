@@ -23,7 +23,7 @@
 "Appearance" = "Внешний вид";
 
 /* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "Аутентикация успешна";
+"Authentication successful" = "Аутентификация успешна";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Автоматически отправлять при стыковке";
