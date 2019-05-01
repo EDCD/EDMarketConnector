@@ -89,7 +89,7 @@ class _Theme:
             # Overrides
             if theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000:
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
-                self.current['font'] = tkFont.Font(family='Euro Caps', size=tkFont.Font().actual()['size'], weight=tkFont.NORMAL)
+                self.current['font'] = tkFont.Font(family='Euro Caps', size=9, weight=tkFont.NORMAL)
 
         else:
             # System colors
