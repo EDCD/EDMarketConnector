@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import sys
@@ -6,7 +6,6 @@ from sys import platform
 from collections import OrderedDict
 from functools import partial
 import json
-import keyring
 from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
@@ -301,9 +300,6 @@ class AppWindow:
         config.delete('logdir')
 
         self.postprefs(False)	# Companion login happens in callback from monitor
-
-        if keyring.get_keyring().priority < 1:
-            self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
 
     # callback after the Preferences dialog is applied
     def postprefs(self, dologin=True):

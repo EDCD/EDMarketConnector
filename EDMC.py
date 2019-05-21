@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 #
 # Command-line interface. Requires prior setup through the GUI.
 #

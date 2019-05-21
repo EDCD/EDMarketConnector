@@ -1,4 +1,3 @@
-import keyring
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
@@ -360,13 +359,22 @@ class Config:
     # Common
 
     def get_password(self, account):
-        return keyring.get_password(self.identifier, account)
+        try:
+            import keyring
+            return keyring.get_password(self.identifier, account)
+        except ImportException:
+            return None
 
     def set_password(self, account, password):
-        keyring.set_password(self.identifier, account, password)
+        try:
+            import keyring
+            keyring.set_password(self.identifier, account, password)
+        except ImportException:
+            pass
 
     def delete_password(self, account):
         try:
+            import keyring
             keyring.delete_password(self.identifier, account)
         except:
             pass	# don't care - silently fail
