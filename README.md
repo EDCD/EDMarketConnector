@@ -246,7 +246,7 @@ Windows:
 
 Linux:
 
-* Requires the Python “imaging-tk”, “iniparse”, and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-requests` .
+* Requires Python2.7 and the Python “iniparse”, and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests` .
 * Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX ./EDMarketConnector.py` .
 
 Command-line

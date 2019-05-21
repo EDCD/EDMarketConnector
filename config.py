@@ -362,14 +362,14 @@ class Config:
         try:
             import keyring
             return keyring.get_password(self.identifier, account)
-        except ImportException:
+        except ImportError:
             return None
 
     def set_password(self, account, password):
         try:
             import keyring
             keyring.set_password(self.identifier, account, password)
-        except ImportException:
+        except ImportError:
             pass
 
     def delete_password(self, account):
