@@ -246,7 +246,7 @@ Windows:
 
 Linux:
 
-* Requires Python2.7 and the Python “iniparse”, and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests` .
+* Requires Python2.7 and the Python “iniparse”, “requests” and "tkinter" modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests python-tk` .
 * Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX ./EDMarketConnector.py` .
 
 Command-line
