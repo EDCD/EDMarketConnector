@@ -319,7 +319,9 @@ class Config:
                 return 0
 
         def set(self, key, val):
-            if isinstance(val, basestring) or isinstance(val, numbers.Integral):
+            if isinstance(val, bool):
+                self.config.set(self.SECTION, key, val and '1' or '0')
+            elif isinstance(val, basestring) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, self._escape(val))
             elif hasattr(val, '__iter__'):	# iterable
                 self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
