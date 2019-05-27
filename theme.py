@@ -24,6 +24,75 @@ if platform == 'win32':
     FR_NOT_ENUM = 0x20
     AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
+elif platform == 'linux2':
+    from ctypes import *
+
+    XID = c_ulong 	# from X.h: typedef unsigned long XID
+    Window = XID
+    Atom = c_ulong
+    Display = c_void_p	# Opaque
+
+    # Sending ClientMessage to WM using XSendEvent()
+    SubstructureNotifyMask   = 1<<19
+    SubstructureRedirectMask = 1<<20
+    ClientMessage = 33
+
+    _NET_WM_STATE_REMOVE = 0
+    _NET_WM_STATE_ADD    = 1
+    _NET_WM_STATE_TOGGLE = 2
+
+    class XClientMessageEvent_data(Union):
+        _fields_ = [
+            ('b', c_char * 20),
+            ('s', c_short * 10),
+            ('l', c_long * 5),
+        ]
+
+    class XClientMessageEvent(Structure):
+        _fields_ = [
+            ('type', c_int),
+            ('serial', c_ulong),
+            ('send_event', c_int),
+            ('display', POINTER(Display)),
+            ('window', Window),
+            ('message_type', Atom),
+            ('format', c_int),
+            ('data', XClientMessageEvent_data),
+        ]
+
+    class XEvent(Union):
+        _fields_ = [
+            ('xclient', XClientMessageEvent),
+        ]
+
+    xlib = cdll.LoadLibrary('libX11.so.6')
+    XFlush = xlib.XFlush
+    XFlush.argtypes = [POINTER(Display)]
+    XFlush.restype = c_int
+    XInternAtom = xlib.XInternAtom
+    XInternAtom.restype = Atom
+    XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
+    XOpenDisplay = xlib.XOpenDisplay
+    XOpenDisplay.argtypes = [c_char_p]
+    XOpenDisplay.restype = POINTER(Display)
+    XQueryTree = xlib.XQueryTree
+    XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
+    XQueryTree.restype = c_int
+    XSendEvent = xlib.XSendEvent
+    XSendEvent.argtypes = [POINTER(Display), Window, c_int, c_long, POINTER(XEvent)]
+    XSendEvent.restype = c_int
+
+    try:
+        dpy = xlib.XOpenDisplay(None)
+        XA_ATOM = Atom(4)
+        net_wm_state = XInternAtom(dpy, '_NET_WM_STATE', False)
+        net_wm_state_above = XInternAtom(dpy, '_NET_WM_STATE_ABOVE', False)
+        net_wm_state_sticky = XInternAtom(dpy, '_NET_WM_STATE_STICKY', False)
+        net_wm_state_skip_pager = XInternAtom(dpy, '_NET_WM_STATE_SKIP_PAGER', False)
+        net_wm_state_skip_taskbar = XInternAtom(dpy, '_NET_WM_STATE_SKIP_TASKBAR', False)
+    except:
+        dpy = None
+
 
 class _Theme:
 
@@ -195,11 +264,26 @@ class _Theme:
             root.wait_visibility()	# need main window to be displayed before returning
 
         else:
-            root.overrideredirect(theme and 1 or 0)
             root.withdraw()
+            # https://www.tcl-lang.org/man/tcl/TkCmd/wm.htm#M19
+            # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#STACKINGORDER
+            root.attributes('-type', theme and 'splash' or 'normal')
             root.update_idletasks()	# Size gets recalculated here
             root.deiconify()
             root.wait_visibility()	# need main window to be displayed before returning
+            if dpy and theme:
+                # Try to display in the taskbar
+                xroot = Window()
+                parent = Window()
+                children = Window()
+                nchildren = c_uint()
+                XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
+                # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472615568
+                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_skip_pager, net_wm_state_skip_taskbar, 1, 0))))
+                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
+                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_sticky, 0, 1, 0))))
+                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
+                XFlush(dpy)
 
         if not self.minwidth:
             self.minwidth = root.winfo_width()	# Minimum width = width on first creation

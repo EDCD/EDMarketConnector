@@ -431,10 +431,6 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_0['state'] = state
         self.theme_button_1['state'] = state
 
-        if platform == 'linux2':
-            # Unmanaged windows are always on top on X
-            self.ontop_button['state'] = self.theme.get() and tk.DISABLED or tk.NORMAL
-
     def hotkeystart(self, event):
         event.widget.bind('<KeyPress>', self.hotkeylisten)
         event.widget.bind('<KeyRelease>', self.hotkeylisten)
