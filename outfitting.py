@@ -42,6 +42,7 @@ weapon_map = {
     'mininglaser'                    : 'Mining Laser',
     ('mininglaser','advanced')       : 'Mining Lance Beam Laser',
     'multicannon'                    : 'Multi-Cannon',
+    ('multicannon','advanced')       : 'Advanced Multi-Cannon',
     ('multicannon','strong')         : 'Enforcer Cannon',
     'plasmaaccelerator'              : 'Plasma Accelerator',
     ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
