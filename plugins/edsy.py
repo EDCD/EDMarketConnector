@@ -19,4 +19,4 @@ def shipyard_url(loadout, is_beta):
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
 
-    return (is_beta and 'http://www.edshipyard.com/beta/#/I=' or 'http://www.edshipyard.com/#/I=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
+    return (is_beta and 'http://edsy.org/beta/#/I=' or 'http://edsy.org/#/I=') + base64.urlsafe_b64encode(out.getvalue()).replace('=', '%3D')
