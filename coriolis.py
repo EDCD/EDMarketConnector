@@ -83,6 +83,8 @@ if __name__ == "__main__":
     # Missing
     add(modules, 'hpt_mining_subsurfdispmisle_fixed_small',      { 'mass': 2 })
     add(modules, 'hpt_mining_subsurfdispmisle_fixed_medium',     { 'mass': 4 })
+    add(modules, 'hpt_multicannon_fixed_small_advanced',         { 'mass': 2 })
+    add(modules, 'hpt_multicannon_fixed_medium_advanced',        { 'mass': 4 })
 
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
