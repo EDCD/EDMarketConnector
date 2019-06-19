@@ -232,22 +232,22 @@ Windows:
 Running from source
 --------
 
-Download and extract the [latest source code](https://github.com/Marginal/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`). To use the cAPI you will need to visit the [Frontier authentication website](https://auth.frontierstore.net/), login with your Frontier credentials, register a "Developer App" and obtain the "Client Id".
+Download and extract the [latest source code](https://github.com/Marginal/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`).
 
 Mac:
 
 * Requires the Python “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U requests watchdog py2app` .
-* Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX python ./EDMarketConnector.py` .
+* Run with `python ./EDMarketConnector.py` .
 
 Windows:
 
 * Requires Python2.7 and the Python “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
-* Run with `set CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX && EDMarketConnector.py` .
+* Run with `EDMarketConnector.py` .
 
 Linux:
 
 * Requires Python2.7 and the Python “iniparse”, “requests” and "tkinter" modules. On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests python-tk` .
-* Run with `CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX ./EDMarketConnector.py` .
+* Run with `./EDMarketConnector.py` .
 
 Command-line
 --------
