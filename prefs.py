@@ -52,12 +52,15 @@ elif platform=='win32':
     class BROWSEINFO(ctypes.Structure):
         _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
-    GetParent = ctypes.windll.user32.GetParent
-    GetParent.argtypes = [HWND]
-    GetWindowRect = ctypes.windll.user32.GetWindowRect
-    GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-    CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-    CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+    try:
+        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+        CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+        GetParent = ctypes.windll.user32.GetParent
+        GetParent.argtypes = [HWND]
+        GetWindowRect = ctypes.windll.user32.GetWindowRect
+        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
+    except:	# Not supported under Wine 4.0
+        CalculatePopupWindowPosition = None
 
 class PreferencesDialog(tk.Toplevel):
 
@@ -305,7 +308,7 @@ class PreferencesDialog(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if platform == 'win32':
+        if platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),

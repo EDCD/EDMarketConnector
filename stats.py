@@ -19,13 +19,15 @@ import prefs
 if platform=='win32':
     import ctypes
     from ctypes.wintypes import *
-    GetParent = ctypes.windll.user32.GetParent
-    GetParent.argtypes = [HWND]
-    GetWindowRect = ctypes.windll.user32.GetWindowRect
-    GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-    CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-    CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
-
+    try:
+        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+        CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+        GetParent = ctypes.windll.user32.GetParent
+        GetParent.argtypes = [HWND]
+        GetWindowRect = ctypes.windll.user32.GetWindowRect
+        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
+    except:	# Not supported under Wine 4.0
+        CalculatePopupWindowPosition = None
 
 def status(data):
 
@@ -270,7 +272,7 @@ class StatsResults(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if platform == 'win32':
+        if platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),

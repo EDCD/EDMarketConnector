@@ -8,6 +8,15 @@ import sys
 from config import appname
 
 
+if sys.platform == 'win32':
+    from ctypes import *
+    from ctypes.wintypes import *
+    try:
+        is_wine = windll.ntdll.wine_get_version
+    except:
+        is_wine = False
+
+
 class GenericProtocolHandler:
 
     def __init__(self):
@@ -62,10 +71,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
             protocolhandler.master.after(ProtocolHandler.POLL, protocolhandler.poll)
 
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False):
-
-    from ctypes import *
-    from ctypes.wintypes import *
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
 
     class WNDCLASS(Structure):
         _fields_ = [('style', UINT),
