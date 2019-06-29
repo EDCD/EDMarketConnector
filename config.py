@@ -139,7 +139,7 @@ class Config:
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-        def get(self, key):
+        def impl_get(self, key):
             val = self.settings.get(key)
             if val is None:
                 return None
@@ -219,7 +219,7 @@ class Config:
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', KnownFolderPath(FOLDERID_Documents) or self.home)
 
-        def get(self, key):
+        def impl_get(self, key):
             typ  = DWORD()
             size = DWORD()
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
@@ -302,7 +302,7 @@ class Config:
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', expanduser('~'))
 
-        def get(self, key):
+        def impl_get(self, key):
             try:
                 val = self.config.get(self.SECTION, key)
                 if u'\n' in val:
@@ -359,6 +359,12 @@ class Config:
             raise NotImplementedError('Implement me')
 
     # Common
+
+    def get(self, key, default=None):
+        value = self.impl_get(key)
+        if value:
+            return value
+        return default
 
     def get_password(self, account):
         try:
