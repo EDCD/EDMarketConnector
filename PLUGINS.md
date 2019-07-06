@@ -146,13 +146,60 @@ This gets called when EDMC has just fetched fresh Cmdr and station data from Fro
 
 ```python
 def cmdr_data(data, is_beta):
-   """
-   We have new data on our commander
-   """
-   sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
+    """
+    We have new data on our commander
+    """
+    sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
 ```
 
 The data is a dictionary and full of lots of wonderful stuff!
+
+### Plugin-specific events
+
+If the player has chosen to "Send flight log and Cmdr status to EDSM" this gets called when the player starts the game or enters a new system. It is called some time after the corresponding `journal_entry()` event.
+
+```python
+def edsm_notify_system(reply):
+    """
+    `reply` holds the response from a call to https://www.edsm.net/en/api-journal-v1
+    """
+    if not reply:
+        sys.stderr.write("Error: Can't connect to EDSM\n")
+    elif reply['msgnum'] // 100 not in (1,4):
+        sys.stderr.write('Error: EDSM {MSG}\n').format(MSG=reply['msg'])
+    elif reply.get('systemCreated'):
+        sys.stderr.write('New EDSM system!\n')
+    else:
+        sys.stderr.write('Known EDSM system\n')
+```
+
+If the player has chosen to "Send flight log and Cmdr status to Inara" this gets called when the player starts the game, enters a new system, docks or undocks. It is called some time after the corresponding `journal_entry()` event.
+
+```python
+def inara_notify_location(eventData):
+    """
+    `eventData` holds the response to one of the "Commander's Flight Log" events https://inara.cz/inara-api-docs/#event-29
+    """
+    if eventData.get('starsystemInaraID'):
+        sys.stderr.write('Now in Inara system {ID} at {URL}\n'.format(ID=eventData['starsystemInaraID'], URL=eventData['starsystemInaraURL']))
+    else:
+        sys.stderr.write('System not known to Inara\n')
+    if eventData.get('stationInaraID'):
+        sys.stderr.write('Docked at Inara station {ID} at {URL}\n'.format(ID=eventData['stationInaraID'], URL=eventData['stationInaraURL']))
+    else:
+        sys.stderr.write('Undocked or station unknown to Inara\n')
+```
+
+If the player has chosen to "Send flight log and Cmdr status to Inara" this gets called when the player starts the game or switches ship. It is called some time after the corresponding `journal_entry()` event.
+
+```python
+def inara_notify_ship(eventData):
+    """
+    `eventData` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
+    """
+    if eventData.get('shipInaraID'):
+        sys.stderr.write('Now in Inara ship {ID} at {URL}\n'.format(ID=eventData['shipInaraID'], URL=eventData['shipInaraURL']))
+```
 
 ## Error messages
 

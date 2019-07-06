@@ -30,6 +30,8 @@ CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a 
 this = sys.modules[__name__]	# For holding module globals
 this.session = requests.Session()
 this.queue = Queue()	# Items to be sent to Inara by worker thread
+this.lastlocation = None	# eventData from the last Commander's Flight Log event
+this.lastship = None	# eventData from the last addCommanderShip or setCommanderShip event
 
 # Cached Cmdr state
 this.events = []	# Unsent events
@@ -71,6 +73,8 @@ def plugin_start():
 def plugin_app(parent):
     this.system_link  = parent.children['system']	# system label in main window
     this.station_link = parent.children['station']	# station label in main window
+    this.system_link.bind_all('<<InaraLocation>>', update_location)
+    this.system_link.bind_all('<<InaraShip>>', update_ship)
 
 def plugin_stop():
     # Send any unsent events
@@ -818,13 +822,12 @@ def worker():
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
                         if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
-                            eventData = reply_event.get('eventData', {})
-                            this.system  = eventData.get('starsystemInaraURL')
-                            if config.get('system_provider') == 'Inara':
-                                this.system_link['url'] = this.system	# Override standard URL function
-                            this.station = eventData.get('stationInaraURL')
-                            if config.get('station_provider') == 'Inara':
-                                this.station_link['url'] = this.station or this.system	# Override standard URL function
+                            this.lastlocation = reply_event.get('eventData', {})
+                            this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
+                        elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
+                            this.lastship = reply_event.get('eventData', {})
+                            this.system_link.event_generate('<<InaraShip>>', when="tail")	# calls update_ship in main thread
+
                 break
             except:
                 if __debug__: print_exc()
@@ -834,3 +837,24 @@ def worker():
                 callback(None)
             else:
                 plug.show_error(_("Error: Can't connect to Inara"))
+
+
+# Call inara_notify_location() in this and other interested plugins with Inara's response when changing system or station
+def update_location(event=None):
+    if this.lastlocation:
+        for plugin in plug.provides('inara_notify_location'):
+            plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
+
+def inara_notify_location(eventData):
+    this.system  = eventData.get('starsystemInaraURL')
+    if config.get('system_provider') == 'Inara':
+        this.system_link['url'] = this.system	# Override standard URL function
+    this.station = eventData.get('stationInaraURL')
+    if config.get('station_provider') == 'Inara':
+        this.station_link['url'] = this.station or this.system	# Override standard URL function
+
+# Call inara_notify_ship() in interested plugins with Inara's response when changing ship
+def update_ship(event=None):
+    if this.lastship:
+        for plugin in plug.provides('inara_notify_ship'):
+            plug.invoke(plugin, None, 'inara_notify_ship', this.lastship)
