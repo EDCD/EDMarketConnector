@@ -801,6 +801,6 @@ if __name__ == "__main__":
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
-    root = tk.Tk()
+    root = tk.Tk(className=appname.lower())
     app = AppWindow(root)
     root.mainloop()
