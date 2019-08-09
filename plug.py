@@ -44,6 +44,9 @@ FlagsInFighter = 1<<25
 FlagsInSRV = 1<<26
 FlagsAnalysisMode = 1<<27	# Hud in Analysis mode
 FlagsNightVision = 1<<28
+FlagsAverageAltitude = 1<<29		# Altitude from Average radius
+FlagsFsdJump = 1<<30
+FlagsSrvHighBeam = 1<<31
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
