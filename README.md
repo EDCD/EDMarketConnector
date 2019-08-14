@@ -46,6 +46,21 @@ Windows:
 * Double-click on it to install.
 * Run **Elite Dangerous Market Connector** from the Start Menu or Start Screen.
 
+Linux with Steam Play:
+
+* Copy and paste the following into a Terminal app window:
+
+  `mkdir -p ~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved\ Games/Frontier\ Developments/Elite\ Dangerous`
+
+  and press Enter (assuming that your Steam library is in the default `~/.steam` location).
+* (Re)-start the game.
+* Follow the instructions on [running from source](#running-from-source).
+* Adjust the “E:D journal file location” setting on the Configuration tab to point to `~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved Games/Frontier Developments/Elite Dangerous`.
+
+Linux with Wine:
+
+* Follow the above instructions for Windows.
+
 
 Setup
 --------
