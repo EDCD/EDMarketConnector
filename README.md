@@ -68,6 +68,8 @@ The first time that you run the app while playing the game you are redirected to
 
 This step is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at. Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
 
+Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
+
 ### Output
 
 This app can save a variety of data in a variety of formats:
@@ -82,8 +84,6 @@ This app can save a variety of data in a variety of formats:
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
-
-Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
 ### EDDN
 
