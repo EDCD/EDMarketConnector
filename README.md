@@ -165,7 +165,11 @@ Please enter your Frontier credentials into the authentication website, not your
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
-The default location on Windows is typically `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous`.
+The default location is typically:
+
+- Windows: `C:\Users\you\Saved Games\Frontier Developments\Elite Dangerous`
+- Linux Steam Play: `~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved Games/Frontier Developments/Elite Dangerous`
+- Linux Wine: `~/.wine/drive_c/users/you/Saved Games/Frontier Developments/Elite Dangerous`
 
 ### Credentials settings are greyed out
 You won't be redirected to Frontier's authentication website and can't edit your EDSM or Inara credentials if:
