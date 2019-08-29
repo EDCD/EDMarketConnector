@@ -40,7 +40,7 @@ def addcommodities(data):
             'name'     : commodity.get('locName') or 'Limpets',
         }
         old = commodities.get(key)
-        if old:
+        if old and companion.category_map.get(commodity['categoryname'], True):
             if new['symbol'] != old['symbol'] or new['name'] != old['name']:
                 raise AssertionError('%s: "%s"!="%s"' % (key, new, old))
         commodities[key] = new

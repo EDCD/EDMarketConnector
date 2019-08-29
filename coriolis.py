@@ -75,6 +75,17 @@ if __name__ == "__main__":
                 else:
                     modules[key] = { 'mass': m.get('mass', 0) }	# Some modules don't have mass
 
+    # Pre 3.3 modules
+    add(modules, 'int_stellarbodydiscoveryscanner_standard',     { 'mass': 2 })
+    add(modules, 'int_stellarbodydiscoveryscanner_intermediate', { 'mass': 2 })
+    add(modules, 'int_stellarbodydiscoveryscanner_advanced',     { 'mass': 2 })
+
+    # Missing
+    add(modules, 'hpt_mining_subsurfdispmisle_fixed_small',      { 'mass': 2 })
+    add(modules, 'hpt_mining_subsurfdispmisle_fixed_medium',     { 'mass': 4 })
+    add(modules, 'hpt_multicannon_fixed_small_advanced',         { 'mass': 2 })
+    add(modules, 'hpt_multicannon_fixed_medium_advanced',        { 'mass': 4 })
+
     modules = OrderedDict([(k,modules[k]) for k in sorted(modules)])	# sort for easier diffing
     cPickle.dump(modules, open('modules.p', 'wb'))
 

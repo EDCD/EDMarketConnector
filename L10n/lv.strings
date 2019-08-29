@@ -1,9 +1,6 @@
 /* Language name */
 "!Language" = "Latviešu";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Apstiprinājuma kods ir nosūtīts uz {CR} e-pasta adresi, kas ir saistīts ar Jūsu Elite profilu.";
-
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Par {APP}";
 
@@ -24,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Izskats";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Autentifikācija sekmīga";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automtiski atjaunoties nosēžoties.";
@@ -58,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Cmdr vārds";
-
 /* Ranking. [stats.py] */
 "Combat" = "Combat";
 
@@ -85,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "CQC";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Lietotāja informācija";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
@@ -103,8 +97,11 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Noklusējuma";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
+
+/* List of plugins in settings. [prefs.py] */
+"Disabled Plugins" = "Atspējoti Spraudņi";
 
 /* Help menu item. [EDMarketConnector.py] */
 "Documentation" = "Dokumentācija";
@@ -130,13 +127,16 @@
 /* Ranking. [stats.py] */
 "Empire" = "Empire";
 
+/* List of plugins in settings. [prefs.py] */
+"Enabled Plugins" = "Iespējoti Spraudņi";
+
 /* Federation rank. [stats.py] */
 "Ensign" = "Ensign";
 
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Kļūda: Nevar savienoties ar EDDN";
 
 /* [edsm.py] */
@@ -154,9 +154,6 @@
 /* [companion.py] */
 "Error: Invalid Credentials" = "Kļūda: Nederīga lietotāja informācija";
 
-/* [companion.py] */
-"Error: Verification failed" = "Kļūda: Apstiprināšana nav izdevusies";
-
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Iziet";
 
@@ -172,6 +169,9 @@
 /* [EDMarketConnector.py] */
 "Fetching data..." = "Iegūst datus...";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Fighter" = "Cīnītājs";
+
 /* Menu title. [EDMarketConnector.py] */
 "File" = "Fails";
 
@@ -181,8 +181,14 @@
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiators";
 
+/* Multicrew role. [EDMarketConnector.py] */
+"Gunner" = "Ložmetējnieks";
+
 /* Combat rank. [stats.py] */
 "Harmless" = "Nekaitīgs";
+
+/* Multicrew role. [EDMarketConnector.py] */
+"Helm" = "Stūre";
 
 /* Menu title. [EDMarketConnector.py] */
 "Help" = "Palīdzība";
@@ -198,12 +204,6 @@
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Ātrais taustiņš";
-
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Kā jūs vēlaties tikt atpazīts saglabātajā informācijā";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Identitāte";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Ātrais taustiņš";
@@ -292,9 +292,6 @@
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
 
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Parole";
-
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
 
@@ -316,11 +313,11 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Lūdzu izvēlaties kādus datus saglabāt";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Lūdzu ievadiet kodu";
+/* Tab heading in settings. [prefs.py] */
+"Plugins" = "Spraudņi";
 
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Lūdzu autorizējaties ar Jūsu Elite: Dangerous profila informāciju";
+/* Section heading in settings. [prefs.py] */
+"Plugins folder" = "Spraudņu mape";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -337,14 +334,11 @@
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Privātums";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Privātuma politika";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseido-anonīms ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -388,13 +382,13 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* Output setting. [prefs.py] */
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Sūta datus uz EDDN...";
 
 /* Empire rank. [stats.py] */
@@ -411,6 +405,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Kuģi";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Kuģu būvētava";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
@@ -450,9 +447,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Atjaunināt";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Lietotājvārds (E-pasts)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Vērtība";

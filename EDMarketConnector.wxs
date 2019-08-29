@@ -90,6 +90,27 @@
 
 		<Directory Id="TARGETDIR" Name="SourceDir">
 
+			<!-- http://wixtoolset.org/documentation/manual/v3/howtos/files_and_registry/write_a_registry_entry.html -->
+			<Component Id="RegistryEntries" Guid="*">
+				<RegistryKey Root="HKCR" Key="edmc">
+					<RegistryValue Type="string" Value="$(var.PRODUCTLONGNAME)"/>
+					<RegistryValue Type="string" Name="URL Protocol" Value=""/>
+					<RegistryKey Key="DefaultIcon">
+						<RegistryValue Type="string" Value="[INSTALLDIR]EDMarketConnector.exe,0"/>
+					</RegistryKey>
+					<RegistryKey Key="shell">
+						<RegistryKey Key="open">
+							<RegistryKey Key="command">
+								<RegistryValue Type="string" Value='"[INSTALLDIR]EDMarketConnector.exe" "%1"'/>
+							</RegistryKey>
+							<RegistryKey Key="ddeexec">
+								<RegistryValue Type="string" Value='Open("%1")'/>
+							</RegistryKey>
+						</RegistryKey>
+					</RegistryKey>
+				</RegistryKey>
+			</Component>
+
 			<!-- Generate with `heat.exe dir dist.win32 -gg -sfrag -suid -out foo.wxs` -->
 			<!-- Sadly too late for auto-generated Component UUIDs -->
 
@@ -134,6 +155,9 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\EDMC.exe" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\EUROCAPS.TTF" />
 					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
@@ -245,6 +269,9 @@
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\plugins\eddn.py" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\edsm.py" />
@@ -473,6 +500,7 @@
 		</Directory>
 
 		<Feature Id='Complete' Level='1'>
+			<ComponentRef Id="RegistryEntries" />
 			<ComponentRef Id="MainExecutable" />
 			<ComponentRef Id="_ctypes.pyd" />
 			<ComponentRef Id="_hashlib.pyd" />
@@ -489,7 +517,9 @@
 			<ComponentRef Id="EDMarketConnector.ico" />
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
+			<ComponentRef Id="EUROCAPS.TTF" />
 			<ComponentRef Id="eddb.py" />
+			<ComponentRef Id="eddn.py" />
 			<ComponentRef Id="edsm.py" />
 			<ComponentRef Id="edsy.py" />
 			<ComponentRef Id="es.strings" />

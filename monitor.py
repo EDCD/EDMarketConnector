@@ -21,35 +21,14 @@ if platform=='darwin':
     from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
- 
+    from fcntl import fcntl
+    F_GLOBAL_NOCACHE = 55
+
 elif platform=='win32':
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
     import ctypes
-
-    # _winreg that ships with Python 2 doesn't support unicode, so do this instead
     from ctypes.wintypes import *
-
-    HKEY_CURRENT_USER       = 0x80000001
-    HKEY_LOCAL_MACHINE      = 0x80000002
-    KEY_READ                = 0x00020019
-    REG_SZ    = 1
-
-    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
-    RegOpenKeyEx.restype = LONG
-    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
-
-    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
-    RegCloseKey.restype = LONG
-    RegCloseKey.argtypes = [HKEY]
-
-    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
-    RegQueryValueEx.restype = LONG
-    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
-
-    RegEnumKeyEx = ctypes.windll.advapi32.RegEnumKeyExW
-    RegEnumKeyEx.restype = LONG
-    RegEnumKeyEx.argtypes = [HKEY, DWORD, LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(DWORD), LPWSTR, ctypes.POINTER(DWORD), ctypes.POINTER(FILETIME)]
 
     EnumWindows            = ctypes.windll.user32.EnumWindows
     EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
@@ -113,10 +92,13 @@ class EDLogs(FileSystemEventHandler):
             'Captain'      : None,	# On a crew
             'Cargo'        : defaultdict(int),
             'Credits'      : None,
+            'FID'          : None,	# Frontier Cmdr ID
+            'Horizons'     : None,	# Does this user have Horizons?
             'Loan'         : None,
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
             'Encoded'      : defaultdict(int),
+            'Engineers'    : {},
             'Rank'         : {},
             'Reputation'   : {},
             'Statistics'   : {},
@@ -216,13 +198,16 @@ class EDLogs(FileSystemEventHandler):
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
-            loghandle = open(logfile, 'r')
+            loghandle = open(logfile, 'rb', 0)	# unbuffered
+            if platform == 'darwin':
+                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
             for line in loghandle:
                 try:
                     self.parse_entry(line)	# Some events are of interest even in the past
                 except:
                     if __debug__:
                         print 'Invalid journal entry "%s"' % repr(line)
+            logpos = loghandle.tell()
         else:
             loghandle = None
 
@@ -272,16 +257,21 @@ class EDLogs(FileSystemEventHandler):
                 if loghandle:
                     loghandle.close()
                 if logfile:
-                    loghandle = open(logfile, 'r')
+                    loghandle = open(logfile, 'rb', 0)	# unbuffered
+                    if platform == 'darwin':
+                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
+                    logpos = 0
                 if __debug__:
                     print 'New logfile "%s"' % logfile
 
             if logfile:
-                loghandle.seek(0, SEEK_CUR)	# reset EOF flag
+                loghandle.seek(0, SEEK_END)		# required to make macOS notice log change over SMB
+                loghandle.seek(logpos, SEEK_SET)	# reset EOF flag
                 for line in loghandle:
                     self.event_queue.append(line)
                 if self.event_queue:
                     self.root.event_generate('<<JournalEvent>>', when="tail")
+                logpos = loghandle.tell()
 
             sleep(self._POLL)
 
@@ -324,10 +314,13 @@ class EDLogs(FileSystemEventHandler):
                     'Captain'      : None,
                     'Cargo'        : defaultdict(int),
                     'Credits'      : None,
+                    'FID'          : None,
+                    'Horizons'     : None,
                     'Loan'         : None,
                     'Raw'          : defaultdict(int),
                     'Manufactured' : defaultdict(int),
                     'Encoded'      : defaultdict(int),
+                    'Engineers'    : {},
                     'Rank'         : {},
                     'Reputation'   : {},
                     'Statistics'   : {},
@@ -359,7 +352,10 @@ class EDLogs(FileSystemEventHandler):
                 self.state.update({	# Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
+                    'FID'          : entry.get('FID'),	# From 3.3
+                    'Horizons'     : entry['Horizons'],	# From 3.0
                     'Loan'         : entry['Loan'],
+                    'Engineers'    : {},
                     'Rank'         : {},
                     'Reputation'   : {},
                     'Statistics'   : {},
@@ -393,8 +389,8 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
             elif (entry['event'] == 'Loadout' and
-                  not self.canonicalise(entry['Ship']).endswith('fighter') and
-                  not self.canonicalise(entry['Ship']).endswith('buggy')):
+                  not 'fighter' in self.canonicalise(entry['Ship']) and
+                  not 'buggy' in self.canonicalise(entry['Ship'])):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
                 self.state['ShipName']  = entry['ShipName']
@@ -470,8 +466,17 @@ class EDLogs(FileSystemEventHandler):
                 payload.pop('timestamp')
                 self.state[entry['event']] = payload
 
-            elif entry['event'] == 'Cargo':
+            elif entry['event'] == 'EngineerProgress':
+                if 'Engineers' in entry:	# Startup summary
+                    self.state['Engineers'] = { e['Engineer']: (e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'] for e in entry['Engineers'] }
+                else:	# Promotion
+                    self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0)) if 'Rank' in entry else entry['Progress']
+
+            elif entry['event'] == 'Cargo' and entry.get('Vessel') == 'Ship':
                 self.state['Cargo'] = defaultdict(int)
+                if 'Inventory' not in entry:	# From 3.3 full Cargo event (after the first one) is written to a separate file
+                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:
+                        entry = json.load(h, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
                 self.state['Cargo'].update({ self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory'] })
             elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
                 commodity = self.canonicalise(entry['Type'])

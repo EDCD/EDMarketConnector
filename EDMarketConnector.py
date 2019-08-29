@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import sys
@@ -6,7 +6,6 @@ from sys import platform
 from collections import OrderedDict
 from functools import partial
 import json
-import keyring
 from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
@@ -41,29 +40,22 @@ if __debug__:
         import signal
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
-from l10n import Translations
-Translations.install(config.get('language') or None)
-
 import companion
 import commodity
 from commodity import COMMODITY_CSV
 import td
-import eddn
 import stats
 import prefs
 import plug
 from hotkey import hotkeymgr
+from l10n import Translations
 from monitor import monitor
+from protocol import protocolhandler
 from dashboard import dashboard
 from theme import theme
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
-
-# Limits on local clock drift from EDDN gateway
-DRIFT_THRESHOLD = 3 * 60
-TZ_THRESHOLD = 30 * 60
-CLOCK_THRESHOLD = 11 * 60 * 60 + TZ_THRESHOLD
 
 
 class AppWindow:
@@ -75,15 +67,16 @@ class AppWindow:
 
     def __init__(self, master):
 
+        # Start a protocol handler to handle cAPI registration. Requires main window to exist.
+        protocolhandler.start(master)
+
         self.holdofftime = config.getint('querytime') + companion.holdoff
-        self.eddn = eddn.EDDN(self)
 
         self.w = master
         self.w.title(applongname)
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
-        self.authdialog = None
         self.prefsdialog = None
 
         plug.load_plugins(master)
@@ -92,8 +85,7 @@ class AppWindow:
             if platform == 'win32':
                 self.w.wm_iconbitmap(default='EDMarketConnector.ico')
             else:
-                from PIL import Image, ImageTk
-                self.w.tk.call('wm', 'iconphoto', self.w, '-default', ImageTk.PhotoImage(Image.open("EDMarketConnector.png")))
+                self.w.tk.call('wm', 'iconphoto', self.w, '-default', tk.PhotoImage(file = join(config.respath, 'EDMarketConnector.png')))
             self.theme_icon = tk.PhotoImage(data = 'R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')
             self.theme_minimize = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')
             self.theme_close    = tk.BitmapImage(data = '#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')
@@ -173,6 +165,7 @@ class AppWindow:
             self.menubar.add_cascade(menu=window_menu)
             self.help_menu = tk.Menu(self.menubar, name='help')
             self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
+            self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.menubar.add_cascade(menu=self.help_menu)
             self.w['menu'] = self.menubar
@@ -197,6 +190,7 @@ class AppWindow:
             self.menubar.add_cascade(menu=self.edit_menu)
             self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.help_menu.add_command(command=self.help_general)
+            self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
             self.menubar.add_cascade(menu=self.help_menu)
@@ -282,6 +276,7 @@ class AppWindow:
         self.w.bind_all('<<JournalEvent>>', self.journal_event)	# Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)	# Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
+        self.w.bind_all('<<CompanionAuthEvent>>', self.auth)	# cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
 
         # Load updater after UI creation (for WinSparkle)
@@ -295,26 +290,15 @@ class AppWindow:
         except RuntimeError:
             pass
 
-        # Migration from <= 2.25
-        if not config.get('cmdrs') and config.get('username') and config.get('password'):
-            try:
-                companion.session.login(config.get('username'), config.get('password'), False)
-                data = companion.session.profile()
-                prefs.migrate(data['commander']['name'])
-            except:
-                if __debug__: print_exc()
+        # Migration from <= 3.30
+        for username in config.get('fdev_usernames') or []:
+            config.delete_password(username)
+        config.delete('fdev_usernames')
         config.delete('username')
         config.delete('password')
         config.delete('logdir')
 
         self.postprefs(False)	# Companion login happens in callback from monitor
-
-        if keyring.get_keyring().priority < 1:
-            self.status['text'] = 'Warning: Storing passwords as text'	# Shouldn't happen unless no secure storage on Linux
-
-        # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-        if not self.eddn.load():
-            self.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
 
     # callback after the Preferences dialog is applied
     def postprefs(self, dologin=True):
@@ -354,7 +338,8 @@ class AppWindow:
             self.system_menu.entryconfigure(1, label=_("Check for Updates..."))	# Menu item
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))	# Menu item
             self.view_menu.entryconfigure(0, label=_('Status'))	# Menu item
-            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))	# Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))	# Help menu item
         else:
             self.menubar.entryconfigure(1, label=_('File'))	# Menu title
             self.menubar.entryconfigure(2, label=_('Edit'))	# Menu title
@@ -367,44 +352,37 @@ class AppWindow:
             self.file_menu.entryconfigure(2, label=_('Settings'))	# Item in the File menu on Windows
             self.file_menu.entryconfigure(4, label=_('Exit'))	# Item in the File menu on Windows
             self.help_menu.entryconfigure(0, label=_('Documentation'))	# Help menu item
-            self.help_menu.entryconfigure(1, label=_('Release Notes'))	# Help menu item
-            self.help_menu.entryconfigure(2, label=_("Check for Updates..."))	# Menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))	# Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))	# Help menu item
+            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))	# Menu item
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
         if not self.status['text']:
             self.status['text'] = _('Logging in...')
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
+        if platform == 'darwin':
+            self.view_menu.entryconfigure(0, state=tk.DISABLED)	# Status
+            self.file_menu.entryconfigure(0, state=tk.DISABLED)	# Save Raw Data
+        else:
+            self.file_menu.entryconfigure(0, state=tk.DISABLED)	# Status
+            self.file_menu.entryconfigure(1, state=tk.DISABLED)	# Save Raw Data
         self.w.update_idletasks()
         try:
-            if not monitor.cmdr or not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
-                raise companion.CredentialsError()
-            idx = config.get('cmdrs').index(monitor.cmdr)
-            username = config.get('fdev_usernames')[idx]
-            companion.session.login(username, config.get_password(username), monitor.is_beta)
-            self.status['text'] = ''
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.login))
-        except companion.ServerError as e:
+            if companion.session.login(monitor.cmdr, monitor.is_beta):
+                self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+                if platform == 'darwin':
+                    self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                    self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+                else:
+                    self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                    self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
+        except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = unicode(e)
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
         self.cooldown()
-
-    # callback after verification code
-    def verify(self, callback, code):
-        self.authdialog = None
-        try:
-            companion.session.verify(code)
-            config.save()	# Save settings now for use by command-line app
-        except Exception as e:
-            if __debug__: print_exc()
-            self.button['state'] = self.theme_button['state'] = tk.NORMAL
-            self.status['text'] = unicode(e)
-        else:
-            return callback()	# try again
 
     def getandsend(self, event=None, retrying=False):
 
@@ -414,6 +392,11 @@ class AppWindow:
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return	# In CQC or on crew - do nothing
+
+        if companion.session.state == companion.Session.STATE_AUTH:
+            # Attempt another Auth
+            self.login()
+            return
 
         if not retrying:
             if time() < self.holdofftime:	# Was invoked by key while in cooldown
@@ -471,64 +454,31 @@ class AppWindow:
                 if err:
                     play_bad = True
 
-                # Export ship for backwards compatibility even 'though it's no longer derived from cAPI
-                if config.getint('output') & config.OUT_SHIP:
-                    monitor.export_ship()
-
-                if not (config.getint('output') & ~config.OUT_SHIP & config.OUT_STATION_ANY):
-                    # no station data requested - we're done
-                    pass
-
-                elif not data['commander'].get('docked'):
-                    if not self.status['text']:
-                        # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
-                        self.status['text'] = _("You're not docked at a station!")
-                        play_bad = True
-
-                else:
-                    # Finally - the data looks sane and we're docked at a station
-
-                    # No EDDN output?
-                    if (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
+                # Export market data
+                if config.getint('output') & (config.OUT_STATION_ANY):
+                    if not data['commander'].get('docked'):
+                        if not self.status['text']:
+                            # Signal as error because the user might actually be docked but the server hosting the Companion API hasn't caught up
+                            self.status['text'] = _("You're not docked at a station!")
+                            play_bad = True
+                    elif (config.getint('output') & config.OUT_MKT_EDDN) and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
-
-                    # No market output?
-                    elif not (config.getint('output') & config.OUT_MKT_EDDN) and not data['lastStarport'].get('commodities'):
+                    elif not data['lastStarport'].get('commodities'):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have a market!")
+                    elif config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD):
+                        # Fixup anomalies in the commodity data
+                        fixed = companion.fixup(data)
+                        if config.getint('output') & config.OUT_MKT_CSV:
+                            commodity.export(fixed, COMMODITY_CSV)
+                        if config.getint('output') & config.OUT_MKT_TD:
+                            td.export(fixed)
 
-                    else:
-                        if data['lastStarport'].get('commodities') and config.getint('output') & (config.OUT_MKT_CSV|config.OUT_MKT_TD):
-                            # Fixup anomalies in the commodity data
-                            fixed = companion.fixup(data)
-
-                            if config.getint('output') & config.OUT_MKT_CSV:
-                                commodity.export(fixed, COMMODITY_CSV)
-                            if config.getint('output') & config.OUT_MKT_TD:
-                                td.export(fixed)
-
-                        if config.getint('output') & config.OUT_MKT_EDDN:
-                            old_status = self.status['text']
-                            if not old_status:
-                                self.status['text'] = _('Sending data to EDDN...')
-                            self.w.update_idletasks()
-                            self.eddn.export_commodities(data, monitor.is_beta)
-                            self.eddn.export_outfitting(data, monitor.is_beta)
-                            if data['lastStarport'].get('ships', {}).get('shipyard_list'):
-                                self.eddn.export_shipyard(data, monitor.is_beta)
-                            elif data['lastStarport'].get('services', {}).get('shipyard'):
-                                # API is flakey about shipyard info - silently retry if missing (<1s is usually sufficient - 5s for margin).
-                                self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(2))
-                            if not old_status:
-                                self.status['text'] = ''
-
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.getandsend))
+                self.holdofftime = querytime + companion.holdoff
 
         # Companion API problem
-        except (companion.ServerError, companion.ServerLagging) as e:
+        except companion.ServerLagging as e:
             if retrying:
                 self.status['text'] = unicode(e)
                 play_bad = True
@@ -537,12 +487,13 @@ class AppWindow:
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.getandsend(event, True))
                 return	# early exit to avoid starting cooldown count
 
-        except requests.RequestException as e:
-            if __debug__: print_exc()
-            self.status['text'] = _("Error: Can't connect to EDDN")
+        except companion.CmdrError as e:	# Companion API return doesn't match Journal
+            self.status['text'] = unicode(e)
             play_bad = True
+            companion.session.invalidate()
+            self.login()
 
-        except Exception as e:
+        except Exception as e:			# Including CredentialsError, ServerError
             if __debug__: print_exc()
             self.status['text'] = unicode(e)
             play_bad = True
@@ -552,7 +503,6 @@ class AppWindow:
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
-        self.holdofftime = querytime + companion.holdoff
         self.cooldown()
 
     def retry_for_shipyard(self, tries):
@@ -617,18 +567,21 @@ class AppWindow:
 
             # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
-                if config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                    prefs.make_current(monitor.cmdr)
-                    self.login()
-                elif config.get('cmdrs') and entry['event'] == 'NewCommander':
-                    cmdrs = config.get('cmdrs')
-                    cmdrs[0] = monitor.cmdr	# New Cmdr uses same credentials as old
-                    config.set('cmdrs', cmdrs)
-                elif not self.prefsdialog:
-                    self.prefsdialog = prefs.PreferencesDialog(self.w, self.postprefs)	# First run or failed migration
+                if not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
+                    config.set('cmdrs', (config.get('cmdrs') or []) + [monitor.cmdr])
+                self.login()
 
             if not entry['event'] or not monitor.mode:
                 return	# Startup or in CQC
+
+            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Can start dashboard monitoring
+                if not dashboard.start(self.w, monitor.started):
+                    print "Can't start Status monitoring"
+
+            # Export loadout
+            if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
+                monitor.export_ship()
 
             # Plugins
             err = plug.notify_journal_entry(monitor.cmdr, monitor.is_beta, monitor.system, monitor.station, entry, monitor.state)
@@ -637,64 +590,27 @@ class AppWindow:
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
-                # Can start dashboard monitoring
-                if not dashboard.start(self.w, monitor.started):
-                    print "Can't start Status monitoring"
-
-            # Don't send to EDDN while on crew
-            if monitor.state['Captain']:
-                return
-
-            # Plugin backwards compatibility
-            if monitor.mode and entry['event'] in ['StartUp', 'Location', 'FSDJump']:
-                plug.notify_system_changed(timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')), monitor.system, monitor.coordinates)
-
-            # Export loadout
-            if monitor.mode and entry['event'] == 'Loadout' and config.getint('output') & config.OUT_SHIP:
-                monitor.export_ship()
-
-            # Auto-Update after docking
-            if monitor.mode and monitor.station and entry['event'] in ['StartUp', 'Location', 'Docked'] and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY:
+            # Auto-Update after docking, but not if auth callback is pending
+            if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY and companion.session.state != companion.Session.STATE_AUTH:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
-            # Send interesting events to EDDN
-            try:
-                if (config.getint('output') & config.OUT_SYS_EDDN and monitor.cmdr and monitor.mode and
-                    (entry['event'] == 'Location' or
-                     entry['event'] == 'FSDJump' or
-                     entry['event'] == 'Docked'  or
-                     entry['event'] == 'Scan'    and monitor.system and monitor.coordinates)):
-                    # strip out properties disallowed by the schema
-                    for thing in ['CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
-                        entry.pop(thing, None)
-
-                    # add planet to Docked event for planetary stations if known
-                    if entry['event'] == 'Docked' and monitor.planet:
-                        entry['Body'] = monitor.planet
-                        entry['BodyType'] = 'Planet'
-
-                    # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
-                    if 'StarSystem' not in entry:
-                        entry['StarSystem'] = monitor.system
-                    if 'StarPos' not in entry:
-                        entry['StarPos'] = list(monitor.coordinates)
-                    if 'SystemAddress' not in entry and monitor.systemaddress:
-                        entry['SystemAddress'] = monitor.systemaddress
-
-                    self.eddn.export_journal_entry(monitor.cmdr, monitor.is_beta, self.filter_localised(entry))
-
-            except requests.exceptions.RequestException as e:
-                if __debug__: print_exc()
-                self.status['text'] = _("Error: Can't connect to EDDN")
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
-
-            except Exception as e:
-                if __debug__: print_exc()
-                self.status['text'] = unicode(e)
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
+    # cAPI auth
+    def auth(self, event=None):
+        try:
+            companion.session.auth_callback()
+            self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+            if platform == 'darwin':
+                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+            else:
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
+                self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
+        except companion.ServerError as e:
+            self.status['text'] = unicode(e)
+        except Exception as e:
+            if __debug__: print_exc()
+            self.status['text'] = unicode(e)
+        self.cooldown()
 
     # Handle Status event
     def dashboard_event(self, event):
@@ -724,21 +640,6 @@ class AppWindow:
     def station_url(self, station):
         return plug.invoke(config.get('station_provider'),  'eddb', 'station_url', monitor.system, monitor.station)
 
-
-    # Recursively filter '*_Localised' keys from dict
-    def filter_localised(self, d):
-        filtered = OrderedDict()
-        for k, v in d.iteritems():
-            if k.endswith('_Localised'):
-                pass
-            elif hasattr(v, 'iteritems'):	# dict -> recurse
-                filtered[k] = self.filter_localised(v)
-            elif isinstance(v, list):	# list of dicts -> recurse
-                filtered[k] = [self.filter_localised(x) if hasattr(x, 'iteritems') else x for x in v]
-            else:
-                filtered[k] = v
-        return filtered
-
     def cooldown(self):
         if time() < self.holdofftime:
             self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS = int(self.holdofftime - time()))	# Update button in main window
@@ -763,6 +664,9 @@ class AppWindow:
     def help_general(self, event=None):
         webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')
 
+    def help_privacy(self, event=None):
+        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki/Privacy-Policy')
+
     def help_releases(self, event=None):
         webbrowser.open('https://github.com/Marginal/EDMarketConnector/releases')
 
@@ -781,9 +685,6 @@ class AppWindow:
             if f:
                 with open(f, 'wt') as h:
                     h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
-        except companion.VerificationRequired:
-            if not self.authdialog:
-                self.authdialog = prefs.AuthenticationDialog(self.w, partial(self.verify, self.save_raw))
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
@@ -794,11 +695,11 @@ class AppWindow:
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
+        protocolhandler.close()
         hotkeymgr.unregister()
         dashboard.close()
         monitor.close()
         plug.notify_stop()
-        self.eddn.close()
         self.updater.close()
         companion.session.close()
         config.close()
@@ -845,15 +746,25 @@ if __name__ == "__main__":
         import ctypes
         from ctypes.wintypes import *
         EnumWindows            = ctypes.windll.user32.EnumWindows
-        EnumWindowsProc        = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
         GetClassName           = ctypes.windll.user32.GetClassNameW
         GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
         GetWindowText          = ctypes.windll.user32.GetWindowTextW
         GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
         GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
         GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
+
+        SW_RESTORE = 9
         SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
+        ShowWindow             = ctypes.windll.user32.ShowWindow
         ShowWindowAsync        = ctypes.windll.user32.ShowWindowAsync
+
+        COINIT_MULTITHREADED = 0
+        COINIT_APARTMENTTHREADED = 0x2
+        COINIT_DISABLE_OLE1DDE = 0x4
+        CoInitializeEx         = ctypes.windll.ole32.CoInitializeEx
+
+        ShellExecute           = ctypes.windll.shell32.ShellExecuteW
+        ShellExecute.argtypes  = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
 
         def WindowTitle(h):
             if h:
@@ -863,17 +774,24 @@ if __name__ == "__main__":
                     return buf.value
             return None
 
+        @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
         def enumwindowsproc(hWnd, lParam):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
             if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                ShowWindowAsync(hWnd, 9)	# SW_RESTORE
-                SetForegroundWindow(hWnd)
+                if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
+                    # Browser invoked us directly with auth response. Forward the response to the other app instance.
+                    CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                    ShowWindow(hWnd, SW_RESTORE)	# Wait for it to be responsive to avoid ShellExecute recursing
+                    ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                else:
+                    ShowWindowAsync(hWnd, SW_RESTORE)
+                    SetForegroundWindow(hWnd)
                 sys.exit(0)
             return True
 
-        EnumWindows(EnumWindowsProc(enumwindowsproc), 0)
+        EnumWindows(enumwindowsproc, 0)
 
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
@@ -881,6 +799,8 @@ if __name__ == "__main__":
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
         print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
 
-    root = tk.Tk()
+    Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
+
+    root = tk.Tk(className=appname.lower())
     app = AppWindow(root)
     root.mainloop()

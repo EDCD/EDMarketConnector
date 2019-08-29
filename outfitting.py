@@ -36,9 +36,13 @@ weapon_map = {
     'guardian_shardcannon'           : 'Guardian Shard Cannon',
     'minelauncher'                   : 'Mine Launcher',
     ('minelauncher','impulse')       : 'Shock Mine Launcher',
+    'mining_abrblstr'                : 'Abrasion Blaster',
+    'mining_seismchrgwarhd'          : 'Seismic Charge Launcher',
+    'mining_subsurfdispmisle'        : 'Sub-Surface Displacement Missile',
     'mininglaser'                    : 'Mining Laser',
     ('mininglaser','advanced')       : 'Mining Lance Beam Laser',
     'multicannon'                    : 'Multi-Cannon',
+    ('multicannon','advanced')       : 'Advanced Multi-Cannon',
     ('multicannon','strong')         : 'Enforcer Cannon',
     'plasmaaccelerator'              : 'Plasma Accelerator',
     ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
@@ -60,6 +64,8 @@ missiletype_map = {
     'causticmissile'      : 'Dumbfire',
     'drunkmissilerack'    : 'Swarm',
     'dumbfiremissilerack' : 'Dumbfire',
+    'mining_subsurfdispmisle' : 'Seeker',
+    'mining_seismchrgwarhd'   : 'Seeker',
 }
 
 weaponmount_map = {
@@ -140,6 +146,14 @@ weaponrating_map = {
     'hpt_guardian_shardcannon_turret_large': 'D',
     'hpt_minelauncher_fixed_small': 'I',
     'hpt_minelauncher_fixed_medium': 'I',
+    'hpt_mining_abrblstr_fixed_small' : 'D',
+    'hpt_mining_abrblstr_turret_small' : 'D',
+    'hpt_mining_seismchrgwarhd_fixed_medium' : 'B',
+    'hpt_mining_seismchrgwarhd_turret_medium' : 'B',
+    'hpt_mining_subsurfdispmisle_fixed_small' : 'B',
+    'hpt_mining_subsurfdispmisle_fixed_medium' : 'B',
+    'hpt_mining_subsurfdispmisle_turret_small' : 'B',
+    'hpt_mining_subsurfdispmisle_turret_medium' : 'B',
     'hpt_mininglaser_fixed_small': 'D',
     'hpt_mininglaser_fixed_medium': 'D',
     'hpt_mininglaser_turret_small': 'D',
@@ -225,6 +239,7 @@ utility_map = {
     'cargoscanner'             : 'Cargo Scanner',
     'cloudscanner'             : 'Frame Shift Wake Scanner',
     'crimescanner'             : 'Kill Warrant Scanner',
+    'mrascanner'               : 'Pulse Wave Analyser',
     'shieldbooster'            : 'Shield Booster',
 }
 
@@ -263,10 +278,13 @@ fighter_rating_map = {
 
 misc_internal_map = {
     ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
+    ('dockingcomputer',             'advanced')     : ('Advanced Docking Computer', 'E'),
     ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
+    'planetapproachsuite'                           : ('Planetary Approach Suite', 'I'),
     ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
     ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
     ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
+    'supercruiseassist'                             : ('Supercruise Assist', 'E'),
 }
 
 standard_map = {
@@ -339,11 +357,6 @@ def lookup(module, ship_map, entitled=False):
     name = module['name'].lower().split('_')
     new = { 'id': module['id'], 'symbol': module['name'] }
 
-    # Hack 'Guardian used as a prefix'
-    if name[1] == 'guardian':
-        name.pop(1)
-        name[1] = 'guardian_%s' % name[1]
-
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
         name = module['name'].lower().rsplit('_', 2)	# Armour is ship-specific, and ship names can have underscores
@@ -365,10 +378,30 @@ def lookup(module, ship_map, entitled=False):
     elif not entitled and name[1] == 'planetapproachsuite':
         return None
 
+    # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
+    elif name[0]=='hpt' and name[1] in countermeasure_map:
+        new['category'] = 'utility'
+        new['name'], new['rating'] = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
+        new['class'] = weaponclass_map[name[-1]]
+
+    # Utility - e.g. Hpt_CargoScanner_Size0_Class1
+    elif name[0]=='hpt' and name[1] in utility_map:
+        new['category'] = 'utility'
+        new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
+        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
+        new['class'] = str(name[2][4:])
+        new['rating'] = rating_map[name[3][5:]]
+
     # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
-    elif name[0]=='hpt' and name[1] in weapon_map:
+    elif name[0]=='hpt':
+        # Hack 'Guardian' and 'Mining' prefixes
+        if len(name) > 3 and name[3] in weaponmount_map:
+            prefix = name.pop(1)
+            name[1] = '%s_%s' % (prefix, name[1])
+        if name[1] not in weapon_map:      raise AssertionError('%s: Unknown weapon "%s"'       % (module['id'], name[0]))
         if name[2] not in weaponmount_map: raise AssertionError('%s: Unknown weapon mount "%s"' % (module['id'], name[2]))
         if name[3] not in weaponclass_map: raise AssertionError('%s: Unknown weapon class "%s"' % (module['id'], name[3]))
+
         new['category'] = 'hardpoint'
         if len(name)>4:
             if name[4] in weaponoldvariant_map:		# Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
@@ -389,34 +422,14 @@ def lookup(module, ship_map, entitled=False):
             new['guidance'] = missiletype_map[name[1]]
         new['class'] = weaponclass_map[name[3]]
 
-    # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
-    elif name[0]=='hpt' and name[1] in countermeasure_map:
-        new['category'] = 'utility'
-        new['name'], new['rating'] = countermeasure_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        new['class'] = weaponclass_map[name[-1]]
-
-    # Utility - e.g. Hpt_CargoScanner_Size0_Class1
-    elif name[0]=='hpt' and name[1] in utility_map:
-        new['category'] = 'utility'
-        new['name'] = utility_map[len(name)>4 and (name[1],name[4]) or name[1]]
-        if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
-        new['class'] = str(name[2][4:])
-        new['rating'] = rating_map[name[3][5:]]
-
-    elif name[0]=='hpt':
-        raise AssertionError('%s: Unknown weapon "%s"' % (module['id'], name[1]))
-
     elif name[0]!='int':
         raise AssertionError('%s: Unknown prefix "%s"' % (module['id'], name[0]))
 
-    # Horizons Planetary Approach Suite - only listed in outfitting if the user is *playing* Horizons
-    elif name[1] == 'planetapproachsuite':
-        new['category'] = 'standard'
-        new['name'] = 'Planetary Approach Suite'
+    # Miscellaneous Class 1 - e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
+    elif name[1] in misc_internal_map:
+        new['category'] = 'internal'
+        new['name'], new['rating'] = misc_internal_map[name[1]]
         new['class'] = '1'
-        new['rating'] = 'I'
-
-    # Miscellaneous Class 1 - e.g. Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
     elif len(name) > 2 and (name[1],name[2]) in misc_internal_map:
         # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
         new['category'] = 'internal'

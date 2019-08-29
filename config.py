@@ -1,4 +1,3 @@
-import keyring
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
@@ -9,7 +8,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '3.1.2.1'
+appversion = '3.4.2.0'
 
 update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
 update_interval = 47*60*60
@@ -320,7 +319,9 @@ class Config:
                 return 0
 
         def set(self, key, val):
-            if isinstance(val, basestring) or isinstance(val, numbers.Integral):
+            if isinstance(val, bool):
+                self.config.set(self.SECTION, key, val and '1' or '0')
+            elif isinstance(val, basestring) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, self._escape(val))
             elif hasattr(val, '__iter__'):	# iterable
                 self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
@@ -360,13 +361,22 @@ class Config:
     # Common
 
     def get_password(self, account):
-        return keyring.get_password(self.identifier, account)
+        try:
+            import keyring
+            return keyring.get_password(self.identifier, account)
+        except ImportError:
+            return None
 
     def set_password(self, account, password):
-        keyring.set_password(self.identifier, account, password)
+        try:
+            import keyring
+            keyring.set_password(self.identifier, account, password)
+        except ImportError:
+            pass
 
     def delete_password(self, account):
         try:
+            import keyring
             keyring.delete_password(self.identifier, account)
         except:
             pass	# don't care - silently fail

@@ -9,7 +9,7 @@ import json
 import requests
 
 def download(filename):
-    r = requests.get('https://eddb.io/archive/v5/' + filename, stream=True)
+    r = requests.get('https://eddb.io/archive/v6/' + filename, stream=True)
     print '\n%s\t%dK' % (filename, len(r.content) / 1024)
     return r
 
@@ -90,6 +90,7 @@ if __name__ == "__main__":
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
     system_ids['Amo'] = (866, True)
+    system_ids['C Puppis']  = (25068, False)
     system_ids['q Velorum'] = (15843, True)
     system_ids['M Carinae'] = (22627, False)
     system_ids['HH 17']     = (61275, False)

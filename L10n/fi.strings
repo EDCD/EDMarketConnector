@@ -1,29 +1,5 @@
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
-
-/* [inara.py] */
-"Error: Inara {MSG}" = "Inaran virhe: {MSG}";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inaran kirjautuminen";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Ensisijaiset sivustot";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Telakka";
-
 /* Language name */
 "!Language" = "Suomi";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Vahvistuskoodi on lähetetty Elite -tiliisi{CR}yhdistettyyn sähköpostiosoitteeseen.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Ohjelmasta {APP}";
@@ -45,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Ulkoasu";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Todennus onnistui";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Päivitä automaattisesti telakoituessa";
@@ -79,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Cmdr";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Komentajanimelläsi";
-
 /* Ranking. [stats.py] */
 "Combat" = "Taistelija -ranking";
 
@@ -106,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "CQC -ranking";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Kirjautuminen";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Dangerous";
 
@@ -124,7 +97,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Oletus";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
 
 /* List of plugins in settings. [prefs.py] */
@@ -163,11 +136,14 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
 
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Virhe: ei saatu yhteyttä EDSM:ään";
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
@@ -181,11 +157,11 @@
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Virhe: Frontier -palvelimen SKU-ongelma";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
+/* [inara.py] */
+"Error: Inara {MSG}" = "Inaran virhe: {MSG}";
 
 /* [companion.py] */
-"Error: Verification failed" = "Virhe: varmentaminen epäonnistui";
+"Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Virhe: väärä komentaja";
@@ -241,11 +217,8 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Pikanäppäin";
 
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Tunnistautuminen lähettämissäsi tiedoissa";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Henkilöllisyys";
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inaran kirjautuminen";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Näppäimistöoikopolku";
@@ -313,9 +286,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normaali teksti";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Ei saatavissa Elite:Dangerousin ollessa päävalikossa";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Novice";
 
@@ -336,9 +306,6 @@
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Salasana";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Pathfinder";
@@ -361,12 +328,6 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Valitse mitkä tiedot tallennetaan";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Syötä koodi alla olevaan kenttään";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Kirjaudu Elite:Dangerous -tilitiedoillasi";
-
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Lisäosat";
 
@@ -385,17 +346,17 @@
 /* [prefs.py] */
 "Preferences" = "Valinnat";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Ensisijaiset sivustot";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Prince";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Yksityisyys";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Tietosuojakäytäntö";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Salanimellä tunnistettava";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Ranger";
@@ -439,13 +400,19 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
 
-/* Output setting. [prefs.py] */
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
+
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Lähetä asematiedot Elite Dangerous Data Network -palveluun";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja skannaustiedot Elite Dangerous Data Network -palveluun";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
 
 /* Empire rank. [stats.py] */
@@ -462,6 +429,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Alukset";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Telakka";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
@@ -504,9 +474,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Päivitä";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Käyttäjänimi (sähköpostiosoite)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Arvo";

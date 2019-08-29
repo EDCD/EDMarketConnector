@@ -46,20 +46,29 @@ Windows:
 * Double-click on it to install.
 * Run **Elite Dangerous Market Connector** from the Start Menu or Start Screen.
 
+Linux with Steam Play:
+
+* Copy and paste the following into a Terminal app window:
+
+  `mkdir -p ~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved\ Games/Frontier\ Developments/Elite\ Dangerous`
+
+  and press Enter (assuming that your Steam library is in the default `~/.steam` location).
+* (Re)-start the game.
+* Follow the instructions on [running from source](#running-from-source).
+* Adjust the “E:D journal file location” setting on the Configuration tab to point to `~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved Games/Frontier Developments/Elite Dangerous`.
+
+Linux with Wine:
+
+* Follow the above instructions for Windows.
+
 
 Setup
 --------
-The first time that you run the app you are prompted for your username and password. This is the same username and password
-combination that you use to log into the Elite: Dangerous launcher, and is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at.
+The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password. This is the same username and password combination that you use to log into the Elite: Dangerous launcher.
 
-You can also choose here what data to save (refer to the next section for details), whether to “Update” Cmdr and station data automatically on docking and/or with a hotkey, and whether to attach your Cmdr name or a [pseudo-anonymized](https://en.wikipedia.org/wiki/Pseudonymity) ID to the data.
+This step is required so that the Frontier servers can send the app *your* data and the data for the station that *you* are docked at. Refer to the [Privacy Policy](PRIVACY.md) for how this app handles your data.
 
-You will be prompted to authenticate with a “verification code”, which you will shortly receive by email from Frontier.
-Note that each “verification code” is one-time only - if you enter the code incorrectly or quit the app before
-authenticating you will need to wait for Frontier to send you a new code.
-
-If you are not prompted to authenticate, but instead see the message “Error: Invalid Credentials” then choose the menu
-option EDMarketConnector → Preferences (Mac) or File → Settings (Windows) and double-check your username and password.
+Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
 ### Output
 
@@ -75,8 +84,6 @@ This app can save a variety of data in a variety of formats:
   * After every outfitting change saves a record of your ship loadout as a file that you can open in a text editor and that you can import into [E:D&nbsp;Shipyard](http://www.edshipyard.com), [Coriolis](https://coriolis.edcd.io) or [Elite Trade Net](http://etn.io/).
 
 By default these files will be placed in your Documents folder. Since this app will create a lot of files if you use it for a while you may wish to create a separate folder for the files and tell the app to place them there.
-
-Some options work by reading the Elite: Dangerous game's log files. If you're running this app on a different machine from the Elite: Dangerous game then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
 ### EDDN
 
@@ -130,19 +137,48 @@ Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
 Troubleshooting
 --------
 
+### App repeatedly opens the Frontier authentication website
+The authentication didn't complete correctly for some reason. This can be caused by:
+
+- Using Internet Explorer. IE is [known](https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/) to be broken. Please (temporarily) set your default browser to Edge, Chrome or Firefox and retry.
+- The Frontier authentication website is confused - see [Error: An error occured](#error-an-error-occured).
+- Entering credentials for a different Cmdr - see [Error: Wrong Cmdr](#error-wrong-cmdr).
+- Entering Steam credentials instead of Frontier credentials - see [Error: User not found](#error-user-not-found).
+
+### Error: Invalid Credentials
+See [above](#app-repeatedly-opens-the-frontier-authentication-website).
+
+### Error: An error occured
+The Frontier authentication website is confused. Visit the [Frontier authentication website](https://auth.frontierstore.net/), log in and deauthorize "Elite Dangerous Market Connector". Then restart the app.
+
+### 500 internal server error
+Either:
+
+- You pressed the "Approve" button on Frontier's authentication website twice. This is harmless; if the app isn't displaying any error messages and isn't redirecting again to Frontier's authentication website then all is fine.
+- Frontier's authentication website sometimes gets overloaded and displays this error. Please try again later.
+
+### Error: User not found
+Your Steam account may not be linked to your Frontier account (you can check whether you have any external accounts linked on the [Frontier store](https://www.frontierstore.net/frontier_partnerkeys/)).
+
+Please enter your Frontier credentials into the authentication website, not your Steam credentials.
+
 ### Doesn't auto-update and/or persistently gives “Server is lagging” error
 This app uses Elite: Dangerous' log files to track the systems and stations that you visit. If you're running this app on a different machine from the Elite: Dangerous game, or if you find that this app isn't automatically tracking the systems that you visit and/or isn't automatically “updating” on docking (if you have that option selected), then adjust the “E:D journal file location” setting on the Configuration tab to point to the game's log files.
 
-The default location on Windows is typically `C:\Users\you\Saved Games\Frontier Developments\EliteDangerous`.
+The default location is typically:
+
+- Windows: `C:\Users\you\Saved Games\Frontier Developments\Elite Dangerous`
+- Linux Steam Play: `~/.steam/steam/steamapps/compatdata/359320/pfx/drive_c/users/steamuser/Saved Games/Frontier Developments/Elite Dangerous`
+- Linux Wine: `~/.wine/drive_c/users/you/Saved Games/Frontier Developments/Elite Dangerous`
 
 ### Credentials settings are greyed out
-You can't edit your Username/Password or EDSM Commander Name/API Key if:
+You won't be redirected to Frontier's authentication website and can't edit your EDSM or Inara credentials if:
 - Elite: Dangerous is at the Main Menu. You will be able to edit these values once you've entered the game.
 - The last time you ran Elite: Dangerous you didn't enter the game. You will be able to edit these values once you've entered the game.
-- Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-or-track-systems-visited).
+- Your “E:D journal file location” setting is incorrect. See [above](#doesnt-auto-update-andor-persistently-gives-server-is-lagging-error).
 
 ### Error: Wrong Cmdr
-The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. Either:
+The Frontier server that supplies data to this app is supplying data for a different Cmdr than the one that you're currently playing. You are redirected to Frontier's authentication website and prompted again for your username and password. Either:
 
 1. You have multiple accounts and the username/password setting is not for the account that you're currently playing; or
 2. You have reset your Cmdr but Frontier's server is still supplying data for the old Cmdr.
@@ -151,15 +187,16 @@ If 1 check your username/password settings.
 
 If 2 this problem may or may not resolve itself in time.
 
-This problem is tracked as [Issue #165](https://github.com/Marginal/EDMarketConnector/issues/165).
-
 ### I run two instances of E:D simultaneously, but I can't run two instances of EDMC
 EDMC supports this scenario if you run the second instance of E:D in a *different* user account - e.g. using `runas` on Windows. Run the second instance of EDMC in the same user account as the second instance of E:D.
 
 EDMC doesn't support running two instances of E:D in the *same* user account. EDMC will only respond to the instance of E:D that you ran last.
 
+### I forgot to run the app - is there a way to process the missing data?
+EDMC only processes live data from E:D. But you can upload your [journal](#doesnt-auto-update-andor-persistently-gives-server-is-lagging-error) file(s) for the missing period to [EDSM](https://www.edsm.net/en/settings/import/journal) and [Inara](https://inara.cz/settings/).
+
 ### Error: Can't connect to EDDN
-EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound.
+EDMC needs to talk to eddn.edcd.io on port 4430. If you consistently receive this error check that your router or VPN configuration allows port 4430 / tcp outbound. If using a proxy add `eddn.edcd.io` to the exemption list, plus `www.edsm.net` and/or `inara.cz` if using EDSM and/or Inara integration.
 
 ### Import failed: No ship loadout found
 Complex ship loadouts with Engineers' mods can cause you to hit an Internet Explorer / Edge limitation on the length of URLs. Switch to a browser that doesn't suck.
@@ -172,6 +209,9 @@ You'll see a very long cooldown period if your system's time of day changes whil
 - Windows: Run the RegEdit program and locate and delete the key `HKEY_CURRENT_USER\Software\Marginal\EDMarketConnector\querytime`.
 - Mac: Copy and paste the following into a Terminal app window: `defaults write uk.org.marginal.edmarketconnector querytime -int 0` and press Enter.
 - Re-start the app.
+
+### Update Error!
+The [GitHub server](https://github.com/Marginal/EDMarketConnector/releases/latest) that hosts this app's updates only supports TLS 1.2 and higher. Follow [these](https://help.passageways.com/hc/en-us/articles/115005183226-How-to-enable-TLS-1-2-in-Internet-Explorer-11-and-MS-Edge) instructions to change your Windows settings to disable the [deprecated](https://tools.ietf.org/html/rfc7568) SSL 2.0 and 3.0 protocols and enable TLS 1.2.
 
 ### Location of configuration files
 If your configuration has been corrupted, or badly set, such that you can't run the program to fix it, or you otherwise need to directly access the configuration then these are the locations of the configuration:
@@ -211,21 +251,23 @@ Windows:
 Running from source
 --------
 
-Download and extract the source code of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+Download and extract the [latest source code](https://github.com/Marginal/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`).
 
 Mac:
 
-* Requires the Python “keyring”, “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U keyring requests watchdog py2app` .
+* Requires the Python “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U requests watchdog py2app` .
 * Run with `python ./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “keyring”, “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
+* Requires Python2.7 and the Python “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
 * Run with `EDMarketConnector.py` .
 
 Linux:
 
-* Requires the Python “imaging-tk”, “iniparse”, “keyring” and “requests” modules. On Debian-based systems install these with `sudo apt-get install python-imaging-tk python-iniparse python-keyring python-requests` .
+* Requires Python2.7 and the Python “iniparse”, “requests” and "tkinter" modules.
+  - On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests python-tk` .
+  - On Arch, install these with `sudo pacman -S python2 python2-requests tk; sudo easy_install-2.7 iniparse` .
 * Run with `./EDMarketConnector.py` .
 
 Command-line
@@ -312,6 +354,7 @@ Acknowledgements
 * Uses [Sparkle](https://github.com/sparkle-project/Sparkle) by [Andy Matuschak](http://andymatuschak.org/) and the [Sparkle Project](https://github.com/sparkle-project).
 * Uses [WinSparkle](https://github.com/vslavik/winsparkle/wiki) by [Václav Slavík](https://github.com/vslavik).
 * Uses [OneSky](http://www.oneskyapp.com/) for [translation management](https://marginal.oneskyapp.com/collaboration/project?id=52710).
+* Uses "Euro Caps" font by [Tom Oetken](https://www.dafont.com/profile.php?user=298681).
 
 License
 -------

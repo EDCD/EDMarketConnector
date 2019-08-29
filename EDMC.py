@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 #
 # Command-line interface. Requires prior setup through the GUI.
 #
@@ -23,10 +23,12 @@ import outfitting
 import loadout
 import edshipyard
 import shipyard
-import eddn
 import stats
 from config import appcmdname, appversion, update_feed, config
 from monitor import monitor
+
+sys.path.append(config.internal_plugin_dir)
+import eddn
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
@@ -109,17 +111,13 @@ try:
                     if cmdr.lower() == args.p.lower():
                         break
                 else:
-                    raise companion.CredentialsError
-            username = config.get('fdev_usernames')[idx]
-            companion.session.login(username, config.get_password(username), monitor.is_beta)
-        elif config.get('cmdrs'):
+                    raise companion.CredentialsError()
+            companion.session.login(cmdr, monitor.is_beta)
+        else:
             cmdrs = config.get('cmdrs') or []
             if monitor.cmdr not in cmdrs:
-                raise companion.CredentialsError
-            username = config.get('fdev_usernames')[cmdrs.index(monitor.cmdr)]
-            companion.session.login(username, config.get_password(username), monitor.is_beta)
-        else:	# <= 2.25 not yet migrated
-            companion.session.login(config.get('username'), config.get('password'), monitor.is_beta)
+                raise companion.CredentialsError()
+            companion.session.login(monitor.cmdr, monitor.is_beta)
         querytime = int(time())
         data = companion.session.station()
         config.set('querytime', querytime)
@@ -237,6 +235,3 @@ except companion.SKUError as e:
 except companion.CredentialsError as e:
     sys.stderr.write('Invalid Credentials\n')
     sys.exit(EXIT_CREDENTIALS)
-except companion.VerificationRequired:
-    sys.stderr.write('Verification Required\n')
-    sys.exit(EXIT_VERIFICATION)

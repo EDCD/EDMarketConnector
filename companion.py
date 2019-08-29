@@ -1,24 +1,35 @@
+import base64
 import csv
 import requests
-from cookielib import LWPCookieJar
+from cookielib import LWPCookieJar	# No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
+import json
 import numbers
 import os
 from os.path import dirname, isfile, join
 import sys
 import time
 from traceback import print_exc
+import urlparse
+import webbrowser
+import zlib
 
 from config import appname, appversion, config
+from protocol import protocolhandler
+
 
 holdoff = 60	# be nice
 timeout = 10	# requests timeout
+auth_timeout = 30	# timeout for initial auth
+
+CLIENT_ID   = os.getenv('CLIENT_ID') or '227cd239-ab8c-4728-9d3c-d8f588f247bd' 	# Obtain from https://auth.frontierstore.net/client/signup
+SERVER_AUTH = 'https://auth.frontierstore.net'
+URL_AUTH    = '/auth'
+URL_TOKEN   = '/token'
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
-URL_LOGIN   = '/user/login'
-URL_CONFIRM = '/user/confirm'
 URL_QUERY   = '/profile'
 URL_MARKET  = '/market'
 URL_SHIPYARD= '/shipyard'
@@ -63,6 +74,8 @@ ship_map = {
     'independant_trader'          : 'Keelback',
     'independent_fighter'         : 'Taipan Fighter',
     'krait_mkii'                  : 'Krait MkII',
+    'krait_light'                 : 'Krait Phantom',
+    'mamba'                       : 'Mamba',
     'orca'                        : 'Orca',
     'python'                      : 'Python',
     'scout'                       : 'Taipan Fighter',
@@ -123,8 +136,10 @@ class SKUError(Exception):
         return unicode(self).encode('utf-8')
 
 class CredentialsError(Exception):
+    def __init__(self, message=None):
+        self.message = message and unicode(message) or _('Error: Invalid Credentials')
     def __unicode__(self):
-        return _('Error: Invalid Credentials')
+        return self.message
     def __str__(self):
         return unicode(self).encode('utf-8')
 
@@ -134,24 +149,140 @@ class CmdrError(Exception):
     def __str__(self):
         return unicode(self).encode('utf-8')
 
-class VerificationRequired(Exception):
-    def __unicode__(self):
-        return _('Error: Verification failed')
-    def __str__(self):
-        return unicode(self).encode('utf-8')
 
+class Auth:
 
-# Server companion.orerve.net uses a session cookie ("CompanionApp") to tie together login, verification
-# and query. So route all requests through a single Session object which holds this state.
+    def __init__(self, cmdr):
+        self.cmdr = cmdr
+        self.session = requests.Session()
+        self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
+        self.verifier = self.state = None
+
+    def refresh(self):
+        # Try refresh token. Returns new refresh token if successful, otherwise makes new authorization request.
+        self.verifier = None
+        cmdrs = config.get('cmdrs')
+        idx = cmdrs.index(self.cmdr)
+        tokens = config.get('fdev_apikeys') or []
+        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+        if tokens[idx]:
+            try:
+                data = {
+                    'grant_type': 'refresh_token',
+                    'client_id': CLIENT_ID,
+                    'refresh_token': tokens[idx],
+                }
+                r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
+                if r.status_code == requests.codes.ok:
+                    data = r.json()
+                    tokens[idx] = data.get('refresh_token', '')
+                    config.set('fdev_apikeys', tokens)
+                    config.save()	# Save settings now for use by command-line app
+                    return data.get('access_token')
+                else:
+                    print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
+                    self.dump(r)
+            except:
+                print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
+                print_exc()
+        else:
+            print 'Auth\tNo token for %s' % self.cmdr.encode('utf-8')
+
+        # New request
+        print 'Auth\tNew authorization request'
+        self.verifier = self.base64URLEncode(os.urandom(32))
+        self.state = self.base64URLEncode(os.urandom(8))
+        # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
+        webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=%s' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state, protocolhandler.redirect))
+
+    def authorize(self, payload):
+        # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
+        if not '?' in payload:
+            print 'Auth\tMalformed response "%s"' % payload.encode('utf-8')
+            raise CredentialsError()	# Not well formed
+
+        data = urlparse.parse_qs(payload[payload.index('?')+1:])
+        if not self.state or not data.get('state') or data['state'][0] != self.state:
+            print 'Auth\tUnexpected response "%s"' % payload.encode('utf-8')
+            raise CredentialsError()	# Unexpected reply
+
+        if not data.get('code'):
+            print 'Auth\tNegative response "%s"' % payload.encode('utf-8')
+            if data.get('error_description'):
+                raise CredentialsError('Error: %s' % data['error_description'][0])
+            elif data.get('error'):
+                raise CredentialsError('Error: %s' % data['error'][0])
+            elif data.get('message'):
+                raise CredentialsError('Error: %s' % data['message'][0])
+            else:
+                raise CredentialsError()
+
+        try:
+            r = None
+            data = {
+                'grant_type': 'authorization_code',
+                'client_id': CLIENT_ID,
+                'code_verifier': self.verifier,
+                'code': data['code'][0],
+                'redirect_uri': protocolhandler.redirect,
+            }
+            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
+            data = r.json()
+            if r.status_code == requests.codes.ok:
+                print 'Auth\tNew token for %s' % self.cmdr.encode('utf-8')
+                cmdrs = config.get('cmdrs')
+                idx = cmdrs.index(self.cmdr)
+                tokens = config.get('fdev_apikeys') or []
+                tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+                tokens[idx] = data.get('refresh_token', '')
+                config.set('fdev_apikeys', tokens)
+                config.save()	# Save settings now for use by command-line app
+                return data.get('access_token')
+        except:
+            print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
+            print_exc()
+            if r: self.dump(r)
+            raise CredentialsError()
+
+        print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
+        self.dump(r)
+        if data.get('error_description'):
+            raise CredentialsError('Error: %s' % data['error_description'])
+        elif data.get('error'):
+            raise CredentialsError('Error: %s' % data['error'])
+        elif data.get('message'):
+            raise CredentialsError('Error: %s' % data['message'])
+        else:
+            raise CredentialsError()
+
+    @staticmethod
+    def invalidate(cmdr):
+        print 'Auth\tInvalidated token for %s' % cmdr.encode('utf-8')
+        cmdrs = config.get('cmdrs')
+        idx = cmdrs.index(cmdr)
+        tokens = config.get('fdev_apikeys') or []
+        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+        tokens[idx] = ''
+        config.set('fdev_apikeys', tokens)
+        config.save()	# Save settings now for use by command-line app
+
+    def dump(self, r):
+        print 'Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8')
+
+    def base64URLEncode(self, text):
+        return base64.urlsafe_b64encode(text).replace('=', '')
+
 
 class Session:
 
-    STATE_NONE, STATE_INIT, STATE_AUTH, STATE_OK = range(4)
+    STATE_INIT, STATE_AUTH, STATE_OK = range(3)
 
     def __init__(self):
         self.state = Session.STATE_INIT
         self.credentials = None
         self.session = None
+        self.auth = None
+        self.retrying = False	# Avoid infinite loop when successful auth / unsuccessful query
 
         # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
         if sys.version_info < (2,7,9):
@@ -161,96 +292,103 @@ class Session:
         if getattr(sys, 'frozen', False):
             os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
 
-    def login(self, username=None, password=None, is_beta=False):
-        if (not username or not password):
+    def login(self, cmdr=None, is_beta=None):
+        # Returns True if login succeeded, False if re-authorization initiated.
+        if not CLIENT_ID:
+            raise CredentialsError()
+        if not cmdr or is_beta is None:
+            # Use existing credentials
             if not self.credentials:
-                raise CredentialsError()
-            else:
-                credentials = self.credentials
+                raise CredentialsError()	# Shouldn't happen
+            elif self.state == Session.STATE_OK:
+                return True	# already logged in
         else:
-            credentials = { 'email' : username, 'password' : password, 'beta' : is_beta }
+            credentials = {'cmdr': cmdr, 'beta': is_beta}
+            if self.credentials == credentials and self.state == Session.STATE_OK:
+                return True	# already logged in
+            else:
+                # changed account or retrying login during auth
+                self.close()
+                self.credentials = credentials
 
-        if self.credentials == credentials and self.state == Session.STATE_OK:
-            return	# already logged in
-
-        if not self.credentials or self.credentials['email'] != credentials['email'] or self.credentials['beta'] != credentials['beta']:
-            # changed account
-            self.close()
-            self.session = requests.Session()
-            self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
-            cookiefile = join(config.app_dir, 'cookies-%s.txt' % hashlib.md5(credentials['email']).hexdigest())
-            if not isfile(cookiefile) and isfile(join(config.app_dir, 'cookies.txt')):
-                os.rename(join(config.app_dir, 'cookies.txt'), cookiefile)	# migration from <= 2.25
-            self.session.cookies = LWPCookieJar(cookiefile)
-            try:
-                self.session.cookies.load()
-            except IOError:
-                pass
-
-        self.server = credentials['beta'] and SERVER_BETA or SERVER_LIVE
-        self.credentials = credentials
+        self.server = self.credentials['beta'] and SERVER_BETA or SERVER_LIVE
         self.state = Session.STATE_INIT
-        try:
-            r = self.session.post(self.server + URL_LOGIN, data = self.credentials, timeout=timeout)
-        except:
-            if __debug__: print_exc()
-            raise ServerError()
-
-        if r.status_code != requests.codes.ok or 'server error' in r.text:
-            self.dump(r)
-            raise ServerError()
-        elif r.url == self.server + URL_LOGIN:		# would have redirected away if success
-            self.dump(r)
-            if 'purchase' in r.text.lower():
-                raise SKUError()
-            else:
-                raise CredentialsError()
-        elif r.url == self.server + URL_CONFIRM:	# redirected to verification page
-            self.state = Session.STATE_AUTH
-            raise VerificationRequired()
+        self.auth = Auth(self.credentials['cmdr'])
+        access_token = self.auth.refresh()
+        if access_token:
+            self.auth = None
+            self.start(access_token)
+            return True
         else:
-            self.state = Session.STATE_OK
-            return r.status_code
+            self.state = Session.STATE_AUTH
+            return False
+            # Wait for callback
 
-    def verify(self, code):
-        if not code:
-            raise VerificationRequired()
-        r = self.session.post(self.server + URL_CONFIRM, data = {'code' : code}, timeout=timeout)
-        if r.status_code != requests.codes.ok or r.url == self.server + URL_CONFIRM:	# would have redirected away if success
-            raise VerificationRequired()
-        self.session.cookies.save()	# Save cookies now for use by command-line app
-        self.login()
+    # Callback from protocol handler
+    def auth_callback(self):
+        if self.state != Session.STATE_AUTH:
+            raise CredentialsError()	# Shouldn't be getting a callback
+        try:
+            self.start(self.auth.authorize(protocolhandler.lastpayload))
+            self.auth = None
+        except:
+            self.state = Session.STATE_INIT	# Will try to authorize again on next login or query
+            self.auth = None
+            raise	# Bad thing happened
+
+    def start(self, access_token):
+        self.session = requests.Session()
+        self.session.headers['Authorization'] = 'Bearer %s' % access_token
+        self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
+        self.state = Session.STATE_OK
 
     def query(self, endpoint):
-        if self.state == Session.STATE_NONE:
-            raise Exception('General error')	# Shouldn't happen - don't bother localizing
-        elif self.state == Session.STATE_INIT:
-            self.login()
+        if self.state == Session.STATE_INIT:
+            if self.login():
+                return self.query(endpoint)
         elif self.state == Session.STATE_AUTH:
-            raise VerificationRequired()
+            raise CredentialsError()
+
         try:
             r = self.session.get(self.server + endpoint, timeout=timeout)
         except:
             if __debug__: print_exc()
             raise ServerError()
 
-        if r.status_code == requests.codes.forbidden or r.url == self.server + URL_LOGIN:
-            # Start again - maybe our session cookie expired?
-            self.state = Session.STATE_INIT
-            return self.query(endpoint)
-
-        if r.status_code != requests.codes.ok:
+        if r.url.startswith(SERVER_AUTH):
+            # Redirected back to Auth server - force full re-authentication
+            self.dump(r)
+            self.invalidate()
+            self.retrying = False
+            self.login()
+            raise CredentialsError()
+        elif 500 <= r.status_code < 600:
+            # Server error. Typically 500 "Internal Server Error" if server is down
             self.dump(r)
             raise ServerError()
 
         try:
-            data = r.json()
-            if 'timestamp' not in data:
-                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
+            r.raise_for_status()	# Typically 403 "Forbidden" on token expiry
+            data = r.json()		# May also fail here if token expired since response is empty
         except:
+            print_exc()
             self.dump(r)
-            raise ServerError()
+            self.close()
+            if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
+                self.invalidate()
+                self.retrying = False
+                self.login()
+                raise CredentialsError()
+            elif self.login():		# Maybe our token expired. Re-authorize in any case
+                self.retrying = True
+                return self.query(endpoint)
+            else:
+                self.retrying = False
+                raise CredentialsError()
 
+        self.retrying = False
+        if 'timestamp' not in data:
+            data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
         return data
 
     def profile(self):
@@ -277,18 +415,21 @@ class Session:
         return data
 
     def close(self):
-        self.state = Session.STATE_NONE
+        self.state = Session.STATE_INIT
         if self.session:
             try:
-                self.session.cookies.save()
                 self.session.close()
             except:
                 if __debug__: print_exc()
         self.session = None
 
+    def invalidate(self):
+        # Force a full re-authentication
+        self.close()
+        Auth.invalidate(self.credentials['cmdr'])
+
     def dump(self, r):
-        print_exc()
-        print 'cAPI\t' + r.url, r.status_code, r.headers, r.text.encode('utf-8')
+        print 'cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.text.encode('utf-8')
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up

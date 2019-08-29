@@ -1,29 +1,5 @@
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Hiba:Nem lehet kapcsolódni az Inarához";
-
-/* [inara.py] */
-"Error: Inara {MSG}" = "Hiba:Inara {MSG}";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inara hitelesitő adatok";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Repülési napló és Parancsnok státusz küldése az EDSM-nek";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Repülési napló és Parancsnok státusz küldése az Inarának";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Preferált weboldalak";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Hajógyár";
-
 /* Language name */
 "!Language" = "Magyar";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Egy megerősítő kód el lett küldve a e-mail címre ami{CR}megegyezik az Elite fiókod regisztrációs címével";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Az {APP} névjegye";
@@ -45,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Megjelenés";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "A hitelesítés sikerült";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Automatikusan frissit dokkolásnál";
@@ -79,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Parancsnok";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Paramcsnok név";
-
 /* Ranking. [stats.py] */
 "Combat" = "Harc";
 
@@ -106,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "CQC";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Hitelesítés";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Veszélyes";
 
@@ -124,7 +97,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Alap";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Küldés késletetése amig dokkolsz";
 
 /* List of plugins in settings. [prefs.py] */
@@ -163,11 +136,14 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Vállalkozó";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Hiba:Nem lehet kapcsolódni az EDDN-hez";
 
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Hiba:nem lehet kapcsólodni az EDSM-hez";
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Hiba:Nem lehet kapcsolódni az Inarához";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Hiba:EDSM {MSG}";
@@ -181,11 +157,11 @@
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Hiba:Frontier szerver SKU probléma";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
+/* [inara.py] */
+"Error: Inara {MSG}" = "Hiba:Inara {MSG}";
 
 /* [companion.py] */
-"Error: Verification failed" = "Hiba:Hítelesités nem sikerült";
+"Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Hiba:Rossz parancsnok";
@@ -241,11 +217,8 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Gyorsgomb";
 
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Hogyan szeretné azonosítani a mentett adatokat";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Személyazonnoság";
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara hitelesitő adatok";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Billentyűparancsok";
@@ -313,9 +286,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Normál txt";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Nem elérhető amíg az E:D a főmenüben van";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Kezdő";
 
@@ -336,9 +306,6 @@
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Kivűlálló";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Jelszó";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Útkereső";
@@ -361,12 +328,6 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Kérem válassza ki a menteni kivánt adatokat.";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Kérem írja be a kódot a szöveg alart lévő rublikába";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Kérlek jelentkez be az Elite Dangerous fiókoddal";
-
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Pluginok";
 
@@ -385,17 +346,17 @@
 /* [prefs.py] */
 "Preferences" = "Beállítások";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Preferált weboldalak";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Herceg";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Titkosítás";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Adatvédelmi irányelvek";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Szakember";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Pseudo-anonymized ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Vándor";
@@ -439,13 +400,19 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Fél profi";
 
-/* Output setting. [prefs.py] */
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Repülési napló és Parancsnok státusz küldése az EDSM-nek";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Repülési napló és Parancsnok státusz küldése az Inarának";
+
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Állomás adatok küldése az EDDN-nek";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Rendszer és szken adatok küldése az EDDN-nek";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Adatok küldése az EDDN-nek...";
 
 /* Empire rank. [stats.py] */
@@ -462,6 +429,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Hajók";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Hajógyár";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Földesúr";
@@ -504,9 +474,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Frissítés";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Felhasználónév (Email)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Érték";

@@ -1,29 +1,5 @@
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
-
-/* [inara.py] */
-"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Обліковий запис Inara";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Обрані веб-сайти";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Верф";
-
 /* Language name */
 "!Language" = "Українська";
-
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"A verification code has now been sent to the{CR}email address associated with your Elite account." = "Код підтвердження був відправлений на адресу {CR}, що пов'язана з Вашим обліковим записом Elite.";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Про {APP}";
@@ -45,6 +21,9 @@
 
 /* Tab heading in settings. [prefs.py] */
 "Appearance" = "Зовнішній вигляд";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Автентифікацію пройдено успішно";
 
 /* Output setting. [prefs.py] */
 "Automatically update on docking" = "Автоматичне оновлювання при стикуванні зі станцією";
@@ -79,9 +58,6 @@
 /* Main window. [EDMarketConnector.py] */
 "Cmdr" = "Км-др";
 
-/* Privacy setting. [prefs.py] */
-"Cmdr name" = "Ім`я пілота";
-
 /* Ranking. [stats.py] */
 "Combat" = "Бойовий";
 
@@ -106,9 +82,6 @@
 /* Ranking. [stats.py] */
 "CQC" = "Близький бій (CQC)";
 
-/* Section heading in settings. [prefs.py] */
-"Credentials" = "Облікові дані";
-
 /* Combat rank. [stats.py] */
 "Dangerous" = "Небезпечний";
 
@@ -124,7 +97,7 @@
 /* Appearance theme and language setting. [l10n.py] */
 "Default" = "Стандартне налаштування";
 
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [prefs.py] */
+/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";
 
 /* List of plugins in settings. [prefs.py] */
@@ -163,11 +136,14 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Підприємець";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Error: Can't connect to EDDN" = "Помилка: Немає зв'язку з EDDN!";
 
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Помилка: Немає з`єднання з EDSM!";
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
@@ -181,11 +157,11 @@
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Помилка! Проблема SKU сервера Frontier";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
+/* [inara.py] */
+"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
 
 /* [companion.py] */
-"Error: Verification failed" = "Помилка: Не вдалося перевірити";
+"Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Помилка! Не той обліковий запис!";
@@ -241,11 +217,8 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Гаряча клавіша";
 
-/* [prefs.py] */
-"How do you want to be identified in the saved data" = "Як вас ідентифікувати в збережених даних";
-
-/* Tab heading in settings. [prefs.py] */
-"Identity" = "Ідентифікація";
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Обліковий запис Inara";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сполучення клавіш";
@@ -313,9 +286,6 @@
 /* Dark theme color setting. [prefs.py] */
 "Normal text" = "Нормальний текст";
 
-/* Displayed when credentials settings are greyed out. [prefs.py] */
-"Not available while E:D is at the main menu" = "Не доступно (поки гра E:D в головному меню)";
-
 /* Combat rank. [stats.py] */
 "Novice" = "Новачок";
 
@@ -336,9 +306,6 @@
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Чужинець";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Password" = "Пароль";
 
 /* Explorer rank. [stats.py] */
 "Pathfinder" = "Слідопит";
@@ -361,12 +328,6 @@
 /* [prefs.py] */
 "Please choose what data to save" = "Оберіть дані які буде збережено";
 
-/* Use same text as E:D Launcher's verification dialog. [prefs.py] */
-"Please enter the code into the box below." = "Будь ласка, введіть код в поле нижче.";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Please log in with your Elite: Dangerous account details" = "Будь ласка, введіть Ваші реквізити Elite : Dangerous";
-
 /* Tab heading in settings. [prefs.py] */
 "Plugins" = "Плагіни";
 
@@ -385,17 +346,17 @@
 /* [prefs.py] */
 "Preferences" = "Уподобання";
 
+/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
+"Preferred websites" = "Обрані веб-сайти";
+
 /* Empire rank. [stats.py] */
 "Prince" = "Принц";
 
-/* Section heading in settings. [prefs.py] */
-"Privacy" = "Конфіденційність";
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Політика конфіденційності";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Професійний";
-
-/* Privacy setting. [prefs.py] */
-"Pseudo-anonymized ID" = "Псевдо-анонімний ID";
 
 /* Explorer rank. [stats.py] */
 "Ranger" = "Рейнджер";
@@ -439,13 +400,19 @@
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Напів-професійний";
 
-/* Output setting. [prefs.py] */
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
+
+/* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";
 
-/* Output setting new in E:D 2.2. [prefs.py] */
+/* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Відправляти систему і результати сканування в Elite Dangerous Data Network";
 
-/* [EDMarketConnector.py] */
+/* [eddn.py] */
 "Sending data to EDDN..." = "Відправка даних до EDDN...";
 
 /* Empire rank. [stats.py] */
@@ -462,6 +429,9 @@
 
 /* Status dialog title. [stats.py] */
 "Ships" = "Кораблі";
+
+/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+"Shipyard" = "Верф";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Зброєносець";
@@ -504,9 +474,6 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Оновлення";
-
-/* Use same text as E:D Launcher's login dialog. [prefs.py] */
-"Username (Email)" = "Користувач (Email)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Вартість";

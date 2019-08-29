@@ -66,7 +66,7 @@ if sys.platform=='darwin':
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 SHORTVERSION = ''.join(VERSION.split('.')[:3])
-PLUGINS = [ 'plugins/coriolis.py', 'plugins/eddb.py', 'plugins/edsm.py', 'plugins/edsy.py', 'plugins/inara.py' ]
+PLUGINS = [ 'plugins/coriolis.py', 'plugins/eddb.py', 'plugins/eddn.py', 'plugins/edsm.py', 'plugins/edsy.py', 'plugins/inara.py' ]
 
 if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
@@ -86,8 +86,16 @@ if sys.platform=='darwin':
                       'CFBundleLocalizations': sorted(set([x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]) | set([x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')])),	# https://github.com/sparkle-project/Sparkle/issues/238
                       'CFBundleShortVersionString': VERSION,
                       'CFBundleVersion':  VERSION,
+                      'CFBundleURLTypes': [
+                          {
+                              'CFBundleTypeRole': 'Viewer',
+                              'CFBundleURLName': 'uk.org.marginal.%s.URLScheme' % APPNAME.lower(),
+                              'CFBundleURLSchemes': ['edmc'],
+                          }
+                      ],
                       'LSMinimumSystemVersion': '10.10',
-                      'NSHumanReadableCopyright': u'© 2015-2018 Jonathan Harris',
+                      'NSAppleScriptEnabled': True,
+                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -116,6 +124,7 @@ elif sys.platform=='win32':
             requests.certs.where(),
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
+            'EUROCAPS.TTF',
             'commodity.csv',
             'rare_commodity.csv',
             'snd_good.wav',
@@ -138,14 +147,14 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'copyright': u'© 2015-2018 Jonathan Harris',
+                 'copyright': u'© 2015-2019 Jonathan Harris',
                  'name': APPNAME,		# WinSparkle
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
-                 'copyright': u'© 2015-2018 Jonathan Harris',
+                 'copyright': u'© 2015-2019 Jonathan Harris',
                  'name': APPNAME,
                  'company_name': 'Marginal',
              } ],
@@ -185,9 +194,9 @@ else:
         shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
         for lcid in lcids[1:]:
             shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
-            os.system(r'cscript "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
+            os.system(r'cscript /nologo "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
             os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
-            os.system(r'cscript "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+            os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
 
 # Make appcast entry
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')

@@ -15,7 +15,11 @@ from traceback import print_exc
 import __builtin__
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
+    print "Can't set locale!"
 
 from config import config
 
@@ -85,7 +89,12 @@ class Translations:
             for plugin in os.listdir(config.plugin_dir):
                 plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
                 if isdir(plugin_path):
-                    self.translations[plugin] = self.contents(lang, plugin_path)
+                    try:
+                        self.translations[plugin] = self.contents(lang, plugin_path)
+                    except UnicodeDecodeError, e:
+                        print 'Malformed file %s.strings in plugin %s: %s' % (lang, plugin, e)
+                    except:
+                        print_exc()
             __builtin__.__dict__['_'] = self.translate
 
     def contents(self, lang, plugin_path=None):

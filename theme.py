@@ -6,12 +6,92 @@
 #
 
 from sys import platform
+from os.path import join
 
 import Tkinter as tk
 import ttk
 import tkFont
 
 from config import appname, applongname, config
+
+
+if platform == 'win32':
+    import ctypes
+    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+    AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
+    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
+    FR_PRIVATE  = 0x10
+    FR_NOT_ENUM = 0x20
+    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
+
+elif platform == 'linux2':
+    from ctypes import *
+
+    XID = c_ulong 	# from X.h: typedef unsigned long XID
+    Window = XID
+    Atom = c_ulong
+    Display = c_void_p	# Opaque
+
+    # Sending ClientMessage to WM using XSendEvent()
+    SubstructureNotifyMask   = 1<<19
+    SubstructureRedirectMask = 1<<20
+    ClientMessage = 33
+
+    _NET_WM_STATE_REMOVE = 0
+    _NET_WM_STATE_ADD    = 1
+    _NET_WM_STATE_TOGGLE = 2
+
+    class XClientMessageEvent_data(Union):
+        _fields_ = [
+            ('b', c_char * 20),
+            ('s', c_short * 10),
+            ('l', c_long * 5),
+        ]
+
+    class XClientMessageEvent(Structure):
+        _fields_ = [
+            ('type', c_int),
+            ('serial', c_ulong),
+            ('send_event', c_int),
+            ('display', POINTER(Display)),
+            ('window', Window),
+            ('message_type', Atom),
+            ('format', c_int),
+            ('data', XClientMessageEvent_data),
+        ]
+
+    class XEvent(Union):
+        _fields_ = [
+            ('xclient', XClientMessageEvent),
+        ]
+
+    xlib = cdll.LoadLibrary('libX11.so.6')
+    XFlush = xlib.XFlush
+    XFlush.argtypes = [POINTER(Display)]
+    XFlush.restype = c_int
+    XInternAtom = xlib.XInternAtom
+    XInternAtom.restype = Atom
+    XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
+    XOpenDisplay = xlib.XOpenDisplay
+    XOpenDisplay.argtypes = [c_char_p]
+    XOpenDisplay.restype = POINTER(Display)
+    XQueryTree = xlib.XQueryTree
+    XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
+    XQueryTree.restype = c_int
+    XSendEvent = xlib.XSendEvent
+    XSendEvent.argtypes = [POINTER(Display), Window, c_int, c_long, POINTER(XEvent)]
+    XSendEvent.restype = c_int
+
+    try:
+        dpy = xlib.XOpenDisplay(None)
+        XA_ATOM = Atom(4)
+        net_wm_state = XInternAtom(dpy, '_NET_WM_STATE', False)
+        net_wm_state_above = XInternAtom(dpy, '_NET_WM_STATE_ABOVE', False)
+        net_wm_state_sticky = XInternAtom(dpy, '_NET_WM_STATE_STICKY', False)
+        net_wm_state_skip_pager = XInternAtom(dpy, '_NET_WM_STATE_SKIP_PAGER', False)
+        net_wm_state_skip_taskbar = XInternAtom(dpy, '_NET_WM_STATE_SKIP_TASKBAR', False)
+    except:
+        dpy = None
 
 
 class _Theme:
@@ -56,15 +136,6 @@ class _Theme:
         style = ttk.Style()
         if platform == 'linux2':
             style.theme_use('clam')
-        elif platform == 'darwin':
-            # Default ttk font spacing looks bad on El Capitan
-            osxfont = tkFont.Font(family='TkDefaultFont', size=13, weight=tkFont.NORMAL)
-            style.configure('TLabel', font=osxfont)
-            style.configure('TButton', font=osxfont)
-            style.configure('TLabelframe.Label', font=osxfont)
-            style.configure('TCheckbutton', font=osxfont)
-            style.configure('TRadiobutton', font=osxfont)
-            style.configure('TEntry', font=osxfont)
 
         # Default dark theme colors
         if not config.get('dark_text'):
@@ -85,8 +156,9 @@ class _Theme:
                 'font'               : 'TkDefaultFont',
             }
             # Overrides
-            if platform == 'darwin':
-                self.current['font'] = osxfont
+            if theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000:
+                # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
+                self.current['font'] = tkFont.Font(family='Euro Caps', size=9, weight=tkFont.NORMAL)
 
         else:
             # System colors
@@ -102,7 +174,6 @@ class _Theme:
             # Overrides
             if platform == 'darwin':
                 self.current['background'] = 'systemMovableModalBackground'
-                self.current['font'] = osxfont
             elif platform == 'win32':
                 # Menu colors
                 self.current['activebackground'] = 'SystemHighlight'
@@ -124,7 +195,8 @@ class _Theme:
             elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
                 widget.configure(foreground = self.current['highlight'],
-                                 background = self.current['background'])
+                                 background = self.current['background'],
+                                 font = self.current['font'])
             elif 'activeforeground' in widget.keys():
                 # e.g. tk.Button, tk.Label, tk.Menu
                 widget.configure(foreground = self.current['foreground'],
@@ -172,7 +244,6 @@ class _Theme:
                 window.setAppearance_(appearance)
 
         elif platform == 'win32':
-            import ctypes
             GWL_STYLE = -16
             WS_MAXIMIZEBOX   = 0x00010000
             # tk8.5.9/win/tkWinWm.c:342
@@ -193,11 +264,26 @@ class _Theme:
             root.wait_visibility()	# need main window to be displayed before returning
 
         else:
-            root.overrideredirect(theme and 1 or 0)
             root.withdraw()
+            # https://www.tcl-lang.org/man/tcl/TkCmd/wm.htm#M19
+            # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#STACKINGORDER
+            root.attributes('-type', theme and 'splash' or 'normal')
             root.update_idletasks()	# Size gets recalculated here
             root.deiconify()
             root.wait_visibility()	# need main window to be displayed before returning
+            if dpy and theme:
+                # Try to display in the taskbar
+                xroot = Window()
+                parent = Window()
+                children = Window()
+                nchildren = c_uint()
+                XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
+                # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472615568
+                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_skip_pager, net_wm_state_skip_taskbar, 1, 0))))
+                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
+                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_sticky, 0, 1, 0))))
+                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
+                XFlush(dpy)
 
         if not self.minwidth:
             self.minwidth = root.winfo_width()	# Minimum width = width on first creation

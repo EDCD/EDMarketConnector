@@ -12,7 +12,6 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import applongname, config
-import eddn
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -53,12 +52,15 @@ elif platform=='win32':
     class BROWSEINFO(ctypes.Structure):
         _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
-    GetParent = ctypes.windll.user32.GetParent
-    GetParent.argtypes = [HWND]
-    GetWindowRect = ctypes.windll.user32.GetWindowRect
-    GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-    CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-    CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+    try:
+        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+        CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+        GetParent = ctypes.windll.user32.GetParent
+        GetParent.argtypes = [HWND]
+        GetWindowRect = ctypes.windll.user32.GetWindowRect
+        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
+    except:	# Not supported under Wine 4.0
+        CalculatePopupWindowPosition = None
 
 class PreferencesDialog(tk.Toplevel):
 
@@ -93,51 +95,16 @@ class PreferencesDialog(tk.Toplevel):
         frame.grid(sticky=tk.NSEW)
 
         notebook = nb.Notebook(frame)
-        notebook.bind('<<NotebookTabChanged>>', self.outvarchanged)	# Recompute on tab change
+        notebook.bind('<<NotebookTabChanged>>', self.tabchanged)	# Recompute on tab change
 
         PADX = 10
         BUTTONX = 12	# indent Checkbuttons and Radiobuttons
         PADY = 2	# close spacing
 
-        credframe = nb.Frame(notebook)
-        credframe.columnconfigure(1, weight=1)
-
-        nb.Label(credframe, text=_('Credentials')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
-        ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-        self.cred_label = nb.Label(credframe)
-        self.cred_label.grid(padx=PADX, columnspan=2, sticky=tk.W)
-        self.cmdr_label = nb.Label(credframe, text=_('Cmdr'))	# Main window
-        self.cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
-        self.username_label = nb.Label(credframe, text=_('Username (Email)'))	# Use same text as E:D Launcher's login dialog
-        self.username_label.grid(row=11, padx=PADX, sticky=tk.W)
-        self.password_label = nb.Label(credframe, text=_('Password'))		# Use same text as E:D Launcher's login dialog
-        self.password_label.grid(row=12, padx=PADX, sticky=tk.W)
-
-        self.cmdr_text = nb.Label(credframe)
-        self.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
-        self.username = nb.Entry(credframe)
-        self.username.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-        if monitor.cmdr:
-            self.username.focus_set()
-        self.password = nb.Entry(credframe, show=u'•')
-        self.password.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        nb.Label(credframe).grid(sticky=tk.W)	# big spacer
-        nb.Label(credframe, text=_('Privacy')).grid(padx=PADX, sticky=tk.W)	# Section heading in settings
-        ttk.Separator(credframe, orient=tk.HORIZONTAL).grid(columnspan=2, padx=PADX, pady=PADY, sticky=tk.EW)
-
-        self.out_anon= tk.IntVar(value = config.getint('anonymous') and 1)
-        nb.Label(credframe, text=_('How do you want to be identified in the saved data')).grid(columnspan=2, padx=PADX, sticky=tk.W)
-        nb.Radiobutton(credframe, text=_('Cmdr name'), variable=self.out_anon, value=0).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
-        nb.Radiobutton(credframe, text=_('Pseudo-anonymized ID'), variable=self.out_anon, value=1).grid(columnspan=2, padx=BUTTONX, sticky=tk.W)	# Privacy setting
-
-        notebook.add(credframe, text=_('Identity'))		# Tab heading in settings
-
-
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SHIP)	# default settings
+        output = config.getint('output') or config.OUT_SHIP	# default settings
 
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
@@ -168,24 +135,6 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(outframe, text=_('Output'))		# Tab heading in settings
 
-
-        eddnframe = nb.Frame(notebook)
-
-        HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
-        self.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-        self.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=self.eddn_station, command=self.outvarchanged)	# Output setting
-        self.eddn_station_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.eddn_auto_button = nb.Checkbutton(eddnframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)	# Output setting
-        self.eddn_auto_button.grid(padx=BUTTONX, sticky=tk.W)
-        self.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
-        self.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=self.eddn_system, command=self.outvarchanged)	# Output setting new in E:D 2.2
-        self.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-        self.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
-        self.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=self.eddn_delay)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-        self.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
-
-        notebook.add(eddnframe, text='EDDN')		# Not translated
-
         # build plugin prefs tabs
         for plugin in plug.PLUGINS:
             plugframe = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
@@ -199,21 +148,17 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
-        if platform != 'darwin':
-            # Apple's SMB implementation is way too flaky - no filesystem events and bogus NULLs
-            nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
-            self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
-            self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
-                                                          _('Browse...')),	# Folder selection button on Windows
-                                       command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
-            self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
-            if config.default_journal_dir:
-                nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
-
-        if platform == 'win32':
-            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        nb.Label(configframe, text = _('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)	# Location of the new Journal file in E:D 2.2
+        self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0,PADY), sticky=tk.EW)
+        self.logbutton = nb.Button(configframe, text=(platform=='darwin' and _('Change...') or	# Folder selection button on OSX
+                                                      _('Browse...')),	# Folder selection button on Windows
+                                   command = lambda:self.filebrowse(_('E:D journal file location'), self.logdir))
+        self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
+        if config.default_journal_dir:
+            nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state = config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)	# Appearance theme and language setting
 
         if platform in ['darwin','win32']:
+            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
             self.hotkey_code = config.getint('hotkey_code')
             self.hotkey_mods = config.getint('hotkey_mods')
             self.hotkey_only = tk.IntVar(value = not config.getint('hotkey_always'))
@@ -337,7 +282,6 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(plugsframe, text=_('Plugins'))		# Tab heading in settings
 
-
         if platform=='darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)	# close button applies changes
         else:
@@ -358,12 +302,13 @@ class PreferencesDialog(tk.Toplevel):
         hotkeymgr.unregister()
 
         # wait for window to appear on screen before calling grab_set
+        self.parent.update_idletasks()
         self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
         self.wait_visibility()
         self.grab_set()
 
         # Ensure fully on-screen
-        if platform == 'win32':
+        if platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
@@ -374,25 +319,6 @@ class PreferencesDialog(tk.Toplevel):
     def cmdrchanged(self, event=None):
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
-            if monitor.cmdr:
-                self.cred_label['text'] = _('Please log in with your Elite: Dangerous account details')	# Use same text as E:D Launcher's login dialog
-            else:
-                self.cred_label['text'] = _('Not available while E:D is at the main menu')	# Displayed when credentials settings are greyed out
-
-            self.cmdr_label['state'] = self.username_label['state'] = self.password_label['state'] = self.cmdr_text['state'] = self.username['state'] = self.password['state'] = monitor.cmdr and tk.NORMAL or tk.DISABLED
-            self.cmdr_text['text']  = (monitor.cmdr or _('None')) + (monitor.is_beta and ' [Beta]' or '') 	# No hotkey/shortcut currently defined
-            self.username['state'] = tk.NORMAL
-            self.username.delete(0, tk.END)
-            self.password['state'] = tk.NORMAL
-            self.password.delete(0, tk.END)
-            if monitor.cmdr and config.get('cmdrs') and monitor.cmdr in config.get('cmdrs'):
-                config_idx = config.get('cmdrs').index(monitor.cmdr)
-                self.username.insert(0, config.get('fdev_usernames')[config_idx] or '')
-                self.password.insert(0, config.get_password(config.get('fdev_usernames')[config_idx]) or '')
-            elif monitor.cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
-                # migration from <= 2.25
-                self.username.insert(0, config.get('username') or '')
-                self.password.insert(0, config.get('password') or '')
             if self.cmdr is not False:		# Don't notify on first run
                 plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
             self.cmdr = monitor.cmdr
@@ -401,14 +327,23 @@ class PreferencesDialog(tk.Toplevel):
         # Poll
         self.cmdrchanged_alarm = self.after(1000, self.cmdrchanged)
 
+    def tabchanged(self, event):
+        self.outvarchanged()
+        if platform == 'darwin':
+            # Hack to recompute size so that buttons show up under Mojave
+            notebook = event.widget
+            frame = self.nametowidget(notebook.winfo_parent())
+            temp = nb.Label(frame)
+            temp.grid()
+            temp.update_idletasks()
+            temp.destroy()
+
     def outvarchanged(self, event=None):
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
 
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
-        if not logvalid:
-            self.cred_label['text'] = 'Check %s' % _('E:D journal file location')	# Location of the new Journal file in E:D 2.2
 
         self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = tk.NORMAL or tk.DISABLED
         local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
@@ -416,11 +351,6 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_label['state']      = local and tk.NORMAL  or tk.DISABLED
         self.outbutton['state']         = local and tk.NORMAL  or tk.DISABLED
         self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
-
-        self.eddn_station_button['state'] = tk.NORMAL or tk.DISABLED
-        self.eddn_auto_button['state']  = self.eddn_station.get() and logvalid and tk.NORMAL or tk.DISABLED
-        self.eddn_system_button['state']= logvalid and tk.NORMAL or tk.DISABLED
-        self.eddn_delay_button['state'] = logvalid and eddn.replayfile and self.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
     def filebrowse(self, title, pathvar):
         if platform != 'win32':
@@ -504,10 +434,6 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_0['state'] = state
         self.theme_button_1['state'] = state
 
-        if platform == 'linux2':
-            # Unmanaged windows are always on top on X
-            self.ontop_button['state'] = self.theme.get() and tk.DISABLED or tk.NORMAL
-
     def hotkeystart(self, event):
         event.widget.bind('<KeyPress>', self.hotkeylisten)
         event.widget.bind('<KeyRelease>', self.hotkeylisten)
@@ -550,27 +476,12 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
-        if self.cmdr:
-            if self.password.get().strip():
-                config.set_password(self.username.get().strip(), self.password.get().strip())	# Can fail if keyring not unlocked
-            else:
-                config.delete_password(self.username.get().strip())	# user may have cleared the password field
-            if not config.get('cmdrs'):
-                config.set('cmdrs', [self.cmdr])
-                config.set('fdev_usernames', [self.username.get().strip()])
-            else:
-                idx = config.get('cmdrs').index(self.cmdr) if self.cmdr in config.get('cmdrs') else -1
-                _putfirst('cmdrs', idx, self.cmdr)
-                _putfirst('fdev_usernames', idx, self.username.get().strip())
-
         config.set('output',
-                   (self.out_td.get()            and config.OUT_MKT_TD) +
-                   (self.out_csv.get()           and config.OUT_MKT_CSV) +
+                   (self.out_td.get()   and config.OUT_MKT_TD) +
+                   (self.out_csv.get()  and config.OUT_MKT_CSV) +
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
-                   (self.out_ship.get()          and config.OUT_SHIP) +
-                   (self.eddn_station.get()      and config.OUT_MKT_EDDN) +
-                   (self.eddn_system.get()       and config.OUT_SYS_EDDN) +
-                   (self.eddn_delay.get()        and config.OUT_SYS_DELAY))
+                   (self.out_ship.get() and config.OUT_SHIP) +
+                   (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY)))
         config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
 
         logdir = self.logdir.get()
@@ -597,8 +508,6 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
-
-        config.set('anonymous', self.out_anon.get())
 
         # Notify
         if self.callback:
@@ -631,113 +540,3 @@ class PreferencesDialog(tk.Toplevel):
             except:
                 AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
             self.parent.event_generate('<<Quit>>', when="tail")
-
-
-class AuthenticationDialog(tk.Toplevel):
-
-    def __init__(self, parent, callback):
-        tk.Toplevel.__init__(self, parent)
-
-        self.parent = parent
-        self.callback = callback
-        self.title('Authentication')
-
-        if parent.winfo_viewable():
-            self.transient(parent)
-
-        # position over parent
-        if platform!='darwin' or parent.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
-
-        # remove decoration
-        self.resizable(tk.FALSE, tk.FALSE)
-        if platform=='win32':
-            self.attributes('-toolwindow', tk.TRUE)
-        elif platform=='darwin':
-            # http://wiki.tcl.tk/13428
-            parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
-
-        frame = ttk.Frame(self)
-        frame.grid(sticky=tk.NSEW)
-        frame.columnconfigure(0, weight=3)
-        frame.columnconfigure(2, weight=1)
-
-        ttk.Label(frame, text=_('A verification code has now been sent to the{CR}email address associated with your Elite account.') +	# Use same text as E:D Launcher's verification dialog
-
-                  '\n' +
-                  _('Please enter the code into the box below.'), anchor=tk.W, justify=tk.LEFT).grid(columnspan=4, sticky=tk.NSEW)	# Use same text as E:D Launcher's verification dialog
-        ttk.Label(frame).grid(row=1, column=0)	# spacer
-        self.code = ttk.Entry(frame, width=8, validate='key', validatecommand=(self.register(self.validatecode), '%P', '%d', '%i', '%S'))
-        self.code.grid(row=1, column=1)
-        self.code.focus_set()
-        ttk.Label(frame).grid(row=1, column=2)	# spacer
-        self.button = ttk.Button(frame, text=_('OK'), command=self.apply, state=tk.DISABLED)
-        self.button.bind("<Return>", lambda event:self.apply())
-        self.button.grid(row=1, column=3, sticky=tk.E)
-
-        for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=5)
-
-        self.protocol("WM_DELETE_WINDOW", self._destroy)
-
-        # wait for window to appear on screen before calling grab_set
-        self.parent.wm_attributes('-topmost', 0)	# needed for dialog to appear ontop of parent on OSX & Linux
-        self.wait_visibility()
-        self.grab_set()
-
-        # Ensure fully on-screen
-        if platform == 'win32':
-            position = RECT()
-            GetWindowRect(GetParent(self.winfo_id()), position)
-            if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                                            SIZE(position.right - position.left, position.bottom - position.top),
-                                            0x10000, None, position):
-                self.geometry("+%d+%d" % (position.left, position.top))
-
-        self.bind('<Return>', self.apply)
-
-
-    def validatecode(self, newval, ins, idx, diff):
-        self.code.selection_clear()
-        self.code.delete(0, tk.END)
-        self.code.insert(0, newval.upper())
-        self.code.icursor(int(idx) + (int(ins)>0 and len(diff) or 0))
-        self.after_idle(lambda: self.code.config(validate='key'))	# http://tcl.tk/man/tcl8.5/TkCmd/entry.htm#M21
-        self.button['state'] = len(newval.strip())==5 and tk.NORMAL or tk.DISABLED
-        return True
-
-    def apply(self, event=None):
-        code = self.code.get().strip()
-        if len(code) == 5:
-            self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
-            self.destroy()
-            if self.callback: self.callback(code)
-
-    def _destroy(self):
-        self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
-        self.destroy()
-        if self.callback: self.callback(None)
-
-# migration from <= 2.25. Assumes current Cmdr corresponds to the saved credentials
-def migrate(current_cmdr):
-    if current_cmdr and not config.get('cmdrs') and config.get('username') and config.get('password'):
-        config.set_password(config.get('username'), config.get('password'))	# Can fail on Linux
-        config.set('cmdrs', [current_cmdr])
-        config.set('fdev_usernames', [config.get('username')])
-        config.delete('username')
-        config.delete('password')
-
-# Put current Cmdr first in the lists
-def make_current(current_cmdr):
-    if current_cmdr and config.get('cmdrs') and current_cmdr in config.get('cmdrs'):
-        idx = config.get('cmdrs').index(current_cmdr)
-        _putfirst('cmdrs', idx)
-        _putfirst('fdev_usernames', idx)
-
-def _putfirst(setting, config_idx, new_value=None):
-    assert config_idx>=0 or new_value is not None, (setting, config_idx, new_value)
-    values = config.get(setting)
-    values.insert(0, new_value if config_idx<0 else values.pop(config_idx))
-    if new_value is not None:
-        values[0] = new_value
-    config.set(setting, values)

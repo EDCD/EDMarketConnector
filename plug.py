@@ -28,8 +28,8 @@ FlagsCargoScoopDeployed = 1<<9
 FlagsSilentRunning = 1<<10
 FlagsScoopingFuel = 1<<11
 FlagsSrvHandbrake = 1<<12
-FlagsSrvTurret = 1<<13
-FlagsSrvUnderShip = 1<<14
+FlagsSrvTurret = 1<<13		# using turret view
+FlagsSrvUnderShip = 1<<14	# turret retracted
 FlagsSrvDriveAssist = 1<<15
 FlagsFsdMassLocked = 1<<16
 FlagsFsdCharging = 1<<17
@@ -42,6 +42,11 @@ FlagsBeingInterdicted = 1<<23
 FlagsInMainShip = 1<<24
 FlagsInFighter = 1<<25
 FlagsInSRV = 1<<26
+FlagsAnalysisMode = 1<<27	# Hud in Analysis mode
+FlagsNightVision = 1<<28
+FlagsAverageAltitude = 1<<29		# Altitude from Average radius
+FlagsFsdJump = 1<<30
+FlagsSrvHighBeam = 1<<31
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
@@ -52,6 +57,10 @@ GuiFocusRolePanel = 4		# bottom
 GuiFocusStationServices = 5
 GuiFocusGalaxyMap = 6
 GuiFocusSystemMap = 7
+GuiFocusOrrery = 8
+GuiFocusFSS = 9
+GuiFocusSAA = 10
+GuiFocusCodex = 11
 
 
 # List of loaded Plugins
