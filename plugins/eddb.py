@@ -3,7 +3,9 @@
 # Station display and eddb.io lookup
 #
 
-import cPickle
+from future import standard_library
+standard_library.install_aliases()
+import pickle
 import csv
 import os
 from os.path import join
@@ -18,11 +20,11 @@ this = sys.modules[__name__]	# For holding module globals
 
 # (system_id, is_populated) by system_name
 with open(join(config.respath, 'systems.p'),  'rb') as h:
-    this.system_ids  = cPickle.load(h)
+    this.system_ids  = pickle.load(h)
 
 # station_id by (system_id, station_name)
 with open(join(config.respath, 'stations.p'), 'rb') as h:
-    this.station_ids = cPickle.load(h)
+    this.station_ids = pickle.load(h)
 
 
 # Main window clicks

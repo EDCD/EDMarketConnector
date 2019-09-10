@@ -1,8 +1,10 @@
 """
 Plugin hooks for EDMC - Ian Norton, Jonathan Harris
 """
+from builtins import str
+from builtins import object
 import os
-import imp
+import importlib
 import sys
 import operator
 import threading	# We don't use it, but plugins might
@@ -88,16 +90,14 @@ class Plugin(object):
         self.module = None	# None for disabled plugins.
 
         if loadfile:
-            sys.stdout.write(('loading plugin %s from "%s"\n' % (name.replace('.', '_'), loadfile)).encode('utf-8'))
-            with open(loadfile, 'rb') as plugfile:
-                module = imp.load_module('plugin_%s' % name.encode('ascii', 'replace').replace('.', '_'), plugfile, loadfile.encode(sys.getfilesystemencoding()),
-                                         ('.py', 'r', imp.PY_SOURCE))
-                if module.plugin_start.func_code.co_argcount == 0:
-                    newname = module.plugin_start()
-                else:
-                    newname = module.plugin_start(os.path.dirname(loadfile))
-                self.name = newname and unicode(newname) or name
-                self.module = module
+            sys.stdout.write('loading plugin {} from "{}"\n'.format(name.replace('.', '_'), loadfile))
+            module = importlib.machinery.SourceFileLoader('plugin_{}'.format(name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')), loadfile).load_module()
+            if module.plugin_start.__code__.co_argcount == 0:
+                newname = module.plugin_start()
+            else:
+                newname = module.plugin_start(os.path.dirname(loadfile))
+            self.name = newname and str(newname) or name
+            self.module = module
         else:
             sys.stdout.write('plugin %s disabled\n' % name)
 
@@ -143,7 +143,7 @@ class Plugin(object):
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
             try:
-                if plugin_prefs.func_code.co_argcount == 1:
+                if plugin_prefs.__code__.co_argcount == 1:
                     frame = plugin_prefs(parent)
                 else:
                     frame = plugin_prefs(parent, cmdr, is_beta)
@@ -160,8 +160,6 @@ def load_plugins(master):
     Find and load all plugins
     """
     last_error['root'] = master
-
-    imp.acquire_lock()
 
     internal = []
     for name in os.listdir(config.internal_plugin_dir):
@@ -194,8 +192,6 @@ def load_plugins(master):
             except:
                 print_exc()
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
-
-    imp.release_lock()
 
 def provides(fn_name):
     """
@@ -272,7 +268,7 @@ def notify_prefs_changed(cmdr, is_beta):
         prefs_changed = plugin._get_func('prefs_changed')
         if prefs_changed:
             try:
-                if prefs_changed.func_code.co_argcount == 0:
+                if prefs_changed.__code__.co_argcount == 0:
                     prefs_changed()
                 else:
                     prefs_changed(cmdr, is_beta)
@@ -297,9 +293,9 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
         if journal_entry:
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                if journal_entry.func_code.co_argcount == 4:
+                if journal_entry.__code__.co_argcount == 4:
                     newerror = journal_entry(cmdr, system, station, dict(entry))
-                elif journal_entry.func_code.co_argcount == 5:
+                elif journal_entry.__code__.co_argcount == 5:
                     newerror = journal_entry(cmdr, system, station, dict(entry), dict(state))
                 else:
                     newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
@@ -342,7 +338,7 @@ def notify_system_changed(timestamp, system, coordinates):
         system_changed = plugin._get_func('system_changed')
         if system_changed:
             try:
-                if system_changed.func_code.co_argcount == 2:
+                if system_changed.__code__.co_argcount == 2:
                     system_changed(timestamp, system)
                 else:
                     system_changed(timestamp, system, coordinates)
@@ -362,7 +358,7 @@ def notify_newdata(data, is_beta):
         cmdr_data = plugin._get_func('cmdr_data')
         if cmdr_data:
             try:
-                if cmdr_data.func_code.co_argcount == 1:
+                if cmdr_data.__code__.co_argcount == 1:
                     newerror = cmdr_data(data)
                 else:
                     newerror = cmdr_data(data, is_beta)
@@ -379,5 +375,5 @@ def show_error(err):
     .. versionadded:: 2.3.7
     """
     if err and last_error['root']:
-        last_error['msg'] = unicode(err)
+        last_error['msg'] = str(err)
         last_error['root'].event_generate('<<PluginError>>', when="tail")

@@ -1,16 +1,20 @@
+from __future__ import print_function
 #
 # System display and EDSM lookup
 #
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
 import json
 import requests
 import sys
 import time
-import urllib2
-from Queue import Queue
+import urllib.request, urllib.error, urllib.parse
+from queue import Queue
 from threading import Thread
 
-import Tkinter as tk
+import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
@@ -41,13 +45,13 @@ this.navbeaconscan = 0		# batch up burst of Scan events after NavBeaconScan
 
 # Main window clicks
 def system_url(system_name):
-    return 'https://www.edsm.net/en/system?systemName=%s' % urllib2.quote(system_name)
+    return 'https://www.edsm.net/en/system?systemName=%s' % urllib.parse.quote(system_name)
 
 def station_url(system_name, station_name):
     if station_name:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib2.quote(system_name), urllib2.quote(station_name))
+        return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib.parse.quote(system_name), urllib.parse.quote(station_name))
     else:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=ALL' % urllib2.quote(system_name)
+        return 'https://www.edsm.net/en/system?systemName=%s&stationName=ALL' % urllib.parse.quote(system_name)
 
 
 def plugin_start():
@@ -230,9 +234,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             materials = {
                 'timestamp': entry['timestamp'],
                 'event': 'Materials',
-                'Raw':          [ { 'Name': k, 'Count': v } for k,v in state['Raw'].iteritems() ],
-                'Manufactured': [ { 'Name': k, 'Count': v } for k,v in state['Manufactured'].iteritems() ],
-                'Encoded':      [ { 'Name': k, 'Count': v } for k,v in state['Encoded'].iteritems() ],
+                'Raw':          [ { 'Name': k, 'Count': v } for k,v in state['Raw'].items() ],
+                'Manufactured': [ { 'Name': k, 'Count': v } for k,v in state['Manufactured'].items() ],
+                'Encoded':      [ { 'Name': k, 'Count': v } for k,v in state['Encoded'].items() ],
             }
             materials.update(transient)
             this.queue.put((cmdr, materials))

@@ -1,3 +1,7 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import object
 import os
 from os.path import dirname, join
 import sys
@@ -12,9 +16,9 @@ if not getattr(sys, 'frozen', False):
 
     # quick and dirty version comparison assuming "strict" numeric only version numbers
     def versioncmp(versionstring):
-        return map(int, versionstring.split('.'))
+        return list(map(int, versionstring.split('.')))
 
-    class Updater():
+    class Updater(object):
 
         def __init__(self, master):
             self.root = master
@@ -44,7 +48,7 @@ elif sys.platform=='darwin':
 
     import objc
 
-    class Updater():
+    class Updater(object):
 
         # http://sparkle-project.org/documentation/customization/
 
@@ -74,7 +78,7 @@ elif sys.platform=='win32':
     def shutdown_request():
         root.event_generate('<<Quit>>', when="tail")
 
-    class Updater():
+    class Updater(object):
 
         # https://github.com/vslavik/winsparkle/wiki/Basic-Setup
 
