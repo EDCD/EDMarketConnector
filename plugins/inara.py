@@ -1,17 +1,24 @@
+from __future__ import division
+from __future__ import print_function
 #
 # Inara sync
 #
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import zip
+from past.utils import old_div
 from collections import OrderedDict
 import json
 import requests
 import sys
 import time
 from operator import itemgetter
-from Queue import Queue
+from queue import Queue
 from threading import Thread
 
-import Tkinter as tk
+import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
@@ -227,14 +234,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                   ('rankName', k.lower()),
                                   ('rankValue', v[0]),
                                   ('rankProgress', v[1] / 100.0),
-                              ]) for k,v in state['Rank'].iteritems() if v is not None
+                              ]) for k,v in state['Rank'].items() if v is not None
                           ])
                 add_event('setCommanderReputationMajorFaction', entry['timestamp'],
                           [
                               OrderedDict([
                                   ('majorfactionName', k.lower()),
                                   ('majorfactionReputation', v / 100.0),
-                              ]) for k,v in state['Reputation'].iteritems() if v is not None
+                              ]) for k,v in state['Reputation'].items() if v is not None
                           ])
                 if state['Engineers']:	# Not populated < 3.3
                     add_event('setCommanderRankEngineer', entry['timestamp'],
@@ -242,7 +249,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                   OrderedDict([
                                       ('engineerName', k),
                                       type(v) is tuple and ('rankValue', v[0]) or ('rankStage', v),
-                                  ]) for k,v in state['Engineers'].iteritems()
+                                  ]) for k,v in state['Engineers'].items()
                               ])
 
                 # Update location
@@ -274,7 +281,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             # Promotions
             elif entry['event'] == 'Promotion':
-                for k,v in state['Rank'].iteritems():
+                for k,v in state['Rank'].items():
                     if k in entry:
                         add_event('setCommanderRankPilot', entry['timestamp'],
                                   OrderedDict([
@@ -405,7 +412,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         except Exception as e:
             if __debug__: print_exc()
-            return unicode(e)
+            return str(e)
 
         #
         # Events that don't need to be sent immediately but will be sent on the next mandatory event
@@ -707,7 +714,7 @@ def cmdr_data(data, is_beta):
         this.station_link['url'] = this.station or this.system
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
+        if not (CREDIT_RATIO > old_div(this.lastcredits, data['commander']['credits']) > old_div(1,CREDIT_RATIO)):
             this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
             add_event('setCommanderCredits', data['timestamp'],
                       OrderedDict([
@@ -719,7 +726,7 @@ def cmdr_data(data, is_beta):
 
 def make_loadout(state):
     modules = []
-    for m in state['Modules'].itervalues():
+    for m in state['Modules'].values():
         module = OrderedDict([
             ('slotName', m['Slot']),
             ('itemName', m['Item']),
@@ -811,14 +818,14 @@ def worker():
                     callback(reply)
                 elif status // 100 != 2:	# 2xx == OK (maybe with warnings)
                     # Log fatal errors
-                    print 'Inara\t%s %s' % (reply['header']['eventStatus'], reply['header'].get('eventStatusText', ''))
-                    print json.dumps(data, indent=2, separators = (',', ': '))
+                    print('Inara\t%s %s' % (reply['header']['eventStatus'], reply['header'].get('eventStatusText', '')))
+                    print(json.dumps(data, indent=2, separators = (',', ': ')))
                     plug.show_error(_('Error: Inara {MSG}').format(MSG = reply['header'].get('eventStatusText', status)))
                 else:
                     # Log individual errors and warnings
                     for data_event, reply_event in zip(data['events'], reply['events']):
                         if reply_event['eventStatus'] != 200:
-                            print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event))
+                            print('Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event)))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
                         if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:

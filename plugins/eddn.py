@@ -1,5 +1,10 @@
+from __future__ import print_function
 # Export to EDDN
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 from collections import OrderedDict
 import json
 from os import SEEK_SET, SEEK_CUR, SEEK_END
@@ -10,7 +15,7 @@ import requests
 import sys
 import uuid
 
-import Tkinter as tk
+import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
@@ -36,7 +41,7 @@ this.marketId = None
 this.commodities = this.outfitting = this.shipyard = None
 
 
-class EDDN:
+class EDDN(object):
 
     ### SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
@@ -109,10 +114,10 @@ class EDDN:
 
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
         if __debug__ and r.status_code != requests.codes.ok:
-            print 'Status\t%s'  % r.status_code
-            print 'URL\t%s'  % r.url
-            print 'Headers\t%s' % r.headers
-            print ('Content:\n%s' % r.text).encode('utf-8')
+            print('Status\t%s'  % r.status_code)
+            print('URL\t%s'  % r.url)
+            print('Headers\t%s' % r.headers)
+            print(('Content:\n%s' % r.text).encode('utf-8'))
         r.raise_for_status()
 
     def sendreplay(self):
@@ -135,7 +140,7 @@ class EDDN:
         except:
             # Couldn't decode - shouldn't happen!
             if __debug__:
-                print self.replaylog[0]
+                print(self.replaylog[0])
                 print_exc()
             self.replaylog.pop(0)	# Discard and continue
         else:
@@ -153,7 +158,7 @@ class EDDN:
                 return	# stop sending
             except Exception as e:
                 if __debug__: print_exc()
-                status['text'] = unicode(e)
+                status['text'] = str(e)
                 return	# stop sending
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
@@ -186,9 +191,9 @@ class EDDN:
                 ('commodities', commodities),
             ])
             if 'economies' in data['lastStarport']:
-                message['economies']  = sorted([x for x in (data['lastStarport']['economies']  or {}).itervalues()])
+                message['economies']  = sorted([x for x in (data['lastStarport']['economies']  or {}).values()])
             if 'prohibited' in data['lastStarport']:
-                message['prohibited'] = sorted([x for x in (data['lastStarport']['prohibited'] or {}).itervalues()])
+                message['prohibited'] = sorted([x for x in (data['lastStarport']['prohibited'] or {}).values()])
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : message,
@@ -200,10 +205,10 @@ class EDDN:
         modules = data['lastStarport'].get('modules') or {}
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"), prison or rescue Megaships, or under Pirate Attack etc
-        horizons = (any(economy['name'] == 'Colony' for economy in economies.itervalues()) or
-                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues()) or
-                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in (ships['shipyard_list'] or {}).values()))
-        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.itervalues() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
+        horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
+                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
+                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
+        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.values() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
         if outfitting and this.outfitting != (horizons, outfitting):	# Don't send empty modules list - schema won't allow it
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
@@ -222,10 +227,10 @@ class EDDN:
         economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
         ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
-        horizons = (any(economy['name'] == 'Colony' for economy in economies.itervalues()) or
-                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.itervalues()) or
-                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in (ships['shipyard_list'] or {}).values()))
-        shipyard = sorted([ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values() + ships['unavailable_list']])
+        horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
+                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
+                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
+        shipyard = sorted([ship['name'].lower() for ship in list((ships['shipyard_list'] or {}).values()) + ships['unavailable_list']])
         if shipyard and this.shipyard != (horizons, shipyard):	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
             self.send(data['commander']['name'], {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
@@ -384,7 +389,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(d):
         filtered = OrderedDict()
-        for k, v in d.iteritems():
+        for k, v in d.items():
             if k.endswith('_Localised'):
                 pass
             elif hasattr(v, 'iteritems'):	# dict -> recurse
@@ -423,7 +428,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             entry.pop(thing, None)
         if 'Factions' in entry:
             # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
-            entry['Factions'] = [ {k: v for k, v in f.iteritems() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
+            entry['Factions'] = [ {k: v for k, v in f.items() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
 
         # add planet to Docked event for planetary stations if known
         if entry['event'] == 'Docked' and this.planet:
@@ -445,7 +450,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return _("Error: Can't connect to EDDN")
         except Exception as e:
             if __debug__: print_exc()
-            return unicode(e)
+            return str(e)
 
     elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
           entry['event'] in ['Market', 'Outfitting', 'Shipyard']):
@@ -468,7 +473,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return _("Error: Can't connect to EDDN")
         except Exception as e:
             if __debug__: print_exc()
-            return unicode(e)
+            return str(e)
 
 def cmdr_data(data, is_beta):
     if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
@@ -495,4 +500,4 @@ def cmdr_data(data, is_beta):
 
         except Exception as e:
             if __debug__: print_exc()
-            return unicode(e)
+            return str(e)

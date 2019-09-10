@@ -1,9 +1,11 @@
 # EDShipyard ship export
 
+from future import standard_library
+standard_library.install_aliases()
 import base64
 import gzip
 import json
-import StringIO
+import io
 
 
 def plugin_start():
@@ -15,7 +17,7 @@ def shipyard_url(loadout, is_beta):
     if not string:
         return False
 
-    out = StringIO.StringIO()
+    out = io.StringIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
 
