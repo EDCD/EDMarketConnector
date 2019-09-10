@@ -7,8 +7,8 @@
 
 from sys import platform
 
-import Tkinter as tk
-import ttk
+import tkinter as tk
+from tkinter import ttk
 
 
 # Can't do this with styles on OSX - http://www.tkdocs.com/tutorial/styles.html#whydifficult

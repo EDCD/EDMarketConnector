@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import defaultdict, OrderedDict
 import json
 import re
@@ -152,8 +153,8 @@ class EDLogs(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print '%s Journal "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
-            print 'Start logfile "%s"' % self.logfile
+            print('%s Journal "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
+            print('Start logfile "%s"' % self.logfile)
 
         if not self.running():
             self.thread = threading.Thread(target = self.worker, name = 'Journal worker')
@@ -164,7 +165,7 @@ class EDLogs(FileSystemEventHandler):
 
     def stop(self):
         if __debug__:
-            print 'Stopping monitoring Journal'
+            print('Stopping monitoring Journal')
         self.currentdir = None
         self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
         self.is_beta = False
@@ -206,7 +207,7 @@ class EDLogs(FileSystemEventHandler):
                     self.parse_entry(line)	# Some events are of interest even in the past
                 except:
                     if __debug__:
-                        print 'Invalid journal entry "%s"' % repr(line)
+                        print('Invalid journal entry "%s"' % repr(line))
             logpos = loghandle.tell()
         else:
             loghandle = None
@@ -262,7 +263,7 @@ class EDLogs(FileSystemEventHandler):
                         fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
                     logpos = 0
                 if __debug__:
-                    print 'New logfile "%s"' % logfile
+                    print('New logfile "%s"' % logfile)
 
             if logfile:
                 loghandle.seek(0, SEEK_END)		# required to make macOS notice log change over SMB
@@ -454,10 +455,10 @@ class EDLogs(FileSystemEventHandler):
                 payload = dict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
-                for k,v in payload.iteritems():
+                for k,v in payload.items():
                     self.state['Rank'][k] = (v,0)
             elif entry['event'] == 'Progress':
-                for k,v in entry.iteritems():
+                for k,v in entry.items():
                     if k in self.state['Rank']:
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
             elif entry['event'] in ['Reputation', 'Statistics']:
@@ -621,7 +622,7 @@ class EDLogs(FileSystemEventHandler):
             return entry
         except:
             if __debug__:
-                print 'Invalid journal entry "%s"' % repr(line)
+                print('Invalid journal entry "%s"' % repr(line))
                 print_exc()
             return { 'event': None }
 

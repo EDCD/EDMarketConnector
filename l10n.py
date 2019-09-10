@@ -3,6 +3,11 @@
 # Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead.
 #
 
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import codecs
 from collections import OrderedDict
 import numbers
@@ -12,14 +17,14 @@ import re
 import sys
 from sys import platform
 from traceback import print_exc
-import __builtin__
+import builtins
 
 import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
 except:
     # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
-    print "Can't set locale!"
+    print("Can't set locale!")
 
 from config import config
 
@@ -48,7 +53,7 @@ elif platform == 'win32':
     GetNumberFormatEx.restype = ctypes.c_int
 
 
-class Translations:
+class Translations(object):
 
     FALLBACK = 'en'	# strings in this code are in English
     FALLBACK_NAME = 'English'
@@ -63,7 +68,7 @@ class Translations:
     def install_dummy(self):
         # For when translation is not desired or not available
         self.translations = { None: {} }
-        __builtin__.__dict__['_'] = lambda x: unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
+        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
 
     def install(self, lang=None):
         available = self.available()
@@ -91,11 +96,11 @@ class Translations:
                 if isdir(plugin_path):
                     try:
                         self.translations[plugin] = self.contents(lang, plugin_path)
-                    except UnicodeDecodeError, e:
-                        print 'Malformed file %s.strings in plugin %s: %s' % (lang, plugin, e)
+                    except UnicodeDecodeError as e:
+                        print('Malformed file %s.strings in plugin %s: %s' % (lang, plugin, e))
                     except:
                         print_exc()
-            __builtin__.__dict__['_'] = self.translate
+            builtins.__dict__['_'] = self.translate
 
     def contents(self, lang, plugin_path=None):
         assert lang in self.available()
@@ -108,11 +113,11 @@ class Translations:
                 if line.strip():
                     match = Translations.TRANS_RE.match(line)
                     if match:
-                        translations[match.group(1).replace(ur'\"', u'"')] = match.group(2).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
+                        translations[match.group(1).replace(r'\"', u'"')] = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
-                        print 'Bad translation: %s' % line.strip()
+                        print('Bad translation: %s' % line.strip())
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
-            translations[LANGUAGE_ID] = unicode(lang)	# Replace language name with code if missing
+            translations[LANGUAGE_ID] = str(lang)	# Replace language name with code if missing
         return translations
 
     def translate(self, x, context=None):
@@ -120,13 +125,13 @@ class Translations:
             context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
             if __debug__:
                 if self.translations[None] and context not in self.translations:
-                    print 'No translations for "%s"' % context
+                    print('No translations for "%s"' % context)
             return self.translations.get(context, {}).get(x) or self.translate(x)
         else:
             if __debug__:
                 if self.translations[None] and x not in self.translations[None]:
-                    print 'Missing translation: "%s"' % x
-            return self.translations[None].get(x) or unicode(x).replace(ur'\"', u'"').replace(u'{CR}', u'\n')
+                    print('Missing translation: "%s"' % x)
+            return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
     # Returns list of available language codes
     def available(self):
@@ -173,7 +178,7 @@ class Translations:
             return codecs.open(join(self.respath(), '%s.strings' % lang), 'r', 'utf-8')
 
 
-class Locale:
+class Locale(object):
 
     def __init__(self):
         if platform=='darwin':
@@ -274,7 +279,7 @@ if __name__ == "__main__":
             os.mkdir(LOCALISATION_DIR)
         template = codecs.open(join(LOCALISATION_DIR, 'en.template'), 'w', 'utf-8')
         template.write('/* Language name */\n"%s" = "%s";\n\n' % (LANGUAGE_ID, 'English'))
-        for thing in sorted(seen, key=unicode.lower):
+        for thing in sorted(seen, key=str.lower):
             if seen[thing]:
                 template.write('/* %s */\n' % (seen[thing]))
             template.write('"%s" = "%s";\n\n' % (thing, thing))

@@ -1,3 +1,8 @@
+from __future__ import division
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+from past.utils import old_div
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
@@ -89,7 +94,7 @@ elif platform=='linux2':
     from iniparse import RawConfigParser
 
 
-class Config:
+class Config(object):
 
     OUT_MKT_EDDN      = 1
     # OUT_MKT_BPC     = 2	# No longer supported
@@ -146,7 +151,7 @@ class Config:
             elif hasattr(val, '__iter__'):
                 return list(val)	# make writeable
             else:
-                return unicode(val)
+                return str(val)
 
         def getint(self, key):
             try:
@@ -212,7 +217,7 @@ class Config:
                     if disposition.value == REG_CREATED_NEW_KEY:
                         buf = ctypes.create_unicode_buffer('1')
                         RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
-                        buf = ctypes.create_unicode_buffer(unicode(update_interval))
+                        buf = ctypes.create_unicode_buffer(str(update_interval))
                         RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
                     RegCloseKey(sparklekey)
 
@@ -224,13 +229,13 @@ class Config:
             size = DWORD()
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
                 return None
-            buf = ctypes.create_unicode_buffer(size.value / 2)
+            buf = ctypes.create_unicode_buffer(old_div(size.value, 2))
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                 return None
             elif typ.value == REG_MULTI_SZ:
                 return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
             else:
-                return unicode(buf.value)
+                return str(buf.value)
 
         def getint(self, key):
             typ  = DWORD()
@@ -248,7 +253,7 @@ class Config:
             elif isinstance(val, numbers.Integral):
                 RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
             elif hasattr(val, '__iter__'):	# iterable
-                stringval = u'\x00'.join([unicode(x) or u' ' for x in val] + [u''])	# null terminated non-empty strings
+                stringval = u'\x00'.join([str(x) or u' ' for x in val] + [u''])	# null terminated non-empty strings
                 buf = ctypes.create_unicode_buffer(stringval)
                 RegSetValueEx(self.hkey, key, 0, REG_MULTI_SZ, buf, len(buf)*2)
             else:
@@ -333,14 +338,14 @@ class Config:
 
         def save(self):
             with codecs.open(self.filename, 'w', 'utf-8') as h:
-                h.write(unicode(self.config.data))
+                h.write(str(self.config.data))
 
         def close(self):
             self.save()
             self.config = None
 
         def _escape(self, val):
-            return unicode(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
+            return str(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
 
         def _unescape(self, val):
             chars = list(val)

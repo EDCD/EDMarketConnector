@@ -8,7 +8,7 @@ import operator
 import threading	# We don't use it, but plugins might
 from traceback import print_exc
 
-import Tkinter as tk
+import tkinter as tk
 import myNotebook as nb
 
 from config import config

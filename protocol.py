@@ -1,8 +1,12 @@
+from __future__ import print_function
 # edmc: protocol handler for cAPI authorisation
 
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import threading
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import sys
 
 from config import appname
@@ -17,7 +21,7 @@ if sys.platform == 'win32':
         is_wine = False
 
 
-class GenericProtocolHandler:
+class GenericProtocolHandler(object):
 
     def __init__(self):
         self.redirect = 'edmc://auth'	# Base redirection URL
@@ -67,7 +71,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
             return self
 
         def handleEvent_withReplyEvent_(self, event, replyEvent):
-            protocolhandler.lasturl = urllib2.unquote(event.paramDescriptorForKeyword_(keyDirectObject).stringValue()).strip()
+            protocolhandler.lasturl = urllib.parse.unquote(event.paramDescriptorForKeyword_(keyDirectObject).stringValue()).strip()
             protocolhandler.master.after(ProtocolHandler.POLL, protocolhandler.poll)
 
 
@@ -189,7 +193,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
                         args = wstring_at(GlobalLock(msg.lParam)).strip()
                         GlobalUnlock(msg.lParam)
                         if args.lower().startswith('open("') and args.endswith('")'):
-                            url = urllib2.unquote(args[6:-2]).strip()
+                            url = urllib.parse.unquote(args[6:-2]).strip()
                             if url.startswith(self.redirect):
                                 self.event(url)
                             SetForegroundWindow(GetParent(self.master.winfo_id()))	# raise app window
@@ -202,11 +206,11 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
                         TranslateMessage(byref(msg))
                         DispatchMessage(byref(msg))
             else:
-                print 'Failed to register DDE for cAPI'
+                print('Failed to register DDE for cAPI')
 
 else:	# Linux / Run from source
 
-    from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+    from http.server import HTTPServer, BaseHTTPRequestHandler
 
     class ProtocolHandler(GenericProtocolHandler):
 
@@ -236,7 +240,7 @@ else:	# Linux / Run from source
     class HTTPRequestHandler(BaseHTTPRequestHandler):
 
         def parse(self):
-            url = urllib2.unquote(self.path)
+            url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 protocolhandler.event(url)
                 self.send_response(200)
