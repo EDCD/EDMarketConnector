@@ -1,9 +1,9 @@
 from sys import platform
 import webbrowser
 
-import Tkinter as tk
-import ttk
-import tkFont
+import tkinter as tk
+from tkinter import ttk
+from tkinter import font as tkFont
 
 if platform == 'win32':
     import subprocess

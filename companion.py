@@ -1,7 +1,13 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import base64
 import csv
 import requests
-from cookielib import LWPCookieJar	# No longer needed but retained in case plugins use it
+from http.cookiejar import LWPCookieJar	# No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
 import json
@@ -11,7 +17,7 @@ from os.path import dirname, isfile, join
 import sys
 import time
 from traceback import print_exc
-import urlparse
+import urllib.parse
 import webbrowser
 import zlib
 
@@ -104,7 +110,7 @@ def listify(thing):
         return list(thing)	# array is not sparse
     elif isinstance(thing, dict):
         retval = []
-        for k,v in thing.iteritems():
+        for k,v in thing.items():
             idx = int(k)
             if idx >= len(retval):
                 retval.extend([None] * (idx - len(retval)))
@@ -121,36 +127,36 @@ class ServerError(Exception):
     def __unicode__(self):
         return _('Error: Frontier server is down')	# Raised when cannot contact the Companion API server
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
 class ServerLagging(Exception):
     def __unicode__(self):
         return _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
 class SKUError(Exception):
     def __unicode__(self):
         return _('Error: Frontier server SKU problem')	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
 class CredentialsError(Exception):
     def __init__(self, message=None):
-        self.message = message and unicode(message) or _('Error: Invalid Credentials')
+        self.message = message and str(message) or _('Error: Invalid Credentials')
     def __unicode__(self):
         return self.message
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
 class CmdrError(Exception):
     def __unicode__(self):
         return _('Error: Wrong Cmdr')	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
 
-class Auth:
+class Auth(object):
 
     def __init__(self, cmdr):
         self.cmdr = cmdr
@@ -180,16 +186,16 @@ class Auth:
                     config.save()	# Save settings now for use by command-line app
                     return data.get('access_token')
                 else:
-                    print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
+                    print('Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8'))
                     self.dump(r)
             except:
-                print 'Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8')
+                print('Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8'))
                 print_exc()
         else:
-            print 'Auth\tNo token for %s' % self.cmdr.encode('utf-8')
+            print('Auth\tNo token for %s' % self.cmdr.encode('utf-8'))
 
         # New request
-        print 'Auth\tNew authorization request'
+        print('Auth\tNew authorization request')
         self.verifier = self.base64URLEncode(os.urandom(32))
         self.state = self.base64URLEncode(os.urandom(8))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
@@ -198,16 +204,16 @@ class Auth:
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
         if not '?' in payload:
-            print 'Auth\tMalformed response "%s"' % payload.encode('utf-8')
+            print('Auth\tMalformed response "%s"' % payload.encode('utf-8'))
             raise CredentialsError()	# Not well formed
 
-        data = urlparse.parse_qs(payload[payload.index('?')+1:])
+        data = urllib.parse.parse_qs(payload[payload.index('?')+1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
-            print 'Auth\tUnexpected response "%s"' % payload.encode('utf-8')
+            print('Auth\tUnexpected response "%s"' % payload.encode('utf-8'))
             raise CredentialsError()	# Unexpected reply
 
         if not data.get('code'):
-            print 'Auth\tNegative response "%s"' % payload.encode('utf-8')
+            print('Auth\tNegative response "%s"' % payload.encode('utf-8'))
             if data.get('error_description'):
                 raise CredentialsError('Error: %s' % data['error_description'][0])
             elif data.get('error'):
@@ -229,7 +235,7 @@ class Auth:
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
-                print 'Auth\tNew token for %s' % self.cmdr.encode('utf-8')
+                print('Auth\tNew token for %s' % self.cmdr.encode('utf-8'))
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get('fdev_apikeys') or []
@@ -239,12 +245,12 @@ class Auth:
                 config.save()	# Save settings now for use by command-line app
                 return data.get('access_token')
         except:
-            print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
+            print('Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8'))
             print_exc()
             if r: self.dump(r)
             raise CredentialsError()
 
-        print 'Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8')
+        print('Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8'))
         self.dump(r)
         if data.get('error_description'):
             raise CredentialsError('Error: %s' % data['error_description'])
@@ -257,7 +263,7 @@ class Auth:
 
     @staticmethod
     def invalidate(cmdr):
-        print 'Auth\tInvalidated token for %s' % cmdr.encode('utf-8')
+        print('Auth\tInvalidated token for %s' % cmdr.encode('utf-8'))
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
@@ -267,15 +273,15 @@ class Auth:
         config.save()	# Save settings now for use by command-line app
 
     def dump(self, r):
-        print 'Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8')
+        print('Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8'))
 
     def base64URLEncode(self, text):
         return base64.urlsafe_b64encode(text).replace('=', '')
 
 
-class Session:
+class Session(object):
 
-    STATE_INIT, STATE_AUTH, STATE_OK = range(3)
+    STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
 
     def __init__(self):
         self.state = Session.STATE_INIT
@@ -429,7 +435,7 @@ class Session:
         Auth.invalidate(self.credentials['cmdr'])
 
     def dump(self, r):
-        print 'cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.text.encode('utf-8')
+        print('cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.text.encode('utf-8'))
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
@@ -451,7 +457,7 @@ def fixup(data):
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
         for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
             if not isinstance(commodity.get(thing), numbers.Number):
-                if __debug__: print 'Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', ''))
+                if __debug__: print('Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', '')))
                 break
         else:
             if not category_map.get(commodity['categoryname'], True):	# Check not marketable i.e. Limpets
@@ -461,13 +467,13 @@ def fixup(data):
             elif commodity.get('legality'):	# Check not prohibited
                 pass
             elif not commodity.get('categoryname'):
-                if __debug__: print 'Missing "categoryname" for "%s"' % commodity.get('name', '')
+                if __debug__: print('Missing "categoryname" for "%s"' % commodity.get('name', ''))
             elif not commodity.get('name'):
-                if __debug__: print 'Missing "name" for a commodity in "%s"' % commodity.get('categoryname', '')
+                if __debug__: print('Missing "name" for a commodity in "%s"' % commodity.get('categoryname', ''))
             elif not commodity['demandBracket'] in range(4):
-                if __debug__: print 'Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name'])
+                if __debug__: print('Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name']))
             elif not commodity['stockBracket'] in range(4):
-                if __debug__: print 'Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name'])
+                if __debug__: print('Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name']))
             else:
                 # Rewrite text fields
                 new = dict(commodity)	# shallow copy
@@ -498,7 +504,7 @@ def ship(data):
 
     def filter_ship(d):
         filtered = {}
-        for k, v in d.iteritems():
+        for k, v in d.items():
             if v == []:
                 pass	# just skip empty fields for brevity
             elif k in ['alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining', 'rebuilds', 'starsystem', 'station']:
@@ -519,7 +525,7 @@ def ship(data):
 
 # Ship name suitable for writing to a file
 def ship_file_name(ship_name, ship_type):
-    name = unicode(ship_name or ship_map.get(ship_type.lower(), ship_type)).strip()
+    name = str(ship_name or ship_map.get(ship_type.lower(), ship_type)).strip()
     if name.endswith('.'):
         name = name[:-1]
     if name.lower() in ['con', 'prn', 'aux', 'nul',

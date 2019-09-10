@@ -5,9 +5,9 @@ from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpa
 from sys import platform
 import webbrowser
 
-import Tkinter as tk
-import ttk
-import tkColorChooser
+import tkinter as tk
+from tkinter import ttk
+from tkinter import colorchooser as tkColorChooser
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 

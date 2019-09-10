@@ -1,6 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import sys
 from sys import platform
 from collections import OrderedDict
@@ -26,11 +31,11 @@ if getattr(sys, 'frozen', False):
     if 'TCL_LIBRARY' in environ:
         environ.pop('TCL_LIBRARY')
 
-import Tkinter as tk
-import ttk
-import tkFileDialog
-import tkFont
-import tkMessageBox
+import tkinter as tk
+import tkinter.ttk
+import tkinter.filedialog
+import tkinter.font
+import tkinter.messagebox
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
@@ -58,7 +63,7 @@ from theme import theme
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
 
 
-class AppWindow:
+class AppWindow(object):
 
     # Tkinter Event types
     EVENT_KEYPRESS = 2
@@ -125,7 +130,7 @@ class AppWindow:
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
-        self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.button = tkinter.ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
@@ -378,10 +383,10 @@ class AppWindow:
                     self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
                     self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
         self.cooldown()
 
     def getandsend(self, event=None, retrying=False):
@@ -480,7 +485,7 @@ class AppWindow:
         # Companion API problem
         except companion.ServerLagging as e:
             if retrying:
-                self.status['text'] = unicode(e)
+                self.status['text'] = str(e)
                 play_bad = True
             else:
                 # Retry once if Companion server is unresponsive
@@ -488,14 +493,14 @@ class AppWindow:
                 return	# early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:	# Companion API return doesn't match Journal
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except Exception as e:			# Including CredentialsError, ServerError
             if __debug__: print_exc()
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
             play_bad = True
 
         if not self.status['text']:	# no errors
@@ -510,7 +515,7 @@ class AppWindow:
         try:
             data = companion.session.station()
             if __debug__:
-                print 'Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!')
+                print('Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!'))
             if not data['commander'].get('docked'):
                 pass	# might have undocked while we were waiting for retry in which case station data is unreliable
             elif (data.get('lastSystem',   {}).get('name') == monitor.system and
@@ -577,7 +582,7 @@ class AppWindow:
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
-                    print "Can't start Status monitoring"
+                    print("Can't start Status monitoring")
 
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
@@ -606,10 +611,10 @@ class AppWindow:
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
                 self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
         except companion.ServerError as e:
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
         self.cooldown()
 
     # Handle Status event
@@ -677,7 +682,7 @@ class AppWindow:
         try:
             data = companion.session.station()
             self.status['text'] = ''
-            f = tkFileDialog.asksaveasfilename(parent = self.w,
+            f = tkinter.filedialog.asksaveasfilename(parent = self.w,
                                                defaultextension = platform=='darwin' and '.json' or '',
                                                filetypes = [('JSON', '.json'), ('All Files', '*')],
                                                initialdir = config.get('outdir'),
@@ -689,7 +694,7 @@ class AppWindow:
             self.status['text'] = str(e)
         except Exception as e:
             if __debug__: print_exc()
-            self.status['text'] = unicode(e)
+            self.status['text'] = str(e)
 
     def onexit(self, event=None):
         if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
@@ -797,7 +802,7 @@ if __name__ == "__main__":
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
-        print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
+        print('%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime())))
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 

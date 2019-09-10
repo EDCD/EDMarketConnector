@@ -6,8 +6,8 @@ import time
 if __debug__:
     from traceback import print_exc
 
-import Tkinter as tk
-import ttk
+import tkinter as tk
+from tkinter import ttk
 import myNotebook as nb
 
 import companion

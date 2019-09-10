@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import print_function
+from past.utils import old_div
 import json
 from calendar import timegm
 from operator import itemgetter
@@ -68,18 +71,18 @@ class Dashboard(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print '%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir)
+            print('%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
         # being supported on this filesystem.
-        self.root.after(self._POLL * 1000/2, self.poll, True)
+        self.root.after(old_div(self._POLL * 1000,2), self.poll, True)
 
         return True
 
     def stop(self):
         if __debug__:
-            print 'Stopping monitoring Dashboard'
+            print('Stopping monitoring Dashboard')
         self.currentdir = None
         if self.observed:
             self.observed = None
