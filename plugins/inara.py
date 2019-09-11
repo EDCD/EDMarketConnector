@@ -790,7 +790,7 @@ def call(callback=None):
             ('appName', applongname),
             ('appVersion', appversion),
             ('APIkey', credentials(this.cmdr)),
-            ('commanderName', this.cmdr.encode('utf-8')),
+            ('commanderName', this.cmdr),
             ('commanderFrontierID', this.FID),
         ])),
         ('events', list(this.events)),	# shallow copy
