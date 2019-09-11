@@ -112,7 +112,6 @@ class EDDN(object):
             ('message',    msg['message']),
         ])
 
-        print('plugins/eddn.py:send(): msg[header][softwareName] = "{}"'.format(msg['header']['softwareName']))
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
         if __debug__ and r.status_code != requests.codes.ok:
             print('Status\t%s'  % r.status_code)
@@ -315,7 +314,7 @@ class EDDN(object):
         }
         if self.replayfile or self.load():
             # Store the entry
-            self.replaylog.append(json.dumps([cmdr.encode('utf-8'), msg]))
+            self.replaylog.append(json.dumps([cmdr, msg]))
             self.replayfile.write('%s\n' % self.replaylog[-1])
 
             if (entry['event'] == 'Docked' or
