@@ -732,7 +732,7 @@ class EDLogs(FileSystemEventHandler):
 
     # Export ship loadout as a Loadout event
     def export_ship(self, filename=None):
-        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': ')).encode('utf-8')	# pretty print
+        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))	# pretty print
 
         if filename:
             with open(filename, 'wt') as h:
