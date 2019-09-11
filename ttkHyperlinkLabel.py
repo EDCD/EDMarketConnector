@@ -144,7 +144,7 @@ def openurl(url):
             typ  = DWORD()
             size = DWORD()
             if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
-                buf = ctypes.create_unicode_buffer(size.value / 2)
+                buf = ctypes.create_unicode_buffer('', int(size.value / 2))
                 if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                     if buf.value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
                         # IE and Edge can't handle long arguments so just use webbrowser.open and hope
@@ -158,7 +158,7 @@ def openurl(url):
             typ  = DWORD()
             size = DWORD()
             if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
-                buf = ctypes.create_unicode_buffer(size.value / 2)
+                buf = ctypes.create_unicode_buffer('', int(size.value / 2))
                 if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), buf, ctypes.byref(size)) and 'iexplore' not in buf.value.lower():
                     RegCloseKey(hkey)
                     if '%1' in buf.value:
