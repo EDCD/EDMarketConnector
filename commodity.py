@@ -55,6 +55,6 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
             line = sep.join([line, str(int(commodity['meanPrice'])), str(commodity['id']), data['timestamp'] + '\n'])
         else:
             line = sep.join([line, data['timestamp'] + '\n'])
-        h.write(line.encode('utf-8'))
+        h.write(line)
 
     h.close()
