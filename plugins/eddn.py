@@ -100,7 +100,7 @@ class EDDN(object):
                 uploaderID = uuid.uuid4().hex
                 config.set('uploaderID', uploaderID)
         else:
-            uploaderID = cmdr.encode('utf-8')
+            uploaderID = cmdr
 
         msg = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
@@ -112,12 +112,13 @@ class EDDN(object):
             ('message',    msg['message']),
         ])
 
+        print('plugins/eddn.py:send(): msg[header][softwareName] = "{}"'.format(msg['header']['softwareName']))
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
         if __debug__ and r.status_code != requests.codes.ok:
             print('Status\t%s'  % r.status_code)
             print('URL\t%s'  % r.url)
             print('Headers\t%s' % r.headers)
-            print(('Content:\n%s' % r.text).encode('utf-8'))
+            print('Content:\n%s' % r.text)
         r.raise_for_status()
 
     def sendreplay(self):
