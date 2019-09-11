@@ -14,6 +14,7 @@ import json
 import numbers
 import os
 from os.path import dirname, isfile, join
+import random
 import sys
 import time
 from traceback import print_exc
@@ -196,8 +197,10 @@ class Auth(object):
 
         # New request
         print('Auth\tNew authorization request')
-        self.verifier = self.base64URLEncode(os.urandom(32))
-        self.state = self.base64URLEncode(os.urandom(8))
+        v = random.SystemRandom().getrandbits(8 * 32)
+        self.verifier = self.base64URLEncode(v.to_bytes(32, byteorder='big')).encode('utf-8')
+        s = random.SystemRandom().getrandbits(8 * 32)
+        self.state = self.base64URLEncode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
         webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=%s' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state, protocolhandler.redirect))
 
@@ -276,7 +279,7 @@ class Auth(object):
         print('Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8'))
 
     def base64URLEncode(self, text):
-        return base64.urlsafe_b64encode(text).replace('=', '')
+        return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
 class Session(object):
