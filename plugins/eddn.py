@@ -392,10 +392,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         for k, v in d.items():
             if k.endswith('_Localised'):
                 pass
-            elif hasattr(v, 'iteritems'):	# dict -> recurse
+            elif hasattr(v, 'items'):	# dict -> recurse
                 filtered[k] = filter_localised(v)
             elif isinstance(v, list):	# list of dicts -> recurse
-                filtered[k] = [filter_localised(x) if hasattr(x, 'iteritems') else x for x in v]
+                filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
             else:
                 filtered[k] = v
         return filtered
