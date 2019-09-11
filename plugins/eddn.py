@@ -437,10 +437,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
+            if not system:
+                return("system is None, can't add StarSystem")
             entry['StarSystem'] = system
         if 'StarPos' not in entry:
+            if not this.coordinates:
+                return("this.coordinates is None, can't add StarPos")
             entry['StarPos'] = list(this.coordinates)
-        if 'SystemAddress' not in entry and this.systemaddress:
+        if 'SystemAddress' not in entry:
+            if not this.systemaddress:
+                return("this.systemaddress is None, can't add SystemAddress")
             entry['SystemAddress'] = this.systemaddress
 
         try:
