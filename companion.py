@@ -276,7 +276,7 @@ class Auth(object):
         config.save()	# Save settings now for use by command-line app
 
     def dump(self, r):
-        print('Auth\t' + r.url, r.status_code, r.reason and r.reason.decode('utf-8') or 'None', r.text.encode('utf-8'))
+        print('Auth\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
 
     def base64URLEncode(self, text):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
