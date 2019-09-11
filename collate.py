@@ -77,7 +77,7 @@ def addmodules(data):
                 modules[int(row['id'])] = row	# index by int for easier lookup and sorting
     size_pre = len(modules)
 
-    for key,module in data['lastStarport'].get('modules').iteritems():
+    for key,module in data['lastStarport'].get('modules').items():
         # sanity check
         if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
         try:

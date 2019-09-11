@@ -52,28 +52,28 @@ if __name__ == "__main__":
     # (system_id, is_populated) by system_name (ignoring duplicate names)
     system_ids = {
         str(s['name']) : (k, s['is_populated'])
-        for k,s in systems.iteritems() if inbubble(s['x'], s['y'], s['z'])
+        for k,s in systems.items() if inbubble(s['x'], s['y'], s['z'])
     }
     print '%d\tsystems in bubble' % len(system_ids)
 
     extra_ids = {
         str(s['name']) : (k, s['is_populated'])
-        for k,s in systems.iteritems() if around_jaques(s['x'], s['y'], s['z'])
+        for k,s in systems.items() if around_jaques(s['x'], s['y'], s['z'])
     }
     system_ids.update(extra_ids)
     print '%d\tsystems in Colonia' % len(extra_ids)
 
     cut = {
-        k : s for k, s in systems.iteritems()
+        k : s for k, s in systems.items()
         if s['is_populated'] and s['name'] not in system_ids
     }
     print '%d\toutlying populated systems:' % len(cut)
     extra_ids = {}
-    for k1,o in sorted(cut.iteritems()):
+    for k1,o in sorted(cut.items()):
         ox, oy, oz = o['x'], o['y'], o['z']
         extra = {
             str(s['name']) : (k, s['is_populated'])
-            for k,s in systems.iteritems() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z'])
+            for k,s in systems.items() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z'])
         }
         print '%-30s%7d %11.5f %11.5f %11.5f %4d' % (o['name'], k1, ox, oy, oz, len(extra))
         extra_ids.update(extra)
@@ -82,10 +82,10 @@ if __name__ == "__main__":
 
     cut = {
         k : s
-        for k,s in systems.iteritems() if s['name'] in system_ids and system_ids[s['name']][0] != k
+        for k,s in systems.items() if s['name'] in system_ids and system_ids[s['name']][0] != k
     }
     print '\n%d duplicate systems' % len(cut)
-    for k,s in sorted(cut.iteritems()):
+    for k,s in sorted(cut.items()):
         print '%-20s%8d %8d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']][0], k, s['x'], s['y'], s['z'])
 
     # Hack - ensure duplicate system names are pointing at the more interesting system

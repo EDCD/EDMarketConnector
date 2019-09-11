@@ -516,7 +516,7 @@ def ship(data):
                 pass	# also noisy, and redundant
             elif k in ['dir', 'LessIsGood']:
                 pass	# dir is not ASCII - remove to simplify handling
-            elif hasattr(v, 'iteritems'):
+            elif hasattr(v, 'items'):
                 filtered[k] = filter_ship(v)
             else:
                 filtered[k] = v

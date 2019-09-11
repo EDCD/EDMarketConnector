@@ -39,7 +39,7 @@ if __name__ == "__main__":
     }
 
     # Symbolic name from in-game name
-    reverse_ship_map = {v: k for k, v in companion.ship_map.iteritems()}
+    reverse_ship_map = {v: k for k, v in companion.ship_map.items()}
 
     bulkheads = outfitting.armour_map.keys()
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     # Module masses
     for cat in data['Modules'].values():
-        for grp, mlist in cat.iteritems():
+        for grp, mlist in cat.items():
             for m in mlist:
                 assert 'symbol' in m, m
                 key = str(m['symbol'].lower())
