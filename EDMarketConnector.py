@@ -504,7 +504,7 @@ class AppWindow(object):
             play_bad = True
 
         if not self.status['text']:	# no errors
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S').encode('utf-8'), localtime(querytime)).decode('utf-8')
+            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S'), localtime(querytime))
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
