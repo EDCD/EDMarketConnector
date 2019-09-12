@@ -128,19 +128,19 @@ class ServerError(Exception):
     def __unicode__(self):
         return _('Error: Frontier server is down')	# Raised when cannot contact the Companion API server
     def __str__(self):
-        return str(self).encode('utf-8')
+        return str(self)
 
 class ServerLagging(Exception):
     def __unicode__(self):
         return _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
     def __str__(self):
-        return str(self).encode('utf-8')
+        return str(self)
 
 class SKUError(Exception):
     def __unicode__(self):
         return _('Error: Frontier server SKU problem')	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
     def __str__(self):
-        return str(self).encode('utf-8')
+        return str(self)
 
 class CredentialsError(Exception):
     def __init__(self, message=None):
@@ -148,13 +148,13 @@ class CredentialsError(Exception):
     def __unicode__(self):
         return self.message
     def __str__(self):
-        return str(self).encode('utf-8')
+        return str(self)
 
 class CmdrError(Exception):
     def __unicode__(self):
         return _('Error: Wrong Cmdr')	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
     def __str__(self):
-        return str(self).encode('utf-8')
+        return str(self)
 
 
 class Auth(object):
@@ -187,13 +187,13 @@ class Auth(object):
                     config.save()	# Save settings now for use by command-line app
                     return data.get('access_token')
                 else:
-                    print('Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8'))
+                    print('Auth\tCan\'t refresh token for %s' % self.cmdr)
                     self.dump(r)
             except:
-                print('Auth\tCan\'t refresh token for %s' % self.cmdr.encode('utf-8'))
+                print('Auth\tCan\'t refresh token for %s' % self.cmdr)
                 print_exc()
         else:
-            print('Auth\tNo token for %s' % self.cmdr.encode('utf-8'))
+            print('Auth\tNo token for %s' % self.cmdr)
 
         # New request
         print('Auth\tNew authorization request')
@@ -207,16 +207,16 @@ class Auth(object):
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
         if not '?' in payload:
-            print('Auth\tMalformed response "%s"' % payload.encode('utf-8'))
+            print('Auth\tMalformed response "%s"' % payload)
             raise CredentialsError()	# Not well formed
 
         data = urllib.parse.parse_qs(payload[payload.index('?')+1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
-            print('Auth\tUnexpected response "%s"' % payload.encode('utf-8'))
+            print('Auth\tUnexpected response "%s"' % payload)
             raise CredentialsError()	# Unexpected reply
 
         if not data.get('code'):
-            print('Auth\tNegative response "%s"' % payload.encode('utf-8'))
+            print('Auth\tNegative response "%s"' % payload)
             if data.get('error_description'):
                 raise CredentialsError('Error: %s' % data['error_description'][0])
             elif data.get('error'):
@@ -238,7 +238,7 @@ class Auth(object):
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
-                print('Auth\tNew token for %s' % self.cmdr.encode('utf-8'))
+                print('Auth\tNew token for %s' % self.cmdr)
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get('fdev_apikeys') or []
@@ -248,12 +248,12 @@ class Auth(object):
                 config.save()	# Save settings now for use by command-line app
                 return data.get('access_token')
         except:
-            print('Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8'))
+            print('Auth\tCan\'t get token for %s' % self.cmdr)
             print_exc()
             if r: self.dump(r)
             raise CredentialsError()
 
-        print('Auth\tCan\'t get token for %s' % self.cmdr.encode('utf-8'))
+        print('Auth\tCan\'t get token for %s' % self.cmdr)
         self.dump(r)
         if data.get('error_description'):
             raise CredentialsError('Error: %s' % data['error_description'])
@@ -266,7 +266,7 @@ class Auth(object):
 
     @staticmethod
     def invalidate(cmdr):
-        print('Auth\tInvalidated token for %s' % cmdr.encode('utf-8'))
+        print('Auth\tInvalidated token for %s' % cmdr)
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
@@ -438,7 +438,7 @@ class Session(object):
         Auth.invalidate(self.credentials['cmdr'])
 
     def dump(self, r):
-        print('cAPI\t' + r.url, r.status_code, r.reason and r.reason.encode('utf-8') or 'None', r.text.encode('utf-8'))
+        print('cAPI\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
 
 
 # Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
