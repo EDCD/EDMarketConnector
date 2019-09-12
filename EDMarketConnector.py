@@ -688,7 +688,7 @@ class AppWindow(object):
                                                initialdir = config.get('outdir'),
                                                initialfile = '%s%s.%s.json' % (data.get('lastSystem', {}).get('name', 'Unknown'), data['commander'].get('docked') and '.'+data.get('lastStarport', {}).get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
             if f:
-                with open(f, 'wt') as h:
+                with open(f, 'wb') as h:
                     h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
         except companion.ServerError as e:
             self.status['text'] = str(e)
