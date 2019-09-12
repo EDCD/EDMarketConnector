@@ -163,9 +163,9 @@ if platform == 'darwin':
             elif keycode in HotkeyMgr.DISPLAY:	# specials
                 text += HotkeyMgr.DISPLAY[keycode]
             elif keycode < 0x20:		# control keys
-                text += unichr(keycode+0x40)
+                text += chr(keycode+0x40)
             elif keycode < 0xf700:		# key char
-                text += unichr(keycode).upper()
+                text += chr(keycode).upper()
             else:
                 text += u'⁈'
             return text
@@ -388,9 +388,9 @@ elif platform == 'win32':
                 if not c:		# oops not printable
                     text += u'⁈'
                 elif c < 0x20:		# control keys
-                    text += unichr(c+0x40)
+                    text += chr(c+0x40)
                 else:
-                    text += unichr(c).upper()
+                    text += chr(c).upper()
             return text
 
         def play_good(self):
