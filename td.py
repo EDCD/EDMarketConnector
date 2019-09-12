@@ -29,7 +29,7 @@ def export(data):
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
     # Format described here: https://bitbucket.org/kfsone/tradedangerous/wiki/Price%20Data
-    h = open(filename, 'wt')	# codecs can't automatically handle line endings, so encode manually where required
+    h = open(filename, 'wb')	# codecs can't automatically handle line endings, so encode manually where required
     h.write(('#! trade.py import -\n# Created by %s %s on %s%s.\n#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n@ %s/%s\n' % (applongname, appversion, platform=='darwin' and "Mac OS" or system(), not config.getint('anonymous') and ' for Cmdr '+data['commander']['name'].strip() or '', data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip())).encode('utf-8'))
 
     # sort commodities by category
@@ -38,10 +38,11 @@ def export(data):
         bycategory[commodity['categoryname']].append(commodity)
 
     for category in sorted(bycategory):
-        h.write('   + %s\n' % category)
+        h.write('   + {}\n'.format(category).encode('utf-8'))
         # corrections to commodity names can change the sort order
         for commodity in sorted(bycategory[category], key=itemgetter('name')):
-            h.write('      %-23s %7d %7d %9s%c %8s%c  %s\n' % (
+            #h.write('      %-23s %7d %7d %9s%c %8s%c  %s\n'.format(
+            h.write('      {:<23} {:7d} {:7d} {:9}{:1} {:8}{:1}  {}\n'.format(
                 commodity['name'],
                 int(commodity['sellPrice']),
                 int(commodity['buyPrice']),
@@ -49,6 +50,6 @@ def export(data):
                 demandbracketmap[commodity['demandBracket']],
                 int(commodity['stock']) if commodity['stockBracket'] else '',
                 stockbracketmap[commodity['stockBracket']],
-                timestamp))
+                timestamp).encode('utf-8'))
 
     h.close()
