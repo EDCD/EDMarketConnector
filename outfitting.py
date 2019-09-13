@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import cPickle
+import pickle
 from os.path import join
 import time
 
@@ -350,7 +350,7 @@ def lookup(module, ship_map, entitled=False):
 
     # Lazily populate
     if not moduledata:
-        moduledata.update(cPickle.load(open(join(config.respath, 'modules.p'),  'rb')))
+        moduledata.update(pickle.load(open(join(config.respath, 'modules.p'),  'rb')))
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])
@@ -464,7 +464,12 @@ def lookup(module, ship_map, entitled=False):
             (new['class'], new['rating']) = (str(name[2][4:]), 'A')
         elif len(name) < 4 and name[1] in ['guardianfsdbooster']:	# Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'H')
+        elif len(name) < 4 and name[0] == 'dronecontrol' and name[1] == 'resourcesiphon':
+            # 128066402,Int_DroneControl_ResourceSiphon,internal,Limpet Control,,,,1,I,
+            (new['class'], new['rating']) = (1, 'I')
         else:
+            if len(name) < 3:
+                raise AssertionError('%s: length < 3]' % (name))
             if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
             new['class'] = str(name[2][4:])
             new['rating'] = (name[1]=='buggybay' and planet_rating_map or
@@ -490,7 +495,7 @@ def lookup(module, ship_map, entitled=False):
     if __debug__:
         m = moduledata.get(key, {})
         if not m:
-            print 'No data for module %s' % key
+            print('No data for module %s' % key)
         elif new['name'] == 'Frame Shift Drive':
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
         else:
@@ -518,13 +523,13 @@ def export(data, filename):
 
     h = open(filename, 'wt')
     h.write(header)
-    for v in data['lastStarport'].get('modules', {}).itervalues():
+    for v in list(data['lastStarport'].get('modules', {}).values()):
         try:
             m = lookup(v, companion.ship_map)
             if m:
                 h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], data['timestamp']))
         except AssertionError as e:
-            if __debug__: print 'Outfitting: %s' % e	# Silently skip unrecognized modules
+            if __debug__: print('Outfitting: %s' % e)	# Silently skip unrecognized modules
         except:
             if __debug__: raise
     h.close()
