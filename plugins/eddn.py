@@ -1,4 +1,3 @@
-from __future__ import print_function
 # Export to EDDN
 
 from collections import OrderedDict
