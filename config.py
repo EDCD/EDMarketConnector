@@ -1,8 +1,3 @@
-from __future__ import division
-from builtins import str
-from past.builtins import basestring
-from builtins import object
-from past.utils import old_div
 import numbers
 import sys
 from os import getenv, makedirs, mkdir, pardir
@@ -229,7 +224,7 @@ class Config(object):
             size = DWORD()
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
                 return None
-            buf = ctypes.create_unicode_buffer(old_div(size.value, 2))
+            buf = ctypes.create_unicode_buffer(int(size.value / 2))
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
                 return None
             elif typ.value == REG_MULTI_SZ:
@@ -247,7 +242,7 @@ class Config(object):
                 return val.value
 
         def set(self, key, val):
-            if isinstance(val, basestring):
+            if isinstance(val, str):
                 buf = ctypes.create_unicode_buffer(val)
                 RegSetValueEx(self.hkey, key, 0, REG_SZ, buf, len(buf)*2)
             elif isinstance(val, numbers.Integral):
@@ -326,7 +321,7 @@ class Config(object):
         def set(self, key, val):
             if isinstance(val, bool):
                 self.config.set(self.SECTION, key, val and '1' or '0')
-            elif isinstance(val, basestring) or isinstance(val, numbers.Integral):
+            elif isinstance(val, str) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, self._escape(val))
             elif hasattr(val, '__iter__'):	# iterable
                 self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
