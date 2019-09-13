@@ -470,7 +470,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return unicode(e)
 
 def cmdr_data(data, is_beta):
-    if data['commander'].get('docked') & config.OUT_MKT_EDDN:
+    if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
         try:
             if this.marketId != data['lastStarport']['id']:
                 this.commodities = this.outfitting = this.shipyard = None
