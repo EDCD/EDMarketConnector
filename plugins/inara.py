@@ -1,14 +1,7 @@
-from __future__ import division
-from __future__ import print_function
 #
 # Inara sync
 #
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import zip
-from past.utils import old_div
 from collections import OrderedDict
 import json
 import requests
@@ -714,7 +707,7 @@ def cmdr_data(data, is_beta):
         this.station_link['url'] = this.station or this.system
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if not (CREDIT_RATIO > old_div(this.lastcredits, data['commander']['credits']) > old_div(1,CREDIT_RATIO)):
+        if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']	# Remove any unsent
             add_event('setCommanderCredits', data['timestamp'],
                       OrderedDict([
