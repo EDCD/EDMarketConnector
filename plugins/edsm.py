@@ -1,11 +1,7 @@
-from __future__ import print_function
 #
 # System display and EDSM lookup
 #
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import zip
 import json
 import requests
 import sys
