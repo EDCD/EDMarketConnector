@@ -416,7 +416,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         (entry['event'] == 'Location' or
          entry['event'] == 'FSDJump' or
          entry['event'] == 'Docked'  or
-         entry['event'] == 'Scan'    and this.coordinates)):
+         entry['event'] == 'Scan') and
+        ('StarPos' in entry or this.coordinates)):
         # strip out properties disallowed by the schema
         for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
             entry.pop(thing, None)
