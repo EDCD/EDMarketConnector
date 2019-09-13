@@ -59,12 +59,12 @@ class EDDN:
         try:
             try:
                 # Try to open existing file
-                self.replayfile = open(filename, 'r+')
+                self.replayfile = open(filename, 'r+', buffering=1)
             except:
                 if exists(filename):
                     raise	# Couldn't open existing file
                 else:
-                    self.replayfile = open(filename, 'w+')	# Create file
+                    self.replayfile = open(filename, 'w+', buffering=1)	# Create file
             if sys.platform != 'win32':	# open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX|LOCK_NB)
         except:
