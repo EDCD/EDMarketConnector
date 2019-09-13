@@ -3,11 +3,6 @@
 # Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead.
 #
 
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
 import codecs
 from collections import OrderedDict
 import numbers
