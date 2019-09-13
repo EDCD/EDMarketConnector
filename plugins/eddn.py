@@ -1,10 +1,6 @@
 from __future__ import print_function
 # Export to EDDN
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
 from collections import OrderedDict
 import json
 from os import SEEK_SET, SEEK_CUR, SEEK_END
