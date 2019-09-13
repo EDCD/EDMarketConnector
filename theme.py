@@ -1,4 +1,3 @@
-from __future__ import division
 #
 # Theme support
 #
@@ -6,11 +5,6 @@ from __future__ import division
 # So can't use ttk's theme support. So have to change colors manually.
 #
 
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
-from past.utils import old_div
 from sys import platform
 from os.path import join
 
@@ -216,7 +210,7 @@ class _Theme(object):
                 'foreground'         : config.get('dark_text'),
                 'activebackground'   : config.get('dark_text'),
                 'activeforeground'   : 'grey4',
-                'disabledforeground' : '#%02x%02x%02x' % (old_div(r,384), old_div(g,384), old_div(b,384)),
+                'disabledforeground' : '#%02x%02x%02x' % (int(r/384), int(g/384), int(b/384)),
                 'highlight'          : config.get('dark_highlight'),
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
                 'font'               : (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
