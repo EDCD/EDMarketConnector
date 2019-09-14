@@ -73,7 +73,7 @@ class Dashboard(FileSystemEventHandler):
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
         # being supported on this filesystem.
-        self.root.after(self._POLL * 1000/2, self.poll, True)
+        self.root.after(int(self._POLL * 1000/2), self.poll, True)
 
         return True
 
