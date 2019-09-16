@@ -3,8 +3,6 @@
 # Station display and eddb.io lookup
 #
 
-from future import standard_library
-standard_library.install_aliases()
 import pickle
 import csv
 import os
