@@ -1,5 +1,3 @@
-from future import standard_library
-standard_library.install_aliases()
 from builtins import map
 from builtins import object
 import os
