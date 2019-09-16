@@ -41,7 +41,6 @@ def export(data):
         h.write('   + {}\n'.format(category).encode('utf-8'))
         # corrections to commodity names can change the sort order
         for commodity in sorted(bycategory[category], key=itemgetter('name')):
-            #h.write('      %-23s %7d %7d %9s%c %8s%c  %s\n'.format(
             h.write('      {:<23} {:7d} {:7d} {:9}{:1} {:8}{:1}  {}\n'.format(
                 commodity['name'],
                 int(commodity['sellPrice']),

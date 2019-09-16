@@ -1,5 +1,3 @@
-from builtins import map
-from builtins import object
 import os
 from os.path import dirname, join
 import sys
