@@ -1,7 +1,5 @@
 # EDShipyard ship export
 
-from future import standard_library
-standard_library.install_aliases()
 import base64
 import gzip
 import json
