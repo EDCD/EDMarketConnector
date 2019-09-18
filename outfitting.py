@@ -457,6 +457,8 @@ def lookup(module, ship_map, entitled=False):
 
         if len(name) < 4 and name[1] == 'unkvesselresearch':	# Hack! No size or class.
             (new['class'], new['rating']) = ('1', 'E')
+        elif len(name) < 4 and name[1] == 'resourcesiphon':	# Hack! 128066402 has no size or class.
+            (new['class'], new['rating']) = ('1', 'I')
         elif len(name) < 4 and name[1] in ['guardianpowerdistributor', 'guardianpowerplant']:	# Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'A')
         elif len(name) < 4 and name[1] in ['guardianfsdbooster']:	# Hack! No class.

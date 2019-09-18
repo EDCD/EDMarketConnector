@@ -59,12 +59,12 @@ class EDDN:
         try:
             try:
                 # Try to open existing file
-                self.replayfile = open(filename, 'r+')
+                self.replayfile = open(filename, 'r+', buffering=1)
             except:
                 if exists(filename):
                     raise	# Couldn't open existing file
                 else:
-                    self.replayfile = open(filename, 'w+')	# Create file
+                    self.replayfile = open(filename, 'w+', buffering=1)	# Create file
             if sys.platform != 'win32':	# open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX|LOCK_NB)
         except:
@@ -416,7 +416,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         (entry['event'] == 'Location' or
          entry['event'] == 'FSDJump' or
          entry['event'] == 'Docked'  or
-         entry['event'] == 'Scan'    and this.coordinates)):
+         entry['event'] == 'Scan') and
+        ('StarPos' in entry or this.coordinates)):
         # strip out properties disallowed by the schema
         for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
             entry.pop(thing, None)
