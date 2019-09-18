@@ -129,7 +129,7 @@ def addships(data):
                 ships[int(row['id'])] = row	# index by int for easier lookup and sorting
     size_pre = len(ships)
 
-    for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list'):
+    for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list'):
         # sanity check
         key = ship['id']
         new = { 'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower()) }
@@ -152,7 +152,7 @@ def addships(data):
                 os.unlink(shipfile+'.bak')
             os.rename(shipfile, shipfile+'.bak')
 
-        with open(shipfile, 'wb') as csvfile:
+        with open(shipfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
             writer.writeheader()
             for key in sorted(ships):
