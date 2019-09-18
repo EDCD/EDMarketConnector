@@ -83,7 +83,7 @@ elif platform=='win32':
         return retval
 
 
-elif platform=='linux2':
+elif platform=='linux':
     import codecs
     # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
     from iniparse import RawConfigParser
@@ -264,7 +264,7 @@ class Config(object):
             RegCloseKey(self.hkey)
             self.hkey = None
 
-    elif platform=='linux2':
+    elif platform=='linux':
 
         SECTION = 'config'
 

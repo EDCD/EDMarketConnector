@@ -25,7 +25,7 @@ if platform == 'win32':
     FR_NOT_ENUM = 0x20
     AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
-elif platform == 'linux2':
+elif platform == 'linux':
     from ctypes import *
 
     XID = c_ulong 	# from X.h: typedef unsigned long XID
@@ -190,7 +190,7 @@ class _Theme(object):
     # Set up colors
     def _colors(self, root, theme):
         style = ttk.Style()
-        if platform == 'linux2':
+        if platform == 'linux':
             style.theme_use('clam')
 
         # Default dark theme colors
