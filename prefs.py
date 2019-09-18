@@ -354,8 +354,8 @@ class PreferencesDialog(tk.Toplevel):
 
     def filebrowse(self, title, pathvar):
         if platform != 'win32':
-            import tkFileDialog
-            d = tkFileDialog.askdirectory(parent=self, initialdir=expanduser(pathvar.get()), title=title, mustexist=tk.TRUE)
+            import tkinter.filedialog
+            d = tkinter.filedialog.askdirectory(parent=self, initialdir=expanduser(pathvar.get()), title=title, mustexist=tk.TRUE)
         else:
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
