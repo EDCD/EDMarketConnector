@@ -1,6 +1,6 @@
 # Export ship loadout in E:D Shipyard plain text format
 
-import cPickle
+import pickle
 from collections import defaultdict
 import os
 from os.path import join
@@ -40,7 +40,7 @@ slot_map = {
 
 
 # Ship masses
-ships = cPickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+ships = pickle.load(open(join(config.respath, 'ships.p'),  'rb'))
 
 
 # Export ship loadout in E:D Shipyard plain text format
@@ -107,10 +107,10 @@ def export(data, filename=None):
                 if slot.lower().startswith('slot'):
                     loadout[slot[-1]].append(cr + name)
                 elif __debug__ and not slot.lower().startswith('planetaryapproachsuite'):
-                    print 'EDShipyard: Unknown slot %s' % slot
+                    print('EDShipyard: Unknown slot %s' % slot)
 
         except AssertionError as e:
-            if __debug__: print 'EDShipyard: %s' % e
+            if __debug__: print('EDShipyard: %s' % e)
             continue	# Silently skip unrecognized modules
         except:
             if __debug__: raise
