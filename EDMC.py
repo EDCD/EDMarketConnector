@@ -94,7 +94,7 @@ try:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
         except Exception as e:
-            sys.stderr.write("Can't read Journal file: %s\n" % unicode(e).encode('ascii', 'replace'))
+            sys.stderr.write("Can't read Journal file: %s\n" % str(e).encode('ascii', 'replace'))
             sys.exit(EXIT_SYS_ERR)
 
         if not monitor.cmdr:
