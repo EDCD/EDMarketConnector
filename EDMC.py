@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # Command-line interface. Requires prior setup through the GUI.
 #
@@ -72,7 +72,7 @@ try:
                 latest = ' (%s is available)' % items[lastversion]
         except:
             pass	# Quietly suppress timeouts etc.
-        print '%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest)	# just first three digits
+        print('%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest))	# just first three digits
         sys.exit(EXIT_SUCCESS)
 
     if args.j:
@@ -92,7 +92,7 @@ try:
                         monitor.parse_entry(line)
                     except:
                         if __debug__:
-                            print 'Invalid journal entry "%s"' % repr(line)
+                            print('Invalid journal entry "%s"' % repr(line))
         except Exception as e:
             sys.stderr.write("Can't read Journal file: %s\n" % unicode(e).encode('ascii', 'replace'))
             sys.exit(EXIT_SYS_ERR)
@@ -159,9 +159,9 @@ try:
         stats.export_status(data, args.t)
 
     if data['commander'].get('docked'):
-        print '%s,%s' % (data.get('lastSystem', {}).get('name', 'Unknown'), data.get('lastStarport', {}).get('name', 'Unknown'))
+        print('%s,%s' % (data.get('lastSystem', {}).get('name', 'Unknown'), data.get('lastStarport', {}).get('name', 'Unknown')))
     else:
-        print data.get('lastSystem', {}).get('name', 'Unknown')
+        print(data.get('lastSystem', {}).get('name', 'Unknown'))
 
     if (args.m or args.o or args.s or args.n or args.j):
         if not data['commander'].get('docked'):

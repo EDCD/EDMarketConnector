@@ -58,7 +58,7 @@ def addcommodities(data):
             for key in sorted(commodities):
                 writer.writerow(commodities[key])
 
-        print 'Added %d new commodities' % (len(commodities) - size_pre)
+        print('Added %d new commodities' % (len(commodities) - size_pre))
 
 # keep a summary of modules found
 def addmodules(data):
@@ -83,7 +83,7 @@ def addmodules(data):
         try:
             new = outfitting.lookup(module, companion.ship_map, True)
         except:
-            print '%d, %s:' % (module['id'], module['name'])
+            print('%d, %s:' % (module['id'], module['name']))
             print_exc(0)
             new = None
         if new:
@@ -110,7 +110,7 @@ def addmodules(data):
             for key in sorted(modules):
                 writer.writerow(modules[key])
 
-        print 'Added %d new modules' % (len(modules) - size_pre)
+        print('Added %d new modules' % (len(modules) - size_pre))
 
 # keep a summary of ships found
 def addships(data):
@@ -158,33 +158,33 @@ def addships(data):
             for key in sorted(ships):
                 writer.writerow(ships[key])
 
-        print 'Added %d new ships' % (len(ships) - size_pre)
+        print('Added %d new ships' % (len(ships) - size_pre))
 
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
-        print 'Usage: collate.py [dump.json]'
+        print('Usage: collate.py [dump.json]')
     else:
         # read from dumped json file(s)
         session = companion.Session()
         for f in sys.argv[1:]:
             with open(f) as h:
-                print f
+                print(f)
                 data = json.load(h)
                 if not data['commander'].get('docked'):
-                    print 'Not docked!'
+                    print('Not docked!')
                 elif not data.get('lastStarport'):
-                    print 'No starport!'
+                    print('No starport!')
                 else:
                     if data['lastStarport'].get('commodities'):
                         addcommodities(data)
                     else:
-                        print 'No market'
+                        print('No market')
                     if data['lastStarport'].get('modules'):
                         addmodules(data)
                     else:
-                        print 'No outfitting'
+                        print('No outfitting')
                     if data['lastStarport'].get('ships'):
                         addships(data)
                     else:
-                        print 'No shipyard'
+                        print('No shipyard')
