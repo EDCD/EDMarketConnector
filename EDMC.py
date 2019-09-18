@@ -78,7 +78,7 @@ try:
     if args.j:
         # Import and collate from JSON dump
         data = json.load(open(args.j))
-        config.set('querytime', getmtime(args.j))
+        config.set('querytime', int(getmtime(args.j)))
     else:
         # Get state from latest Journal file
         try:
