@@ -112,7 +112,7 @@ try:
                         break
                 else:
                     raise companion.CredentialsError()
-            companion.session.login(cmdr, monitor.is_beta)
+            companion.session.login(cmdrs[idx], monitor.is_beta)
         else:
             cmdrs = config.get('cmdrs') or []
             if monitor.cmdr not in cmdrs:
