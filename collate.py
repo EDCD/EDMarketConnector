@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Script for collating lists of seen commodities, modules and ships from dumps of the Companion API output
 #
