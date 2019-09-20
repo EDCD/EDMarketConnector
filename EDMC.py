@@ -147,7 +147,7 @@ try:
 
     # stuff we can do when not docked
     if args.d:
-        with open(args.d, 'wt') as h:
+        with open(args.d, 'wb') as h:
             h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
     if args.a:
         loadout.export(data, args.a)

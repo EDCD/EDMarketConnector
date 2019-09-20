@@ -19,6 +19,6 @@ def export(data, filename):
 
     h = open(filename, 'wt')
     h.write(header)
-    for (name,fdevid) in [(ship_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in (data['lastStarport']['ships'].get('shipyard_list') or {}).values() + data['lastStarport']['ships'].get('unavailable_list')]:
+    for (name,fdevid) in [(ship_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list')]:
         h.write('%s,%s,%s,%s\n' % (rowheader, name, fdevid, data['timestamp']))
     h.close()

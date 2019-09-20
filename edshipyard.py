@@ -117,7 +117,7 @@ def export(data, filename=None):
 
     # Construct description
     ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-    string = '[%s]\n' % (data['ship'].get('shipName') and ', '.join([ship, data['ship']['shipName'].encode('utf-8')]) or ship)
+    string = '[%s]\n' % (data['ship'].get('shipName') and ', '.join([ship, data['ship']['shipName']]) or ship)
     for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
