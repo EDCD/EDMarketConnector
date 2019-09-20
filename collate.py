@@ -104,7 +104,7 @@ def addmodules(data):
                 os.unlink(outfile+'.bak')
             os.rename(outfile, outfile+'.bak')
 
-        with open(outfile, 'wb') as csvfile:
+        with open(outfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
             writer.writeheader()
             for key in sorted(modules):
