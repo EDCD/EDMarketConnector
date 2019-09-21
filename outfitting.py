@@ -366,8 +366,8 @@ def lookup(module, ship_map, entitled=False):
         new['class'] = '1'
         new['rating'] = 'I'
 
-    # Skip uninteresting stuff - no longer present in ED 3.1 cAPI data
-    elif name[0] in ['bobble', 'decal', 'nameplate', 'paintjob', 'enginecustomisation', 'weaponcustomisation'] or name[1].startswith('shipkit') :
+    # Skip uninteresting stuff - some no longer present in ED 3.1 cAPI data
+    elif name[0] in ['bobble', 'decal', 'nameplate', 'paintjob', 'enginecustomisation', 'voicepack', 'weaponcustomisation'] or name[1].startswith('shipkit') :
         return None
 
     # Shouldn't be listing player-specific paid stuff or broker/powerplay-specific modules in outfitting, other than Horizons
