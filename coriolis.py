@@ -8,6 +8,8 @@ import base64
 from collections import OrderedDict
 import cPickle
 import json
+import subprocess
+import sys
 from traceback import print_exc
 
 from config import config
@@ -22,6 +24,8 @@ if __name__ == "__main__":
         assert name not in modules, name
         modules[name] = attributes
 
+    # Regenerate coriolis-data distribution
+    subprocess.check_call(['npm', 'install'], cwd='coriolis-data', stdout=sys.stdout, stderr=sys.stderr)
 
     data = json.load(open('coriolis-data/dist/index.json'))
 
@@ -81,8 +85,6 @@ if __name__ == "__main__":
     add(modules, 'int_stellarbodydiscoveryscanner_advanced',     { 'mass': 2 })
 
     # Missing
-    add(modules, 'hpt_mining_subsurfdispmisle_fixed_small',      { 'mass': 2 })
-    add(modules, 'hpt_mining_subsurfdispmisle_fixed_medium',     { 'mass': 4 })
     add(modules, 'hpt_multicannon_fixed_small_advanced',         { 'mass': 2 })
     add(modules, 'hpt_multicannon_fixed_medium_advanced',        { 'mass': 4 })
 
