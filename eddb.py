@@ -1,19 +1,34 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # build databases from files systems.csv and stations.json from http://eddb.io/api
 #
 
-import cPickle
+import argparse
+import pickle
 import csv
 import json
 import requests
 
-def download(filename):
-    r = requests.get('https://eddb.io/archive/v6/' + filename, stream=True)
-    print '\n%s\t%dK' % (filename, len(r.content) / 1024)
-    return r
+def load_file(filename):
+    if filename == 'systems.csv' and args.systems_file:
+        print('load_file: systems.csv from local file')
+        return open(args.systems_file, newline='')
+    elif filename == 'stations.json' and args.stations_file:
+        print('load_file: stations.json from local file')
+        stations = []
+        with open(args.stations_file) as jsonl_file:
+            for l in jsonl_file:
+                stations.append(json.loads(l))
+        return stations
+    else:
+        raise AssertionError('load_file called with unsupported filename')
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Utilises eddb.io data files to produce... FIXME')
+    parser.add_argument('-S', '--systems-file', help="Specify a local file copy of eddb.io's systems.csv")
+    parser.add_argument('-s', '--stations-file', help="Specify a local file copy of eddb.io's stations.json")
+    args = parser.parse_args()
 
     # Ellipsoid that encompasses most of the systems in the bubble (but not outliers like Sothis)
     RX = RZ = 260
@@ -39,35 +54,44 @@ if __name__ == "__main__":
     def around_outlier(cx, cy, cz, x, y, z):
         return ((x - ox) * (x - ox) + (y - oy) * (y - oy) + (z - oz) * (z - oz)) <= RO2
 
+    # Load all EDDB-known systems into a dictionary
     systems = { int(s['id']) : {
-        'name'         : s['name'].decode('utf-8'),
+        'name'         : s['name'],
         'x'            : float(s['x']),
         'y'            : float(s['y']),
         'z'            : float(s['z']),
         'is_populated' : int(s['is_populated']),
-    } for s in csv.DictReader(download('systems.csv').iter_lines()) }
-    #} for s in csv.DictReader(open('systems.csv')) }
-    print '%d\tsystems' % len(systems)
+    } for s in csv.DictReader(load_file('systems.csv')) }
+    print('%d\tsystems' % len(systems))
 
+    # Build another dict containing all systems considered to be in the
+    # main populated bubble (see constants above and inbubble() for
+    # the criteria).
     # (system_id, is_populated) by system_name (ignoring duplicate names)
     system_ids = {
         str(s['name']) : (k, s['is_populated'])
         for k,s in systems.items() if inbubble(s['x'], s['y'], s['z'])
     }
-    print '%d\tsystems in bubble' % len(system_ids)
+    print('%d\tsystems in bubble' % len(system_ids))
 
+    # Build another dict for systems considered to be around Colonia
     extra_ids = {
         str(s['name']) : (k, s['is_populated'])
         for k,s in systems.items() if around_jaques(s['x'], s['y'], s['z'])
     }
     system_ids.update(extra_ids)
-    print '%d\tsystems in Colonia' % len(extra_ids)
+    print('%d\tsystems in Colonia' % len(extra_ids))
 
+    # Build another dict for systems that are marked as populated, but
+    # didn't make it into the bubble list.
     cut = {
         k : s for k, s in systems.items()
         if s['is_populated'] and s['name'] not in system_ids
     }
-    print '%d\toutlying populated systems:' % len(cut)
+    print('%d\toutlying populated systems:' % len(cut))
+
+    # Build another dict with all the systems, populated or not, around any
+    # of the outliers.
     extra_ids = {}
     for k1,o in sorted(cut.items()):
         ox, oy, oz = o['x'], o['y'], o['z']
@@ -75,18 +99,19 @@ if __name__ == "__main__":
             str(s['name']) : (k, s['is_populated'])
             for k,s in systems.items() if around_outlier(ox, oy, oz, s['x'], s['y'], s['z'])
         }
-        print '%-30s%7d %11.5f %11.5f %11.5f %4d' % (o['name'], k1, ox, oy, oz, len(extra))
+        print('%-30s%7d %11.5f %11.5f %11.5f %4d' % (o['name'], k1, ox, oy, oz, len(extra)))
         extra_ids.update(extra)
-    print '\n%d\tsystems around outliers' % len(extra_ids)
+    print('\n%d\tsystems around outliers' % len(extra_ids))
     system_ids.update(extra_ids)
 
+    # Re-build 'cut' dict to hold duplicate (name) systems
     cut = {
         k : s
         for k,s in systems.items() if s['name'] in system_ids and system_ids[s['name']][0] != k
     }
-    print '\n%d duplicate systems' % len(cut)
+    print('\n%d duplicate systems' % len(cut))
     for k,s in sorted(cut.items()):
-        print '%-20s%8d %8d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']][0], k, s['x'], s['y'], s['z'])
+        print('%-20s%8d %8d %11.5f %11.5f %11.5f' % (s['name'], system_ids[s['name']][0], k, s['x'], s['y'], s['z']))
 
     # Hack - ensure duplicate system names are pointing at the more interesting system
     system_ids['Amo'] = (866, True)
@@ -101,16 +126,16 @@ if __name__ == "__main__":
     system_ids['i Velorum'] = (3387990, False)
 
     with open('systems.p',  'wb') as h:
-        cPickle.dump(system_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
-    print '\n%d saved systems' % len(system_ids)
+        pickle.dump(system_ids, h, protocol = pickle.HIGHEST_PROTOCOL)
+    print('\n%d saved systems' % len(system_ids))
 
     # station_id by (system_id, station_name)
-    stations = json.loads(download('stations.json').content)	# let json do the utf-8 decode
+    stations = load_file('stations.json')
     station_ids = {
-        (x['system_id'], x['name'].encode('utf-8')) : x['id']	# Pilgrim's Ruin in HR 3005 id 70972 has U+2019 quote
+        (x['system_id'], x['name']) : x['id']	# Pilgrim's Ruin in HR 3005 id 70972 has U+2019 quote
         for x in stations if x['max_landing_pad_size']
     }
 
     with open('stations.p', 'wb') as h:
-        cPickle.dump(station_ids, h, protocol = cPickle.HIGHEST_PROTOCOL)
-    print '\n%d saved stations' % len(station_ids)
+        pickle.dump(station_ids, h, protocol = pickle.HIGHEST_PROTOCOL)
+    print('\n%d saved stations' % len(station_ids))
