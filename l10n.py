@@ -223,7 +223,7 @@ class Locale:
     def preferredLanguages(self):
 
         if platform=='darwin':
-            return NSLocale.preferredLanguages() or None
+            return NSLocale.preferredLanguages()
 
         elif platform=='win32':
 
@@ -243,11 +243,11 @@ class Locale:
                 buf = ctypes.create_unicode_buffer(size.value)
                 if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
                     return wszarray_to_list(buf)
-            return None
+            return []
 
         else:	# POSIX
             lang = locale.getlocale()[0]
-            return lang and [lang.replace('_','-')]
+            return lang and [lang.replace('_','-')] or []
 
 # singletons
 Locale = Locale()
