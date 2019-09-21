@@ -28,6 +28,7 @@ weapon_map = {
     'causticmissile'                 : 'Enzyme Missile Rack',
     'drunkmissilerack'               : 'Pack-Hound Missile Rack',
     'dumbfiremissilerack'            : 'Missile Rack',
+    ('dumbfiremissilerack', 'advanced') : 'Advanced Missile Rack',
     ('dumbfiremissilerack', 'lasso') : 'Rocket Propelled FSD Disruptor',
     'flakmortar'                     : 'Remote Release Flak Launcher',
     'flechettelauncher'              : 'Remote Release Flechette Launcher',
