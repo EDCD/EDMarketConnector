@@ -25,7 +25,7 @@ if __name__ == "__main__":
         modules[name] = attributes
 
     # Regenerate coriolis-data distribution
-    subprocess.check_call(['npm', 'install'], cwd='coriolis-data', stdout=sys.stdout, stderr=sys.stderr)
+    subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
 
     data = json.load(open('coriolis-data/dist/index.json'))
 
