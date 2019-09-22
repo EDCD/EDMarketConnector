@@ -153,31 +153,26 @@ class _Theme:
                 'activeforeground'   : 'grey4',
                 'disabledforeground' : '#%02x%02x%02x' % (r/384, g/384, b/384),
                 'highlight'          : config.get('dark_highlight'),
-                'font'               : 'TkDefaultFont',
-            }
-            # Overrides
-            if theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000:
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
-                self.current['font'] = tkFont.Font(family='Euro Caps', size=9, weight=tkFont.NORMAL)
-
+                'font'               : (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
+                                        tkFont.Font(family='Euro Caps', size=10, weight=tkFont.NORMAL) or
+                                        'TkDefaultFont'),
+            }
         else:
-            # System colors
+            # (Mostly) system colors
+            style = ttk.Style()
             self.current = {
-                'background'         : style.lookup('TLabel', 'background'),
+                'background'         : (platform == 'darwin' and 'systemMovableModalBackground' or
+                                        style.lookup('TLabel', 'background')),
                 'foreground'         : style.lookup('TLabel', 'foreground'),
-                'activebackground'   : style.lookup('TLabel', 'background', ['active']),
-                'activeforeground'   : style.lookup('TLabel', 'foreground', ['active']),
+                'activebackground'   : (platform == 'win32' and 'SystemHighlight' or
+                                        style.lookup('TLabel', 'background', ['active'])),
+                'activeforeground'   : (platform == 'win32' and 'SystemHighlightText' or
+                                        style.lookup('TLabel', 'foreground', ['active'])),
                 'disabledforeground' : style.lookup('TLabel', 'foreground', ['disabled']),
                 'highlight'          : 'blue',
                 'font'               : 'TkDefaultFont',
             }
-            # Overrides
-            if platform == 'darwin':
-                self.current['background'] = 'systemMovableModalBackground'
-            elif platform == 'win32':
-                # Menu colors
-                self.current['activebackground'] = 'SystemHighlight'
-                self.current['activeforeground'] = 'SystemHighlightText'
 
 
     # Apply configured theme
