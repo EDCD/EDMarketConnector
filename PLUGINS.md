@@ -93,15 +93,39 @@ You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format numb
 this = sys.modules[__name__]	# For holding module globals
 
 def plugin_app(parent):
-   """
-   Create a pair of TK widgets for the EDMC main window
-   """
-   label = tk.Label(parent, text="Status:")
-   this.status = tk.Label(parent, anchor=tk.W, text="")
-   return (label, this.status)
+    """
+    Create a pair of TK widgets for the EDMC main window
+    """
+    label = tk.Label(parent, text="Status:")    # By default widgets inherit the current theme's colors
+    this.status = tk.Label(parent, text="", foreground="yellow")    # Override theme's foreground color
+    return (label, this.status)
    
-# later on your event functions can directly update this.status["text"]
-this.status["text"] = "Happy!"
+# later on your event functions can update the contents of these widgets
+    this.status["text"] = "Happy!"
+    this.status["foreground"] = "green"
+```
+
+You can dynamically add and remove widgets on the main window by returning a tk.Frame from `plugin_app()` and later creating and destroying child widgets of that frame.
+
+```python
+from theme import theme
+
+this = sys.modules[__name__]	# For holding module globals
+
+def plugin_app(parent):
+    """
+    Create a frame for the EDMC main window
+    """
+    this.frame = tk.Frame(parent)
+    return this.frame
+
+# later on your event functions can add or remove widgets
+    row = this.frame.grid_size()[1]
+    new_widget_1 = tk.Label(this.frame, text="Status:")
+    new_widget_1.grid(row=row, column=0, sticky=tk.W)
+    new_widget_2 = tk.Label(this.frame, text="Unhappy!", foreground="red")    # Override theme's foreground color
+    new_widget_2.grid(row=row, column=1, sticky=tk.W)
+    theme.update(this.frame)	# Apply theme colours to the frame and its children, including the new widgets
 ```
 
 ## Events

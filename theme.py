@@ -11,6 +11,7 @@ from os.path import join
 import Tkinter as tk
 import ttk
 import tkFont
+from ttkHyperlinkLabel import HyperlinkLabel
 
 from config import appname, applongname, config
 
@@ -99,15 +100,70 @@ class _Theme:
     def __init__(self):
         self.active = None	# Starts out with no theme
         self.minwidth = None
-        self.widgets = set()
+        self.widgets = {}
         self.widgets_pair = []
+        self.defaults = {}
+        self.current = {}
 
     def register(self, widget):
+        # Note widget and children for later application of a theme. Note if the widget has explicit fg or bg attributes.
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        if not self.defaults:
+            # Can't initialise this til window is created       # Windows, MacOS
+            self.defaults = {
+                'fg'        : tk.Label()['foreground'],         # SystemButtonText, systemButtonText
+                'bg'        : tk.Label()['background'],         # SystemButtonFace, White
+                'font'      : tk.Label()['font'],               # TkDefaultFont
+                'bitmapfg'  : tk.BitmapImage()['foreground'],   # '-foreground {} {} #000000 #000000'
+                'bitmapbg'  : tk.BitmapImage()['background'],   # '-background {} {} {} {}'
+                'entryfg'   : tk.Entry()['foreground'],         # SystemWindowText, Black
+                'entrybg'   : tk.Entry()['background'],         # SystemWindow, systemWindowBody
+                'entryfont' : tk.Entry()['font'],               # TkTextFont
+                'frame'     : tk.Frame()['background'],         # SystemButtonFace, systemWindowBody
+                'menufg'    : tk.Menu()['foreground'],          # SystemMenuText,
+                'menubg'    : tk.Menu()['background'],          # SystemMenu,
+                'menufont'  : tk.Menu()['font'],                # TkTextFont
+            }
+
+        if widget not in self.widgets:
+            # No general way to tell whether the user has overridden, so compare against widget-type specific defaults
+            attribs = set()
+            if isinstance(widget, tk.BitmapImage):
+                if widget['foreground'] not in ['', self.defaults['bitmapfg']]:
+                    attribs.add('fg')
+                if widget['background'] not in ['', self.defaults['bitmapbg']]:
+                    attribs.add('bg')
+            elif isinstance(widget, tk.Entry) or isinstance(widget, ttk.Entry):
+                if widget['foreground'] not in ['', self.defaults['entryfg']]:
+                    attribs.add('fg')
+                if widget['background'] not in ['', self.defaults['entrybg']]:
+                    attribs.add('bg')
+                if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
+                    attribs.add('font')
+            elif isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame) or isinstance(widget, tk.Canvas):
+                if ('background' in widget.keys() or isinstance(widget, tk.Canvas)) and widget['background'] not in ['', self.defaults['frame']]:
+                    attribs.add('bg')
+            elif isinstance(widget, HyperlinkLabel):
+                pass    # Hack - HyperlinkLabel changes based on state, so skip
+            elif isinstance(widget, tk.Menu):
+                if widget['foreground'] not in ['', self.defaults['menufg']]:
+                    attribs.add('fg')
+                if widget['background'] not in ['', self.defaults['menubg']]:
+                    attribs.add('bg')
+                if widget['font'] not in ['', self.defaults['menufont']]:
+                    attribs.add('font')
+            else:      # tk.Button, tk.Label
+                if 'foreground' in widget.keys() and widget['foreground'] not in ['', self.defaults['fg']]:
+                    attribs.add('fg')
+                if 'background' in widget.keys() and widget['background'] not in ['', self.defaults['bg']]:
+                    attribs.add('bg')
+                if 'font' in widget.keys() and widget['font'] not in ['', self.defaults['font']]:
+                    attribs.add('font')
+            self.widgets[widget] = attribs
+
         if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
             for child in widget.winfo_children():
                 self.register(child)
-        self.widgets.add(widget)
 
     def register_alternate(self, pair, gridopts):
         self.widgets_pair.append((pair, gridopts))
@@ -175,6 +231,68 @@ class _Theme:
             }
 
 
+    # Apply current theme to a widget and its children, and register it for future updates
+    def update(self, widget):
+        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        if not self.current:
+            return	# No need to call this for widgets created in plugin_app()
+        self.register(widget)
+        self._update_widget(widget)
+        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
+            for child in widget.winfo_children():
+                self._update_widget(child)
+
+    # Apply current theme to a single widget
+    def _update_widget(self, widget):
+        assert widget in self.widgets, '%s %s "%s"' %(widget.winfo_class(), widget, 'text' in widget.keys() and widget['text'])
+        attribs = self.widgets.get(widget, [])
+
+        if isinstance(widget, tk.BitmapImage):
+            # not a widget
+            if 'fg' not in attribs:
+                widget.configure(foreground = self.current['foreground']),
+            if 'bg' not in attribs:
+                widget.configure(background = self.current['background'])
+        elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
+            # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
+            if 'fg' not in attribs:
+                widget.configure(foreground = self.current['highlight']),
+                if 'insertbackground' in widget.keys():	# tk.Entry
+                    widget.configure(insertbackground = self.current['foreground']),
+            if 'bg' not in attribs:
+                widget.configure(background = self.current['background'])
+                if 'highlightbackground' in widget.keys():	# tk.Entry
+                    widget.configure(highlightbackground = self.current['background'])
+            if 'font' not in attribs:
+                widget.configure(font = self.current['font'])
+        elif 'activeforeground' in widget.keys():
+            # e.g. tk.Button, tk.Label, tk.Menu
+            if 'fg' not in attribs:
+                widget.configure(foreground = self.current['foreground'],
+                                 activeforeground = self.current['activeforeground'],
+                                 disabledforeground = self.current['disabledforeground'])
+            if 'bg' not in attribs:
+                widget.configure(background = self.current['background'],
+                                 activebackground = self.current['activebackground'])
+                if platform == 'darwin' and isinstance(widget, tk.Button):
+                    widget.configure(highlightbackground = self.current['background'])
+            if 'font' not in attribs:
+                widget.configure(font = self.current['font'])
+        elif 'foreground' in widget.keys():
+            # e.g. ttk.Label
+            if 'fg' not in attribs:
+                widget.configure(foreground = self.current['foreground']),
+            if 'bg' not in attribs:
+                widget.configure(background = self.current['background'])
+            if 'font' not in attribs:
+                widget.configure(font = self.current['font'])
+        elif 'background' in widget.keys() or isinstance(widget, tk.Canvas):
+            # e.g. Frame, Canvas
+            if 'bg' not in attribs:
+                widget.configure(background = self.current['background'],
+                                 highlightbackground = self.current['disabledforeground'])
+
+
     # Apply configured theme
     def apply(self, root):
 
@@ -182,35 +300,13 @@ class _Theme:
         self._colors(root, theme)
 
         # Apply colors
-        for widget in self.widgets:
-            if isinstance(widget, tk.BitmapImage):
-                # not a widget
-                widget.configure(foreground = self.current['foreground'],
-                                 background = self.current['background'])
-            elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
-                # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
-                widget.configure(foreground = self.current['highlight'],
-                                 background = self.current['background'],
-                                 font = self.current['font'])
-            elif 'activeforeground' in widget.keys():
-                # e.g. tk.Button, tk.Label, tk.Menu
-                widget.configure(foreground = self.current['foreground'],
-                                 background = self.current['background'],
-                                 activeforeground = self.current['activeforeground'],
-                                 activebackground = self.current['activebackground'],
-                                 disabledforeground = self.current['disabledforeground'],
-                                 font = self.current['font']
-                )
-            elif 'foreground' in widget.keys():
-                # e.g. ttk.Label
-                widget.configure(foreground = self.current['foreground'],
-                                 background = self.current['background'],
-                                 font = self.current['font'])
-            elif 'background' in widget.keys():
-                # e.g. Frame
-                widget.configure(background = self.current['background'])
-                widget.configure(highlightbackground = self.current['disabledforeground'])
+        for widget in set(self.widgets):
+            if isinstance(widget, tk.Widget) and not widget.winfo_exists():
+                self.widgets.pop(widget)	# has been destroyed
+            else:
+                self._update_widget(widget)
 
+        # Switch menus
         for pair, gridopts in self.widgets_pair:
             for widget in pair:
                 widget.grid_remove()
