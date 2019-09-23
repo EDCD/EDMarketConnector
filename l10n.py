@@ -150,9 +150,9 @@ class Translations(object):
     def respath(self):
         if getattr(sys, 'frozen', False):
             if platform=='darwin':
-                return normpath(join(dirname(sys.executable.decode(sys.getfilesystemencoding())), os.pardir, 'Resources'))
+                return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
             else:
-                return join(dirname(sys.executable.decode(sys.getfilesystemencoding())), LOCALISATION_DIR)
+                return join(dirname(sys.executable), LOCALISATION_DIR)
         elif __file__:
             return join(dirname(__file__), LOCALISATION_DIR)
         else:
