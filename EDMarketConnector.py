@@ -24,10 +24,6 @@ if getattr(sys, 'frozen', False):
     if platform == 'win32':
         chdir(dirname(sys.path[0]))
 
-    # Workaround for CSR's BlueSuite: http://sw.rucsok.hu/tkinter/tclenvar.html
-    if 'TCL_LIBRARY' in environ:
-        environ.pop('TCL_LIBRARY')
-
 import tkinter as tk
 import tkinter.ttk
 import tkinter.filedialog
