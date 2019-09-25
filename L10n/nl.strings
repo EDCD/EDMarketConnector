@@ -142,6 +142,9 @@
 /* [edsm.py] */
 "Error: Can't connect to EDSM" = "Fout: Kan geen verbinding maken met EDSM";
 
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Fout: Kan geen verbinding maken met Inara";
+
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Fout: EDSM {MSG}";
 
@@ -154,11 +157,14 @@
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Fout: Frontier server SKU probleem";
 
+/* [inara.py] */
+"Error: Inara {MSG}" = "Fout: Inara {MSG}";
+
 /* [companion.py] */
 "Error: Invalid Credentials" = "Fout: Ongeldige inlog gegevens";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Fout: Verkeerde CMDR";
+"Error: Wrong Cmdr" = "Fout: Verkeerde Cmdr";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
 "Exit" = "Afsluiten";
@@ -210,6 +216,9 @@
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
+
+/* Section heading in settings. [inara.py] */
+"Inara credentials" = "Inara inlog gegevens";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Toetscombinaties";
@@ -390,6 +399,12 @@
 
 /* CQC rank. [stats.py] */
 "Semi Professional" = "Semi Professional";
+
+/* [edsm.py] */
+"Send flight log and Cmdr status to EDSM" = "Stuur vlucht logboek en Cmdr status naar EDSM";
+
+/* [inara.py] */
+"Send flight log and Cmdr status to Inara" = "Stuur vlucht logboek en Cmdr status naar Inara";
 
 /* Output setting. [eddn.py] */
 "Send station data to the Elite Dangerous Data Network" = "Stuur station gegevens naar het Elite Dangerous Data Network";
