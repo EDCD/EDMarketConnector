@@ -65,12 +65,14 @@
 		</InstallExecuteSequence>
 
 		<!-- Merge in C runtime -->
+		<!--
 		<DirectoryRef Id="TARGETDIR">
 			<Merge Id="VCRedist90" SourceFile="C:\Program Files (x86)\Common Files\Merge Modules\Microsoft_VC90_CRT_x86.msm" DiskId="1" Language="0"/>
 		</DirectoryRef>
 		<Feature Id="VCRedist90" Title="Visual C++ 9.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
 			<MergeRef Id="VCRedist90"/>
 		</Feature>
+		-->
 
 		<!-- Launch app after upgrade -->
 		<Property Id="LAUNCH" Value="yes" />
