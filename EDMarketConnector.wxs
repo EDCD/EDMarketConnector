@@ -140,6 +140,9 @@
 					<Component Id="EUROCAPS.TTF" Guid="*">
 			                    <File Id="EUROCAPS.TTF" KeyPath="yes" Source="SourceDir\EUROCAPS.TTF" />
 			                </Component>
+					<Component Id="library.zip" Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
+					    <File Id="library.zip" KeyPath="yes" Source="SourceDir\library.zip" />
+					</Component>
 					<Component Id="libcrypto_1_1.dll" Guid="*">
 			                    <File Id="libcrypto_1_1.dll" KeyPath="yes" Source="SourceDir\libcrypto-1_1.dll" />
 			                </Component>
@@ -3379,6 +3382,7 @@
 			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="EUROCAPS.TTF" />
+			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="libcrypto_1_1.dll" />
 			<ComponentRef Id="libssl_1_1.dll" />
 			<ComponentRef Id="modules.p" />
