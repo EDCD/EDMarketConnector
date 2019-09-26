@@ -7,16 +7,16 @@ Usage:
     python setup.py py2app
 """
 
-from setuptools import setup
-import codecs
+from distutils.core import setup
+import py2exe
+
+import platform
+import sys
 import os
 from os.path import exists, isdir, join
-import platform
-import re
 import shutil
-import sys
+import re
 from tempfile import gettempdir
-import requests
 
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
 from config import update_feed, update_interval
@@ -77,7 +77,7 @@ if sys.platform=='darwin':
                   'excludes': [ 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': [ requests.certs.where(), 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
+                  'resources': [ 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
                   'semi_standalone': True,
                   'site_packages': False,
                   'plist': {
@@ -112,8 +112,13 @@ elif sys.platform=='win32':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [
-                      'requests', 'keyring.backends',
-                      'shutil', 'sqlite3', 'zipfile',	# Included for plugins
+                      'requests',
+                      'keyring.backends',
+                      'sqlite3',	# Included for plugins
+                  ],
+                  'includes': [
+                      'shutil',         # Included for plugins
+                      'zipfile',        # Included for plugins
                   ],
                   'excludes': [ 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
@@ -121,7 +126,6 @@ elif sys.platform=='win32':
 
     DATA_FILES = [
         ('', [
-            requests.certs.where(),
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
             'EUROCAPS.TTF',
@@ -143,28 +147,27 @@ elif sys.platform=='win32':
 
 setup(
     name = APPLONGNAME,
-    version = VERSION,
-    app = [APP],
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
-                 'name': APPNAME,		# WinSparkle
                  'company_name': 'EDCD',	# WinSparkle
+                 'product_name': APP,           # WinSparkle
+                 'version': VERSION,
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
-                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
-                 'name': APPNAME,
                  'company_name': 'EDCD',
+                 'product_name': APPNAME,
+                 'version': VERSION,
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,
-    setup_requires = [sys.platform=='darwin' and 'py2app' or 'py2exe'],
 )
 
-
+PKG = None
 if sys.platform == 'darwin':
     if isdir('%s/%s.app' % (dist_dir, APPLONGNAME)):	# from CFBundleName
         os.rename('%s/%s.app' % (dist_dir, APPLONGNAME), '%s/%s.app' % (dist_dir, APPNAME))
@@ -182,23 +185,32 @@ if sys.platform == 'darwin':
         # Make zip for distribution, preserving signature
         PKG = '%s_mac_%s.zip' % (APPNAME, SHORTVERSION)
         os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, APPNAME, PKG))
-else:
+elif sys.platform == 'win32':
     os.system(r'"%s\candle.exe" -out %s\ %s.wxs' % (WIXPATH, dist_dir, APPNAME))
-    if exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
-        PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)
-        os.system(r'"%s\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (WIXPATH, dist_dir, APPNAME, PKG))
+    if not exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
+        raise AssertionError('No %s/%s.wixobj: candle.exe failed?' % (dist_dir, APPNAME))
 
-        # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
-        # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
-        lcids = [int(x) for x in re.search(r'Languages\s*=\s*"(.+?)"', open('%s.wxs' % APPNAME).read()).group(1).split(',')]
-        assert lcids[0]==1033, 'Default language is %d, should be 1033 (en_US)' % lcids[0]
-        shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
-        for lcid in lcids[1:]:
-            shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
-            os.system(r'cscript /nologo "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
-            os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
-            os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+    PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)
+    import subprocess
+    os.system(r'"%s\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (WIXPATH, dist_dir, APPNAME, PKG))
+    if not exists(PKG):
+        raise AssertionError('light.exe failed, no %s' % (PKG))
 
+    # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
+    # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
+    lcids = [int(x) for x in re.search(r'Languages\s*=\s*"(.+?)"', open('%s.wxs' % APPNAME).read()).group(1).split(',')]
+    assert lcids[0]==1033, 'Default language is %d, should be 1033 (en_US)' % lcids[0]
+    shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % APPNAME))
+    for lcid in lcids[1:]:
+        shutil.copyfile(join(gettempdir(), '%s_1033.msi' % APPNAME), join(gettempdir(), '%s_%d.msi' % (APPNAME, lcid)))
+        os.system(r'cscript /nologo "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), APPNAME, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
+        os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), APPNAME, gettempdir(), APPNAME, lcid, gettempdir(), lcid))
+        os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+else:
+    raise AssertionError('Unsupported platform')
+
+if not exists(PKG):
+    raise AssertionError('No %s found prior to appcast' % (PKG))
 # Make appcast entry
 appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
 appcast.write('''
