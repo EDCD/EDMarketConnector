@@ -134,7 +134,8 @@ elif sys.platform=='win32':
             'stations.p',
             'systems.p',
             '%s.VisualElementsManifest.xml' % APPNAME,
-            '%s.ico' % APPNAME
+            '%s.ico' % APPNAME,
+            '%s/DLLs/sqlite3.dll' % (sys.base_prefix),
         ]),
         ('L10n', [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')]),
         ('plugins', PLUGINS),
