@@ -3363,20 +3363,20 @@
 
 		<Feature Id='Complete' Level='1'>
 			<ComponentRef Id="RegistryEntries" />
-			<ComponentRef Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
-			<ComponentRef Id="cacert.pem" Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
+			<ComponentRef Id="MainExecutable" />
+			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="commodity.csv" />
-			<ComponentRef Id="EDMarketConnector.ico" Guid="{6762E871-5FA1-4C2F-A3C9-6A9954CC018C}">
-			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" Guid="{9A0CB8A2-7167-492F-A185-0BDF7E9F5C01}">
+			<ComponentRef Id="EDMarketConnector.ico" />
+			<ComponentRef Id="EDMarketConnector.VisualElementsManifest.xml" />
 			<ComponentRef Id="EDMC.exe" />
 			<ComponentRef Id="EUROCAPS.TTF" />
 			<ComponentRef Id="libcrypto_1_1.dll" />
 			<ComponentRef Id="libssl_1_1.dll" />
 			<ComponentRef Id="modules.p" />
-			<ComponentRef Id="pyexpat.pyd" Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
+			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python37.dll" />
 			<ComponentRef Id="rare_commodity.csv" />
-			<ComponentRef Id="select.pyd" Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
+			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="ships.p" />
 			<ComponentRef Id="snd_bad.wav" />
 			<ComponentRef Id="snd_good.wav" />
@@ -3384,22 +3384,22 @@
 			<ComponentRef Id="systems.p" />
 			<ComponentRef Id="tcl86t.dll" />
 			<ComponentRef Id="tk86t.dll" />
-			<ComponentRef Id="unicodedata.pyd" Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
+			<ComponentRef Id="unicodedata.pyd" />
 			<ComponentRef Id="winsound.pyd" />
-			<ComponentRef Id="WinSparkle.dll" Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
+			<ComponentRef Id="WinSparkle.dll" />
 			<ComponentRef Id="_bz2.pyd" />
-			<ComponentRef Id="_ctypes.pyd" Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
+			<ComponentRef Id="_ctypes.pyd" />
 			<ComponentRef Id="_decimal.pyd" />
 			<ComponentRef Id="_elementtree.pyd" />
-			<ComponentRef Id="_hashlib.pyd" Guid="{45803711-A2A6-4DA8-8219-F625DE6DB33E}">
+			<ComponentRef Id="_hashlib.pyd" />
 			<ComponentRef Id="_lzma.pyd" />
 			<ComponentRef Id="_multiprocessing.pyd" />
 			<ComponentRef Id="_queue.pyd" />
 			<ComponentRef Id="_socket.pyd" />
 			<ComponentRef Id="_sqlite3.pyd" />
-			<ComponentRef Id="_ssl.pyd" Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
+			<ComponentRef Id="_ssl.pyd" />
 			<ComponentRef Id="_testcapi.pyd" />
-			<ComponentRef Id="_tkinter.pyd" Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
+			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="cs.strings" />
 			<ComponentRef Id="de.strings" />
 			<ComponentRef Id="es.strings" />
