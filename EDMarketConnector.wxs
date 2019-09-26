@@ -221,6 +221,9 @@
 					<Component Id="_socket.pyd" Guid="*">
 			                    <File Id="_socket.pyd" KeyPath="yes" Source="SourceDir\_socket.pyd" />
 			                </Component>
+					<Component Id="sqlite3.dll" Guid="*">
+						<File Id="sqlite3.dll" KeyPath="yes" Source="SourceDir\sqlite3.dll" />
+					</Component>
 					<Component Id="_sqlite3.pyd" Guid="*">
 			                    <File Id="_sqlite3.pyd" KeyPath="yes" Source="SourceDir\_sqlite3.pyd" />
 			                </Component>
@@ -3409,6 +3412,7 @@
 			<ComponentRef Id="_multiprocessing.pyd" />
 			<ComponentRef Id="_queue.pyd" />
 			<ComponentRef Id="_socket.pyd" />
+			<ComponentRef Id="sqlite3.dll" />
 			<ComponentRef Id="_sqlite3.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
 			<ComponentRef Id="_testcapi.pyd" />
