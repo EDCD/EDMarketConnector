@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Command-line interface. Requires prior setup through the GUI.
 #

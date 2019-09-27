@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # build databases from files systems.csv and stations.json from http://eddb.io/api
 #
