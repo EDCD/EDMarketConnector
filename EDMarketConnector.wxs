@@ -2294,56 +2294,6 @@
 			                        <Component Id="xmfbox.tcl" Guid="*">
 			                            <File Id="xmfbox.tcl" KeyPath="yes" Source="SourceDir\lib\tk\xmfbox.tcl" />
 			                        </Component>
-			                        <Directory Id="msgs_1" Name="msgs">
-			                            <Component Id="cs.msg_1" Guid="*">
-			                                <File Id="cs.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\cs.msg" />
-			                            </Component>
-			                            <Component Id="da.msg_1" Guid="*">
-			                                <File Id="da.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\da.msg" />
-			                            </Component>
-			                            <Component Id="de.msg_1" Guid="*">
-			                                <File Id="de.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\de.msg" />
-			                            </Component>
-			                            <Component Id="el.msg_1" Guid="*">
-			                                <File Id="el.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\el.msg" />
-			                            </Component>
-			                            <Component Id="en.msg_1" Guid="*">
-			                                <File Id="en.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\en.msg" />
-			                            </Component>
-			                            <Component Id="en_gb.msg_1" Guid="*">
-			                                <File Id="en_gb.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\en_gb.msg" />
-			                            </Component>
-			                            <Component Id="eo.msg_1" Guid="*">
-			                                <File Id="eo.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\eo.msg" />
-			                            </Component>
-			                            <Component Id="es.msg_1" Guid="*">
-			                                <File Id="es.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\es.msg" />
-			                            </Component>
-			                            <Component Id="fr.msg_1" Guid="*">
-			                                <File Id="fr.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\fr.msg" />
-			                            </Component>
-			                            <Component Id="hu.msg_1" Guid="*">
-			                                <File Id="hu.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\hu.msg" />
-			                            </Component>
-			                            <Component Id="it.msg_1" Guid="*">
-			                                <File Id="it.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\it.msg" />
-			                            </Component>
-			                            <Component Id="nl.msg_2" Guid="*">
-			                                <File Id="nl.msg_2" KeyPath="yes" Source="SourceDir\lib\tk\msgs\nl.msg" />
-			                            </Component>
-			                            <Component Id="pl.msg_1" Guid="*">
-			                                <File Id="pl.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\pl.msg" />
-			                            </Component>
-			                            <Component Id="pt.msg_1" Guid="*">
-			                                <File Id="pt.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\pt.msg" />
-			                            </Component>
-			                            <Component Id="ru.msg_1" Guid="*">
-			                                <File Id="ru.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\ru.msg" />
-			                            </Component>
-			                            <Component Id="sv.msg_1" Guid="*">
-			                                <File Id="sv.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\sv.msg" />
-			                            </Component>
-			                        </Directory>
 			                        <Directory Id="ttk" Name="ttk">
 			                            <Component Id="altTheme.tcl" Guid="*">
 			                                <File Id="altTheme.tcl" KeyPath="yes" Source="SourceDir\lib\tk\ttk\altTheme.tcl" />
@@ -3160,22 +3110,6 @@
 			<ComponentRef Id="tkfbox.tcl" />
 			<ComponentRef Id="unsupported.tcl" />
 			<ComponentRef Id="xmfbox.tcl" />
-			<ComponentRef Id="cs.msg_1" />
-			<ComponentRef Id="da.msg_1" />
-			<ComponentRef Id="de.msg_1" />
-			<ComponentRef Id="el.msg_1" />
-			<ComponentRef Id="en.msg_1" />
-			<ComponentRef Id="en_gb.msg_1" />
-			<ComponentRef Id="eo.msg_1" />
-			<ComponentRef Id="es.msg_1" />
-			<ComponentRef Id="fr.msg_1" />
-			<ComponentRef Id="hu.msg_1" />
-			<ComponentRef Id="it.msg_1" />
-			<ComponentRef Id="nl.msg_2" />
-			<ComponentRef Id="pl.msg_1" />
-			<ComponentRef Id="pt.msg_1" />
-			<ComponentRef Id="ru.msg_1" />
-			<ComponentRef Id="sv.msg_1" />
 			<ComponentRef Id="altTheme.tcl" />
 			<ComponentRef Id="aquaTheme.tcl" />
 			<ComponentRef Id="button.tcl_2" />
