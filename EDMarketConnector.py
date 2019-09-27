@@ -25,7 +25,7 @@ if getattr(sys, 'frozen', False):
         chdir(dirname(sys.path[0]))
 
 import tkinter as tk
-import tkinter.ttk
+from tkinter import ttk
 import tkinter.filedialog
 import tkinter.font
 import tkinter.messagebox
@@ -123,7 +123,7 @@ class AppWindow(object):
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
-        self.button = tkinter.ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
+        self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)	# Update button in main window
         self.theme_button = tk.Label(frame, width = platform == 'darwin' and 32 or 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
