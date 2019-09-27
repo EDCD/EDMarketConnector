@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
 from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath

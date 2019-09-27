@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead.
 #
