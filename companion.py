@@ -295,9 +295,6 @@ class Session(object):
             from requests.packages import urllib3
             urllib3.disable_warnings()
 
-        if getattr(sys, 'frozen', False):
-            os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
-
     def login(self, cmdr=None, is_beta=None):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
