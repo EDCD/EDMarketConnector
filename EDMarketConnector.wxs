@@ -2304,47 +2304,6 @@
 			                        <Component Id="xmfbox.tcl" Guid="*">
 			                            <File Id="xmfbox.tcl" KeyPath="yes" Source="SourceDir\lib\tk\xmfbox.tcl" />
 			                        </Component>
-			                        <Directory Id="images_1" Name="images">
-			                            <Component Id="logo.eps" Guid="*">
-			                                <File Id="logo.eps" KeyPath="yes" Source="SourceDir\lib\tk\images\logo.eps" />
-			                            </Component>
-			                            <Component Id="logo100.gif" Guid="*">
-			                                <File Id="logo100.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\logo100.gif" />
-			                            </Component>
-			                            <Component Id="logo64.gif" Guid="*">
-			                                <File Id="logo64.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\logo64.gif" />
-			                            </Component>
-			                            <Component Id="logoLarge.gif" Guid="*">
-			                                <File Id="logoLarge.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\logoLarge.gif" />
-			                            </Component>
-			                            <Component Id="logoMed.gif" Guid="*">
-			                                <File Id="logoMed.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\logoMed.gif" />
-			                            </Component>
-			                            <Component Id="pwrdLogo.eps" Guid="*">
-			                                <File Id="pwrdLogo.eps" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo.eps" />
-			                            </Component>
-			                            <Component Id="pwrdLogo100.gif" Guid="*">
-			                                <File Id="pwrdLogo100.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo100.gif" />
-			                            </Component>
-			                            <Component Id="pwrdLogo150.gif" Guid="*">
-			                                <File Id="pwrdLogo150.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo150.gif" />
-			                            </Component>
-			                            <Component Id="pwrdLogo175.gif" Guid="*">
-			                                <File Id="pwrdLogo175.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo175.gif" />
-			                            </Component>
-			                            <Component Id="pwrdLogo200.gif" Guid="*">
-			                                <File Id="pwrdLogo200.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo200.gif" />
-			                            </Component>
-			                            <Component Id="pwrdLogo75.gif" Guid="*">
-			                                <File Id="pwrdLogo75.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\pwrdLogo75.gif" />
-			                            </Component>
-			                            <Component Id="README_1" Guid="*">
-			                                <File Id="README_1" KeyPath="yes" Source="SourceDir\lib\tk\images\README" />
-			                            </Component>
-			                            <Component Id="tai_ku.gif" Guid="*">
-			                                <File Id="tai_ku.gif" KeyPath="yes" Source="SourceDir\lib\tk\images\tai-ku.gif" />
-			                            </Component>
-			                        </Directory>
 			                        <Directory Id="msgs_1" Name="msgs">
 			                            <Component Id="cs.msg_1" Guid="*">
 			                                <File Id="cs.msg_1" KeyPath="yes" Source="SourceDir\lib\tk\msgs\cs.msg" />
@@ -3211,19 +3170,6 @@
 			<ComponentRef Id="tkfbox.tcl" />
 			<ComponentRef Id="unsupported.tcl" />
 			<ComponentRef Id="xmfbox.tcl" />
-			<ComponentRef Id="logo.eps" />
-			<ComponentRef Id="logo100.gif" />
-			<ComponentRef Id="logo64.gif" />
-			<ComponentRef Id="logoLarge.gif" />
-			<ComponentRef Id="logoMed.gif" />
-			<ComponentRef Id="pwrdLogo.eps" />
-			<ComponentRef Id="pwrdLogo100.gif" />
-			<ComponentRef Id="pwrdLogo150.gif" />
-			<ComponentRef Id="pwrdLogo175.gif" />
-			<ComponentRef Id="pwrdLogo200.gif" />
-			<ComponentRef Id="pwrdLogo75.gif" />
-			<ComponentRef Id="README_1" />
-			<ComponentRef Id="tai_ku.gif" />
 			<ComponentRef Id="cs.msg_1" />
 			<ComponentRef Id="da.msg_1" />
 			<ComponentRef Id="de.msg_1" />
