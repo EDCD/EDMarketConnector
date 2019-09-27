@@ -23,7 +23,7 @@ from config import appname, appversion, config
 from protocol import protocolhandler
 
 
-holdoff = 10	# be nice
+holdoff = 60	# be nice
 timeout = 10	# requests timeout
 auth_timeout = 30	# timeout for initial auth
 
