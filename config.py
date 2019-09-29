@@ -85,8 +85,7 @@ elif platform=='win32':
 
 elif platform=='linux':
     import codecs
-    # requires python-iniparse package - ConfigParser that ships with Python < 3.2 doesn't support unicode
-    from iniparse import RawConfigParser
+    from configparser import RawConfigParser
 
 
 class Config(object):
@@ -295,9 +294,10 @@ class Config(object):
             if not isdir(dirname(self.filename)):
                 makedirs(dirname(self.filename))
 
-            self.config = RawConfigParser()
+            self.config = RawConfigParser(comment_prefixes = ('#',))
             try:
-                self.config.readfp(codecs.open(self.filename, 'r', 'utf-8'))
+                with codecs.open(self.filename, 'r') as h:
+                    self.config.read_file(h)
             except:
                 self.config.add_section(self.SECTION)
 
@@ -307,7 +307,9 @@ class Config(object):
         def get(self, key):
             try:
                 val = self.config.get(self.SECTION, key)
-                if u'\n' in val:
+                if u'\n' in val:	# list
+                    # ConfigParser drops the last entry if blank, so we add a spurious ';' entry in set() and remove it here
+                    assert val.split('\n')[-1] == ';', val.split('\n')
                     return [self._unescape(x) for x in val.split(u'\n')[:-1]]
                 else:
                     return self._unescape(val)
@@ -335,7 +337,7 @@ class Config(object):
 
         def save(self):
             with codecs.open(self.filename, 'w', 'utf-8') as h:
-                h.write(str(self.config.data))
+                self.config.write(h)
 
         def close(self):
             self.save()
