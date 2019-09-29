@@ -21,6 +21,7 @@ elif platform=='win32':
     import ctypes
     from ctypes.wintypes import *
     import uuid
+    from winreg import CloseKey, CreateKeyEx, OpenKeyEx, DeleteValue, QueryValueEx, SetValueEx, HKEY_CURRENT_USER, KEY_ALL_ACCESS, REG_SZ, REG_DWORD, REG_MULTI_SZ
 
     FOLDERID_Documents    = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
@@ -32,47 +33,6 @@ elif platform=='win32':
 
     CoTaskMemFree = ctypes.windll.ole32.CoTaskMemFree
     CoTaskMemFree.argtypes = [ctypes.c_void_p]
-
-    # _winreg that ships with Python 2 doesn't support unicode, so do this instead
-    HKEY_CURRENT_USER       = 0x80000001
-    KEY_ALL_ACCESS          = 0x000F003F
-    REG_CREATED_NEW_KEY     = 0x00000001
-    REG_OPENED_EXISTING_KEY = 0x00000002
-    REG_SZ    = 1
-    REG_DWORD = 4
-    REG_MULTI_SZ = 7
-
-    RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
-    RegCreateKeyEx.restype = LONG
-    RegCreateKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, LPCVOID, DWORD, DWORD, LPCVOID, ctypes.POINTER(HKEY), ctypes.POINTER(DWORD)]
-
-    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
-    RegOpenKeyEx.restype = LONG
-    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
-
-    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
-    RegCloseKey.restype = LONG
-    RegCloseKey.argtypes = [HKEY]
-
-    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
-    RegQueryValueEx.restype = LONG
-    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
-
-    RegSetValueEx = ctypes.windll.advapi32.RegSetValueExW
-    RegSetValueEx.restype = LONG
-    RegSetValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, DWORD, LPCVOID, DWORD]
-
-    RegCopyTree = ctypes.windll.advapi32.RegCopyTreeW
-    RegCopyTree.restype = LONG
-    RegCopyTree.argtypes = [HKEY, LPCWSTR, HKEY]
-
-    RegDeleteKey = ctypes.windll.advapi32.RegDeleteTreeW
-    RegDeleteKey.restype = LONG
-    RegDeleteKey.argtypes = [HKEY, LPCWSTR]
-
-    RegDeleteValue = ctypes.windll.advapi32.RegDeleteValueW
-    RegDeleteValue.restype = LONG
-    RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
     def KnownFolderPath(guid):
         buf = ctypes.c_wchar_p()
@@ -193,76 +153,58 @@ class Config(object):
 
             self.identifier = applongname
 
-            self.hkey = HKEY()
-            disposition = DWORD()
-            if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\Marginal\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(self.hkey), ctypes.byref(disposition)):
-                raise Exception()
-
-            if disposition.value == REG_CREATED_NEW_KEY:
-
-                # Migrate pre-1.3.4 registry location
-                oldkey = HKEY()
-                if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\EDMarketConnector', 0, KEY_ALL_ACCESS, ctypes.byref(oldkey)):
-                    RegCopyTree(oldkey, None, self.hkey)
-                    RegCloseKey(oldkey)
-                    RegDeleteKey(HKEY_CURRENT_USER, r'Software\EDMarketConnector')
-
+            self.hkey = CreateKeyEx(HKEY_CURRENT_USER, r'Software\Marginal\EDMarketConnector', access=KEY_ALL_ACCESS)
+            try:
+                sparklekey = OpenKeyEx(hkey, 'WinSparkle')
+            except:
                 # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
-                sparklekey = HKEY()
-                if not RegCreateKeyEx(self.hkey, 'WinSparkle', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(sparklekey), ctypes.byref(disposition)):
-                    if disposition.value == REG_CREATED_NEW_KEY:
-                        buf = ctypes.create_unicode_buffer('1')
-                        RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
-                        buf = ctypes.create_unicode_buffer(str(update_interval))
-                        RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
-                    RegCloseKey(sparklekey)
+                sparklekey = CreateKeyEx(self.hkey, 'WinSparkle', access=KEY_ALL_ACCESS)
+                SetValueEx(sparklekey, 'CheckForUpdates', 0, REG_SZ, '1')
+                SetValueEx(sparklekey, 'UpdateInterval', 0, REG_SZ, str(update_interval))
+            CloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', KnownFolderPath(FOLDERID_Documents) or self.home)
 
         def get(self, key):
-            typ  = DWORD()
-            size = DWORD()
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
+            try:
+                (value, typ) = QueryValueEx(self.hkey, key)
+            except:
                 return None
-            buf = ctypes.create_unicode_buffer(int(size.value / 2))
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
+            if typ not in [REG_SZ, REG_MULTI_SZ]:
                 return None
-            elif typ.value == REG_MULTI_SZ:
-                return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
-            else:
-                return str(buf.value)
+            return value
 
         def getint(self, key):
-            typ  = DWORD()
-            size = DWORD(4)
-            val  = DWORD()
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), ctypes.byref(val), ctypes.byref(size)) or typ.value != REG_DWORD:
-                return 0
-            else:
-                return val.value
+            try:
+                (value, typ) = QueryValueEx(self.hkey, key)
+            except:
+                return None
+            if typ != REG_DWORD:
+                return None
+            return value
 
         def set(self, key, val):
             if isinstance(val, str):
-                buf = ctypes.create_unicode_buffer(val)
-                RegSetValueEx(self.hkey, key, 0, REG_SZ, buf, len(buf)*2)
+                SetValueEx(self.hkey, key, 0, REG_SZ, val)
             elif isinstance(val, numbers.Integral):
-                RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
+                SetValueEx(self.hkey, key, 0, REG_DWORD, val)
             elif hasattr(val, '__iter__'):	# iterable
-                stringval = u'\x00'.join([str(x) or u' ' for x in val] + [u''])	# null terminated non-empty strings
-                buf = ctypes.create_unicode_buffer(stringval)
-                RegSetValueEx(self.hkey, key, 0, REG_MULTI_SZ, buf, len(buf)*2)
+                SetValueEx(self.hkey, key, 0, REG_MULTI_SZ, val)
             else:
                 raise NotImplementedError()
 
         def delete(self, key):
-            RegDeleteValue(self.hkey, key)
+            try:
+                DeleteValue(self.hkey, key)
+            except:
+                pass
 
         def save(self):
             pass	# Redundant since registry keys are written immediately
 
         def close(self):
-            RegCloseKey(self.hkey)
+            CloseKey(self.hkey)
             self.hkey = None
 
     elif platform=='linux':

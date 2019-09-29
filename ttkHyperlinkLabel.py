@@ -9,29 +9,7 @@ if platform == 'win32':
     import subprocess
     import ctypes
     from ctypes.wintypes import *
-
-    HKEY_CLASSES_ROOT = 0x80000000
-    HKEY_CURRENT_USER = 0x80000001
-
-    KEY_READ          = 0x00020019
-    KEY_ALL_ACCESS    = 0x000F003F
-
-    REG_SZ            = 1
-    REG_DWORD         = 4
-    REG_MULTI_SZ      = 7
-
-    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
-    RegOpenKeyEx.restype = LONG
-    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
-
-    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
-    RegCloseKey.restype = LONG
-    RegCloseKey.argtypes = [HKEY]
-
-    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
-    RegQueryValueEx.restype = LONG
-    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
-
+    from winreg import CloseKey, OpenKeyEx, QueryValueEx, HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, KEY_READ, REG_SZ, REG_MULTI_SZ
 
 # A clickable ttk Label
 #
@@ -138,34 +116,31 @@ def openurl(url):
         # so discover and launch the browser directly.
         # https://blogs.msdn.microsoft.com/oldnewthing/20031210-00/?p=41553
 
-        hkey = HKEY()
-        cls  = 'http'
-        if not RegOpenKeyEx(HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice', 0, KEY_READ, ctypes.byref(hkey)):
-            typ  = DWORD()
-            size = DWORD()
-            if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
-                buf = ctypes.create_unicode_buffer('', int(size.value / 2))
-                if not RegQueryValueEx(hkey, 'ProgId', 0, ctypes.byref(typ), buf, ctypes.byref(size)):
-                    if buf.value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
-                        # IE and Edge can't handle long arguments so just use webbrowser.open and hope
-                        # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
-                        cls = None
-                    else:
-                        cls = buf.value
-            RegCloseKey(hkey)
+        try:
+            hkey = OpenKeyEx(HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice')
+            (value, typ) = QueryValueEx(hkey, 'ProgId')
+            CloseKey(hkey)
+            if value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
+                # IE and Edge can't handle long arguments so just use webbrowser.open and hope
+                # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
+                cls = None
+            else:
+                cls = value
+        except:
+            cls  = 'https'
 
-        if cls and not RegOpenKeyEx(HKEY_CLASSES_ROOT, r'%s\shell\open\command' % cls, 0, KEY_READ, ctypes.byref(hkey)):
-            typ  = DWORD()
-            size = DWORD()
-            if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), None, ctypes.byref(size)) and typ.value in [REG_SZ, REG_MULTI_SZ]:
-                buf = ctypes.create_unicode_buffer('', int(size.value / 2))
-                if not RegQueryValueEx(hkey, None, 0, ctypes.byref(typ), buf, ctypes.byref(size)) and 'iexplore' not in buf.value.lower():
-                    RegCloseKey(hkey)
-                    if '%1' in buf.value:
+        if cls:
+            try:
+                hkey = OpenKeyEx(HKEY_CLASSES_ROOT, r'%s\shell\open\command' % cls)
+                (value, typ) = QueryValueEx(hkey, None)
+                CloseKey(hkey)
+                if 'iexplore' not in value.lower():
+                    if '%1' in value:
                         subprocess.Popen(buf.value.replace('%1', url))
                     else:
                         subprocess.Popen('%s "%s"' % (buf.value, url))
                     return
-            RegCloseKey(hkey)
+            except:
+                pass
 
     webbrowser.open(url)
