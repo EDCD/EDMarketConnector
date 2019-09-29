@@ -29,7 +29,7 @@ class Notebook(ttk.Notebook):
         style = ttk.Style()
 
         if platform=='darwin':
-            if map(int, mac_ver()[0].split('.')) >= [10,10]:
+            if list(map(int, mac_ver()[0].split('.'))) >= [10,10]:
                 # Hack for tab appearance with 8.5 on Yosemite & El Capitan. For proper fix see
                 # https://github.com/tcltk/tk/commit/55c4dfca9353bbd69bbcec5d63bf1c8dfb461e25
                 style.configure('TNotebook.Tab', padding=(12,10,12,2))
