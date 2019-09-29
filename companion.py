@@ -122,36 +122,24 @@ def listify(thing):
 
 
 class ServerError(Exception):
-    def __unicode__(self):
-        return _('Error: Frontier server is down')	# Raised when cannot contact the Companion API server
-    def __str__(self):
-        return str(self)
+    def __init__(self, *args):
+        self.args = args if args else (_('Error: Frontier server is down'),)	# Raised when cannot contact the Companion API server
 
 class ServerLagging(Exception):
-    def __unicode__(self):
-        return _('Error: Frontier server is lagging')	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
-    def __str__(self):
-        return str(self)
+    def __init__(self, *args):
+        self.args = args if args else (_('Error: Frontier server is lagging'),)	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
 
 class SKUError(Exception):
-    def __unicode__(self):
-        return _('Error: Frontier server SKU problem')	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
-    def __str__(self):
-        return str(self)
+    def __init__(self, *args):
+        self.args = args if args else (_('Error: Frontier server SKU problem'),)	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
 
 class CredentialsError(Exception):
-    def __init__(self, message=None):
-        self.message = message and str(message) or _('Error: Invalid Credentials')
-    def __unicode__(self):
-        return self.message
-    def __str__(self):
-        return str(self)
+    def __init__(self, *args):
+        self.args = args if args else (_('Error: Invalid Credentials'),)
 
 class CmdrError(Exception):
-    def __unicode__(self):
-        return _('Error: Wrong Cmdr')	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
-    def __str__(self):
-        return str(self)
+    def __init__(self, *args):
+        self.args = args if args else (_('Error: Wrong Cmdr'),)	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
 
 
 class Auth(object):
