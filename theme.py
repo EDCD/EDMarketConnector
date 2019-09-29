@@ -331,7 +331,7 @@ class _Theme(object):
             from AppKit import NSApplication, NSAppearance, NSMiniaturizableWindowMask, NSResizableWindowMask
             root.update_idletasks()	# need main window to be created
             appearance = NSAppearance.appearanceNamed_(theme and
-                                                       'NSAppearanceNameVibrantDark' or
+                                                       'NSAppearanceNameDarkAqua' or
                                                        'NSAppearanceNameAqua')
             for window in NSApplication.sharedApplication().windows():
                 window.setStyleMask_(window.styleMask() & ~(NSMiniaturizableWindowMask | NSResizableWindowMask))	# disable zoom

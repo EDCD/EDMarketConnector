@@ -57,7 +57,7 @@ if platform == 'darwin':
 
             # Monkey-patch tk (tkMacOSXKeyEvent.c)
             if not self.tkProcessKeyEvent_old:
-                sel = 'tkProcessKeyEvent:'
+                sel = b'tkProcessKeyEvent:'
                 cls = NSApplication.sharedApplication().class__()
                 self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)
                 newmethod = objc.selector(self.tkProcessKeyEvent, selector = self.tkProcessKeyEvent_old.selector, signature = self.tkProcessKeyEvent_old.signature)
