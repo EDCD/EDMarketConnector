@@ -8,14 +8,13 @@ Usage:
 """
 
 from distutils.core import setup
-import py2exe
-
-import platform
-import sys
+import codecs
 import os
 from os.path import exists, isdir, join
-import shutil
+import platform
 import re
+import shutil
+import sys
 from tempfile import gettempdir
 
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
@@ -147,6 +146,8 @@ elif sys.platform=='win32':
 
 setup(
     name = APPLONGNAME,
+    version = VERSION,
+    app = [APP],
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
@@ -165,6 +166,7 @@ setup(
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,
+    setup_requires = [sys.platform=='darwin' and 'py2app' or 'py2exe'],
 )
 
 PKG = None
