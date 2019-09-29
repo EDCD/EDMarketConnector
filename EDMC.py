@@ -56,9 +56,6 @@ try:
     parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
     args = parser.parse_args()
 
-    if getattr(sys, 'frozen', False):
-        os.environ['REQUESTS_CA_BUNDLE'] = join(config.respath, 'cacert.pem')
-
     if args.version:
         latest = ''
         try:
