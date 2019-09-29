@@ -3,32 +3,17 @@
 # build databases from files systems.csv and stations.json from http://eddb.io/api
 #
 
-import argparse
 import pickle
 import csv
 import json
 import requests
 
-def load_file(filename):
-    if filename == 'systems.csv' and args.systems_file:
-        print('load_file: systems.csv from local file')
-        return open(args.systems_file, newline='')
-    elif filename == 'stations.json' and args.stations_file:
-        print('load_file: stations.json from local file')
-        stations = []
-        with open(args.stations_file) as jsonl_file:
-            for l in jsonl_file:
-                stations.append(json.loads(l))
-        return stations
-    else:
-        raise AssertionError('load_file called with unsupported filename')
+def download(filename):
+    r = requests.get('https://eddb.io/archive/v6/' + filename, stream=True)
+    print('\n%s\t%dK' % (filename, len(r.content) / 1024))
+    return r
 
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Utilises eddb.io data files to produce... FIXME')
-    parser.add_argument('-S', '--systems-file', help="Specify a local file copy of eddb.io's systems.csv")
-    parser.add_argument('-s', '--stations-file', help="Specify a local file copy of eddb.io's stations.json")
-    args = parser.parse_args()
 
     # Ellipsoid that encompasses most of the systems in the bubble (but not outliers like Sothis)
     RX = RZ = 260
@@ -61,7 +46,8 @@ if __name__ == "__main__":
         'y'            : float(s['y']),
         'z'            : float(s['z']),
         'is_populated' : int(s['is_populated']),
-    } for s in csv.DictReader(load_file('systems.csv')) }
+    } for s in csv.DictReader(download('systems.csv').iter_lines(decode_unicode=True)) }
+    #} for s in csv.DictReader(open('systems.csv')) }
     print('%d\tsystems' % len(systems))
 
     # Build another dict containing all systems considered to be in the
@@ -130,7 +116,7 @@ if __name__ == "__main__":
     print('\n%d saved systems' % len(system_ids))
 
     # station_id by (system_id, station_name)
-    stations = load_file('stations.json')
+    stations = json.loads(download('stations.json').content)	# let json do the utf-8 decode
     station_ids = {
         (x['system_id'], x['name']) : x['id']	# Pilgrim's Ruin in HR 3005 id 70972 has U+2019 quote
         for x in stations if x['max_landing_pad_size']

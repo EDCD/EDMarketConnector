@@ -464,12 +464,8 @@ def lookup(module, ship_map, entitled=False):
             (new['class'], new['rating']) = (str(name[2][4:]), 'A')
         elif len(name) < 4 and name[1] in ['guardianfsdbooster']:	# Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'H')
-        elif len(name) < 4 and name[0] == 'dronecontrol' and name[1] == 'resourcesiphon':
-            # 128066402,Int_DroneControl_ResourceSiphon,internal,Limpet Control,,,,1,I,
-            (new['class'], new['rating']) = (1, 'I')
         else:
-            if len(name) < 3:
-                raise AssertionError('%s: length < 3]' % (name))
+            if len(name) < 3: raise AssertionError('%s: length < 3]' % (name))
             if not name[2].startswith('size') or not name[3].startswith('class'): raise AssertionError('%s: Unknown class/rating "%s/%s"' % (module['id'], name[2], name[3]))
             new['class'] = str(name[2][4:])
             new['rating'] = (name[1]=='buggybay' and planet_rating_map or
