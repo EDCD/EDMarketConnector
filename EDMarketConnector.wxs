@@ -104,7 +104,7 @@
 				</RegistryKey>
 			</Component>
 
-			<!-- Generate with `heat.exe dir dist.win32 -gg -sfrag -suid -out foo.wxs` -->
+			<!-- Generate with `heat.exe dir dist.win32 -ag -sfrag -suid -out foo.wxs` -->
 			<!-- Sadly too late for auto-generated Component UUIDs -->
 
 			<Directory Id="ProgramFilesFolder">

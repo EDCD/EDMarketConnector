@@ -68,7 +68,7 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [ 'requests', 'keyring.backends' ],
                   'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
                   'include_plugins': [('plugins', x) for x in PLUGINS],
                   'resources': [ 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
@@ -113,7 +113,7 @@ elif sys.platform=='win32':
                       'shutil',         # Included for plugins
                       'zipfile',        # Included for plugins
                   ],
-                  'excludes': [ 'distutils', 'iniparse', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [ 'distutils', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
               }
     }
 
