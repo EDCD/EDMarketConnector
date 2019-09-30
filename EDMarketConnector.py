@@ -217,10 +217,9 @@ class AppWindow:
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-            if platform == 'win32':	# Can't work out how to deiconify on Linux
-                theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-                theme_minimize.grid(row=0, column=3, padx=2)
-                theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
+            theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
+            theme_minimize.grid(row=0, column=3, padx=2)
+            theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
             theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
             theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
