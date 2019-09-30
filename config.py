@@ -169,20 +169,20 @@ class Config(object):
         def get(self, key):
             try:
                 (value, typ) = QueryValueEx(self.hkey, key)
+                if typ not in [REG_SZ, REG_MULTI_SZ]:
+                    raise ValueError()
+                return value
             except:
                 return None
-            if typ not in [REG_SZ, REG_MULTI_SZ]:
-                return None
-            return value
 
         def getint(self, key):
             try:
                 (value, typ) = QueryValueEx(self.hkey, key)
+                if typ != REG_DWORD:
+                    raise ValueError()
+                return value
             except:
-                return None
-            if typ != REG_DWORD:
-                return None
-            return value
+                return 0
 
         def set(self, key, val):
             if isinstance(val, str):
