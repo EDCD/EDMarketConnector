@@ -255,19 +255,19 @@ Download and extract the [latest source code](https://github.com/Marginal/EDMark
 
 Mac:
 
-* Requires the Python “requests” and “watchdog” modules, plus an up-to-date “py2app” module if you also want to package the app - install these with `easy_install -U requests watchdog py2app` .
-* Run with `python ./EDMarketConnector.py` .
+* Requires Python3.7 and the Python “keyring”, “pyobjc”, “requests” and “watchdog” modules - install these with `pip3.7 install keyring pyobjc requests watchdog` .
+* Run with `./EDMarketConnector.py` .
 
 Windows:
 
-* Requires Python2.7 and the Python “requests” and “watchdog” modules, plus “py2exe” 0.6 if you also want to package the app.
-* Run with `EDMarketConnector.py` .
+* Requires Python3.7 and the Python “keyring”, “requests” and “watchdog” modules - install these with `pip3.7 install keyring requests watchdog`
+* Run with `"C:\Program Files (x86)\Python37-32\python.exe" EDMarketConnector.py` .
 
 Linux:
 
-* Requires Python2.7 and the Python “iniparse”, “requests” and "tkinter" modules.
-  - On Debian-based systems install these with `sudo apt-get install python-iniparse python-requests python-tk` .
-  - On Arch, install these with `sudo pacman -S python2 python2-requests tk; sudo easy_install-2.7 iniparse` .
+* Requires Python3.6 or later and the Python “requests” and "tkinter" modules.
+  - On Debian-based systems install these with `sudo apt-get install python3-requests python3-tk` .
+  - On Arch, install these with `sudo pacman -S python python-requests tk` .
 * Run with `./EDMarketConnector.py` .
 
 Command-line
@@ -309,13 +309,13 @@ Packaging for distribution
 
 Mac:
 
-* requires py2app 0.9.x
+* requires py2app 0.19
 * [Sparkle.framework](https://github.com/sparkle-project/Sparkle) installed in /Library/Frameworks
 * Run `setup.py py2app`
 
 Windows:
 
-* requires py2exe 0.6.x
+* requires py2exe 0.9.3.2
 * winsparkle.dll & .pdb from [WinSparkle](https://github.com/vslavik/winsparkle) copied to the current directory
 * [WiX Toolset](http://wixtoolset.org/)
 * Run `setup.py py2exe`
@@ -328,7 +328,7 @@ This app uses the “Companion” web API that Frontier originally supplied for 
 
 Acknowledgements
 --------
-* “Elite: Dangerous” is © 1984 - 2018 Frontier Developments plc.
+* “Elite: Dangerous” is © 1984 - 2019 Frontier Developments plc.
 * Thanks to Cmdr Zhixian Wu for the Chinese (Simplified) translation.
 * Thanks to Cmdrs CatfoodCZ, Mike Stix & DaraCZ for the Czech translation.
 * Thanks to Cmdr CoolBreeze for the Dutch translation.
@@ -347,6 +347,7 @@ Acknowledgements
 * Thanks to Armando Ota for the Slovenian translation.
 * Thanks to Cmdr Mila Strelok for the Spanish translation.
 * Thanks to Taras Velychko for the Ukranian translation.
+* Thanks to [Athanasius](https://github.com/Athanasius) for the port to Python 3.
 * Thanks to [Ian Norton](https://github.com/inorton) for plugin support.
 * Thanks to [Cmdr Anthor](https://github.com/EDSM-NET) and [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/EDSM-NET/EDDN/wiki).
 * Thanks to [Andargor](https://github.com/Andargor) for the idea of using the “Companion” interface in [edce-client](https://github.com/Andargor/edce-client).
@@ -358,6 +359,6 @@ Acknowledgements
 
 License
 -------
-Copyright © 2015-2018 Jonathan Harris.
+Copyright © 2015-2019 Jonathan Harris.
 
 Licensed under the [GNU Public License (GPL)](http://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
