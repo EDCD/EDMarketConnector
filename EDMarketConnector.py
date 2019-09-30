@@ -23,6 +23,9 @@ if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
     if platform == 'win32':
         chdir(dirname(sys.path[0]))
+        # Allow executable to be invoked from any cwd
+        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
+        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
 
 import tkinter as tk
 from tkinter import ttk
