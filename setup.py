@@ -66,7 +66,15 @@ if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests', 'keyring.backends' ],
+                  'packages': [
+                      'requests',
+                      'keyring.backends',
+                      'sqlite3',	# Included for plugins
+                  ],
+                  'includes': [
+                      'shutil',         # Included for plugins
+                      'zipfile',        # Included for plugins
+                  ],
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'distutils', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,

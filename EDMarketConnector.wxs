@@ -167,8 +167,8 @@
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
-					<Component Id="libssl_1_1.dll" Guid="*">
-						<File Id="libssl_1_1.dll" KeyPath="yes" Source="SourceDir\libssl-1_1.dll" />
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\libssl-1_1.dll" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\modules.p" />
