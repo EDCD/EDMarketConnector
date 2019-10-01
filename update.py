@@ -3,6 +3,7 @@ from os.path import dirname, join
 import sys
 from time import time
 import threading
+from traceback import print_exc
 
 # ensure registry is set up on Windows before we start
 from config import appname, appversion, update_feed, update_interval, config
@@ -50,10 +51,11 @@ elif sys.platform=='darwin':
 
         def __init__(self, master):
             try:
-                objc.loadBundle('Sparkle', globals(), join(dirname(sys.executable.decode(sys.getfilesystemencoding())), os.pardir, 'Frameworks', 'Sparkle.framework'))
+                objc.loadBundle('Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework'))
                 self.updater = SUUpdater.sharedUpdater()
             except:
                 # can't load framework - not frozen or not included in app bundle?
+                print_exc()
                 self.updater = None
 
         def checkForUpdates(self):
@@ -82,7 +84,7 @@ elif sys.platform=='win32':
             try:
                 sys.frozen	# don't want to try updating python.exe
                 self.updater = ctypes.cdll.WinSparkle
-                self.updater.win_sparkle_set_appcast_url(update_feed)	# py2exe won't let us embed this in resources
+                self.updater.win_sparkle_set_appcast_url(update_feed.encode())	# py2exe won't let us embed this in resources
 
                 # set up shutdown callback
                 global root
@@ -90,11 +92,9 @@ elif sys.platform=='win32':
                 self.callback_t = ctypes.CFUNCTYPE(None)	# keep reference
                 self.callback_fn = self.callback_t(shutdown_request)
                 self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
-
                 self.updater.win_sparkle_init()
 
             except:
-                from traceback import print_exc
                 print_exc()
                 self.updater = None
 

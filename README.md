@@ -315,7 +315,7 @@ Mac:
 
 Windows:
 
-* requires py2exe 0.9.3.2
+* requires py2exe 0.9.3.2 (currently unreleased - build from [source](https://github.com/albertosottile/py2exe))
 * winsparkle.dll & .pdb from [WinSparkle](https://github.com/vslavik/winsparkle) copied to the current directory
 * [WiX Toolset](http://wixtoolset.org/)
 * Run `setup.py py2exe`

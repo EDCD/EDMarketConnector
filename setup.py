@@ -66,7 +66,15 @@ if sys.platform=='darwin':
     OPTIONS =  { 'py2app':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
-                  'packages': [ 'requests', 'keyring.backends' ],
+                  'packages': [
+                      'requests',
+                      'keyring.backends',
+                      'sqlite3',	# Included for plugins
+                  ],
+                  'includes': [
+                      'shutil',         # Included for plugins
+                      'zipfile',        # Included for plugins
+                  ],
                   'frameworks': [ 'Sparkle.framework' ],
                   'excludes': [ 'distutils', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
                   'iconfile': '%s.icns' % APPNAME,
@@ -145,10 +153,9 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'product_name': APP,
+                 'product_name': APPNAME,	# WinSparkle
                  'version': VERSION,
                  'copyright': u'© 2015-2019 Jonathan Harris',
-                 'name': APPNAME,		# WinSparkle
                  'company_name': 'Marginal',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
@@ -157,7 +164,6 @@ setup(
                  'product_name': APPNAME,
                  'version': VERSION,
                  'copyright': u'© 2015-2019 Jonathan Harris',
-                 'name': APPNAME,
                  'company_name': 'Marginal',
              } ],
     data_files = DATA_FILES,
