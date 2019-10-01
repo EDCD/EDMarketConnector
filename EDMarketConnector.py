@@ -68,9 +68,6 @@ class AppWindow(object):
 
     def __init__(self, master):
 
-        # Start a protocol handler to handle cAPI registration. Requires main window to exist.
-        protocolhandler.start(master)
-
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
         self.w = master
@@ -278,6 +275,9 @@ class AppWindow(object):
         self.w.bind_all('<<PluginError>>', self.plugin_error)	# Statusbar
         self.w.bind_all('<<CompanionAuthEvent>>', self.auth)	# cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)		# Updater
+
+        # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
+        self.w.after_idle(lambda:protocolhandler.start(self.w))
 
         # Load updater after UI creation (for WinSparkle)
         import update
