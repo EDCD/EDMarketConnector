@@ -613,20 +613,25 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif entry['event'] == 'Interdicted':
-            add_event('addCommanderCombatInterdicted', entry['timestamp'],
-                      OrderedDict([('starsystemName', system),
-                                   ('opponentName', entry['Interdictor']),
-                                   ('isPlayer', entry['IsPlayer']),
-                                   ('isSubmit', entry['Submitted']),
-                      ]))
+            data = OrderedDict([('starsystemName', system),
+                                ('isPlayer', entry['IsPlayer']),
+                                ('isSubmit', entry['Submitted']),
+            ])
+            if 'Interdictor' in entry:
+                data['opponentName'] = entry['Interdictor']
+            elif 'Faction' in entry:
+                data['opponentName'] = entry['Faction']
+            elif 'Power' in entry:
+                data['opponentName'] = entry['Power']
+            add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif entry['event'] == 'Interdiction':
             data = OrderedDict([('starsystemName', system),
                                 ('isPlayer', entry['IsPlayer']),
                                 ('isSuccess', entry['Success']),
             ])
-            if 'Interdictor' in entry:
-                data['opponentName'] = entry['Interdictor']
+            if 'Interdicted' in entry:
+                data['opponentName'] = entry['Interdicted']
             elif 'Faction' in entry:
                 data['opponentName'] = entry['Faction']
             elif 'Power' in entry:
