@@ -51,7 +51,7 @@ def station_id(system_name, station_name):
     return this.station_ids.get((system_id(system_name), station_name), 0)
 
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     return 'eddb'
 
 def plugin_app(parent):

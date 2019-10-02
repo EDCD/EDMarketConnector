@@ -64,7 +64,7 @@ def station_url(system_name, station_name):
     return this.station or this.system
 
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     this.thread = Thread(target = worker, name = 'Inara worker')
     this.thread.daemon = True
     this.thread.start()
