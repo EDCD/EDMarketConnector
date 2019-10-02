@@ -12,7 +12,7 @@ if not config.get('shipyard_provider') and config.getint('shipyard'):
 config.delete('shipyard')
 
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     return 'Coriolis'
 
 # Return a URL for the current ship

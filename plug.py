@@ -91,13 +91,19 @@ class Plugin(object):
 
         if loadfile:
             sys.stdout.write('loading plugin {} from "{}"\n'.format(name.replace('.', '_'), loadfile))
-            module = importlib.machinery.SourceFileLoader('plugin_{}'.format(name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')), loadfile).load_module()
-            if module.plugin_start.__code__.co_argcount == 0:
-                newname = module.plugin_start()
-            else:
-                newname = module.plugin_start(os.path.dirname(loadfile))
-            self.name = newname and str(newname) or name
-            self.module = module
+            try:
+                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')), loadfile).load_module()
+                if getattr(module, 'plugin_start3', None):
+                    newname = module.plugin_start3(os.path.dirname(loadfile))
+                    self.name = newname and str(newname) or name
+                    self.module = module
+                elif getattr(module, 'plugin_start', None):
+                    sys.stdout.write('plugin %s needs migrating\n' % name)
+                else:
+                    sys.stdout.write('plugin %s has no plugin_start3() function\n' % name)
+            except:
+                print_exc()
+                raise
         else:
             sys.stdout.write('plugin %s disabled\n' % name)
 
@@ -143,10 +149,7 @@ class Plugin(object):
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
             try:
-                if plugin_prefs.__code__.co_argcount == 1:
-                    frame = plugin_prefs(parent)
-                else:
-                    frame = plugin_prefs(parent, cmdr, is_beta)
+                frame = plugin_prefs(parent, cmdr, is_beta)
                 if not isinstance(frame, nb.Frame):
                     raise AssertionError
                 return frame
@@ -169,7 +172,7 @@ def load_plugins(master):
                 plugin.folder = None	# Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except:
-                print_exc()
+                pass
     PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
@@ -190,7 +193,7 @@ def load_plugins(master):
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
             except:
-                print_exc()
+                pass
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
 
 def provides(fn_name):
@@ -268,10 +271,7 @@ def notify_prefs_changed(cmdr, is_beta):
         prefs_changed = plugin._get_func('prefs_changed')
         if prefs_changed:
             try:
-                if prefs_changed.__code__.co_argcount == 0:
-                    prefs_changed()
-                else:
-                    prefs_changed(cmdr, is_beta)
+                prefs_changed(cmdr, is_beta)
             except:
                 print_exc()
 
@@ -293,12 +293,7 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
         if journal_entry:
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                if journal_entry.__code__.co_argcount == 4:
-                    newerror = journal_entry(cmdr, system, station, dict(entry))
-                elif journal_entry.__code__.co_argcount == 5:
-                    newerror = journal_entry(cmdr, system, station, dict(entry), dict(state))
-                else:
-                    newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
+                newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
                 error = error or newerror
             except:
                 print_exc()
@@ -326,26 +321,6 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
     return error
 
 
-def notify_system_changed(timestamp, system, coordinates):
-    """
-    Send notification data to each plugin when we arrive at a new system.
-    :param timestamp:
-    :param system:
-    .. deprecated:: 2.2
-    Use :func:`journal_entry` with the 'FSDJump' event.
-    """
-    for plugin in PLUGINS:
-        system_changed = plugin._get_func('system_changed')
-        if system_changed:
-            try:
-                if system_changed.__code__.co_argcount == 2:
-                    system_changed(timestamp, system)
-                else:
-                    system_changed(timestamp, system, coordinates)
-            except:
-                print_exc()
-
-
 def notify_newdata(data, is_beta):
     """
     Send the latest EDMC data from the FD servers to each plugin
@@ -358,10 +333,7 @@ def notify_newdata(data, is_beta):
         cmdr_data = plugin._get_func('cmdr_data')
         if cmdr_data:
             try:
-                if cmdr_data.__code__.co_argcount == 1:
-                    newerror = cmdr_data(data)
-                else:
-                    newerror = cmdr_data(data, is_beta)
+                newerror = cmdr_data(data, is_beta)
                 error = error or newerror
             except:
                 print_exc()

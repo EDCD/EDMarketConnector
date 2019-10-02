@@ -331,7 +331,7 @@ class EDDN(object):
 
 # Plugin callbacks
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     return 'EDDN'
 
 def plugin_app(parent):

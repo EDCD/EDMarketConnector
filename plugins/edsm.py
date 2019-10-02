@@ -50,7 +50,7 @@ def station_url(system_name, station_name):
         return 'https://www.edsm.net/en/system?systemName=%s&stationName=ALL' % urllib.parse.quote(system_name)
 
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     # Can't be earlier since can only call PhotoImage after window is created
     this._IMG_KNOWN    = tk.PhotoImage(data = 'R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7rMpvNV4q932VSuRiPjQQAOw==')	# green circle
     this._IMG_UNKNOWN  = tk.PhotoImage(data = 'R0lGODlhEAAQAKEDAGVLJ+ddWO5fW////yH5BAEKAAMALAAAAAAQABAAAAItnI+pywYRQBtA2CtVvTwjDgrJFlreEJRXgKSqwB5keQ6vOKq1E+7IE5kIh4kCADs=')	# red circle
@@ -89,6 +89,8 @@ def plugin_stop():
     this.queue.put(None)
     this.thread.join()
     this.thread = None
+    # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors
+    this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
 
 def plugin_prefs(parent, cmdr, is_beta):
 

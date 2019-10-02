@@ -6,7 +6,7 @@ import json
 import io
 
 
-def plugin_start():
+def plugin_start3(plugin_dir):
     return 'EDSY'
 
 # Return a URL for the current ship
