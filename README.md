@@ -320,13 +320,13 @@ Packaging for distribution
 
 Mac:
 
-* requires py2app 0.19
+* requires py2app 0.19 or later
 * [Sparkle.framework](https://github.com/sparkle-project/Sparkle) installed in /Library/Frameworks
 * Run `setup.py py2app`
 
 Windows:
 
-* requires py2exe 0.9.3.2 (currently unreleased - build from [source](https://github.com/albertosottile/py2exe))
+* requires [py2exe 0.9.3.2 or later](https://github.com/albertosottile/py2exe/releases/latest)
 * winsparkle.dll & .pdb from [WinSparkle](https://github.com/vslavik/winsparkle) copied to the current directory
 * [WiX Toolset](http://wixtoolset.org/)
 * Run `setup.py py2exe`
