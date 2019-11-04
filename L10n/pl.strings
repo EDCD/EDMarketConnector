@@ -143,7 +143,7 @@
 "Error: Can't connect to EDSM" = "Błąd: Brak połączenia z EDSM";
 
 /* [inara.py] */
-"Error: Can't connect to Inara" = "Błąd: Nie można połączyć się do serwisu Inara";
+"Error: Can't connect to Inara" = "Błąd: Nie można połączyć się z serwisem Inara";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Błąd: EDSM {MSG}";
