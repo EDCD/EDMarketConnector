@@ -19,14 +19,14 @@ Each plugin has it's own folder in the `plugins` directory:
 
 Plugins are python files. The plugin folder must have a file named `load.py` that must provide one module level function and optionally provide a few others.
 
-EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
+EDMC will import the `load.py` file as a module and then call the `plugin_start3()` function.
 
 ```python
 def plugin_start3(plugin_dir):
    """
    Load this plugin into EDMC
    """
-   print "I am loaded! My plugin folder is {}".format(plugin_dir.encode("utf-8"))
+   print("I am loaded! My plugin folder is {}".format(plugin_dir))
    return "Test"
 ```
 
@@ -39,7 +39,7 @@ def plugin_stop():
     """
     EDMC is closing
     """
-    print "Farewell cruel world!"
+    print("Farewell cruel world!")
 ```
 
 If your plugin uses one or more threads to handle Events then stop and join() the threads before returning from this function.
