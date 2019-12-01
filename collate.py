@@ -52,7 +52,7 @@ def addcommodities(data):
                 os.unlink(commodityfile+'.bak')
             os.rename(commodityfile, commodityfile+'.bak')
 
-        with open(commodityfile, 'wb') as csvfile:
+        with open(commodityfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
             writer.writeheader()
             for key in sorted(commodities):
