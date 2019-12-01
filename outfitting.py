@@ -278,7 +278,7 @@ fighter_rating_map = {
 }
 
 misc_internal_map = {
-    ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'C'),
+    ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'I'),
     ('dockingcomputer',             'advanced')     : ('Advanced Docking Computer', 'E'),
     ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
     'planetapproachsuite'                           : ('Planetary Approach Suite', 'I'),
