@@ -374,7 +374,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               [
                                   OrderedDict([
                                       ('minorfactionName', f['Name']),
-                                      ('minorfactionReputation', f['MyReputation']/100),
+                                      ('minorfactionReputation', f['MyReputation']/100.0),
                                   ]) for f in entry['Factions']
                               ])
 
