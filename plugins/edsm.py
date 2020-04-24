@@ -298,7 +298,7 @@ def worker():
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                     else:
                         for e, r in zip(pending, reply['events']):
-                            if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump']:
+                            if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump', 'CarrierJump']:
                                 # Update main window's system status
                                 this.lastlookup = r
                                 this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
@@ -345,13 +345,13 @@ def should_send(entries):
     return False
 
 
-# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location' or 'FSDJump' event
+# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event
 def update_status(event=None):
     for plugin in plug.provides('edsm_notify_system'):
         plug.invoke(plugin, None, 'edsm_notify_system', this.lastlookup)
 
 
-# Called with EDSM's response to a 'StartUp', 'Location' or 'FSDJump' event. https://www.edsm.net/en/api-journal-v1
+# Called with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event. https://www.edsm.net/en/api-journal-v1
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply):
     if not reply:

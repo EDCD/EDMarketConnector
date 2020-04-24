@@ -396,8 +396,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         return filtered
 
     # Track location
-    if entry['event'] in ['Location', 'FSDJump', 'Docked']:
-        if entry['event'] == 'Location':
+    if entry['event'] in ['Location', 'FSDJump', 'Docked', 'CarrierJump']:
+        if entry['event'] in ('Location', 'CarrierJump'):
             this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
         elif entry['event'] == 'FSDJump':
             this.planet = None
