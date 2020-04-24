@@ -413,7 +413,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # Send interesting events to EDDN, but not when on a crew
     if (config.getint('output') & config.OUT_SYS_EDDN and not state['Captain'] and
-        (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound')) and
+        (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
         ('StarPos' in entry or this.coordinates)):
         # strip out properties disallowed by the schema
         for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
