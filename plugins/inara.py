@@ -387,6 +387,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                               ('stationName', entry['StationName']),
                               ('marketID', entry['MarketID']),
                           ]))
+                if entry.get('Factions'):
+                    add_event('setCommanderReputationMinorFaction', entry['timestamp'],
+                              [
+                                  OrderedDict([
+                                      ('minorfactionName', f['Name']),
+                                      ('minorfactionReputation', f['MyReputation']/100.0),
+                                  ]) for f in entry['Factions']
+                              ])
                 # Ignore the following 'Docked' event
                 this.suppress_docked = True
 
