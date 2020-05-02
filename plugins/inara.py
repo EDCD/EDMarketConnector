@@ -377,6 +377,18 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                       ('minorfactionReputation', f['MyReputation']),
                                   ]) for f in entry['Factions']
                               ])
+            elif entry['event'] == 'CarrierJump':
+                # There is no (add|set)CommanderTravelCarrierJump() yet
+                # Use setCommanderTravelLocation() for now because it's like an 'Location' event
+                this.system = None
+                add_event('setCommanderTravelLocation', entry['timestamp'],
+                          OrderedDict([
+                              ('starsystemName', entry['StarSystem']),
+                              ('stationName', entry['StationName']),
+                              ('marketID', entry['MarketID']),
+                          ]))
+                # Ignore the following 'Docked' event
+                this.suppress_docked = True
 
             # Override standard URL functions
             if config.get('system_provider') == 'Inara':
