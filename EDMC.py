@@ -68,7 +68,7 @@ try:
             items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
                            item.find('title').text) for item in feed.findall('channel/item')])
             lastversion = sorted(items, key=versioncmp)[-1]
-            if versioncmp(lastversion) > versioncmp(appversion):
+            if versioncmp(lastversion) > versioncmp(appversion.split("-")[0]):
                 latest = ' (%s is available)' % items[lastversion]
         except:
             pass	# Quietly suppress timeouts etc.
