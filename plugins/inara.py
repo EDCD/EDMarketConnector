@@ -378,14 +378,12 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                   ]) for f in entry['Factions']
                               ])
             elif entry['event'] == 'CarrierJump':
-                # There is no (add|set)CommanderTravelCarrierJump() yet
-                # Use setCommanderTravelLocation() for now because it's like an 'Location' event
                 this.system = None
-                add_event('setCommanderTravelLocation', entry['timestamp'],
+                add_event('addCommanderTravelCarrierJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
-                              ('stationName', entry['StationName']),
-                              ('marketID', entry['MarketID']),
+                              ('shipType', state['ShipType']),
+                              ('shipGameID', state['ShipID']),
                           ]))
                 if entry.get('Factions'):
                     add_event('setCommanderReputationMinorFaction', entry['timestamp'],
@@ -846,7 +844,7 @@ def worker():
                             print 'Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event))
                             if reply_event['eventStatus'] // 100 != 2:
                                 plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
-                        if data_event['eventName'] in ['addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                        if data_event['eventName'] in ['addCommanderTravelCarrierJump', 'addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
                             this.lastlocation = reply_event.get('eventData', {})
                             this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
                         elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
