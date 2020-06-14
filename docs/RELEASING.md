@@ -65,11 +65,17 @@ There are other things that you should probably change, but can get away with le
 
 Packaging & Installer Generation
 ---
-Assuming the correct python.exe is in your PATH then simply run:
+You'll want to do the .exe and .msi generation in a `cmd.exe` window, not e.g. a 'Git bash' window.
+
+Assuming the correct python.exe is associated with .py files then simply run:
 
 		setup.py py2exe
 
-else you might need something like:
+else you might need this, which assumes correct python.exe is in your PATH:
+
+		python.exe setup.py py2exe
+	
+else you'll have to specify the path to python.exe:
 
 		"%LOCALAPPDATA%\Programs\Python\Python37-32\python.exe" setup.py py2exe
 
