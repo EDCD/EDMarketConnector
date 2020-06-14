@@ -20,11 +20,21 @@ Environment
 		1. `pip install certifi==2019.9.11` (because a later version doesn't work with py2exe, causing cacert.pem to not be found)
 		1. `pip install requests`
 		1. `pip install watchdog`
-1. [py2exe](https://github.com/albertosottile/py2exe): You need a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225)
-	1. `pip install py2exe-0.9.4.0-cp37-none-win32.whl`
+1. [py2exe](https://github.com/albertosottile/py2exe):
+	1. Install the python module.  There are two options here.
+		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2) and the current Marginal 'python3' branch as-is.  This contains a small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
+
+				pip install py2exe-0.9.3.2-cp37-none-win32.whl
+		1.  Or you can use a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225), which packages that DLL file correctly.
+
+				pip install py2exe-0.9.4.0-cp37-none-win32.whl
+		You can then edit out the following line from `setup.py`, but it does no harm:
+
+				%s/DLLs/sqlite3.dll' % (sys.base_prefix),
+
 	1. `pip install keyring==19.2.0` (because newer tries to get importlib_metadata in a way that doesn't work)
 
-	As dependencies also get pulled in here's a list of what ended up in site-packages, and their versions:
+	As dependencies also get pulled in here's a list of what ends up in site-packages, and their versions:
 
 		cachetools-4.1.0.dist-info
 		certifi-2019.9.11.dist-info
