@@ -102,6 +102,10 @@ Output will be something like (`...` denoting parts elided for brevity):
 
 You should now have one new/updated folder `dist.win32` and two new files (version number dependent): `EDMarketConnector_win_350.msi` and `appcast_win_350.xml`.  If you want to just check the generated .exe files then they're in that `dist.win32` folder.
 
+Now check that the `EDMarketConnector.exe` in the `dist.win32` folder does run without errors.
+
+Finally, uninstall your current version of ED Market Connector and re-install using the newly generated .msi file.  Check the resulting installation does work (the installer will run the program for you).
+
 Distribution
 ---
 Put the `EDMarketConnector_win_<version>.msi` file in place where you're releasing the files.  Put the `appcast_win_<version>.xml` file where it will be served under the URL you specified in the `update_feed` you set in `config.py`.
