@@ -382,6 +382,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 add_event('addCommanderTravelCarrierJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
+                              ('stationName', entry['StationName']),
+                              ('marketID', entry['MarketID']),
                               ('shipType', state['ShipType']),
                               ('shipGameID', state['ShipID']),
                           ]))
