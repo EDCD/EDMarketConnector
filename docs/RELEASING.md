@@ -20,6 +20,9 @@ Environment
 		1. `pip install certifi==2019.9.11` (because a later version doesn't work with py2exe, causing cacert.pem to not be found)
 		1. `pip install requests`
 		1. `pip install watchdog`
+1. [py2exe](https://github.com/albertosottile/py2exe): You need a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225)
+	1. `pip install py2exe-0.9.4.0-cp37-none-win32.whl`
+	1. `pip install keyring==19.2.0` (because newer tries to get importlib_metadata in a way that doesn't work)
 
 	As dependencies also get pulled in here's a list of what ended up in site-packages, and their versions:
 
@@ -32,15 +35,13 @@ Environment
 		keyring-19.2.0.dist-info
 		pathtools-0.1.2-py3.7.egg-info
 		pefile-2019.4.18-py3.7.egg-info
+		py2exe-0.9.4.0.dist-info
 		pywin32_ctypes-0.2.0.dist-info
 		requests-2.23.0.dist-info
 		setuptools-41.2.0.dist-info
 		urllib3-1.25.9.dist-info
 		watchdog-0.10.2-py3.7.egg-info
 		zipp-3.1.0.dist-info
-1. [py2exe](https://github.com/albertosottile/py2exe): You need a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225)
-	1. `pip install py2exe-0.9.4.0-cp37-none-win32.whl`
-	1. `pip install keyring==19.2.0` (because newer tries to get importlib_metadata in a way that doesn't work)
 
 If you are using different versions of any of these tools then please ensure that the paths where they're installed match the associated lines in `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
 
