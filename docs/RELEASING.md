@@ -12,11 +12,17 @@ Environment
 ---
   You will need several pieces of software installed, or the files from their .zip archives, in order to build the .exe and generate the .msi
 
+1. [WiX Toolset](https://wixtoolset.org/): 3.11.2 is the most recently tested version.
+1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently tested version.  Copy the two files, found at `<zip file>\<version>\Release`, into your checkout of the EDMC git files.
+1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).  This is needed for the internationalisation support in EDMC. [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338) is the most recently tested version.  Technically you only need the following components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will auto-select some others).  NB: If you have need to uninstall this it's "Windows Software Development Kit - Windows 10.0.18362.1" in "Apps & Features", *not* "Windows SDK AddOn".
 1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.  [v3.7.4](https://www.python.org/downloads/release/python-374/) is the most recently tested version.
+	1. You'll now need to 'pip install' several python modules
+		1. `pip install certifi==2019.9.11` (because a later version doesn't work with py2exe, causing cacert.pem to not be found)
+		1. `pip install requests`
+		1. `pip install watchdog`
 1. [py2exe](https://github.com/albertosottile/py2exe): You need a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225)
-1. [WiX Toolset](https://wixtoolset.org/): 3.11.1 is the most recently tested version.
-1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and `winsparkle.pdb` from the release's .zip file.  v0.6.0 is the most recently tested version.  Copy the two files into your checkout of the EDMC git files.
-1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).  This is needed for the internationalisation support in EDMC. [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338) is the most recently tested version.
+	1. `pip install py2exe-0.9.4.0-cp37-none-win32.whl`
+	1. `pip install keyring==19.2.0` (because newer tries to get importlib_metadata in a way that doesn't work)
 
 If you are using different versions of any of these tools then please ensure that the paths where they're installed match the associated lines in `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
 
