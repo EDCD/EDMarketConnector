@@ -31,7 +31,6 @@ Environment
 		chardet-3.0.4.dist-info
 		entrypoints-0.3.dist-info
 		future-0.18.2-py3.7.egg-info
-		importlib_metadata-1.6.1.dist-info
 		keyring-19.2.0.dist-info
 		pathtools-0.1.2-py3.7.egg-info
 		pefile-2019.4.18-py3.7.egg-info
@@ -41,7 +40,6 @@ Environment
 		setuptools-41.2.0.dist-info
 		urllib3-1.25.9.dist-info
 		watchdog-0.10.2-py3.7.egg-info
-		zipp-3.1.0.dist-info
 
 If you are using different versions of any of these tools then please ensure that the paths where they're installed match the associated lines in `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
 
