@@ -10,7 +10,7 @@ applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
 appversion = '3.5.0.0'
 
-update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
+update_feed = 'https://raw.githubusercontent.com/Athanasius/EDMarketConnector/miggy/edmarketconnector.xml'
 update_interval = 47*60*60
 
 
