@@ -12,6 +12,8 @@ dump
 EDMarketConnector.VisualElementsManifest.xml
 appcast_*_*.xml
 *.zip
+*.swp
+*/*.swp
 Py3-notes.txt
 README.html
 TODO.html
