@@ -306,7 +306,7 @@
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
 				sparkle:version="3.5.0.0"
-				length="11280384"
+				length="11255808"
 				type="application/octet-stream"
 			/>
 		</item>
