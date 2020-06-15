@@ -9,7 +9,8 @@ dump
 *.pdb
 *.msi
 *.wixobj
-*.xml
+EDMarketConnector.VisualElementsManifest.xml
+appcast_*_*.xml
 *.zip
 Py3-notes.txt
 README.html
