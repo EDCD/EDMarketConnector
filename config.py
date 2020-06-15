@@ -6,9 +6,9 @@ from sys import platform
 
 
 appname = 'EDMarketConnector'
-applongname = 'E:D Market Connector'
+applongname = 'miggy E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '3.5.0.0'
+appversion = '3.5.1.0'
 
 update_feed = 'https://raw.githubusercontent.com/Athanasius/EDMarketConnector/miggy/edmarketconnector.xml'
 update_interval = 47*60*60
