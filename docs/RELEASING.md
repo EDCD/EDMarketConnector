@@ -131,9 +131,7 @@ It is recommended to keep all the files for distribution on github, including th
 	1. Add a git tag matching the `rel-XYZ` part of the URL in the `appcast_win_XYX.msi` file. e.g. `git tag -a rel-350`
 	1. Ensure this tag is pushed to github: `git push --tags <github remote>`
 
-1. TODO: Generate the Source Code zip and tar.gz files.
-
-1. Craft a new github Release, using the tag you added before.  Include the .msi file for Windows and the Source Code files if you have them.  Use the changelog text you already prepared.
+1. Craft a new github Release, using the tag you added before.  Include the .msi file for Windows (the Source Code files are added by github based on the release tag).  Use the changelog text you already prepared.
 
 1. Check that the URL for the release that you specified in `edmarketconnector.xml` actually matches where github has placed the `.msi` file.
 
