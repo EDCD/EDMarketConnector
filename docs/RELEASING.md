@@ -116,4 +116,8 @@ Finally, uninstall your current version of ED Market Connector and re-install us
 
 Distribution
 ---
-Put the `EDMarketConnector_win_<version>.msi` file in place where you're releasing the files.  Put the `appcast_win_<version>.xml` file where it will be served under the URL you specified in the `update_feed` you set in `config.py`.
+Put the `EDMarketConnector_win_<version>.msi` file in place where you're releasing the files.
+
+For the `edmarketconnector.xml` update you'll need to edit the existing file:
+1. Update the `<title>` and `<description>` texts to reflect the latest version and the additional changelog.
+1. Update the `url`, `sparkle:version` and `length` elements as per the latest appcast_win_<version>.xml file geneated by the build process.  Ensure the `url` does match where you uploaded the `.msi` file.
