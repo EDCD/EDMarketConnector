@@ -302,11 +302,11 @@
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/Athanasius/EDMarketConnector/releases/download/rel-350/EDMarketConnector_win_350.msi"
+				url="https://github.com/Athanasius/EDMarketConnector/releases/download/rel-351/EDMarketConnector_win_351.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="3.5.0.0"
-				length="11255808"
+				sparkle:version="3.5.1.0"
+				length="11276288"
 				type="application/octet-stream"
 			/>
 		</item>
