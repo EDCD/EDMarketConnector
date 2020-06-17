@@ -661,13 +661,13 @@ class AppWindow:
             self.w.clipboard_append(monitor.station and '%s,%s' % (monitor.system, monitor.station) or monitor.system)
 
     def help_general(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
 
     def help_privacy(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki/Privacy-Policy')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
 
     def help_releases(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/releases')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
     def save_raw(self):
         self.status['text'] = _('Fetching data...')

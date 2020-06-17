@@ -9,5 +9,7 @@ dump
 *.pdb
 *.msi
 *.wixobj
-*.xml
+appcast_win_*.xml
+appcast_mac_*.xml
+EDMarketConnector.VisualElementsManifest.xml
 *.zip

@@ -251,7 +251,7 @@ If you display localized strings in EDMC's main window you should refresh them i
 
 Translation files should reside in folder named `L10n` inside your plugin's folder. Files must be in macOS/iOS ".strings" format, encoded as UTF-8. You can generate a starting template file for your translations by invoking `l10n.py` in your plugin's folder. This extracts all the translatable strings from Python files in your plugin's folder and places them in a file named `en.template` in the `L10n` folder. Rename this file as `<language_code>.strings` and edit it.
 
-See EDMC's own [`L10n`](https://github.com/Marginal/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
+See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
 
 
 # Python Package Plugins

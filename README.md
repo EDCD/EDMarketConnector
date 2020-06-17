@@ -46,14 +46,14 @@ Installation
 Mac:
 
 * Requires Mac OS 10.10 or later.
-* Download the `.zip` archive of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+* Download the `.zip` archive of the [latest release](https://github.com/EDCD/EDMarketConnector/releases/latest).
 * The zip archive contains the **EDMarketConnector** app - move this app to **Applications** or wherever you want it.
 * Double-click on the app to run it.
 
 Windows:
 
 * Requires Windows 7 or later.
-* Download the `.msi` package of the [latest release](https://github.com/Marginal/EDMarketConnector/releases/latest).
+* Download the `.msi` package of the [latest release](https://github.com/EDCD/EDMarketConnector/releases/latest).
 * Double-click on it to install.
 * Run **Elite Dangerous Market Connector** from the Start Menu or Start Screen.
 
@@ -222,7 +222,7 @@ You'll see a very long cooldown period if your system's time of day changes whil
 - Re-start the app.
 
 ### Update Error!
-The [GitHub server](https://github.com/Marginal/EDMarketConnector/releases/latest) that hosts this app's updates only supports TLS 1.2 and higher. Follow [these](https://help.passageways.com/hc/en-us/articles/115005183226-How-to-enable-TLS-1-2-in-Internet-Explorer-11-and-MS-Edge) instructions to change your Windows settings to disable the [deprecated](https://tools.ietf.org/html/rfc7568) SSL 2.0 and 3.0 protocols and enable TLS 1.2.
+The [GitHub server](https://github.com/EDCD/EDMarketConnector/releases/latest) that hosts this app's updates only supports TLS 1.2 and higher. Follow [these](https://help.passageways.com/hc/en-us/articles/115005183226-How-to-enable-TLS-1-2-in-Internet-Explorer-11-and-MS-Edge) instructions to change your Windows settings to disable the [deprecated](https://tools.ietf.org/html/rfc7568) SSL 2.0 and 3.0 protocols and enable TLS 1.2.
 
 ### Location of configuration files
 If your configuration has been corrupted, or badly set, such that you can't run the program to fix it, or you otherwise need to directly access the configuration then these are the locations of the configuration:
@@ -248,7 +248,7 @@ Future updates will also be installed to this location.
 This app doesn't work with PS4 or Xbox Elite: Dangerous accounts. On these platforms the game lacks support for the API and Journal files that this app relies on.
 
 ### Reporting a problem
-Please report a problem as a new GitHub [issue](https://github.com/Marginal/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
+Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
 
 Mac:
 
@@ -262,7 +262,7 @@ Windows:
 Running from source
 --------
 
-Download and extract the [latest source code](https://github.com/Marginal/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`).
+Download and extract the [latest source code](https://github.com/EDCD/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`).
 
 Mac:
 

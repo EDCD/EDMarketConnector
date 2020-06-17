@@ -11,9 +11,10 @@
 			 Version="$(var.PRODUCTVERSION)"
 			 UpgradeCode="$(var.UPGRADECODE)"
 			 Language="!(bind.fileLanguage.EDMarketConnector.exe)"
-			 Manufacturer="Marginal">
+			 Manufacturer="EDCD">
 
 		<Package Id="*" Keywords="Installer"
+				 InstallScope="perMachine"
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
@@ -32,7 +33,7 @@
 		<!-- For Add/Remove programs -->
 		<Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
 		<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />	<!-- Remove modify - also set by WixUI_Minimal -->
-		<Property Id="ARPHELPLINK" Value="https://github.com/Marginal/EDMarketConnector/wiki" />
+		<Property Id="ARPHELPLINK" Value="https://github.com/EDCD/EDMarketConnector/wiki" />
 
 		<!-- Set INSTALLDIR from ARPINSTALLLOCATION if replacing/upgrading -->
 		<!-- https://wyrdfish.wordpress.com/2012/07/20/msi-writing-guidelines-this-may-be-out-of-date/ -->
@@ -63,14 +64,6 @@
 				NOT Installed
 			</Custom>
 		</InstallExecuteSequence>
-
-		<!-- Merge in C runtime -->
-		<DirectoryRef Id="TARGETDIR">
-			<Merge Id="VCRedist90" SourceFile="C:\Program Files (x86)\Common Files\Merge Modules\Microsoft_VC90_CRT_x86.msm" DiskId="1" Language="0"/>
-		</DirectoryRef>
-		<Feature Id="VCRedist90" Title="Visual C++ 9.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
-			<MergeRef Id="VCRedist90"/>
-		</Feature>
 
 		<!-- Launch app after upgrade -->
 		<Property Id="LAUNCH" Value="yes" />
