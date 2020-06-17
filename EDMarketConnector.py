@@ -798,6 +798,7 @@ if __name__ == "__main__":
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 0)	# unbuffered
         print '%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime()))
+        print 'Gratuitious change to ensure .exe is different'
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
