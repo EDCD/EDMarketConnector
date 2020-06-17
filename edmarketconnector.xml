@@ -8,7 +8,7 @@
 		<!-- Important: Mac must be listed before Windows since Sparkle < 1.18.1 on OSX doesn't check sparkle:os -->
 
 		<item>
-			<title>Release 3.43</title>
+			<title>Release 3.44</title>
 			<description>
 				<![CDATA[
 <style>h2 { font-size: 105%; }</style>
