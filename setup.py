@@ -43,8 +43,8 @@ if dist_dir and len(dist_dir)>1 and isdir(dist_dir):
 macdeveloperid = None
 
 # Windows paths
-WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.9\bin'
-SDKPATH = r'C:\Program Files (x86)\Windows Kits\8.1\bin\x86'
+WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.11\bin'
+SDKPATH = r'C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x86'
 
 # OSX paths
 SPARKLE = '/Library/Frameworks/Sparkle.framework'
@@ -95,7 +95,7 @@ if sys.platform=='darwin':
                       ],
                       'LSMinimumSystemVersion': '10.10',
                       'NSAppleScriptEnabled': True,
-                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris',
+                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris, 2020 Athanasius',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -147,16 +147,16 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'copyright': u'© 2015-2019 Jonathan Harris',
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 Athanasius',
                  'name': APPNAME,		# WinSparkle
-                 'company_name': 'Marginal',	# WinSparkle
+                 'company_name': 'EDCD',	# WinSparkle
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
-                 'copyright': u'© 2015-2019 Jonathan Harris',
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 Athanasius',
                  'name': APPNAME,
-                 'company_name': 'Marginal',
+                 'company_name': 'EDCD',
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,
@@ -213,7 +213,7 @@ appcast.write('''
 \t\t\t\t]]>
 \t\t\t</description>
 \t\t\t<enclosure
-\t\t\t\turl="https://github.com/Marginal/EDMarketConnector/releases/download/rel-{1}/{2}"
+\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{1}/{2}"
 \t\t\t\tsparkle:os="{3}"
 \t\t\t\tsparkle:version="{4}"
 \t\t\t\tlength="{5}"
