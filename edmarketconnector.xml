@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<channel>
+		<title>E:D Market Connector</title>
+		<link>https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml</link>
+		<description>Most recent changes with links to updates.</description>
+
+		<!-- Important: Mac must be listed before Windows since Sparkle < 1.18.1 on OSX doesn't check sparkle:os -->
+
+		<item>
+			<title>Release 3.43</title>
+			<description>
+				<![CDATA[
+<style>h2 { font-size: 105%; }</style>
+<h2>Release 3.44</h2>
+<p><b>NB: This release doesn't yet exist for MacOS
+	...
+</p>
+
+<h2>Release 3.43</h2>
+<ul>
+<li>New commodity and modules from &ldquo;September Update&rdquo;.</li>
+<li>Misc fixes.</li>
+<li>More control over plugin widget colors.</li>
+</ul>
+<p>The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password.</p>
+<h2>Release 3.42</h2>
+<ul>
+<li>Use EDSY.org address for EDShipyard.</li>
+<li>Add advanced multi-cannon from &ldquo;Bridging the Gap&rdquo;.</li>
+</ul>
+<h2>Release 3.41</h2>
+<ul>
+<li>Transparent theme window size reduced.</li>
+</ul>
+<h2>Release 3.40</h2>
+<ul>
+<li>Add new modules in 3.4.</li>
+<li>Improved authentication when app started with game already running.</li>
+</ul>
+<h2>Release 3.38</h2>
+<ul>
+<li>More authentication fixes.</li>
+<li>Send influence and reputation gain to Inara on mission completion.</li>
+</ul>
+<h2>Release 3.37</h2>
+<ul>
+<li>More authentication fixes.</li>
+<li>More robust/graceful handling of Frontier Auth and/or cAPI server outages.</li>
+</ul>
+<h2>Release 3.36</h2>
+<ul>
+<li>Fix for forthcoming Frontier authentication changes.</li>
+</ul>
+<h2>Release 3.35</h2>
+<ul>
+<li>Display feedback on successful authentication.</li>
+<li>Outfitting and Shipyard data also sent to EDDN on visiting outfitting or shipyard in-game, and tagged with a &ldquo;Horizons&rdquo; flag.</li>
+<li>Sends your local faction reputation to Inara.</li>
+<li>Fix for preferences window appearance on macOS Mojave.</li>
+</ul>
+<h2>Release 3.33</h2>
+<ul>
+<li>More authentication fixes.</li>
+</ul>
+<h2>Release 3.32</h2>
+<ul>
+<li>Fix for token expiry during a session (&ldquo;Frontier server is down&rdquo; error).</li>
+<li>Force re-authentication if credentials entered for wrong Cmdr.</li>
+<li>More logging of OAuth failures.</li>
+</ul>
+<h2>Release 3.31</h2>
+<ul>
+<li>Support for OAuth2-based access to station commodity market, outfitting and shipyard data.</li>
+<li>Fix for command-line program.</li>
+<li>Improved handling of authentication errors.</li>
+<li>Commodity market data also sent to EDDN on visiting the in-game commodity market.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.30</h2>
+<ul>
+<li>Support for OAuth2-based access to station commodity market, outfitting and shipyard data.</li>
+<li>Commodity market data also sent to EDDN on visiting the in-game commodity market.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.20</h2>
+<ul>
+<li>Preliminary support for E:D 3.3.</li>
+<li>Support accessing Journal on macOS remotely over SMB.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.12</h2>
+<ul>
+<li>Fix EDSM support.</li>
+<li>Send Coriolis links to <a href="https://coriolis.io/" target="_blank">https://coriolis.io/</a> instead of https://coriolid.edcd.io/. To migrate saved builds see <a href="https://youtu.be/4SvnLcefhtI" target="_blank">https://youtu.be/4SvnLcefhtI</a>.</li>
+<li>Plugins: pass plugin's folder location to plugin_start().</li>
+</ul>
+<h2>Release 3.11</h2>
+<ul>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.10</h2>
+<ul>
+<li>Support for new ships and modules in E:D 3.1.</li>
+<li>Fix for sending ship loadouts with engineered modules with certain secondary effects to Inara.</li>
+<li>Add separators between plugins in main window.</li>
+<li>Chinese (Simplified) translation courtesy of Cmdr Zhixian Wu.</li>
+<li>Portuguese (Portugal) translation courtesy of Carlos Oliveira.</li>
+</ul>
+<h2>Release 3.06</h2>
+<ul>
+<li>Extend localisation support to plugins.</li>
+<li>Hungarian translation courtesy of Cmdr Wormhole.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.05</h2>
+<ul>
+<li>Fix for &ldquo;Frontier server is down&rdquo; error on systems with primary language other than English.</li>
+<li>Fix for TD prices file format.</li>
+</ul>
+<h2>Release 3.04</h2>
+<ul>
+<li>Export ship loadout to Coriolis in Journal &ldquo;Loadout&rdquo; format.</li>
+<li>Fix for &ldquo;This app requires accurate timestamps&rdquo; error - get timestamps for cAPI-derived data from cAPI server.</li>
+<li>Fix for TCE integration.</li>
+<li>Support for &ldquo;package plugins&rdquo;.</li>
+</ul>
+<h2>Release 3.03</h2>
+<ul>
+<li>Fixes for stats and plugin display.</li>
+</ul>
+<h2>Release 3.02</h2>
+<ul>
+<li>Choose between eddb, EDSM and Inara for station and shipyard links.</li>
+<li>Don't display &ldquo;Solo&rdquo; mode in main window.</li>
+<li>Fix for saving ship loadout to file when ship name contains punctuation.</li>
+</ul>
+<h2>Release 3.01</h2>
+<ul>
+<li>Various fixes for EDSM, Inara and TCE integrations.</li>
+<li>Fix for failure to terminate cleanly.</li>
+<li>Switch ship loadout file to journal format.</li>
+</ul>
+<h2>Release 3.00</h2>
+<ul>
+<li>Support for E:D 3.0.</li>
+<li>Updates your entire fleet on EDSM and/or Inara whenever you visit the shipyard in game.</li>
+<li>Updates your current ship's loadout on EDSM and/or Inara whenever it changes.</li>
+<li>Plugin access to your dashboard status.</li>
+</ul>
+				]]>
+			</description>
+			<enclosure
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_mac_344.zip"
+				sparkle:os="macos"
+				sparkle:version="3.4.4.0"
+				length="6058091"
+				type="application/octet-stream"
+			/>
+		</item>
+
+		<!-- Windows -->
+
+		<item>
+			<title>Release 3.44</title>
+			<description>
+				<![CDATA[
+<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+<h2>Release 3.44</h2>
+<p><b>CHANGE OF MAINTAINER</b></p>
+<p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
+<p>Initially Athanasius will now be responsible for maintaining the code, including addressing any Pull Requests and Issues, and making releases.  Unfortunately he has no access to hardware running MacOS so can't easily generate builds for that platform or test them.  So for the time being releases will be for Windows 10 only.  MacOS users are advised to look into running from source (see the github README).</p>
+<p>Going forwards the intention is to move to the python 3.7 code as soon as possible.  To facilitate this there will be one more python 2.7 release in addition to this one, with the main aim of that being to add code to alert the user about any plugins they use that have apparently not been updated to run under python 3.7.</p>
+<p>See the project GitHub repository's README.md for further information.</p>
+<ul>
+ <li>Version increased to 3.4.4.0 / 3.44.</li>
+ <li>URL the application checks for updates changed to point to github,</li>
+</ul>
+<h2>Release 3.43</h2>
+<ul>
+<li>New commodity and modules from &ldquo;September Update&rdquo;.</li>
+<li>Increase transparent theme font size.</li>
+<li>Misc fixes.</li>
+<li>More control over plugin widget colors.</li>
+</ul>
+<p>The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password.</p>
+<h2>Release 3.42</h2>
+<ul>
+<li>Use EDSY.org address for EDShipyard.</li>
+<li>Fixes for running under Wine on Linux.</li>
+<li>Support not always on top with dark theme on Linux.</li>
+<li>Add advanced multi-cannon from &rdquo;Bridging the Gap&rdquo;.</li>
+</ul>
+<h2>Release 3.41</h2>
+<ul>
+<li>Transparent theme window size reduced.</li>
+</ul>
+<h2>Release 3.40</h2>
+<ul>
+<li>Use Euro Caps font with transparent theme.</li>
+<li>Add new modules in 3.4.</li>
+<li>Improved authentication when app started with game already running.</li>
+</ul>
+<h2>Release 3.38</h2>
+<ul>
+<li>More authentication fixes.</li>
+<li>Send influence and reputation gain to Inara on mission completion.</li>
+</ul>
+<h2>Release 3.37</h2>
+<ul>
+<li>More authentication fixes.</li>
+<li>More robust/graceful handling of Frontier Auth and/or cAPI server outages.</li>
+</ul>
+<h2>Release 3.36</h2>
+<ul>
+<li>Fix for forthcoming Frontier authentication changes.</li>
+<li>Fix for installation on non-English systems.</li>
+</ul>
+<h2>Release 3.35</h2>
+<ul>
+<li>Display feedback on successful authentication.</li>
+<li>Outfitting and Shipyard data also sent to EDDN on visiting outfitting or shipyard in-game, and tagged with a &ldquo;Horizons&rdquo; flag.</li>
+<li>Sends your local faction reputation to Inara.</li>
+</ul>
+<p>The first time that you run the app while playing the game you are redirected to Frontier's authentication website and prompted for your username and password.</p>
+<h2>Release 3.33</h2>
+<ul>
+<li>More authentication fixes.</li>
+</ul>
+<h2>Release 3.32</h2>
+<ul>
+<li>Fix for token expiry during a session (&ldquo;Frontier server is down&rdquo; error).</li>
+<li>Force re-authentication if credentials entered for wrong Cmdr.</li>
+<li>More logging of OAuth failures.</li>
+</ul>
+<h2>Release 3.31</h2>
+<ul>
+<li>Support for OAuth2-based access to station commodity market, outfitting and shipyard data.</li>
+<li>Fix for command-line program.</li>
+<li>Improved handling of authentication errors.</li>
+<li>Commodity market data also sent to EDDN on visiting the in-game commodity market.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.30</h2>
+<ul>
+<li>Support for OAuth2-based access to station commodity market, outfitting and shipyard data.</li>
+<li>Commodity market data also sent to EDDN on visiting the in-game commodity market.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.20</h2>
+<ul>
+<li>Preliminary support for E:D 3.3.</li>
+<li>Support accessing Journal on macOS remotely over SMB.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.12</h2>
+<ul>
+<li>Send Coriolis links to <a href="https://coriolis.io/" target="_blank">https://coriolis.io/</a> instead of https://coriolid.edcd.io/. To migrate saved builds see <a href="https://youtu.be/4SvnLcefhtI" target="_blank">https://youtu.be/4SvnLcefhtI</a>.</li>
+</ul>
+<h2>Release 3.11</h2>
+<ul>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.10</h2>
+<ul>
+<li>Support for new ships and modules in E:D 3.1.</li>
+<li>Fix for sending ship loadouts with engineered modules with certain secondary effects to Inara.</li>
+<li>Add separators between plugins in main window.</li>
+<li>Chinese (Simplified) translation courtesy of Cmdr Zhixian Wu.</li>
+<li>Portuguese (Portugal) translation courtesy of Carlos Oliveira.</li>
+</ul>
+<h2>Release 3.06</h2>
+<ul>
+<li>Extend localisation support to plugins.</li>
+<li>Hungarian translation courtesy of Cmdr Wormhole.</li>
+<li>Misc fixes.</li>
+</ul>
+<h2>Release 3.05</h2>
+<ul>
+<li>Fix for &ldquo;Frontier server is down&rdquo; error on systems with primary language other than English.</li>
+<li>Fix for TD prices file format.</li>
+</ul>
+<h2>Release 3.04</h2>
+<ul>
+<li>Export ship loadout to Coriolis in Journal &ldquo;Loadout&rdquo; format.</li>
+<li>Fix for &ldquo;This app requires accurate timestamps&rdquo; error - get timestamps for cAPI-derived data from cAPI server.</li>
+<li>Fix for TCE integration.</li>
+<li>Support for &ldquo;package plugins&rdquo;.</li>
+</ul>
+<h2>Release 3.03</h2>
+<ul>
+<li>Fixes for stats and plugin display.</li>
+</ul>
+<h2>Release 3.02</h2>
+<ul>
+<li>Choose between eddb, EDSM and Inara for station and shipyard links.</li>
+<li>Don't display &ldquo;Solo&rdquo; mode in main window.</li>
+<li>Fix for saving ship loadout to file when ship name contains punctuation.</li>
+</ul>
+<h2>Release 3.01</h2>
+<ul>
+<li>Various fixes for EDSM, Inara and TCE integrations.</li>
+<li>Fix for failure to terminate cleanly.</li>
+<li>Switch ship loadout file to journal format.</li>
+</ul>
+<h2>Release 3.00</h2>
+<ul>
+<li>Support for E:D 3.0.</li>
+<li>Updates your entire fleet on EDSM and/or Inara whenever you visit the shipyard in game.</li>
+<li>Updates your current ship's loadout on EDSM and/or Inara whenever it changes.</li>
+<li>Plugin access to your dashboard status.</li>
+</ul>
+				]]>
+			</description>
+			<enclosure
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_win_344.msi"
+				sparkle:os="windows"
+				sparkle:installerArguments="/passive LAUNCH=yes"
+				sparkle:version="3.4.4.0"
+				length="11276288"
+				type="application/octet-stream"
+			/>
+		</item>
+
+	</channel>
+</rss>
