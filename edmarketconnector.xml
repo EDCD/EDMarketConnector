@@ -13,10 +13,16 @@
 				<![CDATA[
 <style>h2 { font-size: 105%; }</style>
 <h2>Release 3.44</h2>
-<p><b>NB: This release doesn't yet exist for MacOS
-	...
-</p>
-
+<p><b>CHANGE OF MAINTAINER</b></p>
+<p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
+<p>Initially Athanasius will now be responsible for maintaining the code, including addressing any Pull Requests and Issues, and making releases.  <b><u>Unfortunately he has no access to hardware running MacOS so can't easily generate builds for that platform</u> or test them.  So for the time being releases will be for Windows 10 only.</b>  MacOS users are advised to look into running from source (see the github README).</p>
+<p>Going forwards the intention is to move to the python 3.7 code as soon as possible.  To facilitate this there will be one more python 2.7 release in addition to this one, with the main aim of that being to add code to alert the user about any plugins they use that have apparently not been updated to run under python 3.7.</p>
+<p>See the project GitHub repository's <a href="https://github.com/EDCD/EDMarketConnector/blob/master/README.md">README.md</a> for further information.</p>
+<ul>
+ <li>Version increased to 3.4.4.0 / 3.44.</li>
+ <li>URL the application checks for updates changed to point to github,</li>
+</ul>
+<h2>Release 3.44</h2>
 <h2>Release 3.43</h2>
 <ul>
 <li>New commodity and modules from &ldquo;September Update&rdquo;.</li>
@@ -171,7 +177,7 @@
 <p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
 <p>Initially Athanasius will now be responsible for maintaining the code, including addressing any Pull Requests and Issues, and making releases.  Unfortunately he has no access to hardware running MacOS so can't easily generate builds for that platform or test them.  So for the time being releases will be for Windows 10 only.  MacOS users are advised to look into running from source (see the github README).</p>
 <p>Going forwards the intention is to move to the python 3.7 code as soon as possible.  To facilitate this there will be one more python 2.7 release in addition to this one, with the main aim of that being to add code to alert the user about any plugins they use that have apparently not been updated to run under python 3.7.</p>
-<p>See the project GitHub repository's README.md for further information.</p>
+<p>See the project GitHub repository's <a href="https://github.com/EDCD/EDMarketConnector/blob/master/README.md">README.md</a> for further information.</p>
 <ul>
  <li>Version increased to 3.4.4.0 / 3.44.</li>
  <li>URL the application checks for updates changed to point to github,</li>
@@ -317,7 +323,7 @@
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
 				sparkle:version="3.4.4.0"
-				length="11276288"
+				length="10338304"
 				type="application/octet-stream"
 			/>
 		</item>
