@@ -38,4 +38,4 @@ If you have registered with the [Inara](https://inara.cz/) website this app tran
 
 ### Plugins
 
-If you have installed any [plugins](https://github.com/Marginal/EDMarketConnector/wiki/Plugins) this app makes your Commander details available to those plugins.
+If you have installed any [plugins](https://github.com/EDCD/EDMarketConnector/wiki/Plugins) this app makes your Commander details available to those plugins.
