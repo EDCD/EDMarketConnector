@@ -273,6 +273,18 @@ class PreferencesDialog(tk.Toplevel):
                     label = nb.Label(plugsframe, text='%s (%s)' % (plugin.folder, plugin.name))
                 label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
 
+        ############################################################
+        # Show which plugins don't have Python 3.x support
+        ############################################################
+        if len(plug.PLUGINS_not_py3):
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support')+':').grid(padx=PADX, sticky=tk.W)	# List of plugins in settings
+            for plugin in plug.PLUGINS_not_py3:
+                if plugin.folder: # 'system' ones have this set to None to suppress listing in Plugins prefs tab
+                    nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+
+        ############################################################
+
         disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
         if len(disabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)

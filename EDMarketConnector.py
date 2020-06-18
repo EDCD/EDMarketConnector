@@ -299,6 +299,13 @@ class AppWindow:
 
         self.postprefs(False)	# Companion login happens in callback from monitor
 
+        if len(plug.PLUGINS_not_py3):
+            import tkMessageBox
+            tkMessageBox.showinfo('Plugins Without Python 3.x Support',
+                    "One or more of your enabled plugins do not yet have support for Python 3.x.  Please see the list on the 'Plugins' tab of 'File' > 'Settings'.  You should check if there is an updated version available, else alert the developer that they will need to update the code when EDMC moves to Python 3.x"
+            )
+
+
     # callback after the Preferences dialog is applied
     def postprefs(self, dologin=True):
         self.prefsdialog = None

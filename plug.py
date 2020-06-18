@@ -65,6 +65,7 @@ GuiFocusCodex = 11
 
 # List of loaded Plugins
 PLUGINS = []
+PLUGINS_not_py3 = []
 
 # For asynchronous error display
 last_error = {
@@ -194,6 +195,14 @@ def load_plugins(master):
             except:
                 print_exc()
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
+
+    #########################################################
+    # Detect plugins that aren't yet ready for Python 3.x
+    #########################################################
+    for p in PLUGINS:
+        if p.module and p.folder and not p._get_func('plugin_start3'):
+            PLUGINS_not_py3.append(p)
+    #########################################################
 
     imp.release_lock()
 
