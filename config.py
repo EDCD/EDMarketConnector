@@ -11,7 +11,7 @@ appcmdname = 'EDMC'
 appversion = '3.4.6.0'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
-update_interval = 47*60*60
+update_interval = 8*60*60
 
 
 if platform=='darwin':
