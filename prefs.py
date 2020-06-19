@@ -278,10 +278,12 @@ class PreferencesDialog(tk.Toplevel):
         ############################################################
         if len(plug.PLUGINS_not_py3):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
-            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support')+':').grid(padx=PADX, sticky=tk.W)	# List of plugins in settings
+            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=PADX, sticky=tk.W)
             for plugin in plug.PLUGINS_not_py3:
                 if plugin.folder: # 'system' ones have this set to None to suppress listing in Plugins prefs tab
                     nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+            HyperlinkLabel(plugsframe, text=_('Information on migrating plugins'), background=nb.Label().cget('background'), url='https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#migration-to-python-37', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)
+
 
         ############################################################
 
