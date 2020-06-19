@@ -279,3 +279,12 @@ EDMC now lets you disable a plugin without deleting it, simply rename the plugin
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
+# Migration to Python 3.7
+
+In a future release EDMC will use Python **3.7**, instead of the Python 2.7 it has historically used.  As of mid-2020 there is a [python3 branch](/EDCD/EDMarketConnector/tree/python3) to test migrated plugins against.  This is a brief outline of the steps required to migrate a plugin from earlier versions of EDMC:
+
+- Rename the function `plugin_start` to `plugin_start3(plugin_dir)`. Plugins without a `plugin_start3` function will be listed as disabled on EDMC's "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating" will appear in the log.
+- Check that callback functions `plugin_prefs`, `prefs_changed`, `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with the correct number of arguments. Older versions of this app were tolerant of missing arguments in these function declarations.
+- Port the code to Python 3.7. The [2to3](https://docs.python.org/3/library/2to3.html) tool can automate much of this work.
+
+Depending on the complexity of the plugin it may be feasible to make it compatible with both EDMC 3.4 + Python 2.7 and later EDMC + Python 3.7. [Here's](https://python-future.org/compatible_idioms.html) a guide on writing Python 2/3 compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06) an example of the changes required for a simple plugin.
