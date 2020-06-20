@@ -184,6 +184,13 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
+        # Option to disabled Automatic Check For Updates whilst in-game
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        self.disable_autoappupdatecheckingame = tk.IntVar(value = config.getint('disable_autoappupdatecheckingame'))
+        self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(configframe, text=_('Disable Automatic Application Updates Check when in-game'), variable=self.disable_autoappupdatecheckingame, command=self.disable_autoappupdatecheckingame_changed)
+        self.disable_autoappupdatecheckingame_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
+
+
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)	# Settings prompt for preferred ship loadout, system and station info websites
 
@@ -432,6 +439,11 @@ class PreferencesDialog(tk.Toplevel):
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
         self.outvarchanged()
+
+    def disable_autoappupdatecheckingame_changed(self):
+        config.set('disable_autoappupdatecheckingame', self.disable_autoappupdatecheckingame.get())
+        # If it's now False, re-enable WinSparkle ?  Need access to the AppWindow.updater variable to call down
+
 
     def themecolorbrowse(self, index):
         (rgb, color) = tkColorChooser.askcolor(self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)

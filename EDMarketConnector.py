@@ -583,6 +583,10 @@ class AppWindow:
                 return	# Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
+                if config.getint('disable_autoappupdatecheckingame') and 1:
+                    self.updater.setAutomaticUpdatesCheck(False)
+                    print 'Monitor: Disable WinSparkle automatic update checks'
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     print "Can't start Status monitoring"
@@ -601,6 +605,12 @@ class AppWindow:
             # Auto-Update after docking, but not if auth callback is pending
             if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY and companion.session.state != companion.Session.STATE_AUTH:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+
+            if entry['event'] == 'ShutDown':
+                # Enable WinSparkle automatic update checks
+                # NB: Do this blindly, in case option got changed whilst in-game
+                self.updater.setAutomaticUpdatesCheck(True)
+                print 'Monitor: Enable WinSparkle automatic update checks'
 
     # cAPI auth
     def auth(self, event=None):
