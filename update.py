@@ -20,6 +20,9 @@ if not getattr(sys, 'frozen', False):
         def __init__(self, master):
             self.root = master
 
+        def setAutomaticUpdatesCheck(self, onoroff):
+            return
+
         def checkForUpdates(self):
             thread = threading.Thread(target = self.worker, name = 'update worker')
             thread.daemon = True
@@ -57,6 +60,10 @@ elif sys.platform=='darwin':
                 # can't load framework - not frozen or not included in app bundle?
                 print_exc()
                 self.updater = None
+
+        def setAutomaticUpdatesCheck(self, onoroff):
+            if self.updater:
+                self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
 
         def checkForUpdates(self):
             if self.updater:
@@ -97,6 +104,10 @@ elif sys.platform=='win32':
             except:
                 print_exc()
                 self.updater = None
+
+        def setAutomaticUpdatesCheck(self, onoroff):
+            if self.updater:
+                self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
 
         def checkForUpdates(self):
             if self.updater:

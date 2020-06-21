@@ -27,7 +27,9 @@ holdoff = 60	# be nice
 timeout = 10	# requests timeout
 auth_timeout = 30	# timeout for initial auth
 
-CLIENT_ID   = os.getenv('CLIENT_ID') or '227cd239-ab8c-4728-9d3c-d8f588f247bd' 	# Obtain from https://auth.frontierstore.net/client/signup
+# Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
+# Athanasius' Frontier account
+CLIENT_ID   = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a' 	# Obtain from https://auth.frontierstore.net/client/signup
 SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH    = '/auth'
 URL_TOKEN   = '/token'
