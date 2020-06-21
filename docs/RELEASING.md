@@ -139,7 +139,7 @@ It is recommended to keep all the files for distribution on github, including th
 
 1. Craft a new github Release, using the new tag so as to reference the correct commit.  Include the .msi file for Windows (the Source Code files are added by github based on the release tag).  Use the changelog text you already prepared.
 
-1. Check that the URL for the release that you specified in `edmarketconnector.xml` actually matches where github has placed the `.msi` file.
+1. **Check that the URL for the release that you specified in `edmarketconnector.xml` actually matches where github has placed the `.msi` file.**  If, for instance, you fail to *update* this URL then upon running the 'new' installer it will silently fail, because you made people try to install the old version over the old version.
 
 1. **NOW commit the latest `edmarketconnector.xml` changes to the `releases` branch and push to github.**
 This is the step that fully publishes the release for running EDMC instances to pick up on 'Check for Updates'.  Yes, this means that this step isn't included in the git tag for the release, but the alternative (with hosting the file via github raw URL) is to have a race condition where a running EDMC instance might check the file and see there's a new version *before that new version is actually available for download*.
