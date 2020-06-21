@@ -16,10 +16,6 @@ Environment
 1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently tested version.  Copy the two files, found at `<zip file>\<version>\Release`, into your checkout of the EDMC git files.
 1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).  This is needed for the internationalisation support in EDMC. [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338) is the most recently tested version.  Technically you only need the following components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will auto-select some others).  NB: If you have need to uninstall this it's "Windows Software Development Kit - Windows 10.0.18362.1" in "Apps & Features", *not* "Windows SDK AddOn".
 1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.  [v3.7.7](https://www.python.org/downloads/release/python-377/) is the most recently tested version.  You need the `Windows x86 executable installer` file, for the 32-bit version.
-	1. You'll now need to 'pip install' several python modules
-		1. `pip install certifi==2019.9.11` (because a later version doesn't work with py2exe, causing cacert.pem to not be found)
-		1. `pip install requests`
-		1. `pip install watchdog`
 1. [py2exe](https://github.com/albertosottile/py2exe):
 	1. Install the python module.  There are two options here.
 		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2) and the current Marginal 'python3' branch as-is.  This contains a small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
@@ -32,24 +28,10 @@ Environment
 
 				%s/DLLs/sqlite3.dll' % (sys.base_prefix),
 
-	1. `pip install keyring==19.2.0` (because newer tries to get importlib_metadata in a way that doesn't work)
-
-	As dependencies also get pulled in here's a list of what ends up in site-packages, and their versions:
-
-		cachetools-4.1.0.dist-info
-		certifi-2019.9.11.dist-info
-		chardet-3.0.4.dist-info
-		entrypoints-0.3.dist-info
-		future-0.18.2-py3.7.egg-info
-		keyring-19.2.0.dist-info
-		pathtools-0.1.2-py3.7.egg-info
-		pefile-2019.4.18-py3.7.egg-info
-		py2exe-0.9.4.0.dist-info
-		pywin32_ctypes-0.2.0.dist-info
-		requests-2.23.0.dist-info
-		setuptools-41.2.0.dist-info
-		urllib3-1.25.9.dist-info
-		watchdog-0.10.2-py3.7.egg-info
+1. You'll now need to 'pip install' several python modules.
+	1. Ensure you have `pip` installed. If needs be see [Installing pip](https://pip.pypa.io/en/stable/installing/)
+	1. The easiest way is to utilise the `requirements.txt` file: `pip install -r requirements.txt` - NB: This will fail at py2exe if you didn't already install it as above.
+	1. Else check the contents of `requirements.txt` and ensure the modules listed there are installed as per the version requirements.
 
 If you are using different versions of any of these tools then please ensure that the paths where they're installed match the associated lines in `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
 
