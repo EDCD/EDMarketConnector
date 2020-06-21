@@ -199,13 +199,6 @@ def load_plugins(master):
                 pass
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
 
-    plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
-    if (plugins_not_py3_last + 86400) < int(time()) and len(PLUGINS_not_py3):
-        tk.messagebox.showinfo('EDMC: Plugins Without Python 3.x Support',
-                    "One or more of your enabled plugins do not yet have support for Python 3.x.  Please see the list on the 'Plugins' tab of 'File' > 'Settings'.  You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x\r\n\r\nYou can disable a plugin by renaming its folder to have '.disabled' on the end of the name."
-            )
-        config.set('plugins_not_py3_last', int(time()))
-
 def provides(fn_name):
     """
     Find plugins that provide a function
