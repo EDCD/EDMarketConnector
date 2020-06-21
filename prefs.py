@@ -184,6 +184,13 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state = self.hotkey_code and tk.NORMAL or tk.DISABLED)	# Hotkey/Shortcut setting
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
+        # Option to disabled Automatic Check For Updates whilst in-game
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        self.disable_autoappupdatecheckingame = tk.IntVar(value = config.getint('disable_autoappupdatecheckingame'))
+        self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(configframe, text=_('Disable Automatic Application Updates Check when in-game'), variable=self.disable_autoappupdatecheckingame, command=self.disable_autoappupdatecheckingame_changed)
+        self.disable_autoappupdatecheckingame_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
+
+
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)	# Settings prompt for preferred ship loadout, system and station info websites
 
@@ -272,6 +279,20 @@ class PreferencesDialog(tk.Toplevel):
                 else:
                     label = nb.Label(plugsframe, text='%s (%s)' % (plugin.folder, plugin.name))
                 label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+
+        ############################################################
+        # Show which plugins don't have Python 3.x support
+        ############################################################
+        if len(plug.PLUGINS_not_py3):
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=PADX, sticky=tk.W)
+            for plugin in plug.PLUGINS_not_py3:
+                if plugin.folder: # 'system' ones have this set to None to suppress listing in Plugins prefs tab
+                    nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+            HyperlinkLabel(plugsframe, text=_('Information on migrating plugins'), background=nb.Label().cget('background'), url='https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#migration-to-python-37', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)
+
+
+        ############################################################
 
         disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
         if len(disabled_plugins):
@@ -418,6 +439,11 @@ class PreferencesDialog(tk.Toplevel):
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
         self.outvarchanged()
+
+    def disable_autoappupdatecheckingame_changed(self):
+        config.set('disable_autoappupdatecheckingame', self.disable_autoappupdatecheckingame.get())
+        # If it's now False, re-enable WinSparkle ?  Need access to the AppWindow.updater variable to call down
+
 
     def themecolorbrowse(self, index):
         (rgb, color) = tkColorChooser.askcolor(self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)

@@ -15,6 +15,8 @@ from ttkHyperlinkLabel import HyperlinkLabel
 
 from config import appname, applongname, config
 
+if __debug__:
+    from traceback import print_exc
 
 if platform == 'win32':
     import ctypes
@@ -33,65 +35,66 @@ elif platform == 'linux2':
     Atom = c_ulong
     Display = c_void_p	# Opaque
 
-    # Sending ClientMessage to WM using XSendEvent()
-    SubstructureNotifyMask   = 1<<19
-    SubstructureRedirectMask = 1<<20
-    ClientMessage = 33
+    PropModeReplace = 0
+    PropModePrepend = 1
+    PropModeAppend  = 2
 
-    _NET_WM_STATE_REMOVE = 0
-    _NET_WM_STATE_ADD    = 1
-    _NET_WM_STATE_TOGGLE = 2
+    # From xprops.h
+    MWM_HINTS_FUNCTIONS = 1 << 0
+    MWM_HINTS_DECORATIONS = 1 << 1
+    MWM_HINTS_INPUT_MODE = 1 << 2
+    MWM_HINTS_STATUS = 1 << 3
+    MWM_FUNC_ALL = 1 << 0
+    MWM_FUNC_RESIZE = 1 << 1
+    MWM_FUNC_MOVE = 1 << 2
+    MWM_FUNC_MINIMIZE = 1 << 3
+    MWM_FUNC_MAXIMIZE = 1 << 4
+    MWM_FUNC_CLOSE = 1 << 5
+    MWM_DECOR_ALL = 1 << 0
+    MWM_DECOR_BORDER = 1 << 1
+    MWM_DECOR_RESIZEH = 1 << 2
+    MWM_DECOR_TITLE = 1 << 3
+    MWM_DECOR_MENU = 1 << 4
+    MWM_DECOR_MINIMIZE = 1 << 5
+    MWM_DECOR_MAXIMIZE = 1 << 6
 
-    class XClientMessageEvent_data(Union):
+    class MotifWmHints(Structure):
         _fields_ = [
-            ('b', c_char * 20),
-            ('s', c_short * 10),
-            ('l', c_long * 5),
+            ('flags', c_ulong),
+            ('functions', c_ulong),
+            ('decorations', c_ulong),
+            ('input_mode', c_long),
+            ('status', c_ulong),
         ]
-
-    class XClientMessageEvent(Structure):
-        _fields_ = [
-            ('type', c_int),
-            ('serial', c_ulong),
-            ('send_event', c_int),
-            ('display', POINTER(Display)),
-            ('window', Window),
-            ('message_type', Atom),
-            ('format', c_int),
-            ('data', XClientMessageEvent_data),
-        ]
-
-    class XEvent(Union):
-        _fields_ = [
-            ('xclient', XClientMessageEvent),
-        ]
-
-    xlib = cdll.LoadLibrary('libX11.so.6')
-    XFlush = xlib.XFlush
-    XFlush.argtypes = [POINTER(Display)]
-    XFlush.restype = c_int
-    XInternAtom = xlib.XInternAtom
-    XInternAtom.restype = Atom
-    XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
-    XOpenDisplay = xlib.XOpenDisplay
-    XOpenDisplay.argtypes = [c_char_p]
-    XOpenDisplay.restype = POINTER(Display)
-    XQueryTree = xlib.XQueryTree
-    XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
-    XQueryTree.restype = c_int
-    XSendEvent = xlib.XSendEvent
-    XSendEvent.argtypes = [POINTER(Display), Window, c_int, c_long, POINTER(XEvent)]
-    XSendEvent.restype = c_int
 
     try:
+        xlib = cdll.LoadLibrary('libX11.so.6')
+        XInternAtom = xlib.XInternAtom
+        XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
+        XInternAtom.restype = Atom
+        XChangeProperty = xlib.XChangeProperty
+        XChangeProperty.argtypes = [POINTER(Display), Window, Atom, Atom, c_int, c_int, POINTER(MotifWmHints), c_int]
+        XChangeProperty.restype = c_int
+        XFlush = xlib.XFlush
+        XFlush.argtypes = [POINTER(Display)]
+        XFlush.restype = c_int
+        XOpenDisplay = xlib.XOpenDisplay
+        XOpenDisplay.argtypes = [c_char_p]
+        XOpenDisplay.restype = POINTER(Display)
+        XQueryTree = xlib.XQueryTree
+        XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
+        XQueryTree.restype = c_int
         dpy = xlib.XOpenDisplay(None)
-        XA_ATOM = Atom(4)
-        net_wm_state = XInternAtom(dpy, '_NET_WM_STATE', False)
-        net_wm_state_above = XInternAtom(dpy, '_NET_WM_STATE_ABOVE', False)
-        net_wm_state_sticky = XInternAtom(dpy, '_NET_WM_STATE_STICKY', False)
-        net_wm_state_skip_pager = XInternAtom(dpy, '_NET_WM_STATE_SKIP_PAGER', False)
-        net_wm_state_skip_taskbar = XInternAtom(dpy, '_NET_WM_STATE_SKIP_TASKBAR', False)
+        motif_wm_hints_property = XInternAtom(dpy, b'_MOTIF_WM_HINTS', False)
+        motif_wm_hints_normal = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                                             MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                                             MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
+                                             0, 0)
+        motif_wm_hints_dark   = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                                             MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                                             0, 0, 0)
     except:
+        if __debug__: print_exc()
         dpy = None
 
 
@@ -356,25 +359,19 @@ class _Theme:
 
         else:
             root.withdraw()
-            # https://www.tcl-lang.org/man/tcl/TkCmd/wm.htm#M19
-            # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#STACKINGORDER
-            root.attributes('-type', theme and 'splash' or 'normal')
             root.update_idletasks()	# Size gets recalculated here
-            root.deiconify()
-            root.wait_visibility()	# need main window to be displayed before returning
-            if dpy and theme:
-                # Try to display in the taskbar
+            if dpy:
                 xroot = Window()
                 parent = Window()
                 children = Window()
                 nchildren = c_uint()
                 XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
-                # https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472615568
-                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_skip_pager, net_wm_state_skip_taskbar, 1, 0))))
-                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
-                xevent = XEvent(xclient = XClientMessageEvent(ClientMessage, 0, 0, None, parent, net_wm_state, 32, XClientMessageEvent_data(l = (_NET_WM_STATE_REMOVE, net_wm_state_sticky, 0, 1, 0))))
-                XSendEvent(dpy, xroot, False, SubstructureRedirectMask | SubstructureNotifyMask, byref(xevent))
+                XChangeProperty(dpy, parent, motif_wm_hints_property, motif_wm_hints_property, 32, PropModeReplace, theme and motif_wm_hints_dark or motif_wm_hints_normal, 5)
                 XFlush(dpy)
+            else:
+                root.overrideredirect(theme and 1 or 0)
+            root.deiconify()
+            root.wait_visibility()	# need main window to be displayed before returning
 
         if not self.minwidth:
             self.minwidth = root.winfo_width()	# Minimum width = width on first creation

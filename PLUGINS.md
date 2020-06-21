@@ -132,7 +132,7 @@ def plugin_app(parent):
 
 Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `dashboard_entry()` and `cmdr_data()`.
 
-Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
+Your events all get called on the main Tkinter loop so be sure not to block for very long or the app will appear to freeze. If you have a long running operation such as sending or receiving data from an external server then you should do this in a separate worker Thread. You can send work items to the worker thread over a Queue. Tkinter is not thread-safe so you should not access any Tkinter resources (including widgets and variables) from worker threads - doing so may cause the app to crash intermittently. You can signal back to the main thread using Tkinter's `event_generate()` widget method, generating a user-defined event that you have previously registered with the [`bind_all()`](http://effbot.org/tkinterbook/tkinter-events-and-bindings.htm) widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/master/plugins/edsm.py) for an example of these techniques.
 
 ### Journal Entry
 
@@ -279,3 +279,12 @@ EDMC now lets you disable a plugin without deleting it, simply rename the plugin
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
+# Migration to Python 3.7
+
+In a future release EDMC will use Python **3.7**, instead of the Python 2.7 it has historically used.  As of mid-2020 there is a [python3 branch](https://github.com/EDCD/EDMarketConnector/tree/python3) to test migrated plugins against.  This is a brief outline of the steps required to migrate a plugin from earlier versions of EDMC:
+
+- Rename the function `plugin_start` to `plugin_start3(plugin_dir)`. Plugins without a `plugin_start3` function will be listed as disabled on EDMC's "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating" will appear in the log.
+- Check that callback functions `plugin_prefs`, `prefs_changed`, `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with the correct number of arguments. Older versions of this app were tolerant of missing arguments in these function declarations.
+- Port the code to Python 3.7. The [2to3](https://docs.python.org/3/library/2to3.html) tool can automate much of this work.
+
+Depending on the complexity of the plugin it may be feasible to make it compatible with both EDMC 3.4 + Python 2.7 and later EDMC + Python 3.7. [Here's](https://python-future.org/compatible_idioms.html) a guide on writing Python 2/3 compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06) an example of the changes required for a simple plugin.
