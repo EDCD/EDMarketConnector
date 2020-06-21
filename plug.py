@@ -205,8 +205,6 @@ def load_plugins(master):
             PLUGINS_not_py3.append(p)
     #########################################################
 
-    imp.release_lock()
-
 def provides(fn_name):
     """
     Find plugins that provide a function
