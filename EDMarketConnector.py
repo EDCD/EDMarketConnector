@@ -815,4 +815,21 @@ if __name__ == "__main__":
     root = tk.Tk(className=appname.lower())
     app = AppWindow(root)
 
+    def messagebox_not_py3():
+        plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
+        if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+            tk.messagebox.showinfo(
+                'EDMC: Plugins Without Python 3.x Support', (
+                    "One or more of your enabled plugins do not yet have support for Python 3.x. "
+                    "Please see the list on the 'Plugins' tab of 'File' > 'Settings'. "
+                    "You should check if there is an updated version available, "
+                    "else alert the developer that they need to update the code for Python 3.x.\r\n"
+                    "\r\n"
+                    "You can disable a plugin by renaming its folder to have '.disabled' "
+                    "on the end of the name."
+                )
+            )
+            config.set('plugins_not_py3_last', int(time()))
+
+    root.after(0, messagebox_not_py3)
     root.mainloop()
