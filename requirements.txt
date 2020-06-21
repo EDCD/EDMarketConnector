@@ -1,7 +1,6 @@
-argh>=0.26.2
-keyring>=3.3
+certifi==2019.9.11
+keyring==19.2.0
 pathtools>=0.1.2
-PyYAML>=3.12
+py2exe>=0.9.3.2
 requests>=2.11.1
 watchdog>=0.8.3
-wheel>=0.24.0
