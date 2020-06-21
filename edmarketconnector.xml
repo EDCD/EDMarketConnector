@@ -192,7 +192,7 @@ If any of your plugins are listed in that section then they will need updating, 
 	<li>Linux: Should now appear on task bar whilst in dark mode theme.</li>
 	<li>INARA: Send correct opponentName for Interdicted and Interdiction events.<.li>
 	<li>Send SAASignalsFound events to EDDN.</li>
-	<li>Add Agronomic Treatment introduced for an community goal.</li>
+	<li>Add Agronomic Treatment introduced for a community goal.</li>
 	<li>Fix Detailed Surface Scanner rating.</li>
 	<li>Fix for the "Inara 400 The reputation value exceeds the valid range" error.</li>
 	<li>Minimum interval between checks for a new version of EDMC has been reduced from 47 hours to 8 hours.</li>
