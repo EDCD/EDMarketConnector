@@ -14,6 +14,7 @@ import tkinter as tk
 import myNotebook as nb
 
 from config import config
+from time import time as time
 
 
 # Dashboard Flags constants
@@ -67,6 +68,7 @@ GuiFocusCodex = 11
 
 # List of loaded Plugins
 PLUGINS = []
+PLUGINS_not_py3 = []
 
 # For asynchronous error display
 last_error = {
@@ -99,6 +101,7 @@ class Plugin(object):
                     self.module = module
                 elif getattr(module, 'plugin_start', None):
                     sys.stdout.write('plugin %s needs migrating\n' % name)
+                    PLUGINS_not_py3.append(self)
                 else:
                     sys.stdout.write('plugin %s has no plugin_start3() function\n' % name)
             except:
@@ -195,6 +198,13 @@ def load_plugins(master):
             except:
                 pass
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
+
+    plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
+    if (plugins_not_py3_last + 86400) < int(time()) and len(PLUGINS_not_py3):
+        tk.messagebox.showinfo('EDMC: Plugins Without Python 3.x Support',
+                    "One or more of your enabled plugins do not yet have support for Python 3.x.  Please see the list on the 'Plugins' tab of 'File' > 'Settings'.  You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x\r\n\r\nYou can disable a plugin by renaming its folder to have '.disabled' on the end of the name."
+            )
+        config.set('plugins_not_py3_last', int(time()))
 
 def provides(fn_name):
     """

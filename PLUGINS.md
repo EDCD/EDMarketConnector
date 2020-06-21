@@ -19,14 +19,14 @@ Each plugin has it's own folder in the `plugins` directory:
 
 Plugins are python files. The plugin folder must have a file named `load.py` that must provide one module level function and optionally provide a few others.
 
-EDMC will import the `load.py` file as a module and then call the `plugin_start()` function.
+EDMC will import the `load.py` file as a module and then call the `plugin_start3()` function.
 
 ```python
 def plugin_start3(plugin_dir):
    """
    Load this plugin into EDMC
    """
-   print "I am loaded! My plugin folder is {}".format(plugin_dir.encode("utf-8"))
+   print("I am loaded! My plugin folder is {}".format(plugin_dir))
    return "Test"
 ```
 
@@ -39,7 +39,7 @@ def plugin_stop():
     """
     EDMC is closing
     """
-    print "Farewell cruel world!"
+    print("Farewell cruel world!")
 ```
 
 If your plugin uses one or more threads to handle Events then stop and join() the threads before returning from this function.
@@ -132,7 +132,7 @@ def plugin_app(parent):
 
 Once you have created your plugin and EDMC has loaded it there are three other functions you can define to be notified by EDMC when something happens: `journal_entry()`, `dashboard_entry()` and `cmdr_data()`.
 
-Your events all get called on the main tkinter loop so be sure not to block for very long or the EDMC will appear to freeze. If you have a long running operation then you should take a look at how to do background updates in tkinter - http://effbot.org/zone/tkinter-threads.htm
+Your events all get called on the main Tkinter loop so be sure not to block for very long or the app will appear to freeze. If you have a long running operation such as sending or receiving data from an external server then you should do this in a separate worker Thread. You can send work items to the worker thread over a Queue. Tkinter is not thread-safe so you should not access any Tkinter resources (including widgets and variables) from worker threads - doing so may cause the app to crash intermittently. You can signal back to the main thread using Tkinter's `event_generate()` widget method, generating a user-defined event that you have previously registered with the [`bind_all()`](http://effbot.org/tkinterbook/tkinter-events-and-bindings.htm) widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/master/plugins/edsm.py) for an example of these techniques.
 
 ### Journal Entry
 
@@ -251,7 +251,7 @@ If you display localized strings in EDMC's main window you should refresh them i
 
 Translation files should reside in folder named `L10n` inside your plugin's folder. Files must be in macOS/iOS ".strings" format, encoded as UTF-8. You can generate a starting template file for your translations by invoking `l10n.py` in your plugin's folder. This extracts all the translatable strings from Python files in your plugin's folder and places them in a file named `en.template` in the `L10n` folder. Rename this file as `<language_code>.strings` and edit it.
 
-See EDMC's own [`L10n`](https://github.com/Marginal/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
+See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/master/L10n) folder for the list of supported language codes and for example translation files.
 
 
 # Python Package Plugins

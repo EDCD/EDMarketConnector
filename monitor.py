@@ -431,8 +431,8 @@ class EDLogs(FileSystemEventHandler):
                 self.station = None
                 self.stationtype = None
                 self.stationservices = None
-            elif entry['event'] in ['Location', 'FSDJump', 'Docked']:
-                if entry['event'] == 'Location':
+            elif entry['event'] in ['Location', 'FSDJump', 'Docked', 'CarrierJump']:
+                if entry['event'] in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
                 elif entry['event'] == 'FSDJump':
                     self.planet = None

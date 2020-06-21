@@ -215,10 +215,9 @@ class AppWindow(object):
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-            if platform == 'win32':	# Can't work out how to deiconify on Linux
-                theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-                theme_minimize.grid(row=0, column=3, padx=2)
-                theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
+            theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
+            theme_minimize.grid(row=0, column=3, padx=2)
+            theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
             theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
             theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
@@ -300,6 +299,7 @@ class AppWindow(object):
         config.delete('logdir')
 
         self.postprefs(False)	# Companion login happens in callback from monitor
+
 
     # callback after the Preferences dialog is applied
     def postprefs(self, dologin=True):
@@ -576,6 +576,10 @@ class AppWindow(object):
                 return	# Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
+                if config.getint('disable_autoappupdatecheckingame') and 1:
+                    self.updater.setAutomaticUpdatesCheck(False)
+                    print('Monitor: Disable WinSparkle automatic update checks')
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     print("Can't start Status monitoring")
@@ -594,6 +598,12 @@ class AppWindow(object):
             # Auto-Update after docking, but not if auth callback is pending
             if entry['event'] in ['StartUp', 'Location', 'Docked'] and monitor.station and not config.getint('output') & config.OUT_MKT_MANUAL and config.getint('output') & config.OUT_STATION_ANY and companion.session.state != companion.Session.STATE_AUTH:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+
+            if entry['event'] == 'ShutDown':
+                # Enable WinSparkle automatic update checks
+                # NB: Do this blindly, in case option got changed whilst in-game
+                self.updater.setAutomaticUpdatesCheck(True)
+                print('Monitor: Enable WinSparkle automatic update checks')
 
     # cAPI auth
     def auth(self, event=None):
@@ -663,13 +673,13 @@ class AppWindow(object):
             self.w.clipboard_append(monitor.station and '%s,%s' % (monitor.system, monitor.station) or monitor.system)
 
     def help_general(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
 
     def help_privacy(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/wiki/Privacy-Policy')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
 
     def help_releases(self, event=None):
-        webbrowser.open('https://github.com/Marginal/EDMarketConnector/releases')
+        webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
     def save_raw(self):
         self.status['text'] = _('Fetching data...')
@@ -804,4 +814,12 @@ if __name__ == "__main__":
 
     root = tk.Tk(className=appname.lower())
     app = AppWindow(root)
+
+    plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
+    if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+        tkinter.messagebox.showinfo('Plugins Without Python 3.x Support',
+                    "One or more of your enabled plugins do not yet have support for Python 3.x.  Please see the list on the 'Plugins' tab of 'File' > 'Settings'.  You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x\r\n\r\nYou can disable a plugin by renaming its folder to have '.disabled' on the end of the name."
+            )
+        config.set('plugins_not_py3_last', int(time()))
+
     root.mainloop()

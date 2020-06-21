@@ -96,7 +96,7 @@ if sys.platform=='darwin':
                       ],
                       'LSMinimumSystemVersion': '10.10',
                       'NSAppleScriptEnabled': True,
-                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris',
+                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -153,18 +153,18 @@ setup(
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'product_name': APPNAME,	# WinSparkle
+                 'company_name': 'EDCD',	# WinSparkle
+                 'product_name': APP,           # WinSparkle
                  'version': VERSION,
-                 'copyright': u'© 2015-2019 Jonathan Harris',
-                 'company_name': 'Marginal',	# WinSparkle
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
                  'script': APPCMD,
+                 'company_name': 'EDCD',
                  'product_name': APPNAME,
                  'version': VERSION,
-                 'copyright': u'© 2015-2019 Jonathan Harris',
-                 'company_name': 'Marginal',
+                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,
@@ -230,7 +230,7 @@ appcast.write('''
 \t\t\t\t]]>
 \t\t\t</description>
 \t\t\t<enclosure
-\t\t\t\turl="https://github.com/Marginal/EDMarketConnector/releases/download/rel-{1}/{2}"
+\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{1}/{2}"
 \t\t\t\tsparkle:os="{3}"
 \t\t\t\tsparkle:version="{4}"
 \t\t\t\tlength="{5}"

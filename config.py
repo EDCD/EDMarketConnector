@@ -8,10 +8,10 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '3.5.0.0'
+appversion = '3.5.1.0'
 
-update_feed = 'https://marginal.org.uk/edmarketconnector.xml'
-update_interval = 47*60*60
+update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+update_interval = 8*60*60
 
 
 if platform=='darwin':

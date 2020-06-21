@@ -11,7 +11,7 @@
 			 Version="$(var.PRODUCTVERSION)"
 			 UpgradeCode="$(var.UPGRADECODE)"
 			 Language="!(bind.fileLanguage.EDMarketConnector.exe)"
-			 Manufacturer="Marginal">
+			 Manufacturer="EDCD">
 
 		<Package Id="*" Keywords="Installer"
 				 InstallScope="perMachine"
@@ -33,7 +33,7 @@
 		<!-- For Add/Remove programs -->
 		<Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
 		<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />	<!-- Remove modify - also set by WixUI_Minimal -->
-		<Property Id="ARPHELPLINK" Value="https://github.com/Marginal/EDMarketConnector/wiki" />
+		<Property Id="ARPHELPLINK" Value="https://github.com/EDCD/EDMarketConnector/wiki" />
 
 		<!-- Set INSTALLDIR from ARPINSTALLLOCATION if replacing/upgrading -->
 		<!-- https://wyrdfish.wordpress.com/2012/07/20/msi-writing-guidelines-this-may-be-out-of-date/ -->
