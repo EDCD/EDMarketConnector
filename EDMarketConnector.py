@@ -587,7 +587,7 @@ class AppWindow(object):
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
-                    print 'Monitor: Disable WinSparkle automatic update checks'
+                    print('Monitor: Disable WinSparkle automatic update checks')
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     print("Can't start Status monitoring")
@@ -611,7 +611,7 @@ class AppWindow(object):
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
                 self.updater.setAutomaticUpdatesCheck(True)
-                print 'Monitor: Enable WinSparkle automatic update checks'
+                print('Monitor: Enable WinSparkle automatic update checks')
 
     # cAPI auth
     def auth(self, event=None):
