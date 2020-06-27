@@ -223,6 +223,7 @@ class EDLogs(FileSystemEventHandler):
                     ('StarSystem', self.system),
                     ('StarPos', self.coordinates),
                     ('SystemAddress', self.systemaddress),
+                    ('Population', self.systempopulation),
                 ])
                 if self.planet:
                     entry['Body'] = self.planet
@@ -446,6 +447,10 @@ class EDLogs(FileSystemEventHandler):
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None	# Docked event doesn't include coordinates
                 self.systemaddress = entry.get('SystemAddress')
+
+                if entry['event'] in ['Location', 'FSDJump', 'CarrierJump']:
+                    self.systempopulation = entry.get('Population')
+
                 (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
                                                entry.get('StationName'))	# May be None
                 self.station_marketid = entry.get('MarketID') # May be None

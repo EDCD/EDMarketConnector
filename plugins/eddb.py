@@ -59,6 +59,7 @@ def plugin_start3(plugin_dir):
 
 def plugin_app(parent):
     this.system_link  = parent.children['system']	# system label in main window
+    this.system_population = None
     this.station_marketid = None                        # Frontier MarketID
     this.station_link = parent.children['station']	# station label in main window
     this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
@@ -73,11 +74,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system_link['url'] = system_url(system)	# Override standard URL function
 
     if config.get('station_provider') == 'eddb':
+        if entry['event'] in ['StartUp', 'Location', 'FSDJump', 'CarrierJump']:
+            this.system_population = entry.get('Population')
+
         if entry['event'] in ['StartUp', 'Location', 'Docked', 'CarrierJump']:
             this.station_marketid = entry.get('MarketID')
         elif entry['event'] in ['Undocked']:
             this.station_marketid = None
-        this.station_link['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
+
+        this.station_link['text'] = station or (this.system_population and this.system_population > 0  and STATION_UNDOCKED or '')
         this.station_link.update_idletasks()
 
 
