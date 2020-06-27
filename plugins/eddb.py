@@ -70,7 +70,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system_link['url'] = system_url(system)	# Override standard URL function
 
     if config.get('station_provider') == 'eddb':
-        if entry['event'] in ['Location', 'Docked', 'StartUp']:
+        if entry['event'] in ['StartUp', 'Location', 'Docked', 'CarrierJump']:
             this.station_marketid = entry.get('MarketID')
         elif entry['event'] in ['Undocked']:
             this.station_marketid = None
@@ -80,7 +80,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 def cmdr_data(data, is_beta):
     if config.get('system_provider') == 'eddb':
-        this.system_link['url'] = system_url(data['lastSystem']['name'])	# Override standard URL function
+        this.system_link['url'] = system_url(data['lastSystem']['name'])  # Override standard URL function
 
     if config.get('station_provider') == 'eddb':
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
