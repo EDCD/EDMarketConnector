@@ -41,19 +41,6 @@ def station_url(system_name, station_name):
         return system_url(system_name)
 
 
-# system_name -> system_id or 0
-def system_id(system_name):
-    return this.system_ids.get(system_name, [0, False])[0]
-
-# system_name -> is_populated
-def system_populated(system_name):
-    return this.system_ids.get(system_name, [0, False])[1]
-
-# (system_name, station_name) -> station_id or 0
-def station_id(system_name, station_name):
-    return this.station_ids.get((system_id(system_name), station_name), 0)
-
-
 def plugin_start3(plugin_dir):
     return 'eddb'
 
@@ -92,5 +79,5 @@ def cmdr_data(data, is_beta):
 
     if config.get('station_provider') == 'eddb':
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
-        this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
+        this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (data['lastStarport']['name'] and data['lastStarport']['name'] != "" and STATION_UNDOCKED or '')
         this.station_link.update_idletasks()
