@@ -8,6 +8,7 @@ import csv
 import os
 from os.path import join
 import sys
+import urllib.parse
 
 from config import config
 
@@ -27,7 +28,7 @@ with open(join(config.respath, 'stations.p'), 'rb') as h:
 
 # Main window clicks
 def system_url(system_name):
-    return 'https://eddb.io/system/name/%s' % system_name
+    return 'https://eddb.io/system/name/%s' % urllib.parse.quote(system_name)
 
 
 def station_url(system_name, station_name):
