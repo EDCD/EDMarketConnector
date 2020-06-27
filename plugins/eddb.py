@@ -29,11 +29,13 @@ with open(join(config.respath, 'stations.p'), 'rb') as h:
 def system_url(system_name):
     return 'https://eddb.io/system/name/%s' % system_name
 
+
 def station_url(system_name, station_name):
-    if station_id(system_name, station_name):
-        return 'https://eddb.io/station/%d' % station_id(system_name, station_name)
+    if this.station_marketid:
+        return 'https://eddb.io/station/market-id/{}'.format(this.station_marketid)
     else:
         return system_url(system_name)
+
 
 # system_name -> system_id or 0
 def system_id(system_name):
@@ -53,6 +55,7 @@ def plugin_start3(plugin_dir):
 
 def plugin_app(parent):
     this.system_link  = parent.children['system']	# system label in main window
+    this.station_marketid = None                        # Frontier MarketID
     this.station_link = parent.children['station']	# station label in main window
     this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
 
@@ -60,14 +63,25 @@ def prefs_changed(cmdr, is_beta):
     if config.get('system_provider') == 'eddb':
         this.system_link['url'] = system_url(system_link['text'])	# Override standard URL function
 
+
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     if config.get('system_provider') == 'eddb':
         this.system_link['url'] = system_url(system)	# Override standard URL function
-    this.station_link['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
-    this.station_link.update_idletasks()
+
+    if config.get('station_provider') == 'eddb':
+        if entry['event'] in ['Location', 'Docked', 'StartUp']:
+            this.station_marketid = entry.get('MarketID')
+        elif entry['event'] in ['Undocked']:
+            this.station_marketid = None
+        this.station_link['text'] = station or (system_populated(system) and STATION_UNDOCKED or '')
+        this.station_link.update_idletasks()
+
 
 def cmdr_data(data, is_beta):
     if config.get('system_provider') == 'eddb':
         this.system_link['url'] = system_url(data['lastSystem']['name'])	# Override standard URL function
-    this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
-    this.station_link.update_idletasks()
+
+    if config.get('station_provider') == 'eddb':
+        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+        this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (system_populated(data['lastSystem']['name']) and STATION_UNDOCKED or '')
+        this.station_link.update_idletasks()

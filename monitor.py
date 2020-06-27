@@ -82,6 +82,7 @@ class EDLogs(FileSystemEventHandler):
         self.planet = None
         self.system = None
         self.station = None
+        self.station_marketid = None
         self.stationtype = None
         self.coordinates = None
         self.systemaddress = None
@@ -166,7 +167,7 @@ class EDLogs(FileSystemEventHandler):
         if __debug__:
             print('Stopping monitoring Journal')
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
+        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.station_marketid = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -229,6 +230,7 @@ class EDLogs(FileSystemEventHandler):
                 if self.station:
                     entry['StationName'] = self.station
                     entry['StationType'] = self.stationtype
+                    entry['MarketID'] = self.station_marketid
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
             else:
                 self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
@@ -305,6 +307,7 @@ class EDLogs(FileSystemEventHandler):
                 self.planet = None
                 self.system = None
                 self.station = None
+                self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
@@ -344,6 +347,7 @@ class EDLogs(FileSystemEventHandler):
                 self.planet = None
                 self.system = None
                 self.station = None
+                self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
@@ -429,6 +433,7 @@ class EDLogs(FileSystemEventHandler):
                     self.state['Modules'].pop(entry['FromSlot'], None)
             elif entry['event'] in ['Undocked']:
                 self.station = None
+                self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
             elif entry['event'] in ['Location', 'FSDJump', 'Docked', 'CarrierJump']:
@@ -443,6 +448,7 @@ class EDLogs(FileSystemEventHandler):
                 self.systemaddress = entry.get('SystemAddress')
                 (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
                                                entry.get('StationName'))	# May be None
+                self.station_marketid = entry.get('MarketID') # May be None
                 self.stationtype = entry.get('StationType')	# May be None
                 self.stationservices = entry.get('StationServices')	# None under E:D < 2.4
             elif entry['event'] == 'ApproachBody':
@@ -595,6 +601,7 @@ class EDLogs(FileSystemEventHandler):
                 self.planet = None
                 self.system = None
                 self.station = None
+                self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
@@ -607,6 +614,7 @@ class EDLogs(FileSystemEventHandler):
                 self.planet = None
                 self.system = None
                 self.station = None
+                self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
@@ -651,6 +659,7 @@ class EDLogs(FileSystemEventHandler):
                         ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
                         ('event', 'StartUp'),
                         ('Docked', True),
+                        ('MarketID', self.station_marketid),
                         ('StationName', self.station),
                         ('StationType', self.stationtype),
                         ('StarSystem', self.system),
