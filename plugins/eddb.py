@@ -28,7 +28,10 @@ with open(join(config.respath, 'stations.p'), 'rb') as h:
 
 # Main window clicks
 def system_url(system_name):
-    return 'https://eddb.io/system/name/%s' % urllib.parse.quote(system_name)
+    if system_name:
+        return 'https://eddb.io/system/name/%s' % urllib.parse.quote(system_name)
+    else:
+        return ''
 
 
 def station_url(system_name, station_name):
