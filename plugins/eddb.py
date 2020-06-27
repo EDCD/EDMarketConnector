@@ -27,10 +27,7 @@ with open(join(config.respath, 'stations.p'), 'rb') as h:
 
 # Main window clicks
 def system_url(system_name):
-    if system_id(system_name):
-        return 'https://eddb.io/system/%d' % system_id(system_name)
-    else:
-        return None
+    return 'https://eddb.io/system/name/%s' % system_name
 
 def station_url(system_name, station_name):
     if station_id(system_name, station_name):
