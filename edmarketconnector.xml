@@ -168,10 +168,39 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 3.44</title>
+			<title>Release 3.46</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+<h2>Release 3.46</h2>
+<p><b>This should be the final release of EDMC based on Python 2.7.</b> The next release after this, assuming this one doesn't introduce new bugs, will be based on Python 3.7.  Any plugins that users have installed will need to have been updated to work under Python 3.7 by the time that next version of EDMC is released.  During EDMC startup, at most once per day, you might see a popup with the text:
+
+<blockquote>One or more of your enabled plugins do not yet have support for Python 3.x.  Please see the list on the 'Plugins' tab of 'File' > 'Settings'.  You should check if there is an updated version available, else alert the developer that they will need to update the code when EDMC moves to Python 3.x</blockquote>
+
+If so, do as it directs and check "File" > "Settings" > "Plugins" tab and see what plugins are listed in the section with the text "Plugins Without Python 3.x Support".
+</p>
+<p>
+If any of your plugins are listed in that section then they will need updating, by you or the original developer, to work with Python 3.7.  See <a href="https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#migration-to-python-37">Migrating To Python 3.7</a> for more information.
+</p>
+<p>Changes in this version:
+<ul>
+	<li>The CAPI CLIENT_ID has been changed to one under Athanasius' account, so when users are asked to (re-)authenticate with Frontier they'll see "Elite Dangerous Market Connector (EDCD/Athanasius)" as the application asking for permission.  There's been no change to the use of the data Frontier then gives access to.</li>
+	<li>Updated translations (as of 2019-09-26 in general and 2019-11-04 for Polish).</li>
+	<li>Linux: Should now appear on task bar whilst in dark mode theme.</li>
+	<li>INARA: Send correct opponentName for Interdicted and Interdiction events.<.li>
+	<li>Send SAASignalsFound events to EDDN.</li>
+	<li>Add Agronomic Treatment introduced for a community goal.</li>
+	<li>Fix Detailed Surface Scanner rating.</li>
+	<li>Fix for the "Inara 400 The reputation value exceeds the valid range" error.</li>
+	<li>Minimum interval between checks for a new version of EDMC has been reduced from 47 hours to 8 hours.</li>
+	<li>There is a new option, within the 'Configuration' tab, 'Disable Automatic Application Updates Check when in-game' which when active should prevent update checks from showing a popup whilst you're in-game. You can still use "Help" > "Check for updates" to trigger a manual check.</li>
+	<li>Support added for the journal 'CarrierJump' event, triggered when you're docked on a Fleet Carrier as it performs a jump.  This is now sent to: EDDN, Inara, EDSM.  NB: EDSM doesn't yet support this event at the time of writing, so will still not track such Carrier Jumps in your Flight Log or current location.  Generally when EDSM is updated to handle such new events it will back-process stored unrecognised events.</li>
+</ul>
+</p>
+
+<h2>Release 3.45</h2>
+<p>There was no real 3.45, it was 'burned' testing that updates from 3.44 would work with the new update_feed URL.</p>
+
 <h2>Release 3.44</h2>
 <p><b>CHANGE OF MAINTAINER</b></p>
 <p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
@@ -322,7 +351,7 @@
 				url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_win_344.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="3.4.4.0"
+				sparkle:version="3.4.6.0"
 				length="10338304"
 				type="application/octet-stream"
 			/>
