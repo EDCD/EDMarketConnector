@@ -37,6 +37,12 @@ which matches with:
 	nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(     # Help text in settings
 `{CR}` is handled in `l10n.py`, translating to a unicode `\n`.  See the code in`l10n.py` for any other such special substitutions.
 
+You can even use other translations within a given string, e.g.:
+
+	_("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.".format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled'))
+	/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
+
 Adding it to the OneSky project
 ---
 You will, of course, need admin access to the project.  Jonathan Harris (aka Maringal, aka Otis) still handles this.  Check for this email address in github commits if you need to get in touch.
