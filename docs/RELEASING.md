@@ -129,7 +129,7 @@ Now get all the relevant code changes into this branch.  This might mean merging
 
 1. Craft a [new github Release](https://github.com/EDCD/EDMarketConnector/releases/new), using the new tag so as to reference the correct commit.  Include the .msi file for Windows (the Source Code files are added by github based on the release tag).  Use the changelog text you already prepared.
 
-1. Check that the URL for the release that you specified in `edmarketconnector.xml` actually matches where github has placed the `.msi` file.
+1. **Check that the URL for the release that you specified in `edmarketconnector.xml` actually matches where github has placed the `.msi` file.**  If, for instance, you fail to *update* this URL then upon running the 'new' installer it will silently fail, because you made people try to install the old version over the old version.
 
 1. **Now merge the new release branch into `releases`.**
 The final step below is what fully publishes the release for running EDMC instances to pick up on 'Check for Updates'.  The WinSparkle check for updates specifically targets `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml` as per `config.py `update_feed`.

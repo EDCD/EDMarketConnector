@@ -1,0 +1,21 @@
+GitHub API
+===
+
+<https://developer.github.com/v3/repos/releases/>
+
+Using 'GitHub CLI'
+===
+
+<https://github.com/cli/cli>
+
+/c/Program\ Files\ \(x86\)/GitHub\ CLI/gh.exe api repos/:owner/:repo/releases
+
+This is paged somehow....
+
+OR
+
+/GitHub\ CLI/gh.exe api repos/:owner/:repo/releases/tags/rel-100
+
+And increment up ?
+
+The 'notes' are from the "body" key
