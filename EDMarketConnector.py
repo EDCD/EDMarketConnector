@@ -914,7 +914,7 @@ if __name__ == "__main__":
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
             tk.messagebox.showinfo(
                 _('EDMC: Plugins Without Python 3.x Support'),
-                _("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the 'Plugins' tab of 'File' > 'Settings'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '.disabled' on the end of the name.")
+                _("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.".format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled'))
             )
             config.set('plugins_not_py3_last', int(time()))
 
