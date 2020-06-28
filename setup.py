@@ -187,14 +187,14 @@ if sys.platform == 'darwin':
         if macdeveloperid:
             os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, APPNAME))
         # Make zip for distribution, preserving signature
-        PKG = '%s_mac_%s.zip' % (APPNAME, SHORTVERSION)
+        PKG = '%s_mac_%s.zip' % (APPNAME, VERSION)
         os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, APPNAME, PKG))
 elif sys.platform == 'win32':
     os.system(r'"%s\candle.exe" -out %s\ %s.wxs' % (WIXPATH, dist_dir, APPNAME))
     if not exists('%s/%s.wixobj' % (dist_dir, APPNAME)):
         raise AssertionError('No %s/%s.wixobj: candle.exe failed?' % (dist_dir, APPNAME))
 
-    PKG = '%s_win_%s.msi' % (APPNAME, SHORTVERSION)
+    PKG = '%s_win_%s.msi' % (APPNAME, VERSION)
     import subprocess
     os.system(r'"%s\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (WIXPATH, dist_dir, APPNAME, PKG))
     if not exists(PKG):
@@ -216,31 +216,32 @@ else:
 if not exists(PKG):
     raise AssertionError('No %s found prior to appcast' % (PKG))
 # Make appcast entry
-appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', SHORTVERSION), 'w')
+appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', VERSION), 'w')
 appcast.write('''
 \t\t<item>
-\t\t\t<title>Release {0:.2f}</title>
+\t\t\t<title>Release {VERSION}</title>
 \t\t\t<description>
 \t\t\t\t<![CDATA[
-<style>{6}</style>
-<h2>Release {0:.2f}</h2>
+<style>{STYLE}</style>
+<h2>Release {VERSION}</h2>
 <ul>
 
 </ul>
 \t\t\t\t]]>
 \t\t\t</description>
 \t\t\t<enclosure
-\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{1}/{2}"
-\t\t\t\tsparkle:os="{3}"
-\t\t\t\tsparkle:version="{4}"
-\t\t\t\tlength="{5}"
+\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{VERSION}/{PKG}"
+\t\t\t\tsparkle:os="{OS}"
+\t\t\t\tsparkle:version="{VERSION}"
+\t\t\t\tlength="{LENGTH}"
 \t\t\t\ttype="application/octet-stream"
 \t\t\t/>
 \t\t</item>
-'''.format(float(SHORTVERSION)/100,
-           SHORTVERSION,
-           PKG,
-           sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos',
-           VERSION,
-           os.stat(PKG).st_size,
-           sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' or 'h2 { font-size: 105%; }'))
+'''.format(VERSION=VERSION,
+           STYLE='{}'.format(
+                sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' 
+                or 'h2 { font-size: 105%; }'),
+           PKG=PKG,
+           OS=''.format(sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos'),
+           LENGTH=os.stat(PKG).st_size)
+)
