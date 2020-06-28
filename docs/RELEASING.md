@@ -113,6 +113,8 @@ We'll use an old version number, 3.5.0.0, as an example throughout the following
 
 Now get all the relevant code changes into this branch.  This might mean merging from another branch, such as an issue-specific one, or possibly cherry-picking commits.  See [Contributing Guidelines](docs/Contributing.md) for how such branches should be named.
 
+**Remember to import any new/updated translations.** See [docs/Translations](docs/Translations) for details.
+
 1. Prepare a changelog text for the release.  You'll need this both for the GitHub release and the contents of the `edmarketconnector.xml` file.
 	1. The primary location of the changelog is [Changelog.md](Changelog.md) - update this first.
 	1. Update `edmarketconnector.xml` to add this changelog text to the correct section(s).
