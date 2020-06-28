@@ -68,3 +68,24 @@ Once you have new/changed translations on OneSky you'll want to update the code 
 1. Access the contents of this zip file, extracting *all* the files into `L10n/` in the code.
 1. Rename the "en.strings" file to "en.template".
 1. Commit the changes to git.
+
+Adding a New Language
+===
+To add a new language to the app:
+
+1. open [EDMarketConnector - Miscellaneous Manage Languages](https://marginal.oneskyapp.com/admin/project/languages/project/52710)
+1. Search for the language.
+1. Ensure you have the correct one if there are variants.
+1. Click the `+` on the right hand side to add the language.
+
+Remember that until there are translations all strings will default to the English version (actually the key, which is always specified in English).
+
+You will also want to add it to the installer.  This is simple enough, only requiring you add a number to an array in `EDMarketConnector.wxs`.
+
+1. In `EDMarketConnector.wxs` find the line beginning `Languages="1033,`, e.g.
+
+		Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,0" />
+1. Now you'll need to consult the latest [[MS-LCID]: Windows Language Code Identifier (LCID) Reference](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f) for the correct numerical code to add to the list.
+1. Convert the hexadecimal Language ID to the equivalent in decimal.
+1. Add the new decimal value as the last but one value in the list, keeping the `,0` at the end.
+1. Update the comment on the next line to reflect what you added.
