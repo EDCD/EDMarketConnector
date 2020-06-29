@@ -281,7 +281,7 @@ Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
 # Migration
 
-Starting with release 3.5 EDMC uses Python **3.7**. This is a brief outline of the steps required to migrate a plugin from earlier versions of EDMC:
+Starting with pre-release 3.5 EDMC uses Python **3.7**.   The first full release under Python 3.7 will be 4.0.0.0.  This is a brief outline of the steps required to migrate a plugin from earlier versions of EDMC:
 
 - Rename the function `plugin_start` to `plugin_start3(plugin_dir)`.
 Plugins without a `plugin_start3` function are listed as disabled on EDMC's "Plugins" tab
