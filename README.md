@@ -45,10 +45,9 @@ Installation
 
 Mac:
 
-* Requires Mac OS 10.10 or later.
-* Download the `.zip` archive of the [latest release](https://github.com/EDCD/EDMarketConnector/releases/latest).
-* The zip archive contains the **EDMarketConnector** app - move this app to **Applications** or wherever you want it.
-* Double-click on the app to run it.
+ **MacOS Apps are no longer built**.  Users still wishing to run this under MacOS should consult [running from source](#running-from-source).
+
+* Last tested on MacOS in version 3.43.  No guarantees it will work with later versions of the app.
 
 Windows:
 
@@ -116,13 +115,9 @@ You can send a record of your Cmdr's details, ship details, cargo, materials, mi
 Uninstall
 --------
 
-Mac:
-
-* Delete the **EDMarketConnector** app.
-
 Windows:
 
-* Uninstall **Elite Dangerous Market Connector** from Control Panel → Programs.
+* Uninstall **Elite Dangerous Market Connector** from Windows Settings (`WinKey+i`) → Apps → Apps & Features
 
 Note: Uninstalling the app does not delete any output files that it has previously written.
 
@@ -320,6 +315,8 @@ Packaging for distribution
 
 Mac:
 
+**NB: Untested since 3.43**
+
 * requires py2app 0.19 or later
 * [Sparkle.framework](https://github.com/sparkle-project/Sparkle) installed in /Library/Frameworks
 * Run `setup.py py2app`
@@ -339,6 +336,7 @@ This app uses the “Companion” web API that Frontier originally supplied for 
 
 Acknowledgements
 --------
+* Thanks to [Marginal](https://github.com/Marginal), the original developer, for all his hard work over the years.
 * “Elite: Dangerous” is © 1984 - 2019 Frontier Developments plc.
 * Thanks to Cmdr Zhixian Wu for the Chinese (Simplified) translation.
 * Thanks to Cmdrs CatfoodCZ, Mike Stix & DaraCZ for the Czech translation.
@@ -370,7 +368,7 @@ Acknowledgements
 
 License
 -------
-Copyright © 2015-2019 Jonathan Harris.
+Copyright © 2015-2019 Jonathan Harris, 2020 EDCD
 
 Licensed under the [GNU Public License (GPL)](http://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
 
