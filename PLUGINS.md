@@ -256,7 +256,7 @@ See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/master/L1
 
 # Python Package Plugins
 
-A _Package Plugin_ is both a standard Python package (i.e. contains an `__init__.py` file) and an EDMC plugin (i.e. contains a `load.py` file providing at minimum a `plugin_start()` function). These plugins are loaded before any non-Package plugins.
+A _Package Plugin_ is both a standard Python package (i.e. contains an `__init__.py` file) and an EDMC plugin (i.e. contains a `load.py` file providing at minimum a `plugin_start3()` function). These plugins are loaded before any non-Package plugins.
 
 Other plugins can access features in a Package Plugin by `import`ing the package by name in the usual way.
 
@@ -283,8 +283,16 @@ Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
 Starting with release 3.5 EDMC uses Python **3.7**. This is a brief outline of the steps required to migrate a plugin from earlier versions of EDMC:
 
-- Rename the function `plugin_start` to `plugin_start3(plugin_dir)`. Plugins without a `plugin_start3` function are listed as disabled on EDMC's "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating" appears in the log.
-- Check that callback functions `plugin_prefs`, `prefs_changed`, `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with the correct number of arguments. Older versions of this app were tolerant of missing arguments in these function declarations.
+- Rename the function `plugin_start` to `plugin_start3(plugin_dir)`.
+Plugins without a `plugin_start3` function are listed as disabled on EDMC's "Plugins" tab
+and a message like "plugin SuperSpaceHelper needs migrating" appears in the log.
+Such plugins are also listed in a section "Plugins Without Python 3.x Support:" on the Settings > Plugins tab.
+- Check that callback functions `plugin_prefs`, `prefs_changed`, `journal_entry`, `dashboard_entry` and `cmdr_data`
+if used are declared with the correct number of arguments.xi
+Older versions of this app were tolerant of missing arguments in these function declarations.
 - Port the code to Python 3.7. The [2to3](https://docs.python.org/3/library/2to3.html) tool can automate much of this work.
 
-Depending on the complexity of the plugin it may be feasible to make it compatible with both EDMC 3.4 + Python 2.7 and EDMC 3.5 + Python 3.7. [Here's](https://python-future.org/compatible_idioms.html) a guide on writing Python 2/3 compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06) an example of the changes required for a simple plugin.
+Depending on the complexity of the plugin it may be feasible to make it compatible with both EDMC 3.4 + Python 2.7 and
+EDMC 3.5 + Python 3.7. [Here's](https://python-future.org/compatible_idioms.html) a guide on writing Python 2/3
+compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06)
+an example of the changes required for a simple plugin.
