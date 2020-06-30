@@ -29,7 +29,7 @@ Historically the A.B.C.D version was collapsed into A.BC and then a tag added of
 forwards we will always use the full version and 'folder style' tag names, e.g. `Release/A.B.C.D` .
 
 Currently the only file that defines the version code-wise is `config.py`.  `Changelog.md` and `edmarketconnector.xml`
-are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/master/docs/RELEASING.md#distribution).
+are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/master/docs/Releasing.md#distribution).
 
 Git branch structure and tag contentions
 ---
@@ -134,7 +134,7 @@ Git commit conventions
 
 Build process
 ===
-See [RELEASING.md](docs/RELEASING.md) for the environment and procedure necessary for building the application into
+See [Releasing.md](docs/Releasing.md) for the environment and procedure necessary for building the application into
 a .exe and Windows installer file.
 
 Translations
