@@ -103,7 +103,10 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or config.OUT_SHIP	# default settings
+        if not config.getint('PrefsDidSave'):
+            output = config.OUT_SHIP	# default settings
+        else:
+            output = config.getint('output')
 
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
@@ -499,6 +502,7 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
+        config.set('PrefsDidSave', 1)
         config.set('output',
                    (self.out_td.get()   and config.OUT_MKT_TD) +
                    (self.out_csv.get()  and config.OUT_MKT_CSV) +
