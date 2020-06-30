@@ -18,9 +18,11 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 Version conventions
 ---
-The only currently supported format for the version is A.B.C.D, following [Semantic Versioning](https://semver.org/)
-conventions.  Note that the 'D' part being different does *not* make the version different for purposes of the
-WinSparkle update checking, XXX (true?): or the Windows installer thinking it's a newer version.
+The only currently supported format for the version is A.B.C.D.  This diverges from [Semantic Versioning](https://semver.org/)
+conventions in that we have that `.D`, and don't currently support any additional strings, but follows the spirit of
+the intent behind each of `A`, `B` and `C`.  Note that the 'D' part being different does *not* make the version
+different for purposes of the WinSparkle update checking, XXX (true?): or the Windows installer thinking it's a
+newer version.
 
 There is currently no support for appending any other string to the version (it will break some of the build
 code), see [this issue](https://github.com/EDCD/EDMarketConnector/issues/534).
