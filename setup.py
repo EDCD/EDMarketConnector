@@ -154,7 +154,7 @@ setup(
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
                  'company_name': 'EDCD',	# WinSparkle
-                 'product_name': APP,           # WinSparkle
+                 'product_name': APPNAME,           # WinSparkle
                  'version': VERSION,
                  'copyright': COPYRIGHT,
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],

@@ -1,5 +1,30 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
+
+Pre-Release 3.99.0.0
+===
+Consider this as 'beta0' for the following full '4.0.0.0' release.
+
+ * This release is based on Python 3.7, not 2.7, so a user might find some of their plugins stop working.  If you have any that do not have the proper support you'll see a popup about this, at most once every 24 hours, when you start the program.  As directed on that popup you can check the status of your plugins on 'File' > 'Settings' > 'Plugins' in the new 'Plugins Without Python 3.x Support:' section.
+ 
+   If the popup gets annoying then follow the directions to [Disable a plugin](https://github.com/EDCD/EDMarketConnector/blob/develop/PLUGINS.md#disable-a-plugin).  
+   
+   For any plugins without Python 3.x support you should first ensure you're using the latest version of that plugin.  If that hasn't been updated then you might want to contact the plugin developer to see if they'll update the plugin.  For some plugins [check this list](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37).
+ 
+ * Translations updated:
+   * New languages: Serbian (Latin, Bosnia and Herzegovina) (175/175), Slovenian (Slovenia) (144/175).
+   * New phrases were added and the only 100% translated languages are now: French, German, Ukrainian, Spanish, Russian, Czech, Japanese, Serbian (Latin), Portugese (Portugal), Serbian (Latin, Bosnia and Herzegovina).
+   
+     Please do contribute on [the OneSkyApp project](https://marginal.oneskyapp.com/collaboration/project/52710) if you are able to.
+     
+ * Fixes a bug where certain combinations of 'Output' and 'EDDN' options would lead to both reverting to their defaults.
+ * EDDB plugin now uses a system's SystemAddress to construct the URL to view the system on eddb.io.  This removes the need for the systems.p file.  That file will be removed in a future version, plugin authors should not be relying on its presence.
+ * EDDB plugin now uses a station's MarketID to construct a URL to view the station on eddb.io.  This removes the need for stations.p.  That file will be removed in a future version, plugin authors should not be relying on its presence.
+ 
+   NB: It's now using the system's "Population" data from Journal messages to determine if the system has stations or not.  This allows for the `×` as station name to be clickable to open the eddb.io page for system when you're not docked.  It's known that some systems with stations have a Population of "0" and thus won't allow this functionality.  This is Frontier's issue, not EDMC's.  If you logged out in a populated system, run EDMC afresh, and use the 'Update' button you won't see the `×` until you login fully to the game.
+ * New 'Help' > 'About E:D Market Connector' menu item to show the currently running version.  Includes a link to the release notes.
+
+
 Release 3.46
 ===
 

@@ -138,3 +138,14 @@ The final step below is what fully publishes the release for running EDMC instan
 	1. `git checkout releases`
 	1. `git merge release-3.5.0.0`
 	1. `git push origin`
+
+1. You should also merge the code into the `stable` branch for easy reference.
+
+Pre-Releases
+===
+If you are making a pre-release then:
+
+1. **DO NOT** Edit edmarketconnector.xml at all.  No, not even if you think you won't accidentally merge it into `releases`. Just don't change it at all.
+1. **DO NOT** merge into `releases`.
+1. **DO NOT** merge into `stable`.
+1. *Do* merge the code into `beta` after you have made a 'pre-release' on GitHub.
