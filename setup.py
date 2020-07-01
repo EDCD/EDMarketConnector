@@ -17,7 +17,7 @@ import shutil
 import sys
 from tempfile import gettempdir
 
-from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION
+from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION, copyright as COPYRIGHT
 from config import update_feed, update_interval
 
 
@@ -96,7 +96,7 @@ if sys.platform=='darwin':
                       ],
                       'LSMinimumSystemVersion': '10.10',
                       'NSAppleScriptEnabled': True,
-                      'NSHumanReadableCopyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
+                      'NSHumanReadableCopyright': COPYRIGHT,
                       'SUEnableAutomaticChecks': True,
                       'SUShowReleaseNotes': True,
                       'SUAllowsAutomaticUpdates': False,
@@ -156,7 +156,7 @@ setup(
                  'company_name': 'EDCD',	# WinSparkle
                  'product_name': APP,           # WinSparkle
                  'version': VERSION,
-                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
+                 'copyright': COPYRIGHT,
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
     console = [ {'dest_base': APPCMDNAME,
@@ -164,7 +164,7 @@ setup(
                  'company_name': 'EDCD',
                  'product_name': APPNAME,
                  'version': VERSION,
-                 'copyright': u'© 2015-2019 Jonathan Harris, 2020 EDCD',
+                 'copyright': COPYRIGHT,
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,

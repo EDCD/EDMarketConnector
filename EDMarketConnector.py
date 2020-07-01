@@ -17,7 +17,7 @@ import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
 
-from config import appname, applongname, appversion, config
+from config import appname, applongname, appversion, copyright, config
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
@@ -191,6 +191,8 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.help_menu.add_command(command=lambda:not self.help_about.showing and self.help_about(self.w))
+
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
@@ -348,14 +350,21 @@ class AppWindow(object):
             self.theme_file_menu['text'] = _('File')	# Menu title
             self.theme_edit_menu['text'] = _('Edit')	# Menu title
             self.theme_help_menu['text'] = _('Help')	# Menu title
+
+            ## File menu
             self.file_menu.entryconfigure(0, label=_('Status'))	# Menu item
             self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))	# Menu item
             self.file_menu.entryconfigure(2, label=_('Settings'))	# Item in the File menu on Windows
             self.file_menu.entryconfigure(4, label=_('Exit'))	# Item in the File menu on Windows
+
+            ## Help menu
             self.help_menu.entryconfigure(0, label=_('Documentation'))	# Help menu item
             self.help_menu.entryconfigure(1, label=_('Privacy Policy'))	# Help menu item
             self.help_menu.entryconfigure(2, label=_('Release Notes'))	# Help menu item
             self.help_menu.entryconfigure(3, label=_('Check for Updates...'))	# Menu item
+            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))	# App menu entry
+
+        ## Edit menu
         self.edit_menu.entryconfigure(0, label=_('Copy'))	# As in Copy and Paste
 
     def login(self):
@@ -680,6 +689,91 @@ class AppWindow(object):
 
     def help_releases(self, event=None):
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
+
+    class help_about(tk.Toplevel):
+        showing = False
+
+        def __init__(self, parent):
+            if self.__class__.showing:
+                return
+            self.__class__.showing = True
+
+            tk.Toplevel.__init__(self, parent)
+
+            self.parent = parent
+            self.title(_('About {APP}').format(APP=applongname))
+
+            if parent.winfo_viewable():
+                self.transient(parent)
+
+            # position over parent
+            if platform!='darwin' or parent.winfo_rooty()>0:        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+                self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+
+            # remove decoration
+            if platform=='win32':
+                self.attributes('-toolwindow', tk.TRUE)
+                
+            self.resizable(tk.FALSE, tk.FALSE)
+
+            frame = ttk.Frame(self)
+            frame.grid(sticky=tk.NSEW)
+
+            PADX = 10
+            BUTTONX = 12    # indent Checkbuttons and Radiobuttons
+            PADY = 2        # close spacing
+
+            row = 1
+            ############################################################
+            # applongname
+            self.appname_label = tk.Label(frame, text=applongname)
+            self.appname_label.grid(row=row, columnspan=3, sticky=tk.EW)
+            row += 1
+            ############################################################
+
+            ############################################################
+            # version <link to changelog>
+            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            row += 1
+            self.appversion_label = tk.Label(frame, text=appversion)
+            self.appversion_label.grid(row=row, column=0, sticky=tk.E)
+            self.appversion = HyperlinkLabel(frame, compoun=tk.RIGHT, text=_('Release Notes'), url='https://github.com/EDCD/EDMarketConnector/releases/tag/rel-{VERSION}'.format(VERSION=appversion), underline=True)
+            self.appversion.grid(row=row, column=2, sticky=tk.W)
+            row += 1
+            ############################################################
+
+            ############################################################
+            # <whether up to date>
+            ############################################################
+
+            ############################################################
+            # <copyright>
+            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            row += 1
+            self.copyright = tk.Label(frame, text=copyright)
+            self.copyright.grid(row=row, columnspan=3, sticky=tk.EW)
+            row += 1
+            ############################################################
+
+            ############################################################
+            # OK button to close the window
+            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            row += 1
+            button = ttk.Button(frame, text=_('OK'), command=self.apply)
+            button.grid(row=row, column=2, sticky=tk.E)
+            button.bind("<Return>", lambda event:self.apply())
+            self.protocol("WM_DELETE_WINDOW", self._destroy)
+            ############################################################
+
+            print('Current version is {}'.format(appversion))
+
+        def apply(self):
+            self._destroy()
+
+        def _destroy(self):
+            self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+            self.destroy()
+            self.__class__.showing = False
 
     def save_raw(self):
         self.status['text'] = _('Fetching data...')
