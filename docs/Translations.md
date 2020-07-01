@@ -60,9 +60,9 @@ Updating Translations In The Code
 ===
 Once you have new/changed translations on OneSky you'll want to update the code to use them.
 
-1. Navigate to the [Translation Overview](https://marginal.oneskyapp.com/admin/project/dashboard/project/52710) then click on "Download Translation" which shuld bring you to [Download](https://marginal.oneskyapp.com/admin/export/phrases/project/52710).
+1. Navigate to the [Translation Overview](https://marginal.oneskyapp.com/admin/project/dashboard/project/52710) then click on "Download Translation" which should bring you to [Download](https://marginal.oneskyapp.com/admin/export/phrases/project/52710).
 1. In "File format" select ".strings (iOS/MacOS)".
-1. "All languages" shoudl already be selected in the "Languages filter".  If not, select it.
+1. "All languages" should already be selected in the "Languages filter".  If not, select it.
 1. Likewise "All files" should already be selected in "File Filter".
 1. Click "Export".  After a short delay you should be offered a file "EDMarketConnector.zip" for download.
 1. Access the contents of this zip file, extracting *all* the files into `L10n/` in the code.
