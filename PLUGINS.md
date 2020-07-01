@@ -19,6 +19,7 @@ Each plugin has it's own folder in the `plugins` directory:
 
 Plugins are python files. The plugin folder must have a file named `load.py` that must provide one module level function and optionally provide a few others.
 
+##Startup
 EDMC will import the `load.py` file as a module and then call the `plugin_start3()` function.
 
 ```python
@@ -29,9 +30,11 @@ def plugin_start3(plugin_dir):
    print("I am loaded! My plugin folder is {}".format(plugin_dir))
    return "Test"
 ```
+The string you return is used as the internal name of the plugin.
 
 Any errors or print statements from your plugin will appear in `%TMP%\EDMarketConnector.log` on Windows, `$TMPDIR/EDMarketConnector.log` on Mac, and `$TMP/EDMarketConnector.log` on Linux.
 
+##Shutdown
 This gets called when the user closes the program:
 
 ```python
@@ -47,9 +50,11 @@ If your plugin uses one or more threads to handle Events then stop and join() th
 # Plugin Hooks
 ## Configuration 
 
-If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. The tab title will be the value that you returned from `plugin_start`. Use widgets from EDMC's myNotebook.py for the correct look-and-feel. You can be notified when the settings dialog is closed so you can save your settings.
+If you want your plugin to be configurable via the GUI you can define a frame (panel) to be displayed on its own tab in EDMC's settings dialog. The tab title will be the value that you returned from `plugin_start3`. Use widgets from EDMC's myNotebook.py for the correct look-and-feel. You can be notified when the settings dialog is closed so you can save your settings.
 
 You can use `set()`, `get()` and `getint()` from EDMC's `config.config` object to retrieve your plugin's settings in a platform-independent way.
+
+**Be sure to use a unique prefix for any settings you save so as not to clash with core EDMC or other plugins.**
 
 Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input numbers in a locale-independent way.
 
@@ -176,7 +181,7 @@ def cmdr_data(data, is_beta):
     sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
 ```
 
-The data is a dictionary and full of lots of wonderful stuff!
+The data is a dictionary containing the response from Frontier to a CAPI `/profile` request.
 
 ### Plugin-specific events
 
