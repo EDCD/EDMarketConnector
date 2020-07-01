@@ -1,525 +1,525 @@
 /* Language name */
-"!Language" = "Deutsch";
+"!Language" = "Srpski (Latinica, BiH)";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Über {APP}";
+"About {APP}" = "O {APP}";
 
 /* Federation rank. [stats.py] */
 "Admiral" = "Admiral";
 
 /* Explorer rank. [stats.py] */
-"Aimless" = "Total planlos";
+"Aimless" = "Aimless";
 
 /* Appearance setting. [EDMarketConnector.py] */
-"Always on top" = "Immer im Vordergrund";
+"Always on top" = "Uvijek na vrhu";
 
 /* CQC rank. [stats.py] */
-"Amateur" = "Anfänger";
+"Amateur" = "Amateur";
 
 /* EDSM setting. [edsm.py] */
-"API Key" = "API Schlüssel";
+"API Key" = "API ključ";
 
 /* Tab heading in settings. [prefs.py] */
-"Appearance" = "Aussehen";
+"Appearance" = "Izgled";
 
 /* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "Authentifizierung erfolgreich";
+"Authentication successful" = "Autentifikacija uspješna";
 
 /* Output setting. [prefs.py] */
-"Automatically update on docking" = "Automatisch beim Andocken aktualisieren";
+"Automatically update on docking" = "Automatsko slanje nakon pristajanja";
 
 /* Cmdr stats. [stats.py] */
-"Balance" = "Kontostand";
+"Balance" = "Balans";
 
 /* Empire rank. [stats.py] */
 "Baron" = "Baron";
 
 /* Trade rank. [stats.py] */
-"Broker" = "Großhändler";
+"Broker" = "Broker";
 
 /* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Durchsuchen...";
+"Browse..." = "Potraži...";
 
 /* Federation rank. [stats.py] */
-"Cadet" = "Kadett";
+"Cadet" = "Cadet";
 
 /* CQC rank. [stats.py] */
-"Champion" = "Sieger";
+"Champion" = "Champion";
 
 /* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Ordner...";
+"Change..." = "Promijeni...";
 
 /* Menu item. [EDMarketConnector.py] */
-"Check for Updates..." = "Auf Aktualisierungen überprüfen...";
+"Check for Updates..." = "Provjeri nadogradnje...";
 
 /* Federation rank. [stats.py] */
-"Chief Petty Officer" = "Obermaat";
+"Chief Petty Officer" = "Chief Petty Officer";
 
 /* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Kdt.";
+"Cmdr" = "Cmdr";
 
 /* Ranking. [stats.py] */
-"Combat" = "Kampfrang";
+"Combat" = "Borba (Combat)";
 
 /* EDSM setting. [edsm.py] */
-"Commander Name" = "Kommandantenname";
+"Commander Name" = "Ime komandanta";
 
 /* Combat rank. [stats.py] */
-"Competent" = "Kompetent";
+"Competent" = "Competent";
 
 /* Tab heading in settings. [prefs.py] */
-"Configuration" = "Konfiguration";
+"Configuration" = "Konfiguracija";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "Wartezeit {SS}s";
+"cooldown {SS}s" = "pauza {SS}s";
 
 /* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Kopieren";
+"Copy" = "Kopiraj";
 
 /* Empire rank. [stats.py] */
-"Count" = "Graf";
+"Count" = "Count";
 
 /* Ranking. [stats.py] */
-"CQC" = "CQC-Rang";
+"CQC" = "CQC";
 
 /* Combat rank. [stats.py] */
-"Dangerous" = "Gefährlich";
+"Dangerous" = "Dangerous";
 
 /* Appearance theme setting. [prefs.py] */
-"Dark" = "Dunkel";
+"Dark" = "Tamna";
 
 /* Combat rank. [stats.py] */
-"Deadly" = "Tödlich";
+"Deadly" = "Deadly";
 
 /* Trade rank. [stats.py] */
-"Dealer" = "Kleinhändler";
+"Dealer" = "Dealer";
 
 /* Appearance theme and language setting. [l10n.py] */
-"Default" = "Standard";
+"Default" = "Standardna";
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "Senden verzögern bis angedockt";
+"Delay sending until docked" = "Odgodi slanje do pristajanja";
 
 /* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "Während das Spiel läuft nicht auf Updates überprüfen";
+"Disable Automatic Application Updates Check when in-game" = "Isključi automatsku provjeru nadogradnji za vrijeme igranja";
 
 /* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Deaktivierte Plugins";
+"Disabled Plugins" = "Deaktivirani dodaci (plugins)";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Documentation" = "Dokumentation";
+"Documentation" = "Dokumentacija";
 
 /* Empire rank. [stats.py] */
-"Duke" = "Herzog";
+"Duke" = "Duke";
 
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "E:D Journal Dateispeicherort";
+"E:D journal file location" = "Lokacija E:D journal fajlova";
 
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 
 /* Menu title. [EDMarketConnector.py] */
-"Edit" = "Bearbeiten";
+"Edit" = "Uredi";
 
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
 /* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Elite: Dangerous Star Map Anmeldedaten";
+"Elite Dangerous Star Map credentials" = "Kredencijali za Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
-"Empire" = "Imperium";
+"Empire" = "Imperija (Empire)";
 
 /* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Aktivierte Plugins";
+"Enabled Plugins" = "Aktivirani dodaci (plugins)";
 
 /* Federation rank. [stats.py] */
-"Ensign" = "Leutnant";
+"Ensign" = "Ensign";
 
 /* Trade rank. [stats.py] */
-"Entrepreneur" = "Unternehmer";
+"Entrepreneur" = "Entrepreneur";
 
 /* [eddn.py] */
-"Error: Can't connect to EDDN" = "Fehler: Keine Verbindung zum EDDN";
+"Error: Can't connect to EDDN" = "Greška: Nemoguće povezivanje sa EDDN";
 
 /* [edsm.py] */
-"Error: Can't connect to EDSM" = "Fehler: Kann keine Verbindung zu EDSM aufbauen";
+"Error: Can't connect to EDSM" = "Greška: Nemoguće povezivanje sa EDSM";
 
 /* [inara.py] */
-"Error: Can't connect to Inara" = "Fehler: Verbindung zu Inara fehlgeschlagen";
+"Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje sa Inara";
 
 /* [edsm.py] */
-"Error: EDSM {MSG}" = "Fehler: EDSM {MSG}";
+"Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
 
 /* Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier server is down" = "Fehler: Frontier-Server ist offline";
+"Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
-"Error: Frontier server is lagging" = "Fehler: Frontier-Server ist überlastet";
+"Error: Frontier server is lagging" = "Greška: Frontier server je usporen";
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Fehler: Frontier-Server SKU Problem";
+"Error: Frontier server SKU problem" = "Greška: SKU problem na Frontier serveru";
 
 /* [inara.py] */
-"Error: Inara {MSG}" = "Fehler: Inara {MSG}";
+"Error: Inara {MSG}" = "Greška: Inara {MSG}";
 
 /* [companion.py] */
-"Error: Invalid Credentials" = "Fehler: Ungültige Anmeldedaten";
+"Error: Invalid Credentials" = "Greška: Neispravni kredencijali";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Fehler: Falscher Kdt.";
+"Error: Wrong Cmdr" = "Greška: Pogrešan Cmdr";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Beenden";
+"Exit" = "Izlaz";
 
 /* Combat rank. [stats.py] */
-"Expert" = "Experte";
+"Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Erkunderrang";
+"Explorer" = "Istraživanje (Explorer)";
 
 /* Ranking. [stats.py] */
-"Federation" = "Föderation";
+"Federation" = "Federacija (Federation)";
 
 /* [EDMarketConnector.py] */
-"Fetching data..." = "Daten werden abgerufen...";
+"Fetching data..." = "Preuzimanje podataka...";
 
 /* Multicrew role. [EDMarketConnector.py] */
 "Fighter" = "Fighter";
 
 /* Menu title. [EDMarketConnector.py] */
-"File" = "Datei";
+"File" = "Fajl";
 
 /* Section heading in settings. [prefs.py] */
-"File location" = "Speicherort";
+"File location" = "Lokacija fajlova";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Kanonier";
+"Gunner" = "Gunner";
 
 /* Combat rank. [stats.py] */
-"Harmless" = "Harmlos";
+"Harmless" = "Harmless";
 
 /* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Steuer";
+"Helm" = "Helm";
 
 /* Menu title. [EDMarketConnector.py] */
-"Help" = "Hilfe";
+"Help" = "Pomoć";
 
 /* CQC rank. [stats.py] */
-"Helpless" = "Hilflos";
+"Helpless" = "Helpless";
 
 /* CQC rank. [stats.py] */
-"Hero" = "Held";
+"Hero" = "Hero";
 
 /* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Hervorgehobener Text";
+"Highlighted text" = "Označeni tekst";
 
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Hotkey";
+"Hotkey" = "Prečica";
 
 /* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inara-Anmeldedaten";
+"Inara credentials" = "Kredencijali za Inara";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
-"Keyboard shortcut" = "Makro";
+"Keyboard shortcut" = "Prečica";
 
 /* Empire rank. [stats.py] */
-"King" = "König";
+"King" = "King";
 
 /* Empire rank. [stats.py] */
-"Knight" = "Ritter";
+"Knight" = "Knight";
 
 /* Appearance setting prompt. [prefs.py] */
-"Language" = "Sprache";
+"Language" = "Jezik";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Zuletzt aktualisiert um {HH}:{MM}:{SS}";
+"Last updated at {HH}:{MM}:{SS}" = "Posljednji put osvježeno {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
-"Lieutenant" = "Kapitänleutnant";
+"Lieutenant" = "Lieutenant";
 
 /* Federation rank. [stats.py] */
-"Lieutenant Commander" = "Korvettenleutnant";
+"Lieutenant Commander" = "Lieutenant Commander";
 
 /* Cmdr stats. [stats.py] */
-"Loan" = "Kredit";
+"Loan" = "Zajam";
 
 /* [EDMarketConnector.py] */
-"Logging in..." = "Anmelden...";
+"Logging in..." = "Prijavljivanje...";
 
 /* Empire rank. [stats.py] */
-"Lord" = "Fürst";
+"Lord" = "Lord";
 
 /* [prefs.py] */
-"Market data in CSV format file" = "Marktdaten als CSV Datei";
+"Market data in CSV format file" = "Fajl sa market podacima u CSV formatu";
 
 /* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Marktdaten als Trade-Dangerous Datei";
+"Market data in Trade Dangerous format file" = "Fajl sa market podacima u Trade Dangerous formatu";
 
 /* Empire rank. [stats.py] */
-"Marquis" = "Marquise";
+"Marquis" = "Marquis";
 
 /* Combat rank. [stats.py] */
-"Master" = "Meister";
+"Master" = "Master";
 
 /* Trade rank. [stats.py] */
-"Merchant" = "Kaufmann";
+"Merchant" = "Merchant";
 
 /* Federation rank. [stats.py] */
-"Midshipman" = "Fähnrich";
+"Midshipman" = "Midshipman";
 
 /* Explorer rank. [stats.py] */
-"Mostly Aimless" = "Fast Planlos";
+"Mostly Aimless" = "Mostly Aimless";
 
 /* Combat rank. [stats.py] */
-"Mostly Harmless" = "Zumeist Harmlos";
+"Mostly Harmless" = "Mostly Harmless";
 
 /* CQC rank. [stats.py] */
-"Mostly Helpless" = "Zumeist Hilflos";
+"Mostly Helpless" = "Mostly Helpless";
 
 /* Trade rank. [stats.py] */
-"Mostly Penniless" = "Sehr Arm";
+"Mostly Penniless" = "Mostly Penniless";
 
 /* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Keine Zuweisung";
+"None" = "Nije definisano";
 
 /* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normaler Text";
+"Normal text" = "Normalan tekst";
 
 /* Combat rank. [stats.py] */
-"Novice" = "Neuling";
+"Novice" = "Novice";
 
 /* [prefs.py] */
 "OK" = "OK";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Nur wenn Elite: Dangerous geöffnet ist";
+"Only when Elite: Dangerous is the active app" = "Samo kada je Elite: Dangerous aktivna aplikacija";
 
 /* Button that opens a folder in Explorer/Finder. [prefs.py] */
-"Open" = "Öffnen";
+"Open" = "Otvori";
 
 /* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Öffne Systemeinstellungen";
+"Open System Preferences" = "Otvori sistemska podešavanja";
 
 /* Tab heading in settings. [prefs.py] */
-"Output" = "Ausgabe";
+"Output" = "Izvoz";
 
 /* Empire rank. [stats.py] */
-"Outsider" = "Fremder";
+"Outsider" = "Outsider";
 
 /* Explorer rank. [stats.py] */
-"Pathfinder" = "Pistensucher";
+"Pathfinder" = "Pathfinder";
 
 /* Trade rank. [stats.py] */
-"Peddler" = "Krämer";
+"Peddler" = "Peddler";
 
 /* Trade rank. [stats.py] */
-"Penniless" = "Bettelarm";
+"Penniless" = "Penniless";
 
 /* Federation rank. [stats.py] */
-"Petty Officer" = "Maat";
+"Petty Officer" = "Petty Officer";
 
 /* Explorer rank. [stats.py] */
-"Pioneer" = "Pionier";
+"Pioneer" = "Pioneer";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Ton abspielen";
+"Play sound" = "Zvučni efekat";
 
 /* [prefs.py] */
-"Please choose what data to save" = "Bitte wähle zu speichernde Daten aus";
+"Please choose what data to save" = "Izaberite koji podaci se snimaju";
 
 /* Tab heading in settings. [prefs.py] */
-"Plugins" = "Plugins";
+"Plugins" = "Dodaci (plugins)";
 
 /* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Plugin-Ordner";
+"Plugins folder" = "Folder za dodatke (plugins)";
 
 /* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins ohne Python 3.x Support";
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Dodaci (plugins) bez Python 3.x podrške";
 
 /* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Eins oder mehr deiner aktivierten Plugins hat noch keinen Support für Python 3.x. Du kannst dir die Liste im '{PLUGINS}'-Tab unter '{FILE}' > '{SETTINGS}' ansehen. Du solltest prüfen, ob es für diese Updates gibt und ansonsten dem Entwickler Bescheid geben, dass sie ihren Code für Python 3.x aktualisieren müssen.\n\nDu kannst ein Plugin deaktivieren, indem du dessen Ordner ein '{DISABLED}' am Ende des Namens anhängst.";
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Provjerite da li postoji nadograđena verzija ili obavijesite autora da treba da promijeni kod za Python 3.x.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
 
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Plugins ohne Python 3.x Support";
+"Plugins Without Python 3.x Support" = "Dodaci (plugins) bez Python 3.x podrške";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Informationen zum Migrieren von Plugins";
+"Information on migrating plugins" = "Informacije o migraciji dodataka (plugins)";
 
 /* Federation rank. [stats.py] */
-"Post Captain" = "Kapitän";
+"Post Captain" = "Post Captain";
 
 /* Federation rank. [stats.py] */
-"Post Commander" = "Fregattenkapitän";
+"Post Commander" = "Post Commander";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Machtspiele";
+"Powerplay" = "Powerplay";
 
 /* [prefs.py] */
-"Preferences" = "Einstellungen";
+"Preferences" = "Podešavanja";
 
 /* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Favorisierte Webseiten";
+"Preferred websites" = "Preferirani web sajtovi";
 
 /* Empire rank. [stats.py] */
-"Prince" = "Prinz";
+"Prince" = "Prince";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "Datenschutzrichtlinie";
+"Privacy Policy" = "Politika privatnosti";
 
 /* CQC rank. [stats.py] */
-"Professional" = "Profi";
+"Professional" = "Professional";
 
 /* Explorer rank. [stats.py] */
-"Ranger" = "Aufseher";
+"Ranger" = "Ranger";
 
 /* Power rank. [stats.py] */
-"Rating 1" = "Wertung 1";
+"Rating 1" = "Rating 1";
 
 /* Power rank. [stats.py] */
-"Rating 2" = "Wertung 2";
+"Rating 2" = "Rating 2";
 
 /* Power rank. [stats.py] */
-"Rating 3" = "Wertung 3";
+"Rating 3" = "Rating 3";
 
 /* Power rank. [stats.py] */
-"Rating 4" = "Wertung 4";
+"Rating 4" = "Rating 4";
 
 /* Power rank. [stats.py] */
-"Rating 5" = "Wertung 5";
+"Rating 5" = "Rating 5";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Starte {APP} neu, um den Tastenkürzel nutzen zu können";
+"Re-start {APP} to use shortcuts" = "Restartujte {APP} da bi ste koristili prečice";
 
 /* Federation rank. [stats.py] */
-"Rear Admiral" = "Konteradmiral";
+"Rear Admiral" = "Rear Admiral";
 
 /* Federation rank. [stats.py] */
-"Recruit" = "Rekrut";
+"Recruit" = "Recruit";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Anmerkungen";
+"Release Notes" = "Informacije o verziji";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Rolle";
+"Role" = "Uloga";
 
 /* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Speichere Originaldaten...";
+"Save Raw Data..." = "Snimi sirove podatke...";
 
 /* Explorer rank. [stats.py] */
-"Scout" = "Späher";
+"Scout" = "Scout";
 
 /* CQC rank. [stats.py] */
-"Semi Professional" = "Halbprofi";
+"Semi Professional" = "Semi Professional";
 
 /* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Sende Fluglog und CMDR-Status an EDSM";
+"Send flight log and Cmdr status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
 
 /* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Sende Fluglog und CMDR-Status an Inara";
+"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
 
 /* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Schicke Stationsdaten an das Elite Dangerous Data Netzwerk";
+"Send station data to the Elite Dangerous Data Network" = "Slanje podataka o stanici na Elite Dangerous Data Network";
 
 /* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Sende System- und Scandaten zum Elite Dangerous Data Network";
+"Send system and scan data to the Elite Dangerous Data Network" = "Slanje podataka o sistemu i skeniranju na Elite Dangerous Data Network";
 
 /* [eddn.py] */
-"Sending data to EDDN..." = "Daten werden an das EDDN gesendet...";
+"Sending data to EDDN..." = "Slanje podataka na EDDN...";
 
 /* Empire rank. [stats.py] */
-"Serf" = "Leibeigener";
+"Serf" = "Serf";
 
 /* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Einstellungen";
+"Settings" = "Podešavanja";
 
 /* Main window. [EDMarketConnector.py] */
-"Ship" = "Schiff";
+"Ship" = "Brod";
 
 /* Output setting. [prefs.py] */
-"Ship loadout" = "Schiffsausstattung";
+"Ship loadout" = "Brodska oprema";
 
 /* Status dialog title. [stats.py] */
-"Ships" = "Schiffe";
+"Ships" = "Brodovi";
 
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Werft";
+"Shipyard" = "Brodogradilište";
 
 /* Empire rank. [stats.py] */
-"Squire" = "Knappe";
+"Squire" = "Squire";
 
 /* Main window. [EDMarketConnector.py] */
-"Station" = "Station";
+"Station" = "Stanica";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "Diese Station hat keinen Markt!";
+"Station doesn't have a market!" = "Stanica nema market!";
 
 /* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "Diese Station hat nichts!";
+"Station doesn't have anything!" = "Stanica nema ništa!";
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
 /* Explorer rank. [stats.py] */
-"Surveyor" = "Landkundiger";
+"Surveyor" = "Surveyor";
 
 /* Main window. [EDMarketConnector.py] */
-"System" = "System";
+"System" = "Sistem";
 
 /* Appearance setting. [prefs.py] */
-"Theme" = "Theme";
+"Theme" = "Tema";
 
 /* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Savjet: Možete da deaktivirate dodatak (plugin){CR}dodavanjem '{EXT}' na ime njegovog foldera";
 
 /* Ranking. [stats.py] */
-"Trade" = "Handelsrang";
+"Trade" = "Trgovina (Trade)";
 
 /* Explorer rank. [stats.py] */
-"Trailblazer" = "Wegebner";
+"Trailblazer" = "Trailblazer";
 
 /* Appearance theme setting. [prefs.py] */
-"Transparent" = "Transparent";
+"Transparent" = "Prozirna";
 
 /* Trade rank. [stats.py] */
-"Tycoon" = "Magnat";
+"Tycoon" = "Tycoon";
 
 /* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Aktualisieren";
+"Update" = "Osvježi";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "Wert";
+"Value" = "Vrijednost";
 
 /* Federation rank. [stats.py] */
-"Vice Admiral" = "Vizeadmiral";
+"Vice Admiral" = "Vice Admiral";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Ansicht";
+"View" = "Pogled";
 
 /* Empire rank. [stats.py] */
 "Viscount" = "Viscount";
 
 /* Federation rank. [stats.py] */
-"Warrant Officer" = "Feldwebel";
+"Warrant Officer" = "Warrant Officer";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Was fliegst du?!";
+"What are you flying?!" = "U čemu letite?!";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Wo bist du?!";
+"Where are you?!" = "Gdje se nalazite?!";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Wer bist du?!";
+"Who are you?!" = "Ko ste vi?!";
 
 /* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Fenster";
+"Window" = "Prozor";
 
 /* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Du bist an keiner Station angedockt!";
+"You're not docked at a station!" = "Niste pristali na stanicu";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} benötigt für Tastenkürzel Systemrechte (Bedienungshilfen)";
+"{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi prečice";
 
