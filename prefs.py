@@ -10,13 +10,77 @@ from tkinter import colorchooser as tkColorChooser
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
-from config import applongname, config
+from config import applongname, config, appversion
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from theme import theme
 
 import plug
+
+###########################################################################
+# Versioned preferences, so we know whether to set an 'on' default on
+# 'new' preferences, or not.
+###########################################################################
+
+
+class PrefsVersion(object):
+    versions = {
+        '0.0.0.0': 1,
+        '1.0.0.0': 2,
+        '3.4.6.0': 3,
+        '3.5.1.0': 4,
+        # Only add new versions that add new Preferences
+        'current': 4,  # Should always match the last specific version, but only increment after you've added the new version.  Guess at it if anticipating a new version.
+    }
+
+    def __init__(self):
+        return
+
+    def stringToSerial(self, versionStr: str) -> int:
+        """
+        Convert a version string into a preferences version serial number.
+
+        If the version string isn't known returns the 'current' (latest) serial number.
+
+        :param versionStr:
+        :return int:
+        """
+        if versionStr in self.versions:
+            return self.versions[versionStr]
+
+        return self.versions['current']
+
+    ###########################################################################
+    # Should defaults be set, given the settings were added after 'addedAfter' ?
+    #
+    # config.get('PrefsVersion') is the version preferences we last saved for
+    ###########################################################################
+    def shouldSetDefaults(self, addedAfter: str, oldTest : bool=True) -> bool:
+        pv = config.getint('PrefsVersion')
+        # If no PrefsVersion yet exists then return oldTest
+        if not pv:
+            return oldTest
+
+        # Convert addedAfter to a version serial number
+        if addedAfter not in self.versions:
+            # Assume it was added at the start
+            aa = 1
+        else:
+            aa = self.versions[addedAfter]
+            # Sanity check, if something was added after then current should be greater
+            if aa >= self.versions['current']:
+                raise Exception('ERROR: Call to prefs.py:PrefsVersion.shouldSetDefaults() with "addedAfter" >= current latest in "versions" table.  You probably need to increase "current" serial number.')
+
+        # If this preference was added after the saved PrefsVersion we should set defaults
+        if aa >= pv:
+            return True
+
+        return False
+    ###########################################################################
+
+prefsVersion = PrefsVersion()
+###########################################################################
 
 if platform == 'darwin':
     import objc
@@ -103,7 +167,10 @@ class PreferencesDialog(tk.Toplevel):
         outframe = nb.Frame(notebook)
         outframe.columnconfigure(0, weight=1)
 
-        output = config.getint('output') or config.OUT_SHIP	# default settings
+        if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
+            output = config.OUT_SHIP	# default settings
+        else:
+            output = config.getint('output')
 
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
@@ -499,6 +566,7 @@ class PreferencesDialog(tk.Toplevel):
 
 
     def apply(self):
+        config.set('PrefsVersion', prefsVersion.stringToSerial(appversion))
         config.set('output',
                    (self.out_td.get()   and config.OUT_MKT_TD) +
                    (self.out_csv.get()  and config.OUT_MKT_CSV) +

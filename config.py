@@ -9,6 +9,7 @@ appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
 appversion = '3.5.1.0'
+copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60

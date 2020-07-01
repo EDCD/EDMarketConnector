@@ -100,6 +100,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "ドッキングするまでデータを送信しない";
 
+/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
+"Disable Automatic Application Updates Check when in-game" = "ゲーム中の自動アプリケーション更新チェックを無効にする";
+
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "無効なプラグイン";
 
@@ -333,6 +336,18 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "プラグインフォルダ";
+
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: プラグインがPython 3.xをサポートしていません";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "有効にしている1つ以上のプラグインがPython 3.xをサポートしていません。'{FILE}' > '{SETTINGS}'\nメニューで表示される設定ダイアログの'{PLUGINS}' タブの一覧を確認してください。更新済みのバージョンがあるかを確認し、なければ開発者にPython 3.xに対応するように開発者に連絡してください。\n\nプラグインを無効にするにはフォルダ名の最後に'{DISABLED}'を追加してください。";
+
+/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
+"Plugins Without Python 3.x Support" = "EDMC: プラグインがPython 3.xをサポートしていません";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "プラグインの移行に関する情報";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";

@@ -14,6 +14,8 @@ import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
+from prefs import prefsVersion
+
 if sys.platform != 'win32':
     from fcntl import lockf, LOCK_EX, LOCK_NB
 
@@ -347,7 +349,10 @@ def plugin_prefs(parent, cmdr, is_beta):
     BUTTONX = 12	# indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
 
-    output = config.getint('output') or (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)	# default settings
+    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
+        output = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)	# default settings
+    else:
+        output = config.getint('output')
 
     eddnframe = nb.Frame(parent)
 
@@ -371,7 +376,7 @@ def prefsvarchanged(event=None):
 
 def prefs_changed(cmdr, is_beta):
     config.set('output',
-               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP |config. OUT_MKT_MANUAL)) +
+               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP |config.OUT_MKT_MANUAL)) +
                (this.eddn_station.get() and config.OUT_MKT_EDDN) +
                (this.eddn_system.get() and config.OUT_SYS_EDDN) +
                (this.eddn_delay.get() and config.OUT_SYS_DELAY))
