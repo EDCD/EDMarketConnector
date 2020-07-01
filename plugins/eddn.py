@@ -14,6 +14,8 @@ import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
+from prefs import prefsVersion
+
 if sys.platform != 'win32':
     from fcntl import lockf, LOCK_EX, LOCK_NB
 
@@ -347,7 +349,7 @@ def plugin_prefs(parent, cmdr, is_beta):
     BUTTONX = 12	# indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
 
-    if not config.getint('PrefsDidSave'):
+    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
         output = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)	# default settings
     else:
         output = config.getint('output')
