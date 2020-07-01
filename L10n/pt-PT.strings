@@ -100,6 +100,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Atrasar o envio até estar atracado";
 
+/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
+"Disable Automatic Application Updates Check when in-game" = "Desactivar Verificação de Updates Automáticos da Aplicação enquanto joga";
+
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Plugins Desactivados";
 
@@ -333,6 +336,18 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Pasta dos Plugins";
+
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins sem suporte para Python 3.x";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Um ou mais dos plugins activados não possui ainda suporte para Python 3.x. Por favor verifique a lista na aba '{PLUGINS}' em  '{FILE}' > '{SETTINGS}'.  Deverá verificar se está disponível uma versão mais actualizada, caso contrário, informe o desenvolvedor de que necessita de actualizar o código para suportar Python 3.x.\n\nPode desactivar um plugin colocando '{DISABLED}' no fim do nome da pasta correspondente.";
+
+/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
+"Plugins Without Python 3.x Support" = "Plugins sem suporte para Python 3.x";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Informação para migração de plugins";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Capitão de Fragata";

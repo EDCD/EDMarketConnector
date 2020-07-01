@@ -1,0 +1,432 @@
+/* Language name */
+"!Language" = "Slovenščina";
+
+/* App menu entry on OSX. [EDMarketConnector.py] */
+"About {APP}" = "O {APP}";
+
+/* Federation rank. [stats.py] */
+"Admiral" = "Admiral";
+
+/* Explorer rank. [stats.py] */
+"Aimless" = "Aimless";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Always on top" = "Vedno na vrhu";
+
+/* CQC rank. [stats.py] */
+"Amateur" = "Amateur";
+
+/* EDSM setting. [edsm.py] */
+"API Key" = "API ključ";
+
+/* Tab heading in settings. [prefs.py] */
+"Appearance" = "Videz";
+
+/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
+"Authentication successful" = "Preverjanje pristnosti je bilo uspešno";
+
+/* Cmdr stats. [stats.py] */
+"Balance" = "Ravnotežje";
+
+/* Empire rank. [stats.py] */
+"Baron" = "Baron";
+
+/* Trade rank. [stats.py] */
+"Broker" = "Broker";
+
+/* Folder selection button on Windows. [prefs.py] */
+"Browse..." = "Prebrskaj...";
+
+/* Federation rank. [stats.py] */
+"Cadet" = "Cadet";
+
+/* CQC rank. [stats.py] */
+"Champion" = "Champion";
+
+/* Folder selection button on OSX. [prefs.py] */
+"Change..." = "Spremeni...";
+
+/* Menu item. [EDMarketConnector.py] */
+"Check for Updates..." = "Preveri posodobitve...";
+
+/* Federation rank. [stats.py] */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* Main window. [EDMarketConnector.py] */
+"Cmdr" = "Cmdr";
+
+/* Ranking. [stats.py] */
+"Combat" = "Combat";
+
+/* EDSM setting. [edsm.py] */
+"Commander Name" = "Commander ime";
+
+/* Combat rank. [stats.py] */
+"Competent" = "Competent";
+
+/* Tab heading in settings. [prefs.py] */
+"Configuration" = "Konfiguracija";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"cooldown {SS}s" = "Posodobitev v {SS}s";
+
+/* As in Copy and Paste. [EDMarketConnector.py] */
+"Copy" = "Kopiraj";
+
+/* Empire rank. [stats.py] */
+"Count" = "Count";
+
+/* Ranking. [stats.py] */
+"CQC" = "CQC";
+
+/* Combat rank. [stats.py] */
+"Dangerous" = "Dangerous";
+
+/* Appearance theme setting. [prefs.py] */
+"Dark" = "Temno";
+
+/* Combat rank. [stats.py] */
+"Deadly" = "Deadly";
+
+/* Trade rank. [stats.py] */
+"Dealer" = "Dealer";
+
+/* Appearance theme and language setting. [l10n.py] */
+"Default" = "Privzeta";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Documentation" = "Dokumentacija";
+
+/* Empire rank. [stats.py] */
+"Duke" = "Duke";
+
+/* Empire rank. [stats.py] */
+"Earl" = "Earl";
+
+/* Menu title. [EDMarketConnector.py] */
+"Edit" = "Uredi";
+
+/* Top rank. [stats.py] */
+"Elite" = "Elite";
+
+/* Section heading in settings. [edsm.py] */
+"Elite Dangerous Star Map credentials" = "EDStarMap uporabniški podatki";
+
+/* Ranking. [stats.py] */
+"Empire" = "Cesarstvo";
+
+/* Federation rank. [stats.py] */
+"Ensign" = "Ensign";
+
+/* Trade rank. [stats.py] */
+"Entrepreneur" = "Enterpreneur";
+
+/* [eddn.py] */
+"Error: Can't connect to EDDN" = "Napaka: povezava z EDDN ni mogoča";
+
+/* [edsm.py] */
+"Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
+
+/* [edsm.py] */
+"Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
+
+/* [companion.py] */
+"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Exit" = "Izhod";
+
+/* Combat rank. [stats.py] */
+"Expert" = "Expert";
+
+/* Ranking. [stats.py] */
+"Explorer" = "Explorer";
+
+/* Ranking. [stats.py] */
+"Federation" = "Federacija";
+
+/* [EDMarketConnector.py] */
+"Fetching data..." = "Nalagam podatke...";
+
+/* Menu title. [EDMarketConnector.py] */
+"File" = "Datoteka";
+
+/* Section heading in settings. [prefs.py] */
+"File location" = "Lokacija datoteke";
+
+/* CQC rank. [stats.py] */
+"Gladiator" = "Gladiator";
+
+/* Combat rank. [stats.py] */
+"Harmless" = "Harmless";
+
+/* Menu title. [EDMarketConnector.py] */
+"Help" = "Pomoč";
+
+/* CQC rank. [stats.py] */
+"Helpless" = "Helpless";
+
+/* CQC rank. [stats.py] */
+"Hero" = "Hero";
+
+/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
+"Hotkey" = "Bližnjica";
+
+/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
+"Keyboard shortcut" = "Bližnjica";
+
+/* Empire rank. [stats.py] */
+"King" = "King";
+
+/* Empire rank. [stats.py] */
+"Knight" = "Knight";
+
+/* Appearance setting prompt. [prefs.py] */
+"Language" = "Jezik";
+
+/* [EDMarketConnector.py] */
+"Last updated at {HH}:{MM}:{SS}" = "Zadnja osvežitev podatkov {HH}:{MM}:{SS} ";
+
+/* Federation rank. [stats.py] */
+"Lieutenant" = "LIeutenant";
+
+/* Federation rank. [stats.py] */
+"Lieutenant Commander" = "Lieutenant Commander";
+
+/* Cmdr stats. [stats.py] */
+"Loan" = "Posojilo";
+
+/* [EDMarketConnector.py] */
+"Logging in..." = "Prijava v teku... ";
+
+/* Empire rank. [stats.py] */
+"Lord" = "Lord";
+
+/* [prefs.py] */
+"Market data in CSV format file" = "Podatki trga v CSV formatu";
+
+/* [prefs.py] */
+"Market data in Trade Dangerous format file" = "Podatki trga v Trade Dangerous formatu";
+
+/* Empire rank. [stats.py] */
+"Marquis" = "Marquis";
+
+/* Combat rank. [stats.py] */
+"Master" = "Master";
+
+/* Trade rank. [stats.py] */
+"Merchant" = "Merchant";
+
+/* Federation rank. [stats.py] */
+"Midshipman" = "Midshipman";
+
+/* Explorer rank. [stats.py] */
+"Mostly Aimless" = "Mostly Aimless";
+
+/* Combat rank. [stats.py] */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* CQC rank. [stats.py] */
+"Mostly Helpless" = "Mostly Helpless";
+
+/* Trade rank. [stats.py] */
+"Mostly Penniless" = "Mostly peniless";
+
+/* No hotkey/shortcut currently defined. [prefs.py] */
+"None" = "Brez";
+
+/* Combat rank. [stats.py] */
+"Novice" = "Novice";
+
+/* [prefs.py] */
+"OK" = "Potrdi";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Only when Elite: Dangerous is the active app" = "Samo ko je Elite:Dangerous aktivna aplikacija ";
+
+/* Shortcut settings button on OSX. [prefs.py] */
+"Open System Preferences" = "Odpri sistemske nastavitve";
+
+/* Tab heading in settings. [prefs.py] */
+"Output" = "Izpis";
+
+/* Empire rank. [stats.py] */
+"Outsider" = "Outsider";
+
+/* Explorer rank. [stats.py] */
+"Pathfinder" = "Pathfinder";
+
+/* Trade rank. [stats.py] */
+"Peddler" = "Peddler";
+
+/* Trade rank. [stats.py] */
+"Penniless" = "Peniless";
+
+/* Federation rank. [stats.py] */
+"Petty Officer" = "Petty Officer";
+
+/* Explorer rank. [stats.py] */
+"Pioneer" = "Pioneer";
+
+/* Hotkey/Shortcut setting. [prefs.py] */
+"Play sound" = "Sproži zvok";
+
+/* [prefs.py] */
+"Please choose what data to save" = "Izberite podatke, ki jih želite shraniti";
+
+/* Federation rank. [stats.py] */
+"Post Captain" = "Post Captain";
+
+/* Federation rank. [stats.py] */
+"Post Commander" = "Post Commander";
+
+/* Ranking. [stats.py] */
+"Powerplay" = "Igra moči";
+
+/* [prefs.py] */
+"Preferences" = "Nastavitve";
+
+/* Empire rank. [stats.py] */
+"Prince" = "Prince";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Privacy Policy" = "Pravilnik o zasebnosti";
+
+/* CQC rank. [stats.py] */
+"Professional" = "Professional";
+
+/* Explorer rank. [stats.py] */
+"Ranger" = "Ranger";
+
+/* Power rank. [stats.py] */
+"Rating 1" = "Ocena 1";
+
+/* Power rank. [stats.py] */
+"Rating 2" = "Ocena 2";
+
+/* Power rank. [stats.py] */
+"Rating 3" = "Ocena 3";
+
+/* Power rank. [stats.py] */
+"Rating 4" = "Ocena 4";
+
+/* Power rank. [stats.py] */
+"Rating 5" = "Ocena 5";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"Re-start {APP} to use shortcuts" = "Ponovno poženi {APP} za uporabo bližnjic";
+
+/* Federation rank. [stats.py] */
+"Rear Admiral" = "Read Admiral";
+
+/* Federation rank. [stats.py] */
+"Recruit" = "Recruit";
+
+/* Help menu item. [EDMarketConnector.py] */
+"Release Notes" = "Opombe ob izdaji";
+
+/* Multicrew role label in main window. [EDMarketConnector.py] */
+"Role" = "Vloga";
+
+/* Menu item. [EDMarketConnector.py] */
+"Save Raw Data..." = "Shrani Izvirne Podatke...";
+
+/* Explorer rank. [stats.py] */
+"Scout" = "Scout";
+
+/* CQC rank. [stats.py] */
+"Semi Professional" = "Semi Professional";
+
+/* Output setting. [eddn.py] */
+"Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
+
+/* [eddn.py] */
+"Sending data to EDDN..." = "Pošiljam podatke na EDDN";
+
+/* Empire rank. [stats.py] */
+"Serf" = "Serif";
+
+/* Item in the File menu on Windows. [EDMarketConnector.py] */
+"Settings" = "Nastavitve";
+
+/* Main window. [EDMarketConnector.py] */
+"Ship" = "Ladja";
+
+/* Output setting. [prefs.py] */
+"Ship loadout" = "Oprema ladje";
+
+/* Status dialog title. [stats.py] */
+"Ships" = "Ladje";
+
+/* Empire rank. [stats.py] */
+"Squire" = "Squire";
+
+/* Main window. [EDMarketConnector.py] */
+"Station" = "Postaja";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have a market!" = "Postaja nima trga";
+
+/* [EDMarketConnector.py] */
+"Station doesn't have anything!" = "Postaja nima ničesar";
+
+/* Menu item. [EDMarketConnector.py] */
+"Status" = "Status";
+
+/* Explorer rank. [stats.py] */
+"Surveyor" = "Surveyor";
+
+/* Main window. [EDMarketConnector.py] */
+"System" = "Sistem";
+
+/* Appearance setting. [prefs.py] */
+"Theme" = "Tema";
+
+/* Ranking. [stats.py] */
+"Trade" = "Trgovanje";
+
+/* Explorer rank. [stats.py] */
+"Trailblazer" = "Trailblazer";
+
+/* Appearance theme setting. [prefs.py] */
+"Transparent" = "Prosojno";
+
+/* Trade rank. [stats.py] */
+"Tycoon" = "Tycoon";
+
+/* Update button in main window. [EDMarketConnector.py] */
+"Update" = "Osveži";
+
+/* Status dialog subtitle - CR value of ship. [stats.py] */
+"Value" = "Vrednost";
+
+/* Federation rank. [stats.py] */
+"Vice Admiral" = "Vice Admiral";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"View" = "Pogled";
+
+/* Empire rank. [stats.py] */
+"Viscount" = "Viscount";
+
+/* Federation rank. [stats.py] */
+"Warrant Officer" = "Warrant Officer";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"What are you flying?!" = "S čim letiš";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Where are you?!" = "Kje se nahajaš";
+
+/* Shouldn't happen. [EDMarketConnector.py] */
+"Who are you?!" = "Kdo si";
+
+/* Menu title on OSX. [EDMarketConnector.py] */
+"Window" = "Okno";
+
+/* [EDMarketConnector.py] */
+"You're not docked at a station!" = "Nahajš se v postaji!";
+
+/* Shortcut settings prompt on OSX. [prefs.py] */
+"{APP} needs permission to use shortcuts" = "{APP} potrebuje dovoljenja za uporabo bližnjic";
+
