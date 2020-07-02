@@ -262,7 +262,13 @@
 							<File KeyPath="yes" Source="SourceDir\L10n\ru.strings" />
 						</Component>
 						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\sl.strings" />
+						</Component>
+						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\sr-Latn.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\sr-Latn-BA.strings" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\uk.strings" />
@@ -561,7 +567,9 @@
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
 			<ComponentRef Id="ships.p" />
+			<ComponentRef Id="sl.strings" />
 			<ComponentRef Id="sr_Latn.strings" />
+			<ComponentRef Id="sr_Latn_BA.strings" />
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
 			<ComponentRef Id="sqlite3.dll" />
