@@ -53,6 +53,17 @@ There are other things that you should probably change, but can get away with le
 	1. appversion: The current version, e.g. '3.5.0.0'
 	1. update_feed: The URL where the application looks for current latest version information.  This URL should be hosting a renamed (so the full URL doesn't change over application versions) version of the appcast_win_<version>.xml file.  The original upstream value is `https://marginal.org.uk/edmarketconnector.xml`
 
+Pre-Packaging Steps
+===
+Before you create a new install each time you should:
+
+1. Ensure the data sourced from coriolis.io is up to date and works:
+    1. Update the `coriolis-data` repo.
+    1. Run `coriolis.py` to update `modules.p` and `ships.p`
+    1. XXX: Test ?
+1. Ensure translations are up to date, see [Translations.md](Translations.md).
+1. Increase `appversion` in `config.py` to reflect the changes.  See ['Version conventions' in Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/develop/Contributing.md#version-conventions).
+
 Packaging & Installer Generation
 ---
 You'll want to do the .exe and .msi generation in a `cmd.exe` window, not e.g. a 'Git bash' window.
