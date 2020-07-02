@@ -129,7 +129,7 @@ class EDLogs(FileSystemEventHandler):
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
         try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal') and x.endswith('.log')],
+            logfiles = sorted([x for x in listdir(self.currentdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
                               key=lambda x: x.split('.')[1:])
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
         except:
@@ -188,7 +188,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and basename(event.src_path).startswith('Journal') and basename(event.src_path).endswith('.log'):
+        if not event.is_directory and re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)):
             self.logfile = event.src_path
 
     def worker(self):
@@ -248,7 +248,7 @@ class EDLogs(FileSystemEventHandler):
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if x.startswith('Journal') and x.endswith('.log')],
+                    logfiles = sorted([x for x in listdir(self.currentdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
                                       key=lambda x: x.split('.')[1:])
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
                 except:
