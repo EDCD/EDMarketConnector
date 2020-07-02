@@ -58,7 +58,7 @@ Pre-Packaging Steps
 Before you create a new install each time you should:
 
 1. Ensure the data sourced from coriolis.io is up to date and works:
-    1. Update the `coriolis-data` repo.
+    1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for this.**
     1. Run `coriolis.py` to update `modules.p` and `ships.p`
     1. XXX: Test ?
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
