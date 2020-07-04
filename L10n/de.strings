@@ -269,13 +269,13 @@
 "Midshipman" = "Fähnrich";
 
 /* Explorer rank. [stats.py] */
-"Mostly Aimless" = "Fast Planlos";
+"Mostly Aimless" = "Fast planlos";
 
 /* Combat rank. [stats.py] */
-"Mostly Harmless" = "Zumeist Harmlos";
+"Mostly Harmless" = "Zumeist harmlos";
 
 /* CQC rank. [stats.py] */
-"Mostly Helpless" = "Zumeist Hilflos";
+"Mostly Helpless" = "Zumeist hilflos";
 
 /* Trade rank. [stats.py] */
 "Mostly Penniless" = "Sehr Arm";
@@ -308,7 +308,7 @@
 "Outsider" = "Fremder";
 
 /* Explorer rank. [stats.py] */
-"Pathfinder" = "Pistensucher";
+"Pathfinder" = "Pfadfinder";
 
 /* Trade rank. [stats.py] */
 "Peddler" = "Krämer";
@@ -359,7 +359,7 @@
 "Professional" = "Profi";
 
 /* Explorer rank. [stats.py] */
-"Ranger" = "Aufseher";
+"Ranger" = "Ranger";
 
 /* Power rank. [stats.py] */
 "Rating 1" = "Wertung 1";
@@ -377,7 +377,7 @@
 "Rating 5" = "Wertung 5";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Starte {APP} neu, um den Tastenkürzel nutzen zu können";
+"Re-start {APP} to use shortcuts" = "Starte {APP} neu, um Tastenkürzel nutzen zu können";
 
 /* Federation rank. [stats.py] */
 "Rear Admiral" = "Konteradmiral";
@@ -455,7 +455,7 @@
 "System" = "System";
 
 /* Appearance setting. [prefs.py] */
-"Theme" = "Theme";
+"Theme" = "Thema";
 
 /* Help text in settings. [prefs.py] */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";
@@ -470,7 +470,7 @@
 "Transparent" = "Transparent";
 
 /* Trade rank. [stats.py] */
-"Tycoon" = "Magnat";
+"Tycoon" = "Tycoon";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualisieren";
