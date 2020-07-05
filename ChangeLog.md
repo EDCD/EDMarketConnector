@@ -1,6 +1,16 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 3.99.2.0
+===
+Consider this as 'beta2' for the following full '4.0.0.0' release.
+
+ * Added Swedish to the translated languages.  Thanks to Gurra.
+ * Will throw an exception, rather than a Segmentation Fault, if run on Linux
+   without DISPLAY properly set.
+ * Corrects setting of WinSparkle (updates checking) options to be under the
+   new 'EDCD' Registry key.
+
 Pre-Release 3.99.1.0
 ===
 Consider this as 'beta1' for the following full '4.0.0.0' release.
