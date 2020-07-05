@@ -85,6 +85,8 @@ elif platform == 'linux':
         XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
         XQueryTree.restype = c_int
         dpy = xlib.XOpenDisplay(None)
+        if not dpy:
+          raise Exception("Can't find your display, can't continue")
         motif_wm_hints_property = XInternAtom(dpy, b'_MOTIF_WM_HINTS', False)
         motif_wm_hints_normal = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
                                              MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,

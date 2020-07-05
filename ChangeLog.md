@@ -1,6 +1,23 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 3.99.1.0
+===
+Consider this as 'beta1' for the following full '4.0.0.0' release.
+
+ * Actually include the new translations in the install: Serbian (Latin, Bosnia and Herzegovina) (175/175), Slovenian (Slovenia) (144/175).
+ * Fix a bug where if you copied a Journal file to the live location, resulting in a "Journal.YYMMDDHHMMss.XX - Copy.log" file,
+   the application would pick it up as 'new' and potentially re-send duplicate data to all of EDDN, EDSM and Inara.
+   
+   Now the only files the application will take note of must:
+    1. Start with `Journal.` or `JournalBeta.`.
+    1. Have the 12-digit date/timestamp, followed by a `.`
+    1. Have the 2 digit serial number, followed by a `.`
+    1. Nothing else before the trailing `log`.
+ * Fix the 'Release Note' URL in the 'About' popup to use the correct format.
+ * Fix the location of Registry keys for the update checker, WinSparkle, to be under `EDMarketConnector` instead
+   of `EDMarketConnector.py`.
+
 Pre-Release 3.99.0.0
 ===
 Consider this as 'beta0' for the following full '4.0.0.0' release.

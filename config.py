@@ -8,7 +8,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '3.99.0.0'
+appversion = '3.99.1.0'
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
@@ -200,13 +200,17 @@ class Config(object):
                 raise Exception()
 
             # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
+            edcdhkey = HKEY()
+            if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\EDCD\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(edcdhkey), ctypes.byref(disposition)):
+                raise Exception()
+
             sparklekey = HKEY()
-            if not RegCreateKeyEx(self.hkey, 'WinSparkle', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(sparklekey), ctypes.byref(disposition)):
+            if not RegCreateKeyEx(edcdhkey, 'WinSparkle', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(sparklekey), ctypes.byref(disposition)):
                 if disposition.value == REG_CREATED_NEW_KEY:
                     buf = ctypes.create_unicode_buffer('1')
                     RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
-                    buf = ctypes.create_unicode_buffer(str(update_interval))
-                    RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
+                buf = ctypes.create_unicode_buffer(str(update_interval))
+                RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
                 RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
