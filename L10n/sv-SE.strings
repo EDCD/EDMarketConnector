@@ -446,7 +446,7 @@
 "Ships" = "Skepp";
 
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Webbsida för översikt av skepp";
+"Shipyard" = "Översikt av skepp";
 
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
