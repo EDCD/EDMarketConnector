@@ -78,6 +78,7 @@ To add a new language to the app:
     1. Search for the language.
     1. Ensure you have the correct one if there are variants.
     1. Click the `+` on the right hand side to add the language.
+    1. Be sure to go through and Finalize any phrases that shouldn't be translated.  See [Translations]() in the Wiki.
 
     Remember that until there are translations all strings will default to the English version (actually the key, which is always specified in English).
 
