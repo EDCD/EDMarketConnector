@@ -356,6 +356,7 @@ Acknowledgements
 * Thanks to Armando Ota for the Slovenian translation.
 * Thanks to Cmdr Mila Strelok for the Spanish translation.
 * Thanks to Taras Velychko for the Ukranian translation.
+* Thanks to Gurra for the Swedish translation.
 * Thanks to [Athanasius](https://github.com/Athanasius) for the port to Python 3.
 * Thanks to [Ian Norton](https://github.com/inorton) for plugin support.
 * Thanks to [Cmdr Anthor](https://github.com/EDSM-NET) and [James Muscat](https://github.com/jamesremuscat) for [EDDN](https://github.com/EDSM-NET/EDDN/wiki).
