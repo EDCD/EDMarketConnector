@@ -34,25 +34,6 @@ Troubleshooting
 Please see the [Troubleshooting](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting) wiki page.
 
 
-### Location of configuration files
-If your configuration has been corrupted, or badly set, such that you can't run the program to fix it, or you otherwise need to directly access the configuration then these are the locations of the configuration:
-
-* Mac: You can use the 'defaults' command to interact with the stored settings, i.e.
-
-  `defaults read uk.org.marginal.edmarketconnector`
-
-  to show the current settings and appropriate '[write](https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html)' commands to change them.
-* Windows: Configuration is stored in the registry under `HKEY_CURRENT_USER\Software\Marginal\EDMarketConnector` . There are also some non-configuration files at `%LOCALAPPDATA%\EDMarketConnector\` in your user profile.
-* Linux: Configuration is stored in the file `${HOME}/.config/EDMarketConnector/EDMarketConnector.ini`
-
-### Installing on a different drive
-* In Control Panel uninstall "Elite Dangerous Market Connector".
-* At a Command Prompt type:
-
-  `msiexec /i "X:\path\to\EDMarketConnector_win_NNN.msi" INSTALLDIR="Y:\destination\EDMarketConnector"`
-
-Future updates will also be installed to this location.
-
 ### Reporting a problem
 Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
 
