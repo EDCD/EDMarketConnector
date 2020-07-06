@@ -117,7 +117,7 @@ We'll use an old version number, 3.5.0.0, as an example throughout the following
 
 1. You should have already decided on the new version number, as it's specified in `config.py`.  You'll need to redo the `.msi` build if you forgot. **Remember to do a fresh git commit for this change.**
 
-1. So as to make backing out any mistakes easier create a new branch for this release, e.g. `release-3.5.0.0`.  'release' is in full so as not to clash with the tag `rel-3.5.0.0` which could cause confusion.  Ensure all the relevant commits, and no more than them, are present in this branch.
+1. So as to make backing out any mistakes easier create a new branch for this release, using a name like `release-3.5.0.0`.  Do not use the tag `Release/3.5.0.0` form, that could cause confusion.  Ensure all the relevant commits, and no more than them, are present in this branch.
 	1. `git checkout releases`
 	1. `git pull origin` # Ensures local `releases` branch is up to date.
 	1. `git checkout -b release-3.5.0.0`
@@ -134,7 +134,7 @@ Now get all the relevant code changes into this branch.  This might mean merging
 	1. As you're working in a version-specific branch, `release-3.5.0.0`, you can safely commit these changes to git.  **Do not merge the branch with `releases` until the github release is in place.**
 
 1. Add a git tag for the release, which you'll refer to when actually creating the release:
-	1. This should be named `rel-A.B.C.D`, e.g. `rel-3.5.0.0.` as per the version number.
+	1. This should be named `Release/A.B.C.D`, e.g. `Release/3.5.0.0.` as per the version number.
 
 1. Now push this release-specific branch to GitHub.
 	1. Check which of your remotes is for github with `git remotes -v`. It should really be `origin` and the following assumes that.
