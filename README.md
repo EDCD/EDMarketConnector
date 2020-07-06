@@ -31,19 +31,9 @@ Click on the station name to view its entry in [eddb](https://eddb.io/), [EDSM](
 
 ![Windows screenshot](img/win_transparent.png)
 
-Installation
---------
+Installation & Uninstall
+---
 Please see the [Installation & Setup](https://github.com/EDCD/EDMarketConnector/wiki/Installation-&-Setup) wiki page.
-
-Uninstall
---------
-
-Windows:
-
-* Uninstall **Elite Dangerous Market Connector** from Windows Settings (`WinKey+i`) → Apps → Apps & Features
-
-Note: Uninstalling the app does not delete any output files that it has previously written.
-
 
 Plugins
 --------
