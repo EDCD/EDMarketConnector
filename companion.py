@@ -4,27 +4,25 @@ from builtins import object
 import base64
 import csv
 import requests
-from http.cookiejar import LWPCookieJar	# No longer needed but retained in case plugins use it
+from http.cookiejar import LWPCookieJar  # No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
-import json
 import numbers
 import os
-from os.path import dirname, isfile, join
+from os.path import join
 import random
 import sys
 import time
 from traceback import print_exc
 import urllib.parse
 import webbrowser
-import zlib
 
 from config import appname, appversion, config
 from protocol import protocolhandler
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    _ = lambda x: x # noqa
+    _ = lambda x: x # noqa # to make flake8 stop complaining that the hacked in _ method doesnt exist
 
 
 holdoff = 60  # be nice
@@ -214,8 +212,7 @@ class Auth(object):
         self.state = self.base64URLEncode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
         webbrowser.open(
-            
-            '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501
+            '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501 # I cant make this any shorter
                 server_auth=SERVER_AUTH,
                 url_auth=URL_AUTH,
                 client_id=CLIENT_ID,
@@ -503,7 +500,7 @@ class Session(object):
 def fixup(data):
     if not commodity_map:
         # Lazily populate
-        for f in ['commodity.csv', 'rare_commodity.csv']:
+        for f in ('commodity.csv', 'rare_commodity.csv'):
             with open(join(config.respath, f), 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
 
@@ -514,9 +511,11 @@ def fixup(data):
     for commodity in data['lastStarport'].get('commodities') or []:
 
         # Check all required numeric fields are present and are numeric
-        # Catches "demandBracket": "" for some phantom commodites in ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
+        # Catches "demandBracket": "" for some phantom commodites in 
+        # ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
+        #
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
-        for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
+        for thing in ('buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket'):
             if not isinstance(commodity.get(thing), numbers.Number):
                 if __debug__:
                     print(
@@ -589,13 +588,14 @@ def ship(data):
             if v == []:
                 pass  # just skip empty fields for brevity
 
-            elif k in ['alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining', 'rebuilds', 'starsystem', 'station']:
+            elif k in ('alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining',
+                       'rebuilds', 'starsystem', 'station'):
                 pass  # noisy
 
-            elif k in ['locDescription', 'locName'] or k.endswith('LocDescription') or k.endswith('LocName'):
+            elif k in ('locDescription', 'locName') or k.endswith('LocDescription') or k.endswith('LocName'):
                 pass  # also noisy, and redundant
 
-            elif k in ['dir', 'LessIsGood']:
+            elif k in ('dir', 'LessIsGood'):
                 pass  # dir is not ASCII - remove to simplify handling
 
             elif hasattr(v, 'items'):
@@ -616,12 +616,12 @@ def ship_file_name(ship_name, ship_type):
     if name.endswith('.'):
         name = name[:-1]
 
-    if name.lower() in ['con', 'prn', 'aux', 'nul',
+    if name.lower() in ('con', 'prn', 'aux', 'nul',
                         'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
-                        'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9']:
+                        'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'):
         name = name + '_'
 
-    return name.translate({ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*']})
+    return name.translate({ord(x): u'_' for x in ('\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*')})
 
 
 # singleton
