@@ -260,12 +260,15 @@ class Auth(object):
                 tokens[idx] = data.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
                 config.save()  # Save settings now for use by command-line app
+
                 return data.get('access_token')
 
         except:
             print('Auth\tCan\'t get token for %s' % self.cmdr)
             print_exc()
-            if r: self.dump(r)
+            if r:
+                self.dump(r)
+
             raise CredentialsError()
 
         print('Auth\tCan\'t get token for %s' % self.cmdr)
@@ -385,7 +388,9 @@ class Session(object):
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
         except:
-            if __debug__: print_exc()
+            if __debug__:
+                print_exc()
+
             raise ServerError()
 
         if r.url.startswith(SERVER_AUTH):
@@ -464,7 +469,8 @@ class Session(object):
                 self.session.close()
 
             except:
-                if __debug__: print_exc()
+                if __debug__:
+                    print_exc()
 
         self.session = None
 
@@ -497,7 +503,8 @@ def fixup(data):
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
         for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
             if not isinstance(commodity.get(thing), numbers.Number):
-                if __debug__: print('Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', '')))
+                if __debug__:
+                    print('Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', '')))
                 break
 
         else:
@@ -512,16 +519,20 @@ def fixup(data):
                 pass
 
             elif not commodity.get('categoryname'):
-                if __debug__: print('Missing "categoryname" for "%s"' % commodity.get('name', ''))
+                if __debug__:
+                    print('Missing "categoryname" for "%s"' % commodity.get('name', ''))
 
             elif not commodity.get('name'):
-                if __debug__: print('Missing "name" for a commodity in "%s"' % commodity.get('categoryname', ''))
+                if __debug__:
+                    print('Missing "name" for a commodity in "%s"' % commodity.get('categoryname', ''))
 
             elif not commodity['demandBracket'] in range(4):
-                if __debug__: print('Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name']))
+                if __debug__:
+                    print('Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name']))
 
             elif not commodity['stockBracket'] in range(4):
-                if __debug__: print('Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name']))
+                if __debug__:
+                    print('Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name']))
 
             else:
                 # Rewrite text fields
