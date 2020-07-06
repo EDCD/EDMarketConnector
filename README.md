@@ -58,7 +58,11 @@ Please see [docs/Releasing.md](docs/Releasing.md).
 
 Disclaimer
 --------
-This app uses the “Companion” web API that Frontier originally supplied for their Elite Dangerous iOS app and now [support](https://forums.frontier.co.uk/showthread.php?t=218658&p=3371472#post3371472) for third-party apps. However this API could go away at some time in the future - in which case this app will cease to work.
+This app uses the “Companion” web API that Frontier originally supplied for
+their Elite Dangerous iOS app and now [support](https://forums.frontier.co.uk/threads/open-letter-to-frontier-developments.218658/page-19#post-3371472)
+for third-party apps. If that API ceases to function in the future then
+much of this application's functionality will be curtailed (although it
+could still utilise [Journal files](https://forums.frontier.co.uk/threads/commanders-log-manual-and-data-sample.275151/#post4562494).
 
 
 
