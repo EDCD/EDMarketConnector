@@ -13,7 +13,7 @@ It utilises the Journal files written by the game on the user's computer,
 together with data from the API Frontier Developments supplies in order to
 feed this data to various third party sites that the user may find useful.
 
-See [the Wiki documenation](https://github.com/EDCD/EDMarketConnector/wiki)
+See [the Wiki documentation](https://github.com/EDCD/EDMarketConnector/wiki)
 for more details.
 
 
