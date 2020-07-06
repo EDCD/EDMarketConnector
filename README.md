@@ -24,20 +24,9 @@ Please see the [Installation & Setup](https://github.com/EDCD/EDMarketConnector/
 
 Plugins
 --------
-Plugins extend the behaviour of this app. To install a downloaded plugin:
+Plugins extend the behaviour of this app. See the [Plugins](https://github.com/EDCD/EDMarketConnector/wiki/Plugins) wiki page for more information.
 
-* On the Plugins settings tab press the “Open” button. This reveals the `plugins` folder where this app looks for plugins.
-* Open the `.zip` archive that you downloaded and move the folder contained inside into the `plugins` folder.
-
-You will need to re-start EDMC for it to notice the new plugin.
-
-The `plugins` folder is located at:
-
-* Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins` (usually `C:\Users\you\AppData\Local\EDMarketConnector\plugins`).
-* Mac: `~/Library/Application Support/EDMarketConnector/plugins` (in Finder hold ⌥ and choose Go &rarr; Library to open your `~/Library` folder).
-* Linux: `$XDG_DATA_HOME/EDMarketConnector/plugins`, or `~/.local/share/EDMarketConnector/plugins` if `$XDG_DATA_HOME` is unset.
-
-Refer to [PLUGINS.md](PLUGINS.md) if you would like to write a plugin.
+If you would like to write a plugin please see [PLUGINS.md](PLUGINS.md).
 
 
 Troubleshooting
