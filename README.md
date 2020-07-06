@@ -4,7 +4,7 @@ channel:
 [![Discord chat](https://img.shields.io/discord/164411426939600896.svg?style=social&label=Discord%20chat)](https://discord.gg/usQ5e6n)
 
 Elite: Dangerous Market Connector (EDMC)
-========
+===
 
 This application is only of use to PC players of the game Elite Dangerous
 (and its expansions).  It won't work with PS4 or Xbox accounts.
@@ -22,19 +22,25 @@ Installation & Uninstall
 Please see the [Installation & Setup](https://github.com/EDCD/EDMarketConnector/wiki/Installation-&-Setup) wiki page.
 
 
+Running from source
+---
+Please see the [Running from source](https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source) wiki page.
+
+
 Plugins
---------
+---
 Plugins extend the behaviour of this app. See the [Plugins](https://github.com/EDCD/EDMarketConnector/wiki/Plugins) wiki page for more information.
 
 If you would like to write a plugin please see [PLUGINS.md](PLUGINS.md).
 
 
 Troubleshooting
---------
+---
 Please see the [Troubleshooting](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting) wiki page.
 
 
-### Reporting a problem
+Reporting a problem
+---
 Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
 
 Mac:
@@ -45,10 +51,6 @@ Windows:
 
 * `%TMP%\EDMarketConnector.log`
 
-
-Running from source
---------
-Please see the [Running from source](https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source) wiki page.
 
 Packaging for distribution
 --------
