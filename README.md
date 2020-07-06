@@ -1,13 +1,4 @@
-**2020-06-16 21:00 UTC**
-
-**Due to a lack of time to continue with maintenance at this point Marginal (also known as Otis on the Discord) has kindly transferred ownership of this github repository to the EDCD Organisation.**
-
-**EDCD has some volunteers ready to take over maintenance, so over the next few days you can expect at least one fresh release to get things fully transferred (necessary to change the URL that EDMC uses to check for new versions).  After that we'll work hard at getting all of the Pull Requests addressed before moving on to any other outstanding Issues.**
-
-**Initially Athanasius will be the principle maintainer and releaser before passing the reins over to "LCU No Fool Like One" who has kindly agreed to take over as primary maintainer.**
-
-**Any questions or further offers of help can be directed to the Discord #edmc channel as below.**
-
+Any questions or offers of help can be directed to the Discord #edmc channel:
 
 [![Discord chat](https://img.shields.io/discord/164411426939600896.svg?style=social&label=Discord%20chat)](https://discord.gg/usQ5e6n)
 
@@ -139,16 +130,3 @@ License
 Copyright © 2015-2019 Jonathan Harris, 2020 EDCD
 
 Licensed under the [GNU Public License (GPL)](http://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
-
-**2020-06-16 21:00 UTC**
-
-**Due to a lack of time to continue with maintenance at this point Marginal (also known as Otis on the Discord) has kindly transferred ownership of this github repository to the EDCD Organisation.**
-
-**EDCD has some volunteers ready to take over maintenance, so over the next few days you can expect at least one fresh release to get things fully transferred (necessary to change the URL that EDMC uses to check for new versions).  After that we'll work hard at getting all of the Pull Requests addressed before moving on to any other outstanding Issues.**
-
-**Initially Athanasius will be the principle maintainer and releaser before passing the reins over to "LCU No Fool Like One" who has kindly agreed to take over as primary maintainer.**
-
-**Any questions or further offers of help can be directed to the Discord #edmc channel as below.**
-
-
-[![Discord chat](https://img.shields.io/discord/164411426939600896.svg?style=social&label=Discord%20chat)](https://discord.gg/usQ5e6n)
