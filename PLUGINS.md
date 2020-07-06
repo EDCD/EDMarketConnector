@@ -3,9 +3,7 @@
 Plugins allow you to customise and extend the behavior of EDMC.
 
 # Installing a Plugin
-
-EDMC loads all plugins it finds in it's `plugins` folder.  The location of this is shown on "File" > "Settings" >
-"Plugins" (tab).  There's also a button to "Open" it.  Defaults for this location are listed in the next section.
+See [Plugins](https://github.com/EDCD/EDMarketConnector/wiki/Plugins) on the wiki.
 
 # Writing a Plugin
 
