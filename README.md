@@ -117,78 +117,11 @@ Windows:
 
 Running from source
 --------
-
-Download and extract the [latest source code](https://github.com/EDCD/EDMarketConnector/archive/master.zip) (or fork and clone if you're comfortable with using `git`).
-
-Mac:
-
-* Requires Python3.7 and the Python “keyring”, “pyobjc”, “requests” and “watchdog” modules - install these with `pip3.7 install keyring pyobjc requests watchdog` .
-* Run with `./EDMarketConnector.py` .
-
-Windows:
-
-* Requires Python3.7 and the Python “keyring”, “requests” and “watchdog” modules - install these with `pip3.7 install keyring requests watchdog`
-* Run with `"C:\Program Files (x86)\Python37-32\python.exe" EDMarketConnector.py` .
-
-Linux:
-
-* Requires Python3.6 or later and the Python “requests” and "tkinter" modules.
-  - On Debian-based systems install these with `sudo apt-get install python3-requests python3-tk` .
-  - On Arch, install these with `sudo pacman -S python python-requests tk` .
-* Run with `./EDMarketConnector.py` .
-
-Command-line
---------
-
-The command-line program `EDMC.py` writes the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file.
-This program requires that the user has performed [setup](#setup) and verification through the app.
-
-Arguments:
-
-```
- -h, --help     show this help message and exit
- -v, --version  print program version and exit
- -a FILE        write ship loadout to FILE in Companion API json format
- -e FILE        write ship loadout to FILE in E:D Shipyard plain text format
- -l FILE        write ship locations to FILE in CSV format
- -m FILE        write station commodity market data to FILE in CSV format
- -o FILE        write station outfitting data to FILE in CSV format
- -s FILE        write station shipyard data to FILE in CSV format
- -t FILE        write player status to FILE in CSV format
- -d FILE        write raw JSON data to FILE
- -n             send data to EDDN
- -p CMDR        Returns data from the specified player account
-```
-
-The program returns one of the following exit codes. Further information may be written to stderr.
-<ol start="0">
-  <li>Success. Note that this doesn't necessarily mean that any requested output files have been produced - for example if the current station doesn't support the facilities for which data was requested.</li>
-  <li>Server is down.</li>
-  <li>Invalid Credentials.</li>
-  <li>Verification Required.</li>
-  <li>Server is lagging.</li>
-  <li>I/O or other OS error.</li>
-</ol>
-
+Please see the [Running from source](https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source) wiki page.
 
 Packaging for distribution
 --------
-
-Mac:
-
-**NB: Untested since 3.43**
-
-* requires py2app 0.19 or later
-* [Sparkle.framework](https://github.com/sparkle-project/Sparkle) installed in /Library/Frameworks
-* Run `setup.py py2app`
-
-Windows:
-
-* requires [py2exe 0.9.3.2 or later](https://github.com/albertosottile/py2exe/releases/latest)
-* winsparkle.dll & .pdb from [WinSparkle](https://github.com/vslavik/winsparkle) copied to the current directory
-* [WiX Toolset](http://wixtoolset.org/)
-* Run `setup.py py2exe`
-
+Please see [docs/Releasing.md](docs/Releasing.md).
 
 Disclaimer
 --------
