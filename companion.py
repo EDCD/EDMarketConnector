@@ -22,10 +22,14 @@ import zlib
 from config import appname, appversion, config
 from protocol import protocolhandler
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    _ = lambda x: x # noqa
 
-holdoff = 60	# be nice
-timeout = 10	# requests timeout
-auth_timeout = 30	# timeout for initial auth
+
+holdoff = 60  # be nice
+timeout = 10  # requests timeout
+auth_timeout = 30  # timeout for initial auth
 
 # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
 # Athanasius' Frontier account
@@ -47,7 +51,7 @@ category_map = {
     'Narcotics'     : 'Legal Drugs',
     'Slaves'        : 'Slavery',
     'Waste '        : 'Waste',
-    'NonMarketable' : False,	# Don't appear in the in-game market so don't report
+    'NonMarketable' : False  # Don't appear in the in-game market so don't report
 }
 
 commodity_map = {}
@@ -105,47 +109,62 @@ ship_map = {
 # In practice these arrays aren't very sparse so just convert them to lists with any 'gaps' holding None.
 def listify(thing):
     if thing is None:
-        return []	# data is not present
+        return []  # data is not present
+
     elif isinstance(thing, list):
-        return list(thing)	# array is not sparse
+        return list(thing)  # array is not sparse
+
     elif isinstance(thing, dict):
         retval = []
-        for k,v in thing.items():
+        for k, v in thing.items():
             idx = int(k)
+
             if idx >= len(retval):
                 retval.extend([None] * (idx - len(retval)))
                 retval.append(v)
             else:
                 retval[idx] = v
+
         return retval
+
     else:
-        assert False, thing	# we expect an array or a sparse array
-        return list(thing)	# hope for the best
+        assert False, thing  # we expect an array or a sparse array
+        return list(thing)  # hope for the best
 
 
 class ServerError(Exception):
     def __init__(self, *args):
-        self.args = args if args else (_('Error: Frontier server is down'),)	# Raised when cannot contact the Companion API server
+        # Raised when cannot contact the Companion API server
+        self.args = args if args else (_('Error: Frontier server is down'),)
+
 
 class ServerLagging(Exception):
     def __init__(self, *args):
-        self.args = args if args else (_('Error: Frontier server is lagging'),)	# Raised when Companion API server is returning old data, e.g. when the servers are too busy
+        # Raised when Companion API server is returning old data, e.g. when the servers are too busy
+        self.args = args if args else (_('Error: Frontier server is lagging'),)
+
 
 class SKUError(Exception):
     def __init__(self, *args):
-        self.args = args if args else (_('Error: Frontier server SKU problem'),)	# Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'
+        # Raised when the Companion API server thinks that the user has not purchased E:D
+        # i.e. doesn't have the correct 'SKU'
+        self.args = args if args else (_('Error: Frontier server SKU problem'),)
+
 
 class CredentialsError(Exception):
     def __init__(self, *args):
         self.args = args if args else (_('Error: Invalid Credentials'),)
 
+
 class CmdrError(Exception):
     def __init__(self, *args):
-        self.args = args if args else (_('Error: Wrong Cmdr'),)	# Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr
+        # Raised when the user has multiple accounts and the username/password setting is not for
+        # the account they're currently playing OR the user has reset their Cmdr and the Companion API
+        # server is still returning data for the old Cmdr
+        self.args = args if args else (_('Error: Wrong Cmdr'),)
 
 
 class Auth(object):
-
     def __init__(self, cmdr):
         self.cmdr = cmdr
         self.session = requests.Session()
@@ -166,19 +185,23 @@ class Auth(object):
                     'client_id': CLIENT_ID,
                     'refresh_token': tokens[idx],
                 }
+
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
                     config.set('fdev_apikeys', tokens)
-                    config.save()	# Save settings now for use by command-line app
+                    config.save()  # Save settings now for use by command-line app
                     return data.get('access_token')
+
                 else:
                     print('Auth\tCan\'t refresh token for %s' % self.cmdr)
                     self.dump(r)
+
             except:
                 print('Auth\tCan\'t refresh token for %s' % self.cmdr)
                 print_exc()
+
         else:
             print('Auth\tNo token for %s' % self.cmdr)
 
@@ -193,23 +216,26 @@ class Auth(object):
 
     def authorize(self, payload):
         # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
-        if not '?' in payload:
+        if '?' not in payload:
             print('Auth\tMalformed response "%s"' % payload)
-            raise CredentialsError()	# Not well formed
+            raise CredentialsError()  # Not well formed
 
         data = urllib.parse.parse_qs(payload[payload.index('?')+1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
             print('Auth\tUnexpected response "%s"' % payload)
-            raise CredentialsError()	# Unexpected reply
+            raise CredentialsError()  # Unexpected reply
 
         if not data.get('code'):
             print('Auth\tNegative response "%s"' % payload)
             if data.get('error_description'):
                 raise CredentialsError('Error: %s' % data['error_description'][0])
+
             elif data.get('error'):
                 raise CredentialsError('Error: %s' % data['error'][0])
+
             elif data.get('message'):
                 raise CredentialsError('Error: %s' % data['message'][0])
+
             else:
                 raise CredentialsError()
 
@@ -222,6 +248,7 @@ class Auth(object):
                 'code': data['code'][0],
                 'redirect_uri': protocolhandler.redirect,
             }
+
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
@@ -232,8 +259,9 @@ class Auth(object):
                 tokens = tokens + [''] * (len(cmdrs) - len(tokens))
                 tokens[idx] = data.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
-                config.save()	# Save settings now for use by command-line app
+                config.save()  # Save settings now for use by command-line app
                 return data.get('access_token')
+
         except:
             print('Auth\tCan\'t get token for %s' % self.cmdr)
             print_exc()
@@ -244,10 +272,13 @@ class Auth(object):
         self.dump(r)
         if data.get('error_description'):
             raise CredentialsError('Error: %s' % data['error_description'])
+
         elif data.get('error'):
             raise CredentialsError('Error: %s' % data['error'])
+
         elif data.get('message'):
             raise CredentialsError('Error: %s' % data['message'])
+
         else:
             raise CredentialsError()
 
@@ -260,7 +291,7 @@ class Auth(object):
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         tokens[idx] = ''
         config.set('fdev_apikeys', tokens)
-        config.save()	# Save settings now for use by command-line app
+        config.save()  # Save settings now for use by command-line app
 
     def dump(self, r):
         print('Auth\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
@@ -270,7 +301,6 @@ class Auth(object):
 
 
 class Session(object):
-
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
 
     def __init__(self):
@@ -278,10 +308,10 @@ class Session(object):
         self.credentials = None
         self.session = None
         self.auth = None
-        self.retrying = False	# Avoid infinite loop when successful auth / unsuccessful query
+        self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
         # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
-        if sys.version_info < (2,7,9):
+        if sys.version_info < (2, 7, 9):
             from requests.packages import urllib3
             urllib3.disable_warnings()
 
@@ -289,16 +319,20 @@ class Session(object):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
             raise CredentialsError()
+
         if not cmdr or is_beta is None:
             # Use existing credentials
             if not self.credentials:
-                raise CredentialsError()	# Shouldn't happen
+                raise CredentialsError()  # Shouldn't happen
+
             elif self.state == Session.STATE_OK:
-                return True	# already logged in
+                return True  # already logged in
+
         else:
             credentials = {'cmdr': cmdr, 'beta': is_beta}
             if self.credentials == credentials and self.state == Session.STATE_OK:
-                return True	# already logged in
+                return True  # already logged in
+
             else:
                 # changed account or retrying login during auth
                 self.close()
@@ -307,11 +341,13 @@ class Session(object):
         self.server = self.credentials['beta'] and SERVER_BETA or SERVER_LIVE
         self.state = Session.STATE_INIT
         self.auth = Auth(self.credentials['cmdr'])
+
         access_token = self.auth.refresh()
         if access_token:
             self.auth = None
             self.start(access_token)
             return True
+
         else:
             self.state = Session.STATE_AUTH
             return False
@@ -320,14 +356,16 @@ class Session(object):
     # Callback from protocol handler
     def auth_callback(self):
         if self.state != Session.STATE_AUTH:
-            raise CredentialsError()	# Shouldn't be getting a callback
+            raise CredentialsError()  # Shouldn't be getting a callback
+
         try:
             self.start(self.auth.authorize(protocolhandler.lastpayload))
             self.auth = None
+
         except:
-            self.state = Session.STATE_INIT	# Will try to authorize again on next login or query
+            self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
-            raise	# Bad thing happened
+            raise  # Bad thing happened
 
     def start(self, access_token):
         self.session = requests.Session()
@@ -339,11 +377,13 @@ class Session(object):
         if self.state == Session.STATE_INIT:
             if self.login():
                 return self.query(endpoint)
+
         elif self.state == Session.STATE_AUTH:
             raise CredentialsError()
 
         try:
             r = self.session.get(self.server + endpoint, timeout=timeout)
+
         except:
             if __debug__: print_exc()
             raise ServerError()
@@ -355,26 +395,31 @@ class Session(object):
             self.retrying = False
             self.login()
             raise CredentialsError()
+
         elif 500 <= r.status_code < 600:
             # Server error. Typically 500 "Internal Server Error" if server is down
             self.dump(r)
             raise ServerError()
 
         try:
-            r.raise_for_status()	# Typically 403 "Forbidden" on token expiry
-            data = r.json()		# May also fail here if token expired since response is empty
+            r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
+            data = r.json()  # May also fail here if token expired since response is empty
+
         except:
             print_exc()
             self.dump(r)
             self.close()
+
             if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
                 self.invalidate()
                 self.retrying = False
                 self.login()
                 raise CredentialsError()
+
             elif self.login():		# Maybe our token expired. Re-authorize in any case
                 self.retrying = True
                 return self.query(endpoint)
+
             else:
                 self.retrying = False
                 raise CredentialsError()
@@ -382,6 +427,7 @@ class Session(object):
         self.retrying = False
         if 'timestamp' not in data:
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
+
         return data
 
     def profile(self):
@@ -391,20 +437,24 @@ class Session(object):
         data = self.query(URL_QUERY)
         if data['commander'].get('docked'):
             services = data['lastStarport'].get('services', {})
+
             if services.get('commodities'):
+
                 marketdata = self.query(URL_MARKET)
-                if (data['lastStarport']['name'] != marketdata['name'] or
-                    int(data['lastStarport']['id']) != int(marketdata['id'])):
+                if (data['lastStarport']['name'] != marketdata['name'] or int(data['lastStarport']['id']) != int(marketdata['id'])):
                     raise ServerLagging()
+
                 else:
                     data['lastStarport'].update(marketdata)
+
             if services.get('outfitting') or services.get('shipyard'):
                 shipdata = self.query(URL_SHIPYARD)
-                if (data['lastStarport']['name'] != shipdata['name'] or
-                    int(data['lastStarport']['id']) != int(shipdata['id'])):
+                if (data['lastStarport']['name'] != shipdata['name'] or int(data['lastStarport']['id']) != int(shipdata['id'])):
                     raise ServerLagging()
+
                 else:
                     data['lastStarport'].update(shipdata)
+
         return data
 
     def close(self):
@@ -412,8 +462,10 @@ class Session(object):
         if self.session:
             try:
                 self.session.close()
+
             except:
                 if __debug__: print_exc()
+
         self.session = None
 
     def invalidate(self):
@@ -425,14 +477,15 @@ class Session(object):
         print('cAPI\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
 
 
-# Returns a shallow copy of the received data suitable for export to older tools - English commodity names and anomalies fixed up
+# Returns a shallow copy of the received data suitable for export to older tools
+# English commodity names and anomalies fixed up
 def fixup(data):
-
     if not commodity_map:
         # Lazily populate
         for f in ['commodity.csv', 'rare_commodity.csv']:
             with open(join(config.respath, f), 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
+
                 for row in reader:
                     commodity_map[row['symbol']] = (row['category'], row['name'])
 
@@ -446,24 +499,33 @@ def fixup(data):
             if not isinstance(commodity.get(thing), numbers.Number):
                 if __debug__: print('Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', '')))
                 break
+
         else:
-            if not category_map.get(commodity['categoryname'], True):	# Check not marketable i.e. Limpets
+            # Check not marketable i.e. Limpets
+            if not category_map.get(commodity['categoryname'], True):
                 pass
-            elif commodity['demandBracket'] == 0 and commodity['stockBracket'] == 0:	# Check not normally stocked e.g. Salvage
+
+            # Check not normally stocked e.g. Salvage
+            elif commodity['demandBracket'] == 0 and commodity['stockBracket'] == 0:
                 pass
-            elif commodity.get('legality'):	# Check not prohibited
+            elif commodity.get('legality'):  # Check not prohibited
                 pass
+
             elif not commodity.get('categoryname'):
                 if __debug__: print('Missing "categoryname" for "%s"' % commodity.get('name', ''))
+
             elif not commodity.get('name'):
                 if __debug__: print('Missing "name" for a commodity in "%s"' % commodity.get('categoryname', ''))
+
             elif not commodity['demandBracket'] in range(4):
                 if __debug__: print('Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name']))
+
             elif not commodity['stockBracket'] in range(4):
                 if __debug__: print('Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name']))
+
             else:
                 # Rewrite text fields
-                new = dict(commodity)	# shallow copy
+                new = dict(commodity)  # shallow copy
                 if commodity['name'] in commodity_map:
                     (new['categoryname'], new['name']) = commodity_map[commodity['name']]
                 elif commodity['categoryname'] in category_map:
@@ -488,22 +550,27 @@ def fixup(data):
 
 # Return a subset of the received data describing the current ship
 def ship(data):
-
     def filter_ship(d):
         filtered = {}
         for k, v in d.items():
             if v == []:
-                pass	# just skip empty fields for brevity
+                pass  # just skip empty fields for brevity
+
             elif k in ['alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining', 'rebuilds', 'starsystem', 'station']:
-                pass	# noisy
+                pass  # noisy
+
             elif k in ['locDescription', 'locName'] or k.endswith('LocDescription') or k.endswith('LocName'):
-                pass	# also noisy, and redundant
+                pass  # also noisy, and redundant
+
             elif k in ['dir', 'LessIsGood']:
-                pass	# dir is not ASCII - remove to simplify handling
+                pass  # dir is not ASCII - remove to simplify handling
+
             elif hasattr(v, 'items'):
                 filtered[k] = filter_ship(v)
+
             else:
                 filtered[k] = v
+
         return filtered
 
     # subset of "ship" that's not noisy
@@ -515,11 +582,13 @@ def ship_file_name(ship_name, ship_type):
     name = str(ship_name or ship_map.get(ship_type.lower(), ship_type)).strip()
     if name.endswith('.'):
         name = name[:-1]
+
     if name.lower() in ['con', 'prn', 'aux', 'nul',
                         'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
                         'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9']:
         name = name + '_'
-    return name.translate({ ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*'] })
+
+    return name.translate({ord(x): u'_' for x in ['\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*']})
 
 
 # singleton
