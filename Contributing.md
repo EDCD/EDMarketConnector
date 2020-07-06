@@ -48,9 +48,9 @@ then the HEAD of this Branch should always point to the code that was used in th
 
 * `master` - To avoid accidental commits that could have unintended consequences we do NOT use this branch.
    see `develop` or `stable` instead.  However, whenever a new stable release is made `master` should be fast-forwarded
-   to remain in sync with `stable`, as this is the default branch for code display on GitHub.  Anyone working on
-   something without first reading these guidelines is also likely to have worked on either local `master`
-   directly, or a branch based on it.
+   to remain in sync with `stable`, as this is the default branch for git (but we've set GitHub to use `develop`
+   as the default branch).  Anyone working on something without first reading these guidelines is also likely to
+   have worked on either local `master` directly, or a branch based on it.
 
 * `releases` - Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
@@ -70,7 +70,8 @@ In all cases the branch should be named as per the scheme `<class>/<issue number
   * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192-add-thing-to-wotsit`
   * `feature` - For working on *new* features, e.g. `feature/284-allow-users-to-frob`
 
-* `<issue-number>` is for easy reference when citing the issue number in commit messages.
+* `<issue-number>` is for easy reference when citing the issue number in commit messages.  If you're somehow doing
+  work that's not versus an issue then don't put the `<issue number>-` part in.
 * `<title>` is intended to allow anyone to quickly know what the branch is addressing.  Try to choose something
    succinct for `<title>`, it's just there for easy reference, it doesn't need to be the entire title of
    the appropriate issue.
