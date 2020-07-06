@@ -33,7 +33,8 @@ auth_timeout = 30  # timeout for initial auth
 
 # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
 # Athanasius' Frontier account
-CLIENT_ID   = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a' 	# Obtain from https://auth.frontierstore.net/client/signup
+# Obtain from https://auth.frontierstore.net/client/signup
+CLIENT_ID   = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
 SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH    = '/auth'
 URL_TOKEN   = '/token'
@@ -168,7 +169,7 @@ class Auth(object):
     def __init__(self, cmdr):
         self.cmdr = cmdr
         self.session = requests.Session()
-        self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
+        self.session.headers['User-Agent'] = 'EDCD-{}-{}'.format(appname, appversion)
         self.verifier = self.state = None
 
     def refresh(self):
@@ -195,15 +196,15 @@ class Auth(object):
                     return data.get('access_token')
 
                 else:
-                    print('Auth\tCan\'t refresh token for %s' % self.cmdr)
+                    print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
                     self.dump(r)
 
             except:
-                print('Auth\tCan\'t refresh token for %s' % self.cmdr)
+                print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
                 print_exc()
 
         else:
-            print('Auth\tNo token for %s' % self.cmdr)
+            print('Auth\tNo token for {}'.format(self.cmdr))
 
         # New request
         print('Auth\tNew authorization request')
@@ -212,29 +213,43 @@ class Auth(object):
         s = random.SystemRandom().getrandbits(8 * 32)
         self.state = self.base64URLEncode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
-        webbrowser.open('%s%s?response_type=code&audience=frontier&scope=capi&client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s&redirect_uri=%s' % (SERVER_AUTH, URL_AUTH, CLIENT_ID, self.base64URLEncode(hashlib.sha256(self.verifier).digest()), self.state, protocolhandler.redirect))
+        webbrowser.open(
+            
+            '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501
+                server_auth=SERVER_AUTH,
+                url_auth=URL_AUTH,
+                client_id=CLIENT_ID,
+                challenge=self.base64URLEncode(hashlib.sha256(self.verifier).digest()),
+                state=self.state,
+                redirect=protocolhandler.redirect
+            )
+        )
 
     def authorize(self, payload):
-        # Handle OAuth authorization code callback. Returns access token if successful, otherwise raises CredentialsError
+        # Handle OAuth authorization code callback.
+        # Returns access token if successful, otherwise raises CredentialsError
         if '?' not in payload:
-            print('Auth\tMalformed response "%s"' % payload)
+            print('Auth\tMalformed response {!r}'.format(payload))
             raise CredentialsError()  # Not well formed
 
-        data = urllib.parse.parse_qs(payload[payload.index('?')+1:])
+        data = urllib.parse.parse_qs(payload[payload.index('?') + 1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
-            print('Auth\tUnexpected response "%s"' % payload)
+            print('Auth\tUnexpected response {!r}'.format(payload))
             raise CredentialsError()  # Unexpected reply
 
         if not data.get('code'):
-            print('Auth\tNegative response "%s"' % payload)
+            print('Auth\tNegative response {!r}'.format(payload))
+
+            # TODO(A_D): there should be a cleaner way to do this rather than raising in every if
+            #            Additionally, this is basically the same code as seen below, helper method perhaps?
             if data.get('error_description'):
-                raise CredentialsError('Error: %s' % data['error_description'][0])
+                raise CredentialsError('Error: {!r}'.format(data['error_description'][0]))
 
             elif data.get('error'):
-                raise CredentialsError('Error: %s' % data['error'][0])
+                raise CredentialsError('Error: {!r}'.format(data['error'][0]))
 
             elif data.get('message'):
-                raise CredentialsError('Error: %s' % data['message'][0])
+                raise CredentialsError('Error: {!r}'.format(data['message'][0]))
 
             else:
                 raise CredentialsError()
@@ -252,7 +267,7 @@ class Auth(object):
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
-                print('Auth\tNew token for %s' % self.cmdr)
+                print('Auth\tNew token for {}'.format(self.cmdr))
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get('fdev_apikeys') or []
@@ -264,30 +279,30 @@ class Auth(object):
                 return data.get('access_token')
 
         except:
-            print('Auth\tCan\'t get token for %s' % self.cmdr)
+            print('Auth\tCan\'t get token for {}'.format(self.cmdr))
             print_exc()
             if r:
                 self.dump(r)
 
-            raise CredentialsError()
+            raise CredentialsError()  # TODO(A_D): Probably give more info about the error here
 
-        print('Auth\tCan\'t get token for %s' % self.cmdr)
+        print('Auth\tCan\'t get token for {}'.format(self.cmdr))
         self.dump(r)
         if data.get('error_description'):
-            raise CredentialsError('Error: %s' % data['error_description'])
+            raise CredentialsError('Error: {!r}'.format(data['error_description']))
 
         elif data.get('error'):
-            raise CredentialsError('Error: %s' % data['error'])
+            raise CredentialsError('Error: {!r}'.format(data['error']))
 
         elif data.get('message'):
-            raise CredentialsError('Error: %s' % data['message'])
+            raise CredentialsError('Error: {!r}'.format(data['message']))
 
         else:
             raise CredentialsError()
 
     @staticmethod
     def invalidate(cmdr):
-        print('Auth\tInvalidated token for %s' % cmdr)
+        print('Auth\tInvalidated token for {}'.format(cmdr))
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
@@ -297,7 +312,7 @@ class Auth(object):
         config.save()  # Save settings now for use by command-line app
 
     def dump(self, r):
-        print('Auth\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
+        print('Auth\t' + r.url, r.status_code, r.reason if r.reason else 'None', r.text)
 
     def base64URLEncode(self, text):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
@@ -372,8 +387,8 @@ class Session(object):
 
     def start(self, access_token):
         self.session = requests.Session()
-        self.session.headers['Authorization'] = 'Bearer %s' % access_token
-        self.session.headers['User-Agent'] = 'EDCD-%s-%s' % (appname, appversion)
+        self.session.headers['Authorization'] = 'Bearer {}'.format(access_token)
+        self.session.headers['User-Agent'] = 'EDCD-{appname}-{version}'.format(appname=appname, version=appversion)
         self.state = Session.STATE_OK
 
     def query(self, endpoint):
@@ -504,7 +519,14 @@ def fixup(data):
         for thing in ['buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket']:
             if not isinstance(commodity.get(thing), numbers.Number):
                 if __debug__:
-                    print('Invalid "%s":"%s" (%s) for "%s"' % (thing, commodity.get(thing), type(commodity.get(thing)), commodity.get('name', '')))
+                    print(
+                        'Invalid {!r}:{!r} ({}) for {!r}'.format(
+                            thing,
+                            commodity.get(thing),
+                            type(commodity.get(thing)),
+                            commodity.get('name', '')
+                        )
+                    )
                 break
 
         else:
@@ -520,19 +542,19 @@ def fixup(data):
 
             elif not commodity.get('categoryname'):
                 if __debug__:
-                    print('Missing "categoryname" for "%s"' % commodity.get('name', ''))
+                    print('Missing "categoryname" for {!r}'.format(commodity.get('name', '')))
 
             elif not commodity.get('name'):
                 if __debug__:
-                    print('Missing "name" for a commodity in "%s"' % commodity.get('categoryname', ''))
+                    print('Missing "name" for a commodity in {!r}'.format(commodity.get('categoryname', '')))
 
             elif not commodity['demandBracket'] in range(4):
                 if __debug__:
-                    print('Invalid "demandBracket":"%s" for "%s"' % (commodity['demandBracket'], commodity['name']))
+                    print('Invalid "demandBracket":{!r} for {!r}'.format(commodity['demandBracket'], commodity['name']))
 
             elif not commodity['stockBracket'] in range(4):
                 if __debug__:
-                    print('Invalid "stockBracket":"%s" for "%s"' % (commodity['stockBracket'], commodity['name']))
+                    print('Invalid "stockBracket":{!r} for {!r}'.format(commodity['stockBracket'], commodity['name']))
 
             else:
                 # Rewrite text fields
