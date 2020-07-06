@@ -62,7 +62,7 @@ This app uses the “Companion” web API that Frontier originally supplied for
 their Elite Dangerous iOS app and now [support](https://forums.frontier.co.uk/threads/open-letter-to-frontier-developments.218658/page-19#post-3371472)
 for third-party apps. If that API ceases to function in the future then
 much of this application's functionality will be curtailed (although it
-could still utilise [Journal files](https://forums.frontier.co.uk/threads/commanders-log-manual-and-data-sample.275151/#post4562494).
+could still utilise [Journal files](https://forums.frontier.co.uk/threads/commanders-log-manual-and-data-sample.275151/#post4562494)).
 
 
 
