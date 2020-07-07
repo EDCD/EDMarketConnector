@@ -439,10 +439,12 @@ class Session(object):
         if data['commander'].get('docked'):
             services = data['lastStarport'].get('services', {})
 
-            if services.get('commodities'):
+            last_starport_name = data['lastStarport']['name']
+            last_starport_id = int(data['lastStarport']['id'])
 
+            if services.get('commodities'):
                 marketdata = self.query(URL_MARKET)
-                if (data['lastStarport']['name'] != marketdata['name'] or int(data['lastStarport']['id']) != int(marketdata['id'])):
+                if (last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id'])):
                     raise ServerLagging()
 
                 else:
@@ -450,7 +452,7 @@ class Session(object):
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipdata = self.query(URL_SHIPYARD)
-                if (data['lastStarport']['name'] != shipdata['name'] or int(data['lastStarport']['id']) != int(shipdata['id'])):
+                if (last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id'])):
                     raise ServerLagging()
 
                 else:
