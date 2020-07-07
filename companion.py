@@ -308,11 +308,6 @@ class Session(object):
         self.auth = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
-        # yuck suppress InsecurePlatformWarning under Python < 2.7.9 which lacks SNI support
-        if sys.version_info < (2, 7, 9):
-            from requests.packages import urllib3
-            urllib3.disable_warnings()
-
     def login(self, cmdr=None, is_beta=None):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
