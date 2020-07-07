@@ -1,6 +1,15 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 3.99.3.0
+===
+Consider this as 'beta3' for the following full '4.0.0.0' release.
+
+* Fix up EDMC.exe (command line tool)t d:
+    * Correctly report the version with `-v`.
+    * Don't error out on checking Journal filenames.
+* Updated Swedish translation.
+
 Pre-Release 3.99.2.0
 ===
 Consider this as 'beta2' for the following full '4.0.0.0' release.
