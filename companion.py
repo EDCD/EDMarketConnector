@@ -227,12 +227,12 @@ class Auth(object):
         # Returns access token if successful, otherwise raises CredentialsError
         if '?' not in payload:
             print('Auth\tMalformed response {!r}'.format(payload))
-            raise CredentialsError()  # Not well formed
+            raise CredentialsError('malformed payload')  # Not well formed
 
         data = urllib.parse.parse_qs(payload[payload.index('?') + 1:])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
             print('Auth\tUnexpected response {!r}'.format(payload))
-            raise CredentialsError()  # Unexpected reply
+            raise CredentialsError('Unexpected response from authorization {!r}'.format(payload))  # Unexpected reply
 
         if not data.get('code'):
             print('Auth\tNegative response {!r}'.format(payload))
@@ -314,12 +314,12 @@ class Session(object):
     def login(self, cmdr=None, is_beta=None):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
-            raise CredentialsError()
+            raise CredentialsError('cannot login without a valid client ID')
 
         if not cmdr or is_beta is None:
             # Use existing credentials
             if not self.credentials:
-                raise CredentialsError()  # Shouldn't happen
+                raise CredentialsError('Missing credentials')  # Shouldn't happen
 
             elif self.state == Session.STATE_OK:
                 return True  # already logged in
@@ -352,7 +352,8 @@ class Session(object):
     # Callback from protocol handler
     def auth_callback(self):
         if self.state != Session.STATE_AUTH:
-            raise CredentialsError()  # Shouldn't be getting a callback
+            # Shouldn't be getting a callback
+            raise CredentialsError('Got an auth callback while not doing auth')
 
         try:
             self.start(self.auth.authorize(protocolhandler.lastpayload))
@@ -375,7 +376,7 @@ class Session(object):
                 return self.query(endpoint)
 
         elif self.state == Session.STATE_AUTH:
-            raise CredentialsError()
+            raise CredentialsError('cannot make a query when unauthorized')
 
         try:
             r = self.session.get(self.server + endpoint, timeout=timeout)
@@ -397,7 +398,7 @@ class Session(object):
         elif 500 <= r.status_code < 600:
             # Server error. Typically 500 "Internal Server Error" if server is down
             self.dump(r)
-            raise ServerError()
+            raise ServerError('Received error {} from server'.format(r.status_code))
 
         try:
             r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
