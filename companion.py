@@ -197,7 +197,7 @@ class Auth(object):
                     print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
                     self.dump(r)
 
-            except:
+            except Exception:
                 print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
                 print_exc()
 
@@ -265,13 +265,13 @@ class Auth(object):
 
                 return data.get('access_token')
 
-        except:
+        except Exception as e:
             print('Auth\tCan\'t get token for {}'.format(self.cmdr))
             print_exc()
             if r:
                 self.dump(r)
 
-            raise CredentialsError()  # TODO(A_D): Probably give more info about the error here
+            raise CredentialsError('unable to get token') from e
 
         print('Auth\tCan\'t get token for {}'.format(self.cmdr))
         self.dump(r)
@@ -358,7 +358,7 @@ class Session(object):
             self.start(self.auth.authorize(protocolhandler.lastpayload))
             self.auth = None
 
-        except:
+        except Exception:
             self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
@@ -380,11 +380,11 @@ class Session(object):
         try:
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
-        except:
+        except Exception as e:
             if __debug__:
                 print_exc()
 
-            raise ServerError()
+            raise ServerError('unable to get endpoint {}'.format(endpoint)) from e
 
         if r.url.startswith(SERVER_AUTH):
             # Redirected back to Auth server - force full re-authentication
@@ -403,7 +403,7 @@ class Session(object):
             r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
             data = r.json()  # May also fail here if token expired since response is empty
 
-        except:
+        except (requests.HTTPError, ValueError) as e:
             print_exc()
             self.dump(r)
             self.close()
@@ -412,7 +412,7 @@ class Session(object):
                 self.invalidate()
                 self.retrying = False
                 self.login()
-                raise CredentialsError()
+                raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
                 self.retrying = True
@@ -420,7 +420,7 @@ class Session(object):
 
             else:
                 self.retrying = False
-                raise CredentialsError()
+                raise CredentialsError('Invalid JSON or HTTP error') from e
 
         self.retrying = False
         if 'timestamp' not in data:
@@ -461,7 +461,7 @@ class Session(object):
             try:
                 self.session.close()
 
-            except:
+            except Exception:
                 if __debug__:
                     print_exc()
 
@@ -492,7 +492,7 @@ def fixup(data):
     for commodity in data['lastStarport'].get('commodities') or []:
 
         # Check all required numeric fields are present and are numeric
-        # Catches "demandBracket": "" for some phantom commodites in 
+        # Catches "demandBracket": "" for some phantom commodites in
         # ED 1.3 - https://github.com/Marginal/EDMarketConnector/issues/2
         #
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
