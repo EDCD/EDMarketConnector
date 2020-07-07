@@ -98,7 +98,7 @@
 "Default" = "Standard";
 
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "Sänd bara uppdatering när du är dockad";
+"Delay sending until docked" = "Skicka bara uppdateringar till EDDN när du är dockad";
 
 /* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
 "Disable Automatic Application Updates Check when in-game" = "Leta inte efter programuppdateringar när spelet körs";
@@ -257,7 +257,7 @@
 "Market data in CSV format file" = "Marknadsdata i CSV-formaterad fil";
 
 /* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Marknadsdata i Trade Dangerous-formatterad fil";
+"Market data in Trade Dangerous format file" = "Marknadsdata i Trade Dangerous-formaterad fil";
 
 /* Empire rank. [stats.py] */
 "Marquis" = "Marquis";
@@ -305,7 +305,7 @@
 "Open System Preferences" = "Öppna systeminställningar";
 
 /* Tab heading in settings. [prefs.py] */
-"Output" = "Output";
+"Output" = "Exportdata";
 
 /* Empire rank. [stats.py] */
 "Outsider" = "Outsider";
@@ -368,7 +368,7 @@
 "Prince" = "Prince";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "Privacy Policy";
+"Privacy Policy" = "Integritetspolicy";
 
 /* CQC rank. [stats.py] */
 "Professional" = "Professional";
@@ -401,7 +401,7 @@
 "Recruit" = "Recruit";
 
 /* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Release Notes";
+"Release Notes" = "Versionsinformation";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Roll";
@@ -416,19 +416,19 @@
 "Semi Professional" = "Semi Professional";
 
 /* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Sänd flight log-data och Cmdr-status till EDSM";
+"Send flight log and Cmdr status to EDSM" = "Skicka flight log-data och Cmdr-status till EDSM";
 
 /* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Sänd flight log-data och Cmdr-status till Inara";
+"Send flight log and Cmdr status to Inara" = "Skicka flight log-data och Cmdr-status till Inara";
 
 /* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Sänd stationsdata till Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "Skicka stationsdata till Elite Dangerous Data Network";
 
 /* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Sänd system och scan-data till Elite Dangerous Data Network";
+"Send system and scan data to the Elite Dangerous Data Network" = "Skicka system och scan-data till Elite Dangerous Data Network";
 
 /* [eddn.py] */
-"Sending data to EDDN..." = "Sänder data till EDDN...";
+"Sending data to EDDN..." = "Skickar data till EDDN...";
 
 /* Empire rank. [stats.py] */
 "Serf" = "Serf";
