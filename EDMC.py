@@ -11,6 +11,7 @@ import os
 from os.path import dirname, getmtime, join
 from time import time, sleep
 from xml.etree import ElementTree
+import re
 
 import l10n
 l10n.Translations.install_dummy()
@@ -36,7 +37,7 @@ EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EX
 
 # quick and dirty version comparison assuming "strict" numeric only version numbers
 def versioncmp(versionstring):
-    return map(int, versionstring.split('.'))
+    return list(map(int, versionstring.split('.')))
 
 
 try:
@@ -67,9 +68,10 @@ try:
             lastversion = sorted(items, key=versioncmp)[-1]
             if versioncmp(lastversion) > versioncmp(appversion):
                 latest = ' (%s is available)' % items[lastversion]
-        except:
-            pass	# Quietly suppress timeouts etc.
-        print('%.2f%s' % (float(''.join(appversion.split('.')[:3])) / 100, latest))	# just first three digits
+        except Exception as e:
+            sys.stderr.write('Exception in version check: {}'.format(str(e)))
+            #pass	# Quietly suppress timeouts etc.
+        print(appversion)
         sys.exit(EXIT_SUCCESS)
 
     if args.j:
@@ -91,7 +93,7 @@ try:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
         except Exception as e:
-            sys.stderr.write("Can't read Journal file: %s\n" % str(e).encode('ascii', 'replace'))
+            sys.stderr.write("Can't read Journal file: {}\n".format(str(e)))
             sys.exit(EXIT_SYS_ERR)
 
         if not monitor.cmdr:
