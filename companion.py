@@ -35,7 +35,9 @@ auth_timeout = 30  # timeout for initial auth
 CLIENT_ID   = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
 SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH    = '/auth'
-URL_TOKEN   = '/token'
+URL_TOKEN = '/token'
+
+USER_AGENT = 'EDCD-{}-{}'.format(appname, appversion)
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
@@ -167,7 +169,7 @@ class Auth(object):
     def __init__(self, cmdr):
         self.cmdr = cmdr
         self.session = requests.Session()
-        self.session.headers['User-Agent'] = 'EDCD-{}-{}'.format(appname, appversion)
+        self.session.headers['User-Agent'] = USER_AGENT
         self.verifier = self.state = None
 
     def refresh(self):
@@ -367,7 +369,7 @@ class Session(object):
     def start(self, access_token):
         self.session = requests.Session()
         self.session.headers['Authorization'] = 'Bearer {}'.format(access_token)
-        self.session.headers['User-Agent'] = 'EDCD-{appname}-{version}'.format(appname=appname, version=appversion)
+        self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
     def query(self, endpoint):
