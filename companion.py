@@ -480,7 +480,6 @@ class Session(object):
     def dump(self, r):
         print('cAPI\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
 
-
 # Returns a shallow copy of the received data suitable for export to older tools
 # English commodity names and anomalies fixed up
 def fixup(data):
@@ -560,8 +559,8 @@ def fixup(data):
                 commodities.append(new)
 
     # return a shallow copy
-    datacopy = dict(data)
-    datacopy['lastStarport'] = dict(data['lastStarport'])
+    datacopy = data.copy()
+    datacopy['lastStarport'] = data['lastStarport'].copy()
     datacopy['lastStarport']['commodities'] = commodities
     return datacopy
 
