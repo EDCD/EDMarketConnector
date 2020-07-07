@@ -236,20 +236,10 @@ class Auth(object):
 
         if not data.get('code'):
             print('Auth\tNegative response {!r}'.format(payload))
-
-            # TODO(A_D): there should be a cleaner way to do this rather than raising in every if
-            #            Additionally, this is basically the same code as seen below, helper method perhaps?
-            if data.get('error_description'):
-                raise CredentialsError('Error: {!r}'.format(data['error_description'][0]))
-
-            elif data.get('error'):
-                raise CredentialsError('Error: {!r}'.format(data['error'][0]))
-
-            elif data.get('message'):
-                raise CredentialsError('Error: {!r}'.format(data['message'][0]))
-
-            else:
-                raise CredentialsError()
+            error = next(
+                (data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',)
+            )
+            raise CredentialsError('Error: {!r}'.format(error)[0])
 
         try:
             r = None
@@ -285,17 +275,8 @@ class Auth(object):
 
         print('Auth\tCan\'t get token for {}'.format(self.cmdr))
         self.dump(r)
-        if data.get('error_description'):
-            raise CredentialsError('Error: {!r}'.format(data['error_description']))
-
-        elif data.get('error'):
-            raise CredentialsError('Error: {!r}'.format(data['error']))
-
-        elif data.get('message'):
-            raise CredentialsError('Error: {!r}'.format(data['message']))
-
-        else:
-            raise CredentialsError()
+        error = next((data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',))
+        raise CredentialsError('Error: {!r}'.format(error)[0])
 
     @staticmethod
     def invalidate(cmdr):
