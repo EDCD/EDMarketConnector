@@ -52,7 +52,7 @@ category_map = {
     'Narcotics'     : 'Legal Drugs',
     'Slaves'        : 'Slavery',
     'Waste '        : 'Waste',
-    'NonMarketable' : False  # Don't appear in the in-game market so don't report
+    'NonMarketable' : False,  # Don't appear in the in-game market so don't report
 }
 
 commodity_map = {}
@@ -231,7 +231,7 @@ class Auth(object):
             print('Auth\tMalformed response {!r}'.format(payload))
             raise CredentialsError('malformed payload')  # Not well formed
 
-        data = urllib.parse.parse_qs(payload[payload.index('?') + 1:])
+        data = urllib.parse.parse_qs(payload[(payload.index('?') + 1):])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
             print('Auth\tUnexpected response {!r}'.format(payload))
             raise CredentialsError('Unexpected response from authorization {!r}'.format(payload))  # Unexpected reply
@@ -311,7 +311,7 @@ class Session(object):
     def login(self, cmdr=None, is_beta=None):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
-            raise CredentialsError('cannot login without a valid client ID')
+            raise CredentialsError('cannot login without a valid Client ID')
 
         if not cmdr or is_beta is None:
             # Use existing credentials
@@ -418,7 +418,7 @@ class Session(object):
 
             else:
                 self.retrying = False
-                raise CredentialsError('Invalid JSON or HTTP error') from e
+                raise CredentialsError('HTTP error or invalid JSON') from e
 
         self.retrying = False
         if 'timestamp' not in data:
