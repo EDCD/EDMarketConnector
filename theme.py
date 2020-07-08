@@ -5,6 +5,7 @@
 # So can't use ttk's theme support. So have to change colors manually.
 #
 
+import os
 from sys import platform
 from os.path import join
 
@@ -18,86 +19,94 @@ from config import appname, applongname, config
 if __debug__:
     from traceback import print_exc
 
-if platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
-    AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
-    FR_PRIVATE  = 0x10
-    FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
-
-elif platform == 'linux':
+if platform == "linux":
     from ctypes import *
 
-    XID = c_ulong 	# from X.h: typedef unsigned long XID
-    Window = XID
-    Atom = c_ulong
-    Display = c_void_p	# Opaque
 
-    PropModeReplace = 0
-    PropModePrepend = 1
-    PropModeAppend  = 2
+def setup_UI__():
+    if platform == 'win32':
+        import ctypes
+        from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+        AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
+        AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
+        FR_PRIVATE  = 0x10
+        FR_NOT_ENUM = 0x20
+        AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
-    # From xprops.h
-    MWM_HINTS_FUNCTIONS = 1 << 0
-    MWM_HINTS_DECORATIONS = 1 << 1
-    MWM_HINTS_INPUT_MODE = 1 << 2
-    MWM_HINTS_STATUS = 1 << 3
-    MWM_FUNC_ALL = 1 << 0
-    MWM_FUNC_RESIZE = 1 << 1
-    MWM_FUNC_MOVE = 1 << 2
-    MWM_FUNC_MINIMIZE = 1 << 3
-    MWM_FUNC_MAXIMIZE = 1 << 4
-    MWM_FUNC_CLOSE = 1 << 5
-    MWM_DECOR_ALL = 1 << 0
-    MWM_DECOR_BORDER = 1 << 1
-    MWM_DECOR_RESIZEH = 1 << 2
-    MWM_DECOR_TITLE = 1 << 3
-    MWM_DECOR_MENU = 1 << 4
-    MWM_DECOR_MINIMIZE = 1 << 5
-    MWM_DECOR_MAXIMIZE = 1 << 6
+    elif platform == 'linux':
+        XID = c_ulong 	# from X.h: typedef unsigned long XID
+        Window = XID
+        Atom = c_ulong
+        Display = c_void_p	# Opaque
 
-    class MotifWmHints(Structure):
-        _fields_ = [
-            ('flags', c_ulong),
-            ('functions', c_ulong),
-            ('decorations', c_ulong),
-            ('input_mode', c_long),
-            ('status', c_ulong),
-        ]
+        PropModeReplace = 0
+        PropModePrepend = 1
+        PropModeAppend  = 2
 
-    try:
-        xlib = cdll.LoadLibrary('libX11.so.6')
-        XInternAtom = xlib.XInternAtom
-        XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
-        XInternAtom.restype = Atom
-        XChangeProperty = xlib.XChangeProperty
-        XChangeProperty.argtypes = [POINTER(Display), Window, Atom, Atom, c_int, c_int, POINTER(MotifWmHints), c_int]
-        XChangeProperty.restype = c_int
-        XFlush = xlib.XFlush
-        XFlush.argtypes = [POINTER(Display)]
-        XFlush.restype = c_int
-        XOpenDisplay = xlib.XOpenDisplay
-        XOpenDisplay.argtypes = [c_char_p]
-        XOpenDisplay.restype = POINTER(Display)
-        XQueryTree = xlib.XQueryTree
-        XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
-        XQueryTree.restype = c_int
-        dpy = xlib.XOpenDisplay(None)
-        if not dpy:
-          raise Exception("Can't find your display, can't continue")
-        motif_wm_hints_property = XInternAtom(dpy, b'_MOTIF_WM_HINTS', False)
-        motif_wm_hints_normal = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
-                                             MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
-                                             MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
-                                             0, 0)
-        motif_wm_hints_dark   = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
-                                             MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
-                                             0, 0, 0)
-    except:
-        if __debug__: print_exc()
-        dpy = None
+        # From xprops.h
+        MWM_HINTS_FUNCTIONS = 1 << 0
+        MWM_HINTS_DECORATIONS = 1 << 1
+        MWM_HINTS_INPUT_MODE = 1 << 2
+        MWM_HINTS_STATUS = 1 << 3
+        MWM_FUNC_ALL = 1 << 0
+        MWM_FUNC_RESIZE = 1 << 1
+        MWM_FUNC_MOVE = 1 << 2
+        MWM_FUNC_MINIMIZE = 1 << 3
+        MWM_FUNC_MAXIMIZE = 1 << 4
+        MWM_FUNC_CLOSE = 1 << 5
+        MWM_DECOR_ALL = 1 << 0
+        MWM_DECOR_BORDER = 1 << 1
+        MWM_DECOR_RESIZEH = 1 << 2
+        MWM_DECOR_TITLE = 1 << 3
+        MWM_DECOR_MENU = 1 << 4
+        MWM_DECOR_MINIMIZE = 1 << 5
+        MWM_DECOR_MAXIMIZE = 1 << 6
+
+        class MotifWmHints(Structure):
+            _fields_ = [
+                ('flags', c_ulong),
+                ('functions', c_ulong),
+                ('decorations', c_ulong),
+                ('input_mode', c_long),
+                ('status', c_ulong),
+            ]
+        
+        # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
+        if os.getenv("EDMC_NO_UI") :
+            return
+        
+        try:
+            xlib = cdll.LoadLibrary('libX11.so.6')
+            XInternAtom = xlib.XInternAtom
+            XInternAtom.argtypes = [POINTER(Display), c_char_p, c_int]
+            XInternAtom.restype = Atom
+            XChangeProperty = xlib.XChangeProperty
+            XChangeProperty.argtypes = [POINTER(Display), Window, Atom, Atom, c_int, c_int, POINTER(MotifWmHints), c_int]
+            XChangeProperty.restype = c_int
+            XFlush = xlib.XFlush
+            XFlush.argtypes = [POINTER(Display)]
+            XFlush.restype = c_int
+            XOpenDisplay = xlib.XOpenDisplay
+            XOpenDisplay.argtypes = [c_char_p]
+            XOpenDisplay.restype = POINTER(Display)
+            XQueryTree = xlib.XQueryTree
+            XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
+            XQueryTree.restype = c_int
+            dpy = xlib.XOpenDisplay(None)
+            if not dpy:
+                raise Exception("Can't find your display, can't continue")
+            
+            motif_wm_hints_property = XInternAtom(dpy, b'_MOTIF_WM_HINTS', False)
+            motif_wm_hints_normal = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                                                MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                                                MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
+                                                0, 0)
+            motif_wm_hints_dark   = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                                                MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                                                0, 0, 0)
+        except:
+            if __debug__: print_exc()
+            dpy = None
 
 
 class _Theme(object):
@@ -379,5 +388,7 @@ class _Theme(object):
             self.minwidth = root.winfo_width()	# Minimum width = width on first creation
             root.minsize(self.minwidth, -1)
 
+
+setup_UI__()
 # singleton
 theme = _Theme()
