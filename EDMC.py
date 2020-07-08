@@ -8,6 +8,10 @@ import json
 import requests
 import sys
 import os
+
+# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
+os.environ["EDMC_NO_UI"] = "1"
+
 from os.path import dirname, getmtime, join
 from time import time, sleep
 from xml.etree import ElementTree
