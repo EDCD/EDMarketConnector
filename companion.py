@@ -129,8 +129,7 @@ def listify(thing):
         return retval
 
     else:
-        assert False, thing  # we expect an array or a sparse array
-        return list(thing)  # hope for the best
+        raise ValueError("expected an array or sparse array")
 
 
 class ServerError(Exception):
