@@ -4,6 +4,8 @@ from builtins import object
 import base64
 import csv
 import requests
+
+# TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
@@ -11,7 +13,6 @@ import numbers
 import os
 from os.path import join
 import random
-import sys
 import time
 from traceback import print_exc
 import urllib.parse
@@ -129,7 +130,7 @@ def listify(thing):
         return retval
 
     else:
-        raise ValueError("expected an array or sparse array")
+        raise ValueError("expected an array or sparse array, got {!r}".format(thing))
 
 
 class ServerError(Exception):
