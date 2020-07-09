@@ -23,58 +23,55 @@ if platform == "linux":
     from ctypes import *
 
 
-def setup_UI__():
-    if platform == 'win32':
-        import ctypes
-        from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
-        AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-        AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
-        FR_PRIVATE  = 0x10
-        FR_NOT_ENUM = 0x20
-        AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
+if platform == 'win32':
+    import ctypes
+    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+    AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
+    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
+    FR_PRIVATE  = 0x10
+    FR_NOT_ENUM = 0x20
+    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
-    elif platform == 'linux':
-        XID = c_ulong 	# from X.h: typedef unsigned long XID
-        Window = XID
-        Atom = c_ulong
-        Display = c_void_p	# Opaque
+elif platform == 'linux':
+    XID = c_ulong 	# from X.h: typedef unsigned long XID
+    Window = XID
+    Atom = c_ulong
+    Display = c_void_p	# Opaque
 
-        PropModeReplace = 0
-        PropModePrepend = 1
-        PropModeAppend  = 2
+    PropModeReplace = 0
+    PropModePrepend = 1
+    PropModeAppend  = 2
 
-        # From xprops.h
-        MWM_HINTS_FUNCTIONS = 1 << 0
-        MWM_HINTS_DECORATIONS = 1 << 1
-        MWM_HINTS_INPUT_MODE = 1 << 2
-        MWM_HINTS_STATUS = 1 << 3
-        MWM_FUNC_ALL = 1 << 0
-        MWM_FUNC_RESIZE = 1 << 1
-        MWM_FUNC_MOVE = 1 << 2
-        MWM_FUNC_MINIMIZE = 1 << 3
-        MWM_FUNC_MAXIMIZE = 1 << 4
-        MWM_FUNC_CLOSE = 1 << 5
-        MWM_DECOR_ALL = 1 << 0
-        MWM_DECOR_BORDER = 1 << 1
-        MWM_DECOR_RESIZEH = 1 << 2
-        MWM_DECOR_TITLE = 1 << 3
-        MWM_DECOR_MENU = 1 << 4
-        MWM_DECOR_MINIMIZE = 1 << 5
-        MWM_DECOR_MAXIMIZE = 1 << 6
+    # From xprops.h
+    MWM_HINTS_FUNCTIONS = 1 << 0
+    MWM_HINTS_DECORATIONS = 1 << 1
+    MWM_HINTS_INPUT_MODE = 1 << 2
+    MWM_HINTS_STATUS = 1 << 3
+    MWM_FUNC_ALL = 1 << 0
+    MWM_FUNC_RESIZE = 1 << 1
+    MWM_FUNC_MOVE = 1 << 2
+    MWM_FUNC_MINIMIZE = 1 << 3
+    MWM_FUNC_MAXIMIZE = 1 << 4
+    MWM_FUNC_CLOSE = 1 << 5
+    MWM_DECOR_ALL = 1 << 0
+    MWM_DECOR_BORDER = 1 << 1
+    MWM_DECOR_RESIZEH = 1 << 2
+    MWM_DECOR_TITLE = 1 << 3
+    MWM_DECOR_MENU = 1 << 4
+    MWM_DECOR_MINIMIZE = 1 << 5
+    MWM_DECOR_MAXIMIZE = 1 << 6
 
-        class MotifWmHints(Structure):
-            _fields_ = [
-                ('flags', c_ulong),
-                ('functions', c_ulong),
-                ('decorations', c_ulong),
-                ('input_mode', c_long),
-                ('status', c_ulong),
-            ]
-        
-        # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
-        if os.getenv("EDMC_NO_UI") :
-            return
-        
+    class MotifWmHints(Structure):
+        _fields_ = [
+            ('flags', c_ulong),
+            ('functions', c_ulong),
+            ('decorations', c_ulong),
+            ('input_mode', c_long),
+            ('status', c_ulong),
+        ]
+    
+    # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
+    if not os.getenv("EDMC_NO_UI") :
         try:
             xlib = cdll.LoadLibrary('libX11.so.6')
             XInternAtom = xlib.XInternAtom
@@ -389,6 +386,5 @@ class _Theme(object):
             root.minsize(self.minwidth, -1)
 
 
-setup_UI__()
 # singleton
 theme = _Theme()
