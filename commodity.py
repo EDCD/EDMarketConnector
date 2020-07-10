@@ -48,10 +48,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
         cmdr = data['commander']['name'].strip()
 
         header_cmdr = cmdr
-        if config.getint('anonymous'):
-            header_cmdr = hashlib.md5(cmdr.encode('utf-8')).hexdigest()
-
-        elif sep in cmdr:
+        if sep in cmdr:
             header_cmdr = f'"{cmdr}"'
 
         rowheader = sep.join((header_cmdr, data['lastSystem']['name'], data['lastStarport']['name']))
