@@ -157,7 +157,11 @@ def export(data, filename=None):
 
     string = '[{}]\n'.format(_ships)
 
-    for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
+    SLOT_TYPES = (
+        'H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8',
+        '7', '6', '5', '4', '3', '2', '1'
+    )
+    for slot in SLOT_TYPES:
         if not slot:
             string += '\n'
 
@@ -172,6 +176,7 @@ def export(data, filename=None):
     assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
 
     try:
+        # TODO: broken link
         # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
         string += 'Mass  : {:.2f} T empty\n        {:.2f} T full\n'.format(mass, mass + fuel + cargo)
