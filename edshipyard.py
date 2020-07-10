@@ -88,10 +88,12 @@ def export(data, filename=None):
 
         v = data['ship']['modules'][slot]
         try:
-            if not v: continue
+            if not v:
+                continue
 
             module: __Module = outfitting.lookup(v['module'], ship_map)
-            if not module: continue
+            if not module:
+                continue
 
             cr = class_rating(module)
             mods = v.get('modifications') or v.get('WorkInProgress_modifications') or {}
@@ -129,10 +131,13 @@ def export(data, filename=None):
                     print('EDShipyard: Unknown slot %s' % slot)
 
         except AssertionError as e:
-            if __debug__: print('EDShipyard: %s' % e)
+            if __debug__:
+                print('EDShipyard: %s' % e)
             continue	# Silently skip unrecognized modules
+        
         except:
-            if __debug__: raise
+            if __debug__:
+                raise
 
     # Construct description
     ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
@@ -157,7 +162,8 @@ def export(data, filename=None):
             multiplier / (mass + fuel) + jumpboost,
             multiplier / (mass + fuel + cargo) + jumpboost)
     except:
-        if __debug__: raise
+        if __debug__:
+            raise
 
     if filename:
         with open(filename, 'wt') as h:
