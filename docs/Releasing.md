@@ -62,7 +62,7 @@ Before you create a new install each time you should:
     1. Run `coriolis.py` to update `modules.p` and `ships.p`
     1. XXX: Test ?
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
-1. Increase `appversion` in `config.py` to reflect the changes.  See ['Version conventions' in Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/develop/Contributing.md#version-conventions).
+1. Increase `appversion` in `config.py` to reflect the changes.  See ['Version conventions' in Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md#version-conventions).
 
 Packaging & Installer Generation
 ---

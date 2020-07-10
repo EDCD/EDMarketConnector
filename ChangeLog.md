@@ -43,7 +43,7 @@ Consider this as 'beta0' for the following full '4.0.0.0' release.
 
  * This release is based on Python 3.7, not 2.7, so a user might find some of their plugins stop working.  If you have any that do not have the proper support you'll see a popup about this, at most once every 24 hours, when you start the program.  As directed on that popup you can check the status of your plugins on 'File' > 'Settings' > 'Plugins' in the new 'Plugins Without Python 3.x Support:' section.
  
-   If the popup gets annoying then follow the directions to [Disable a plugin](https://github.com/EDCD/EDMarketConnector/blob/develop/PLUGINS.md#disable-a-plugin).  
+   If the popup gets annoying then follow the directions to [Disable a plugin](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#disable-a-plugin).  
    
    For any plugins without Python 3.x support you should first ensure you're using the latest version of that plugin.  If that hasn't been updated then you might want to contact the plugin developer to see if they'll update the plugin.  For some plugins [check this list](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37).
  
