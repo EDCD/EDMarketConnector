@@ -74,7 +74,6 @@ def export(data, filename=None):
 
         return ret + ' '
 
-
     querytime = config.getint('querytime') or int(time.time())
 
     loadout = defaultdict(list)
@@ -99,6 +98,7 @@ def export(data, filename=None):
             mods = v.get('modifications') or v.get('WorkInProgress_modifications') or {}
             if mods.get('OutfittingFieldType_Mass'):
                 mass += (module.get('mass', 0) * mods['OutfittingFieldType_Mass']['value'])
+
             else:
                 mass += module.get('mass', 0)
 
@@ -106,33 +106,41 @@ def export(data, filename=None):
             if 'Fuel Tank'in module['name']:
                 fuel += 2**int(module['class'])
                 name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+
             elif 'Cargo Rack' in module['name']:
                 cargo += 2**int(module['class'])
                 name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+
             else:
                 name = module['name']
 
             if name == 'Frame Shift Drive':
                 fsd = module	# save for range calculation
+
                 if mods.get('OutfittingFieldType_FSDOptimalMass'):
                     fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
+
                 if mods.get('OutfittingFieldType_MaxFuelPerJump'):
                     fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
+
             jumpboost += module.get('jumpboost', 0)
 
             for s in slot_map:
                 if slot.lower().startswith(s):
                     loadout[slot_map[s]].append(cr + name)
                     break
+
             else:
                 if slot.lower().startswith('slot'):
                     loadout[slot[-1]].append(cr + name)
+
                 elif __debug__ and not slot.lower().startswith('planetaryapproachsuite'):
                     print('EDShipyard: Unknown slot %s' % slot)
 
         except AssertionError as e:
             if __debug__:
                 print('EDShipyard: %s' % e)
+
             continue	# Silently skip unrecognized modules
         
         except:
@@ -145,14 +153,17 @@ def export(data, filename=None):
     for slot in ['H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8', '7', '6', '5', '4', '3', '2', '1']:
         if not slot:
             string += '\n'
+
         elif slot in loadout:
             for name in loadout[slot]:
                 string += '%s: %s\n' % (slot, name)
+
     string += '---\nCargo : %d T\nFuel  : %d T\n' % (cargo, fuel)
 
     # Add mass and range
     assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
     assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
+
     try:
         # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
@@ -161,6 +172,7 @@ def export(data, filename=None):
         string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
             multiplier / (mass + fuel) + jumpboost,
             multiplier / (mass + fuel + cargo) + jumpboost)
+
     except:
         if __debug__:
             raise
@@ -168,6 +180,7 @@ def export(data, filename=None):
     if filename:
         with open(filename, 'wt') as h:
             h.write(string)
+
         return
 
     # Look for last ship of this type
