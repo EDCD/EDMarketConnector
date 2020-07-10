@@ -11,13 +11,20 @@ from config import config
 import companion
 import outfitting
 
+from typing import Dict, Union, List
+__Module = Dict[str, Union[str, List[str]]]
 
 # Map API ship names to E:D Shipyard ship names
-ship_map = dict(companion.ship_map)
-ship_map['cobramkiii'] = 'Cobra Mk III'
-ship_map['cobramkiv']  = 'Cobra Mk IV',
-ship_map['viper']      = 'Viper'
-ship_map['viper_mkiv'] = 'Viper Mk IV'
+ship_map = companion.ship_map.copy()
+
+ship_map.update(
+    {
+        'cobramkiii': 'Cobra Mk III',
+        'cobramkiv' : 'Cobra Mk IV',
+        'viper'     : 'Viper',
+        'viper_mkiv': 'Viper Mk IV',
+    }
+)
 
 
 # Map API slot names to E:D Shipyard slot names
@@ -40,21 +47,33 @@ slot_map = {
 
 
 # Ship masses
-ships = pickle.load(open(join(config.respath, 'ships.p'),  'rb'))
+# TODO: prefer something other than pickle for this storage (dev readability, security)
+ships = pickle.load(open(join(config.respath, 'ships.p'), 'rb'))
 
 
 # Export ship loadout in E:D Shipyard plain text format
 def export(data, filename=None):
+    def class_rating(module: __Module):
+        mod_class = module['class']
+        mod_rating = module['rating']
+        mod_mount = module.get('mount')
+        mod_guidance = module.get('guidance')
 
-    def class_rating(module):
-        if 'guidance' in module:	# Missiles
-            return module['class'] + module['rating'] + '/' + module.get('mount', 'F')[0] + module['guidance'][0] + ' '
-        elif 'mount' in module:		# Hardpoints
-            return module['class'] + module['rating'] + '/' + module['mount'][0] + ' '
-        elif 'Cabin' in module['name']:	# Passenger cabins
-            return module['class'] + module['rating'] + '/' + module['name'][0] + ' '
-        else:
-            return module['class'] + module['rating'] + ' '
+        ret = '{clazz}{rating}'.format(clazz=mod_class, rating=mod_rating)
+        if 'guidance' in module:  # Missiles
+            ret += "/{mount}{guidance}".format(
+                mount=mod_mount[0] if mod_mount is not None else 'F',
+                guidance=mod_guidance[0],
+            )
+
+        elif 'mount' in module:  # Hardpoints
+            ret += "/{mount}".format(mount=mod_mount)
+
+        elif 'Cabin' in module['name']:  # Passenger cabins
+            ret += "/{name}".format(name=module['name'][0])
+
+        return ret + ' '
+
 
     querytime = config.getint('querytime') or int(time.time())
 
@@ -71,7 +90,7 @@ def export(data, filename=None):
         try:
             if not v: continue
 
-            module = outfitting.lookup(v['module'], ship_map)
+            module: __Module = outfitting.lookup(v['module'], ship_map)
             if not module: continue
 
             cr = class_rating(module)
