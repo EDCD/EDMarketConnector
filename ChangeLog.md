@@ -1,6 +1,34 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 3.99.4.0
+===
+Consider this as 'rc1' for the following full '4.0.0.0' release.
+
+* Translations updated: Polish, Portugese (Brazil).  Thank you translators!
+
+    Remember you can help with translations.  Please see [Translations.md](https://github.com/EDCD/EDMarketConnector/wiki/Translations)
+* Properly fix Linux code for when there's no X11 display available.  This
+ includes ensuring that the CLI tool EDMC.exe will run without issue, with or
+  without an
+ X11 display.
+* The old 'anonymous' and custom 'uploaderID' options were taken out of
+ the UI back in December 2018, but the settings lingered in the Windows
+ Registry. Thus some users would still have been sending an anonymised or
+ custom 'uploaderID' in EDDN messages with no easy way to de-activate this.
+ 
+    The EDDN Relay has been forcefully anonymising uploaderID since March
+    2018 anyway, so this is redundant.  Thus the code that performs this
+    anonymising has now been removed.
+* There used to be an option to output commodities data in 'BPC' format, but
+ the option for this was removed from the UI back in Dec 2016.  A few small
+ pieces of code lingered and they have now been removed.  Any plugin that
+ was passing COMMODITY_BPC to commodity.export() will now break.
+* There have been general coding style cleanups made to companion.py.  No
+ functionality should have changed and cursory checks show no regressions.
+ Please report any weirdness with the automatic checking and upload of
+ commodities data.
+
 Pre-Release 3.99.3.0
 ===
 Consider this as 'beta3' for the following full '4.0.0.0' release.
