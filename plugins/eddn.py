@@ -91,13 +91,7 @@ class EDDN(object):
         self.replayfile = None
 
     def send(self, cmdr, msg):
-        if config.getint('anonymous'):
-            uploaderID = config.get('uploaderID')
-            if not uploaderID:
-                uploaderID = uuid.uuid4().hex
-                config.set('uploaderID', uploaderID)
-        else:
-            uploaderID = cmdr
+        uploaderID = cmdr
 
         msg = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
