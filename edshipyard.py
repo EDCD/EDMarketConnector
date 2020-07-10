@@ -115,7 +115,7 @@ def export(data, filename=None):
                 name = module['name']
 
             if name == 'Frame Shift Drive':
-                fsd = module	# save for range calculation
+                fsd = module  # save for range calculation
 
                 if mods.get('OutfittingFieldType_FSDOptimalMass'):
                     fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
@@ -141,8 +141,8 @@ def export(data, filename=None):
             if __debug__:
                 print('EDShipyard: %s' % e)
 
-            continue	# Silently skip unrecognized modules
-        
+            continue  # Silently skip unrecognized modules
+
         except Exception:
             if __debug__:
                 raise
@@ -190,7 +190,7 @@ def export(data, filename=None):
     if oldfiles:
         with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
             if h.read() == string:
-                return	# same as last time - don't write
+                return  # same as last time - don't write
 
     # Write
     filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
