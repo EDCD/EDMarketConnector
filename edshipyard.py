@@ -59,7 +59,7 @@ def export(data, filename=None):
         mod_mount = module.get('mount')
         mod_guidance = module.get('guidance')
 
-        ret = '{clazz}{rating}'.format(clazz=mod_class, rating=mod_rating)
+        ret = '{mod_class}{rating}'.format(mod_class=mod_class, rating=mod_rating)
         if 'guidance' in module:  # Missiles
             ret += "/{mount}{guidance}".format(
                 mount=mod_mount[0] if mod_mount is not None else 'F',
@@ -103,7 +103,7 @@ def export(data, filename=None):
                 mass += module.get('mass', 0)
 
             # Specials
-            if 'Fuel Tank'in module['name']:
+            if 'Fuel Tank' in module['name']:
                 fuel += 2**int(module['class'])
                 name = '{} (Capacity: {})'.format(module['name'], 2**int(module['class']))
 
@@ -176,8 +176,6 @@ def export(data, filename=None):
     assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
 
     try:
-        # TODO: broken link
-        # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
         string += 'Mass  : {:.2f} T empty\n        {:.2f} T full\n'.format(mass, mass + fuel + cargo)
 
