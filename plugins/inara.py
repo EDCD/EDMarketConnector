@@ -50,7 +50,7 @@ this.loadout = None
 this.fleet = None
 this.shipswap = False	# just swapped ship
 
-this.last_update_time = time.time()  # last time since we updated (set to now because we're going to update quickly)
+this.last_update_time = time.time()  # last time we updated (set to now because we're going to update quickly)
 FLOOD_LIMIT_SECONDS = 45  # minimum time between sending non-major cargo triggered messages
 
 
