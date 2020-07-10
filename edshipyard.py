@@ -105,11 +105,11 @@ def export(data, filename=None):
             # Specials
             if 'Fuel Tank'in module['name']:
                 fuel += 2**int(module['class'])
-                name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+                name = '{} (Capacity: {})'.format(module['name'], 2**int(module['class']))
 
             elif 'Cargo Rack' in module['name']:
                 cargo += 2**int(module['class'])
-                name = '%s (Capacity: %d)' % (module['name'], 2**int(module['class']))
+                name = '{} (Capacity: {})'.format(module['name'], 2**int(module['class']))
 
             else:
                 name = module['name']
@@ -135,11 +135,11 @@ def export(data, filename=None):
                     loadout[slot[-1]].append(cr + name)
 
                 elif __debug__ and not slot.lower().startswith('planetaryapproachsuite'):
-                    print('EDShipyard: Unknown slot %s' % slot)
+                    print('EDShipyard: Unknown slot {}'.format(slot))
 
         except AssertionError as e:
             if __debug__:
-                print('EDShipyard: %s' % e)
+                print('EDShipyard: {}'.format(e))
 
             continue  # Silently skip unrecognized modules
 
