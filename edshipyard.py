@@ -143,7 +143,7 @@ def export(data, filename=None):
 
             continue	# Silently skip unrecognized modules
         
-        except:
+        except Exception:
             if __debug__:
                 raise
 
@@ -173,7 +173,7 @@ def export(data, filename=None):
             multiplier / (mass + fuel) + jumpboost,
             multiplier / (mass + fuel + cargo) + jumpboost)
 
-    except:
+    except Exception:
         if __debug__:
             raise
 
