@@ -200,7 +200,7 @@ def export(data, filename=None):
 
     # Look for last ship of this type
     ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
-    regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
+    regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
     if oldfiles:
         with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
