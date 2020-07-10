@@ -14,44 +14,27 @@ bracketmap = {
     3: 'High',
 }
 
-(COMMODITY_DEFAULT, COMMODITY_BPC, COMMODITY_CSV) = range(3)
+# DEFAULT means semi-colon separation
+# CSV means comma separation
+(COMMODITY_DEFAULT, COMMODITY_CSV) = range(2)
 
 
 def export(data, kind=COMMODITY_DEFAULT, filename=None):
     querytime = config.getint('querytime') or int(time.time())
 
     if not filename:
-        kind_str = 'bpc'
-        if kind != COMMODITY_BPC:
-            kind_str = 'csv'
-
         filename = '{system}.{starport}.{time}.{kind}'.format(
             system=data['lastSystem']['name'].strip(),
             starport=data['lastStarport']['name'].strip(),
             time=time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)),
-            kind=kind_str
+            kind='csv'
         )
-
         filename = join(config.get('outdir'), filename)
 
     if kind == COMMODITY_CSV:
         sep = ';'  # BUG: for fixing later after cleanup
         header = sep.join(('System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', '', 'Supply', '', 'Date', '\n'))
         rowheader = sep.join((data['lastSystem']['name'], data['lastStarport']['name']))
-
-    elif kind == COMMODITY_BPC:
-        sep = ';'
-        header = sep.join(
-            ('userID', 'System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', '', 'Supply', '', 'Date\n')
-        )
-
-        cmdr = data['commander']['name'].strip()
-
-        header_cmdr = cmdr
-        if sep in cmdr:
-            header_cmdr = f'"{cmdr}"'
-
-        rowheader = sep.join((header_cmdr, data['lastSystem']['name'], data['lastStarport']['name']))
 
     else:
         sep = ','
