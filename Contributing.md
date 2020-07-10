@@ -46,11 +46,12 @@ then the HEAD of this Branch should always point to the code that was used in th
   to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
   resolving that Pull Request.
 
-* `master` - To avoid accidental commits that could have unintended consequences we do NOT use this branch.
-   see `develop` or `stable` instead.  However, whenever a new stable release is made `master` should be fast-forwarded
-   to remain in sync with `stable`, as this is the default branch for git (but we've set GitHub to use `develop`
-   as the default branch).  Anyone working on something without first reading these guidelines is also likely to
-   have worked on either local `master` directly, or a branch based on it.
+* `main` - Yes, we've renamed this from `master`.  See
+ "[Using 'main' as the primary branch in Git](https://github.com/EDCD/EDMarketConnector/wiki/Git-Using-Main-Branch)"
+  for instructions on ensuring you're cleanly using it in any local clone.
+ 
+    This branch should contain anything from `develop` that is considered well
+     tested and ready for the next `stable` merge.
 
 * `releases` - Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
