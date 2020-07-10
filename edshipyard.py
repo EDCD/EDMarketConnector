@@ -156,9 +156,9 @@ def export(data, filename=None):
 
         elif slot in loadout:
             for name in loadout[slot]:
-                string += '%s: %s\n' % (slot, name)
+                string += '{}: {}\n'.format(slot, name)
 
-    string += '---\nCargo : %d T\nFuel  : %d T\n' % (cargo, fuel)
+    string += '---\nCargo : {} T\nFuel  : {} T\n'.format(cargo, fuel)
 
     # Add mass and range
     assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
@@ -167,11 +167,14 @@ def export(data, filename=None):
     try:
         # https://github.com/cmmcleod/coriolis/blob/master/app/js/shipyard/module-shipyard.js#L184
         mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
-        string += 'Mass  : %.2f T empty\n        %.2f T full\n' % (mass, mass + fuel + cargo)
+        string += 'Mass  : {:.2f} T empty\n        {:.2f} T full\n'.format(mass, mass + fuel + cargo)
+
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
-        string += 'Range : %.2f LY unladen\n        %.2f LY laden\n' % (
+
+        string += 'Range : {:.2f} LY unladen\n        {:.2f} LY laden\n'.format(
             multiplier / (mass + fuel) + jumpboost,
-            multiplier / (mass + fuel + cargo) + jumpboost)
+            multiplier / (mass + fuel + cargo) + jumpboost
+        )
 
     except Exception:
         if __debug__:
@@ -193,6 +196,9 @@ def export(data, filename=None):
                 return  # same as last time - don't write
 
     # Write
-    filename = join(config.get('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get('outdir'), '{}.{}.txt'.format(
+        ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)))
+    )
+
     with open(filename, 'wt') as h:
         h.write(string)
