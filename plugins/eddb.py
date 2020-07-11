@@ -75,7 +75,8 @@ def cmdr_data(data, is_beta):
             this.system_address = data['lastSystem']['id']
             this.system_link['url'] = system_url(this.system_address)  # Override standard URL function
 
-    if config.get('station_provider') == 'eddb':
+    # 'eddb' is also the *default* Station provider
+    if not config.get('station_provider') or config.get('station_provider') == 'eddb':
         # Only use CAPI value if not yet set
         # This is to avoid CAPI lagging causing incorrect value
         if not this.station_marketid:
