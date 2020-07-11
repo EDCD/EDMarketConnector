@@ -413,14 +413,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             # and our flood limit isnt covered, queue an update
             should_poll = this.cargo != cargo and time.time() - this.last_update_time > FLOOD_LIMIT_SECONDS
             
-            if should_poll:
-                print("[{}] INARA: should_poll is true".format(time.asctime()))
-
             # Send event(s) to Inara
             if entry['event'] == 'ShutDown' or len(this.events) > old_events or should_poll:
 
                 # Send cargo and materials if changed
-                # cargo = [ OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo']) ]
                 if this.cargo != cargo:
                     add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                     this.cargo = cargo
