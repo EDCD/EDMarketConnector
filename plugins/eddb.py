@@ -69,10 +69,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 def cmdr_data(data, is_beta):
     if config.get('system_provider') == 'eddb':
-        this.system_address = data['lastSystem']['id'] or this.system_address
-        this.system_link['url'] = system_url(this.system_address)  # Override standard URL function
+        # Only fill in system_address from CAPI if it's not set yet
+        # This is to avoid CAPI lagging causing incorrect value
+        if not this.system_address:
+            this.system_address = data['lastSystem']['id']
+            this.system_link['url'] = system_url(this.system_address)  # Override standard URL function
 
     if config.get('station_provider') == 'eddb':
-        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
-        this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (data['lastStarport']['name'] and data['lastStarport']['name'] != "" and STATION_UNDOCKED or '')
-        this.station_link.update_idletasks()
+        # Only use CAPI value if not yet set
+        # This is to avoid CAPI lagging causing incorrect value
+        if not this.station_marketid:
+            this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+            this.station_link['text'] = data['commander']['docked'] and data['lastStarport']['name'] or (data['lastStarport']['name'] and data['lastStarport']['name'] != "" and STATION_UNDOCKED or '')
+            this.station_link.update_idletasks()
