@@ -1,6 +1,21 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 3.99.5.0
+===
+Consider this as 'rc2' for the following full '4.0.0.0' release.
+
+* Fix for using EDDB as System provider.  It was picking up a wrong
+ SystemAddress from the Frontier CAPI (it's a bug their end).  Now the CAPI
+ will only be used for this when we don't already have a value, otherwise
+ we always get the new value from Journals anyway.
+* Tweak to Inara plugin so it will send updates via the Inara API more
+ frequently.  Will now send an update, no more often than about once a
+ minute, if your cargo changes at all.  This still won't update if you dock
+ and quickly buy or sell some cargo, but it's better than it was before.
+ You can nudge it by waiting a minute then re-opening the Commodities screen,
+ or indeed performing any other action the logs a new Journal event.
+
 Pre-Release 3.99.4.0
 ===
 Consider this as 'rc1' for the following full '4.0.0.0' release.
