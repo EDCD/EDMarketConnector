@@ -50,6 +50,9 @@ this.loadout = None
 this.fleet = None
 this.shipswap = False	# just swapped ship
 
+this.last_update_time = time.time()  # last time we updated (set to now because we're going to update quickly)
+FLOOD_LIMIT_SECONDS = 45  # minimum time between sending non-major cargo triggered messages
+
 
 # Main window clicks
 this.system_link = None
@@ -404,12 +407,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             if config.get('station_provider') == 'Inara':
                 this.station_link['url'] = this.station or this.system
 
+            cargo = [OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo'])]
 
+            # if our cargo differers from last we checked, we're at a station,
+            # and our flood limit isnt covered, queue an update
+            should_poll = this.cargo != cargo and time.time() - this.last_update_time > FLOOD_LIMIT_SECONDS
+            
             # Send event(s) to Inara
-            if entry['event'] == 'ShutDown' or len(this.events) > old_events:
+            if entry['event'] == 'ShutDown' or len(this.events) > old_events or should_poll:
 
                 # Send cargo and materials if changed
-                cargo = [ OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo']) ]
                 if this.cargo != cargo:
                     add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                     this.cargo = cargo
@@ -803,6 +810,8 @@ def call(callback=None):
     if not this.events:
         return
 
+    this.last_update_time = time.time()
+    
     data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
