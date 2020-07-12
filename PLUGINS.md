@@ -21,6 +21,32 @@ Plugins are python files. The plugin folder must have a file named `load.py`
 that must provide one module level function and optionally provide a few
 others.
 
+---
+### Available imports
+
+**`import`ing anything from the core EDMarketConnector code that is not
+explicitly mentioned here is unsupported and may lead to your plugin
+breaking with future code changes.**
+
+`from config import appname, applongname, appcmdname, appversion
+, copyright, config` - to access config.
+
+`from prefs import prefsVersion` - to allow for versioned preferences.
+
+`from companion import category_map` - Or any of the other static date
+ contained therein.   NB: There's a plan to move such to a `data` module.
+
+`import plug` - Mostly for using `plug.show_error()`.  Relying on anything
+ else isn't supported.
+
+```python
+from ttkHyperlinkLabel import HyperlinkLabel
+import myNotebook as nb
+```
+For creating UI elements.
+
+
+---
 ### Startup
 EDMC will import the `load.py` file as a module and then call the
 `plugin_start3()` function.
@@ -282,7 +308,7 @@ Frontier's servers.
      docked and the station has the shipyard service.
 - `is_beta` is a `bool` denoting if data came from a beta version of the game.
 
-#### Plugin-specific events.
+#### Plugin-specific events
 
 ```python
 def edsm_notify_system(reply):

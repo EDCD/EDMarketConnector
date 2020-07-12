@@ -10,6 +10,7 @@ from sys import platform
 import tkinter as tk
 from tkinter import ttk
 
+# Entire file may be imported by plugins
 
 # Can't do this with styles on OSX - http://www.tkdocs.com/tutorial/styles.html#whydifficult
 if platform == 'darwin':
