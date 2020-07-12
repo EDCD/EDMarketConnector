@@ -168,7 +168,7 @@ def load_plugins(master):
     last_error['root'] = master
 
     internal = []
-    for name in os.listdir(config.internal_plugin_dir):
+    for name in sorted(os.listdir(config.internal_plugin_dir)):
         if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
