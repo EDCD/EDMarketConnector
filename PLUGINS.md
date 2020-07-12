@@ -28,6 +28,11 @@ others.
 explicitly mentioned here is unsupported and may lead to your plugin
 breaking with future code changes.**
 
+`import L10n` - for plugin localisation support.
+
+`from theme import them` - So plugins can theme their own UI elements to
+ match the main UI.
+ 
 `from config import appname, applongname, appcmdname, appversion
 , copyright, config` - to access config.
 
@@ -36,8 +41,13 @@ breaking with future code changes.**
 `from companion import category_map` - Or any of the other static date
  contained therein.   NB: There's a plan to move such to a `data` module.
 
-`import plug` - Mostly for using `plug.show_error()`.  Relying on anything
+`import plug` - Mostly for using `plug.show_error()`.  Also the flags
+ for `dashboard_entry()` to be useful (see example below).  Relying on anything
  else isn't supported.
+ 
+`from monitor import gamerunning` - in case a plugin needs to know if we
+ think the game is running.
+ 
 
 ```python
 from ttkHyperlinkLabel import HyperlinkLabel
