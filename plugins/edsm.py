@@ -15,7 +15,6 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from config import appname, applongname, appversion, config
-import companion
 import plug
 
 if __debug__:

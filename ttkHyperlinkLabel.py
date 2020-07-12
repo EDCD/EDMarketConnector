@@ -18,6 +18,7 @@ if platform == 'win32':
 #   underline: If True/False the text is always/never underlined. If None (the default) the text is underlined only on hover.
 #   popup_copy: Whether right-click on non-empty label text pops up a context menu with a 'Copy' option. Defaults to no context menu. If popup_copy is a function it will be called with the current label text and should return a boolean.
 #
+# May be imported by plugins
 class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
     def __init__(self, master=None, **kw):

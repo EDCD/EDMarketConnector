@@ -23,7 +23,7 @@ import plug
 # 'new' preferences, or not.
 ###########################################################################
 
-
+# May be imported by plugins
 class PrefsVersion(object):
     versions = {
         '0.0.0.0': 1,

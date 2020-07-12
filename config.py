@@ -4,7 +4,7 @@ from os import getenv, makedirs, mkdir, pardir
 from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
 
-
+# Any of these may be imported by plugins
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'

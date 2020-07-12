@@ -89,6 +89,7 @@ class EDLogs(FileSystemEventHandler):
         self.started = None	# Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
+        # If you change anything here update PLUGINS.md documentation!
         self.state = {
             'Captain'      : None,	# On a crew
             'Cargo'        : defaultdict(int),

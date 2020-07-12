@@ -48,7 +48,7 @@ URL_SHIPYARD= '/shipyard'
 
 
 # Map values reported by the Companion interface to names displayed in-game
-
+# May be imported by plugins
 category_map = {
     'Narcotics'     : 'Legal Drugs',
     'Slaves'        : 'Slavery',
