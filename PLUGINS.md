@@ -175,19 +175,6 @@ for an example of these techniques.
 
 #### Journal Entry
 
-This gets called when EDMC sees a new entry in the game's journal. `state` is a
-dictionary containing information about the Cmdr and their ship and cargo
-(including the effect of the current journal entry).
-
-A special "StartUp" entry is sent if EDMC is started while the game is already
-running. In this case you won't receive initial events such as "LoadGame",
-"Rank", "Location", etc. However the `state` dictionary will reflect the
-cumulative effect of these missed events.
-
-Similarly, a special "ShutDown" entry is sent when the game is quitted while
-EDMC is running. This event is not sent when EDMC is running on a different
-machine so you should not *rely* on receiving this event.
-
 ```python
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     if entry['event'] == 'FSDJump':
@@ -198,14 +185,61 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
 ```
 
-#### Player Dashboard
+This gets called when EDMC sees a new entry in the game's journal.
+ 
+- `cmdr` is a `str` denoting the current Commander Name.
+- `is_beta` is a `bool` denoting if data came from a beta version of the game.
+- `system` is a `str` holding the name of the current system, or `None` if not
+ yet known.
+- `station` is a `str` holding the name of the current station, or `None` if
+ not yet known or appropriate.
+- `entry` is an `OrderedDict` holding the Journal event.
+- `state` is a `dictionary` containing information about the Cmdr and their
+ ship and cargo (including the effect of the current journal entry).
+    - `Captain` - `str` of name of Commander's crew you joined in multi-crew,
+     else `None`
+    - `Cargo` - `dict` with details of current cargo.
+    - `Credits` - Current credit balance.
+    - `FID` - Frontier Cmdr ID
+    - `Horizons` - `bool` denoting if Horizons expansion active.
+    - `Loan` - Current loan amount, else None.
+    - `Raw` - `dict` with details of "Raw" materials held.
+    - `Manufactured` - `dict` with details of "Manufactured" materials held.
+    - `Encoded` - `dict` with details of "Encoded" materials held.
+    - `Engineers` - `dict` with details of Rank Progress for Engineers.
+    - `Rank` - `dict` of current Ranks.  Each entry is a `tuple` of
+     (<rank `int`>, <progress %age `int`>)
+    - `Reputation` - `dict` of Major Faction reputations, scale is -100 to +100
+     See Frontier's Journal Manual for detail of bands.
+    - `Statistics` - `dict` of a Journal "Statistics" event, i.e. data shown
+     in the statistics panel on the right side of the cockpit.  See Frontier's
+     Journal Manual for details.
+    - `Role` - Crew role if multi-crewing in another Commander's ship:
+        - `None`
+        - "Idle"
+        - "FireCon"
+        - "FighterCon"
+    - `Friends` -`set` of online friends.
+    - `ShipID` - `int` that denotes Frontier internal ID for your current ship.
+    - `ShipIdent` - `str` of your current ship's textual ID (which you set).
+    - `ShipName` - `str` of your current ship's textual Name (which you set).
+    - `ShipType` - `str` of your current ship's model, e.g. "CobraMkIII".
+    - `HullValue` - `int` of current ship's credits value, excluding modules.
+    - `ModulesValue` - `int` of current ship's module's total credits value.
+    - `Rebuy` - `int` of current ship's rebuy cost in credits.
+    - `Modules` - `dict` with data on currently fitted modules.
 
-This gets called when something on the player's cockpit display changes -
-typically about once a second when in orbital flight. See the "Status File"
-section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661)
-for the available `entry` properties and for the list of available `"Flags"`.
-Refer to the source code of [plug.py](./plug.py) for the list of available
-constants.
+A special "StartUp" entry is sent if EDMC is started while the game is already
+running. In this case you won't receive initial events such as "LoadGame",
+"Rank", "Location", etc. However the `state` dictionary will reflect the
+cumulative effect of these missed events.
+
+Similarly, a special "ShutDown" entry is sent when the game is quitted while
+EDMC is running. This event is not sent when EDMC is running on a different
+machine so you should not *rely* on receiving this event.
+
+
+#### Player Dashboard
 
 ```python
 import plug
@@ -215,10 +249,19 @@ def dashboard_entry(cmdr, is_beta, entry):
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
-#### Getting Commander Data
+This gets called when something on the player's cockpit display changes -
+typically about once a second when in orbital flight.
+ 
 
-This gets called when EDMC has just fetched fresh Cmdr and station data from
-Frontier's servers.
+- `cmdr` is a `str` denoting the current Commander Name.
+- `is_beta` is a `bool` denoting if data came from a beta version of the game.
+- `entry` is a `dict` loaded from the Status.json file the game writes.
+ See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661)
+ for the available `entry` properties and for the list of available `"Flags"`.
+ Ask on the EDCD Discord server to be sure you have the latest version.
+ Refer to the source code of [plug.py](./plug.py) for the list of available
+ constants.
+#### Getting Commander Data
 
 ```python
 def cmdr_data(data, is_beta):
@@ -228,15 +271,18 @@ def cmdr_data(data, is_beta):
     sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
 ```
 
-The data is a dictionary containing the response from Frontier to a CAPI
-`/profile` request.
-TODO: market and shipyard augmentation
+This gets called when EDMC has just fetched fresh Cmdr and station data from
+Frontier's servers.
 
-#### Plugin-specific events
+- `data` is a dictionary containing the response from Frontier to a CAPI
+`/profile` request, augmented with two extra keys:
+    - `marketdata` - contains the CAPI data from the `/market` endpoint, if
+     docked and the station has the commodites service.
+    - `shipdata` - contains the CAPI data from the `/shipyard` endpoint, if
+     docked and the station has the shipyard service.
+- `is_beta` is a `bool` denoting if data came from a beta version of the game.
 
-If the player has chosen to "Send flight log and Cmdr status to EDSM" this gets
-called when the player starts the game or enters a new system. It is called
-some time after the corresponding `journal_entry()` event.
+#### Plugin-specific events.
 
 ```python
 def edsm_notify_system(reply):
@@ -253,11 +299,11 @@ def edsm_notify_system(reply):
         sys.stderr.write('Known EDSM system\n')
 ```
 
-If the player has chosen to "Send flight log and Cmdr status to Inara" this
-gets called when the player starts the game, enters a new system, docks or
-undocks. It is called some time after the corresponding `journal_entry()`
-event.
+If the player has chosen to "Send flight log and Cmdr status to EDSM" this gets
+called when the player starts the game or enters a new system. It is called
+some time after the corresponding `journal_entry()` event.
 
+---
 ```python
 def inara_notify_location(eventData):
     """
@@ -278,9 +324,10 @@ def inara_notify_location(eventData):
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
-gets called when the player starts the game or switches ship. It is called some
-time after the corresponding `journal_entry()` event.
-
+gets called when the player starts the game, enters a new system, docks or
+undocks. It is called some time after the corresponding `journal_entry()`
+event.
+---
 ```python
 def inara_notify_ship(eventData):
     """
@@ -291,6 +338,10 @@ def inara_notify_ship(eventData):
                                                                     URL=eventData['shipInaraURL'])
         )
 ```
+
+If the player has chosen to "Send flight log and Cmdr status to Inara" this
+gets called when the player starts the game or switches ship. It is called some
+time after the corresponding `journal_entry()` event.
 
 ## Error messages
 
