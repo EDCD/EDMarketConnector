@@ -30,7 +30,7 @@ breaking with future code changes.**
 
 `import L10n` - for plugin localisation support.
 
-`from theme import them` - So plugins can theme their own UI elements to
+`from theme import theme` - So plugins can theme their own UI elements to
  match the main UI.
  
 `from config import appname, applongname, appcmdname, appversion
