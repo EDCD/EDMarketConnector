@@ -356,7 +356,7 @@ class PreferencesDialog(tk.Toplevel):
                 if plugin.folder: # 'system' ones have this set to None to suppress listing in Plugins prefs tab
                     nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
             HyperlinkLabel(plugsframe, text=_('Information on migrating plugins'),
-                           background=nb.Label().cget(e 'background'),
+                           background=nb.Label().cget('background'),
                            url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
                            underline=True
             ).grid(columnspan=2, padx=PADX, sticky=tk.W)
