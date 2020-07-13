@@ -65,18 +65,20 @@ def addcommodities(data):
 
         commodities[key] = new
 
-    if len(commodities) > size_pre:
-        if isfile(commodityfile):
-            __make_backup(commodityfile)
+    if not len(commodities) > size_pre:
+        return
 
-        with open(commodityfile, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
-            writer.writeheader()
+    if isfile(commodityfile):
+        __make_backup(commodityfile)
 
-            for key in sorted(commodities):
-                writer.writerow(commodities[key])
+    with open(commodityfile, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
+        writer.writeheader()
 
-        print('Added {} new commodities'.format(len(commodities) - size_pre))
+        for key in sorted(commodities):
+            writer.writerow(commodities[key])
+
+    print('Added {} new commodities'.format(len(commodities) - size_pre))
 
 
 # keep a summary of modules found
@@ -124,18 +126,20 @@ def addmodules(data):
 
             modules[key] = new
 
-    if len(modules) > size_pre:
-        if isfile(outfile):
-            __make_backup(outfile)
+    if not len(modules) > size_pre:
+        return
 
-        with open(outfile, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
-            writer.writeheader()
+    if isfile(outfile):
+        __make_backup(outfile)
 
-            for key in sorted(modules):
-                writer.writerow(modules[key])
+    with open(outfile, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
+        writer.writeheader()
 
-        print('Added {} new modules'.format(len(modules) - size_pre))
+        for key in sorted(modules):
+            writer.writerow(modules[key])
+
+    print('Added {} new modules'.format(len(modules) - size_pre))
 
 
 # keep a summary of ships found
@@ -175,19 +179,20 @@ def addships(data):
 
             ships[key] = new
 
-    if len(ships) > size_pre:
+    if not len(ships) > size_pre:
+        return
 
-        if isfile(shipfile):
-            __make_backup(shipfile)
+    if isfile(shipfile):
+        __make_backup(shipfile)
 
-        with open(shipfile, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
-            writer.writeheader()
+    with open(shipfile, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
+        writer.writeheader()
 
-            for key in sorted(ships):
-                writer.writerow(ships[key])
+        for key in sorted(ships):
+            writer.writerow(ships[key])
 
-        print('Added {} new ships'.format(len(ships) - size_pre))
+    print('Added {} new ships'.format(len(ships) - size_pre))
 
 
 if __name__ == "__main__":
