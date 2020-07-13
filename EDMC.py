@@ -36,8 +36,9 @@ sys.path.append(config.internal_plugin_dir)
 import eddn
 
 
-SERVER_RETRY = 5	# retry pause for Companion servers [s]
+SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR = range(6)
+
 
 # quick and dirty version comparison assuming "strict" numeric only version numbers
 def versioncmp(versionstring):
@@ -58,7 +59,7 @@ try:
     parser.add_argument('-d', metavar='FILE', help='write raw JSON data to FILE')
     parser.add_argument('-n', action='store_true', help='send data to EDDN')
     parser.add_argument('-p', metavar='CMDR', help='Returns data from the specified player account')
-    parser.add_argument('-j', help=argparse.SUPPRESS)	# Import JSON dump
+    parser.add_argument('-j', help=argparse.SUPPRESS)  # Import JSON dump
     args = parser.parse_args()
 
     if args.version:
@@ -124,14 +125,14 @@ try:
         sys.stderr.write('Who are you?!\n')
         sys.exit(EXIT_SERVER)
     elif (not data.get('lastSystem', {}).get('name') or
-          (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):	# Only care if docked
+          (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
         sys.stderr.write('Where are you?!\n')		# Shouldn't happen
         sys.exit(EXIT_SERVER)
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
-        sys.stderr.write('What are you flying?!\n')	# Shouldn't happen
+        sys.stderr.write('What are you flying?!\n')  # Shouldn't happen
         sys.exit(EXIT_SERVER)
     elif args.j:
-        pass	# Skip further validation
+        pass  # Skip further validation
     elif data['commander']['name'] != monitor.cmdr:
         sys.stderr.write('Wrong Cmdr\n')				# Companion API return doesn't match Journal
         sys.exit(EXIT_CREDENTIALS)
@@ -167,7 +168,7 @@ try:
         elif not data.get('lastStarport', {}).get('name'):
             sys.stderr.write("Unknown station!\n")
             sys.exit(EXIT_LAGGING)
-        elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):	# Ignore possibly missing shipyard info
+        elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):  # Ignore possibly missing shipyard info
             sys.stderr.write("Station doesn't have anything!\n")
             sys.exit(EXIT_SUCCESS)
     else:
@@ -199,7 +200,7 @@ try:
         # Retry for shipyard
         sleep(SERVER_RETRY)
         data2 = companion.session.station()
-        if (data2['commander'].get('docked') and	# might have undocked while we were waiting for retry in which case station data is unreliable
+        if (data2['commander'].get('docked') and  # might have undocked while we were waiting for retry in which case station data is unreliable
             data2.get('lastSystem',   {}).get('name') == monitor.system and
             data2.get('lastStarport', {}).get('name') == monitor.station):
             data = data2
