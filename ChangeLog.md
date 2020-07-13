@@ -5,105 +5,115 @@ Pre-Release 3.99.5.0
 ===
 Consider this as 'rc2' for the following full '4.0.0.0' release.
 
-* Fix for using EDDB as System provider.  It was picking up a wrong
- SystemAddress from the Frontier CAPI (it's a bug their end).  Now the CAPI
- will only be used for this when we don't already have a value, otherwise
- we always get the new value from Journals anyway.
-* Tweak to Inara plugin so it will send updates via the Inara API more
- frequently.  Will now send an update, no more often than about once a
- minute, if your cargo changes at all.  This still won't update if you dock
- and quickly buy or sell some cargo, but it's better than it was before.
- You can nudge it by waiting a minute then re-opening the Commodities screen,
- or indeed performing any other action the logs a new Journal event.
 
-Pre-Release 3.99.4.0
+Release 4.0.0.0
 ===
-Consider this as 'rc1' for the following full '4.0.0.0' release.
 
-* Translations updated: Polish, Portugese (Brazil).  Thank you translators!
+ * This release is based on Python 3.7, not 2.7, so a user might find some of
+   their plugins stop working.  If you have any plugins that do not have the
+   proper support you'll see a popup about this when you
+   start the program, at most once every 24 hours.  As directed on that
+    popup you can check the status of
+   your plugins on 'File' > 'Settings' > 'Plugins' in the new 'Plugins Without
+   Python 3.x Support:' section.
+ 
+   If the popup gets annoying then follow the directions to
+   [disable a plugin](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#disable-a-plugin).  
+   
+   For any plugins without Python 3.x support you should first ensure you're
+   using the latest version of that plugin.  If that hasn't been updated then
+   you might want to contact the plugin developer to see if they'll update the
+   plugin.  We've checked many plugins and put them in the appropriate
+   section of [this list](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37).
+ 
+    *Plugin authors should also read the latest [Developer Plugin
+     Documentation](https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md)
+     ,* **particularly the section
+      [Available imports](https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#available-imports)
+     .** Let us know if we've missed anything.
+     
+ * New 'Help' > 'About E:D Market Connector' menu item to show the currently
+   running version.  Includes a link to the release notes.
 
-    Remember you can help with translations.  Please see [Translations.md](https://github.com/EDCD/EDMarketConnector/wiki/Translations)
-* Properly fix Linux code for when there's no X11 display available.  This
- includes ensuring that the CLI tool EDMC.exe will run without issue, with or
-  without an
- X11 display.
-* The old 'anonymous' and custom 'uploaderID' options were taken out of
- the UI back in December 2018, but the settings lingered in the Windows
- Registry. Thus some users would still have been sending an anonymised or
- custom 'uploaderID' in EDDN messages with no easy way to de-activate this.
+ * Translations updated:
+   * New languages: Serbian (Latin, Bosnia and Herzegovina),
+     Slovenian (Slovenia) and Swedish.
+     
+   * New phrases were added and the only 100% translated languages are now:
+     Czech, French, German, Japanese, Polish, Portugese (Brazil),
+     Portugese (Portugal), Russian, Serbian (Latin),
+     Serbian (Latin, Bosnia and Herzegovina), Spanish, Swedish (Sweden)
+     Ukrainian,
+     
+   Thank you translators! Please do contribute on
+   [the OneSkyApp project](https://marginal.oneskyapp.com/collaboration/project/52710)
+   if you are able to.
+     
+ * EDDB plugin now uses a system's SystemAddress to construct the URL to view
+   the system on eddb.io.  This removes the need for the systems.p file.
+   That file will be removed in a future version, plugin authors should not
+   be relying on its presence.
+
+ * EDDB plugin now uses a station's MarketID to construct a URL to view the
+   station on eddb.io.  This removes the need for stations.p.  That file will
+   be removed in a future version, plugin authors should not be relying on its
+   presence.
+ 
+   NB: It's now using the system's "Population" data from Journal messages to
+   determine if the system has stations or not.  This allows for the `×` as
+   station name to be clickable to open the eddb.io page for system when you're
+   not docked.  It's known that some systems with stations have a Population of
+   "0" and thus won't allow this functionality.  This is Frontier's issue, not
+   EDMC's.  If you logged out in a populated system, run EDMC afresh, and use
+   the 'Update' button you won't see the `×` until you login fully to the game.
+   
+ * Tweak to Inara plugin so it will send updates via the Inara API more
+   frequently.  Will now send an update, no more often than about once a
+   minute, if your cargo changes at all.  This still won't update if you dock
+   and quickly buy or sell some cargo, but it's better than it was before.
+   You can nudge it by waiting a minute then re-opening the Commodities screen,
+   or indeed performing any other action the logs a new Journal event.
+
+ * The old 'anonymous' and custom 'uploaderID' options were taken out of
+   the UI back in December 2018, but the settings lingered in the Windows
+   Registry. Thus some users would still have been sending an anonymised or
+   custom 'uploaderID' in EDDN messages with no easy way to de-activate this.
  
     The EDDN Relay has been forcefully anonymising uploaderID since March
     2018 anyway, so this is redundant.  Thus the code that performs this
-    anonymising has now been removed.
-* There used to be an option to output commodities data in 'BPC' format, but
- the option for this was removed from the UI back in Dec 2016.  A few small
- pieces of code lingered and they have now been removed.  Any plugin that
- was passing COMMODITY_BPC to commodity.export() will now break.
-* There have been general coding style cleanups made to companion.py.  No
- functionality should have changed and cursory checks show no regressions.
- Please report any weirdness with the automatic checking and upload of
- commodities data.
-
-Pre-Release 3.99.3.0
-===
-Consider this as 'beta3' for the following full '4.0.0.0' release.
-
-* Fix up EDMC.exe (command line tool)t d:
-    * Correctly report the version with `-v`.
-    * Don't error out on checking Journal filenames.
-* Updated Swedish translation.
-
-Pre-Release 3.99.2.0
-===
-Consider this as 'beta2' for the following full '4.0.0.0' release.
-
- * Added Swedish to the translated languages.  Thanks to Gurra.
- * Will throw an exception, rather than a Segmentation Fault, if run on Linux
-   without DISPLAY properly set.
- * Corrects setting of WinSparkle (updates checking) options to be under the
-   new 'EDCD' Registry key.
-
-Pre-Release 3.99.1.0
-===
-Consider this as 'beta1' for the following full '4.0.0.0' release.
-
- * Actually include the new translations in the install: Serbian (Latin, Bosnia and Herzegovina) (175/175), Slovenian (Slovenia) (144/175).
- * Fix a bug where if you copied a Journal file to the live location, resulting in a "Journal.YYMMDDHHMMss.XX - Copy.log" file,
-   the application would pick it up as 'new' and potentially re-send duplicate data to all of EDDN, EDSM and Inara.
+    anonymisation has now been removed.
+    
+ * There used to be an option to output commodities data in 'BPC' format, but
+   it was removed from the UI back in Dec 2016.  A few small pieces of code
+   lingered and they have now been removed.  Any plugin that was passing
+   `COMMODITY_BPC` to `commodity.export()` will now break.
+   
+ * Fixed a bug where certain combinations of 'Output' and 'EDDN' options would
+   lead to all options on both tabs reverting to their defaults.
+   
+ * Fixed a bug where if you copied a Journal file to the live location,
+   resulting in a "Journal.YYMMDDHHMMss.XX - Copy.log" file, the application
+   would pick it up as 'new' and potentially re-send duplicate data to all of
+   EDDN, EDSM and Inara.
    
    Now the only files the application will take note of must:
     1. Start with `Journal.` or `JournalBeta.`.
     1. Have the 12-digit date/timestamp, followed by a `.`
     1. Have the 2 digit serial number, followed by a `.`
     1. Nothing else before the trailing `log`.
- * Fix the 'Release Note' URL in the 'About' popup to use the correct format.
- * Fix the location of Registry keys for the update checker, WinSparkle, to be under `EDMarketConnector` instead
-   of `EDMarketConnector.py`.
-
-Pre-Release 3.99.0.0
-===
-Consider this as 'beta0' for the following full '4.0.0.0' release.
-
- * This release is based on Python 3.7, not 2.7, so a user might find some of their plugins stop working.  If you have any that do not have the proper support you'll see a popup about this, at most once every 24 hours, when you start the program.  As directed on that popup you can check the status of your plugins on 'File' > 'Settings' > 'Plugins' in the new 'Plugins Without Python 3.x Support:' section.
- 
-   If the popup gets annoying then follow the directions to [Disable a plugin](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#disable-a-plugin).  
+    
+ * Fixed the location of Registry keys for the update checker, WinSparkle:
+   * To be under the new `EDCD` Registry key in
+    `Computer\HKEY_CURRENT_USER\Software\`.
+   * To be under `EDMarketConnector` instead of `EDMarketConnector.py` inside
+     there.
    
-   For any plugins without Python 3.x support you should first ensure you're using the latest version of that plugin.  If that hasn't been updated then you might want to contact the plugin developer to see if they'll update the plugin.  For some plugins [check this list](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37).
- 
- * Translations updated:
-   * New languages: Serbian (Latin, Bosnia and Herzegovina) (175/175), Slovenian (Slovenia) (144/175).
-   * New phrases were added and the only 100% translated languages are now: French, German, Ukrainian, Spanish, Russian, Czech, Japanese, Serbian (Latin), Portugese (Portugal), Serbian (Latin, Bosnia and Herzegovina).
+ * Fixed to throw an exception, rather than a Segmentation Fault, if
+   run on Linux without DISPLAY properly set.
    
-     Please do contribute on [the OneSkyApp project](https://marginal.oneskyapp.com/collaboration/project/52710) if you are able to.
-     
- * Fixes a bug where certain combinations of 'Output' and 'EDDN' options would lead to both reverting to their defaults.
- * EDDB plugin now uses a system's SystemAddress to construct the URL to view the system on eddb.io.  This removes the need for the systems.p file.  That file will be removed in a future version, plugin authors should not be relying on its presence.
- * EDDB plugin now uses a station's MarketID to construct a URL to view the station on eddb.io.  This removes the need for stations.p.  That file will be removed in a future version, plugin authors should not be relying on its presence.
- 
-   NB: It's now using the system's "Population" data from Journal messages to determine if the system has stations or not.  This allows for the `×` as station name to be clickable to open the eddb.io page for system when you're not docked.  It's known that some systems with stations have a Population of "0" and thus won't allow this functionality.  This is Frontier's issue, not EDMC's.  If you logged out in a populated system, run EDMC afresh, and use the 'Update' button you won't see the `×` until you login fully to the game.
- * New 'Help' > 'About E:D Market Connector' menu item to show the currently running version.  Includes a link to the release notes.
-
-
+ * Fixed EDMC.exe (command line tool) to correctly report the version with
+   `-v`.
+   
 Release 3.46
 ===
 
