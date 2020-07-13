@@ -51,10 +51,10 @@ def addcommodities(data):
 
     if len(commodities) > size_pre:
         if isfile(commodityfile):
-            if isfile(commodityfile+'.bak'):
-                os.unlink(commodityfile+'.bak')
+            if isfile(commodityfile + '.bak'):
+                os.unlink(commodityfile + '.bak')
 
-            os.rename(commodityfile, commodityfile+'.bak')
+            os.rename(commodityfile, commodityfile + '.bak')
 
         with open(commodityfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
@@ -83,7 +83,7 @@ def addmodules(data):
 
     size_pre = len(modules)
 
-    for key,module in data['lastStarport'].get('modules').items():
+    for key, module in data['lastStarport'].get('modules').items():
         # sanity check
         if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
 
@@ -103,17 +103,17 @@ def addmodules(data):
                     if not old.get(thing) and new.get(thing):
                         size_pre -= 1
 
-                    elif str(new.get(thing,'')) != old.get(thing):
+                    elif str(new.get(thing, '')) != old.get(thing):
                         raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
 
             modules[int(key)] = new
 
     if len(modules) > size_pre:
         if isfile(outfile):
-            if isfile(outfile+'.bak'):
-                os.unlink(outfile+'.bak')
+            if isfile(outfile + '.bak'):
+                os.unlink(outfile + '.bak')
 
-            os.rename(outfile, outfile+'.bak')
+            os.rename(outfile, outfile + '.bak')
 
         with open(outfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
@@ -145,7 +145,7 @@ def addships(data):
     for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list'):
         # sanity check
         key = ship['id']
-        new = { 'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower()) }
+        new = {'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower())}
         if new:
             old = ships.get(int(key))
             if old:
@@ -155,7 +155,7 @@ def addships(data):
                         ships[int(key)] = new
                         size_pre -= 1
 
-                    elif str(new.get(thing,'')) != old.get(thing):
+                    elif str(new.get(thing, '')) != old.get(thing):
                         raise AssertionError('%s: %s "%s"!="%s"' % (key, thing, new.get(thing), old.get(thing)))
 
             ships[int(key)] = new
@@ -163,10 +163,10 @@ def addships(data):
     if len(ships) > size_pre:
 
         if isfile(shipfile):
-            if isfile(shipfile+'.bak'):
-                os.unlink(shipfile+'.bak')
+            if isfile(shipfile + '.bak'):
+                os.unlink(shipfile + '.bak')
 
-            os.rename(shipfile, shipfile+'.bak')
+            os.rename(shipfile, shipfile + '.bak')
 
         with open(shipfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
