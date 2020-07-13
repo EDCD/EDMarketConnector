@@ -168,10 +168,141 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 3.46</title>
+			<title>Release 4.0.0.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.0.0.0</h2>
+<p>Developers please note the new <a href="https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md">Contributing.md</a>
+, particularly <a href="https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md#git-branch-structure-and-tag-conventions">Git branch structure and tag conventions</a>
+.</p>
+<ul>
+<li>
+<p>This release is based on Python 3.7, not 2.7, so a user might find some of
+their plugins stop working.  If you have any plugins that do not have the
+proper support you'll see a popup about this when you
+start the program, at most once every 24 hours.  As directed on that
+popup you can check the status of
+your plugins on 'File' &gt; 'Settings' &gt; 'Plugins' in the new 'Plugins Without
+Python 3.x Support:' section.</p>
+<p>If the popup gets annoying then follow the directions to
+<a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#disable-a-plugin">disable a plugin</a>.</p>
+<p>For any plugins without Python 3.x support you should first ensure you're
+using the latest version of that plugin.  If that hasn't been updated then
+you might want to contact the plugin developer to see if they'll update the
+plugin.  We've checked many plugins and put them in the appropriate
+section of <a href="https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37">this list</a>.</p>
+<p><em>Plugin authors should also read the latest <a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md">Developer Plugin
+Documentation</a>
+,</em> <strong>particularly the section
+<a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports">Available imports</a>
+.</strong> Let us know if we've missed anything.</p>
+</li>
+<li>
+<p>New 'Help' &gt; 'About E:D Market Connector' menu item to show the currently
+running version.  Includes a link to the release notes.</p>
+</li>
+<li>
+<p>Translations updated:</p>
+<ul>
+<li>
+<p>New languages: Serbian (Latin, Bosnia and Herzegovina),
+Slovenian (Slovenia) and Swedish.</p>
+</li>
+<li>
+<p>New phrases were added and the only 100% translated languages are now:
+Czech, French, German, Japanese, Polish, Portugese (Brazil),
+Portugese (Portugal), Russian, Serbian (Latin),
+Serbian (Latin, Bosnia and Herzegovina), Spanish, Swedish (Sweden)
+Ukrainian,</p>
+</li>
+</ul>
+<p>Thank you translators! Please do contribute on
+<a href="https://marginal.oneskyapp.com/collaboration/project/52710" rel="nofollow">the OneSkyApp project</a>
+if you are able to.</p>
+</li>
+<li>
+<p>EDDB plugin now uses a system's SystemAddress to construct the URL to view
+the system on eddb.io.  This removes the need for the systems.p file.
+That file will be removed in a future version, plugin authors should not
+be relying on its presence.</p>
+</li>
+<li>
+<p>EDDB plugin now uses a station's MarketID to construct a URL to view the
+station on eddb.io.  This removes the need for stations.p.  That file will
+be removed in a future version, plugin authors should not be relying on its
+presence.</p>
+<p>NB: It's now using the system's "Population" data from Journal messages to
+determine if the system has stations or not.  This allows for the <code>×</code> as
+station name to be clickable to open the eddb.io page for system when you're
+not docked.  It's known that some systems with stations have a Population of
+"0" and thus won't allow this functionality.  This is Frontier's issue, not
+EDMC's.  If you logged out in a populated system, run EDMC afresh, and use
+the 'Update' button you won't see the <code>×</code> until you login fully to the game.</p>
+</li>
+<li>
+<p>Tweak to Inara plugin so it will send updates via the Inara API more
+frequently.  Will now send an update, no more often than about once a
+minute, if your cargo changes at all.  This still won't update if you dock
+and quickly buy or sell some cargo, but it's better than it was before.
+You can nudge it by waiting a minute then re-opening the Commodities screen,
+or indeed performing any other action the logs a new Journal event.</p>
+</li>
+<li>
+<p>The old 'anonymous' and custom 'uploaderID' options were taken out of
+the UI back in December 2018, but the settings lingered in the Windows
+Registry. Thus some users would still have been sending an anonymised or
+custom 'uploaderID' in EDDN messages with no easy way to de-activate this.</p>
+<p>The EDDN Relay has been forcefully anonymising uploaderID since March
+2018 anyway, so this is redundant.  Thus the code that performs this
+anonymisation has now been removed.</p>
+</li>
+<li>
+<p>There used to be an option to output commodities data in 'BPC' format, but
+it was removed from the UI back in Dec 2016.  A few small pieces of code
+lingered and they have now been removed.  Any plugin that was passing
+<code>COMMODITY_BPC</code> to <code>commodity.export()</code> will now break.</p>
+</li>
+<li>
+<p>Fixed a bug where certain combinations of 'Output' and 'EDDN' options would
+lead to all options on both tabs reverting to their defaults.</p>
+</li>
+<li>
+<p>Fixed a bug where if you copied a Journal file to the live location,
+resulting in a "Journal.YYMMDDHHMMss.XX - Copy.log" file, the application
+would pick it up as 'new' and potentially re-send duplicate data to all of
+EDDN, EDSM and Inara.</p>
+<p>Now the only files the application will take note of must:</p>
+<ol>
+<li>Start with <code>Journal.</code> or <code>JournalBeta.</code>.</li>
+<li>Have the 12-digit date/timestamp, followed by a <code>.</code>
+</li>
+<li>Have the 2 digit serial number, followed by a <code>.</code>
+</li>
+<li>Nothing else before the trailing <code>log</code>.</li>
+</ol>
+</li>
+<li>
+<p>Fixed the location of Registry keys for the update checker, WinSparkle:</p>
+<ul>
+<li>To be under the new <code>EDCD</code> Registry key in
+<code>Computer\HKEY_CURRENT_USER\Software\</code>.</li>
+<li>To be under <code>EDMarketConnector</code> instead of <code>EDMarketConnector.py</code> inside
+there.</li>
+</ul>
+</li>
+<li>
+<p>Fixed to throw an exception, rather than a Segmentation Fault, if
+run on Linux without DISPLAY properly set.</p>
+</li>
+<li>
+<p>Fixed EDMC.exe (command line tool) to correctly report the version with
+<code>-v</code>.</p>
+</li>
+</ul>
+
+
 <h2>Release 3.46</h2>
 <p><b>This should be the final release of EDMC based on Python 2.7.</b> The next release after this, assuming this one doesn't introduce new bugs, will be based on Python 3.7.  Any plugins that users have installed will need to have been updated to work under Python 3.7 by the time that next version of EDMC is released.  During EDMC startup, at most once per day, you might see a popup with the text:
 
@@ -348,10 +479,10 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-346/EDMarketConnector_win_346.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.0.0/EDMarketConnector_win_4.0.0.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="3.4.6.0"
+				sparkle:version="4.0.0.0"
 				length="10338304"
 				type="application/octet-stream"
 			/>
