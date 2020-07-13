@@ -68,13 +68,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 
 def cmdr_data(data, is_beta):
-    if config.get('system_provider') == 'eddb':
-        # Only fill in system_address from CAPI if it's not set yet
-        # This is to avoid CAPI lagging causing incorrect value
-        if not this.system_address:
-            this.system_address = data['lastSystem']['id']
-            this.system_link['url'] = system_url(this.system_address)  # Override standard URL function
-
     # 'eddb' is also the *default* Station provider
     if not config.get('station_provider') or config.get('station_provider') == 'eddb':
         # Only use CAPI value if not yet set
