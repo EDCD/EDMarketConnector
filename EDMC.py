@@ -49,16 +49,18 @@ def versioncmp(versionstring):
 
 
 def deep_get(target: dict, *args: str, default=None) -> Any:
+    if not hasattr(target, 'get'):
+        raise ValueError("Cannot call get on {} ({})".format(target, type(target)))
+    
     current = target
     for arg in args:
         res = current.get(arg)
-        if res is not None:
-            current = res
+        if res is None:
+            return default
 
-        else:
-            break
+        current = res
 
-    return default
+    return current
 
 
 def main():
