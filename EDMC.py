@@ -8,7 +8,7 @@ import json
 import requests
 import sys
 import os
-from typing import Union, Any
+from typing import Any
 
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
@@ -146,7 +146,7 @@ def main():
             config.set('querytime', querytime)
 
         # Validation
-        if not data.get('commander') or not data['commander'].get('name','').strip():
+        if not deep_get(data, 'commander', 'name', default='').strip():
             print('Who are you?!', file=sys.stderr)
             sys.exit(EXIT_SERVER)
 
@@ -200,14 +200,14 @@ def main():
             ))
 
         else:
-            print(data.get('lastSystem', {}).get('name', 'Unknown'))
+            print(deep_get(data, 'lastSystem', 'name', default='Unknown'))
 
         if (args.m or args.o or args.s or args.n or args.j):
             if not data['commander'].get('docked'):
                 print("You're not docked at a station!", file=sys.stderr)
                 sys.exit(EXIT_SUCCESS)
 
-            elif not data.get('lastStarport', {}).get('name'):
+            elif not deep_get(data, 'lastStarport', 'name'):
                 print("Unknown station!", file=sys.stderr)
                 sys.exit(EXIT_LAGGING)
 
@@ -257,7 +257,7 @@ def main():
                 data = data2
 
         if args.s:
-            if data['lastStarport'].get('ships', {}).get('shipyard_list'):
+            if deep_get(data, 'lastStarport', 'ships', 'shipyard_list'):
                 shipyard.export(data, args.s)
 
             elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
