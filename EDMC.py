@@ -96,11 +96,11 @@ try:
                             print('Invalid journal entry "%s"' % repr(line))
 
         except Exception as e:
-            print("Can't read Journal file: {}\n".format(str(e)), file=sys.stderr)
+            print("Can't read Journal file: {}".format(str(e)), file=sys.stderr)
             sys.exit(EXIT_SYS_ERR)
 
         if not monitor.cmdr:
-            sys.stderr.write('Not available while E:D is at the main menu\n')
+            print('Not available while E:D is at the main menu', file=sys.stderr)
             sys.exit(EXIT_SYS_ERR)
 
         # Get data from Companion API
@@ -131,23 +131,23 @@ try:
 
     # Validation
     if not data.get('commander') or not data['commander'].get('name','').strip():
-        sys.stderr.write('Who are you?!\n')
+        print('Who are you?!', file=sys.stderr)
         sys.exit(EXIT_SERVER)
 
     elif (not data.get('lastSystem', {}).get('name') or
           (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
-        sys.stderr.write('Where are you?!\n')		# Shouldn't happen
+        print('Where are you?!', file=sys.stderr)  # Shouldn't happen
         sys.exit(EXIT_SERVER)
 
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
-        sys.stderr.write('What are you flying?!\n')  # Shouldn't happen
+        print('What are you flying?!', file=sys.stderr)  # Shouldn't happen
         sys.exit(EXIT_SERVER)
 
     elif args.j:
         pass  # Skip further validation
 
     elif data['commander']['name'] != monitor.cmdr:
-        sys.stderr.write('Wrong Cmdr\n')				# Companion API return doesn't match Journal
+        print('Wrong Cmdr', file=sys.stderr)  # Companion API return doesn't match Journal
         sys.exit(EXIT_CREDENTIALS)
 
     elif ((data['lastSystem']['name'] != monitor.system) or
@@ -155,7 +155,7 @@ try:
           (data['ship']['id'] != monitor.state['ShipID']) or
           (data['ship']['name'].lower() != monitor.state['ShipType'])):
 
-        sys.stderr.write('Frontier server is lagging\n')
+        print('Frontier server is lagging', file=sys.stderr)
         sys.exit(EXIT_LAGGING)
 
     # stuff we can do when not docked
@@ -183,15 +183,15 @@ try:
 
     if (args.m or args.o or args.s or args.n or args.j):
         if not data['commander'].get('docked'):
-            sys.stderr.write("You're not docked at a station!\n")
+            print("You're not docked at a station!", file=sys.stderr)
             sys.exit(EXIT_SUCCESS)
 
         elif not data.get('lastStarport', {}).get('name'):
-            sys.stderr.write("Unknown station!\n")
+            print("Unknown station!", file=sys.stderr)
             sys.exit(EXIT_LAGGING)
 
         elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):  # Ignore possibly missing shipyard info
-            sys.stderr.write("Station doesn't have anything!\n")
+            print("Station doesn't have anything!", file=sys.stderr)
             sys.exit(EXIT_SUCCESS)
 
     else:
@@ -212,14 +212,14 @@ try:
             commodity.export(fixed, COMMODITY_DEFAULT, args.m)
 
         else:
-            sys.stderr.write("Station doesn't have a market\n")
+            print("Station doesn't have a market", file=sys.stderr)
 
     if args.o:
         if data['lastStarport'].get('modules'):
             outfitting.export(data, args.o)
 
         else:
-            sys.stderr.write("Station doesn't supply outfitting\n")
+            print("Station doesn't supply outfitting", file=sys.stderr)
 
     if (args.s or args.n) and not args.j and not data['lastStarport'].get('ships') and data['lastStarport']['services'].get('shipyard'):
         # Retry for shipyard
@@ -235,10 +235,10 @@ try:
             shipyard.export(data, args.s)
 
         elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
-            sys.stderr.write("Failed to get shipyard data\n")
+            print("Failed to get shipyard data", file=sys.stderr)
 
         else:
-            sys.stderr.write("Station doesn't have a shipyard\n")
+            print("Station doesn't have a shipyard", file=sys.stderr)
 
     if args.n:
         try:
@@ -248,18 +248,18 @@ try:
             eddn_sender.export_shipyard(data, monitor.is_beta)
 
         except Exception as e:
-            sys.stderr.write("Failed to send data to EDDN: %s\n" % unicode(e).encode('ascii', 'replace'))
+            print("Failed to send data to EDDN: %s" % unicode(e).encode('ascii', 'replace'), file=sys.stderr)
 
     sys.exit(EXIT_SUCCESS)
 
 except companion.ServerError:
-    sys.stderr.write('Server is down\n')
+    print('Server is down', file=sys.stderr)
     sys.exit(EXIT_SERVER)
 
 except companion.SKUError:
-    sys.stderr.write('Server SKU problem\n')
+    print('Server SKU problem', file=sys.stderr)
     sys.exit(EXIT_SERVER)
 
 except companion.CredentialsError:
-    sys.stderr.write('Invalid Credentials\n')
+    print('Invalid Credentials', file=sys.stderr)
     sys.exit(EXIT_CREDENTIALS)
