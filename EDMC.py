@@ -107,7 +107,7 @@ try:
                         monitor.parse_entry(line)
                     except Exception:
                         if __debug__:
-                            print('Invalid journal entry "%s"' % repr(line))
+                            print('Invalid journal entry {!r}'.format(line))
 
         except Exception as e:
             print("Can't read Journal file: {}".format(str(e)), file=sys.stderr)
@@ -191,7 +191,7 @@ try:
         stats.export_status(data, args.t)
 
     if data['commander'].get('docked'):
-        print('%s,%s' % (
+        print('{},{}'.format(
             deep_get(data, 'lastSystem', 'name', default='Unknown'),
             deep_get(data, 'lastStarport', 'name', default='Unknown')
         ))
@@ -266,7 +266,7 @@ try:
             eddn_sender.export_shipyard(data, monitor.is_beta)
 
         except Exception as e:
-            print("Failed to send data to EDDN: %s" % unicode(e).encode('ascii', 'replace'), file=sys.stderr)
+            print("Failed to send data to EDDN: {}".format(str(e)), file=sys.stderr)
 
     sys.exit(EXIT_SUCCESS)
 
