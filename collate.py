@@ -16,7 +16,7 @@ import outfitting
 
 def __make_backup(file_name: str, suffix: str = '.bak') -> None:
     """
-    Rename the given file to $file.bak, removing any existing $file.bak
+    Rename the given file to $file.bak, removing any existing $file.bak. Assumes $file exists on disk.
 
     :param file_name: The name of the file to make a backup of
     :param suffix: The suffix to use for backup files (default '.bak')
