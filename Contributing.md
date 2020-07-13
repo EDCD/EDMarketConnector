@@ -33,7 +33,7 @@ forwards we will always use the full version and 'folder style' tag names, e.g. 
 Currently the only file that defines the version code-wise is `config.py`.  `Changelog.md` and `edmarketconnector.xml`
 are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/master/docs/Releasing.md#distribution).
 
-Git branch structure and tag contentions
+Git branch structure and tag conventions
 ---
 Somewhat based on git-flow, but our particular take on it:
 
