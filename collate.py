@@ -142,7 +142,8 @@ def addships(data):
 
     size_pre = len(ships)
 
-    for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list'):
+    data_ships = data['lastStarport']['ships']
+    for ship in tuple(data_ships.get('shipyard_list', {}).values()) + data_ships.get('unavailable_list'):
         # sanity check
         key = ship['id']
         new = {'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower())}
