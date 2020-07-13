@@ -98,7 +98,7 @@ def main():
         else:
             # Get state from latest Journal file
             try:
-                logdir = config.get('journaldir', config.default_journal_dir)
+                logdir = config.get('journaldir') or config.default_journal_dir
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
 
                 logfile = join(logdir, logfiles[-1])
@@ -121,7 +121,7 @@ def main():
 
             # Get data from Companion API
             if args.p:
-                cmdrs = config.get('cmdrs', [])
+                cmdrs = config.get('cmdrs') or []
                 if args.p in cmdrs:
                     idx = cmdrs.index(args.p)
 
@@ -135,7 +135,7 @@ def main():
                 companion.session.login(cmdrs[idx], monitor.is_beta)
 
             else:
-                cmdrs = config.get('cmdrs', [])
+                cmdrs = config.get('cmdrs') or []
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
 
