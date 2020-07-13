@@ -1,5 +1,5 @@
 /* Language name */
-"!Language" = "Srpski (Latinica, BiH)";
+"!Language" = "Srpski (Latinica, Bosna i Hercegovina)";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "O {APP}";
@@ -176,7 +176,7 @@
 "Expert" = "Expert";
 
 /* Ranking. [stats.py] */
-"Explorer" = "Istraživanje (Explorer)";
+"Explorer" = "Explorer";
 
 /* Ranking. [stats.py] */
 "Federation" = "Federacija (Federation)";
