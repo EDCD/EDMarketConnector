@@ -73,7 +73,7 @@ def addmodules(data):
 
     outfile = 'outfitting.csv'
     modules = {}
-    fields = ['id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement']
+    fields = ('id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement')
 
     # slurp existing
     if isfile(outfile):
@@ -134,7 +134,7 @@ def addships(data):
 
     shipfile = 'shipyard.csv'
     ships = {}
-    fields = ['id', 'symbol', 'name']
+    fields = ('id', 'symbol', 'name')
 
     # slurp existing
     if isfile(shipfile):
