@@ -39,8 +39,11 @@ Somewhat based on git-flow, but our particular take on it:
 
 * `stable` - The HEAD of this Branch should always point to the code that was used in the last released stable version.
 
-* `beta` - If we run any pre-release betas *with actual builds released, not just a branch to be run from source*,
-then the HEAD of this Branch should always point to the code that was used in the last beta version.
+* `beta` - If we run any pre-release betas *with actual builds released, not
+  just a branch to be run from source*, then the HEAD of this Branch should
+  always point to the code that was used in the last beta version. *This means
+  that if there hasn't yet been a new beta version this could be far behind
+  all of: main, develop, stable.*
 
 * `develop` - This is the branch where all current development is integrated.  No commits should be made directly
   to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
