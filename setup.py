@@ -130,6 +130,7 @@ elif sys.platform=='win32':
             'WinSparkle.dll',
             'WinSparkle.pdb',	# For debugging - don't include in package
             'EUROCAPS.TTF',
+            'Changelog.md',
             'commodity.csv',
             'rare_commodity.csv',
             'snd_good.wav',
