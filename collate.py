@@ -68,7 +68,8 @@ def addcommodities(data):
 
 # keep a summary of modules found
 def addmodules(data):
-    if not data['lastStarport'].get('modules'): return
+    if not data['lastStarport'].get('modules'):
+        return
 
     outfile = 'outfitting.csv'
     modules = {}
@@ -85,7 +86,8 @@ def addmodules(data):
 
     for key, module in data['lastStarport'].get('modules').items():
         # sanity check
-        if int(key) != module.get('id'): raise AssertionError('id: %s!=%s' % (key, module['id']))
+        if int(key) != module.get('id'):
+            raise AssertionError('id: %s!=%s' % (key, module['id']))
 
         try:
             new = outfitting.lookup(module, companion.ship_map, True)
@@ -127,7 +129,8 @@ def addmodules(data):
 
 # keep a summary of ships found
 def addships(data):
-    if not data['lastStarport'].get('ships'): return
+    if not data['lastStarport'].get('ships'):
+        return
 
     shipfile = 'shipyard.csv'
     ships = {}
