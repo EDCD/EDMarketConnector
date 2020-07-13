@@ -77,13 +77,16 @@ try:
         # Import and collate from JSON dump
         data = json.load(open(args.j))
         config.set('querytime', int(getmtime(args.j)))
+
     else:
         # Get state from latest Journal file
         try:
             logdir = config.get('journaldir') or config.default_journal_dir
             logfiles = sorted([x for x in os.listdir(logdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
                               key=lambda x: x.split('.')[1:])
+
             logfile = join(logdir, logfiles[-1])
+
             with open(logfile, 'r') as loghandle:
                 for line in loghandle:
                     try:
@@ -91,6 +94,7 @@ try:
                     except:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
+
         except Exception as e:
             print("Can't read Journal file: {}\n".format(str(e)), file=sys.stderr)
             sys.exit(EXIT_SYS_ERR)
@@ -104,18 +108,23 @@ try:
             cmdrs = config.get('cmdrs') or []
             if args.p in cmdrs:
                 idx = cmdrs.index(args.p)
+
             else:
                 for idx, cmdr in enumerate(cmdrs):
                     if cmdr.lower() == args.p.lower():
                         break
                 else:
                     raise companion.CredentialsError()
+
             companion.session.login(cmdrs[idx], monitor.is_beta)
+
         else:
             cmdrs = config.get('cmdrs') or []
             if monitor.cmdr not in cmdrs:
                 raise companion.CredentialsError()
+
             companion.session.login(monitor.cmdr, monitor.is_beta)
+
         querytime = int(time())
         data = companion.session.station()
         config.set('querytime', querytime)
@@ -124,22 +133,28 @@ try:
     if not data.get('commander') or not data['commander'].get('name','').strip():
         sys.stderr.write('Who are you?!\n')
         sys.exit(EXIT_SERVER)
+
     elif (not data.get('lastSystem', {}).get('name') or
           (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
         sys.stderr.write('Where are you?!\n')		# Shouldn't happen
         sys.exit(EXIT_SERVER)
+
     elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
         sys.stderr.write('What are you flying?!\n')  # Shouldn't happen
         sys.exit(EXIT_SERVER)
+
     elif args.j:
         pass  # Skip further validation
+
     elif data['commander']['name'] != monitor.cmdr:
         sys.stderr.write('Wrong Cmdr\n')				# Companion API return doesn't match Journal
         sys.exit(EXIT_CREDENTIALS)
+
     elif ((data['lastSystem']['name'] != monitor.system) or
           ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
           (data['ship']['id'] != monitor.state['ShipID']) or
           (data['ship']['name'].lower() != monitor.state['ShipType'])):
+
         sys.stderr.write('Frontier server is lagging\n')
         sys.exit(EXIT_LAGGING)
 
@@ -147,17 +162,22 @@ try:
     if args.d:
         with open(args.d, 'wb') as h:
             h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+
     if args.a:
         loadout.export(data, args.a)
+
     if args.e:
         edshipyard.export(data, args.e)
+
     if args.l:
         stats.export_ships(data, args.l)
+
     if args.t:
         stats.export_status(data, args.t)
 
     if data['commander'].get('docked'):
         print('%s,%s' % (data.get('lastSystem', {}).get('name', 'Unknown'), data.get('lastStarport', {}).get('name', 'Unknown')))
+
     else:
         print(data.get('lastSystem', {}).get('name', 'Unknown'))
 
@@ -165,12 +185,15 @@ try:
         if not data['commander'].get('docked'):
             sys.stderr.write("You're not docked at a station!\n")
             sys.exit(EXIT_SUCCESS)
+
         elif not data.get('lastStarport', {}).get('name'):
             sys.stderr.write("Unknown station!\n")
             sys.exit(EXIT_LAGGING)
+
         elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):  # Ignore possibly missing shipyard info
             sys.stderr.write("Station doesn't have anything!\n")
             sys.exit(EXIT_SUCCESS)
+
     else:
         sys.exit(EXIT_SUCCESS)
 
@@ -187,12 +210,14 @@ try:
             # Fixup anomalies in the commodity data
             fixed = companion.fixup(data)
             commodity.export(fixed, COMMODITY_DEFAULT, args.m)
+
         else:
             sys.stderr.write("Station doesn't have a market\n")
 
     if args.o:
         if data['lastStarport'].get('modules'):
             outfitting.export(data, args.o)
+
         else:
             sys.stderr.write("Station doesn't supply outfitting\n")
 
@@ -208,8 +233,10 @@ try:
     if args.s:
         if data['lastStarport'].get('ships', {}).get('shipyard_list'):
             shipyard.export(data, args.s)
+
         elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
             sys.stderr.write("Failed to get shipyard data\n")
+
         else:
             sys.stderr.write("Station doesn't have a shipyard\n")
 
@@ -219,6 +246,7 @@ try:
             eddn_sender.export_commodities(data, monitor.is_beta)
             eddn_sender.export_outfitting(data, monitor.is_beta)
             eddn_sender.export_shipyard(data, monitor.is_beta)
+
         except Exception as e:
             sys.stderr.write("Failed to send data to EDDN: %s\n" % unicode(e).encode('ascii', 'replace'))
 
@@ -227,9 +255,11 @@ try:
 except companion.ServerError as e:
     sys.stderr.write('Server is down\n')
     sys.exit(EXIT_SERVER)
+
 except companion.SKUError as e:
     sys.stderr.write('Server SKU problem\n')
     sys.exit(EXIT_SERVER)
+
 except companion.CredentialsError as e:
     sys.stderr.write('Invalid Credentials\n')
     sys.exit(EXIT_CREDENTIALS)
