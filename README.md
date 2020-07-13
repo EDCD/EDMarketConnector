@@ -1,3 +1,7 @@
+**This branch is now considered defunct.  Please use the 'main' branch instead.**
+===
+
+
 Any questions or offers of help can be directed to the EDCD Discord #edmc
 channel:
 
