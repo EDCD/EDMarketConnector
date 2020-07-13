@@ -31,7 +31,7 @@ Historically the A.B.C.D version was collapsed into A.BC and then a tag added of
 forwards we will always use the full version and 'folder style' tag names, e.g. `Release/A.B.C.D` .
 
 Currently the only file that defines the version code-wise is `config.py`.  `Changelog.md` and `edmarketconnector.xml`
-are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/master/docs/Releasing.md#distribution).
+are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#distribution).
 
 Git branch structure and tag conventions
 ---
@@ -52,6 +52,8 @@ then the HEAD of this Branch should always point to the code that was used in th
  
     This branch should contain anything from `develop` that is considered well
      tested and ready for the next `stable` merge.
+
+* `master` - **This is no longer used.  If the branch is even present then it's no longer updated.  You should be using `main` instead.**
 
 * `releases` - Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
