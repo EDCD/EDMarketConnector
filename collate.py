@@ -45,7 +45,7 @@ def addcommodities(data):
 
         if old and companion.category_map.get(commodity['categoryname'], True):
             if new['symbol'] != old['symbol'] or new['name'] != old['name']:
-                raise AssertionError('{}: {!r} != {!r}'.format(key, new, old))
+                raise ValueError('{}: {!r} != {!r}'.format(key, new, old))
 
         commodities[key] = new
 
@@ -87,7 +87,7 @@ def addmodules(data):
     for key, module in data['lastStarport'].get('modules').items():
         # sanity check
         if int(key) != module.get('id'):
-            raise AssertionError('id: {} != {}'.format(key, module['id']))
+            raise ValueError('id: {} != {}'.format(key, module['id']))
 
         try:
             new = outfitting.lookup(module, companion.ship_map, True)
@@ -106,7 +106,7 @@ def addmodules(data):
                         size_pre -= 1
 
                     elif str(new.get(thing, '')) != old.get(thing):
-                        raise AssertionError('{}: {} {!r}!={!r}'.format(key, thing, new.get(thing), old.get(thing)))
+                        raise ValueError('{}: {} {!r}!={!r}'.format(key, thing, new.get(thing), old.get(thing)))
 
             modules[int(key)] = new
 
@@ -160,7 +160,7 @@ def addships(data):
                         size_pre -= 1
 
                     elif str(new.get(thing, '')) != old.get(thing):
-                        raise AssertionError('{}: {} {!r} != {!r}'.format(key, thing, new.get(thing), old.get(thing)))
+                        raise ValueError('{}: {} {!r} != {!r}'.format(key, thing, new.get(thing), old.get(thing)))
 
             ships[int(key)] = new
 
