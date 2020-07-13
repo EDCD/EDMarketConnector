@@ -1,4 +1,4 @@
-# EDMC Plugins
+# Developer Plugin Documentation
 
 Plugins allow you to customise and extend the behavior of EDMC.
 
