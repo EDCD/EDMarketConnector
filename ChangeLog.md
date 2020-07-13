@@ -1,13 +1,11 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-Pre-Release 3.99.5.0
-===
-Consider this as 'rc2' for the following full '4.0.0.0' release.
-
-
 Release 4.0.0.0
 ===
+Developers please note the new [Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md)
+, particularly [Git branch structure and tag conventions](https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md#git-branch-structure-and-tag-conventions)
+.
 
  * This release is based on Python 3.7, not 2.7, so a user might find some of
    their plugins stop working.  If you have any plugins that do not have the
@@ -27,9 +25,9 @@ Release 4.0.0.0
    section of [this list](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37).
  
     *Plugin authors should also read the latest [Developer Plugin
-     Documentation](https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md)
+     Documentation](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md)
      ,* **particularly the section
-      [Available imports](https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#available-imports)
+      [Available imports](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports)
      .** Let us know if we've missed anything.
      
  * New 'Help' > 'About E:D Market Connector' menu item to show the currently
@@ -123,7 +121,7 @@ Release 3.46
 
 A small bug means that popup will never appear, but you can still check "File" > "Settings" > "Plugins" tab and see what plugins are listed in the section with the text "Plugins Without Python 3.x Support".
 
-If any of your plugins are listed in that section then they will need updating, by you or the original developer, to work with Python 3.7.  See <a href="https://github.com/EDCD/EDMarketConnector/blob/master/PLUGINS.md#migration-to-python-37">Migrating To Python 3.7</a> for more information.
+If any of your plugins are listed in that section then they will need updating, by you or the original developer, to work with Python 3.7.  See <a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37">Migrating To Python 3.7</a> for more information.
 
 
 Changes in this version:
@@ -164,7 +162,7 @@ Initially Athanasius will now be responsible for maintaining the code, including
 Going forwards the intention is to move to the python 3.7 code as soon as possible.  To facilitate this there will be one more python 2.7 release in addition to this one, with the main aim of that being to add code to alert the user about any plugins they use that have apparently not been updated to run under python 3.7.
 
 
-See the project GitHub repository's <a href="https://github.com/EDCD/EDMarketConnector/blob/master/README.md">README.md</a> for further information.
+See the project GitHub repository's <a href="https://github.com/EDCD/EDMarketConnector/blob/main/README.md">README.md</a> for further information.
 
 
   * Version increased to 3.4.4.0 / 3.44.
