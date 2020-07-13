@@ -150,9 +150,10 @@ def main():
             print('Who are you?!', file=sys.stderr)
             sys.exit(EXIT_SERVER)
 
-        elif not deep_get(data, 'lastSystem', 'name') or (
-                data['commander'].get('docked') and not deep_get(data, 'lastStarport', 'name')):  # Only care if docked
-            
+        elif not deep_get(data, 'lastSystem', 'name') or \
+                data['commander'].get('docked') and not \
+                deep_get(data, 'lastStarport', 'name'):  # Only care if docked
+
             print('Where are you?!', file=sys.stderr)  # Shouldn't happen
             sys.exit(EXIT_SERVER)
 
@@ -167,10 +168,10 @@ def main():
             print('Wrong Cmdr', file=sys.stderr)  # Companion API return doesn't match Journal
             sys.exit(EXIT_CREDENTIALS)
 
-        elif ((data['lastSystem']['name'] != monitor.system) or
-            ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
-            (data['ship']['id'] != monitor.state['ShipID']) or
-            (data['ship']['name'].lower() != monitor.state['ShipType'])):
+        elif data['lastSystem']['name'] != monitor.system or \
+                ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or \
+                data['ship']['id'] != monitor.state['ShipID'] or \
+                data['ship']['name'].lower() != monitor.state['ShipType']:
 
             print('Frontier server is lagging', file=sys.stderr)
             sys.exit(EXIT_LAGGING)
