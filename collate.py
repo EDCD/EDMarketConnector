@@ -6,7 +6,7 @@
 import csv
 import json
 import os
-from os.path import exists, isfile
+from os.path import isfile
 import sys
 from traceback import print_exc
 
@@ -28,7 +28,7 @@ def addcommodities(data):
         with open(commodityfile) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                commodities[int(row['id'])] = row	# index by int for easier lookup and sorting
+                commodities[int(row['id'])] = row  # index by int for easier lookup and sorting
 
     size_pre = len(commodities)
 
@@ -65,6 +65,7 @@ def addcommodities(data):
 
         print('Added %d new commodities' % (len(commodities) - size_pre))
 
+
 # keep a summary of modules found
 def addmodules(data):
     if not data['lastStarport'].get('modules'): return
@@ -78,7 +79,7 @@ def addmodules(data):
         with open(outfile) as csvfile:
             reader = csv.DictReader(csvfile, restval='')
             for row in reader:
-                modules[int(row['id'])] = row	# index by int for easier lookup and sorting
+                modules[int(row['id'])] = row  # index by int for easier lookup and sorting
 
     size_pre = len(modules)
 
@@ -123,6 +124,7 @@ def addmodules(data):
 
         print('Added %d new modules' % (len(modules) - size_pre))
 
+
 # keep a summary of ships found
 def addships(data):
     if not data['lastStarport'].get('ships'): return
@@ -136,7 +138,7 @@ def addships(data):
         with open(shipfile) as csvfile:
             reader = csv.DictReader(csvfile, restval='')
             for row in reader:
-                ships[int(row['id'])] = row	# index by int for easier lookup and sorting
+                ships[int(row['id'])] = row  # index by int for easier lookup and sorting
 
     size_pre = len(ships)
 
