@@ -39,6 +39,8 @@ import eddn
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR = range(6)
 
+JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+
 
 # quick and dirty version comparison assuming "strict" numeric only version numbers
 def versioncmp(versionstring):
@@ -82,10 +84,7 @@ try:
         # Get state from latest Journal file
         try:
             logdir = config.get('journaldir') or config.default_journal_dir
-            logfiles = sorted(
-                (x for x in os.listdir(logdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)),
-                key=lambda x: x.split('.')[1:]
-            )
+            logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
 
             logfile = join(logdir, logfiles[-1])
 
