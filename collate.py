@@ -185,34 +185,38 @@ def addships(data):
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
         print('Usage: collate.py [dump.json]')
-    else:
-        # read from dumped json file(s)
-        session = companion.Session()
-        for f in sys.argv[1:]:
-            with open(f) as h:
-                print(f)
-                data = json.load(h)
-                if not data['commander'].get('docked'):
-                    print('Not docked!')
+        sys.exit()
 
-                elif not data.get('lastStarport'):
-                    print('No starport!')
+    # read from dumped json file(s)
+    session = companion.Session()
+    for file_name in sys.argv[1:]:
+        data = None
+        with open(file_name) as f:
+            print(file_name)
+            data = json.load(f)
 
-                else:
-                    if data['lastStarport'].get('commodities'):
-                        addcommodities(data)
+        if not data['commander'].get('docked'):
+            print('Not docked!')
+            continue
 
-                    else:
-                        print('No market')
+        elif not data.get('lastStarport'):
+            print('No starport!')
+            continue
 
-                    if data['lastStarport'].get('modules'):
-                        addmodules(data)
+        if data['lastStarport'].get('commodities'):
+            addcommodities(data)
 
-                    else:
-                        print('No outfitting')
+        else:
+            print('No market')
 
-                    if data['lastStarport'].get('ships'):
-                        addships(data)
+        if data['lastStarport'].get('modules'):
+            addmodules(data)
 
-                    else:
-                        print('No shipyard')
+        else:
+            print('No outfitting')
+
+        if data['lastStarport'].get('ships'):
+            addships(data)
+
+        else:
+            print('No shipyard')
