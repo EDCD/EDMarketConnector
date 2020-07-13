@@ -159,7 +159,7 @@ def main():
             print('Where are you?!', file=sys.stderr)  # Shouldn't happen
             sys.exit(EXIT_SERVER)
 
-        elif not deep_get(data, 'ship', 'modules') or not deep_get('ship', 'name', default=''):
+        elif not deep_get(data, 'ship', 'modules') or not deep_get(data, 'ship', 'name', default=''):
             print('What are you flying?!', file=sys.stderr)  # Shouldn't happen
             sys.exit(EXIT_SERVER)
 
