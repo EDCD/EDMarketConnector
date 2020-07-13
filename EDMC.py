@@ -91,7 +91,7 @@ try:
                 for line in loghandle:
                     try:
                         monitor.parse_entry(line)
-                    except:
+                    except Exception:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
 
