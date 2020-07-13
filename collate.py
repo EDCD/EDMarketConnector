@@ -14,6 +14,22 @@ import companion
 import outfitting
 
 
+def __make_backup(file_name: str, suffix: str = '.bak') -> None:
+    """
+    Rename the given file to $file.bak, removing any existing $file.bak
+
+    :param file_name: The name of the file to make a backup of
+    :param suffix: The suffix to use for backup files (default '.bak')
+    """
+
+    backup_name = file_name + suffix
+
+    if isfile(backup_name):
+        os.unlink(backup_name)
+
+    os.rename(file_name, backup_name)
+
+
 # keep a summary of commodities found using in-game names
 # Assumes that the commodity data has already been 'fixed up'
 def addcommodities(data):
@@ -51,10 +67,7 @@ def addcommodities(data):
 
     if len(commodities) > size_pre:
         if isfile(commodityfile):
-            if isfile(commodityfile + '.bak'):
-                os.unlink(commodityfile + '.bak')
-
-            os.rename(commodityfile, commodityfile + '.bak')
+            __make_backup(commodityfile)
 
         with open(commodityfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
@@ -112,10 +125,7 @@ def addmodules(data):
 
     if len(modules) > size_pre:
         if isfile(outfile):
-            if isfile(outfile + '.bak'):
-                os.unlink(outfile + '.bak')
-
-            os.rename(outfile, outfile + '.bak')
+            __make_backup(outfile)
 
         with open(outfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
@@ -167,10 +177,7 @@ def addships(data):
     if len(ships) > size_pre:
 
         if isfile(shipfile):
-            if isfile(shipfile + '.bak'):
-                os.unlink(shipfile + '.bak')
-
-            os.rename(shipfile, shipfile + '.bak')
+            __make_backup(shipfile)
 
         with open(shipfile, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
