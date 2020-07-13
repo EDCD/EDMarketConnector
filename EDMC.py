@@ -252,14 +252,14 @@ try:
 
     sys.exit(EXIT_SUCCESS)
 
-except companion.ServerError as e:
+except companion.ServerError:
     sys.stderr.write('Server is down\n')
     sys.exit(EXIT_SERVER)
 
-except companion.SKUError as e:
+except companion.SKUError:
     sys.stderr.write('Server SKU problem\n')
     sys.exit(EXIT_SERVER)
 
-except companion.CredentialsError as e:
+except companion.CredentialsError:
     sys.stderr.write('Invalid Credentials\n')
     sys.exit(EXIT_CREDENTIALS)
