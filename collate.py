@@ -99,7 +99,8 @@ def addmodules(data):
 
     for key, module in data['lastStarport'].get('modules').items():
         # sanity check
-        if int(key) != module.get('id'):
+        key = int(key)
+        if key != module.get('id'):
             raise ValueError('id: {} != {}'.format(key, module['id']))
 
         try:
@@ -111,7 +112,7 @@ def addmodules(data):
             new = None
 
         if new:
-            old = modules.get(int(key))
+            old = modules.get(key)
             if old:
                 # check consistency with existing data
                 for thing in fields:
@@ -121,7 +122,7 @@ def addmodules(data):
                     elif str(new.get(thing, '')) != old.get(thing):
                         raise ValueError('{}: {} {!r}!={!r}'.format(key, thing, new.get(thing), old.get(thing)))
 
-            modules[int(key)] = new
+            modules[key] = new
 
     if len(modules) > size_pre:
         if isfile(outfile):
@@ -158,21 +159,21 @@ def addships(data):
     data_ships = data['lastStarport']['ships']
     for ship in tuple(data_ships.get('shipyard_list', {}).values()) + data_ships.get('unavailable_list'):
         # sanity check
-        key = ship['id']
-        new = {'id': int(key), 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower())}
+        key = int(ship['id'])
+        new = {'id': key, 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower())}
         if new:
-            old = ships.get(int(key))
+            old = ships.get(key)
             if old:
                 # check consistency with existing data
                 for thing in fields:
                     if not old.get(thing) and new.get(thing):
-                        ships[int(key)] = new
+                        ships[key] = new
                         size_pre -= 1
 
                     elif str(new.get(thing, '')) != old.get(thing):
                         raise ValueError('{}: {} {!r} != {!r}'.format(key, thing, new.get(thing), old.get(thing)))
 
-            ships[int(key)] = new
+            ships[key] = new
 
     if len(ships) > size_pre:
 
