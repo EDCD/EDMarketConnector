@@ -8,6 +8,7 @@ import json
 import requests
 import sys
 import os
+from typing import Union, Any
 
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
@@ -47,6 +48,18 @@ def versioncmp(versionstring):
     return list(map(int, versionstring.split('.')))
 
 
+def deep_get(target: dict, *args: str, default=None) -> Any:
+    current = target
+    for arg in args:
+        res = current.get(arg)
+        if res is not None:
+            current = res
+
+        else:
+            break
+
+    return default
+
 try:
     # arg parsing
     parser = argparse.ArgumentParser(prog=appcmdname, description='Prints the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file. Requires prior setup through the accompanying GUI app.')  # noqa:E501
@@ -83,7 +96,7 @@ try:
     else:
         # Get state from latest Journal file
         try:
-            logdir = config.get('journaldir') or config.default_journal_dir
+            logdir = config.get('journaldir', config.default_journal_dir)
             logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
 
             logfile = join(logdir, logfiles[-1])
@@ -106,7 +119,7 @@ try:
 
         # Get data from Companion API
         if args.p:
-            cmdrs = config.get('cmdrs') or []
+            cmdrs = config.get('cmdrs', [])
             if args.p in cmdrs:
                 idx = cmdrs.index(args.p)
 
@@ -120,7 +133,7 @@ try:
             companion.session.login(cmdrs[idx], monitor.is_beta)
 
         else:
-            cmdrs = config.get('cmdrs') or []
+            cmdrs = config.get('cmdrs', [])
             if monitor.cmdr not in cmdrs:
                 raise companion.CredentialsError()
 
@@ -135,12 +148,13 @@ try:
         print('Who are you?!', file=sys.stderr)
         sys.exit(EXIT_SERVER)
 
-    elif (not data.get('lastSystem', {}).get('name') or
-          (data['commander'].get('docked') and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
+    elif not deep_get(data, 'lastSystem', 'name') or (
+            data['commander'].get('docked') and not deep_get(data, 'lastStarport', 'name')):  # Only care if docked
+        
         print('Where are you?!', file=sys.stderr)  # Shouldn't happen
         sys.exit(EXIT_SERVER)
 
-    elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
+    elif not deep_get(data, 'ship', 'modules') or not deep_get('ship', 'name', default=''):
         print('What are you flying?!', file=sys.stderr)  # Shouldn't happen
         sys.exit(EXIT_SERVER)
 
@@ -177,7 +191,10 @@ try:
         stats.export_status(data, args.t)
 
     if data['commander'].get('docked'):
-        print('%s,%s' % (data.get('lastSystem', {}).get('name', 'Unknown'), data.get('lastStarport', {}).get('name', 'Unknown')))
+        print('%s,%s' % (
+            deep_get(data, 'lastSystem', 'name', default='Unknown'),
+            deep_get(data, 'lastStarport', 'name', default='Unknown')
+        ))
 
     else:
         print(data.get('lastSystem', {}).get('name', 'Unknown'))
