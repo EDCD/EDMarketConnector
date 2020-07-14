@@ -1,6 +1,17 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.1.0
+===
+This fixes a bug with the EDDB 'System Provider' URLs.
+
+ * It was possible to pick up, and use, a bad SystemAddress from the Frontier
+ CAPI.  The CAPI will no longer be used as a source for this.
+ * If we do not yet have a SystemAddress from the Journal we will use the
+ SystemName instead.  This carries the small risk of the player being in one
+ of the duplicate-name systems, in which case EDDB might not display the
+ correct system.
+ 
 Release 4.0.0.0
 ===
 Developers please note the new [Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md)
