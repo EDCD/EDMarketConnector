@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.2.0
+===
+Only a minor fix to EDMC.exe
+
+ * Restore the reporting of new releases for `EDMC.exe -v`.
+ 
 Release 4.0.1.0
 ===
 This fixes a bug with the EDDB 'System Provider' URLs.
