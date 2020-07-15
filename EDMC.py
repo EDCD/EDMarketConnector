@@ -71,11 +71,14 @@ try:
                            item.find('title').text) for item in feed.findall('channel/item')])
             lastversion = sorted(items, key=versioncmp)[-1]
             if versioncmp(lastversion) > versioncmp(appversion):
-                latest = ' (%s is available)' % items[lastversion]
+                latest = items[lastversion]
         except Exception as e:
             sys.stderr.write('Exception in version check: {}'.format(str(e)))
             #pass	# Quietly suppress timeouts etc.
-        print(appversion)
+        if latest:
+            print('{CURRENT} ({UPDATE} is available)'.format(CURRENT=appversion, UPDATE=latest))
+        else:
+            print(appversion)
         sys.exit(EXIT_SUCCESS)
 
     if args.j:
