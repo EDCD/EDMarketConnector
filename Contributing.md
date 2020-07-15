@@ -37,13 +37,19 @@ Git branch structure and tag conventions
 ---
 Somewhat based on git-flow, but our particular take on it:
 
-* `stable` - The HEAD of this Branch should always point to the code that was used in the last released stable version.
+### Branches
+* `stable` - This will either have `HEAD` pointing to the latest stable
+release code *or* might have extra code merged in for a hotfix that will
+shortly be in the next stable release.  If you want the latest stable release
+code then use the appropriate `Release/A.B.C.D` tag!
 
 * `beta` - If we run any pre-release betas *with actual builds released, not
-  just a branch to be run from source*, then the HEAD of this Branch should
-  always point to the code that was used in the last beta version. *This means
-  that if there hasn't yet been a new beta version this could be far behind
-  all of: main, develop, stable.*
+  just a branch to be run from source*, then this branch will contain that
+  code.  As per `stable` above, this branch might be ahead of the latest
+  pre-release due to merging of hotfixes.  Use the appropriate tag if you want
+  to be sure of the code you checkout.
+  *If there hasn't yet been a new beta version this could be far behind all
+  of: `main`, `develop`, `stable`.*
 
 * `develop` - This is the branch where all current development is integrated.  No commits should be made directly
   to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
@@ -63,6 +69,23 @@ clients check to be notified of new versions.  This can potentially be replaced 
 but some care will be necessary to ensure no users are left behind (their client checking the `releases` branch which
 then no longer exists).  For the time being this should always be kept in sync with `stable` as each new release is
 made.
+
+### Tags
+
+#### Stable Releases
+All stable releases **MUST** had a tag of the form `Release/A.B.C.D` on the
+commit that was `HEAD` when the installer for it was built.
+
+#### Pre-Releases
+Currently the tags for pre-releases are of the same form as those for stable
+releases.  This will change in the future when the project for [full semantic
+versioning](https://github.com/EDCD/EDMarketConnector/projects/4) is completed.
+
+This does mean that some care should be taken.  If the current stable
+ release is `4.0.1.0` then you should 'guess' at the pre-release version
+needing to be either `4.1.0.0` or `5.0.0.0` depending on what has changed.
+
+---
 
 Work in progress conventions
 ---
