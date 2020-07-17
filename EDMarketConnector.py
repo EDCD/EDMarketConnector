@@ -17,7 +17,7 @@ import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
 
-from config import appname, applongname, appversion, copyright, config
+from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
@@ -737,7 +737,10 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion)
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
-            self.appversion = HyperlinkLabel(frame, compoun=tk.RIGHT, text=_('Release Notes'), url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(VERSION=appversion), underline=True)
+            self.appversion = HyperlinkLabel(frame, compoun=tk.RIGHT, text=_('Release Notes'),
+                                             url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(
+                                                 VERSION=appversion_nobuild),
+                                             underline=True)
             self.appversion.grid(row=row, column=2, sticky=tk.W)
             row += 1
             ############################################################
