@@ -6,7 +6,7 @@ import threading
 from traceback import print_exc
 
 # ensure registry is set up on Windows before we start
-from config import appname, appversion, update_feed, update_interval, config
+from config import appname, appversion, appversion_nobuild, update_feed, update_interval, config
 
 
 if not getattr(sys, 'frozen', False):
@@ -100,8 +100,7 @@ elif sys.platform=='win32':
                 # NB: It 'accidentally' supports pre-release due to how it
                 # splits and compares strings:
                 # <https://github.com/vslavik/winsparkle/issues/214>
-                appversion_nobuildmetadata = appversion.split(sep='+')[0]
-                self.updater.win_sparkle_set_app_build_version(appversion_nobuildmetadata)
+                self.updater.win_sparkle_set_app_build_version(appversion_nobuild)
 
                 # set up shutdown callback
                 global root
