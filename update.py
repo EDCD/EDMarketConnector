@@ -1,22 +1,18 @@
 import os
 from os.path import dirname, join
 import sys
-from time import time
 import threading
 from traceback import print_exc
+import semantic_version
 
 # ensure registry is set up on Windows before we start
 from config import appname, appversion, appversion_nobuild, update_feed, update_interval, config
 
 
 if not getattr(sys, 'frozen', False):
+    # Running from source
 
-    #TODO: Update this to use Semantic Version as per EDMC.pu args.version check
-
-    # quick and dirty version comparison assuming "strict" numeric only version numbers
-    def versioncmp(versionstring):
-        return list(map(int, versionstring.split('.')))
-
+    #TODO: Update this to use Semantic Version as per EDMC.py args.version check
     class Updater(object):
 
         def __init__(self, master):
@@ -30,17 +26,47 @@ if not getattr(sys, 'frozen', False):
             thread.daemon = True
             thread.start()
 
-        def worker(self):
+        def check_appcast(self) -> dict:
             import requests
             from xml.etree import ElementTree
 
-            r = requests.get(update_feed, timeout = 20, verify = (sys.version_info >= (2,7,9)))
-            feed = ElementTree.fromstring(r.text)
-            items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
-                           item.find('title').text) for item in feed.findall('channel/item')])
-            lastversion = sorted(items, key=versioncmp)[-1]
-            if versioncmp(lastversion) > versioncmp(appversion):
-                self.root.nametowidget('.%s.%s' % (appname.lower(), 'status'))['text'] = items[lastversion] + ' is available'
+            newversion = None
+            try:
+                r = requests.get(update_feed, timeout=10)
+            except requests.RequestException as ex:
+                sys.stderr.write('Error retrieving update_feed file: {}\n'.format(str(ex)))
+            else:
+                try:
+                    feed = ElementTree.fromstring(r.text)
+                except SyntaxError as ex:
+                    sys.stderr.write('Syntax error in update_feed file: {}\n'.format(str(ex)))
+                else:
+
+                    items = dict()
+                    for item in feed.findall('channel/item'):
+                        ver = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version')
+                        sv = semantic_version.Version.coerce(ver)
+
+                        os = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}os')
+                        os_map = {'darwin': 'macos', 'win32': 'windows', 'linux' : 'linux'}  # Map sys.platform to sparkle:os
+                        if os == os_map[sys.platform]:
+                            items[sv] = {
+                                'version': ver,
+                                'title': item.find('title').text,
+                            }
+
+                    # Look for any remaining version greater than appversion
+                    simple_spec = semantic_version.SimpleSpec('>' + appversion)
+                    newversion = simple_spec.select(items.keys())
+
+            return items[newversion]
+
+        def worker(self):
+
+            newversion = self.check_appcast()
+
+            if newversion:
+                self.root.nametowidget('.{}.status'.format(appname.lower()))['text'] = newversion['title'] + ' is available'
                 self.root.update_idletasks()
 
         def close(self):
