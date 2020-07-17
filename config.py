@@ -8,6 +8,9 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
+# appversion **MUST** follow Semantic Versioning rules:
+# <https://semver.org/#semantic-versioning-specification-semver>
+# Major.Minor.Patch(-prerelease)(+buildmetadata)
 appversion = '4.0.2'
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
 
