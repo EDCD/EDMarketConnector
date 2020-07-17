@@ -11,6 +11,8 @@ from config import appname, appversion, appversion_nobuild, update_feed, update_
 
 if not getattr(sys, 'frozen', False):
 
+    #TODO: Update this to use Semantic Version as per EDMC.pu args.version check
+
     # quick and dirty version comparison assuming "strict" numeric only version numbers
     def versioncmp(versionstring):
         return list(map(int, versionstring.split('.')))
