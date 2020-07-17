@@ -91,7 +91,17 @@ elif sys.platform=='win32':
             try:
                 sys.frozen	# don't want to try updating python.exe
                 self.updater = ctypes.cdll.WinSparkle
-                self.updater.win_sparkle_set_appcast_url(update_feed.encode())	# py2exe won't let us embed this in resources
+
+                # Set the appcast URL
+                self.updater.win_sparkle_set_appcast_url(update_feed.encode())
+
+                # Set the appversion *without* build metadata, as WinSparkle
+                # doesn't do proper Semantic Version checks.
+                # NB: It 'accidentally' supports pre-release due to how it
+                # splits and compares strings:
+                # <https://github.com/vslavik/winsparkle/issues/214>
+                appversion_nobuildmetadata = appversion.split(sep='+')[0]
+                self.updater.win_sparkle_set_app_build_version(appversion_nobuildmetadata)
 
                 # set up shutdown callback
                 global root
@@ -99,9 +109,11 @@ elif sys.platform=='win32':
                 self.callback_t = ctypes.CFUNCTYPE(None)	# keep reference
                 self.callback_fn = self.callback_t(shutdown_request)
                 self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
+
+                # Get WinSparkle running
                 self.updater.win_sparkle_init()
 
-            except:
+            except Exception as ex:
                 print_exc()
                 self.updater = None
 

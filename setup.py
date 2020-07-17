@@ -16,6 +16,7 @@ import re
 import shutil
 import sys
 from tempfile import gettempdir
+import semantic_version
 
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION, copyright as COPYRIGHT
 from config import update_feed, update_interval
@@ -29,6 +30,10 @@ elif sys.platform=='darwin':
     dist_dir = 'dist.macosx'
 else:
     assert False, 'Unsupported platform %s' % sys.platform
+
+# Split version, as py2exe wants the 'base' for version
+semver = semantic_version.Version.coerce(VERSION)
+BASEVERSION = str(semver.truncate('patch'))
 
 if dist_dir and len(dist_dir)>1 and isdir(dist_dir):
     shutil.rmtree(dist_dir)
@@ -150,13 +155,13 @@ elif sys.platform=='win32':
 setup(
     name = APPLONGNAME,
     version = VERSION,
-    app = [APP],
     windows = [ {'dest_base': APPNAME,
                  'script': APP,
                  'icon_resources': [(0, '%s.ico' % APPNAME)],
-                 'company_name': 'EDCD',	# WinSparkle
-                 'product_name': APPNAME,           # WinSparkle
-                 'version': VERSION,
+                 'company_name': 'EDCD',  # WinSparkle
+                 'product_name': APPNAME,  # WinSparkle
+                 'version': BASEVERSION,
+                 'product_version': VERSION,
                  'copyright': COPYRIGHT,
                  'other_resources': [(24, 1, open(APPNAME+'.manifest').read())],
              } ],
@@ -164,12 +169,12 @@ setup(
                  'script': APPCMD,
                  'company_name': 'EDCD',
                  'product_name': APPNAME,
-                 'version': VERSION,
+                 'version': BASEVERSION,
+                 'product_version': VERSION,
                  'copyright': COPYRIGHT,
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,
-    setup_requires = [sys.platform=='darwin' and 'py2app' or 'py2exe'],
 )
 
 PKG = None

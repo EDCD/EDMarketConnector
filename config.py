@@ -8,7 +8,7 @@ from sys import platform
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '4.0.2.0'
+appversion = '4.0.2'
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
