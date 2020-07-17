@@ -65,7 +65,6 @@ try:
     if args.version:
         newversion = None
         try:
-            update_feed = 'https://ed.miggy.org/misc/semvertest-appcast.xml'
             r = requests.get(update_feed, timeout = 10)
         except requests.RequestException as ex:
             sys.stderr.write('Error retrieving update_feed file: {}\n'.format(str(ex)))
