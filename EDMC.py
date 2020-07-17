@@ -16,6 +16,7 @@ from os.path import dirname, getmtime, join
 from time import time, sleep
 from xml.etree import ElementTree
 import re
+import semantic_version
 
 import l10n
 l10n.Translations.install_dummy()
@@ -62,21 +63,42 @@ try:
     args = parser.parse_args()
 
     if args.version:
-        latest = ''
+        newversion = None
         try:
-            # Copied from update.py - probably should refactor
+            update_feed = 'https://ed.miggy.org/misc/semvertest-appcast.xml'
             r = requests.get(update_feed, timeout = 10)
-            feed = ElementTree.fromstring(r.text)
-            items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
-                           item.find('title').text) for item in feed.findall('channel/item')])
-            lastversion = sorted(items, key=versioncmp)[-1]
-            if versioncmp(lastversion) > versioncmp(appversion):
-                latest = items[lastversion]
-        except Exception as e:
-            sys.stderr.write('Exception in version check: {}'.format(str(e)))
-            #pass	# Quietly suppress timeouts etc.
-        if latest:
-            print('{CURRENT} ({UPDATE} is available)'.format(CURRENT=appversion, UPDATE=latest))
+        except requests.RequestException as ex:
+            sys.stderr.write('Error retrieving update_feed file: {}\n'.format(str(ex)))
+        else:
+            try:
+                feed = ElementTree.fromstring(r.text)
+            except SyntaxError as ex:
+                sys.stderr.write('Syntax error in update_feed file: {}\n'.format(str(ex)))
+            else:
+                # Want to make items['<version>'] = {'os': '...', 'title': '...' }
+                items = dict(
+                    [
+                        (
+                            item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
+                            {'title': item.find('title').text,
+                             'os': item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}os'),
+                            }
+                        ) for item in feed.findall('channel/item')
+                    ]
+                )
+
+                # Filter on the sparkle:os attribute
+                os_map = {'darwin': 'macos', 'win32': 'windows', 'linux': 'linux'}  # Map sys.platform to sparkle:os
+                items = { k:v for (k,v) in items.items() if v['os'] == os_map[sys.platform]}
+
+                # Look for any remaining version greater than appversion
+                simple_spec = semantic_version.SimpleSpec('>' + appversion)
+                newversion = simple_spec.select([semantic_version.Version.coerce(x) for x in items])
+
+        if newversion:
+            print('{CURRENT} ("{UPDATE}" is available)'.format(
+                CURRENT=appversion,
+                UPDATE=items[str(newversion)]['title']))
         else:
             print(appversion)
         sys.exit(EXIT_SUCCESS)
