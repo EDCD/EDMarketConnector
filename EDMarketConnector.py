@@ -737,7 +737,7 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion)
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
-            self.appversion = HyperlinkLabel(frame, compoun=tk.RIGHT, text=_('Release Notes'),
+            self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(
                                                  VERSION=appversion_nobuild),
                                              underline=True)
