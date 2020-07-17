@@ -363,6 +363,7 @@ If the player has chosen to "Send flight log and Cmdr status to Inara" this
 gets called when the player starts the game, enters a new system, docks or
 undocks. It is called some time after the corresponding `journal_entry()`
 event.
+
 ---
 ```python
 def inara_notify_ship(eventData):
