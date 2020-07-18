@@ -283,9 +283,12 @@ class AppWindow(object):
 
         # Load updater after UI creation (for WinSparkle)
         import update
-        self.updater = update.Updater(self.w)
-        if not getattr(sys, 'frozen', False):
-            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
+        if getattr(sys, 'frozen', False):
+            # Running in frozen .exe, so use WinSparkle
+            self.updater = update.Updater(tkroot=self.w, provider='external')
+        else:
+            self.updater = update.Updater(tkroot=self.w, provider='internal')
+            self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         try:
             config.get_password('')	# Prod SecureStorage on Linux to initialise

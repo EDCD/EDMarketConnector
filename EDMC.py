@@ -12,11 +12,9 @@ import os
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
 
-from os.path import dirname, getmtime, join
+from os.path import getmtime, join
 from time import time, sleep
-from xml.etree import ElementTree
 import re
-import semantic_version
 
 import l10n
 l10n.Translations.install_dummy()
@@ -30,7 +28,8 @@ import loadout
 import edshipyard
 import shipyard
 import stats
-from config import appcmdname, appversion, update_feed, config
+from config import appcmdname, appversion, config
+from update import Updater, EDMCVersion
 from monitor import monitor
 
 sys.path.append(config.internal_plugin_dir)
@@ -63,41 +62,12 @@ try:
     args = parser.parse_args()
 
     if args.version:
-        newversion = None
-        try:
-            r = requests.get(update_feed, timeout = 10)
-        except requests.RequestException as ex:
-            sys.stderr.write('Error retrieving update_feed file: {}\n'.format(str(ex)))
-        else:
-            try:
-                feed = ElementTree.fromstring(r.text)
-            except SyntaxError as ex:
-                sys.stderr.write('Syntax error in update_feed file: {}\n'.format(str(ex)))
-            else:
-                # Want to make items['<version>'] = {'os': '...', 'title': '...' }
-                items = dict(
-                    [
-                        (
-                            item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
-                            {'title': item.find('title').text,
-                             'os': item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}os'),
-                            }
-                        ) for item in feed.findall('channel/item')
-                    ]
-                )
-
-                # Filter on the sparkle:os attribute
-                os_map = {'darwin': 'macos', 'win32': 'windows', 'linux': 'linux'}  # Map sys.platform to sparkle:os
-                items = { k:v for (k,v) in items.items() if v['os'] == os_map[sys.platform]}
-
-                # Look for any remaining version greater than appversion
-                simple_spec = semantic_version.SimpleSpec('>' + appversion)
-                newversion = simple_spec.select([semantic_version.Version.coerce(x) for x in items])
-
+        updater = Updater(provider='internal')
+        newversion: EDMCVersion = updater.check_appcast()
         if newversion:
             print('{CURRENT} ("{UPDATE}" is available)'.format(
                 CURRENT=appversion,
-                UPDATE=items[str(newversion)]['title']))
+                UPDATE=newversion.title))
         else:
             print(appversion)
         sys.exit(EXIT_SUCCESS)
@@ -121,7 +91,7 @@ try:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
         except Exception as e:
-            sys.stderr.write("Can't read Journal file: {}\n".format(str(e)))
+            print("Can't read Journal file: {}\n".format(str(e)), file=sys.stderr)
             sys.exit(EXIT_SYS_ERR)
 
         if not monitor.cmdr:
