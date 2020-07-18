@@ -284,7 +284,7 @@ class AppWindow(object):
         # Load updater after UI creation (for WinSparkle)
         import update
         if getattr(sys, 'frozen', False):
-            # Running in frozen .exe, so use WinSparkle
+            # Running in frozen .exe, so use (Win)Sparkle
             self.updater = update.Updater(tkroot=self.w, provider='external')
         else:
             self.updater = update.Updater(tkroot=self.w, provider='internal')
