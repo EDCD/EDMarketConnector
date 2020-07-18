@@ -1,0 +1,33 @@
+[flake8]
+# Show exactly where in a line the error happened
+show-source = True
+
+max-line-length = 120
+# Add _ as a builtin for localisation stuff
+builtins = _
+
+# check syntax in doctests
+doctests = True 
+max-complexity = 15
+per-file-ignores = ./EDMC.py:E402
+
+# Plugin configs
+# required plugins:
+
+# https://github.com/Melevir/flake8-cognitive-complexity
+# Provides cognitive complexity checking
+
+# https://github.com/gforcada/flake8-pep3101
+# Marks modulo-formatting as an error, as .format formatting is clearer and preferred in this codebase
+
+# https://github.com/adamchainz/flake8-comprehensions
+# Checks list/dict/set/* comprehensions for simplification or replacement
+
+# https://github.com/PyCQA/pep8-naming
+# checks names against PEP8 rules (eg CamelCase for class names)
+
+# https://github.com/best-doctor/flake8-annotations-coverage
+# Checks code for type annotations
+
+
+max-cognitive-complexity = 15
