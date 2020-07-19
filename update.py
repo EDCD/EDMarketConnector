@@ -4,8 +4,9 @@ import sys
 import threading
 from traceback import print_exc
 import semantic_version
-from typing import Optional
-import tkinter as tk
+from typing import TYPE_CHECKING, Optional
+if TYPE_CHECKING:
+    import tkinter as tk
 
 # ensure registry is set up on Windows before we start
 from config import appname, appversion, appversion_nobuild, update_feed
@@ -51,12 +52,12 @@ class Updater(object):
 
         return False
 
-    def __init__(self, tkroot: tk.Tk=None, provider: str='internal'):
+    def __init__(self, tkroot: 'tk.Tk'=None, provider: str='internal'):
         """
         :param tkroot: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
-        self.root: tk.Tk = tkroot
+        self.root: 'tk.Tk' = tkroot
         self.provider: str = provider
         self.thread: threading.Thread = None
 
