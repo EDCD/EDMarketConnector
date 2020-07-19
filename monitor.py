@@ -128,7 +128,7 @@ class EDLogs(FileSystemEventHandler):
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
         try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+            logfiles = sorted([x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
                               key=lambda x: x.split('.')[1:])
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
         except:
@@ -187,7 +187,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)):
+        if not event.is_directory and re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)):
             self.logfile = event.src_path
 
     def worker(self):
@@ -247,7 +247,7 @@ class EDLogs(FileSystemEventHandler):
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if re.search('^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+                    logfiles = sorted([x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
                                       key=lambda x: x.split('.')[1:])
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
                 except:
@@ -752,7 +752,7 @@ class EDLogs(FileSystemEventHandler):
             return
 
         ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
-        regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
+        regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted([x for x in listdir(config.get('outdir')) if regexp.match(x)])
         if oldfiles:
             with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
