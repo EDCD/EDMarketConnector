@@ -54,9 +54,9 @@ You will need several pieces of software installed, or the files from their
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
 	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
-	1. The easiest way is to utilise the `requirements.txt` file:
-	 `pip install -r requirements.txt`
-	1. Else check the contents of `requirements.txt` and ensure the modules
+	1. The easiest way is to utilise the `requirements-dev.txt` file:
+	 `python -m pip install -r requirements-dev.txt`. This will install all dependencies plus anything required for development
+	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`, and ensure the modules
 	listed there are installed as per the version requirements.
 
 If you are using different versions of any of these tools then please ensure

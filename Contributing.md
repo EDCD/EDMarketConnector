@@ -104,7 +104,7 @@ The Semantic Versioning `+<build metadata>` should never be a part of the tag.
 
 ---
 
-Work in progress conventions
+### Work in progress conventions
 ---
 Remember, you should always be working versus a single issue, even if the work is part of a Milestone or Project. 
 There might be cases where issues aren't duplicates, but your work still addresses more than one.  In that case
@@ -131,6 +131,24 @@ your WIP branch.  If there are any non-trivial conflicts when we merge your Pull
 to rebase your WIP branch on the latest version of the source branch.  Otherwise we'll work out how to best
 merge your changes via comments in the Pull Request.
 
+
+#### Linting
+
+We use flake8 for linting all python source.
+
+While working on your changes, please ensure that they pass a check from `flake8` using our configuration and plugins.
+If you installed `requirements-dev.txt` with pip, you should simply be able to run `flake8 your_files_here` to lint
+your files.
+
+Note that if your PR does not cleanly (or mostly cleanly) pass a linting scan, your PR may be put on hold pending fixes.
+
+#### Unit testing
+
+Where possible please write unit tests for your PRs, especially in the case of bug fixes, having regression tests help
+ensure that we don't accidentally re-introduce a bug down the line.
+
+We use the python stdlib library `unittest` for unit testing.
+
 ---
 
 General workflow
@@ -141,6 +159,8 @@ General workflow
 1. In your local copy of *your* fork create an appropriate WIP branch.
 1. Develop the changes, testing as you go (no we don't have any actual tests yet).
     1. Be as sure as you can that the code works as you intend and hasn't introduced any other bugs or regressions.
+    1. Test the codebase as a whole against any unit tests that do exist, and add your own as you can.
+    1. Check your code against flake8 periodically.
 1. When you're sure the work is final:
     1. Push your WIP branch to your fork (you probably should have been doing this as you worked as a form of backup).
     1. Access the WIP branch on your fork on GitHub and create a Pull Request.  Mention any Issue number(s) that it
@@ -162,19 +182,49 @@ Coding Conventions
   on a separate line, with consistent indentation.
   
   Yes:
-  
+
+        ```python
         if somethingTrue:
-            Things we then do
+            Things_we_then_do()
+        ```
   
   No:
-   
-        if somethingTrue: One thing we do
+
+        ```python
+        if somethingTrue: One_thing_we_do()
+        ```
   
   Yes, some existing code still flouts this rule.
-  
+
+* **Always** use Line breaks after scope changes. It makes reading code far easier
+
+  Yes:
+
+      ```python
+        if True:
+          do_something()
+
+        else:
+          raise UniverseBrokenException()
+
+        return
+      ```
+  No:
+
+      ```python
+        if True:
+          do_something()
+        else:
+          raise UniverseBrokenException()
+        return
+      ```
+
+
 * Going forwards please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions, both their arguments and return
   types.
-  
+
+* In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
+
 ---
 
 Git commit conventions
