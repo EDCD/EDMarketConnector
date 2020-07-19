@@ -1,5 +1,7 @@
-#Introduction
-  This document aims to enable anyone to quickly get up to speed on how to:
+Introduction
+===
+
+This document aims to enable anyone to quickly get up to speed on how to:
 
 1. Build a Windows .exe for the application
 1. Package that .exe into an .msi file for distribution
@@ -9,7 +11,8 @@
 Note that for Windows only a 32-bit application is supported at this time.
 This is principally due to the Windows Registry handling in config.py.
 
-##Environment
+Environment
+---
 
 You will need several pieces of software installed, or the files from their
 .zip archives, in order to build the .exe and generate the .msi
@@ -61,7 +64,9 @@ that the paths where they're installed match the associated lines in
 `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH
 line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
 
-##Version Strings
+Version Strings
+---
+
 This project now uses strict [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
 version strings.
 
@@ -81,7 +86,9 @@ version strings.
     start from `1` again when beginning `-rc` releases.
 
 
-##Necessary Edits
+Necessary Edits
+---
+
 There are some things that you should always change before running your own
 version of EDMC
 1. The Frontier CAPI client ID.  This is hardcoded in companion.py, but can be
@@ -118,7 +125,9 @@ that.
 	 appcast_win_<version>.xml file.  The original upstream value is
 	 `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
 
-##Pre-Packaging Steps
+Pre-Packaging Steps
+---
+
 Before you create a new install each time you should:
 
 1. Ensure the data sourced from coriolis.io is up to date and works:
@@ -128,7 +137,8 @@ Before you create a new install each time you should:
     1. XXX: Test ?
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
 
-##Preparing to Package
+Preparing to Package
+---
 
 We'll use an old version string, `4.0.2`, as an example throughout the
 following.
@@ -179,7 +189,9 @@ a `stable` release, as well as any social media posts you make.
 If you're wondering, you needed to get the changelog prepared before building
 the .exe and .msi because ChangeLog.md is bundled with the install.
 
-##Packaging & Installer Generation
+Packaging & Installer Generation
+---
+
 You'll want to do the .exe and .msi generation in a `cmd.exe` window, not e.g.
 a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 
@@ -235,7 +247,9 @@ Update `edmarketconnector.xml` once more to set the `length=` attribute of the
 enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.
 The git commit for this should end up being the release tag as below.
 
-##Distribution
+Distribution
+---
+
 Once you have tested the new .msi file:
 
 1. Add a git tag for the release, which you'll refer to when actually creating
@@ -293,7 +307,9 @@ updates specifically targets
     edmarketconnector.xml contents to all users.
 
 
-##Pre-Releases
+Pre-Releases
+---
+
 If you are making a pre-release then:
 
 1. **DO NOT** Edit edmarketconnector.xml at all.  No, not even if you think you
