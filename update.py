@@ -153,26 +153,29 @@ class Updater(object):
             r = requests.get(update_feed, timeout=10)
         except requests.RequestException as ex:
             print('Error retrieving update_feed file: {}'.format(str(ex)), file=sys.stderr)
-        else:
-            try:
-                feed = ElementTree.fromstring(r.text)
-            except SyntaxError as ex:
-                print('Syntax error in update_feed file: {}'.format(str(ex)), file=sys.stderr)
-            else:
 
-                for item in feed.findall('channel/item'):
-                    ver = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version')
-                    # This will change A.B.C.D to A.B.C+D
-                    sv = semantic_version.Version.coerce(ver)
+            return None
 
-                    items[sv] = EDMCVersion(version=ver, # sv might have mangled version
-                                            title=item.find('title').text,
-                                            sv=sv
-                    )
+        try:
+            feed = ElementTree.fromstring(r.text)
+        except SyntaxError as ex:
+            print('Syntax error in update_feed file: {}'.format(str(ex)), file=sys.stderr)
 
-                # Look for any remaining version greater than appversion
-                simple_spec = semantic_version.SimpleSpec('>' + appversion)
-                newversion = simple_spec.select(items.keys())
+            return None
+
+        for item in feed.findall('channel/item'):
+            ver = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version')
+            # This will change A.B.C.D to A.B.C+D
+            sv = semantic_version.Version.coerce(ver)
+
+            items[sv] = EDMCVersion(version=ver, # sv might have mangled version
+                                    title=item.find('title').text,
+                                    sv=sv
+            )
+
+        # Look for any remaining version greater than appversion
+        simple_spec = semantic_version.SimpleSpec('>' + appversion)
+        newversion = simple_spec.select(items.keys())
 
         if newversion:
             return items[newversion]
