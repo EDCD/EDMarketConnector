@@ -154,7 +154,7 @@ release, using a name like `release-4.0.2`.  Do not use the tag
 	
 1. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
-cherry-picking commits.  See [Contributing Guidelines](docs/Contributing.md)
+cherry-picking commits.  See [Contributing Guidelines](Contributing.md)
 for how such branches should be named.
 
 1. You should have already decided on the new
@@ -165,7 +165,7 @@ commit for this change.**
 1. Prepare a changelog text for the release.  You'll need this both for the
 GitHub release and the contents of the `edmarketconnector.xml` file if making
 a `stable` release, as well as any social media posts you make.
-	1. The primary location of the changelog is [Changelog.md](Changelog.md) -
+	1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
 	update this first.
 	1. To be sure you include all the changes look at the git log since the
 	prior appropriate (pre-)release.
