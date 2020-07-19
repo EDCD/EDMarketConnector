@@ -158,8 +158,8 @@ class EDLogs(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print('%s Journal "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
-            print('Start logfile "%s"' % self.logfile)
+            print('{} Journal {!r}'.format(polling and 'Polling' or 'Monitoring', self.currentdir))
+            print('Start logfile {!r}'.format(self.logfile))
 
         if not self.running():
             self.thread = threading.Thread(target=self.worker, name='Journal worker')
@@ -230,7 +230,7 @@ class EDLogs(FileSystemEventHandler):
 
                 except Exception:
                     if __debug__:
-                        print('Invalid journal entry "%s"' % repr(line))
+                        print('Invalid journal entry {!r}'.format(line))
 
             log_pos = loghandle.tell()
 
@@ -306,7 +306,7 @@ class EDLogs(FileSystemEventHandler):
                     log_pos = 0
 
                 if __debug__:
-                    print('New logfile "%s"' % logfile)
+                    print('New logfile {!r}'.format(logfile))
 
             if logfile:
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
@@ -328,7 +328,7 @@ class EDLogs(FileSystemEventHandler):
             if self.game_was_running:
                 if not self.game_running():
                     self.event_queue.append(
-                        '{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+                        '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
                     )
 
                     self.root.event_generate('<<JournalEvent>>', when="tail")
@@ -738,7 +738,7 @@ class EDLogs(FileSystemEventHandler):
             return entry
         except Exception:
             if __debug__:
-                print('Invalid journal entry "%s"' % repr(line))
+                print('Invalid journal entry {!r}'.format(line))
                 print_exc()
 
             return {'event': None}
@@ -795,7 +795,7 @@ class EDLogs(FileSystemEventHandler):
 
             elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
                 self.event_queue.append(
-                    '{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+                    '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
                 )
 
             return entry
@@ -888,7 +888,9 @@ class EDLogs(FileSystemEventHandler):
                     return  # same as last time - don't write
 
         # Write
-        filename = join(config.get('outdir'), '%s.%s.txt' % (ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))))
+        filename = join(
+            config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
+        )
         with open(filename, 'wt') as h:
             h.write(string)
 
