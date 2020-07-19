@@ -132,7 +132,7 @@ class EDLogs(FileSystemEventHandler):
         # Do this before setting up the observer in case the journal directory has gone away
         try:
             logfiles = sorted(
-                [x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+                (x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)),
                 key=lambda x: x.split('.')[1:]
             )
 
@@ -282,8 +282,8 @@ class EDLogs(FileSystemEventHandler):
                 # Poll
                 try:
                     logfiles = sorted(
-                        [x for x in listdir(self.currentdir) if
-                            re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+                        (x for x in listdir(self.currentdir) if
+                            re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)),
                         key=lambda x: x.split('.')[1:]
                     )
 
@@ -890,7 +890,7 @@ class EDLogs(FileSystemEventHandler):
 
         ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted([x for x in listdir(config.get('outdir')) if regexp.match(x)])
+        oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))
         if oldfiles:
             with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
                 if h.read() == string:
