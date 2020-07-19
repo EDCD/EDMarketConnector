@@ -234,7 +234,7 @@ class EDLogs(FileSystemEventHandler):
                     if __debug__:
                         print('Invalid journal entry "%s"' % repr(line))
 
-            logpos = loghandle.tell()
+            log_pos = loghandle.tell()
 
         else:
             loghandle = None
@@ -305,21 +305,21 @@ class EDLogs(FileSystemEventHandler):
                     if platform == 'darwin':
                         fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
-                    logpos = 0
+                    log_pos = 0
 
                 if __debug__:
                     print('New logfile "%s"' % logfile)
 
             if logfile:
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
-                loghandle.seek(logpos, SEEK_SET)  # reset EOF flag
+                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag
                 for line in loghandle:
                     self.event_queue.append(line)
 
                 if self.event_queue:
                     self.root.event_generate('<<JournalEvent>>', when="tail")
 
-                logpos = loghandle.tell()
+                log_pos = loghandle.tell()
 
             sleep(self._POLL)
 
@@ -452,8 +452,8 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Modules'] = None
 
             elif (entry['event'] == 'Loadout' and
-                  not 'fighter' in self.canonicalise(entry['Ship']) and
-                  not 'buggy' in self.canonicalise(entry['Ship'])):
+                  'fighter' not in self.canonicalise(entry['Ship']) and
+                  'buggy' not in self.canonicalise(entry['Ship'])):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
 
@@ -495,10 +495,10 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Modules'].pop(entry['Slot'], None)
 
             elif entry['event'] == 'ModuleSwap':
-                toitem = self.state['Modules'].get(entry['ToSlot'])
+                to_item = self.state['Modules'].get(entry['ToSlot'])
                 self.state['Modules'][entry['ToSlot']] = self.state['Modules'][entry['FromSlot']]
-                if toitem:
-                    self.state['Modules'][entry['FromSlot']] = toitem
+                if to_item:
+                    self.state['Modules'][entry['FromSlot']] = to_item
 
                 else:
                     self.state['Modules'].pop(entry['FromSlot'], None)
@@ -818,9 +818,9 @@ class EDLogs(FileSystemEventHandler):
         elif platform == 'win32':
             def WindowTitle(h):
                 if h:
-                    l = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(l)
-                    if GetWindowText(h, buf, l):
+                    length = GetWindowTextLength(h) + 1
+                    buf = ctypes.create_unicode_buffer(length)
+                    if GetWindowText(h, buf, length):
                         return buf.value
                 return None
 
