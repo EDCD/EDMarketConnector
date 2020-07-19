@@ -136,7 +136,7 @@ class EDLogs(FileSystemEventHandler):
 
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
 
-        except:
+        except Exception:
             self.logfile = None
             return False
 
@@ -228,7 +228,7 @@ class EDLogs(FileSystemEventHandler):
                 try:
                     self.parse_entry(line)  # Some events are of interest even in the past
 
-                except:
+                except Exception:
                     if __debug__:
                         print('Invalid journal entry "%s"' % repr(line))
 
@@ -287,7 +287,7 @@ class EDLogs(FileSystemEventHandler):
 
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
 
-                except:
+                except Exception:
                     if __debug__:
                         print_exc()
 
@@ -737,7 +737,7 @@ class EDLogs(FileSystemEventHandler):
                     self.state['Friends'].discard(entry['Name'])
 
             return entry
-        except:
+        except Exception:
             if __debug__:
                 print('Invalid journal entry "%s"' % repr(line))
                 print_exc()
