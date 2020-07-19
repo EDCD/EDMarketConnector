@@ -18,7 +18,7 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 Version conventions
 ---
-Please see [docs/Releasing.md#Version-Numbers] for a description of the
+Please see [docs/Releasing.md#Version-Strings] for a description of the
 currently used version strings.
 
 Historically a `A.BC` form was used, based on an internal `A.B.C.D` version
