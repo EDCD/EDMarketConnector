@@ -42,7 +42,7 @@ elif platform=='win32':
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
-    FileSystemEventHandler = object	# dummy
+    FileSystemEventHandler = object  # dummy
 
 
 # Journal handler
@@ -53,7 +53,7 @@ class EDLogs(FileSystemEventHandler):
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
 
     def __init__(self):
-        FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
+        FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.root = None
         self.currentdir = None		# The actual logdir that we're monitoring
         self.logfile = None
@@ -70,7 +70,7 @@ class EDLogs(FileSystemEventHandler):
         # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
         self.live = False
 
-        self.game_was_running = False	# For generation the "ShutDown" event
+        self.game_was_running = False  # For generation the "ShutDown" event
 
         # Context for journal handling
         self.version = None
@@ -85,16 +85,16 @@ class EDLogs(FileSystemEventHandler):
         self.stationtype = None
         self.coordinates = None
         self.systemaddress = None
-        self.started = None	# Timestamp of the LoadGame event
+        self.started = None  # Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state = {
-            'Captain'      : None,	# On a crew
+            'Captain'      : None,  # On a crew
             'Cargo'        : defaultdict(int),
             'Credits'      : None,
-            'FID'          : None,	# Frontier Cmdr ID
-            'Horizons'     : None,	# Does this user have Horizons?
+            'FID'          : None,  # Frontier Cmdr ID
+            'Horizons'     : None,  # Does this user have Horizons?
             'Loan'         : None,
             'Raw'          : defaultdict(int),
             'Manufactured' : defaultdict(int),
@@ -103,8 +103,8 @@ class EDLogs(FileSystemEventHandler):
             'Rank'         : {},
             'Reputation'   : {},
             'Statistics'   : {},
-            'Role'         : None,	# Crew role - None, Idle, FireCon, FighterCon
-            'Friends'      : set(),	# Online friends
+            'Role'         : None,  # Crew role - None, Idle, FireCon, FighterCon
+            'Friends'      : set(),  # Online friends
             'ShipID'       : None,
             'ShipIdent'    : None,
             'ShipName'     : None,
@@ -177,7 +177,7 @@ class EDLogs(FileSystemEventHandler):
             self.observed = None
             self.observer.unschedule_all()
 
-        self.thread = None	# Orphan the worker thread - will terminate at next poll
+        self.thread = None  # Orphan the worker thread - will terminate at next poll
 
     def close(self):
         self.stop()
@@ -204,13 +204,13 @@ class EDLogs(FileSystemEventHandler):
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
-            loghandle = open(logfile, 'rb', 0)	# unbuffered
+            loghandle = open(logfile, 'rb', 0)  # unbuffered
             if platform == 'darwin':
-                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
+                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
             for line in loghandle:
                 try:
-                    self.parse_entry(line)	# Some events are of interest even in the past
+                    self.parse_entry(line)  # Some events are of interest even in the past
 
                 except:
                     if __debug__:
@@ -247,17 +247,17 @@ class EDLogs(FileSystemEventHandler):
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 
             else:
-                self.event_queue.append(None)	# Generate null event to update the display (with possibly out-of-date info)
+                self.event_queue.append(None)  # Generate null event to update the display (with possibly out-of-date info)
                 self.live = False
 
         # Watchdog thread
-        emitter = self.observed and self.observer._emitter_for_watch[self.observed]	# Note: Uses undocumented attribute
+        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
 
         while True:
 
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
-                newlogfile = self.logfile	# updated by on_created watchdog callback
+                newlogfile = self.logfile  # updated by on_created watchdog callback
             else:
                 # Poll
                 try:
@@ -276,9 +276,9 @@ class EDLogs(FileSystemEventHandler):
                     loghandle.close()
 
                 if logfile:
-                    loghandle = open(logfile, 'rb', 0)	# unbuffered
+                    loghandle = open(logfile, 'rb', 0)  # unbuffered
                     if platform == 'darwin':
-                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)	# required to avoid corruption on macOS over SMB
+                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
                     logpos = 0
 
@@ -286,8 +286,8 @@ class EDLogs(FileSystemEventHandler):
                     print('New logfile "%s"' % logfile)
 
             if logfile:
-                loghandle.seek(0, SEEK_END)		# required to make macOS notice log change over SMB
-                loghandle.seek(logpos, SEEK_SET)	# reset EOF flag
+                loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
+                loghandle.seek(logpos, SEEK_SET)  # reset EOF flag
                 for line in loghandle:
                     self.event_queue.append(line)
 
@@ -300,7 +300,7 @@ class EDLogs(FileSystemEventHandler):
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
-                return	# Terminate
+                return  # Terminate
 
             if self.game_was_running:
                 if not self.game_running():
@@ -314,11 +314,11 @@ class EDLogs(FileSystemEventHandler):
 
     def parse_entry(self, line):
         if line is None:
-            return { 'event': None }	# Fake startup event
+            return { 'event': None }  # Fake startup event
 
         try:
-            entry = json.loads(line, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
-            entry['timestamp']	# we expect this to exist
+            entry = json.loads(line, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+            entry['timestamp']  # we expect this to exist
             if entry['event'] == 'Fileheader':
                 self.live = False
                 self.version = entry['gameversion']
@@ -362,11 +362,11 @@ class EDLogs(FileSystemEventHandler):
                 }
 
             elif entry['event'] == 'Commander':
-                self.live = True	# First event in 3.0
+                self.live = True  # First event in 3.0
 
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
-                self.mode = entry.get('GameMode')	# 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
+                self.mode = entry.get('GameMode')  # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.group = entry.get('Group')
                 self.planet = None
                 self.system = None
@@ -377,11 +377,11 @@ class EDLogs(FileSystemEventHandler):
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                self.state.update({	# Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
+                self.state.update({  # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                     'Captain'      : None,
                     'Credits'      : entry['Credits'],
-                    'FID'          : entry.get('FID'),	# From 3.3
-                    'Horizons'     : entry['Horizons'],	# From 3.0
+                    'FID'          : entry.get('FID'),   # From 3.3
+                    'Horizons'     : entry['Horizons'],  # From 3.0
                     'Loan'         : entry['Loan'],
                     'Engineers'    : {},
                     'Rank'         : {},
