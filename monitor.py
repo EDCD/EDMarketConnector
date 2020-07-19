@@ -27,7 +27,7 @@ elif platform == 'win32':
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
     import ctypes
-    from ctypes.wintypes import *
+    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
     EnumWindows = ctypes.windll.user32.EnumWindows
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
@@ -454,7 +454,6 @@ class EDLogs(FileSystemEventHandler):
             elif (entry['event'] == 'Loadout' and
                   not 'fighter' in self.canonicalise(entry['Ship']) and
                   not 'buggy' in self.canonicalise(entry['Ship'])):
-
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
 
