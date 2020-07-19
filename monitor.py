@@ -89,29 +89,29 @@ class EDLogs(FileSystemEventHandler):
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state = {
-            'Captain'      : None,  # On a crew
-            'Cargo'        : defaultdict(int),
-            'Credits'      : None,
-            'FID'          : None,  # Frontier Cmdr ID
-            'Horizons'     : None,  # Does this user have Horizons?
-            'Loan'         : None,
-            'Raw'          : defaultdict(int),
-            'Manufactured' : defaultdict(int),
-            'Encoded'      : defaultdict(int),
-            'Engineers'    : {},
-            'Rank'         : {},
-            'Reputation'   : {},
-            'Statistics'   : {},
-            'Role'         : None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends'      : set(),  # Online friends
-            'ShipID'       : None,
-            'ShipIdent'    : None,
-            'ShipName'     : None,
-            'ShipType'     : None,
-            'HullValue'    : None,
-            'ModulesValue' : None,
-            'Rebuy'        : None,
-            'Modules'      : None,
+            'Captain': None,  # On a crew
+            'Cargo': defaultdict(int),
+            'Credits': None,
+            'FID': None,  # Frontier Cmdr ID
+            'Horizons': None,  # Does this user have Horizons?
+            'Loan': None,
+            'Raw': defaultdict(int),
+            'Manufactured': defaultdict(int),
+            'Encoded': defaultdict(int),
+            'Engineers': {},
+            'Rank': {},
+            'Reputation': {},
+            'Statistics': {},
+            'Role': None,  # Crew role - None, Idle, FireCon, FighterCon
+            'Friends': set(),  # Online friends
+            'ShipID': None,
+            'ShipIdent': None,
+            'ShipName': None,
+            'ShipType': None,
+            'HullValue': None,
+            'ModulesValue': None,
+            'Rebuy': None,
+            'Modules': None,
         }
 
     def start(self, root):
@@ -129,8 +129,11 @@ class EDLogs(FileSystemEventHandler):
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
         try:
-            logfiles = sorted([x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
-                              key=lambda x: x.split('.')[1:])
+            logfiles = sorted(
+                [x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+                key=lambda x: x.split('.')[1:]
+            )
+
             self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
 
         except:
@@ -168,8 +171,20 @@ class EDLogs(FileSystemEventHandler):
     def stop(self):
         if __debug__:
             print('Stopping monitoring Journal')
+        
         self.currentdir = None
-        self.version = self.mode = self.group = self.cmdr = self.planet = self.system = self.station = self.station_marketid = self.stationtype = self.stationservices = self.coordinates = self.systemaddress = None
+        self.version = None
+        self.mode = None
+        self.group = None
+        self.cmdr = None
+        self.planet = None
+        self.system = None
+        self.station = None
+        self.station_marketid = None
+        self.stationtype = None
+        self.stationservices = None
+        self.coordinates = None
+        self.systemaddress = None
         self.is_beta = False
         if self.observed:
             self.observed = None
@@ -191,7 +206,10 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)):
+        if not event.is_directory and re.search(
+            r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)
+        ):
+
             self.logfile = event.src_path
 
     def worker(self):
@@ -245,7 +263,8 @@ class EDLogs(FileSystemEventHandler):
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 
             else:
-                self.event_queue.append(None)  # Generate null event to update the display (with possibly out-of-date info)
+                # Generate null event to update the display (with possibly out-of-date info)
+                self.event_queue.append(None)
                 self.live = False
 
         # Watchdog thread
@@ -259,8 +278,12 @@ class EDLogs(FileSystemEventHandler):
             else:
                 # Poll
                 try:
-                    logfiles = sorted([x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
-                                      key=lambda x: x.split('.')[1:])
+                    logfiles = sorted(
+                        [x for x in listdir(self.currentdir) if
+                            re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)],
+                        key=lambda x: x.split('.')[1:]
+                    )
+
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
 
                 except:
@@ -302,7 +325,10 @@ class EDLogs(FileSystemEventHandler):
 
             if self.game_was_running:
                 if not self.game_running():
-                    self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                    self.event_queue.append(
+                        '{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+                    )
+                    
                     self.root.event_generate('<<JournalEvent>>', when="tail")
                     self.game_was_running = False
 
@@ -334,29 +360,29 @@ class EDLogs(FileSystemEventHandler):
                 self.systemaddress = None
                 self.started = None
                 self.state = {
-                    'Captain'      : None,
-                    'Cargo'        : defaultdict(int),
-                    'Credits'      : None,
-                    'FID'          : None,
-                    'Horizons'     : None,
-                    'Loan'         : None,
-                    'Raw'          : defaultdict(int),
-                    'Manufactured' : defaultdict(int),
-                    'Encoded'      : defaultdict(int),
-                    'Engineers'    : {},
-                    'Rank'         : {},
-                    'Reputation'   : {},
-                    'Statistics'   : {},
-                    'Role'         : None,
-                    'Friends'      : set(),
-                    'ShipID'       : None,
-                    'ShipIdent'    : None,
-                    'ShipName'     : None,
-                    'ShipType'     : None,
-                    'HullValue'    : None,
-                    'ModulesValue' : None,
-                    'Rebuy'        : None,
-                    'Modules'      : None,
+                    'Captain': None,
+                    'Cargo': defaultdict(int),
+                    'Credits': None,
+                    'FID': None,
+                    'Horizons': None,
+                    'Loan': None,
+                    'Raw': defaultdict(int),
+                    'Manufactured': defaultdict(int),
+                    'Encoded': defaultdict(int),
+                    'Engineers': {},
+                    'Rank': {},
+                    'Reputation': {},
+                    'Statistics': {},
+                    'Role': None,
+                    'Friends': set(),
+                    'ShipID': None,
+                    'ShipIdent': None,
+                    'ShipName': None,
+                    'ShipType': None,
+                    'HullValue': None,
+                    'ModulesValue': None,
+                    'Rebuy': None,
+                    'Modules': None,
                 }
 
             elif entry['event'] == 'Commander':
@@ -364,7 +390,8 @@ class EDLogs(FileSystemEventHandler):
 
             elif entry['event'] == 'LoadGame':
                 self.cmdr = entry['Commander']
-                self.mode = entry.get('GameMode')  # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
+                # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
+                self.mode = entry.get('GameMode')
                 self.group = entry.get('Group')
                 self.planet = None
                 self.system = None
@@ -375,17 +402,18 @@ class EDLogs(FileSystemEventHandler):
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                self.state.update({  # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
-                    'Captain'      : None,
-                    'Credits'      : entry['Credits'],
-                    'FID'          : entry.get('FID'),   # From 3.3
-                    'Horizons'     : entry['Horizons'],  # From 3.0
-                    'Loan'         : entry['Loan'],
-                    'Engineers'    : {},
-                    'Rank'         : {},
-                    'Reputation'   : {},
-                    'Statistics'   : {},
-                    'Role'         : None,
+                # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
+                self.state.update({
+                    'Captain': None,
+                    'Credits': entry['Credits'],
+                    'FID': entry.get('FID'),   # From 3.3
+                    'Horizons': entry['Horizons'],  # From 3.0
+                    'Loan': entry['Loan'],
+                    'Engineers': {},
+                    'Rank': {},
+                    'Reputation': {},
+                    'Statistics': {},
+                    'Role': None,
                 })
 
             elif entry['event'] == 'NewCommander':
@@ -512,7 +540,8 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'Progress':
                 for k,v in entry.items():
                     if k in self.state['Rank']:
-                        self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))	# perhaps not taken promotion mission yet
+                        # perhaps not taken promotion mission yet
+                        self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))
 
             elif entry['event'] in ['Reputation', 'Statistics']:
                 payload = OrderedDict(entry)
@@ -522,14 +551,21 @@ class EDLogs(FileSystemEventHandler):
 
             elif entry['event'] == 'EngineerProgress':
                 if 'Engineers' in entry:	# Startup summary
-                    self.state['Engineers'] = { e['Engineer']: (e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'] for e in entry['Engineers'] }
+                    self.state['Engineers'] = {
+                        e['Engineer']: (e['Rank'], e.get('RankProgress', 0))
+                        if 'Rank' in e else e['Progress'] for e in entry['Engineers']
+                    }
 
-                else:	# Promotion
-                    self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0)) if 'Rank' in entry else entry['Progress']
+                else:  # Promotion
+                    if 'Rank' in entry:
+                        self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0))
+                    else:
+                        self.state['Engineers'][entry['Engineer']] = entry['Progress']
 
             elif entry['event'] == 'Cargo' and entry.get('Vessel') == 'Ship':
                 self.state['Cargo'] = defaultdict(int)
-                if 'Inventory' not in entry:	# From 3.3 full Cargo event (after the first one) is written to a separate file
+                # From 3.3 full Cargo event (after the first one) is written to a separate file
+                if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:
                         entry = json.load(h, object_pairs_hook=OrderedDict)	# Preserve property order because why not?
 
@@ -555,7 +591,9 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'Materials':
                 for category in ['Raw', 'Manufactured', 'Encoded']:
                     self.state[category] = defaultdict(int)
-                    self.state[category].update({ self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, []) })
+                    self.state[category].update({
+                        self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, [])
+                    })
 
             elif entry['event'] == 'MaterialCollected':
                 material = self.canonicalise(entry['Name'])
@@ -584,7 +622,10 @@ class EDLogs(FileSystemEventHandler):
                 category = self.category(entry['Received']['Category'])
                 self.state[category][entry['Received']['Material']] += entry['Received']['Quantity']
 
-            elif entry['event'] == 'EngineerCraft' or (entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')):
+            elif entry['event'] == 'EngineerCraft' or (
+                entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')
+            ):
+
                 for category in ['Raw', 'Manufactured', 'Encoded']:
                     for x in entry.get('Ingredients', []):
                         material = self.canonicalise(x['Name'])
@@ -702,8 +743,9 @@ class EDLogs(FileSystemEventHandler):
 
             return { 'event': None }
 
-    # Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount", and "hnshockmount",
-    # "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1", "python" and "Python", etc.
+    # Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount", 
+    # and "hnshockmount", "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1", 
+    # "python" and "Python", etc.
     # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
     def canonicalise(self, item):
         if not item: return ''
@@ -750,7 +792,9 @@ class EDLogs(FileSystemEventHandler):
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 
             elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
-                self.event_queue.append('{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                self.event_queue.append(
+                    '{ "timestamp":"%s", "event":"ShutDown" }' % strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+                )
 
             return entry
 
@@ -789,7 +833,10 @@ class EDLogs(FileSystemEventHandler):
         if not self.state['Modules']:
             return None
 
-        standard_order = ['ShipCockpit', 'CargoHatch', 'Armour', 'PowerPlant', 'MainEngines', 'FrameShiftDrive', 'LifeSupport', 'PowerDistributor', 'Radar', 'FuelTank']
+        standard_order = (
+            'ShipCockpit', 'CargoHatch', 'Armour', 'PowerPlant', 'MainEngines', 'FrameShiftDrive', 'LifeSupport', 
+            'PowerDistributor', 'Radar', 'FuelTank'
+        )
 
         d = OrderedDict()
         if timestamped:
@@ -808,7 +855,13 @@ class EDLogs(FileSystemEventHandler):
         # sort modules by slot - hardpoints, standard, internal
         d['Modules'] = []
 
-        for slot in sorted(self.state['Modules'], key=lambda x: ('Hardpoint' not in x, x not in standard_order and len(standard_order) or standard_order.index(x), 'Slot' not in x, x)):
+        for slot in sorted(
+            self.state['Modules'],
+            key=lambda x: (
+                'Hardpoint' not in x, x not in standard_order and len(standard_order) or standard_order.index(x), 
+                'Slot' not in x, x)
+            ):
+
             module = dict(self.state['Modules'][slot])
             module.pop('Health', None)
             module.pop('Value', None)
