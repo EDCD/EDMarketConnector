@@ -154,7 +154,7 @@ release, using a name like `release-4.0.2`.  Do not use the tag
 	
 1. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
-cherry-picking commits.  See [Contributing Guidelines](Contributing.md)
+cherry-picking commits.  See [Contributing Guidelines](../Contributing.md)
 for how such branches should be named.
 
 1. You should have already decided on the new
