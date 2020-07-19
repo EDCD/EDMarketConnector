@@ -181,43 +181,44 @@ Coding Conventions
 * **ALWAYS** place a single-statement control flow body, for control statements such as `if`, `else`, `for`, `foreach`,
   on a separate line, with consistent indentation.
   
-  Yes:
+Yes:
 
-        ```python
-        if somethingTrue:
-            Things_we_then_do()
-        ```
+```python
+if somethingTrue:
+    Things_we_then_do()
+```
   
-  No:
+No:
 
-        ```python
-        if somethingTrue: One_thing_we_do()
-        ```
+```python
+if somethingTrue: One_thing_we_do()
+```
   
   Yes, some existing code still flouts this rule.
 
 * **Always** use Line breaks after scope changes. It makes reading code far easier
 
-  Yes:
+Yes:
 
-      ```python
-        if True:
-          do_something()
+```python
+  if True:
+    do_something()
 
-        else:
-          raise UniverseBrokenException()
+  else:
+    raise UniverseBrokenException()
 
-        return
-      ```
-  No:
+  return
+```
 
-      ```python
-        if True:
-          do_something()
-        else:
-          raise UniverseBrokenException()
-        return
-      ```
+No:
+
+```python
+  if True:
+    do_something()
+  else:
+    raise UniverseBrokenException()
+  return
+```
 
 
 * Going forwards please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions, both their arguments and return
