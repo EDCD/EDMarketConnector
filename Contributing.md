@@ -18,20 +18,20 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 Version conventions
 ---
-The only currently supported format for the version is A.B.C.D.  This diverges from [Semantic Versioning](https://semver.org/)
-conventions in that we have that `.D`, and don't currently support any additional strings, but follows the spirit of
-the intent behind each of `A`, `B` and `C`.  Note that the 'D' part being different does *not* make the version
-different for purposes of the WinSparkle update checking, XXX (true?): or the Windows installer thinking it's a
-newer version.
+Please see [docs/Releasing.md#Version-Numbers] for a description of the
+currently used version strings.
 
-There is currently no support for appending any other string to the version (it will break some of the build
-code), see [this issue](https://github.com/EDCD/EDMarketConnector/issues/534).
+Historically a `A.BC` form was used, based on an internal `A.B.C.D` version
+string.  This was changed to simply `A.B.C.D` throughout for `4.0.0.0`,
+`4.0.1.0` and `4.0.2.0`.  It would also continue for any other increment of
+only the 'C' (Patch) component.
 
-Historically the A.B.C.D version was collapsed into A.BC and then a tag added of the form `rel-ABC`.  Going
-forwards we will always use the full version and 'folder style' tag names, e.g. `Release/A.B.C.D` .
+Going forwards we will always use the full [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+and 'folder style' tag names, e.g. `Release/Major.Minor.Patch`.
 
-Currently the only file that defines the version code-wise is `config.py`.  `Changelog.md` and `edmarketconnector.xml`
-are another matter handled as part of [the release process](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#distribution).
+Currently the only file that defines the version code-wise is `config.py`.
+`Changelog.md` and `edmarketconnector.xml` are another matter handled as part
+of [the release process](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#distribution).
 
 Git branch structure and tag conventions
 ---
