@@ -89,29 +89,29 @@ class EDLogs(FileSystemEventHandler):
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state = {
-            'Captain': None,  # On a crew
-            'Cargo': defaultdict(int),
-            'Credits': None,
-            'FID': None,  # Frontier Cmdr ID
-            'Horizons': None,  # Does this user have Horizons?
-            'Loan': None,
-            'Raw': defaultdict(int),
+            'Captain':      None,  # On a crew
+            'Cargo':        defaultdict(int),
+            'Credits':      None,
+            'FID':          None,  # Frontier Cmdr ID
+            'Horizons':     None,  # Does this user have Horizons?
+            'Loan':         None,
+            'Raw':          defaultdict(int),
             'Manufactured': defaultdict(int),
-            'Encoded': defaultdict(int),
-            'Engineers': {},
-            'Rank': {},
-            'Reputation': {},
-            'Statistics': {},
-            'Role': None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends': set(),  # Online friends
-            'ShipID': None,
-            'ShipIdent': None,
-            'ShipName': None,
-            'ShipType': None,
-            'HullValue': None,
+            'Encoded':      defaultdict(int),
+            'Engineers':    {},
+            'Rank':         {},
+            'Reputation':   {},
+            'Statistics':   {},
+            'Role':         None,  # Crew role - None, Idle, FireCon, FighterCon
+            'Friends':      set(),  # Online friends
+            'ShipID':       None,
+            'ShipIdent':    None,
+            'ShipName':     None,
+            'ShipType':     None,
+            'HullValue':    None,
             'ModulesValue': None,
-            'Rebuy': None,
-            'Modules': None,
+            'Rebuy':        None,
+            'Modules':      None,
         }
 
     def start(self, root):
@@ -361,29 +361,29 @@ class EDLogs(FileSystemEventHandler):
                 self.systemaddress = None
                 self.started = None
                 self.state = {
-                    'Captain': None,
-                    'Cargo': defaultdict(int),
-                    'Credits': None,
-                    'FID': None,
-                    'Horizons': None,
-                    'Loan': None,
-                    'Raw': defaultdict(int),
+                    'Captain':      None,
+                    'Cargo':        defaultdict(int),
+                    'Credits':      None,
+                    'FID':          None,
+                    'Horizons':     None,
+                    'Loan':         None,
+                    'Raw':          defaultdict(int),
                     'Manufactured': defaultdict(int),
-                    'Encoded': defaultdict(int),
-                    'Engineers': {},
-                    'Rank': {},
-                    'Reputation': {},
-                    'Statistics': {},
-                    'Role': None,
-                    'Friends': set(),
-                    'ShipID': None,
-                    'ShipIdent': None,
-                    'ShipName': None,
-                    'ShipType': None,
-                    'HullValue': None,
+                    'Encoded':      defaultdict(int),
+                    'Engineers':    {},
+                    'Rank':         {},
+                    'Reputation':   {},
+                    'Statistics':   {},
+                    'Role':         None,
+                    'Friends':      set(),
+                    'ShipID':       None,
+                    'ShipIdent':    None,
+                    'ShipName':     None,
+                    'ShipType':     None,
+                    'HullValue':    None,
                     'ModulesValue': None,
-                    'Rebuy': None,
-                    'Modules': None,
+                    'Rebuy':        None,
+                    'Modules':      None,
                 }
 
             elif entry['event'] == 'Commander':
@@ -859,7 +859,8 @@ class EDLogs(FileSystemEventHandler):
         for slot in sorted(
             self.state['Modules'],
             key=lambda x: (
-                'Hardpoint' not in x, x not in standard_order and len(standard_order) or standard_order.index(x),
+                'Hardpoint' not in x,
+                x not in standard_order and len(standard_order) or standard_order.index(x),
                 'Slot' not in x, x)
         ):
 
