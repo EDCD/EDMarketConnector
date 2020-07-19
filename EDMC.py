@@ -12,9 +12,8 @@ import os
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
 
-from os.path import dirname, getmtime, join
+from os.path import getmtime, join
 from time import time, sleep
-from xml.etree import ElementTree
 import re
 
 import l10n
@@ -29,7 +28,8 @@ import loadout
 import edshipyard
 import shipyard
 import stats
-from config import appcmdname, appversion, update_feed, config
+from config import appcmdname, appversion, config
+from update import Updater, EDMCVersion
 from monitor import monitor
 
 sys.path.append(config.internal_plugin_dir)
@@ -62,21 +62,12 @@ try:
     args = parser.parse_args()
 
     if args.version:
-        latest = ''
-        try:
-            # Copied from update.py - probably should refactor
-            r = requests.get(update_feed, timeout = 10)
-            feed = ElementTree.fromstring(r.text)
-            items = dict([(item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version'),
-                           item.find('title').text) for item in feed.findall('channel/item')])
-            lastversion = sorted(items, key=versioncmp)[-1]
-            if versioncmp(lastversion) > versioncmp(appversion):
-                latest = items[lastversion]
-        except Exception as e:
-            sys.stderr.write('Exception in version check: {}'.format(str(e)))
-            #pass	# Quietly suppress timeouts etc.
-        if latest:
-            print('{CURRENT} ({UPDATE} is available)'.format(CURRENT=appversion, UPDATE=latest))
+        updater = Updater(provider='internal')
+        newversion: EDMCVersion = updater.check_appcast()
+        if newversion:
+            print('{CURRENT} ("{UPDATE}" is available)'.format(
+                CURRENT=appversion,
+                UPDATE=newversion.title))
         else:
             print(appversion)
         sys.exit(EXIT_SUCCESS)
@@ -100,7 +91,7 @@ try:
                         if __debug__:
                             print('Invalid journal entry "%s"' % repr(line))
         except Exception as e:
-            sys.stderr.write("Can't read Journal file: {}\n".format(str(e)))
+            print("Can't read Journal file: {}\n".format(str(e)), file=sys.stderr)
             sys.exit(EXIT_SYS_ERR)
 
         if not monitor.cmdr:

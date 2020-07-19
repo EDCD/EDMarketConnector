@@ -17,7 +17,7 @@ import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
 
-from config import appname, applongname, appversion, copyright, config
+from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
@@ -283,9 +283,12 @@ class AppWindow(object):
 
         # Load updater after UI creation (for WinSparkle)
         import update
-        self.updater = update.Updater(self.w)
-        if not getattr(sys, 'frozen', False):
-            self.updater.checkForUpdates()	# Sparkle / WinSparkle does this automatically for packaged apps
+        if getattr(sys, 'frozen', False):
+            # Running in frozen .exe, so use (Win)Sparkle
+            self.updater = update.Updater(tkroot=self.w, provider='external')
+        else:
+            self.updater = update.Updater(tkroot=self.w, provider='internal')
+            self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         try:
             config.get_password('')	# Prod SecureStorage on Linux to initialise
@@ -737,7 +740,10 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion)
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
-            self.appversion = HyperlinkLabel(frame, compoun=tk.RIGHT, text=_('Release Notes'), url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(VERSION=appversion), underline=True)
+            self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
+                                             url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(
+                                                 VERSION=appversion_nobuild),
+                                             underline=True)
             self.appversion.grid(row=row, column=2, sticky=tk.W)
             row += 1
             ############################################################

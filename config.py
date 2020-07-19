@@ -3,12 +3,18 @@ import sys
 from os import getenv, makedirs, mkdir, pardir
 from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
+import semantic_version
 
 # Any of these may be imported by plugins
 appname = 'EDMarketConnector'
 applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
-appversion = '4.0.2.0'
+# appversion **MUST** follow Semantic Versioning rules:
+# <https://semver.org/#semantic-versioning-specification-semver>
+# Major.Minor.Patch(-prerelease)(+buildmetadata)
+appversion = '4.0.2'  #-rc1+a872b5f'
+# For some things we want appversion without (possible) +build metadata
+appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'

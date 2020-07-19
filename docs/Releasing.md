@@ -1,102 +1,171 @@
 Introduction
 ===
-  This document aims to enable anyone to quickly get up to speed on how to:
+
+This document aims to enable anyone to quickly get up to speed on how to:
 
 1. Build a Windows .exe for the application
 1. Package that .exe into an .msi file for distribution
-1. Handle the files generated so the application automatically detects new available versions and asks the user to upgrade.
+1. Handle the files generated so the application automatically detects new
+ available versions and asks the user to upgrade.
 
-Note that for Windows only a 32-bit application is supported at this time.  This is principally due to the Windows Registry handling in config.py.
+Note that for Windows only a 32-bit application is supported at this time.
+This is principally due to the Windows Registry handling in config.py.
 
 Environment
 ---
-  You will need several pieces of software installed, or the files from their .zip archives, in order to build the .exe and generate the .msi
 
-1. [WiX Toolset](https://wixtoolset.org/): 3.11.2 is the most recently tested version.
-1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently tested version.  Copy the two files, found at `<zip file>\<version>\Release`, into your checkout of the EDMC git files.
-1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).  This is needed for the internationalisation support in EDMC. [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338) is the most recently tested version.  Technically you only need the following components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will auto-select some others).  NB: If you have need to uninstall this it's "Windows Software Development Kit - Windows 10.0.18362.1" in "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.  [v3.7.7](https://www.python.org/downloads/release/python-377/) is the most recently tested version.  You need the `Windows x86 executable installer` file, for the 32-bit version.
+You will need several pieces of software installed, or the files from their
+.zip archives, in order to build the .exe and generate the .msi
+
+1. [WiX Toolset](https://wixtoolset.org/): 3.11.2 is the most recently tested
+ version.
+1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and
+ `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently
+ tested version.  Copy the two files, found at `<zip file>\<version>\Release`,
+ into your checkout of the EDMC git files.
+1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
+ This is needed for the internationalisation support in EDMC.
+ [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338)
+ is the most recently tested version.  Technically you only need the following
+ components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will
+ auto-select some others).  NB: If you have need to uninstall this it's
+ "Windows Software Development Kit - Windows 10.0.18362.1" in
+ "Apps & Features", *not* "Windows SDK AddOn".
+1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.
+ [v3.7.7](https://www.python.org/downloads/release/python-377/) is the most
+ recently tested version.  You need the `Windows x86 executable installer`
+ file, for the 32-bit version.
 1. [py2exe](https://github.com/albertosottile/py2exe):
 	1. Install the python module.  There are two options here.
-		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2) and the current Marginal 'python3' branch as-is.  This contains a small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
+		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2)
+	 	 and the current Marginal 'python3' branch as-is.  This contains a
+	 	 small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
 
 				pip install py2exe-0.9.3.2-cp37-none-win32.whl
-		1.  Or you can use a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225), which packages that DLL file correctly.
+		1.  Or you can use a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225),
+		 which packages that DLL file correctly.
 
 				pip install py2exe-0.9.4.0-cp37-none-win32.whl
-		You can then edit out the following line from `setup.py`, but it does no harm:
+		 You can then edit out the following line from `setup.py`, but it
+		 does no harm:
 
 				%s/DLLs/sqlite3.dll' % (sys.base_prefix),
 
 1. You'll now need to 'pip install' several python modules.
-	1. Ensure you have `pip` installed. If needs be see [Installing pip](https://pip.pypa.io/en/stable/installing/)
-	1. The easiest way is to utilise the `requirements.txt` file: `pip install -r requirements.txt` - NB: This will fail at py2exe if you didn't already install it as above.
-	1. Else check the contents of `requirements.txt` and ensure the modules listed there are installed as per the version requirements.
+	1. Ensure you have `pip` installed. If needs be see
+	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
+	1. The easiest way is to utilise the `requirements.txt` file:
+	 `pip install -r requirements.txt`
+	1. Else check the contents of `requirements.txt` and ensure the modules
+	listed there are installed as per the version requirements.
 
-If you are using different versions of any of these tools then please ensure that the paths where they're installed match the associated lines in `setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
+If you are using different versions of any of these tools then please ensure
+that the paths where they're installed match the associated lines in
+`setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH
+line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
+
+Version Strings
+---
+
+This project now uses strict [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+version strings.
+
+1. **Version strings should always be referred to as, e.g. `Major.Minor.Patch`
+ not the old `A.BC` scheme, nor the pre-Semantic Version `A.B.C.D` scheme.**
+1. Any stable release should have a version of **only** `Major.Minor.Patch`,
+ correctly incrementing depending on the changes since the last stable release.
+1. For any pre-release again increment the `Major.Minor.Patch` as fits the
+ changes since the last *stable* release.
+1. Any pre-release should have a <pre-release> component of either:
+    1. `-beta<serial>`, i.e. `-beta1`.  This should be used when first asking
+     a wider audience to test forthcoming changes.
+    1. `-rc<serial>`, i.e. `-rc1`.  This is used when testing has shown this
+     code should be ready for full release, but you want even wider testing.
+     
+    In both these cases simply increment `<serial>` for each new release.  *Do*
+    start from `1` again when beginning `-rc` releases.
+
 
 Necessary Edits
 ---
-There are some things that you should always change before running your own version of EDMC
-1. The Frontier CAPI client ID.  This is hardcoded in companion.py, but can be overridden by setting a CLIENT_ID environment variable.
 
-There are other things that you should probably change, but can get away with leaving at the upstream values, especially if you only you are going to use the resulting .exe and/or .msi files. **But** realise that the resulting program will still try to check for new versions at the main URL unless you change that.
+There are some things that you should always change before running your own
+version of EDMC
+1. The Frontier CAPI client ID.  This is hardcoded in companion.py, but can be
+ overridden by setting a CLIENT_ID environment variable.
 
-1. Copyright and 'Company' texts.  These are in `setup.py`. Search for `'copyright'` and `'company_name'`.
+There are other things that you should probably change, but can get away with
+leaving at the upstream values, especially if you only you are going to use the
+resulting .exe and/or .msi files. **But** realise that the resulting program
+will still try to check for new versions at the main URL unless you change
+that.
 
-1. Location of release files. To change this edit `setup.py`.  Look for the `appcast.write()` statement and change the `url="...` line.
+1. Company is set in  `setup.py`. Search for `company_name`.  This is what
+ appears in the EXE properties, and is also used as the location of WinSparkle
+ registry entries on Windows.
 
-1. Application names, version and URL the file with latest release information.  These are all in the `config.py` file.  See the `from config import ...` lines in setup.py.
-	1. appname: The short appname, e.g. 'EDMarketConnector'
-	1. applongname: The long appname, e.g. 'E:D Market Connector'
-	1. appcmdname: The CLI appname, e.g. 'EDMC'
-	1. appversion: The current version, e.g. '3.5.0.0'
-	1. update_feed: The URL where the application looks for current latest
-	 version information.  This URL should be hosting a renamed (so the full URL doesn't change over application versions) version of the appcast_win_<version>.xml file.  The original upstream value is `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
+1. Location of release files. To change this edit `setup.py`.  Look for the
+`appcast.write()` statement and change the `url="...` line.
+
+1. Application names, version and URL of the file with latest release
+ information. These are all in the `config.py` file.  See the
+ `from config import ...` lines in setup.py.
+	1. `appname`: The short appname, e.g. 'EDMarketConnector'
+	1. `applongname`: The long appname, e.g. 'E:D Market Connector'
+	1. `appcmdname`: The CLI appname, e.g. 'EDMC'
+	1. `appversion`: The current version, e.g. `4.0.2`.  **You MUST make
+	 this something like `4.0.2+<myversion>` to differentiate it from
+	 upstream.**  Whatever is in this field is what will be reported if
+	 sending messages to EDDN, or any of the third-party website APIs.
+	 This is utilising the 'build metadata' part of a Semantic version.
+	1. `copyright`: The Copyright string.
+	1. `update_feed`: The URL where the application looks for current latest
+	 version information.  This URL should be hosting a renamed (so the full
+	 URL doesn't change over application versions) version of the
+	 appcast_win_<version>.xml file.  The original upstream value is
+	 `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
 
 Pre-Packaging Steps
-===
+---
+
 Before you create a new install each time you should:
 
 1. Ensure the data sourced from coriolis.io is up to date and works:
-    1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for this.**
+    1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for
+     this.**
     1. Run `coriolis.py` to update `modules.p` and `ships.p`
     1. XXX: Test ?
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
 
 Preparing to Package
-===
+---
 
-**Version numbers should always be referred to in full, e.g. A.B.C.D not the
-old A.BC scheme.**
-
-We'll use an old version number, 3.5.0.0, as an example throughout the
+We'll use an old version string, `4.0.2`, as an example throughout the
 following.
 
 1. You should by this time know what changes are going into the release, and
 which branch (stable or beta) you'll be ultimately updating.
 1. So as to make backing out any mistakes easier create a new branch for this
-release, using a name like `release-3.5.0.0`.  Do not use the tag
-`Release/3.5.0.0` form, that could cause confusion.
+release, using a name like `release-4.0.2`.  Do not use the tag
+`Release/4.0.2` form, that could cause confusion.
 	1. `git checkout stable` # Or whichever other branch is appropriate.
 	1. `git pull origin` # Ensures local branch is up to date.
-	1. `git checkout -b release-3.5.0.0`
+	1. `git checkout -b release-4.0.2`
 	
 1. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
-cherry-picking commits.  See [Contributing Guidelines](docs/Contributing.md)
+cherry-picking commits.  See [Contributing Guidelines](../Contributing.md)
 for how such branches should be named.
 
-1. You should have already decided on the new version number, as it's specified
-in `config.py`.  You'll need to redo the `.msi` build if you forgot. **Remember
-to do a fresh git commit for this change.**
-
-    See ['Version conventions' in Contributing.md](https://github.com/EDCD/EDMarketConnector/blob/main/Contributing.md#version-conventions).
+1. You should have already decided on the new
+[Version String](#Version-Strings), as it's specified in `config.py`.  You'll
+need to redo the `.msi` build if you forgot. **Remember to do a fresh git
+commit for this change.**
 
 1. Prepare a changelog text for the release.  You'll need this both for the
 GitHub release and the contents of the `edmarketconnector.xml` file if making
 a `stable` release, as well as any social media posts you make.
-	1. The primary location of the changelog is [Changelog.md](Changelog.md) -
+	1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
 	update this first.
 	1. To be sure you include all the changes look at the git log since the
 	prior appropriate (pre-)release.
@@ -110,10 +179,9 @@ a `stable` release, as well as any social media posts you make.
     	section.
 		1. You'll need to change the `<title>` and `<description>` texts to
 		reflect the latest version and the additional changelog.
-		1. Update the `url`, `sparkle:version` and `length` elements of the
-		`<enclosure>` section as per the latest `EDMarketConnector_win_<version>.msi`
-		file generated by the build process.  
-	1. As you're working in a version-specific branch, `release-3.5.0.0`, you
+		1. Update the `url` and `sparkle:version` elements of the `<enclosure>`
+		section.
+	1. As you're working in a version-specific branch, `release-4.0.2`, you
 	can safely commit these changes and push to GitHub.
      **Do not merge the branch with `releases` until the GitHub release is in
      place.**
@@ -123,6 +191,7 @@ the .exe and .msi because ChangeLog.md is bundled with the install.
 
 Packaging & Installer Generation
 ---
+
 You'll want to do the .exe and .msi generation in a `cmd.exe` window, not e.g.
 a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 
@@ -164,34 +233,39 @@ to be included in the install.  If they're not picked up by current rules in
 `setup.py` then you will need to add them to the `win32` `DATA_FILES` array.
 
 You should now have one new/updated folder `dist.win32` and two new files
-(version number dependent): `EDMarketConnector_win_3.5.0.0.msi` and
-`appcast_win_3.5.0.0.xml`.
+(version string dependent): `EDMarketConnector_win_4.0.2.msi` and
+`appcast_win_4.0.2.xml`.
 
-Now check that the `EDMarketConnector.exe` in the `dist.win32` folder does run
+Check that the `EDMarketConnector.exe` in the `dist.win32` folder does run
 without errors.
 
 Finally, uninstall your current version of ED Market Connector and re-install
-using the newly generated `EDMarketConnector_win_3.5.0.0.msi` file.  Check the
+using the newly generated `EDMarketConnector_win_4.0.2.msi` file.  Check the
 resulting installation does work (the installer will run the program for you).
+
+Update `edmarketconnector.xml` once more to set the `length=` attribute of the
+enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.
+The git commit for this should end up being the release tag as below.
 
 Distribution
 ---
+
 Once you have tested the new .msi file:
 
 1. Add a git tag for the release, which you'll refer to when actually creating
 the release:
-	1. This should be named `Release/A.B.C.D`, e.g. `Release/3.5.0.0.` as per
-	the version number.
+	1. This should be named `Release/A.B.C`, e.g. `Release/4.0.2.` as per
+	the version string.
 
 1. Now push the release-specific branch to GitHub.
 	1. Check which of your remotes is for github with `git remotes -v`. It
 	should really be `origin` and the following assumes that.
-	1. `git push --set-upstream --tags origin release-3.5.0.0`
+	1. `git push --set-upstream --tags origin release-4.0.2`
 
 1. Merge the release-specific branch into the appropriate `stable` or `beta`
 branch.  You can either do this locally and push the changes, or do it on
 GitHub.  You'll want to reference `stable` or `beta` in the next step, *not
-the release-3.5.0.0 branch, as it's temporary.*
+the release-4.0.2 branch, as it's temporary.*
 
 1. Craft a [new github Release](https://github.com/EDCD/EDMarketConnector/releases/new),
     1. Use the new tag so as to reference the correct commit, along with the
@@ -218,10 +292,13 @@ the old version over the old version.
 1. **Now merge the new release branch into `releases`.**
 This is the final step that fully publishes the release for running
 EDMC instances to pick up on 'Check for Updates'.  The WinSparkle check for
-updates specifically targets `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
-as per `config.py` `update_feed`.
+updates specifically targets
+
+    `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
+    
+    as per `config.py` `update_feed`.
 	1. `git checkout releases`
-	1. `git merge release-3.5.0.0`
+	1. `git merge release-4.0.2`
 	1. `git push origin`
 	
 	(Or merge on GitHub).
@@ -231,10 +308,13 @@ as per `config.py` `update_feed`.
 
 
 Pre-Releases
-===
+---
+
 If you are making a pre-release then:
 
-1. **DO NOT** Edit edmarketconnector.xml at all.  No, not even if you think you won't accidentally merge it into `releases`. Just don't change it at all.
+1. **DO NOT** Edit edmarketconnector.xml at all.  No, not even if you think you
+ won't accidentally merge it into `releases`. Just don't change it at all.
 1. **DO NOT** merge into `releases`.
 1. **DO NOT** merge into `stable`.
-1. *Do* merge the code into `beta` after you have made a 'pre-release' on GitHub.
+1. *Do* merge the code into `beta` after you have made a 'pre-release' on
+ GitHub.
