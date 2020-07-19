@@ -287,7 +287,8 @@ class EDLogs(FileSystemEventHandler):
                     newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
 
                 except:
-                    if __debug__: print_exc()
+                    if __debug__:
+                        print_exc()
 
                     newlogfile = None
 
@@ -748,7 +749,9 @@ class EDLogs(FileSystemEventHandler):
     # "python" and "Python", etc.
     # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
     def canonicalise(self, item):
-        if not item: return ''
+        if not item: 
+            return ''
+
         item = item.lower()
         match = self._RE_CANONICALISE.match(item)
         return match and match.group(1) or item
