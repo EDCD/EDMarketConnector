@@ -174,7 +174,6 @@ class EDLogs(FileSystemEventHandler):
         self.thread = None	# Orphan the worker thread - will terminate at next poll
 
     def close(self):
-        thread = self.thread
         self.stop()
         if self.observer:
             self.observer.stop()
