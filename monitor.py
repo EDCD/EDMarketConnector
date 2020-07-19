@@ -2,8 +2,7 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
-from operator import itemgetter
-from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
+from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
@@ -18,7 +17,6 @@ from companion import ship_file_name
 
 if platform=='darwin':
     from AppKit import NSWorkspace
-    from Foundation import NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSUserDomainMask
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
     from fcntl import fcntl
