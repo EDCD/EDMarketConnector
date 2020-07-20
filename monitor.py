@@ -129,7 +129,7 @@ class EDLogs(FileSystemEventHandler):
 
         # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
         # Do this before setting up the observer in case the journal directory has gone away
-        try:
+        try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
             logfiles = sorted(
                 (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                 key=lambda x: x.split('.')[1:]
@@ -557,6 +557,7 @@ class EDLogs(FileSystemEventHandler):
                 else:  # Promotion
                     if 'Rank' in entry:
                         self.state['Engineers'][entry['Engineer']] = (entry['Rank'], entry.get('RankProgress', 0))
+
                     else:
                         self.state['Engineers'][entry['Engineer']] = entry['Progress']
 
@@ -617,6 +618,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state[category][entry['Paid']['Material']] -= entry['Paid']['Quantity']
                 if self.state[category][entry['Paid']['Material']] <= 0:
                     self.state[category].pop(entry['Paid']['Material'])
+
                 category = self.category(entry['Received']['Category'])
                 self.state[category][entry['Received']['Material']] += entry['Received']['Quantity']
 
@@ -730,6 +732,7 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'Friends':
                 if entry['Status'] in ['Online', 'Added']:
                     self.state['Friends'].add(entry['Name'])
+
                 else:
                     self.state['Friends'].discard(entry['Name'])
 
@@ -890,6 +893,7 @@ class EDLogs(FileSystemEventHandler):
         filename = join(
             config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
         )
+
         with open(filename, 'wt') as h:
             h.write(string)
 
