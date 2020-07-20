@@ -51,6 +51,7 @@ class EDLogs(FileSystemEventHandler):
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
+    _RE_LOGFILE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
@@ -132,7 +133,7 @@ class EDLogs(FileSystemEventHandler):
         # Do this before setting up the observer in case the journal directory has gone away
         try:
             logfiles = sorted(
-                (x for x in listdir(self.currentdir) if re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)),
+                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                 key=lambda x: x.split('.')[1:]
             )
 
@@ -208,9 +209,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event):
         # watchdog callback, e.g. client (re)started.
-        if not event.is_directory and re.search(
-            r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', basename(event.src_path)
-        ):
+        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
             self.logfile = event.src_path
 
@@ -282,8 +281,7 @@ class EDLogs(FileSystemEventHandler):
                 # Poll
                 try:
                     logfiles = sorted(
-                        (x for x in listdir(self.currentdir) if
-                            re.search(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$', x)),
+                        (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                         key=lambda x: x.split('.')[1:]
                     )
 
