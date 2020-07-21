@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release Candidate 4.0.3-rc2
+===
+
+This is exactly the same as -rc1 except I fixed a missing line of code that
+prevented the EDSM plugin from loading.
+
 Release Candidate 4.0.3-rc1
 ===
 
