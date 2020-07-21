@@ -21,7 +21,6 @@ import plug
 if __debug__:
     from traceback import print_exc
 
-STATION_UNDOCKED: str = u'×'	# "Station" name to display when not docked = U+00D7
 
 _TIMEOUT = 20
 FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to Inara
@@ -63,10 +62,10 @@ this.system_population = None
 this.station_link = None
 this.station = None
 this.station_marketid = None
+STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 def system_url(system_name):
     if this.system_address:
-    # TODO: Switch this to https://inara.cz/galaxy-starsystem/?search=3932277478106
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={this.system_address}')
 
     elif system_name:
@@ -227,7 +226,13 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Always update, even if we're not the *current* system or station provider.
     this.system_address = entry.get('SystemAddress') or this.system_address
     this.system = entry.get('StarSystem') or this.system
-    this.system_population = entry.get('Population') or this.system_population
+
+    # We need pop == 0 to set the value so as to clear 'x' in systems with
+    # no stations.
+    pop = entry.get('Population')
+    if not pop is None:
+        this.system_population = pop
+
     this.station = entry.get('StationName') or this.station
     this.station_marketid = entry.get('MarketID') or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
