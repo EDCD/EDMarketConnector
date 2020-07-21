@@ -492,13 +492,13 @@ class EDLogs(FileSystemEventHandler):
                 else:
                     self.state['Modules'].pop(entry['FromSlot'], None)
 
-            elif entry['event'] in ['Undocked']:
+            elif entry['event'] == 'Undocked':
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
 
-            elif entry['event'] in ['Location', 'FSDJump', 'Docked', 'CarrierJump']:
+            elif entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 if entry['event'] in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
@@ -513,7 +513,7 @@ class EDLogs(FileSystemEventHandler):
 
                 self.systemaddress = entry.get('SystemAddress')
 
-                if entry['event'] in ['Location', 'FSDJump', 'CarrierJump']:
+                if entry['event'] in ('Location', 'FSDJump', 'CarrierJump'):
                     self.systempopulation = entry.get('Population')
 
                 self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
@@ -525,10 +525,10 @@ class EDLogs(FileSystemEventHandler):
             elif entry['event'] == 'ApproachBody':
                 self.planet = entry['Body']
 
-            elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
+            elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
                 self.planet = None
 
-            elif entry['event'] in ['Rank', 'Promotion']:
+            elif entry['event'] in ('Rank', 'Promotion'):
                 payload = dict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
@@ -541,7 +541,7 @@ class EDLogs(FileSystemEventHandler):
                         # perhaps not taken promotion mission yet
                         self.state['Rank'][k] = (self.state['Rank'][k][0], min(v, 100))
 
-            elif entry['event'] in ['Reputation', 'Statistics']:
+            elif entry['event'] in ('Reputation', 'Statistics'):
                 payload = OrderedDict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
@@ -570,11 +570,11 @@ class EDLogs(FileSystemEventHandler):
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
 
-            elif entry['event'] in ['CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined']:
+            elif entry['event'] in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
 
-            elif entry['event'] in ['EjectCargo', 'MarketSell', 'SellDrones']:
+            elif entry['event'] in ('EjectCargo', 'MarketSell', 'SellDrones'):
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] -= entry.get('Count', 1)
                 if self.state['Cargo'][commodity] <= 0:
@@ -588,7 +588,7 @@ class EDLogs(FileSystemEventHandler):
                         self.state['Cargo'].pop(commodity)
 
             elif entry['event'] == 'Materials':
-                for category in ['Raw', 'Manufactured', 'Encoded']:
+                for category in ('Raw', 'Manufactured', 'Encoded'):
                     self.state[category] = defaultdict(int)
                     self.state[category].update({
                         self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, [])
@@ -598,14 +598,14 @@ class EDLogs(FileSystemEventHandler):
                 material = self.canonicalise(entry['Name'])
                 self.state[entry['Category']][material] += entry['Count']
 
-            elif entry['event'] in ['MaterialDiscarded', 'ScientificResearch']:
+            elif entry['event'] in ('MaterialDiscarded', 'ScientificResearch'):
                 material = self.canonicalise(entry['Name'])
                 self.state[entry['Category']][material] -= entry['Count']
                 if self.state[entry['Category']][material] <= 0:
                     self.state[entry['Category']].pop(material)
 
             elif entry['event'] == 'Synthesis':
-                for category in ['Raw', 'Manufactured', 'Encoded']:
+                for category in ('Raw', 'Manufactured', 'Encoded'):
                     for x in entry['Materials']:
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
@@ -626,7 +626,7 @@ class EDLogs(FileSystemEventHandler):
                 entry['event'] == 'EngineerLegacyConvert' and not entry.get('IsPreview')
             ):
 
-                for category in ['Raw', 'Manufactured', 'Encoded']:
+                for category in ('Raw', 'Manufactured', 'Encoded'):
                     for x in entry.get('Ingredients', []):
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
@@ -674,7 +674,7 @@ class EDLogs(FileSystemEventHandler):
 
                 material = self.canonicalise(entry.get('Material'))
                 if material:
-                    for category in ['Raw', 'Manufactured', 'Encoded']:
+                    for category in ('Raw', 'Manufactured', 'Encoded'):
                         if material in self.state[category]:
                             self.state[category][material] -= entry['Quantity']
                             if self.state[category][material] <= 0:
@@ -682,7 +682,7 @@ class EDLogs(FileSystemEventHandler):
 
             elif entry['event'] == 'TechnologyBroker':
                 for thing in entry.get('Ingredients', []):  # 3.01
-                    for category in ['Cargo', 'Raw', 'Manufactured', 'Encoded']:
+                    for category in ('Cargo', 'Raw', 'Manufactured', 'Encoded'):
                         item = self.canonicalise(thing['Name'])
                         if item in self.state[category]:
                             self.state[category][item] -= thing['Count']
@@ -730,7 +730,7 @@ class EDLogs(FileSystemEventHandler):
                 self.systemaddress = None
 
             elif entry['event'] == 'Friends':
-                if entry['Status'] in ['Online', 'Added']:
+                if entry['Status'] in ('Online', 'Added'):
                     self.state['Friends'].add(entry['Name'])
 
                 else:
@@ -774,7 +774,7 @@ class EDLogs(FileSystemEventHandler):
 
         else:
             entry = self.parse_entry(self.event_queue.pop(0))
-            if not self.live and entry['event'] not in [None, 'Fileheader']:
+            if not self.live and entry['event'] not in (None, 'Fileheader'):
                 # Game not running locally, but Journal has been updated
                 self.live = True
                 if self.station:
