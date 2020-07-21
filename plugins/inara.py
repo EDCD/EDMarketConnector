@@ -60,9 +60,16 @@ this.station_link = None
 this.station = None
 
 def system_url(system_name):
+    if system_name:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
     return this.system
 
 def station_url(system_name, station_name):
+    if system_name:
+        if station_name:
+            return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+        return system_url(system_name)
+
     return this.station or this.system
 
 
@@ -402,8 +409,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             # Override standard URL functions
             if config.get('system_provider') == 'Inara':
+                #this.system_link['text'] = this.system
                 this.system_link['url'] = this.system
             if config.get('station_provider') == 'Inara':
+                this.station_link['text'] = this.station
                 this.station_link['url'] = this.station or this.system
 
             cargo = [OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo'])]
@@ -731,11 +740,17 @@ def cmdr_data(data, is_beta):
 
     this.cmdr = data['commander']['name']
 
+    this.system = this.system or data['lastSystem']['name']
+    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = this.system
+        this.system_link['text'] = this.system
+        this.system_link['url'] = system_url(this.system)
+        this.system_link.update_idletasks()
     if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = this.station or this.system
+        this.station_link['text'] = this.station or this.system
+        this.station_link['url'] = station_url(this.system, this.station)
+        this.station_link.update_idletasks()
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
