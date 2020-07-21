@@ -214,7 +214,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
     pop = entry.get('Population')
-    if not pop is None:
+    if pop is not None:
+        this.system_population = pop
 
     this.station = entry.get('StationName') or this.station
     this.station_marketid = entry.get('MarketID') or this.station_marketid
