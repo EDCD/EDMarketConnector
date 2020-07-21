@@ -74,8 +74,6 @@ def cmdr_data(data, is_beta):
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
     # 'eddb' is also the *default* Station provider
     if not config.get('station_provider') or config.get('station_provider') == 'eddb':
-        # Only use CAPI value if not yet set
-        # This is to avoid CAPI lagging causing incorrect value
         if data['commander']['docked']:
             this.station_link['text'] = data['lastStarport']['name']
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
