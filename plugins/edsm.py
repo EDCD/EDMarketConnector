@@ -2,6 +2,15 @@
 # System display and EDSM lookup
 #
 
+# TODO:
+#  1) Re-factor EDSM API calls out of journal_entry() into own function.
+#  2) Fix how StartJump already changes things, but only partially.
+#  3) Possibly this and other two 'provider' plugins could do with being
+#    based on a single class that they extend.  There's a lot of duplicated
+#    logic.
+#  4) Ensure the EDSM API call(back) for setting the image at end of system
+#    text is always fired.  i.e. CAPI cmdr_data() processing.
+
 import json
 import requests
 import sys
@@ -36,6 +45,16 @@ this.coordinates = None
 this.newgame = False		# starting up - batch initial burst of events
 this.newgame_docked = False	# starting up while docked
 this.navbeaconscan = 0		# batch up burst of Scan events after NavBeaconScan
+this.system_link = None
+this.system = None
+this.system_address = None  # Frontier SystemAddress
+this.system_population = None
+this.station_link = None
+this.station = None
+this.station_marketid = None  # Frontier MarketID
+STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
+
+
 
 
 # Main window clicks
@@ -80,8 +99,9 @@ def plugin_start3(plugin_dir):
     return 'EDSM'
 
 def plugin_app(parent):
-    this.system = parent.children['system']	# system label in main window
-    this.system.bind_all('<<EDSMStatus>>', update_status)
+    this.system_link = parent.children['system']  # system label in main window
+    this.system_link.bind_all('<<EDSMStatus>>', update_status)
+    this.station_link = parent.children['station']  # station label in main window
 
 def plugin_stop():
     # Signal thread to close and wait for it
@@ -187,12 +207,32 @@ def credentials(cmdr):
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
+    # Always update, even if we're not the *current* system or station provider.
+    this.system_address = entry.get('SystemAddress') or this.system_address
+    this.system = entry.get('StarSystem') or this.system
 
-    # Update display
-    if this.system['text'] != system:
-        this.system['text'] = system or ''
-        this.system['image'] = ''
-        this.system.update_idletasks()
+    # We need pop == 0 to set the value so as to clear 'x' in systems with
+    # no stations.
+    pop = entry.get('Population')
+    if not pop is None:
+
+    this.station = entry.get('StationName') or this.station
+    this.station_marketid = entry.get('MarketID') or this.station_marketid
+    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
+    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
+        this.station = None
+        this.station_marketid = None
+
+    if config.get('station_provider') == 'EDSM':
+        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        this.station_link['url'] = station_url(this.system, this.station)
+        this.station_link.update_idletasks()
+
+    # Update display of 'EDSM Status' image
+    if this.system_link['text'] != system:
+        this.system_link['text'] = system or ''
+        this.system_link['image'] = ''
+        this.system_link.update_idletasks()
 
     this.multicrew = bool(state['Role'])
     if 'StarPos' in entry:
@@ -243,13 +283,36 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 # Update system data
 def cmdr_data(data, is_beta):
-
     system = data['lastSystem']['name']
 
-    if not this.system['text']:
-        this.system['text'] = system
-        this.system['image'] = ''
-        this.system.update_idletasks()
+    # Always store initially, even if we're not the *current* system provider.
+    if not this.station_marketid:
+        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+    # Only trust CAPI if these aren't yet set
+    this.system = this.system or data['lastSystem']['name']
+    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
+    # TODO: Fire off the EDSM API call to trigger the callback for the icons
+
+    if config.get('station_provider') == 'EDSM':
+        this.system_link['text'] = this.system
+        this.system_link['url'] = system_url(this.system)
+        this.system_link.update_idletasks()
+    if config.get('station_provider') == 'EDSM':
+        if data['commander']['docked']:
+            this.station_link['text'] = this.station
+        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+            this.station_link['text'] = STATION_UNDOCKED
+        else:
+            this.station_link['text'] = ''
+
+        this.station_link['url'] = station_url(this.system, this.station)
+
+        this.station_link.update_idletasks()
+
+    if not this.system_link['text']:
+        this.system_link['text'] = system
+        this.system_link['image'] = ''
+        this.system_link.update_idletasks()
 
 
 # Worker thread
@@ -302,7 +365,7 @@ def worker():
                             if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump', 'CarrierJump']:
                                 # Update main window's system status
                                 this.lastlookup = r
-                                this.system.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
+                                this.system_link.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
                             elif r['msgnum'] // 100 != 1:
                                 print('EDSM\t%s %s\t%s' % (r['msgnum'], r['msg'], json.dumps(e, separators = (',', ': '))))
                         pending = []
@@ -356,13 +419,13 @@ def update_status(event=None):
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply):
     if not reply:
-        this.system['image'] = this._IMG_ERROR
+        this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
     elif reply['msgnum'] // 100 not in (1,4):
-        this.system['image'] = this._IMG_ERROR
+        this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
     elif reply.get('systemCreated'):
-        this.system['image'] = this._IMG_NEW
+        this.system_link['image'] = this._IMG_NEW
     else:
-        this.system['image'] = this._IMG_KNOWN
+        this.system_link['image'] = this._IMG_KNOWN
 
