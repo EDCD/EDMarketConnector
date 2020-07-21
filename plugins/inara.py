@@ -61,6 +61,7 @@ this.station = None
 
 def system_url(system_name):
     if system_name:
+        # TODO: Switch this to https://inara.cz/galaxy-starsystem/?search=3932277478106
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
     return this.system
 
@@ -896,6 +897,7 @@ def update_location(event=None):
 def inara_notify_location(eventData):
     this.system  = eventData.get('starsystemInaraURL')
     if config.get('system_provider') == 'Inara':
+        # TODO: Bother with this?  Just use systemaddress URL version when we detect it
         this.system_link['url'] = this.system	# Override standard URL function
     this.station = eventData.get('stationInaraURL')
     if config.get('station_provider') == 'Inara':
