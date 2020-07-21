@@ -929,13 +929,6 @@ def update_location(event=None):
 
 def inara_notify_location(eventData):
     pass
-#     this.system  = eventData.get('starsystemInaraURL')
-#     if config.get('system_provider') == 'Inara':
-#         # TODO: Bother with this?  Just use systemaddress URL version when we detect it
-#         this.system_link['url'] = this.system	# Override standard URL function
-#     this.station = eventData.get('stationInaraURL')
-#     if config.get('station_provider') == 'Inara':
-#         this.station_link['url'] = this.station or this.system	# Override standard URL function
 
 # Call inara_notify_ship() in interested plugins with Inara's response when changing ship
 def update_ship(event=None):
