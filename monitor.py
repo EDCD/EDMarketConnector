@@ -136,8 +136,8 @@ class EDLogs(FileSystemEventHandler):
                 (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                 key=lambda x: x.split('.')[1:]
             )
-
-            self.logfile = logfiles and join(self.currentdir, logfiles[-1]) or None
+            
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
 
         except Exception:
             self.logfile = None
@@ -161,7 +161,7 @@ class EDLogs(FileSystemEventHandler):
             self.observed = self.observer.schedule(self, self.currentdir)
 
         if __debug__:
-            print('{} Journal {!r}'.format(polling and 'Polling' or 'Monitoring', self.currentdir))
+            print('{} Journal {!r}'.format('Polling' if polling else 'Monitoring', self.currentdir))
             print('Start logfile {!r}'.format(self.logfile))
 
         if not self.running():
@@ -285,7 +285,7 @@ class EDLogs(FileSystemEventHandler):
                         key=lambda x: x.split('.')[1:]
                     )
 
-                    newlogfile = logfiles and join(self.currentdir, logfiles[-1]) or None
+                    newlogfile = join(self.currentdir, logfiles[-1]) if logfiles else None
 
                 except Exception:
                     if __debug__:
@@ -310,7 +310,7 @@ class EDLogs(FileSystemEventHandler):
 
             if logfile:
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
-                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag
+                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
                     self.event_queue.append(line)
 
@@ -525,8 +525,8 @@ class EDLogs(FileSystemEventHandler):
                 if entry['event'] in ['Location', 'FSDJump', 'CarrierJump']:
                     self.systempopulation = entry.get('Population')
 
-                (self.system, self.station) = (entry['StarSystem'] == 'ProvingGround' and 'CQC' or entry['StarSystem'],
-                                               entry.get('StationName'))  # May be None
+                self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
+                self.station = entry.get('StationName')  # May be None
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
@@ -541,8 +541,8 @@ class EDLogs(FileSystemEventHandler):
                 payload = dict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
-                for k, v in payload.items():
-                    self.state['Rank'][k] = (v, 0)
+
+                self.state['Rank'].update({k: (v, 0) for k, v in payload.items()})
 
             elif entry['event'] == 'Progress':
                 for k, v in entry.items():
@@ -757,17 +757,25 @@ class EDLogs(FileSystemEventHandler):
     # and "hnshockmount", "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1",
     # "python" and "Python", etc.
     # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
-    def canonicalise(self, item):
+    def canonicalise(self, item: str):
         if not item:
             return ''
 
         item = item.lower()
         match = self._RE_CANONICALISE.match(item)
-        return match and match.group(1) or item
 
-    def category(self, item):
+        if match:
+            return match.group(1)
+
+        return item
+
+    def category(self, item: str):
         match = self._RE_CATEGORY.match(item)
-        return (match and match.group(1) or item).capitalize()
+
+        if match:
+            return match.group(1).capitalize()
+
+        return item.capitalize()
 
     def get_entry(self):
         if not self.event_queue:
@@ -870,8 +878,10 @@ class EDLogs(FileSystemEventHandler):
             self.state['Modules'],
             key=lambda x: (
                 'Hardpoint' not in x,
-                x not in standard_order and len(standard_order) or standard_order.index(x),
-                'Slot' not in x, x)
+                len(standard_order) if x not in standard_order else standard_order.index(x),
+                'Slot' not in x,
+                x
+            )
         ):
 
             module = dict(self.state['Modules'][slot])
