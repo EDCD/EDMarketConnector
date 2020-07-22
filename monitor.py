@@ -399,7 +399,8 @@ class EDLogs(FileSystemEventHandler):
                   not 'buggy' in self.canonicalise(entry['Ship'])):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
-                self.state['ShipName']  = entry['ShipName']
+                if entry['ShipName'] and entry['ShipName'] not in ('', ' '):
+                    self.state['ShipName']  = entry['ShipName']
                 self.state['ShipType']  = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')	# not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')	#   "
