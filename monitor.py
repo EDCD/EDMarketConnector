@@ -565,8 +565,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 engineers = self.state['Engineers']
                 if 'Engineers' in entry:  # Startup summary
                     self.state['Engineers'] = {
-                        e['Engineer']: (e['Rank'], e.get('RankProgress', 0))
-                        if 'Rank' in e else e['Progress'] for e in entry['Engineers']
+                        e['Engineer']: ((e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'])
+                        for e in entry['Engineers']
                     }
 
                 else:  # Promotion
