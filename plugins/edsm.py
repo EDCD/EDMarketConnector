@@ -11,6 +11,8 @@
 #  4) Ensure the EDSM API call(back) for setting the image at end of system
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
+# TODO: Test with all combinations of Inara an EDSM APIs/sending on and off
+
 import json
 import requests
 import sys

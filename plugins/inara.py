@@ -2,6 +2,8 @@
 # Inara sync
 #
 
+# TODO: Test with all combinations of Inara an EDSM APIs/sending on and off
+
 from collections import OrderedDict
 import json
 import requests

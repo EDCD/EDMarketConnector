@@ -22,6 +22,7 @@
 #    any of the above in the interim.
 #
 
+# TODO: Test with all combinations of Inara an EDSM APIs/sending on and off
 
 import sys
 import requests
