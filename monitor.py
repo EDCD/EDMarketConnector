@@ -8,7 +8,7 @@ from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
-from typing import Any, Dict, List, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING
+from typing import Any, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import tkinter
@@ -124,7 +124,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
     def start(self, root: 'tkinter.Tk'):
         self.root = root
-        logdir: str = config.get('journaldir') or config.default_journal_dir  # type: ignore # config does weird things
+        logdir = expanduser(config.get('journaldir') or config.default_journal_dir)  # type: ignore # config is weird
+
         if not logdir or not isdir(logdir):  # type: ignore # config does weird things in its get
             self.stop()
             return False
