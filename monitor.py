@@ -118,8 +118,9 @@ class EDLogs(FileSystemEventHandler):
 
     def start(self, root):
         self.root = root
-        logdir = config.get('journaldir') or config.default_journal_dir
-        if not logdir or not isdir(logdir):
+        logdir = expanduser(config.get('journaldir') or config.default_journal_dir)  # type: ignore # config is weird
+
+        if not logdir or not isdir(logdir):  # type: ignore # config does weird things in its get
             self.stop()
             return False
 
