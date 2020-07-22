@@ -13,3 +13,7 @@ appcast_win_*.xml
 appcast_mac_*.xml
 EDMarketConnector.VisualElementsManifest.xml
 *.zip
+
+.idea
+.vscode
+venv
