@@ -8,7 +8,10 @@ from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import tkinter
 
 if __debug__:
     from traceback import print_exc
@@ -47,7 +50,8 @@ else:
 
 
 # Journal handler
-class EDLogs(FileSystemEventHandler):
+class EDLogs(FileSystemEventHandler):  # type: ignore # See below
+    # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
 
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
@@ -55,13 +59,14 @@ class EDLogs(FileSystemEventHandler):
     _RE_LOGFILE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
     def __init__(self):
+        # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.root = None
-        self.currentdir = None		# The actual logdir that we're monitoring
-        self.logfile = None
+        self.currentdir: Optional[str] = None		# The actual logdir that we're monitoring
+        self.logfile: Optional[str] = None
         self.observer = None
         self.observed = None		# a watchdog ObservedWatch, or None if polling
-        self.thread = None
+        self.thread: Optional[threading.Thread] = None
         self.event_queue = []		# For communicating journal entries back to main thread
 
         # On startup we might be:
@@ -75,19 +80,19 @@ class EDLogs(FileSystemEventHandler):
         self.game_was_running = False  # For generation the "ShutDown" event
 
         # Context for journal handling
-        self.version = None
+        self.version: Optional[str] = None
         self.is_beta = False
-        self.mode = None
-        self.group = None
-        self.cmdr = None
-        self.planet = None
-        self.system = None
-        self.station = None
-        self.station_marketid = None
-        self.stationtype = None
-        self.coordinates = None
-        self.systemaddress = None
-        self.started = None  # Timestamp of the LoadGame event
+        self.mode: Optional[str] = None
+        self.group: Optional[str] = None
+        self.cmdr: Optional[str] = None
+        self.planet: Optional[str] = None
+        self.system: Optional[str] = None
+        self.station: Optional[str] = None
+        self.station_marketid: Optional[int] = None
+        self.stationtype: Optional[str] = None
+        self.coordinates: Optional[Tuple[int, int, int]] = None
+        self.systemaddress: Optional[int] = None
+        self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
@@ -117,10 +122,9 @@ class EDLogs(FileSystemEventHandler):
             'Modules':      None,
         }
 
-    def start(self, root):
+    def start(self, root: 'tkinter.Tk'):
         self.root = root
-        logdir = expanduser(config.get('journaldir') or config.default_journal_dir)  # type: ignore # config is weird
-
+        logdir: str = config.get('journaldir') or config.default_journal_dir  # type: ignore # config does weird things
         if not logdir or not isdir(logdir):  # type: ignore # config does weird things in its get
             self.stop()
             return False
@@ -134,11 +138,11 @@ class EDLogs(FileSystemEventHandler):
         # Do this before setting up the observer in case the journal directory has gone away
         try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
             logfiles = sorted(
-                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
+                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),  # type: ignore # config is weird
                 key=lambda x: x.split('.')[1:]
             )
 
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore # config is weird
 
         except Exception:
             self.logfile = None
@@ -244,7 +248,7 @@ class EDLogs(FileSystemEventHandler):
         if self.live:
             if self.game_was_running:
                 # Game is running locally
-                entry = OrderedDict([
+                entry: OrderedDictT[str, Any] = OrderedDict([
                     ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
                     ('event', 'StartUp'),
                     ('StarSystem', self.system),
@@ -286,7 +290,7 @@ class EDLogs(FileSystemEventHandler):
                         key=lambda x: x.split('.')[1:]
                     )
 
-                    newlogfile = join(self.currentdir, logfiles[-1]) if logfiles else None
+                    newlogfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
 
                 except Exception:
                     if __debug__:
@@ -339,11 +343,13 @@ class EDLogs(FileSystemEventHandler):
                 self.game_was_running = self.game_running()
 
     def parse_entry(self, line):
+        # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
         if line is None:
             return {'event': None}  # Fake startup event
 
         try:
-            entry: Dict[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+            # Preserve property order because why not?
+            entry: OrderedDictT[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
             entry['timestamp']  # we expect this to exist
 
             event_type = entry['event']
@@ -355,11 +361,11 @@ class EDLogs(FileSystemEventHandler):
                 self.mode = None
                 self.group = None
                 self.planet = None
-                self.system = None
-                self.station = None
-                self.station_marketid = None
-                self.stationtype = None
-                self.stationservices = None
+                self.system: Optional[str] = None
+                self.station: Optional[str] = None
+                self.station_marketid: Optional[int] = None
+                self.stationtype: Optional[str] = None
+                self.stationservices: Optional[List[str]] = None
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = None
@@ -408,16 +414,16 @@ class EDLogs(FileSystemEventHandler):
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                 self.state.update({
-                    'Captain': None,
-                    'Credits': entry['Credits'],
-                    'FID': entry.get('FID'),   # From 3.3
-                    'Horizons': entry['Horizons'],  # From 3.0
-                    'Loan': entry['Loan'],
-                    'Engineers': {},
-                    'Rank': {},
+                    'Captain':    None,
+                    'Credits':    entry['Credits'],
+                    'FID':        entry.get('FID'),   # From 3.3
+                    'Horizons':   entry['Horizons'],  # From 3.0
+                    'Loan':       entry['Loan'],
+                    'Engineers':  {},
+                    'Rank':       {},
                     'Reputation': {},
                     'Statistics': {},
-                    'Role': None,
+                    'Role':       None,
                 })
 
             elif event_type == 'NewCommander':
@@ -583,7 +589,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'] = defaultdict(int)
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
-                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:
+                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
                         entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
@@ -773,7 +779,7 @@ class EDLogs(FileSystemEventHandler):
     # and "hnshockmount", "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1",
     # "python" and "Python", etc.
     # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
-    def canonicalise(self, item: str):
+    def canonicalise(self, item: Optional[str]):
         if not item:
             return ''
 
@@ -909,6 +915,7 @@ class EDLogs(FileSystemEventHandler):
 
     # Export ship loadout as a Loadout event
     def export_ship(self, filename=None):
+        # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
         string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
         if filename:
             with open(filename, 'wt') as h:
@@ -918,14 +925,14 @@ class EDLogs(FileSystemEventHandler):
 
         ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))
+        oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
-            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
+            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
                 if h.read() == string:
                     return  # same as last time - don't write
 
         # Write
-        filename = join(
+        filename = join(  # type: ignore
             config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
         )
 
