@@ -77,7 +77,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
         self.live = False
 
-        self.game_was_running = False  # For generation the "ShutDown" event
+        self.game_was_running = False  # For generation of the "ShutDown" event
 
         # Context for journal handling
         self.version: Optional[str] = None
@@ -342,7 +342,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             else:
                 self.game_was_running = self.game_running()
 
-    def parse_entry(self, line):
+    def parse_entry(self, line: str):
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
         if line is None:
             return {'event': None}  # Fake startup event
@@ -350,7 +350,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         try:
             # Preserve property order because why not?
             entry: OrderedDictT[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
-            entry['timestamp']  # we expect this to exist
+            entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
 
             event_type = entry['event']
             if event_type == 'Fileheader':
@@ -361,11 +361,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.mode = None
                 self.group = None
                 self.planet = None
-                self.system: Optional[str] = None
-                self.station: Optional[str] = None
-                self.station_marketid: Optional[int] = None
-                self.stationtype: Optional[str] = None
-                self.stationservices: Optional[List[str]] = None
+                self.system = None
+                self.station = None
+                self.station_marketid = None
+                self.stationtype = None
+                self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = None
@@ -490,12 +490,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'ModuleBuy':
                 self.state['Modules'][entry['Slot']] = {
-                    'Slot': entry['Slot'],
-                    'Item': self.canonicalise(entry['BuyItem']),
-                    'On': True,
+                    'Slot':     entry['Slot'],
+                    'Item':     self.canonicalise(entry['BuyItem']),
+                    'On':       True,
                     'Priority': 1,
-                    'Health': 1.0,
-                    'Value': entry['BuyPrice'],
+                    'Health':   1.0,
+                    'Value':    entry['BuyPrice'],
                 }
 
             elif event_type == 'ModuleSell':
@@ -668,13 +668,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 module = self.state['Modules'][entry['Slot']]
                 assert(module['Item'] == self.canonicalise(entry['Module']))
                 module['Engineering'] = {
-                    'Engineer': entry['Engineer'],
-                    'EngineerID': entry['EngineerID'],
+                    'Engineer':      entry['Engineer'],
+                    'EngineerID':    entry['EngineerID'],
                     'BlueprintName': entry['BlueprintName'],
-                    'BlueprintID': entry['BlueprintID'],
-                    'Level': entry['Level'],
-                    'Quality': entry['Quality'],
-                    'Modifiers': entry['Modifiers'],
+                    'BlueprintID':   entry['BlueprintID'],
+                    'Level':         entry['Level'],
+                    'Quality':       entry['Quality'],
+                    'Modifiers':     entry['Modifiers'],
                 }
 
                 if 'ExperimentalEffect' in entry:
