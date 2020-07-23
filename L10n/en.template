@@ -490,6 +490,9 @@
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Update";
 
+/* Option to use alternate URL method on shipyard links [prefs.py] */
+"Use alternate URL method" = "Use alternate URL method";
+
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Value";
 
