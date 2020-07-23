@@ -861,6 +861,7 @@ def add_event(name, timestamp, data):
 def call_timer(wait=FLOOD_LIMIT_SECONDS):
     while this.timer_run:
         time.sleep(wait)
+        print("INARA: TICK")
         if this.timer_run:  # check again in here just in case we're closing and the stars align
             call()
 
@@ -873,7 +874,7 @@ def call(callback=None, force=False):
         return
 
     this.last_update_time = time.time()
-    
+    print(f"INARA: {time.asctime()}sending {len(this.events)} entries to inara (call)")
     data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
@@ -895,6 +896,8 @@ def worker():
             return	# Closing
         else:
             (url, data, callback) = item
+
+        print(f"INARA: {time.asctime()}sending {len(data['events'])} entries to inara (worker)")
 
         retrying = 0
         while retrying < 3:
