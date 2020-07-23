@@ -23,7 +23,8 @@ and [4.0.3-rc2](https://github.com/EDCD/EDMarketConnector/releases/tag/Release%2
  choose shipyard provider.  If your setup results in coriolis.io or edsy.org
  saying they can't load your build then try toggling this on.
  
-    This method writes a small .html file in `%LOCALAPPDATA\EDMarketConnector\ `
+    This method writes a small .html file in
+    `%LOCALAPPDATA%\EDMarketConnector\ `
     (or other-OS equivalent) and directs your browser to open that. The file
     contains a meta refresh redirect to the URL for your build on your chosen
     shipyard provider.
