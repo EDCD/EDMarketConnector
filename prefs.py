@@ -172,6 +172,9 @@ class PreferencesDialog(tk.Toplevel):
         else:
             output = config.getint('output')
 
+        #TODO: *All* of this needs to use a 'row' variable, incremented after
+        #      adding one to keep track, so it's easier to insert new rows in
+        #      the middle without worrying about updating `row=X` elements.
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
         self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
@@ -265,6 +268,14 @@ class PreferencesDialog(tk.Toplevel):
         self.shipyard_button = nb.OptionMenu(configframe, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url'))
         self.shipyard_button.configure(width = 15)
         self.shipyard_button.grid(row=31, column=1, sticky=tk.W)
+        # Option for alternate URL opening
+        self.alt_shipyard_open = tk.IntVar(value = config.getint('use_alt_shipyard_open'))
+        self.alt_shipyard_open_btn = nb.Checkbutton(configframe,
+                                         text=_('Use alternate URL method'),
+                                         variable=self.alt_shipyard_open,
+                                         command=self.alt_shipyard_open_changed,
+                                     )
+        self.alt_shipyard_open_btn.grid(row=31, column=2, sticky=tk.W)
 
         self.system_provider = tk.StringVar(value = config.get('system_provider') in plug.provides('system_url') and config.get('system_provider') or 'EDSM')
         nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -512,6 +523,8 @@ class PreferencesDialog(tk.Toplevel):
         config.set('disable_autoappupdatecheckingame', self.disable_autoappupdatecheckingame.get())
         # If it's now False, re-enable WinSparkle ?  Need access to the AppWindow.updater variable to call down
 
+    def alt_shipyard_open_changed(self):
+        config.set('use_alt_shipyard_open', self.alt_shipyard_open.get())
 
     def themecolorbrowse(self, index):
         (rgb, color) = tkColorChooser.askcolor(self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)
