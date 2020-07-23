@@ -50,7 +50,9 @@ this.loadout = None
 this.fleet = None
 this.shipswap = False	# just swapped ship
 
-this.last_update_time = time.time()  # last time we updated (set to now because we're going to update quickly)
+# last time we updated, if unset in config this is 0, which means an instant update
+LAST_UPDATE_CONF_KEY = 'inara_last_update'
+# this.last_update_time = config.getint(LAST_UPDATE_CONF_KEY)
 FLOOD_LIMIT_SECONDS = 30  # minimum time between sending events
 this.timer_run = True
 
@@ -441,10 +443,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 
             cargo = [OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo'])]
-
-            # if our cargo differers from last we checked, we're at a station,
-            # and our flood limit isnt covered, queue an update
-            should_poll = this.cargo != cargo and time.time() - this.last_update_time > FLOOD_LIMIT_SECONDS
 
             # Send cargo and materials if changed
             if this.cargo != cargo:
@@ -861,7 +859,7 @@ def add_event(name, timestamp, data):
 def call_timer(wait=FLOOD_LIMIT_SECONDS):
     while this.timer_run:
         time.sleep(wait)
-        print("INARA: TICK")
+        print(f"INARA: {time.asctime()}  TICK")
         if this.timer_run:  # check again in here just in case we're closing and the stars align
             call()
 
@@ -870,11 +868,11 @@ def call(callback=None, force=False):
     if not this.events:
         return
 
-    if (time.time() - this.last_update_time) <= FLOOD_LIMIT_SECONDS and not force:      
+    if (time.time() - config.getint(LAST_UPDATE_CONF_KEY)) <= FLOOD_LIMIT_SECONDS and not force:      
         return
 
-    this.last_update_time = time.time()
-    print(f"INARA: {time.asctime()}sending {len(this.events)} entries to inara (call)")
+    config.set(LAST_UPDATE_CONF_KEY, int(time.time()))
+    print(f"INARA: {time.asctime()} sending {len(this.events)} entries to inara (call)")
     data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
@@ -897,7 +895,7 @@ def worker():
         else:
             (url, data, callback) = item
 
-        print(f"INARA: {time.asctime()}sending {len(data['events'])} entries to inara (worker)")
+        print(f"INARA: {time.asctime()} sending {len(data['events'])} entries to inara (worker)")
 
         retrying = 0
         while retrying < 3:
