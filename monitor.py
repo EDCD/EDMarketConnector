@@ -400,7 +400,14 @@ class EDLogs(FileSystemEventHandler):
                   not 'buggy' in self.canonicalise(entry['Ship'])):
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = entry['ShipIdent']
-                self.state['ShipName']  = entry['ShipName']
+
+                # Newly purchased ships can show a ShipName of "" initially,
+                # and " " after a game restart/relog.
+                # Players *can* also purposefully set " " as the name, but anyone
+                # doing that gets to live with EDMC showing ShipType instead.
+                if entry['ShipName'] and entry['ShipName'] not in ('', ' '):
+                    self.state['ShipName']  = entry['ShipName']
+
                 self.state['ShipType']  = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')	# not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')	#   "
