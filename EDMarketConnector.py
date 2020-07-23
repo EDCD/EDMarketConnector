@@ -671,6 +671,10 @@ class AppWindow(object):
                 hotkeymgr.play_bad()
 
     def shipyard_url(self, shipname):
+        if not bool(config.getint("use_alt_shipyard_open")):
+            return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+
+        # Avoid file length limits if possible
         provider = config.get('shipyard_provider') or 'EDSY'
         target = plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
         file_name = join(config.app_dir, "last_shipyard.html")

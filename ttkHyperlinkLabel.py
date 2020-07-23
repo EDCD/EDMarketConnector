@@ -112,36 +112,36 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
 
 
 def openurl(url):
-    # if platform == 'win32':
-    #     # On Windows webbrowser.open calls os.startfile which calls ShellExecute which can't handle long arguments,
-    #     # so discover and launch the browser directly.
-    #     # https://blogs.msdn.microsoft.com/oldnewthing/20031210-00/?p=41553
+    if platform == 'win32':
+        # On Windows webbrowser.open calls os.startfile which calls ShellExecute which can't handle long arguments,
+        # so discover and launch the browser directly.
+        # https://blogs.msdn.microsoft.com/oldnewthing/20031210-00/?p=41553
 
-    #     try:
-    #         hkey = OpenKeyEx(HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice')
-    #         (value, typ) = QueryValueEx(hkey, 'ProgId')
-    #         CloseKey(hkey)
-    #         if value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
-    #             # IE and Edge can't handle long arguments so just use webbrowser.open and hope
-    #             # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
-    #             cls = None
-    #         else:
-    #             cls = value
-    #     except:
-    #         cls  = 'https'
+        try:
+            hkey = OpenKeyEx(HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice')
+            (value, typ) = QueryValueEx(hkey, 'ProgId')
+            CloseKey(hkey)
+            if value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
+                # IE and Edge can't handle long arguments so just use webbrowser.open and hope
+                # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
+                cls = None
+            else:
+                cls = value
+        except:
+            cls  = 'https'
 
-    #     if cls:
-    #         try:
-    #             hkey = OpenKeyEx(HKEY_CLASSES_ROOT, r'%s\shell\open\command' % cls)
-    #             (value, typ) = QueryValueEx(hkey, None)
-    #             CloseKey(hkey)
-    #             if 'iexplore' not in value.lower():
-    #                 if '%1' in value:
-    #                     subprocess.Popen(buf.value.replace('%1', url))
-    #                 else:
-    #                     subprocess.Popen('%s "%s"' % (buf.value, url))
-    #                 return
-    #         except:
-    #             pass
+        if cls:
+            try:
+                hkey = OpenKeyEx(HKEY_CLASSES_ROOT, r'%s\shell\open\command' % cls)
+                (value, typ) = QueryValueEx(hkey, None)
+                CloseKey(hkey)
+                if 'iexplore' not in value.lower():
+                    if '%1' in value:
+                        subprocess.Popen(buf.value.replace('%1', url))
+                    else:
+                        subprocess.Popen('%s "%s"' % (buf.value, url))
+                    return
+            except:
+                pass
 
     webbrowser.open(url)
