@@ -4,7 +4,7 @@ import re
 import threading
 from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
-from os.path import basename, isdir, join
+from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
