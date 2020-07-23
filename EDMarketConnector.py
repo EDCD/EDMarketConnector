@@ -11,6 +11,7 @@ import json
 from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
+import html
 import requests
 from time import gmtime, time, localtime, strftime, strptime
 import _strptime	# Workaround for http://bugs.python.org/issue7980
@@ -57,6 +58,21 @@ from theme import theme
 
 
 SERVER_RETRY = 5	# retry pause for Companion servers [s]
+
+SHIPYARD_HTML_TEMPLATE = """
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="refresh" content="0; url={link}">
+        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
+    </head>
+    <body>
+        <a href="{link}">
+            You should be redirected to your {ship_name} at {provider_name} shortly...
+        </a>
+    </body>
+</html>
+"""
 
 
 class AppWindow(object):
@@ -655,7 +671,18 @@ class AppWindow(object):
                 hotkeymgr.play_bad()
 
     def shipyard_url(self, shipname):
-        return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        provider = config.get('shipyard_provider') or 'EDSY'
+        target = plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        file_name = join(config.app_dir, "last_shipyard.html")
+
+        with open(file_name, 'w') as f:
+            print(SHIPYARD_HTML_TEMPLATE.format(
+                link=html.escape(str(target)),
+                provider_name=html.escape(str(provider)),
+                ship_name=html.escape(str(shipname))
+            ), file=f)
+        
+        return f'file://localhost/{file_name}'
 
     def system_url(self, system):
         return plug.invoke(config.get('system_provider'),   'EDSM', 'system_url', monitor.system)
