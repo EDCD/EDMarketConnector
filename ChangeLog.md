@@ -1,6 +1,78 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release Candidate 4.0.3-rc3
+===
+
+  In addition to changes in [4.0.3-rc1](https://github.com/EDCD/EDMarketConnector/releases/tag/Release%2F4.0.3-rc1)
+and [4.0.3-rc2](https://github.com/EDCD/EDMarketConnector/releases/tag/Release%2F4.0.3-rc2):
+
+ * A fix for ships without a player-set name using a single ` ` (space
+  character) as their name in the UI, instead of the ship model name.
+  
+    See [#614 - Ship is not displaying but IS hotlinked](https://github.com/EDCD/EDMarketConnector/issues/614).
+    
+ * A fix for some file paths on Linux not understanding `~` as "my home
+ directory".  This should help anyone using Manjaro Linux.
+ 
+    See [#486 - Some info about running on Manjaro](https://github.com/EDCD/EDMarketConnector/issues/486).
+    
+ * A new option to use an alternate method of opening a URL for shipyard links.
+ It's called 'Use alternate URL method' and is located in the 'File' >
+ 'Settings' dialogue on the 'Configuration' tab, next to the dropdown used to
+ choose shipyard provider.  If your setup results in coriolis.io or edsy.org
+ saying they can't load your build then try toggling this on.
+ 
+    This method writes a small .html file in `%LOCALAPPDATA\EDMarketConnector\ `
+    (or other-OS equivalent) and directs your browser to open that. The file
+    contains a meta refresh redirect to the URL for your build on your chosen
+    shipyard provider.
+    
+    **Please let us know if this doesn't work for you!**
+    Anti-Virus or Software Firewalls might object to the "open .html file, and
+    then it redirects" workaround.
+    
+    See [#617 - Ship load out link error](https://github.com/EDCD/EDMarketConnector/issues/617).
+
+Release Candidate 4.0.3-rc2
+===
+
+This is exactly the same as -rc1 except I fixed a missing line of code that
+prevented the EDSM plugin from loading.
+
+Release Candidate 4.0.3-rc1
+===
+
+The main purpose of this Pre-Release is to test fixes to the System and Station
+provider code supplied by the internal plugins.  But we've also now switched
+to full [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+strings.
+
+ * Switch to Semantic Version strings.
+    * As part of this the version check with `EDMC.exe -v` might now show
+     some exception/error output if it fails to download and parse the appcast
+     file.  The string it shows, new version available or not, should be the
+     same format as previously.
+
+ * Fix for bug [#616 - EDMC Not Showing "Station" after Update](https://github.com/EDCD/EDMarketConnector/issues/616)
+  This was caused by changes to the *EDDB* plugin inadvertently no longer
+  maintaining some state that it turned out the *Inara* plugin was depending
+  on.
+    * Inara plugin is now using direct URLs for System and Station links.  IT
+     no longer relies on you having entered an Inara API Key.
+    * All three 'provider' plugins (EDDB, EDSM, Inara) should now be using the
+     same logic for when they update and what they display.
+    * If you Request Docking, whether the request succeeds or not, the
+     station name will now show and be clickable.
+    * If you Undock, Supercruise away or FSDJump away any station name will
+     be replaced with a `×` character.  As with unpopulated systems clicking
+     this will take you either to the system page, or to a list of stations
+     in the system (depending on provider used).
+
+    There'll likely be a refactor of these plugins in the future.
+    
+    For now please test that this functionality is working as expected.
+
 Release 4.0.2.0
 ===
 Only a minor fix to EDMC.exe

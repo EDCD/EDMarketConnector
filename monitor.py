@@ -4,7 +4,7 @@ import re
 import threading
 from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_CUR, SEEK_END
-from os.path import basename, isdir, join
+from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
@@ -118,8 +118,9 @@ class EDLogs(FileSystemEventHandler):
 
     def start(self, root):
         self.root = root
-        logdir = config.get('journaldir') or config.default_journal_dir
-        if not logdir or not isdir(logdir):
+        logdir = expanduser(config.get('journaldir') or config.default_journal_dir)  # type: ignore # config is weird
+
+        if not logdir or not isdir(logdir):  # type: ignore # config does weird things in its get
             self.stop()
             return False
 

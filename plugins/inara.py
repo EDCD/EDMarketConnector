@@ -21,6 +21,7 @@ import plug
 if __debug__:
     from traceback import print_exc
 
+
 _TIMEOUT = 20
 FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to Inara
 CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
@@ -56,13 +57,28 @@ FLOOD_LIMIT_SECONDS = 45  # minimum time between sending non-major cargo trigger
 # Main window clicks
 this.system_link = None
 this.system = None
+this.system_address = None
+this.system_population = None
 this.station_link = None
 this.station = None
+this.station_marketid = None
+STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 def system_url(system_name):
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={this.system_address}')
+
+    elif system_name:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
+
     return this.system
 
 def station_url(system_name, station_name):
+    if system_name:
+        if station_name:
+            return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+        return system_url(system_name)
+
     return this.station or this.system
 
 
@@ -132,9 +148,9 @@ def prefs_changed(cmdr, is_beta):
 
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = this.system
+        this.system_link['url'] = system_url(this.system)
     if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = this.station or this.system
+        this.station_link['url'] = station_url(this.system, this.station)
 
     if cmdr and not is_beta:
         this.cmdr = cmdr
@@ -198,13 +214,31 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.fleet = None
         this.shipswap = False
         this.system = None
+        this.system_address = None
         this.station = None
+        this.station_marketid = None
     elif entry['event'] in ['Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy']:
         # Events that mean a significant change in credits so we should send credits after next "Update"
         this.lastcredits = 0
     elif entry['event'] in ['ShipyardNew', 'ShipyardSwap'] or (entry['event'] == 'Location' and entry['Docked']):
         this.suppress_docked = True
 
+    # Always update, even if we're not the *current* system or station provider.
+    this.system_address = entry.get('SystemAddress') or this.system_address
+    this.system = entry.get('StarSystem') or this.system
+
+    # We need pop == 0 to set the value so as to clear 'x' in systems with
+    # no stations.
+    pop = entry.get('Population')
+    if pop is not None:
+        this.system_population = pop
+
+    this.station = entry.get('StationName') or this.station
+    this.station_marketid = entry.get('MarketID') or this.station_marketid
+    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
+    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
+        this.station = None
+        this.station_marketid = None
 
     # Send location and status on new game or StartUp. Assumes Cargo is the last event on a new game (other than Docked).
     # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion, EngineerProgress and PowerPlay affiliation.
@@ -362,7 +396,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.undocked = False
             elif entry['event'] == 'FSDJump':
                 this.undocked = False
-                this.system = None
                 add_event('addCommanderTravelFSDJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
@@ -380,7 +413,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                                   ]) for f in entry['Factions']
                               ])
             elif entry['event'] == 'CarrierJump':
-                this.system = None
                 add_event('addCommanderTravelCarrierJump', entry['timestamp'],
                           OrderedDict([
                               ('starsystemName', entry['StarSystem']),
@@ -400,11 +432,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 # Ignore the following 'Docked' event
                 this.suppress_docked = True
 
-            # Override standard URL functions
-            if config.get('system_provider') == 'Inara':
-                this.system_link['url'] = this.system
-            if config.get('station_provider') == 'Inara':
-                this.station_link['url'] = this.station or this.system
 
             cargo = [OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo'])]
 
@@ -727,15 +754,42 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
         this.newuser = False
 
-def cmdr_data(data, is_beta):
+    # Only actually change URLs if we are current provider.
+    if config.get('system_provider') == 'Inara':
+        this.system_link['text'] = this.system
+        this.system_link['url'] = system_url(this.system)
+        this.system_link.update_idletasks()
 
+    if config.get('station_provider') == 'Inara':
+        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        this.station_link['url'] = station_url(this.system, this.station)
+        this.station_link.update_idletasks()
+
+def cmdr_data(data, is_beta):
     this.cmdr = data['commander']['name']
+
+    # Always store initially, even if we're not the *current* system provider.
+    if not this.station_marketid:
+        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+    # Only trust CAPI if these aren't yet set
+    this.system = this.system or data['lastSystem']['name']
+    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = this.system
+        this.system_link['text'] = this.system
+        this.system_link['url'] = system_url(this.system)
+        this.system_link.update_idletasks()
     if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = this.station or this.system
+        if data['commander']['docked']:
+            this.station_link['text'] = this.station
+        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+            this.station_link['text'] = STATION_UNDOCKED
+        else:
+            this.station_link['text'] = ''
+
+        this.station_link['url'] = station_url(this.system, this.station)
+        this.station_link.update_idletasks()
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
@@ -879,12 +933,7 @@ def update_location(event=None):
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
 
 def inara_notify_location(eventData):
-    this.system  = eventData.get('starsystemInaraURL')
-    if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = this.system	# Override standard URL function
-    this.station = eventData.get('stationInaraURL')
-    if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = this.station or this.system	# Override standard URL function
+    pass
 
 # Call inara_notify_ship() in interested plugins with Inara's response when changing ship
 def update_ship(event=None):
