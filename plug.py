@@ -14,6 +14,7 @@ import tkinter as tk
 import myNotebook as nb
 
 from config import config
+from EDMarketConnector import logger
 from time import time as time
 
 
@@ -92,7 +93,7 @@ class Plugin(object):
         self.module = None	# None for disabled plugins.
 
         if loadfile:
-            sys.stdout.write('loading plugin {} from "{}"\n'.format(name.replace('.', '_'), loadfile))
+            logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
                 module = importlib.machinery.SourceFileLoader('plugin_{}'.format(name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')), loadfile).load_module()
                 if getattr(module, 'plugin_start3', None):
@@ -100,15 +101,15 @@ class Plugin(object):
                     self.name = newname and str(newname) or name
                     self.module = module
                 elif getattr(module, 'plugin_start', None):
-                    sys.stdout.write('plugin %s needs migrating\n' % name)
+                    logger.warning(f'plugin {name} needs migrating\n')
                     PLUGINS_not_py3.append(self)
                 else:
-                    sys.stdout.write('plugin %s has no plugin_start3() function\n' % name)
-            except:
-                print_exc()
+                    logger.error(f'plugin {name} has no plugin_start3() function')
+            except Exception as e:
+                logger.error(f'{__class__}: Failed for Plugin "{name}"', exc_info=e)
                 raise
         else:
-            sys.stdout.write('plugin %s disabled\n' % name)
+            logger.info(f'{__class__}: plugin {name} disabled')
 
     def _get_func(self, funcname):
         """
@@ -136,8 +137,8 @@ class Plugin(object):
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
                 return appitem
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'{__class__}: Failed for Plugin "{self.name}"', exc_info=e)
         return None
 
     def get_prefs(self, parent, cmdr, is_beta):
@@ -156,8 +157,8 @@ class Plugin(object):
                 if not isinstance(frame, nb.Frame):
                     raise AssertionError
                 return frame
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'{__class__}: Failed for Plugin "{self.name}"', exc_info=e)
         return None
 
 
@@ -174,8 +175,8 @@ def load_plugins(master):
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
                 plugin.folder = None	# Suppress listing in Plugins prefs tab
                 internal.append(plugin)
-            except:
-                pass
+            except Exception as e:
+                logger.error(f'Failure loading internal Plugin "{name}"', exc_info=e)
     PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
@@ -195,7 +196,8 @@ def load_plugins(master):
                 # Add plugin's folder to load path in case plugin has internal package dependencies
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
-            except:
+            except Exception as e:
+                logger.error(f'Failure loading found Plugin "{name}"', exc_info=e)
                 pass
     PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
 
@@ -240,8 +242,8 @@ def notify_stop():
             try:
                 newerror = plugin_stop()
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
     return error
 
 
@@ -257,8 +259,8 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
         if prefs_cmdr_changed:
             try:
                 prefs_cmdr_changed(cmdr, is_beta)
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
 
 
 def notify_prefs_changed(cmdr, is_beta):
@@ -275,8 +277,8 @@ def notify_prefs_changed(cmdr, is_beta):
         if prefs_changed:
             try:
                 prefs_changed(cmdr, is_beta)
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
 
 
 def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
@@ -298,8 +300,8 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
                 # Pass a copy of the journal entry in case the callee modifies it
                 newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
     return error
 
 
@@ -319,8 +321,8 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
                 # Pass a copy of the status entry in case the callee modifies it
                 newerror = status(cmdr, is_beta, dict(entry))
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
     return error
 
 
@@ -338,8 +340,8 @@ def notify_newdata(data, is_beta):
             try:
                 newerror = cmdr_data(data, is_beta)
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
     return error
 
 
