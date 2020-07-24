@@ -68,6 +68,15 @@ strings.
     
     See [#617 - Ship load out link error](https://github.com/EDCD/EDMarketConnector/issues/617).
 
+ * Translations updated:
+   * New phrases were added and the only 100% translated languages are now:
+     Czech, Finnish, German, Italian, Japanese, Portugese (Brazil), Russian,
+     Serbian (Latin), Serbian (Latin, Bosnia and Herzegovina).
+     
+   Thank you translators! Please do contribute on
+   [the OneSkyApp project](https://marginal.oneskyapp.com/collaboration/project/52710)
+   if you are able to.
+     
 Release 4.0.2.0
 ===
 Only a minor fix to EDMC.exe
