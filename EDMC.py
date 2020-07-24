@@ -184,8 +184,8 @@ def main():
 
         # stuff we can do when not docked
         if args.d:
-            with open(args.d, 'wb') as h:
-                h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+            with open(args.d, 'w') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
 
         if args.a:
             loadout.export(data, args.a)
