@@ -218,7 +218,7 @@ def main():
                 sys.exit(EXIT_LAGGING)
 
             # Ignore possibly missing shipyard info
-            elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
+            elif not data['lastStarport'].get('commodities') or data['lastStarport'].get('modules'):
                 print("Station doesn't have anything!", file=sys.stderr)
                 sys.exit(EXIT_SUCCESS)
 
