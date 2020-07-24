@@ -8,7 +8,7 @@ import json
 import requests
 import sys
 import os
-from typing import Any
+from typing import Any, Optional
 
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
@@ -83,7 +83,7 @@ def main():
 
         if args.version:
             updater = Updater(provider='internal')
-            newversion: EDMCVersion = updater.check_appcast()
+            newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
                 print('{CURRENT} ("{UPDATE}" is available)'.format(
                     CURRENT=appversion,
