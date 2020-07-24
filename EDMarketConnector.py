@@ -991,8 +991,12 @@ class EDMCContextFilter(logging.Filter):
         if 'self' in frame.f_locals:
             # Paranoia checks
             frame_class = frame.f_locals['self'].__class__
+
             if frame_class and frame_class.__qualname__:
                 class_name = frame_class.__qualname__
+
+        if class_name = '':
+            print('ALERT!  Something went wrong with finding class name for logging!')
 
         return class_name
 
@@ -1023,10 +1027,15 @@ class EDMCContextFilter(logging.Filter):
         frame = stack[start]
         if frame.f_locals and 'self' in frame.f_locals:
             # Paranoia checks
+
             if frame.f_code and frame.f_code.co_name:
                 fn = getattr(frame.f_locals['self'], frame.f_code.co_name)
+
                 if fn and fn.__qualname__:
                     qualname = n.__qualname__
+
+        if qualname == '':
+            print('ALERT!  Something went wrong with finding caller qualname for logging!')
 
         return qualname
 
