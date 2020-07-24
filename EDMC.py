@@ -250,13 +250,13 @@ def main():
 
             # Retry for shipyard
             sleep(SERVER_RETRY)
-            data2 = companion.session.station()
+            new_data = companion.session.station()
             # might have undocked while we were waiting for retry in which case station data is unreliable
-            if data2['commander'].get('docked') and \
-                    deep_get(data2, 'lastSystem', 'name') == monitor.system and \
-                    deep_get(data2, 'lastStarport', 'name') == monitor.station:
+            if new_data['commander'].get('docked') and \
+                    deep_get(new_data, 'lastSystem', 'name') == monitor.system and \
+                    deep_get(new_data, 'lastStarport', 'name') == monitor.station:
 
-                data = data2
+                data = new_data
 
         if args.s:
             if deep_get(data, 'lastStarport', 'ships', 'shipyard_list'):
