@@ -53,11 +53,14 @@ strings.
  choose shipyard provider.  If your setup results in coriolis.io or edsy.org
  saying they can't load your build then try toggling this on.
  
-    This method writes a small .html file in
-    `%LOCALAPPDATA%\EDMarketConnector\ `
-    (or other-OS equivalent) and directs your browser to open that. The file
-    contains a meta refresh redirect to the URL for your build on your chosen
-    shipyard provider.
+    This method writes a small .html file,
+    `%LOCALAPPDATA%\EDMarketConnector\shipyard.html`
+    (or other-OS equivalent location), and directs your browser to open that.
+    The file contains a meta refresh redirect to the URL for your build on
+    your chosen shipyard provider.  The file is *not* deleted after use, so
+    you can also use this as "let's re-open that last build" facility even
+     without
+    EDMC running.
     
     **Please let us know if this doesn't work for you!**
     Anti-Virus or Software Firewalls might object to the "open .html file, and
