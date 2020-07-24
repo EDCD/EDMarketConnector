@@ -207,7 +207,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
-            self.help_menu.add_command(command=lambda:not self.help_about.showing and self.help_about(self.w))
+            self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
@@ -409,7 +409,7 @@ class AppWindow(object):
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'{__class__}', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -523,7 +523,7 @@ class AppWindow(object):
             self.login()
 
         except Exception as e:			# Including CredentialsError, ServerError
-            if __debug__: print_exc()
+            logger.debug(f'{__class__}', exc_info=e)
             self.status['text'] = str(e)
             play_bad = True
 
@@ -538,8 +538,14 @@ class AppWindow(object):
         # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
         try:
             data = companion.session.station()
-            if __debug__:
-                print('Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!'))
+            if data['commander'].get('docked'):
+                if data.get('lastStarport', {}).get('ships'):
+                    report = 'Success'
+                else:
+                    report ='Failure'
+            else:
+                report = 'Undocked!'
+            logger.debug(f'{__class__}: Retry for shipyard - {report}')
             if not data['commander'].get('docked'):
                 pass	# might have undocked while we were waiting for retry in which case station data is unreliable
             elif (data.get('lastSystem',   {}).get('name') == monitor.system and
@@ -607,10 +613,10 @@ class AppWindow(object):
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
-                    print('Monitor: Disable WinSparkle automatic update checks')
+                    logger.info(f'{__class__}: Monitor: Disable WinSparkle automatic update checks')
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
-                    print("Can't start Status monitoring")
+                    logger.info(f"{__class__}: Can't start Status monitoring")
 
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
@@ -631,7 +637,7 @@ class AppWindow(object):
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
                 self.updater.setAutomaticUpdatesCheck(True)
-                print('Monitor: Enable WinSparkle automatic update checks')
+                logger.info(f'{__class__}: Monitor: Enable WinSparkle automatic update checks')
 
     # cAPI auth
     def auth(self, event=None):
@@ -647,7 +653,7 @@ class AppWindow(object):
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'{__class__}', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -724,7 +730,7 @@ class AppWindow(object):
     def help_releases(self, event=None):
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
-    class help_about(tk.Toplevel):
+    class HelpAbout(tk.Toplevel):
         showing = False
 
         def __init__(self, parent):
@@ -802,7 +808,7 @@ class AppWindow(object):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
-            print('Current version is {}'.format(appversion))
+            logger.info(f'{__class__}: Current version is {appversion}')
 
         def apply(self):
             self._destroy()
@@ -830,7 +836,7 @@ class AppWindow(object):
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'{__class__}', exc_info=e)
             self.status['text'] = str(e)
 
     def onexit(self, event=None):
@@ -952,7 +958,7 @@ if __name__ == "__main__":
     logger.setLevel(logger_default_loglevel)
     logger_ch = logging.StreamHandler()
     logger_ch.setLevel(logger_default_loglevel)
-    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(funcName)s: %(message)s')
+    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s')
     logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
     logger_formatter.default_msec_format = '%s.%03d'
     logger_ch.setFormatter(logger_formatter)
