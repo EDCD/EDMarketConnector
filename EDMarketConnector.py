@@ -880,13 +880,12 @@ class AppWindow(object):
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
-# Run the app
-if __name__ == "__main__":
 
+def enforce_single_instance() -> None:
     # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
     if platform == 'win32':
         import ctypes
-        from ctypes.wintypes import *
+        from ctypes.wintypes import HWND, LPWSTR, LPCWSTR, INT, BOOL, LPARAM
         EnumWindows            = ctypes.windll.user32.EnumWindows
         GetClassName           = ctypes.windll.user32.GetClassNameW
         GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
@@ -935,6 +934,10 @@ if __name__ == "__main__":
 
         EnumWindows(enumwindowsproc, 0)
 
+# Run the app
+if __name__ == "__main__":
+
+    enforce_single_instance()
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
