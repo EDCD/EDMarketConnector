@@ -5,7 +5,6 @@
 
 import argparse
 import json
-import requests
 import sys
 import os
 from typing import Any, Optional
@@ -50,8 +49,8 @@ def versioncmp(versionstring):
 
 def deep_get(target: dict, *args: str, default=None) -> Any:
     if not hasattr(target, 'get'):
-        raise ValueError("Cannot call get on {} ({})".format(target, type(target)))
-    
+        raise ValueError(f"Cannot call get on {target} ({type(target)})")
+
     current = target
     for arg in args:
         res = current.get(arg)
@@ -85,9 +84,7 @@ def main():
             updater = Updater(provider='internal')
             newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
-                print('{CURRENT} ("{UPDATE}" is available)'.format(
-                    CURRENT=appversion,
-                    UPDATE=newversion.title))
+                print(f'{appversion} ({newversion.title!r} is available)')
             else:
                 print(appversion)
             sys.exit(EXIT_SUCCESS)
@@ -111,10 +108,10 @@ def main():
                             monitor.parse_entry(line)
                         except Exception:
                             if __debug__:
-                                print('Invalid journal entry {!r}'.format(line))
+                                print(f'Invalid journal entry {line!r}')
 
             except Exception as e:
-                print("Can't read Journal file: {}".format(str(e)), file=sys.stderr)
+                print(f"Can't read Journal file: {str(e)}", file=sys.stderr)
                 sys.exit(EXIT_SYS_ERR)
 
             if not monitor.cmdr:
@@ -276,7 +273,7 @@ def main():
                 eddn_sender.export_shipyard(data, monitor.is_beta)
 
             except Exception as e:
-                print("Failed to send data to EDDN: {}".format(str(e)), file=sys.stderr)
+                print(f"Failed to send data to EDDN: {str(e)}", file=sys.stderr)
 
         sys.exit(EXIT_SUCCESS)
 
