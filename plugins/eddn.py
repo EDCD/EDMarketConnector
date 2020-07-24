@@ -15,12 +15,10 @@ from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from prefs import prefsVersion
+from EDMarketConnector import logger
 
 if sys.platform != 'win32':
     from fcntl import lockf, LOCK_EX, LOCK_NB
-
-if __debug__:
-    from traceback import print_exc
 
 from config import applongname, appversion, config
 from companion import category_map
@@ -62,15 +60,15 @@ class EDDN(object):
             try:
                 # Try to open existing file
                 self.replayfile = open(filename, 'r+', buffering=1)
-            except:
+            except Exception as e:
                 if exists(filename):
                     raise	# Couldn't open existing file
                 else:
                     self.replayfile = open(filename, 'w+', buffering=1)	# Create file
             if sys.platform != 'win32':	# open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX|LOCK_NB)
-        except:
-            if __debug__: print_exc()
+        except Exception as e:
+            logger.debug(f'Failed opening "replay.jsonl"', exc_info=e)
             if self.replayfile:
                 self.replayfile.close()
             self.replayfile = None
@@ -104,11 +102,14 @@ class EDDN(object):
         ])
 
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
-        if __debug__ and r.status_code != requests.codes.ok:
-            print('Status\t%s'  % r.status_code)
-            print('URL\t%s'  % r.url)
-            print('Headers\t%s' % r.headers)
-            print('Content:\n%s' % r.text)
+        if r.status_code != requests.codes.ok:
+            logger.debug(f''':
+Status\t{r.status_code}
+URL\t{r.url}
+Headers\t{r.headers}'
+Content:\n{r.text}
+'''
+            )
         r.raise_for_status()
 
     def sendreplay(self):
@@ -128,11 +129,9 @@ class EDDN(object):
         self.parent.update_idletasks()
         try:
             cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
-        except:
+        except json.JSONDecodeError as e:
             # Couldn't decode - shouldn't happen!
-            if __debug__:
-                print(self.replaylog[0])
-                print_exc()
+            logger.debug(f'\n{self.replaylog[0]}\n', exc_info=e)
             self.replaylog.pop(0)	# Discard and continue
         else:
             # Rewrite old schema name
@@ -144,11 +143,11 @@ class EDDN(object):
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
             except requests.exceptions.RequestException as e:
-                if __debug__: print_exc()
+                logger.debug(f'Failed sending', exc_info=e)
                 status['text'] = _("Error: Can't connect to EDDN")
                 return	# stop sending
             except Exception as e:
-                if __debug__: print_exc()
+                logger.debug(f'Failed sending', exc_info=e)
                 status['text'] = str(e)
                 return	# stop sending
 
@@ -443,10 +442,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         try:
             this.eddn.export_journal_entry(cmdr, is_beta, filter_localised(entry))
         except requests.exceptions.RequestException as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed in export_journal_entry', exc_info=e)
             return _("Error: Can't connect to EDDN")
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed in export_journal_entry', exc_info=e)
             return str(e)
 
     elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
@@ -466,10 +465,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                     this.eddn.export_journal_shipyard(cmdr, is_beta, entry)
 
         except requests.exceptions.RequestException as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return _("Error: Can't connect to EDDN")
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
 def cmdr_data(data, is_beta):
@@ -492,9 +491,9 @@ def cmdr_data(data, is_beta):
                 status.update_idletasks()
 
         except requests.RequestException as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed exporting data', exc_info=e)
             return _("Error: Can't connect to EDDN")
 
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'Failed exporting data', exc_info=e)
             return str(e)
