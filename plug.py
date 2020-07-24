@@ -106,10 +106,10 @@ class Plugin(object):
                 else:
                     logger.error(f'plugin {name} has no plugin_start3() function')
             except Exception as e:
-                logger.error(f'{__class__}: Failed for Plugin "{name}"', exc_info=e)
+                logger.error(f': Failed for Plugin "{name}"', exc_info=e)
                 raise
         else:
-            logger.info(f'{__class__}: plugin {name} disabled')
+            logger.info(f'plugin {name} disabled')
 
     def _get_func(self, funcname):
         """
@@ -138,7 +138,7 @@ class Plugin(object):
                     raise AssertionError
                 return appitem
             except Exception as e:
-                logger.error(f'{__class__}: Failed for Plugin "{self.name}"', exc_info=e)
+                logger.error(f'Failed for Plugin "{self.name}"', exc_info=e)
         return None
 
     def get_prefs(self, parent, cmdr, is_beta):
@@ -158,7 +158,7 @@ class Plugin(object):
                     raise AssertionError
                 return frame
             except Exception as e:
-                logger.error(f'{__class__}: Failed for Plugin "{self.name}"', exc_info=e)
+                logger.error(f'Failed for Plugin "{self.name}"', exc_info=e)
         return None
 
 
