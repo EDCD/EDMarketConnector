@@ -18,6 +18,8 @@ import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
 import logging
+import traceback
+from typing import Any, Optional
 
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
@@ -941,8 +943,68 @@ def enforce_single_instance() -> None:
 
         EnumWindows(enumwindowsproc, 0)
 
+###########################################################################
+# Logging
+
 # Has to be here to be defined for other modules importing
 logger = logging.getLogger(appname)
+
+class EDMCContextFilter(logging.Filter):
+    """
+    logging.Filter sub-class to place the calling __class__ in the record.
+    """
+    def filter(self, record: logging.LogRecord) -> bool:
+        """
+
+        :param record:
+        :return: bool - True for this record to be logged.
+        """
+        record.__dict__['class'] = self.caller_class()
+        return True
+
+    def caller_class(self, skip=5) -> str:
+        """
+        Figure out our caller class.
+
+        Ref: <https://gist.github.com/techtonik/2151727#gistcomment-2333747>
+
+        :param skip: How many stack frames above to look.
+        :return: str: The class name.
+        """
+        import inspect
+
+        def stack_(frame):
+            framelist = []
+            while frame:
+                framelist.append(frame)
+                frame = frame.f_back
+            return framelist
+
+        stack = stack_(sys._getframe(1))
+        start = 0 + skip
+        if len(stack) < start + 1:
+            return ''
+
+        class_name = []
+        frame = stack[start]
+        module = inspect.getmodule(frame)
+        # `modname` can be None when frame is executed directly in console
+        # TODO(techtonik): consider using __main__
+        #if module:
+        #    class_name.append(module.__name__)
+        # detect classname
+        if 'self' in frame.f_locals:
+            # I don't know any way to detect call from the object method
+            # XXX: there seems to be no way to detect static method call - it will
+            #      be just a function call
+            class_name.insert(0, frame.f_locals['self'].__class__.__qualname__)
+        codename = frame.f_code.co_name
+        #if codename != '<module>':  # top level usually
+        #    class_name.append(codename)  # function or a method
+
+        return ".".join(class_name)
+###########################################################################
+
 # Run the app
 if __name__ == "__main__":
 
@@ -954,19 +1016,33 @@ if __name__ == "__main__":
 
     ###########################################################################
     # Set up a logging instance
-    logger_default_loglevel = logging.INFO
+    logger_default_loglevel = logging.DEBUG
     logger.setLevel(logger_default_loglevel)
+
+    # Set up filter for adding class name
+    logger_f = EDMCContextFilter()
+    logger.addFilter(logger_f)
+
     logger_ch = logging.StreamHandler()
     logger_ch.setLevel(logger_default_loglevel)
-    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s')
+
+    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s<.%(class)s>.%(funcName)s:%(lineno)d: %(message)s')
     logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
     logger_formatter.default_msec_format = '%s.%03d'
+
     logger_ch.setFormatter(logger_formatter)
     logger.addHandler(logger_ch)
     ###########################################################################
 
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')
+    logger.info('Logging test from __main__')
+    class A(object):
+        class B(object):
+            def __init__(self):
+                logger.info('Test from A.B.__init__')
+
+    ab = A.B()
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
