@@ -459,10 +459,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             logger.debug('Adding events', exc_info=e)
             return str(e)
 
-        #
-        # Events that don't need to be sent immediately but will be sent on the next mandatory event
-        #
-
         # Send credits and stats to Inara on startup only - otherwise may be out of date
         if entry['event'] == 'LoadGame':
             add_event('setCommanderCredits', entry['timestamp'],
