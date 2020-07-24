@@ -1041,7 +1041,7 @@ if __name__ == "__main__":
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
 
     ###########################################################################
-    # Set up a logging instance
+    # Configure the logging.Logger
     logger_default_loglevel = logging.DEBUG
     logger.setLevel(logger_default_loglevel)
 
@@ -1062,13 +1062,6 @@ if __name__ == "__main__":
 
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')
-    logger.info('Logging test from __main__')
-    class A(object):
-        class B(object):
-            def __init__(self):
-                logger.info('Test from A.B.__init__')
-
-    ab = A.B()
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
