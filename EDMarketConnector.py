@@ -17,6 +17,7 @@ from time import gmtime, time, localtime, strftime, strptime
 import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
+import logging
 
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
@@ -940,6 +941,8 @@ def enforce_single_instance() -> None:
 
         EnumWindows(enumwindowsproc, 0)
 
+# Has to be here to be defined for other modules importing
+logger = logging.getLogger(appname)
 # Run the app
 if __name__ == "__main__":
 
@@ -951,10 +954,7 @@ if __name__ == "__main__":
 
     ###########################################################################
     # Set up a logging instance
-    import logging
-
     logger_default_loglevel = logging.INFO
-    logger = logging.getLogger(appname)
     logger.setLevel(logger_default_loglevel)
     logger_ch = logging.StreamHandler()
     logger_ch.setLevel(logger_default_loglevel)
