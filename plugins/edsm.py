@@ -23,11 +23,10 @@ import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
+from EDMarketConnector import logger
 from config import appname, applongname, appversion, config
 import plug
 
-if __debug__:
-    from traceback import print_exc
 
 EDSM_POLL = 0.1
 _TIMEOUT = 20
@@ -359,7 +358,7 @@ def worker():
                     (msgnum, msg) = reply['msgnum'], reply['msg']
                     # 1xx = OK, 2xx = fatal error, 3&4xx not generated at top-level, 5xx = error but events saved for later processing
                     if msgnum // 100 == 2:
-                        print('EDSM\t%s %s\t%s' % (msgnum, msg, json.dumps(pending, separators = (',', ': '))))
+                        logger.warning(f'EDSM\t{msgnum} {msg}\t{json.dumps(pending, separators = (",", ": "))}')
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
                     else:
                         for e, r in zip(pending, reply['events']):
@@ -368,12 +367,12 @@ def worker():
                                 this.lastlookup = r
                                 this.system_link.event_generate('<<EDSMStatus>>', when="tail")	# calls update_status in main thread
                             elif r['msgnum'] // 100 != 1:
-                                print('EDSM\t%s %s\t%s' % (r['msgnum'], r['msg'], json.dumps(e, separators = (',', ': '))))
+                                logger.warning(f'EDSM\t{r["msgnum"]} {r["msg"]}\t{json.dumps(e, separators = (",", ": "))}')
                         pending = []
 
                 break
-            except:
-                if __debug__: print_exc()
+            except Exception as e:
+                logger.debug(f'Sending API events', exc_info=e)
                 retrying += 1
         else:
             plug.show_error(_("Error: Can't connect to EDSM"))
