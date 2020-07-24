@@ -100,6 +100,9 @@
 /* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
 
+/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
+"Disable Automatic Application Updates Check when in-game" = "Disabilita gli aggiornamenti automatici quando sei in-game";
+
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Plugin disabilitati";
 
@@ -334,6 +337,18 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Cartella dei plugins";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins senza Supporto Python 3.x";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x. Per favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
+
+/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
+"Plugins Without Python 3.x Support" = "Plugins senza Supporto Python 3.x";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
+
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
 
@@ -474,6 +489,9 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Recupera";
+
+/* Option to use alternate URL method on shipyard links [prefs.py] */
+"Use alternate URL method" = "Usare metodo URL alternativo";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Valore";
