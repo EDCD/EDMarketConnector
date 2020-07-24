@@ -965,7 +965,8 @@ if __name__ == "__main__":
     logger.addHandler(logger_ch)
     ###########################################################################
 
-    logger.info(f'{applongname} {appversion}')
+    # Plain, not via `logger`
+    print(f'{applongname} {appversion}')
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
