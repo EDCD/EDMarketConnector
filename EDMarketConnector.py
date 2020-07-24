@@ -986,15 +986,15 @@ class EDMCContextFilter(logging.Filter):
         if len(stack) < start + 1:
             return ''
 
-        class_name = []
+        class_name = ''
         frame = stack[start]
         if 'self' in frame.f_locals:
-            # I don't know any way to detect call from the object method
-            # XXX: there seems to be no way to detect static method call - it will
-            #      be just a function call
-            class_name.append(frame.f_locals['self'].__class__.__qualname__)
+            # Paranoia checks
+            frame_class = frame.f_locals['self'].__class__
+            if frame_class and frame_class.__qualname__:
+                class_name = frame_class.__qualname__
 
-        return ".".join(class_name)
+        return class_name
 
     def caller_qualname(self, skip=5) -> str:
         """
@@ -1019,15 +1019,16 @@ class EDMCContextFilter(logging.Filter):
         if len(stack) < start + 1:
             return ''
 
-        class_name = []
+        qualname = ''
         frame = stack[start]
-        if 'self' in frame.f_locals:
-            # I don't know any way to detect call from the object method
-            # XXX: there seems to be no way to detect static method call - it will
-            #      be just a function call
-            class_name.append(getattr(frame.f_locals['self'], frame.f_code.co_name).__qualname__)
+        if frame.f_locals and 'self' in frame.f_locals:
+            # Paranoia checks
+            if frame.f_code and frame.f_code.co_name:
+                fn = getattr(frame.f_locals['self'], frame.f_code.co_name)
+                if fn and fn.__qualname__:
+                    qualname = n.__qualname__
 
-        return ".".join(class_name)
+        return qualname
 
 ###########################################################################
 
