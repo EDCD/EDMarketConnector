@@ -225,9 +225,12 @@ No:
   types.
 
 * Use `logging` not `print()`, and definitely not `sys.stdout.write()`!
- `EDMarketConnector.py` sets up `logger` for this, so:
+ `EDMarketConnector.py` sets up a `logging.Logger` for this under the
+ `appname`, so:
  
-        from EDMarketConnector import logger
+        import logging
+        from config import appname
+        logger = logging.getLogger(appname)
         
         logger.info(f'Some message with a {variable}')
         
@@ -235,14 +238,26 @@ No:
             something
         except Exception as e:  # Try to be more specific
             logger.error(f'Error in ... with ...', exc_info=e)
-            
-    Also if the code is within a class definition at all then please use:
+
+    **DO NOT** use the following, as you might cause a circular import:
     
-        logger.info(f'{__class__}: ...)
+        from EDMarketConnector import logger
     
-    so that the class name is included in the output.  No `logger.Formatter`
-    does not support this (probably because there's no way to get at the
-    information for a calling function).
+    We have implemented a `logging.Filter` that adds support for the following
+    in `logging.Formatter()` strings:
+    
+    1. `%(qualname)s` which gets the full `ClassA(.ClassB...).func` of the
+     calling function.
+    1. `%(class)s` which gets just the immediately encloding class name
+     of the calling function.
+     
+    So don't worry about adding anything about the class or function you're
+    logging from, it's taken care of.
+    
+    *Do use a pertinent message, even when using `exc_info=...` to log an
+    exception*.  e.g. Logging will know you were in your `get_foo()` function
+    but you should still tell it what actually (failed to have) happened
+    in there.
     
 * In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
