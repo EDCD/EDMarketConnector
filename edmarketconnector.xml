@@ -581,7 +581,7 @@ If any of your plugins are listed in that section then they will need updating, 
 				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.3/EDMarketConnector_win_4.0.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.0.3.0"
+				sparkle:version="4.0.3"
 				length="11325440"
 				type="application/octet-stream"
 			/>
