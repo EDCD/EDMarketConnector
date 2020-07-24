@@ -960,6 +960,7 @@ class EDMCContextFilter(logging.Filter):
         :return: bool - True for this record to be logged.
         """
         record.__dict__['class'] = self.caller_class()
+        record.__dict__['qualname'] = self.caller_qualname()
         return True
 
     def caller_class(self, skip=5) -> str:
@@ -987,22 +988,47 @@ class EDMCContextFilter(logging.Filter):
 
         class_name = []
         frame = stack[start]
-        module = inspect.getmodule(frame)
-        # `modname` can be None when frame is executed directly in console
-        # TODO(techtonik): consider using __main__
-        #if module:
-        #    class_name.append(module.__name__)
-        # detect classname
         if 'self' in frame.f_locals:
             # I don't know any way to detect call from the object method
             # XXX: there seems to be no way to detect static method call - it will
             #      be just a function call
-            class_name.insert(0, frame.f_locals['self'].__class__.__qualname__)
-        codename = frame.f_code.co_name
-        #if codename != '<module>':  # top level usually
-        #    class_name.append(codename)  # function or a method
+            class_name.append(frame.f_locals['self'].__class__.__qualname__)
 
         return ".".join(class_name)
+
+    def caller_qualname(self, skip=5) -> str:
+        """
+        Figure out our caller's qualname
+
+        Ref: <https://gist.github.com/techtonik/2151727#gistcomment-2333747>
+
+        :param skip: How many stack frames above to look.
+        :return: str: The caller's qualname
+        """
+        import inspect
+
+        def stack_(frame):
+            framelist = []
+            while frame:
+                framelist.append(frame)
+                frame = frame.f_back
+            return framelist
+
+        stack = stack_(sys._getframe(1))
+        start = 0 + skip
+        if len(stack) < start + 1:
+            return ''
+
+        class_name = []
+        frame = stack[start]
+        if 'self' in frame.f_locals:
+            # I don't know any way to detect call from the object method
+            # XXX: there seems to be no way to detect static method call - it will
+            #      be just a function call
+            class_name.append(getattr(frame.f_locals['self'], frame.f_code.co_name).__qualname__)
+
+        return ".".join(class_name)
+
 ###########################################################################
 
 # Run the app
@@ -1026,7 +1052,7 @@ if __name__ == "__main__":
     logger_ch = logging.StreamHandler()
     logger_ch.setLevel(logger_default_loglevel)
 
-    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s<.%(class)s>.%(funcName)s:%(lineno)d: %(message)s')
+    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')
     logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
     logger_formatter.default_msec_format = '%s.%03d'
 
