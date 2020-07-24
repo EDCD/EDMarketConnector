@@ -915,7 +915,7 @@ def worker():
                             this.system_link.event_generate('<<InaraShip>>', when="tail")	# calls update_ship in main thread
 
                 break
-            except Exceptionas e:
+            except Exception as e:
                 logger.debug(f'Sending events', exc_info=e)
                 retrying += 1
         else:
