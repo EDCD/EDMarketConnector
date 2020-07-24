@@ -65,7 +65,13 @@ def deep_get(target: dict, *args: str, default=None) -> Any:
 def main():
     try:
         # arg parsing
-        parser = argparse.ArgumentParser(prog=appcmdname, description='Prints the current system and station (if docked) to stdout and optionally writes player status, ship locations, ship loadout and/or station data to file. Requires prior setup through the accompanying GUI app.')  # noqa:E501
+        parser = argparse.ArgumentParser(
+            prog=appcmdname,
+            description='Prints the current system and station (if docked) to stdout and optionally writes player '
+                        'status, ship locations, ship loadout and/or station data to file. '
+                        'Requires prior setup through the accompanying GUI app.'
+        )
+
         parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
@@ -128,6 +134,7 @@ def main():
                     for idx, cmdr in enumerate(cmdrs):
                         if cmdr.lower() == args.p.lower():
                             break
+
                     else:
                         raise companion.CredentialsError()
 
