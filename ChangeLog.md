@@ -43,8 +43,7 @@ strings.
     See [#614 - Ship is not displaying but IS hotlinked](https://github.com/EDCD/EDMarketConnector/issues/614).
     
  * A fix for some file paths on Linux not understanding `~` as "my home
- directory".  This should help anyone using Manjaro Linux and probably other
- Linux setups as well.
+ directory".  this should help anyone setting up on linux.
  
     See [#486 - Some info about running on Manjaro](https://github.com/EDCD/EDMarketConnector/issues/486).
     
