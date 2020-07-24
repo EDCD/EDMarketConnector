@@ -184,14 +184,14 @@ Coding Conventions
 Yes:
 
 ```python
-if somethingTrue:
-    Things_we_then_do()
+if something_true:
+    one_thing_we_do()
 ```
   
 No:
 
 ```python
-if somethingTrue: One_thing_we_do()
+if something_true: one_thing_we_do()
 ```
   
   Yes, some existing code still flouts this rule.
@@ -224,6 +224,26 @@ No:
 * Going forwards please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions, both their arguments and return
   types.
 
+* Use `logging` not `print()`, and definitely not `sys.stdout.write()`!
+ `EDMarketConnector.py` sets up `logger` for this, so:
+ 
+        from EDMarketConnector import logger
+        
+        logger.info(f'Some message with a {variable}')
+        
+        try:
+            something
+        except Exception as e:  # Try to be more specific
+            logger.error(f'Error in ... with ...', exc_info=e)
+            
+    Also if the code is within a class definition at all then please use:
+    
+        logger.info(f'{__class__}: ...)
+    
+    so that the class name is included in the output.  No `logger.Formatter`
+    does not support this (probably because there's no way to get at the
+    information for a calling function).
+    
 * In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 ---
