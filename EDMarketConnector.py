@@ -995,7 +995,7 @@ class EDMCContextFilter(logging.Filter):
             if frame_class and frame_class.__qualname__:
                 class_name = frame_class.__qualname__
 
-        if class_name = '':
+        if class_name == '':
             print('ALERT!  Something went wrong with finding class name for logging!')
 
         return class_name
@@ -1032,7 +1032,7 @@ class EDMCContextFilter(logging.Filter):
                 fn = getattr(frame.f_locals['self'], frame.f_code.co_name)
 
                 if fn and fn.__qualname__:
-                    qualname = n.__qualname__
+                    qualname = fn.__qualname__
 
         if qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
