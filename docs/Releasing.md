@@ -180,7 +180,8 @@ a `stable` release, as well as any social media posts you make.
 		1. You'll need to change the `<title>` and `<description>` texts to
 		reflect the latest version and the additional changelog.
 		1. Update the `url` and `sparkle:version` elements of the `<enclosure>`
-		section.
+		section.  **NB: Yes, sparkle:version should be the Semantic Version
+		string, not the Windows A.B.C.D form.**
 	1. As you're working in a version-specific branch, `release-4.0.2`, you
 	can safely commit these changes and push to GitHub.
      **Do not merge the branch with `releases` until the GitHub release is in
