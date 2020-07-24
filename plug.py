@@ -8,15 +8,15 @@ import importlib
 import sys
 import operator
 import threading	# We don't use it, but plugins might
-from traceback import print_exc
-
+import logging
 import tkinter as tk
+
 import myNotebook as nb
 
-from config import config
-from EDMarketConnector import logger
+from config import config, appname
 from time import time as time
 
+logger = logging.getLogger(appname)
 
 # Dashboard Flags constants
 FlagsDocked = 1<<0		# on a landing pad

@@ -18,15 +18,16 @@ import time
 import urllib.request, urllib.error, urllib.parse
 from queue import Queue
 from threading import Thread
+import logging
 
 import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
-from EDMarketConnector import logger
 from config import appname, applongname, appversion, config
 import plug
 
+logger = logging.getLogger(appname)
 
 EDSM_POLL = 0.1
 _TIMEOUT = 20

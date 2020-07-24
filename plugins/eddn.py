@@ -9,20 +9,21 @@ import re
 import requests
 import sys
 import uuid
+import logging
 
 import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
 from prefs import prefsVersion
-from EDMarketConnector import logger
 
 if sys.platform != 'win32':
     from fcntl import lockf, LOCK_EX, LOCK_NB
 
-from config import applongname, appversion, config
+from config import appname, applongname, appversion, config
 from companion import category_map
 
+logger = logging.getLogger(appname)
 
 this = sys.modules[__name__]	# For holding module globals
 
