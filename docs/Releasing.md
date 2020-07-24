@@ -306,6 +306,8 @@ updates specifically targets
 	NB: It can take some time for GitHub to show the changed
     edmarketconnector.xml contents to all users.
 
+**You should now update [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618)
+to reflect anything now fixed in latest release.**
 
 Pre-Releases
 ---
