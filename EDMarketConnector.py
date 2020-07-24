@@ -942,7 +942,24 @@ if __name__ == "__main__":
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
-        print('%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime())))
+
+    ###########################################################################
+    # Set up a logging instance
+    import logging
+
+    logger_default_loglevel = logging.INFO
+    logger = logging.getLogger(appname)
+    logger.setLevel(logger_default_loglevel)
+    logger_ch = logging.StreamHandler()
+    logger_ch.setLevel(logger_default_loglevel)
+    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(funcName)s: %(message)s')
+    logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
+    logger_formatter.default_msec_format = '%s.%03d'
+    logger_ch.setFormatter(logger_formatter)
+    logger.addHandler(logger_ch)
+    ###########################################################################
+
+    logger.info(f'{applongname} {appversion}')
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
