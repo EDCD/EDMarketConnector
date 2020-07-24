@@ -333,12 +333,12 @@ station on eddb.io.  This removes the need for stations.p.  That file will
 be removed in a future version, plugin authors should not be relying on its
 presence.</p>
 <p>NB: It's now using the system's "Population" data from Journal messages to
-determine if the system has stations or not.  This allows for the <code>×</code> as
+determine if the system has stations or not.  This allows for the <code>x</code> as
 station name to be clickable to open the eddb.io page for system when you're
 not docked.  It's known that some systems with stations have a Population of
 "0" and thus won't allow this functionality.  This is Frontier's issue, not
 EDMC's.  If you logged out in a populated system, run EDMC afresh, and use
-the 'Update' button you won't see the <code>×</code> until you login fully to the game.</p>
+the 'Update' button you won't see the <code>x</code> until you login fully to the game.</p>
 </li>
 <li>
 <p>Tweak to Inara plugin so it will send updates via the Inara API more
