@@ -168,10 +168,92 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.0.2.0</title>
+			<title>Release 4.0.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.0.3</h2>
+<p><strong>NB: Anyone who installed a 4.0.3-rcX release candidate version should first
+uninstall it before installing this.</strong>
+<br>Your settings are safe, they're in either the Registry on Windows, or in a
+file outside the install location on other OSes.
+<br>Your third-party plugins should also be safe, because you placed them in
+e.g. <code>%LOCALAPPDATA%\EDMarketConnector\plugins</code>, not in the installation
+plugins folder, didn't you ?</p>
+<p>This release contains fixes for a handful of bugs in 4.0.2.0, as well as a
+switch to full <a href="https://semver.org/#semantic-versioning-specification-semver" rel="nofollow">Semantic Version</a>
+strings.</p>
+<ul>
+<li>
+<p>Switch to Semantic Version strings.</p>
+<ul>
+<li>As part of this the version check with <code>EDMC.exe -v</code> might now show
+some exception/error output if it fails to download and parse the appcast
+file.  The string it shows, new version available or not, should be the
+same format as previously.</li>
+</ul>
+</li>
+<li>
+<p>Fix for bug <a href="https://github.com/EDCD/EDMarketConnector/issues/616">#616 - EDMC Not Showing "Station" after Update</a>
+This was caused by changes to the <em>EDDB</em> plugin inadvertently no longer
+maintaining some state that it turned out the <em>Inara</em> plugin was depending
+on.</p>
+<ul>
+<li>Inara plugin is now using direct URLs for System and Station links.  It
+no longer relies on you having entered an Inara API Key.</li>
+<li>All three 'provider' plugins (EDDB, EDSM, Inara) should now be using the
+same logic for when they update and what they display.</li>
+<li>If you Request Docking, whether the request succeeds or not, the
+station name will now show and be clickable.</li>
+<li>If you Undock, Supercruise away or FSDJump away then any station name
+will be replaced with a <code>×</code> (multiply) character.  As with unpopulated
+systems clicking this will take you either to the system page, or to a
+list of stations in the system (depending on provider used).</li>
+</ul>
+</li>
+<li>
+<p>A fix for ships without a player-set name using a single <code> </code> (space
+character) as their name in the UI, instead of the ship model name.</p>
+<p>See <a href="https://github.com/EDCD/EDMarketConnector/issues/614">#614 - Ship is not displaying but IS hotlinked</a>.</p>
+</li>
+<li>
+<p>A fix for some file paths on Linux not understanding <code>~</code> as "my home
+directory".  this should help anyone setting up on linux.</p>
+<p>See <a href="https://github.com/EDCD/EDMarketConnector/issues/486">#486 - Some info about running on Manjaro</a>.</p>
+</li>
+<li>
+<p>A new option to use an alternate method of opening a URL for shipyard links.
+It's called 'Use alternate URL method' and is located in the 'File' &gt;
+'Settings' dialogue on the 'Configuration' tab, next to the dropdown used to
+choose shipyard provider.  If your setup results in coriolis.io or edsy.org
+saying they can't load your build then try toggling this on.</p>
+<p>This method writes a small .html file,
+<code>%LOCALAPPDATA%\EDMarketConnector\shipyard.html</code>
+(or other-OS equivalent location), and directs your browser to open that.
+The file contains a meta refresh redirect to the URL for your build on
+your chosen shipyard provider.  The file is <em>not</em> deleted after use, so
+you can also use this as "let's re-open that last build" facility even
+without
+EDMC running.</p>
+<p><strong>Please let us know if this doesn't work for you!</strong>
+Anti-Virus or Software Firewalls might object to the "open .html file, and
+then it redirects" workaround.</p>
+<p>See <a href="https://github.com/EDCD/EDMarketConnector/issues/617">#617 - Ship load out link error</a>.</p>
+</li>
+<li>
+<p>Translations updated:</p>
+<ul>
+<li>New phrases were added and the only 100% translated languages are now:
+Czech, Finnish, German, Italian, Japanese, Portugese (Brazil), Russian,
+Serbian (Latin), Serbian (Latin, Bosnia and Herzegovina).</li>
+</ul>
+<p>Thank you translators! Please do contribute on
+<a href="https://marginal.oneskyapp.com/collaboration/project/52710" rel="nofollow">the OneSkyApp project</a>
+if you are able to.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.0.2.0</h2>
 <p>Only a minor fix to EDMC.exe</p>
@@ -496,11 +578,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.2.0/EDMarketConnector_win_4.0.2.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.3/EDMarketConnector_win_4.0.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.0.2.0"
-				length="11309056"
+				sparkle:version="4.0.3.0"
+				length="11325440"
 				type="application/octet-stream"
 			/>
 		</item>
