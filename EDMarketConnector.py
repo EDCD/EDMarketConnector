@@ -21,6 +21,7 @@ import logging
 import traceback
 from typing import Any, Optional
 
+import EDMCLogging
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
@@ -943,109 +944,6 @@ def enforce_single_instance() -> None:
 
         EnumWindows(enumwindowsproc, 0)
 
-###########################################################################
-# Logging
-
-# Has to be here to be defined for other modules importing
-# TODO: now nothing should import this, can it move back into __main__ block ?
-logger = logging.getLogger(appname)
-
-class EDMCContextFilter(logging.Filter):
-    """
-    logging.Filter sub-class to place the calling __class__ in the record.
-    """
-    def filter(self, record: logging.LogRecord) -> bool:
-        """
-
-        :param record:
-        :return: bool - True for this record to be logged.
-        """
-        record.__dict__['class'] = self.caller_class()
-        record.__dict__['qualname'] = self.caller_qualname()
-        return True
-
-    def caller_class(self, skip=5) -> str:
-        """
-        Figure out our caller class.
-
-        Ref: <https://gist.github.com/techtonik/2151727#gistcomment-2333747>
-
-        :param skip: How many stack frames above to look.
-        :return: str: The class name.
-        """
-        import inspect
-
-        def stack_(frame):
-            framelist = []
-            while frame:
-                framelist.append(frame)
-                frame = frame.f_back
-            return framelist
-
-        stack = stack_(sys._getframe(1))
-        # TODO: Make this less fragile by not depending on a magic number of
-        #       stack frames to skip.  Should be able to find the last
-        #       logger frame, where one of the critical, debug etc functions
-        #       was called and then use the next frame before that.
-        #       ALSO UPDATE caller_qualname() !!!
-        start = 0 + skip
-        if len(stack) < start + 1:
-            return ''
-
-        class_name = ''
-        frame = stack[start]
-        if 'self' in frame.f_locals:
-            # Paranoia checks
-            frame_class = frame.f_locals['self'].__class__
-
-            if frame_class and frame_class.__qualname__:
-                class_name = frame_class.__qualname__
-
-        if class_name == '':
-            print('ALERT!  Something went wrong with finding class name for logging!')
-
-        return class_name
-
-    def caller_qualname(self, skip=5) -> str:
-        """
-        Figure out our caller's qualname
-
-        Ref: <https://gist.github.com/techtonik/2151727#gistcomment-2333747>
-
-        :param skip: How many stack frames above to look.
-        :return: str: The caller's qualname
-        """
-        import inspect
-
-        def stack_(frame):
-            framelist = []
-            while frame:
-                framelist.append(frame)
-                frame = frame.f_back
-            return framelist
-
-        stack = stack_(sys._getframe(1))
-        start = 0 + skip
-        if len(stack) < start + 1:
-            return ''
-
-        qualname = ''
-        frame = stack[start]
-        if frame.f_locals and 'self' in frame.f_locals:
-            # Paranoia checks
-
-            if frame.f_code and frame.f_code.co_name:
-                fn = getattr(frame.f_locals['self'], frame.f_code.co_name)
-
-                if fn and fn.__qualname__:
-                    qualname = fn.__qualname__
-
-        if qualname == '':
-            print('ALERT!  Something went wrong with finding caller qualname for logging!')
-
-        return qualname
-
-###########################################################################
 
 # Run the app
 if __name__ == "__main__":
@@ -1056,28 +954,17 @@ if __name__ == "__main__":
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
 
-    ###########################################################################
-    # Configure the logging.Logger
-    logger_default_loglevel = logging.DEBUG
-    logger.setLevel(logger_default_loglevel)
-
-    # Set up filter for adding class name
-    logger_f = EDMCContextFilter()
-    logger.addFilter(logger_f)
-
-    logger_ch = logging.StreamHandler()
-    logger_ch.setLevel(logger_default_loglevel)
-
-    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')
-    logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-    logger_formatter.default_msec_format = '%s.%03d'
-
-    logger_ch.setFormatter(logger_formatter)
-    logger.addHandler(logger_ch)
-    ###########################################################################
+    logger = EDMCLogging.logger(appname).getLogger()
 
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')
+
+    class A(object):
+        class B(object):
+            def __init__(self):
+                logger.debug('A call from A.B.__init__')
+
+    abinit = A.B()
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
