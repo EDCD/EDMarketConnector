@@ -17,9 +17,6 @@ from time import gmtime, time, localtime, strftime, strptime
 import _strptime	# Workaround for http://bugs.python.org/issue7980
 from calendar import timegm
 import webbrowser
-import logging
-import traceback
-from typing import Any, Optional
 
 import EDMCLogging
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
