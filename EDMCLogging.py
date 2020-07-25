@@ -1,5 +1,8 @@
 """
-TODO: blurb
+This module provides for a common logging-powered log facility.
+Mostly it implements a logging.Filter() in order to get two extra
+members on the logging.LogRecord instance for use in logging.Formatter()
+strings.
 """
 
 import sys
@@ -8,8 +11,14 @@ from typing import Tuple
 
 class logger(object):
     """
-    TODO: desc
     Wrapper class for all logging configuration and code.
+
+    Class instantiation requires the 'logger name' and optional loglevel.
+    It is intended that this 'logger name' be re-used in all files/modules
+    that need to log.
+
+    Users of this class should then call getLogger() to get the
+    logging.Logger instance.
     """
     def __init__(self, logger_name: str, loglevel: int=logging.DEBUG):
         """
@@ -36,48 +45,61 @@ class logger(object):
         self.logger.addHandler(self.logger_channel)
 
     def getLogger(self) -> logging.Logger:
+        """
+        :return: The logging.Logger instance.
+        """
         return self.logger
 
 
 class EDMCContextFilter(logging.Filter):
     """
-    TODO: Update this
-    logging.Filter sub-class to place the calling __class__ in the record.
+    logging.Filter sub-class to place extra attributes of the calling site
+    into the record.
     """
     def filter(self, record: logging.LogRecord) -> bool:
         """
+        Attempt to set the following in the LogRecord:
 
-        :param record:
-        :return: bool - True for this record to be logged.
+            1. class = class name of the call site, if applicable
+            2. qualname = __qualname__ of the call site.  This simplifies
+             logging.Formatter() as you can use just this no matter if there is
+             a class involved or not, so you get a nice clean:
+                 <file/module>.<classA>[.classB....].<function>
+
+        :param record: The LogRecord we're "filtering"
+        :return: bool - Always true in order for this record to be logged.
         """
-        # TODO: Only set these if they're not already, in case upstream
-        #       adds them.
-        # TODO: Try setattr(record, 'class', ...
-        (class_name, qualname) = self.caller_class_and_qualname()
-        record.__dict__['class'] = class_name
-        record.__dict__['qualname'] = qualname
+        class_name = qualname = ''
+        # Don't even call in if both already set.
+        if not getattr(record, 'class', None) or not getattr(record, 'qualname', None):
+            (class_name, qualname) = self.caller_class_and_qualname()
+
+        # Only set if not already provided by logging itself
+        if getattr(record, 'class', None) is None:
+            setattr(record, 'class', class_name)
+
+        # Only set if not already provided by logging itself
+        if getattr(record, 'qualname', None) is None:
+            setattr(record, 'qualname', qualname)
+
         return True
 
-    def caller_class_and_qualname(self, skip=4) -> Tuple[str, str]:
+    def caller_class_and_qualname(self) -> Tuple[str, str]:
         """
-        Figure out our caller's qualname
+        Figure out our caller's class name and qualname
 
         Ref: <https://gist.github.com/techtonik/2151726#gistcomment-2333747>
 
-        :param skip: How many stack frames above to look.
-        :return: str: The caller's qualname
+        :return: Tuple[str, str]: The caller's class name and qualname
         """
-        import inspect
+        # TODO: we might as well just walk this below.
+        # Build the stack of frames from here upwards
+        stack = []
+        frame = sys._getframe(0)
+        while frame:
+            stack.append(frame)
+            frame = frame.f_back
 
-        # TODO: Fold this into caller_class()
-        def stack_(frame):
-            framelist = []
-            while frame:
-                framelist.append(frame)
-                frame = frame.f_back
-            return framelist
-
-        stack = stack_(sys._getframe(0))
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
@@ -117,8 +139,10 @@ class EDMCContextFilter(logging.Filter):
 
         if caller_qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
+            caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname()>'
 
         if caller_class_name == '':
             print('ALERT!  Something went wrong with finding caller class name for logging!')
+            caller_class_name = '<ERROR in EDMCLogging.caller_class_and_qualname()>'
 
         return (caller_class_name, caller_qualname)
