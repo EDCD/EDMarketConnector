@@ -947,6 +947,7 @@ def enforce_single_instance() -> None:
 # Logging
 
 # Has to be here to be defined for other modules importing
+# TODO: now nothing should import this, can it move back into __main__ block ?
 logger = logging.getLogger(appname)
 
 class EDMCContextFilter(logging.Filter):
@@ -982,6 +983,11 @@ class EDMCContextFilter(logging.Filter):
             return framelist
 
         stack = stack_(sys._getframe(1))
+        # TODO: Make this less fragile by not depending on a magic number of
+        #       stack frames to skip.  Should be able to find the last
+        #       logger frame, where one of the critical, debug etc functions
+        #       was called and then use the next frame before that.
+        #       ALSO UPDATE caller_qualname() !!!
         start = 0 + skip
         if len(stack) < start + 1:
             return ''
