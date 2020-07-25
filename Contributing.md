@@ -246,11 +246,13 @@ No:
     We have implemented a `logging.Filter` that adds support for the following
     in `logging.Formatter()` strings:
     
-    1. `%(qualname)s` which gets the full `ClassA(.ClassB...).func` of the
-     calling function.
-    1. `%(class)s` which gets just the immediately encloding class name
+    1. `%(qualname)s` which gets the full `<module>.ClassA(.ClassB...).func`
      of the calling function.
+    1. `%(class)s` which gets just the enclosing class name(s) of the calling
+     function.
      
+    If you want to see how we did this, check `EDMCLogging.py`.
+    
     So don't worry about adding anything about the class or function you're
     logging from, it's taken care of.
     

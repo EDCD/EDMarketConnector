@@ -954,7 +954,7 @@ if __name__ == "__main__":
         import tempfile
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
 
-    logger = EDMCLogging.logger(appname).getLogger()
+    logger = EDMCLogging.logger(appname).get_logger()
 
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')

@@ -44,7 +44,7 @@ class logger(object):
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
 
-    def getLogger(self) -> logging.Logger:
+    def get_logger(self) -> logging.Logger:
         """
         :return: The logging.Logger instance.
         """
@@ -60,11 +60,17 @@ class EDMCContextFilter(logging.Filter):
         """
         Attempt to set the following in the LogRecord:
 
-            1. class = class name of the call site, if applicable
+            1. class = class name(s) of the call site, if applicable
             2. qualname = __qualname__ of the call site.  This simplifies
              logging.Formatter() as you can use just this no matter if there is
              a class involved or not, so you get a nice clean:
                  <file/module>.<classA>[.classB....].<function>
+
+        If we fail to be able to properly set either then:
+
+            1. Use print() to alert, to be SURE a message is seen.
+            2. But also return strings noting the error, so there'll be
+             something in the log output if it happens.
 
         :param record: The LogRecord we're "filtering"
         :return: bool - Always true in order for this record to be logged.
@@ -86,11 +92,11 @@ class EDMCContextFilter(logging.Filter):
 
     def caller_class_and_qualname(self) -> Tuple[str, str]:
         """
-        Figure out our caller's class name and qualname
+        Figure out our caller's class name(s) and qualname
 
         Ref: <https://gist.github.com/techtonik/2151726#gistcomment-2333747>
 
-        :return: Tuple[str, str]: The caller's class name and qualname
+        :return: Tuple[str, str]: The caller's class name(s) and qualname
         """
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
@@ -110,10 +116,9 @@ class EDMCContextFilter(logging.Filter):
                 break  # We've found the frame we want
             frame = frame.f_back
 
-        caller_qualname = caller_class_name = ''
+        caller_qualname = caller_class_names = ''
         if frame:
             if frame.f_locals and 'self' in frame.f_locals:
-
                 # Find __qualname__ of the caller
                 # Paranoia checks
                 if frame.f_code and frame.f_code.co_name:
@@ -122,18 +127,18 @@ class EDMCContextFilter(logging.Filter):
                     if fn and fn.__qualname__:
                         caller_qualname = fn.__qualname__
 
-                # Find immediate containing class name of caller, if any
+                # Find containing class name(s) of caller, if any
                 frame_class = frame.f_locals['self'].__class__
                 # Paranoia checks
                 if frame_class and frame_class.__qualname__:
-                    caller_class_name = frame_class.__qualname__
+                    caller_class_names = frame_class.__qualname__
 
         if caller_qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
-            caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname()>'
+            caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname() for "qualname">'
 
-        if caller_class_name == '':
-            print('ALERT!  Something went wrong with finding caller class name for logging!')
-            caller_class_name = '<ERROR in EDMCLogging.caller_class_and_qualname()>'
+        if caller_class_names == '':
+            print('ALERT!  Something went wrong with finding caller class name(s) for logging!')
+            caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
 
-        return (caller_class_name, caller_qualname)
+        return (caller_class_names, caller_qualname)
