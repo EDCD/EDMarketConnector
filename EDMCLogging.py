@@ -92,35 +92,26 @@ class EDMCContextFilter(logging.Filter):
 
         :return: Tuple[str, str]: The caller's class name and qualname
         """
-        # TODO: we might as well just walk this below.
-        # Build the stack of frames from here upwards
-        stack = []
-        frame = sys._getframe(0)
-        while frame:
-            stack.append(frame)
-            frame = frame.f_back
-
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        f = 0
-        while stack[f]:
-            if type(stack[f].f_locals.get('self')) == logging.Logger:
-                f += 1  # Want to start on the next frame below
+        frame = sys._getframe(0)
+        while frame:
+            if type(frame.f_locals.get('self')) == logging.Logger:
+                frame = frame.f_back  # Want to start on the next frame below
                 break
-            f += 1
+            frame = frame.f_back
 
         # Now continue up through frames until we find the next one where
         # that is *not* true, as it should be the call site of the logger
         # call
-        while stack[f]:
-            if type(stack[f].f_locals.get('self')) != logging.Logger:
+        while frame:
+            if type(frame.f_locals.get('self')) != logging.Logger:
                 break  # We've found the frame we want
-            f += 1
+            frame = frame.f_back
 
         caller_qualname = caller_class_name = ''
-        if stack[f]:
-            frame = stack[f]
+        if frame:
             if frame.f_locals and 'self' in frame.f_locals:
 
                 # Find __qualname__ of the caller
