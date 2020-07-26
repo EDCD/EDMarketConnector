@@ -112,20 +112,30 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # But only actually change the URL if we are current station provider.
     if config.get('station_provider') == 'eddb':
-        this.station_link['text'] = this.station or (
-            this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        text = this.station
+        if not text:
+            if this.system_population is not None and this.system_population > 0:
+                text = STATION_UNDOCKED
+
+            else:
+                text = ''
+
+        this.station_link['text'] = text
         this.station_link['url'] = station_url(this.system, this.station)  # Override standard URL function
         this.station_link.update_idletasks()
 
 
 def cmdr_data(data, is_beta):
     # Always store initially, even if we're not the *current* system provider.
-    if not this.station_marketid:
-        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+    if not this.station_marketid and data['commander']['docked']:
+        this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    this.system = this.system or data['lastSystem']['name']
-    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
+    if not this.system:
+        this.system = data['lastSystem']['name']
+
+    if not this.station and data['commander']['docked']:
+        this.station = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get('system_provider') == 'eddb':
