@@ -1,0 +1,27 @@
+# This workflow will:
+#
+#   install Python dependencies
+#   Run flake8 to add annotations to the PR
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: PR-annotate-flake8
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Annotate with Flake8
+      uses: "tayfun/flake8-your-pr@master"
