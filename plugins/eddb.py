@@ -47,8 +47,10 @@ this.station_marketid = None
 def system_url(system_name: str) -> str:
     if this.system_address:
         return requests.utils.requote_uri(f'https://eddb.io/system/ed-address/{this.system_address}')
+
     elif system_name:
         return requests.utils.requote_uri(f'https://eddb.io/system/name/{system_name}')
+
     else:
         return ''
 
@@ -56,6 +58,7 @@ def system_url(system_name: str) -> str:
 def station_url(system_name: str, station_name: str) -> str:
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
+
     else:
         return system_url('')
 
@@ -78,6 +81,7 @@ def prefs_changed(cmdr, is_beta):
     # Override standard URL functions
     if config.get('system_provider') == 'eddb':
         this.system_link['url'] = system_url(this.system)
+
     if config.get('station_provider') == 'eddb':
         this.station_link['url'] = station_url(this.system, this.station)
 
@@ -118,6 +122,7 @@ def cmdr_data(data, is_beta):
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid:
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+
     # Only trust CAPI if these aren't yet set
     this.system = this.system or data['lastSystem']['name']
     this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
@@ -127,11 +132,14 @@ def cmdr_data(data, is_beta):
         this.system_link['text'] = this.system
         this.system_link['url'] = system_url(this.system)
         this.system_link.update_idletasks()
+
     if config.get('station_provider') == 'eddb':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
+
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
             this.station_link['text'] = STATION_UNDOCKED
+
         else:
             this.station_link['text'] = ''
 
