@@ -14,7 +14,9 @@ autopep8==1.5.3
 grip==4.5.2
 
 # Packaging
-py2exe==0.9.3.2
+# This isn't available via 'pip install', so has to be commented out in order for
+# GitHub Action Workflows to not error out
+#py2exe==0.9.3.2
 
 # All of the normal requirements
 -r requirements.txt
