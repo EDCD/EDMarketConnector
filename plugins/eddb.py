@@ -24,6 +24,7 @@
 
 
 import sys
+from typing import Any
 import requests
 
 from config import config
@@ -31,7 +32,7 @@ from config import config
 
 STATION_UNDOCKED: str = u'×'  # "Station" name to display when not docked = U+00D7
 
-this = sys.modules[__name__]  # For holding module globals
+this: Any = sys.modules[__name__]  # For holding module globals
 
 # Main window clicks
 this.system_link = None
