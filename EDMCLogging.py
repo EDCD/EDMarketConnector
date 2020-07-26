@@ -9,7 +9,7 @@ import sys
 import logging
 from typing import Tuple
 
-class logger(object):
+class logger():
     """
     Wrapper class for all logging configuration and code.
 
