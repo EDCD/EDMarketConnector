@@ -29,9 +29,9 @@ import requests
 from config import config
 
 
-STATION_UNDOCKED: str = u'×'	# "Station" name to display when not docked = U+00D7
+STATION_UNDOCKED: str = u'×'  # "Station" name to display when not docked = U+00D7
 
-this = sys.modules[__name__]	# For holding module globals
+this = sys.modules[__name__]  # For holding module globals
 
 # Main window clicks
 this.system_link = None
@@ -51,23 +51,27 @@ def system_url(system_name: str) -> str:
     else:
         return ''
 
+
 def station_url(system_name: str, station_name: str) -> str:
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
     else:
         return system_url('')
 
+
 def plugin_start3(plugin_dir):
     return 'eddb'
 
+
 def plugin_app(parent):
-    this.system_link  = parent.children['system']  # system label in main window
+    this.system_link = parent.children['system']  # system label in main window
     this.system = None
     this.system_address = None
     this.station = None
     this.station_marketid = None  # Frontier MarketID
     this.station_link = parent.children['station']  # station label in main window
-    this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
+    this.station_link.configure(popup_copy=lambda x: x != STATION_UNDOCKED)
+
 
 def prefs_changed(cmdr, is_beta):
     # Override standard URL functions
@@ -103,7 +107,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # But only actually change the URL if we are current station provider.
     if config.get('station_provider') == 'eddb':
-        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        this.station_link['text'] = this.station or (
+            this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
         this.station_link['url'] = station_url(this.system, this.station)  # Override standard URL function
         this.station_link.update_idletasks()
 
@@ -131,4 +136,3 @@ def cmdr_data(data, is_beta):
 
         this.station_link['url'] = station_url(this.system, this.station)
         this.station_link.update_idletasks()
-
