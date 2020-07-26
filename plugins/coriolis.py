@@ -32,4 +32,4 @@ def shipyard_url(loadout, is_beta):
     encoded = base64.urlsafe_b64encode(out.getvalue()).decode().replace('=', '%3D')
     url = 'https://beta.coriolis.io/import?data=' if is_beta else 'https://coriolis.io/import?data='
 
-    return f"{url}{encoded}"
+    return f'{url}{encoded}'
