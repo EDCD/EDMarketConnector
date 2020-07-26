@@ -30,7 +30,7 @@ import requests
 from config import config
 
 
-STATION_UNDOCKED: str = u'×'  # "Station" name to display when not docked = U+00D7
+STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 this: Any = sys.modules[__name__]  # For holding module globals
 
@@ -39,7 +39,7 @@ this.system_link: Optional[str] = None
 this.system: Optional[str] = None
 this.system_address: Optional[str] = None
 this.system_population: Optional[int] = None
-this.station_link = None # tk thing, not annotated
+this.station_link = None  # tk thing, not annotated
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None
 
