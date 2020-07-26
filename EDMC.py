@@ -91,8 +91,10 @@ def main():
             newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
                 print(f'{appversion} ({newversion.title!r} is available)')
+
             else:
                 print(appversion)
+
             sys.exit(EXIT_SUCCESS)
 
         if args.j:
@@ -104,7 +106,9 @@ def main():
             # Get state from latest Journal file
             try:
                 logdir = config.get('journaldir') or config.default_journal_dir
-                logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
+                logfiles = sorted(
+                    (x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:]
+                )
 
                 logfile = join(logdir, logfiles[-1])
 
@@ -112,6 +116,7 @@ def main():
                     for line in loghandle:
                         try:
                             monitor.parse_entry(line)
+
                         except Exception:
                             if __debug__:
                                 print(f'Invalid journal entry {line!r}')
