@@ -25,3 +25,5 @@ jobs:
         python-version: 3.7
     - name: Annotate with Flake8
       uses: "tayfun/flake8-your-pr@master"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
