@@ -1,5 +1,0 @@
-certifi==2019.9.11
-keyring==19.2.0
-pathtools>=0.1.2
-requests>=2.11.1
-watchdog>=0.8.3
