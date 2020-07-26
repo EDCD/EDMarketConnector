@@ -1,6 +1,6 @@
 [flake8]
 # Show exactly where in a line the error happened
-show-source = True
+#show-source = True
 
 max-line-length = 120
 # Add _ as a builtin for localisation stuff
