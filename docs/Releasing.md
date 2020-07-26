@@ -55,9 +55,12 @@ You will need several pieces of software installed, or the files from their
 	1. Ensure you have `pip` installed. If needs be see
 	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
 	1. The easiest way is to utilise the `requirements-dev.txt` file:
-	 `python -m pip install -r requirements-dev.txt`. This will install all dependencies plus anything required for development
-	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`, and ensure the modules
-	listed there are installed as per the version requirements.
+	 `python -m pip install -r requirements-dev.txt`. This will install all
+	 dependencies plus anything required for development *other than py2exe, see
+	 above*.
+	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
+	 and ensure the modules listed there are installed as per the version
+	 requirements.
 
 If you are using different versions of any of these tools then please ensure
 that the paths where they're installed match the associated lines in
