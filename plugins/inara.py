@@ -456,7 +456,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 call()
 
         except Exception as e:
-            logger.debug(f'Adding events', exc_info=e)
+            logger.debug('Adding events', exc_info=e)
             return str(e)
 
         #
@@ -895,11 +895,11 @@ def worker():
                 status = reply['header']['eventStatus']
                 if callback:
                     callback(reply)
-                elif status // 100 != 2:	# 2xx == OK (maybe with warnings)
+                elif status // 100 != 2:  # 2xx == OK (maybe with warnings)
                     # Log fatal errors
-                    log.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
-                    log.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
-                    plug.show_error(_('Error: Inara {MSG}').format(MSG = reply['header'].get('eventStatusText', status)))
+                    logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
+                    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+                    plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
                 else:
                     # Log individual errors and warnings
                     for data_event, reply_event in zip(data['events'], reply['events']):
@@ -907,17 +907,20 @@ def worker():
                             logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
                             logger.debug(f'JSON data:\n{json.dumps(data_event)}')
                             if reply_event['eventStatus'] // 100 != 2:
-                                plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
+                                plug.show_error(_('Error: Inara {MSG}').format(
+                                    MSG=f'{data_event["eventName"]},'
+                                        f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'))
                         if data_event['eventName'] in ['addCommanderTravelCarrierJump', 'addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
                             this.lastlocation = reply_event.get('eventData', {})
                             this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
                         elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
                             this.lastship = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraShip>>', when="tail")	# calls update_ship in main thread
+                            # calls update_ship in main thread
+                            this.system_link.event_generate('<<InaraShip>>', when="tail")
 
                 break
             except Exception as e:
-                logger.debug(f'Sending events', exc_info=e)
+                logger.debug('Sending events', exc_info=e)
                 retrying += 1
         else:
             if callback:

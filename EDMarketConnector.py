@@ -15,7 +15,6 @@ import html
 import requests
 from time import gmtime, time, localtime, strftime, strptime
 import _strptime	# Workaround for http://bugs.python.org/issue7980
-from calendar import timegm
 import webbrowser
 
 import EDMCLogging
@@ -207,7 +206,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
+            self.help_menu.add_command(command=lambda: self.updater.checkForUpdates())
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -528,7 +527,7 @@ class AppWindow(object):
             self.status['text'] = str(e)
             play_bad = True
 
-        if not self.status['text']:	# no errors
+        if not self.status['text']:  # no errors
             self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S'), localtime(querytime))
         if play_sound and play_bad:
             hotkeymgr.play_bad()
@@ -543,12 +542,13 @@ class AppWindow(object):
                 if data.get('lastStarport', {}).get('ships'):
                     report = 'Success'
                 else:
-                    report ='Failure'
+                    report = 'Failure'
             else:
                 report = 'Undocked!'
             logger.debug(f'{__class__}: Retry for shipyard - {report}')
             if not data['commander'].get('docked'):
-                pass	# might have undocked while we were waiting for retry in which case station data is unreliable
+                # might have un-docked while we were waiting for retry in which case station data is unreliable
+                pass
             elif (data.get('lastSystem',   {}).get('name') == monitor.system and
                   data.get('lastStarport', {}).get('name') == monitor.station and
                   data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
@@ -620,7 +620,9 @@ class AppWindow(object):
                     logger.info(f"{__class__}: Can't start Status monitoring")
 
             # Export loadout
-            if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
+            if entry['event'] == 'Loadout'\
+                    and not monitor.state['Captain']\
+                    and config.getint('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
             # Plugins
@@ -649,8 +651,8 @@ class AppWindow(object):
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
             else:
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
-                self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+                self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
@@ -805,7 +807,7 @@ class AppWindow(object):
             row += 1
             button = ttk.Button(frame, text=_('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
-            button.bind("<Return>", lambda event:self.apply())
+            button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
@@ -833,7 +835,11 @@ class AppWindow(object):
                                                initialfile = '%s%s.%s.json' % (data.get('lastSystem', {}).get('name', 'Unknown'), data['commander'].get('docked') and '.'+data.get('lastStarport', {}).get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
             if f:
                 with open(f, 'wb') as h:
-                    h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+                    h.write(json.dumps(data,
+                                       ensure_ascii=False,
+                                       indent=2,
+                                       sort_keys=True,
+                                       separators=(',', ': ')).encode('utf-8'))
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
@@ -841,7 +847,8 @@ class AppWindow(object):
             self.status['text'] = str(e)
 
     def onexit(self, event=None):
-        if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if platform != 'darwin' or self.w.winfo_rooty() > 0:
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         protocolhandler.close()
@@ -882,7 +889,7 @@ class AppWindow(object):
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None):
-        if config.getint('theme') > 1 and event.widget==self.w:
+        if config.getint('theme') > 1 and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
@@ -931,7 +938,7 @@ def enforce_single_instance() -> None:
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
                     # Browser invoked us directly with auth response. Forward the response to the other app instance.
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                    ShowWindow(hWnd, SW_RESTORE)	# Wait for it to be responsive to avoid ShellExecute recursing
+                    ShowWindow(hWnd, SW_RESTORE)  # Wait for it to be responsive to avoid ShellExecute recursing
                     ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
                 else:
                     ShowWindowAsync(hWnd, SW_RESTORE)
@@ -949,9 +956,10 @@ if __name__ == "__main__":
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
+        # unbuffered not allowed for text in python3, so use line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), 'wt', 1)
 
-    logger = EDMCLogging.logger(appname).get_logger()
+    logger = EDMCLogging.Logger(appname).get_logger()
 
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')

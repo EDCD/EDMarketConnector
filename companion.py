@@ -4,6 +4,7 @@ from builtins import object
 import base64
 import csv
 import requests
+from typing import TYPE_CHECKING
 
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # No longer needed but retained in case plugins use it
@@ -23,7 +24,6 @@ import logging
 logger = logging.getLogger(appname)
 
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     _ = lambda x: x # noqa # to make flake8 stop complaining that the hacked in _ method doesnt exist
 
@@ -205,21 +205,21 @@ class Auth(object):
                 logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"", exc_info=e)
 
         else:
-            logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"", exc_info=e)
+            logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"")
 
         # New request
-        logger.info(f'Frontier CAPI Auth: New authorization request')
+        logger.info('Frontier CAPI Auth: New authorization request')
         v = random.SystemRandom().getrandbits(8 * 32)
-        self.verifier = self.base64URLEncode(v.to_bytes(32, byteorder='big')).encode('utf-8')
+        self.verifier = self.base64_url_encode(v.to_bytes(32, byteorder='big')).encode('utf-8')
         s = random.SystemRandom().getrandbits(8 * 32)
-        self.state = self.base64URLEncode(s.to_bytes(32, byteorder='big'))
+        self.state = self.base64_url_encode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
         webbrowser.open(
             '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501 # I cant make this any shorter
                 server_auth=SERVER_AUTH,
                 url_auth=URL_AUTH,
                 client_id=CLIENT_ID,
-                challenge=self.base64URLEncode(hashlib.sha256(self.verifier).digest()),
+                challenge=self.base64_url_encode(hashlib.sha256(self.verifier).digest()),
                 state=self.state,
                 redirect=protocolhandler.redirect
             )
@@ -294,7 +294,7 @@ class Auth(object):
     def dump(self, r):
         logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
 
-    def base64URLEncode(self, text):
+    def base64_url_encode(self, text):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
@@ -379,8 +379,8 @@ class Session(object):
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
         except Exception as e:
-            logger.debug(f'Attempting GET', exc_info=e)
-            raise ServerError('unable to get endpoint {}'.format(endpoint)) from e
+            logger.debug('Attempting GET', exc_info=e)
+            raise ServerError(f'unable to get endpoint {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
             # Redirected back to Auth server - force full re-authentication
@@ -400,7 +400,7 @@ class Session(object):
             data = r.json()  # May also fail here if token expired since response is empty
 
         except (requests.HTTPError, ValueError) as e:
-            logger.error(f'Frontier CAPI Auth: GET ', exc_info=e)
+            logger.error('Frontier CAPI Auth: GET ', exc_info=e)
             self.dump(r)
             self.close()
 
@@ -408,7 +408,7 @@ class Session(object):
                 self.invalidate()
                 self.retrying = False
                 self.login()
-                logger.error(f'Frontier CAPI Auth: query failed after refresh')
+                logger.error('Frontier CAPI Auth: query failed after refresh')
                 raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
@@ -417,7 +417,7 @@ class Session(object):
 
             else:
                 self.retrying = False
-                logger.error(f'Frontier CAPI Auth: HTTP error or invalid JSON')
+                logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
                 raise CredentialsError('HTTP error or invalid JSON') from e
 
         self.retrying = False
@@ -462,7 +462,7 @@ class Session(object):
                 self.session.close()
 
             except Exception as e:
-                logger.debug(f'Frontier CAPI Auth: closing', exc_info=e)
+                logger.debug('Frontier CAPI Auth: closing', exc_info=e)
 
         self.session = None
 
@@ -496,7 +496,7 @@ def fixup(data):
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
         for thing in ('buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket'):
             if not isinstance(commodity.get(thing), numbers.Number):
-                logger.debug(f'Invalid {thing}:{commodity.get(thing)} ({type(commodity.get(thing))}) for {commodity.get("name", "")}')
+                logger.debug(f'Invalid {thing}:{commodity.get(thing)} ({type(commodity.get(thing))}) for {commodity.get("name", "")}')  # noqa: E501
                 break
 
         else:

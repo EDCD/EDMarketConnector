@@ -9,7 +9,7 @@ import sys
 import logging
 from typing import Tuple
 
-class logger():
+class Logger:
     """
     Wrapper class for all logging configuration and code.
 
@@ -20,7 +20,7 @@ class logger():
     Users of this class should then call getLogger() to get the
     logging.Logger instance.
     """
-    def __init__(self, logger_name: str, loglevel: int=logging.DEBUG):
+    def __init__(self, logger_name: str, loglevel: int = logging.DEBUG):
         """
         Set up a `logging.Logger` with our preferred configuration.
         This includes using an EDMCContextFilter to add 'class' and 'qualname'
@@ -37,7 +37,7 @@ class logger():
         self.logger_channel = logging.StreamHandler()
         self.logger_channel.setLevel(loglevel)
 
-        self.logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(class)s: %(message)s')
+        self.logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(class)s: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
         self.logger_formatter.default_msec_format = '%s.%03d'
 
