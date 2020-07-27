@@ -804,7 +804,8 @@ class AppWindow(object):
                 self.transient(parent)
 
             # position over parent
-            if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            if platform != 'darwin' or parent.winfo_rooty() > 0:
                 self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
 
             # remove decoration
