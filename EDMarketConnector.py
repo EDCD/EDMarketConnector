@@ -422,7 +422,7 @@ class AppWindow(object):
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
         except Exception as e:
-            logger.debug(f'Frontier CAPI Auth', exc_info=e)
+            logger.debug('Frontier CAPI Auth', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -810,15 +810,11 @@ class AppWindow(object):
             # remove decoration
             if platform == 'win32':
                 self.attributes('-toolwindow', tk.TRUE)
-                
+
             self.resizable(tk.FALSE, tk.FALSE)
 
             frame = ttk.Frame(self)
             frame.grid(sticky=tk.NSEW)
-
-            PADX = 10
-            BUTTONX = 12    # indent Checkbuttons and Radiobuttons
-            PADY = 2        # close spacing
 
             row = 1
             ############################################################
@@ -835,8 +831,8 @@ class AppWindow(object):
             self.appversion_label = tk.Label(frame, text=appversion)
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
-                                             url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{VERSION}'.format(
-                                                 VERSION=appversion_nobuild),
+                                             url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
+                                                 f'{appversion_nobuild}',
                                              underline=True)
             self.appversion.grid(row=row, column=2, sticky=tk.W)
             row += 1
@@ -928,7 +924,9 @@ class AppWindow(object):
 
     def drag_continue(self, event):
         if self.drag_offset:
-            self.w.geometry('+%d+%d' % (event.x_root - self.drag_offset[0], event.y_root - self.drag_offset[1]))
+            offset_x = event.x_root - self.drag_offset[0]
+            offset_y = event.y_root - self.drag_offset[1]
+            self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
 
     def drag_end(self, event):
         self.drag_offset = None
@@ -962,28 +960,28 @@ def enforce_single_instance() -> None:
     if platform == 'win32':
         import ctypes
         from ctypes.wintypes import HWND, LPWSTR, LPCWSTR, INT, BOOL, LPARAM
-        EnumWindows            = ctypes.windll.user32.EnumWindows
-        GetClassName           = ctypes.windll.user32.GetClassNameW
-        GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
-        GetWindowText          = ctypes.windll.user32.GetWindowTextW
-        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-        GetWindowTextLength    = ctypes.windll.user32.GetWindowTextLengthW
-        GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
+        EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
+        GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
+        GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]  # noqa: N806
+        GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
+        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]  # noqa: N806
+        GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
+        GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
 
-        SW_RESTORE = 9
-        SetForegroundWindow    = ctypes.windll.user32.SetForegroundWindow
-        ShowWindow             = ctypes.windll.user32.ShowWindow
-        ShowWindowAsync        = ctypes.windll.user32.ShowWindowAsync
+        SW_RESTORE = 9  # noqa: N806
+        SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
+        ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
+        ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
 
-        COINIT_MULTITHREADED = 0
-        COINIT_APARTMENTTHREADED = 0x2
-        COINIT_DISABLE_OLE1DDE = 0x4
-        CoInitializeEx         = ctypes.windll.ole32.CoInitializeEx
+        COINIT_MULTITHREADED = 0  # noqa: N806,F841
+        COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
+        COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
+        CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
 
-        ShellExecute           = ctypes.windll.shell32.ShellExecuteW
-        ShellExecute.argtypes  = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
+        ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
+        ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
 
-        def WindowTitle(h):
+        def window_title(h):
             if h:
                 text_length = GetWindowTextLength(h) + 1
                 buf = ctypes.create_unicode_buffer(text_length)
@@ -992,22 +990,23 @@ def enforce_single_instance() -> None:
             return None
 
         @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-        def enumwindowsproc(hWnd, lParam):
+        def enumwindowsproc(window_handle, l_param):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
-            if GetClassName(hWnd, cls, 257)\
+            if GetClassName(window_handle, cls, 257)\
                     and cls.value == 'TkTopLevel'\
-                    and WindowTitle(hWnd) == applongname\
-                    and GetProcessHandleFromHwnd(hWnd):
+                    and window_title(window_handle) == applongname\
+                    and GetProcessHandleFromHwnd(window_handle):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
                     # Browser invoked us directly with auth response. Forward the response to the other app instance.
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                    ShowWindow(hWnd, SW_RESTORE)  # Wait for it to be responsive to avoid ShellExecute recursing
+                    # Wait for it to be responsive to avoid ShellExecute recursing
+                    ShowWindow(window_handle, SW_RESTORE)
                     ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
                 else:
-                    ShowWindowAsync(hWnd, SW_RESTORE)
-                    SetForegroundWindow(hWnd)
+                    ShowWindowAsync(window_handle, SW_RESTORE)
+                    SetForegroundWindow(window_handle)
                 sys.exit(0)
             return True
 
@@ -1035,7 +1034,7 @@ if __name__ == "__main__":
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
 
-    #abinit = A.B()
+    # abinit = A.B()
 
     Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
 
@@ -1045,9 +1044,25 @@ if __name__ == "__main__":
     def messagebox_not_py3():
         plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+            # Yes, this is horribly hacky so as to be sure we match the key
+            # that we told Translators to use.
+            popup_text = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "\
+                         "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "\
+                         "updated version available, else alert the developer that they need to update the code for "\
+                         "Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on "\
+                         "the end of the name."
+            popup_text = popup_text.replace('\n', '\\n')
+            popup_text = popup_text.replace('\r', '\\r')
+            # Now the string should match, so try translation
+            popup_text = _(popup_text)
+            # And substitute in the other words.
+            popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled')
+            # And now we do need these to be actual \r\n
+            popup_text = popup_text.replace('\\n', '\n')
+            popup_text = popup_text.replace('\\r', '\r')
             tk.messagebox.showinfo(
                 _('EDMC: Plugins Without Python 3.x Support'),
-                _("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.".format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled'))
+                popup_text
             )
             config.set('plugins_not_py3_last', int(time()))
 
