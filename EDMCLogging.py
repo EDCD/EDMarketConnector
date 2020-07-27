@@ -133,6 +133,22 @@ class EDMCContextFilter(logging.Filter):
                 # Paranoia checks
                 if frame_class and frame_class.__qualname__:
                     caller_class_names = frame_class.__qualname__
+            # If the frame caller is a bare function then there's no 'self'
+            elif frame.f_code.co_name and frame.f_code.co_name in frame.f_globals:
+                fn = frame.f_globals[frame.f_code.co_name]
+                if fn and fn.__qualname__:
+                    caller_qualname = fn.__qualname__
+
+                frame_class = getattr(fn, '__class__', None)
+                if frame_class and frame_class.__qualname__:
+                    caller_class_names = frame_class.__qualname__
+
+                    # 'class' __qualname__ of 'function' means it's a bare
+                    # function for sure.  You *can* have a class called
+                    # 'function', so let's make this 100% obvious what it is.
+                    if caller_class_names == 'function':
+                        # In case the condition above tests a tuple of values
+                        caller_class_names = f'<{caller_class_names}>'
 
         if caller_qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
