@@ -979,12 +979,13 @@ if __name__ == "__main__":
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')
 
+    # TODO: unittest in place of this
     class A(object):
         class B(object):
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
 
-    abinit = A.B()
+    #abinit = A.B()
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 
