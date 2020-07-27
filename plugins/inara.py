@@ -103,7 +103,8 @@ def plugin_app(parent):
 
 def plugin_stop():
     # Send any unsent events
-    call(force=True)
+    call()
+    time.sleep(0.1)  # Sleep for 100ms to allow call to go out, and to force a context switch to our other threads
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
