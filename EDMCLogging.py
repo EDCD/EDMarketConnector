@@ -104,7 +104,7 @@ class EDMCContextFilter(logging.Filter):
         # of the frames internal to logging.
         frame = sys._getframe(0)
         while frame:
-            if type(frame.f_locals.get('self')) == logging.Logger:
+            if isinstance(frame.f_locals.get('self'), logging.Logger):
                 frame = frame.f_back  # Want to start on the next frame below
                 break
             frame = frame.f_back
@@ -113,7 +113,7 @@ class EDMCContextFilter(logging.Filter):
         # that is *not* true, as it should be the call site of the logger
         # call
         while frame:
-            if type(frame.f_locals.get('self')) != logging.Logger:
+            if not isinstance(frame.f_locals.get('self'), logging.Logger):
                 break  # We've found the frame we want
             frame = frame.f_back
 
