@@ -233,7 +233,7 @@
 "Language" = "Nyelv";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Utoljára frissítve {HH}:{MM}:{SS}";
+"Last updated at %H:%M:%S" = "Utoljára frissítve %H:%M:%S";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Hadnagy";

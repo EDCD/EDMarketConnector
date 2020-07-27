@@ -236,7 +236,7 @@
 "Language" = "Idioma";
 
 /* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Última actualización: {HH}:{MM}:{SS}";
+"Last updated at %H:%M:%S" = "Última actualización: %H:%M:%S";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Teniente de navío";
