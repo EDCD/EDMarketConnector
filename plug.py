@@ -107,7 +107,7 @@ class Plugin(object):
                 else:
                     logger.error(f'plugin {name} has no plugin_start3() function')
             except Exception as e:
-                logger.error(f': Failed for Plugin "{name}"', exc_info=e)
+                logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
             logger.info(f'plugin {name} disabled')
@@ -139,7 +139,7 @@ class Plugin(object):
                     raise AssertionError
                 return appitem
             except Exception as e:
-                logger.error(f'Failed for Plugin "{self.name}"', exc_info=e)
+                logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
     def get_prefs(self, parent, cmdr, is_beta):
@@ -159,7 +159,7 @@ class Plugin(object):
                     raise AssertionError
                 return frame
             except Exception as e:
-                logger.error(f'Failed for Plugin "{self.name}"', exc_info=e)
+                logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
 
@@ -177,7 +177,7 @@ def load_plugins(master):
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except Exception as e:
-                logger.error(f'Failure loading internal Plugin "{name}"', exc_info=e)
+                logger.exception(f'Failure loading internal Plugin "{name}"')
     PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
@@ -198,7 +198,7 @@ def load_plugins(master):
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
             except Exception as e:
-                logger.error(f'Failure loading found Plugin "{name}"', exc_info=e)
+                logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
     PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
 
@@ -245,7 +245,7 @@ def notify_stop():
                 newerror = plugin_stop()
                 error = error or newerror
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -262,7 +262,7 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
             try:
                 prefs_cmdr_changed(cmdr, is_beta)
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
 
 
 def notify_prefs_changed(cmdr, is_beta):
@@ -280,7 +280,7 @@ def notify_prefs_changed(cmdr, is_beta):
             try:
                 prefs_changed(cmdr, is_beta)
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
 
 
 def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
@@ -303,7 +303,7 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
                 newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
                 error = error or newerror
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -324,7 +324,7 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
                 newerror = status(cmdr, is_beta, dict(entry))
                 error = error or newerror
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -343,7 +343,7 @@ def notify_newdata(data, is_beta):
                 newerror = cmdr_data(data, is_beta)
                 error = error or newerror
             except Exception as e:
-                logger.error(f'Plugin "{plugin.name}" failed', exc_info=e)
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 

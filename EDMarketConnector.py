@@ -407,7 +407,7 @@ class AppWindow(object):
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
         except Exception as e:
-            logger.debug(f'{__class__}', exc_info=e)
+            logger.debug(f'Frontier CAPI Auth', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 

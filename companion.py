@@ -202,7 +202,7 @@ class Auth(object):
                     self.dump(r)
 
             except Exception as e:
-                logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"", exc_info=e)
+                logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
 
         else:
             logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"")
@@ -269,7 +269,7 @@ class Auth(object):
                 return data.get('access_token')
 
         except Exception as e:
-            logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"", exc_info=e)
+            logger.exception(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
             if r:
                 self.dump(r)
 
@@ -400,7 +400,7 @@ class Session(object):
             data = r.json()  # May also fail here if token expired since response is empty
 
         except (requests.HTTPError, ValueError) as e:
-            logger.error('Frontier CAPI Auth: GET ', exc_info=e)
+            logger.exception('Frontier CAPI Auth: GET ')
             self.dump(r)
             self.close()
 
