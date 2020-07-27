@@ -24,10 +24,14 @@
 
 
 import sys
-from typing import Any, Optional
+import tkinter
+from typing import Any, Optional, TYPE_CHECKING
 import requests
 
 from config import config
+
+if TYPE_CHECKING:
+    from tkinter import Tk
 
 
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
@@ -39,7 +43,7 @@ this.system_link: Optional[str] = None
 this.system: Optional[str] = None
 this.system_address: Optional[str] = None
 this.system_population: Optional[int] = None
-this.station_link = None  # tk thing, not annotated
+this.station_link: 'Optional[tkinter.Tk]' = None
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None
 
@@ -67,7 +71,7 @@ def plugin_start3(plugin_dir):
     return 'eddb'
 
 
-def plugin_app(parent):
+def plugin_app(parent: 'tkinter.Tk'):
     this.system_link = parent.children['system']  # system label in main window
     this.system = None
     this.system_address = None
