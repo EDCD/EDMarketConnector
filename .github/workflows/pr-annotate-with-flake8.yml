@@ -26,4 +26,5 @@ jobs:
     - name: Annotate with Flake8
       uses: "tayfun/flake8-your-pr@master"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: 7c1a2c48cbe8c4e37affafaec234c7dfe367cf73
