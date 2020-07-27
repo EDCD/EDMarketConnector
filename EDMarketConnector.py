@@ -12,9 +12,7 @@ from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
 import html
-import requests
-from time import gmtime, time, localtime, strftime, strptime
-import _strptime	# Workaround for http://bugs.python.org/issue7980
+from time import time, localtime, strftime
 import webbrowser
 
 import EDMCLogging
@@ -212,7 +210,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
+                self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
@@ -528,7 +526,7 @@ class AppWindow(object):
             play_bad = True
 
         if not self.status['text']:  # no errors
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S'), localtime(querytime))
+            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
@@ -553,7 +551,7 @@ class AppWindow(object):
                   data.get('lastStarport', {}).get('name') == monitor.station and
                   data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
                 self.eddn.export_shipyard(data, monitor.is_beta)
-            elif tries > 1:	# bogus data - retry
+            elif tries > 1:  # bogus data - retry
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(tries-1))
         except:
             pass
@@ -626,7 +624,12 @@ class AppWindow(object):
                 monitor.export_ship()
 
             # Plugins
-            err = plug.notify_journal_entry(monitor.cmdr, monitor.is_beta, monitor.system, monitor.station, entry, monitor.state)
+            err = plug.notify_journal_entry(monitor.cmdr,
+                                            monitor.is_beta,
+                                            monitor.system,
+                                            monitor.station,
+                                            entry,
+                                            monitor.state)
             if err:
                 self.status['text'] = err
                 if not config.getint('hotkey_mute'):
@@ -646,10 +649,11 @@ class AppWindow(object):
     def auth(self, event=None):
         try:
             companion.session.auth_callback()
-            self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+            # Successfully authenticated with the Frontier website
+            self.status['text'] = _('Authentication successful')
             if platform == 'darwin':
-                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+                self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
             else:
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
@@ -828,11 +832,19 @@ class AppWindow(object):
         try:
             data = companion.session.station()
             self.status['text'] = ''
-            f = tkinter.filedialog.asksaveasfilename(parent = self.w,
-                                               defaultextension = platform=='darwin' and '.json' or '',
-                                               filetypes = [('JSON', '.json'), ('All Files', '*')],
-                                               initialdir = config.get('outdir'),
-                                               initialfile = '%s%s.%s.json' % (data.get('lastSystem', {}).get('name', 'Unknown'), data['commander'].get('docked') and '.'+data.get('lastStarport', {}).get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
+            default_extension: str = ''
+            if platform == 'darwin':
+                default_extension = '.json'
+            last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
+            last_starport: str = ''
+            if data['commander'].get('docked'):
+                last_starport = '.'+data.get('lastStarport', {}).get('name', 'Unknown')
+            timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+            f = tkinter.filedialog.asksaveasfilename(parent=self.w,
+                                                     defaultextension=default_extension,
+                                                     filetypes=[('JSON', '.json'), ('All Files', '*')],
+                                                     initialdir=config.get('outdir'),
+                                                     initialfile=f'{last_system}{last_starport}.{timestamp}')
             if f:
                 with open(f, 'wb') as h:
                     h.write(json.dumps(data,
@@ -872,10 +884,10 @@ class AppWindow(object):
         self.drag_offset = None
 
     def oniconify(self, event=None):
-        self.w.overrideredirect(0)	# Can't iconize while overrideredirect
+        self.w.overrideredirect(0)  # Can't iconize while overrideredirect
         self.w.iconify()
-        self.w.update_idletasks()	# Size and windows styles get recalculated here
-        self.w.wait_visibility()	# Need main window to be re-created before returning
+        self.w.update_idletasks()  # Size and windows styles get recalculated here
+        self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None		# So theme will be re-applied on map
 
     def onmap(self, event=None):
@@ -923,9 +935,9 @@ def enforce_single_instance() -> None:
 
         def WindowTitle(h):
             if h:
-                l = GetWindowTextLength(h) + 1
-                buf = ctypes.create_unicode_buffer(l)
-                if GetWindowText(h, buf, l):
+                text_length = GetWindowTextLength(h) + 1
+                buf = ctypes.create_unicode_buffer(text_length)
+                if GetWindowText(h, buf, text_length):
                     return buf.value
             return None
 
@@ -933,7 +945,10 @@ def enforce_single_instance() -> None:
         def enumwindowsproc(hWnd, lParam):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
-            if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
+            if GetClassName(hWnd, cls, 257)\
+                    and cls.value == 'TkTopLevel'\
+                    and WindowTitle(hWnd) == applongname\
+                    and GetProcessHandleFromHwnd(hWnd):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
                     # Browser invoked us directly with auth response. Forward the response to the other app instance.

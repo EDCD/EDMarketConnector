@@ -910,9 +910,13 @@ def worker():
                                 plug.show_error(_('Error: Inara {MSG}').format(
                                     MSG=f'{data_event["eventName"]},'
                                         f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'))
-                        if data_event['eventName'] in ['addCommanderTravelCarrierJump', 'addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                        if data_event['eventName'] in ('addCommanderTravelCarrierJump',
+                                                       'addCommanderTravelDock',
+                                                       'addCommanderTravelFSDJump',
+                                                       'setCommanderTravelLocation'):
                             this.lastlocation = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
+                            # calls update_location in main thread
+                            this.system_link.event_generate('<<InaraLocation>>', when="tail")
                         elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
                             this.lastship = reply_event.get('eventData', {})
                             # calls update_ship in main thread

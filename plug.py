@@ -11,7 +11,7 @@ import threading  # noqa: F401 - We don't use it, but plugins might
 import logging
 import tkinter as tk
 
-import myNotebook as nb
+import myNotebook as nb  # noqa: N813
 
 from config import config, appname
 
@@ -201,6 +201,7 @@ def load_plugins(master):
                 logger.error(f'Failure loading found Plugin "{name}"', exc_info=e)
                 pass
     PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
+
 
 def provides(fn_name):
     """

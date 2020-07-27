@@ -126,7 +126,8 @@ class EDDN(object):
         except json.JSONDecodeError as e:
             # Couldn't decode - shouldn't happen!
             logger.debug(f'\n{self.replaylog[0]}\n', exc_info=e)
-            self.replaylog.pop(0)	# Discard and continue
+            # Discard and continue
+            self.replaylog.pop(0)
         else:
             # Rewrite old schema name
             if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
@@ -137,9 +138,9 @@ class EDDN(object):
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
             except requests.exceptions.RequestException as e:
-                logger.debug(f'Failed sending', exc_info=e)
+                logger.debug('Failed sending', exc_info=e)
                 status['text'] = _("Error: Can't connect to EDDN")
-                return	# stop sending
+                return  # stop sending
             except Exception as e:
                 logger.debug('Failed sending', exc_info=e)
                 status['text'] = str(e)
@@ -437,7 +438,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         try:
             this.eddn.export_journal_entry(cmdr, is_beta, filter_localised(entry))
         except requests.exceptions.RequestException as e:
-            logger.debug(f'Failed in export_journal_entry', exc_info=e)
+            logger.debug('Failed in export_journal_entry', exc_info=e)
             return _("Error: Can't connect to EDDN")
         except Exception as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)

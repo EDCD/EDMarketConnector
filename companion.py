@@ -7,7 +7,7 @@ import requests
 from typing import TYPE_CHECKING
 
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
-from http.cookiejar import LWPCookieJar  # No longer needed but retained in case plugins use it
+from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
 import numbers

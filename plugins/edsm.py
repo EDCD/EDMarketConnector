@@ -14,7 +14,6 @@
 import json
 import requests
 import sys
-import time
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -24,7 +23,7 @@ import logging
 
 import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
-import myNotebook as nb
+import myNotebook as nb  # noqa: N813
 
 from config import appname, applongname, appversion, config
 import plug
@@ -380,7 +379,7 @@ def worker():
 
                 break
             except Exception as e:
-                logger.debug(f'Sending API events', exc_info=e)
+                logger.debug('Sending API events', exc_info=e)
                 retrying += 1
         else:
             plug.show_error(_("Error: Can't connect to EDSM"))
