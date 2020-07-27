@@ -520,8 +520,8 @@ class AppWindow(object):
             companion.session.invalidate()
             self.login()
 
-        except Exception as e:			# Including CredentialsError, ServerError
-            logger.debug(f'{__class__}', exc_info=e)
+        except Exception as e:  # Including CredentialsError, ServerError
+            logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
             play_bad = True
 
@@ -543,7 +543,7 @@ class AppWindow(object):
                     report = 'Failure'
             else:
                 report = 'Undocked!'
-            logger.debug(f'{__class__}: Retry for shipyard - {report}')
+            logger.debug(f'Retry for shipyard - {report}')
             if not data['commander'].get('docked'):
                 # might have un-docked while we were waiting for retry in which case station data is unreliable
                 pass
@@ -612,10 +612,10 @@ class AppWindow(object):
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
-                    logger.info(f'{__class__}: Monitor: Disable WinSparkle automatic update checks')
+                    logger.info('Monitor: Disable WinSparkle automatic update checks')
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
-                    logger.info(f"{__class__}: Can't start Status monitoring")
+                    logger.info("Can't start Status monitoring")
 
             # Export loadout
             if entry['event'] == 'Loadout'\
@@ -643,7 +643,7 @@ class AppWindow(object):
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
                 self.updater.setAutomaticUpdatesCheck(True)
-                logger.info(f'{__class__}: Monitor: Enable WinSparkle automatic update checks')
+                logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     # cAPI auth
     def auth(self, event=None):
@@ -660,7 +660,7 @@ class AppWindow(object):
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            logger.debug(f'{__class__}', exc_info=e)
+            logger.debug('Frontier CAPI Auth:', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -815,7 +815,7 @@ class AppWindow(object):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
-            logger.info(f'{__class__}: Current version is {appversion}')
+            logger.info(f'Current version is {appversion}')
 
         def apply(self):
             self._destroy()
@@ -855,7 +855,7 @@ class AppWindow(object):
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            logger.debug(f'{__class__}', exc_info=e)
+            logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
     def onexit(self, event=None):
