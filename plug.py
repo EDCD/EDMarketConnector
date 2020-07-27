@@ -7,49 +7,49 @@ import os
 import importlib
 import sys
 import operator
-import threading	# We don't use it, but plugins might
-from traceback import print_exc
-
+import threading  # noqa: F401 - We don't use it, but plugins might
+import logging
 import tkinter as tk
-import myNotebook as nb
 
-from config import config
-from time import time as time
+import myNotebook as nb  # noqa: N813
 
+from config import config, appname
+
+logger = logging.getLogger(appname)
 
 # Dashboard Flags constants
-FlagsDocked = 1<<0		# on a landing pad
-FlagsLanded = 1<<1		# on planet surface
-FlagsLandingGearDown = 1<<2
-FlagsShieldsUp = 1<<3
-FlagsSupercruise = 1<<4
-FlagsFlightAssistOff = 1<<5
-FlagsHardpointsDeployed = 1<<6
-FlagsInWing = 1<<7
-FlagsLightsOn = 1<<8
-FlagsCargoScoopDeployed = 1<<9
-FlagsSilentRunning = 1<<10
-FlagsScoopingFuel = 1<<11
-FlagsSrvHandbrake = 1<<12
-FlagsSrvTurret = 1<<13		# using turret view
-FlagsSrvUnderShip = 1<<14	# turret retracted
-FlagsSrvDriveAssist = 1<<15
-FlagsFsdMassLocked = 1<<16
-FlagsFsdCharging = 1<<17
-FlagsFsdCooldown = 1<<18
-FlagsLowFuel = 1<<19		# <25%
-FlagsOverHeating = 1<<20	# > 100%
-FlagsHasLatLong = 1<<21
-FlagsIsInDanger = 1<<22
-FlagsBeingInterdicted = 1<<23
-FlagsInMainShip = 1<<24
-FlagsInFighter = 1<<25
-FlagsInSRV = 1<<26
-FlagsAnalysisMode = 1<<27	# Hud in Analysis mode
-FlagsNightVision = 1<<28
-FlagsAverageAltitude = 1<<29		# Altitude from Average radius
-FlagsFsdJump = 1<<30
-FlagsSrvHighBeam = 1<<31
+FlagsDocked = 1 << 0  # on a landing pad
+FlagsLanded = 1 << 1  # on planet surface
+FlagsLandingGearDown = 1 << 2
+FlagsShieldsUp = 1 << 3
+FlagsSupercruise = 1 << 4
+FlagsFlightAssistOff = 1 << 5
+FlagsHardpointsDeployed = 1 << 6
+FlagsInWing = 1 << 7
+FlagsLightsOn = 1 << 8
+FlagsCargoScoopDeployed = 1 << 9
+FlagsSilentRunning = 1 << 10
+FlagsScoopingFuel = 1 << 11
+FlagsSrvHandbrake = 1 << 12
+FlagsSrvTurret = 1 << 13  # using turret view
+FlagsSrvUnderShip = 1 << 14  # turret retracted
+FlagsSrvDriveAssist = 1 << 15
+FlagsFsdMassLocked = 1 << 16
+FlagsFsdCharging = 1 << 17
+FlagsFsdCooldown = 1 << 18
+FlagsLowFuel = 1 << 19  # <25%
+FlagsOverHeating = 1 << 20  # > 100%
+FlagsHasLatLong = 1 << 21
+FlagsIsInDanger = 1 << 22
+FlagsBeingInterdicted = 1 << 23
+FlagsInMainShip = 1 << 24
+FlagsInFighter = 1 << 25
+FlagsInSRV = 1 << 26
+FlagsAnalysisMode = 1 << 27  # Hud in Analysis mode
+FlagsNightVision = 1 << 28
+FlagsAverageAltitude = 1 << 29  # Altitude from Average radius
+FlagsFsdJump = 1 << 30
+FlagsSrvHighBeam = 1 << 31
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
@@ -87,28 +87,30 @@ class Plugin(object):
         :raises Exception: Typically ImportError or OSError
         """
 
-        self.name = name	# Display name.
-        self.folder = name	# basename of plugin folder. None for internal plugins.
-        self.module = None	# None for disabled plugins.
+        self.name = name  # Display name.
+        self.folder = name  # basename of plugin folder. None for internal plugins.
+        self.module = None  # None for disabled plugins.
 
         if loadfile:
-            sys.stdout.write('loading plugin {} from "{}"\n'.format(name.replace('.', '_'), loadfile))
+            logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
-                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')), loadfile).load_module()
+                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(
+                    name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')),
+                    loadfile).load_module()
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
                     self.name = newname and str(newname) or name
                     self.module = module
                 elif getattr(module, 'plugin_start', None):
-                    sys.stdout.write('plugin %s needs migrating\n' % name)
+                    logger.warning(f'plugin {name} needs migrating\n')
                     PLUGINS_not_py3.append(self)
                 else:
-                    sys.stdout.write('plugin %s has no plugin_start3() function\n' % name)
-            except:
-                print_exc()
+                    logger.error(f'plugin {name} has no plugin_start3() function')
+            except Exception as e:
+                logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
-            sys.stdout.write('plugin %s disabled\n' % name)
+            logger.info(f'plugin {name} disabled')
 
     def _get_func(self, funcname):
         """
@@ -136,8 +138,8 @@ class Plugin(object):
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
                 return appitem
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
     def get_prefs(self, parent, cmdr, is_beta):
@@ -156,8 +158,8 @@ class Plugin(object):
                 if not isinstance(frame, nb.Frame):
                     raise AssertionError
                 return frame
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
 
@@ -172,11 +174,11 @@ def load_plugins(master):
         if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
-                plugin.folder = None	# Suppress listing in Plugins prefs tab
+                plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
-            except:
-                pass
-    PLUGINS.extend(sorted(internal, key = lambda p: operator.attrgetter('name')(p).lower()))
+            except Exception as e:
+                logger.exception(f'Failure loading internal Plugin "{name}"')
+    PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
     sys.path.append(config.plugin_dir)
@@ -195,9 +197,11 @@ def load_plugins(master):
                 # Add plugin's folder to load path in case plugin has internal package dependencies
                 sys.path.append(os.path.join(config.plugin_dir, name))
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
-            except:
+            except Exception as e:
+                logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
-    PLUGINS.extend(sorted(found, key = lambda p: operator.attrgetter('name')(p).lower()))
+    PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
+
 
 def provides(fn_name):
     """
@@ -240,8 +244,8 @@ def notify_stop():
             try:
                 newerror = plugin_stop()
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -257,8 +261,8 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
         if prefs_cmdr_changed:
             try:
                 prefs_cmdr_changed(cmdr, is_beta)
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
 
 
 def notify_prefs_changed(cmdr, is_beta):
@@ -275,8 +279,8 @@ def notify_prefs_changed(cmdr, is_beta):
         if prefs_changed:
             try:
                 prefs_changed(cmdr, is_beta)
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
 
 
 def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
@@ -298,8 +302,8 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
                 # Pass a copy of the journal entry in case the callee modifies it
                 newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -319,8 +323,8 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
                 # Pass a copy of the status entry in case the callee modifies it
                 newerror = status(cmdr, is_beta, dict(entry))
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
@@ -338,8 +342,8 @@ def notify_newdata(data, is_beta):
             try:
                 newerror = cmdr_data(data, is_beta)
                 error = error or newerror
-            except:
-                print_exc()
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 

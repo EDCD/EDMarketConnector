@@ -12,12 +12,10 @@ from os import chdir, environ
 from os.path import dirname, expanduser, isdir, join
 import re
 import html
-import requests
-from time import gmtime, time, localtime, strftime, strptime
-import _strptime	# Workaround for http://bugs.python.org/issue7980
-from calendar import timegm
+from time import time, localtime, strftime
 import webbrowser
 
+import EDMCLogging
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
@@ -206,13 +204,13 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda:self.updater.checkForUpdates())
-            self.help_menu.add_command(command=lambda:not self.help_about.showing and self.help_about(self.w))
+            self.help_menu.add_command(command=lambda: self.updater.checkForUpdates())
+            self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value = config.getint('always_ontop'))
+                self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'), variable = self.always_ontop, command=self.ontop_changed)	# Appearance setting
@@ -409,7 +407,7 @@ class AppWindow(object):
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug(f'Frontier CAPI Auth', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -522,13 +520,13 @@ class AppWindow(object):
             companion.session.invalidate()
             self.login()
 
-        except Exception as e:			# Including CredentialsError, ServerError
-            if __debug__: print_exc()
+        except Exception as e:  # Including CredentialsError, ServerError
+            logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
             play_bad = True
 
-        if not self.status['text']:	# no errors
-            self.status['text'] = strftime(_('Last updated at {HH}:{MM}:{SS}').format(HH='%H', MM='%M', SS='%S'), localtime(querytime))
+        if not self.status['text']:  # no errors
+            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
@@ -538,15 +536,22 @@ class AppWindow(object):
         # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
         try:
             data = companion.session.station()
-            if __debug__:
-                print('Retry for shipyard - ' + (data['commander'].get('docked') and (data.get('lastStarport', {}).get('ships') and 'Success' or 'Failure') or 'Undocked!'))
+            if data['commander'].get('docked'):
+                if data.get('lastStarport', {}).get('ships'):
+                    report = 'Success'
+                else:
+                    report = 'Failure'
+            else:
+                report = 'Undocked!'
+            logger.debug(f'Retry for shipyard - {report}')
             if not data['commander'].get('docked'):
-                pass	# might have undocked while we were waiting for retry in which case station data is unreliable
+                # might have un-docked while we were waiting for retry in which case station data is unreliable
+                pass
             elif (data.get('lastSystem',   {}).get('name') == monitor.system and
                   data.get('lastStarport', {}).get('name') == monitor.station and
                   data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
                 self.eddn.export_shipyard(data, monitor.is_beta)
-            elif tries > 1:	# bogus data - retry
+            elif tries > 1:  # bogus data - retry
                 self.w.after(int(SERVER_RETRY * 1000), lambda:self.retry_for_shipyard(tries-1))
         except:
             pass
@@ -607,17 +612,24 @@ class AppWindow(object):
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
-                    print('Monitor: Disable WinSparkle automatic update checks')
+                    logger.info('Monitor: Disable WinSparkle automatic update checks')
                 # Can start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
-                    print("Can't start Status monitoring")
+                    logger.info("Can't start Status monitoring")
 
             # Export loadout
-            if entry['event'] == 'Loadout' and not monitor.state['Captain'] and config.getint('output') & config.OUT_SHIP:
+            if entry['event'] == 'Loadout'\
+                    and not monitor.state['Captain']\
+                    and config.getint('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
             # Plugins
-            err = plug.notify_journal_entry(monitor.cmdr, monitor.is_beta, monitor.system, monitor.station, entry, monitor.state)
+            err = plug.notify_journal_entry(monitor.cmdr,
+                                            monitor.is_beta,
+                                            monitor.system,
+                                            monitor.station,
+                                            entry,
+                                            monitor.state)
             if err:
                 self.status['text'] = err
                 if not config.getint('hotkey_mute'):
@@ -631,23 +643,24 @@ class AppWindow(object):
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
                 self.updater.setAutomaticUpdatesCheck(True)
-                print('Monitor: Enable WinSparkle automatic update checks')
+                logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     # cAPI auth
     def auth(self, event=None):
         try:
             companion.session.auth_callback()
-            self.status['text'] = _('Authentication successful')	# Successfully authenticated with the Frontier website
+            # Successfully authenticated with the Frontier website
+            self.status['text'] = _('Authentication successful')
             if platform == 'darwin':
-                self.view_menu.entryconfigure(0, state=tk.NORMAL)	# Status
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Save Raw Data
+                self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
             else:
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)	# Status
-                self.file_menu.entryconfigure(1, state=tk.NORMAL)	# Save Raw Data
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+                self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug('Frontier CAPI Auth:', exc_info=e)
             self.status['text'] = str(e)
         self.cooldown()
 
@@ -724,7 +737,7 @@ class AppWindow(object):
     def help_releases(self, event=None):
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
-    class help_about(tk.Toplevel):
+    class HelpAbout(tk.Toplevel):
         showing = False
 
         def __init__(self, parent):
@@ -798,11 +811,11 @@ class AppWindow(object):
             row += 1
             button = ttk.Button(frame, text=_('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
-            button.bind("<Return>", lambda event:self.apply())
+            button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
-            print('Current version is {}'.format(appversion))
+            logger.info(f'Current version is {appversion}')
 
         def apply(self):
             self._destroy()
@@ -819,22 +832,35 @@ class AppWindow(object):
         try:
             data = companion.session.station()
             self.status['text'] = ''
-            f = tkinter.filedialog.asksaveasfilename(parent = self.w,
-                                               defaultextension = platform=='darwin' and '.json' or '',
-                                               filetypes = [('JSON', '.json'), ('All Files', '*')],
-                                               initialdir = config.get('outdir'),
-                                               initialfile = '%s%s.%s.json' % (data.get('lastSystem', {}).get('name', 'Unknown'), data['commander'].get('docked') and '.'+data.get('lastStarport', {}).get('name', 'Unknown') or '', strftime('%Y-%m-%dT%H.%M.%S', localtime())))
+            default_extension: str = ''
+            if platform == 'darwin':
+                default_extension = '.json'
+            last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
+            last_starport: str = ''
+            if data['commander'].get('docked'):
+                last_starport = '.'+data.get('lastStarport', {}).get('name', 'Unknown')
+            timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+            f = tkinter.filedialog.asksaveasfilename(parent=self.w,
+                                                     defaultextension=default_extension,
+                                                     filetypes=[('JSON', '.json'), ('All Files', '*')],
+                                                     initialdir=config.get('outdir'),
+                                                     initialfile=f'{last_system}{last_starport}.{timestamp}')
             if f:
                 with open(f, 'wb') as h:
-                    h.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')).encode('utf-8'))
+                    h.write(json.dumps(data,
+                                       ensure_ascii=False,
+                                       indent=2,
+                                       sort_keys=True,
+                                       separators=(',', ': ')).encode('utf-8'))
         except companion.ServerError as e:
             self.status['text'] = str(e)
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
     def onexit(self, event=None):
-        if platform!='darwin' or self.w.winfo_rooty()>0:	# http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if platform != 'darwin' or self.w.winfo_rooty() > 0:
             config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
         self.w.withdraw()	# Following items can take a few seconds, so hide the main window while they happen
         protocolhandler.close()
@@ -858,10 +884,10 @@ class AppWindow(object):
         self.drag_offset = None
 
     def oniconify(self, event=None):
-        self.w.overrideredirect(0)	# Can't iconize while overrideredirect
+        self.w.overrideredirect(0)  # Can't iconize while overrideredirect
         self.w.iconify()
-        self.w.update_idletasks()	# Size and windows styles get recalculated here
-        self.w.wait_visibility()	# Need main window to be re-created before returning
+        self.w.update_idletasks()  # Size and windows styles get recalculated here
+        self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None		# So theme will be re-applied on map
 
     def onmap(self, event=None):
@@ -875,18 +901,17 @@ class AppWindow(object):
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None):
-        if config.getint('theme') > 1 and event.widget==self.w:
+        if config.getint('theme') > 1 and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
-# Run the app
-if __name__ == "__main__":
 
+def enforce_single_instance() -> None:
     # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
     if platform == 'win32':
         import ctypes
-        from ctypes.wintypes import *
+        from ctypes.wintypes import HWND, LPWSTR, LPCWSTR, INT, BOOL, LPARAM
         EnumWindows            = ctypes.windll.user32.EnumWindows
         GetClassName           = ctypes.windll.user32.GetClassNameW
         GetClassName.argtypes  = [HWND, LPWSTR, ctypes.c_int]
@@ -910,9 +935,9 @@ if __name__ == "__main__":
 
         def WindowTitle(h):
             if h:
-                l = GetWindowTextLength(h) + 1
-                buf = ctypes.create_unicode_buffer(l)
-                if GetWindowText(h, buf, l):
+                text_length = GetWindowTextLength(h) + 1
+                buf = ctypes.create_unicode_buffer(text_length)
+                if GetWindowText(h, buf, text_length):
                     return buf.value
             return None
 
@@ -920,12 +945,15 @@ if __name__ == "__main__":
         def enumwindowsproc(hWnd, lParam):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
-            if GetClassName(hWnd, cls, 257) and cls.value == 'TkTopLevel' and WindowTitle(hWnd) == applongname and GetProcessHandleFromHwnd(hWnd):
+            if GetClassName(hWnd, cls, 257)\
+                    and cls.value == 'TkTopLevel'\
+                    and WindowTitle(hWnd) == applongname\
+                    and GetProcessHandleFromHwnd(hWnd):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
                     # Browser invoked us directly with auth response. Forward the response to the other app instance.
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                    ShowWindow(hWnd, SW_RESTORE)	# Wait for it to be responsive to avoid ShellExecute recursing
+                    ShowWindow(hWnd, SW_RESTORE)  # Wait for it to be responsive to avoid ShellExecute recursing
                     ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
                 else:
                     ShowWindowAsync(hWnd, SW_RESTORE)
@@ -935,11 +963,29 @@ if __name__ == "__main__":
 
         EnumWindows(enumwindowsproc, 0)
 
+
+# Run the app
+if __name__ == "__main__":
+
+    enforce_single_instance()
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), '%s.log' % appname), 'wt', 1)	# unbuffered not allowed for text in python3, so use line buffering
-        print('%s %s %s' % (applongname, appversion, strftime('%Y-%m-%dT%H:%M:%S', localtime())))
+        # unbuffered not allowed for text in python3, so use line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), 'wt', 1)
+
+    logger = EDMCLogging.Logger(appname).get_logger()
+
+    # Plain, not via `logger`
+    print(f'{applongname} {appversion}')
+
+    # TODO: unittest in place of this
+    class A(object):
+        class B(object):
+            def __init__(self):
+                logger.debug('A call from A.B.__init__')
+
+    #abinit = A.B()
 
     Translations.install(config.get('language') or None)	# Can generate errors so wait til log set up
 

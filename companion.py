@@ -4,9 +4,10 @@ from builtins import object
 import base64
 import csv
 import requests
+from typing import TYPE_CHECKING
 
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
-from http.cookiejar import LWPCookieJar  # No longer needed but retained in case plugins use it
+from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from email.utils import parsedate
 import hashlib
 import numbers
@@ -14,14 +15,15 @@ import os
 from os.path import join
 import random
 import time
-from traceback import print_exc
 import urllib.parse
 import webbrowser
 
 from config import appname, appversion, config
 from protocol import protocolhandler
+import logging
+logger = logging.getLogger(appname)
 
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     _ = lambda x: x # noqa # to make flake8 stop complaining that the hacked in _ method doesnt exist
 
@@ -196,29 +198,28 @@ class Auth(object):
                     return data.get('access_token')
 
                 else:
-                    print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
+                    logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
                     self.dump(r)
 
-            except Exception:
-                print('Auth\tCan\'t refresh token for {}'.format(self.cmdr))
-                print_exc()
+            except Exception as e:
+                logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
 
         else:
-            print('Auth\tNo token for {}'.format(self.cmdr))
+            logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"")
 
         # New request
-        print('Auth\tNew authorization request')
+        logger.info('Frontier CAPI Auth: New authorization request')
         v = random.SystemRandom().getrandbits(8 * 32)
-        self.verifier = self.base64URLEncode(v.to_bytes(32, byteorder='big')).encode('utf-8')
+        self.verifier = self.base64_url_encode(v.to_bytes(32, byteorder='big')).encode('utf-8')
         s = random.SystemRandom().getrandbits(8 * 32)
-        self.state = self.base64URLEncode(s.to_bytes(32, byteorder='big'))
+        self.state = self.base64_url_encode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
         webbrowser.open(
             '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501 # I cant make this any shorter
                 server_auth=SERVER_AUTH,
                 url_auth=URL_AUTH,
                 client_id=CLIENT_ID,
-                challenge=self.base64URLEncode(hashlib.sha256(self.verifier).digest()),
+                challenge=self.base64_url_encode(hashlib.sha256(self.verifier).digest()),
                 state=self.state,
                 redirect=protocolhandler.redirect
             )
@@ -228,16 +229,16 @@ class Auth(object):
         # Handle OAuth authorization code callback.
         # Returns access token if successful, otherwise raises CredentialsError
         if '?' not in payload:
-            print('Auth\tMalformed response {!r}'.format(payload))
+            logger.error(f'Frontier CAPI Auth: Malformed response\n{payload}\n')
             raise CredentialsError('malformed payload')  # Not well formed
 
         data = urllib.parse.parse_qs(payload[(payload.index('?') + 1):])
         if not self.state or not data.get('state') or data['state'][0] != self.state:
-            print('Auth\tUnexpected response {!r}'.format(payload))
+            logger.error(f'Frontier CAPI Auth: Unexpected response\n{payload}\n')
             raise CredentialsError('Unexpected response from authorization {!r}'.format(payload))  # Unexpected reply
 
         if not data.get('code'):
-            print('Auth\tNegative response {!r}'.format(payload))
+            logger.error(f'Frontier CAPI Auth: Negative response\n{payload}\n')
             error = next(
                 (data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',)
             )
@@ -256,7 +257,7 @@ class Auth(object):
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
-                print('Auth\tNew token for {}'.format(self.cmdr))
+                logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
                 cmdrs = config.get('cmdrs')
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get('fdev_apikeys') or []
@@ -268,21 +269,20 @@ class Auth(object):
                 return data.get('access_token')
 
         except Exception as e:
-            print('Auth\tCan\'t get token for {}'.format(self.cmdr))
-            print_exc()
+            logger.exception(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
             if r:
                 self.dump(r)
 
             raise CredentialsError('unable to get token') from e
 
-        print('Auth\tCan\'t get token for {}'.format(self.cmdr))
+        logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
         self.dump(r)
         error = next((data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',))
         raise CredentialsError('Error: {!r}'.format(error)[0])
 
     @staticmethod
     def invalidate(cmdr):
-        print('Auth\tInvalidated token for {}'.format(cmdr))
+        logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
         cmdrs = config.get('cmdrs')
         idx = cmdrs.index(cmdr)
         tokens = config.get('fdev_apikeys') or []
@@ -292,9 +292,9 @@ class Auth(object):
         config.save()  # Save settings now for use by command-line app
 
     def dump(self, r):
-        print('Auth\t' + r.url, r.status_code, r.reason if r.reason else 'None', r.text)
+        logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
 
-    def base64URLEncode(self, text):
+    def base64_url_encode(self, text):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
@@ -379,10 +379,8 @@ class Session(object):
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
         except Exception as e:
-            if __debug__:
-                print_exc()
-
-            raise ServerError('unable to get endpoint {}'.format(endpoint)) from e
+            logger.debug('Attempting GET', exc_info=e)
+            raise ServerError(f'unable to get endpoint {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
             # Redirected back to Auth server - force full re-authentication
@@ -402,7 +400,7 @@ class Session(object):
             data = r.json()  # May also fail here if token expired since response is empty
 
         except (requests.HTTPError, ValueError) as e:
-            print_exc()
+            logger.exception('Frontier CAPI Auth: GET ')
             self.dump(r)
             self.close()
 
@@ -410,6 +408,7 @@ class Session(object):
                 self.invalidate()
                 self.retrying = False
                 self.login()
+                logger.error('Frontier CAPI Auth: query failed after refresh')
                 raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
@@ -418,6 +417,7 @@ class Session(object):
 
             else:
                 self.retrying = False
+                logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
                 raise CredentialsError('HTTP error or invalid JSON') from e
 
         self.retrying = False
@@ -461,9 +461,8 @@ class Session(object):
             try:
                 self.session.close()
 
-            except Exception:
-                if __debug__:
-                    print_exc()
+            except Exception as e:
+                logger.debug('Frontier CAPI Auth: closing', exc_info=e)
 
         self.session = None
 
@@ -473,7 +472,7 @@ class Session(object):
         Auth.invalidate(self.credentials['cmdr'])
 
     def dump(self, r):
-        print('cAPI\t' + r.url, r.status_code, r.reason and r.reason or 'None', r.text)
+        logger.error(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason and r.reason or "None"} {r.text}')
 
 # Returns a shallow copy of the received data suitable for export to older tools
 # English commodity names and anomalies fixed up
@@ -497,15 +496,7 @@ def fixup(data):
         # But also see https://github.com/Marginal/EDMarketConnector/issues/32
         for thing in ('buyPrice', 'sellPrice', 'demand', 'demandBracket', 'stock', 'stockBracket'):
             if not isinstance(commodity.get(thing), numbers.Number):
-                if __debug__:
-                    print(
-                        'Invalid {!r}:{!r} ({}) for {!r}'.format(
-                            thing,
-                            commodity.get(thing),
-                            type(commodity.get(thing)),
-                            commodity.get('name', '')
-                        )
-                    )
+                logger.debug(f'Invalid {thing}:{commodity.get(thing)} ({type(commodity.get(thing))}) for {commodity.get("name", "")}')  # noqa: E501
                 break
 
         else:
@@ -520,20 +511,16 @@ def fixup(data):
                 pass
 
             elif not commodity.get('categoryname'):
-                if __debug__:
-                    print('Missing "categoryname" for {!r}'.format(commodity.get('name', '')))
+                logger.debug(f'Missing "categoryname" for {commodity.get("name", "")}')
 
             elif not commodity.get('name'):
-                if __debug__:
-                    print('Missing "name" for a commodity in {!r}'.format(commodity.get('categoryname', '')))
+                logger.debug(f'Missing "name" for a commodity in {commodity.get("categoryname", "")}')
 
             elif not commodity['demandBracket'] in range(4):
-                if __debug__:
-                    print('Invalid "demandBracket":{!r} for {!r}'.format(commodity['demandBracket'], commodity['name']))
+                logger.debug(f'Invalid "demandBracket":{commodity["demandBracket"]} for {commodity["name"]}')
 
             elif not commodity['stockBracket'] in range(4):
-                if __debug__:
-                    print('Invalid "stockBracket":{!r} for {!r}'.format(commodity['stockBracket'], commodity['name']))
+                logger.debug(f'Invalid "stockBracket":{commodity["stockBracket"]} for {commodity["name"]}')
 
             else:
                 # Rewrite text fields

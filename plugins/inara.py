@@ -10,6 +10,7 @@ import time
 from operator import itemgetter
 from queue import Queue
 from threading import Thread
+import logging
 
 import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -17,9 +18,7 @@ import myNotebook as nb
 
 from config import appname, applongname, appversion, config
 import plug
-
-if __debug__:
-    from traceback import print_exc
+logger = logging.getLogger(appname)
 
 
 _TIMEOUT = 20
@@ -457,7 +456,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 call()
 
         except Exception as e:
-            if __debug__: print_exc()
+            logger.debug('Adding events', exc_info=e)
             return str(e)
 
         #
@@ -896,28 +895,36 @@ def worker():
                 status = reply['header']['eventStatus']
                 if callback:
                     callback(reply)
-                elif status // 100 != 2:	# 2xx == OK (maybe with warnings)
+                elif status // 100 != 2:  # 2xx == OK (maybe with warnings)
                     # Log fatal errors
-                    print('Inara\t%s %s' % (reply['header']['eventStatus'], reply['header'].get('eventStatusText', '')))
-                    print(json.dumps(data, indent=2, separators = (',', ': ')))
-                    plug.show_error(_('Error: Inara {MSG}').format(MSG = reply['header'].get('eventStatusText', status)))
+                    logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
+                    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+                    plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
                 else:
                     # Log individual errors and warnings
                     for data_event, reply_event in zip(data['events'], reply['events']):
                         if reply_event['eventStatus'] != 200:
-                            print('Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event)))
+                            logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
+                            logger.debug(f'JSON data:\n{json.dumps(data_event)}')
                             if reply_event['eventStatus'] // 100 != 2:
-                                plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
-                        if data_event['eventName'] in ['addCommanderTravelCarrierJump', 'addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                                plug.show_error(_('Error: Inara {MSG}').format(
+                                    MSG=f'{data_event["eventName"]},'
+                                        f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'))
+                        if data_event['eventName'] in ('addCommanderTravelCarrierJump',
+                                                       'addCommanderTravelDock',
+                                                       'addCommanderTravelFSDJump',
+                                                       'setCommanderTravelLocation'):
                             this.lastlocation = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
+                            # calls update_location in main thread
+                            this.system_link.event_generate('<<InaraLocation>>', when="tail")
                         elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
                             this.lastship = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraShip>>', when="tail")	# calls update_ship in main thread
+                            # calls update_ship in main thread
+                            this.system_link.event_generate('<<InaraShip>>', when="tail")
 
                 break
-            except:
-                if __debug__: print_exc()
+            except Exception as e:
+                logger.debug('Sending events', exc_info=e)
                 retrying += 1
         else:
             if callback:
