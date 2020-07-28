@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        if: ${{ github.actor == 'AthanasiusTEST' }}
+        if: ${{ contains(['Athanasius'], github.actor) }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
