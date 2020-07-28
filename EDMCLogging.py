@@ -5,10 +5,13 @@ members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
 """
 
-import sys
+from sys import _getframe as getframe
+import inspect
 import logging
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
 
+
+# if TYPE_CHECKING:
 
 # TODO: Tests:
 #
@@ -115,7 +118,8 @@ class EDMCContextFilter(logging.Filter):
 
         return True
 
-    def caller_class_and_qualname(self) -> Tuple[str, str]:
+    @classmethod
+    def caller_class_and_qualname(cls) -> Tuple[str, str]:
         """
         Figure out our caller's class name(s) and qualname
 
@@ -126,7 +130,7 @@ class EDMCContextFilter(logging.Filter):
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        frame = sys._getframe(0)
+        frame: 'frameobject' = getframe(0)
         while frame:
             if isinstance(frame.f_locals.get('self'), logging.Logger):
                 frame = frame.f_back  # Want to start on the next frame below
@@ -143,20 +147,21 @@ class EDMCContextFilter(logging.Filter):
 
         caller_qualname = caller_class_names = ''
         if frame:
-            if frame.f_locals and 'self' in frame.f_locals:
+            # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
+            frame_info = inspect.getframeinfo(frame)
+            args, _, _, value_dict = inspect.getargvalues(frame)
+            if len(args) and args[0] == 'self':
+                frame_class = value_dict['self']
                 # Find __qualname__ of the caller
-                # Paranoia checks
-                if frame.f_code and frame.f_code.co_name:
-                    fn = getattr(frame.f_locals['self'], frame.f_code.co_name)
+                fn = getattr(frame_class, frame_info.function)
 
-                    if fn and fn.__qualname__:
-                        caller_qualname = fn.__qualname__
+                if fn and fn.__qualname__:
+                    caller_qualname = fn.__qualname__
 
                 # Find containing class name(s) of caller, if any
-                frame_class = frame.f_locals['self'].__class__
-                # Paranoia checks
                 if frame_class and frame_class.__qualname__:
                     caller_class_names = frame_class.__qualname__
+
             # If the frame caller is a bare function then there's no 'self'
             elif frame.f_code.co_name and frame.f_code.co_name in frame.f_globals:
                 fn = frame.f_globals[frame.f_code.co_name]
@@ -174,6 +179,9 @@ class EDMCContextFilter(logging.Filter):
                         # In case the condition above tests a tuple of values
                         caller_class_names = f'<{caller_class_names}>'
 
+            # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
+            del frame
+
         if caller_qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
             caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname() for "qualname">'
@@ -182,4 +190,4 @@ class EDMCContextFilter(logging.Filter):
             print('ALERT!  Something went wrong with finding caller class name(s) for logging!')
             caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
 
-        return (caller_class_names, caller_qualname)
+        return caller_class_names, caller_qualname
