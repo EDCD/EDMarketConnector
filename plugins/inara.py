@@ -696,7 +696,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
         # Stored modules
         if event_name == 'StoredModules':
-            items = dict([(x['StorageSlot'], x) for x in entry['Items']])  # Impose an order
+            items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
             modules = []
             for slot in sorted(items):
                 item = items[slot]
