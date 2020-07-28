@@ -288,8 +288,8 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
         this.suppress_docked = True
 
     # Always update, even if we're not the *current* system or station provider.
-    this.system_address = entry.get('SystemAddress') or this.system_address
-    this.system = entry.get('StarSystem') or this.system
+    this.system_address = entry.get('SystemAddress', this.system_address)
+    this.system = entry.get('StarSystem', this.system)
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -297,16 +297,12 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
     if pop is not None:
         this.system_population = pop
 
-    this.station = entry.get('StationName') or this.station
-    this.station_marketid = entry.get('MarketID') or this.station_marketid
+    this.station = entry.get('StationName', this.station)
+    this.station_marketid = entry.get('MarketID', this.station_marketid) or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
         this.station = None
         this.station_marketid = None
-
-    # Send location and status on new game or StartUp. Assumes Cargo is the last event on a new game (other than Docked).
-    # Always send an update on Docked, FSDJump, Undocked+SuperCruise, Promotion, EngineerProgress and PowerPlay affiliation.
-    # Also send material and cargo (if changed) whenever we send an update.
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         try:
