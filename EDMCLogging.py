@@ -5,13 +5,12 @@ members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
 """
 
+# So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 import inspect
 import logging
-from typing import TYPE_CHECKING, Tuple
+from typing import Tuple
 
-
-# if TYPE_CHECKING:
 
 # TODO: Tests:
 #
@@ -130,7 +129,7 @@ class EDMCContextFilter(logging.Filter):
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        frame: 'frameobject' = getframe(0)
+        frame: 'frame' = getframe(0)
         while frame:
             if isinstance(frame.f_locals.get('self'), logging.Logger):
                 frame = frame.f_back  # Want to start on the next frame below
