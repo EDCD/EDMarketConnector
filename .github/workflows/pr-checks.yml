@@ -16,15 +16,15 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    -name: Checkout commits
+    - name: Checkout commits
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    -name: Checkout base ref
+    - name: Checkout base ref
       uses: actions/checkout@v2
       with:
         ref: ${{github.base_ref}}
-    -name: Checkout head of PR
+    - name: Checkout head of PR
       uses: actions/checkout@v2
       with:
         ref: ${{github.head_ref}}
