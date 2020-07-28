@@ -152,32 +152,25 @@ class EDMCContextFilter(logging.Filter):
             args, _, _, value_dict = inspect.getargvalues(frame)
             if len(args) and args[0] == 'self':
                 frame_class = value_dict['self']
-                # Find __qualname__ of the caller
-                fn = getattr(frame_class, frame_info.function)
 
-                if fn and fn.__qualname__:
-                    caller_qualname = fn.__qualname__
+                if frame_class:
+                    # Find __qualname__ of the caller
+                    fn = getattr(frame_class, frame_info.function)
+                    if fn and fn.__qualname__:
+                        caller_qualname = fn.__qualname__
 
-                # Find containing class name(s) of caller, if any
-                if frame_class and frame_class.__qualname__:
-                    caller_class_names = frame_class.__qualname__
+                    # Find containing class name(s) of caller, if any
+                    if frame_class.__class__ and frame_class.__class__.__qualname__:
+                        caller_class_names = frame_class.__class__.__qualname__
 
-            # If the frame caller is a bare function then there's no 'self'
-            elif frame.f_code.co_name and frame.f_code.co_name in frame.f_globals:
-                fn = frame.f_globals[frame.f_code.co_name]
-                if fn and fn.__qualname__:
-                    caller_qualname = fn.__qualname__
+            # It's a call from the top level module file
+            elif frame_info.function == '<module>':
+                caller_class_names = '<none>'
+                caller_qualname = value_dict['__name__']
 
-                frame_class = getattr(fn, '__class__', None)
-                if frame_class and frame_class.__qualname__:
-                    caller_class_names = frame_class.__qualname__
-
-                    # 'class' __qualname__ of 'function' means it's a bare
-                    # function for sure.  You *can* have a class called
-                    # 'function', so let's make this 100% obvious what it is.
-                    if caller_class_names == 'function':
-                        # In case the condition above tests a tuple of values
-                        caller_class_names = f'<{caller_class_names}>'
+            elif frame_info.function != '':
+                caller_class_names = '<none>'
+                caller_qualname = frame_info.function
 
             # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
             del frame
