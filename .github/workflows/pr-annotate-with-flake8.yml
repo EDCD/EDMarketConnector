@@ -11,42 +11,31 @@ on:
     branches: [ develop ]
 
 jobs:
-  check_py:
-    runs-on: ubuntu-18.04
-    
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Check for PY files
-      env:
-        BASE_REF: ${{github.base_ref}}
-      run: |
-        # Will exit with non-zero if no filenames ending in ".py" are in
-        # the diff.
-        git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep -v '.py$'
-
   flake8_annotate:
-    - name: Annotate PR with Flake8
-      needs: check_py
-      # Only run if the check_py succeeded
-      if: ${{ success() }}
+    runs-on: ubuntu-18.04
 
-      runs-on: ubuntu-18.04
-
-      steps:
-      - uses: actions/checkout@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
+      - name: Check for PY files
+        env:
+          BASE_REF: ${{github.base_ref}}
+        run: |
+          # Will exit with non-zero if no filenames ending in ".py" are in
+          # the diff.
+          git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep -v '.py$'
+
       - name: Set up Python 3.7
+        if: ${{ success() }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Annotate with Flake8
+        if: ${{ success() }}
         uses: "tayfun/flake8-your-pr@master"
         needs:
         env:
