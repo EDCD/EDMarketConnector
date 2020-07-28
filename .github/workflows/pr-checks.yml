@@ -52,6 +52,6 @@ jobs:
         git log | head -100
         git diff
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
-        git diff "${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
+        git diff "refs/remotes/origin/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "${BASE_REF}" -- | flake8 . --count --exit-zero --statistics --diff
+        git diff "refs/remotes/origin/${BASE_REF}" -- | flake8 . --count --exit-zero --statistics --diff
