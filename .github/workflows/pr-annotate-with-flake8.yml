@@ -16,13 +16,13 @@ jobs:
 
     steps:
       - name: Checkout
-        if: ${{ github.actor == "Athanasius" }}
+        if: ${{ github.actor == 'Athanasius' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
       - name: Check for PY files
-        if: ${{ github.actor == "Athanasius" }}
+        if: ${{ github.actor == 'Athanasius' }}
         env:
           BASE_REF: ${{github.base_ref}}
         run: |
@@ -32,14 +32,14 @@ jobs:
           echo "::set-env name=PYFILES::${PYFILES}"
 
       - name: Set up Python 3.7
-        if: ${{ github.actor == "Athanasius" }}
+        if: ${{ github.actor == 'Athanasius' }}
         if: ${{ env.PYFILES != '' }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Annotate with Flake8
-        if: ${{ github.actor == "Athanasius" }}
+        if: ${{ github.actor == 'Athanasius' }}
         if: ${{ env.PYFILES != '' }}
         uses: "tayfun/flake8-your-pr@master"
         env:
