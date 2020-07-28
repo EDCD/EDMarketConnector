@@ -13,7 +13,7 @@ on:
 jobs:
   check_access:
     steps:
-      -name: Check annotation access
+     - name: Check annotation access
        if: ${{ github.actor != 'AthanasiusTEST' }}
        run: exit 1
 
