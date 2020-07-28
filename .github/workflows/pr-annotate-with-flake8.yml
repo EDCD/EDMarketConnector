@@ -26,7 +26,7 @@ jobs:
           BASE_REF: ${{github.base_ref}}
         run: |
           # Checkout might not have happened.
-          if [ ! -f ".git" ]; then exit 0 ; fi
+          if [ ! -d ".git" ]; then exit 0 ; fi
           # Get a list of files ending with ".py", stuff in environment.
           # We don't rely on exit status because Workflows run with
           # "set -e" so any failure in a pipe is total failure.
