@@ -4,7 +4,7 @@
 
 from collections import OrderedDict
 import json
-from typing import Any, Union
+from typing import Any, Dict, List, Mapping, Optional, OrderedDict as OrderedDictT
 import requests
 import sys
 import time
@@ -34,25 +34,24 @@ this.lastlocation = None  # eventData from the last Commander's Flight Log event
 this.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
 # Cached Cmdr state
-this.events = []  # Unsent events
-this.cmdr = None
-this.FID = None		# Frontier ID
+this.events: List[OrderedDictT[str, Any]] = []  # Unsent events
+this.cmdr: Optional[str] = None
+this.FID: Optional[str] = None		# Frontier ID
 this.multicrew = False  # don't send captain's ship info to Inara while on a crew
 this.newuser = False  # just entered API Key - send state immediately
 this.newsession = True  # starting a new session - wait for Cargo event
 this.undocked = False  # just undocked
 this.suppress_docked = False  # Skip initial Docked event if started docked
-this.cargo = None
-this.materials = None
+this.cargo: Optional[OrderedDictT[str, Any]] = None
+this.materials: Optional[OrderedDictT[str, Any]] = None
 this.lastcredits = 0  # Send credit update soon after Startup / new game
-this.storedmodules = None
-this.loadout = None
-this.fleet = None
+this.storedmodules: Optional[OrderedDictT[str, Any]] = None
+this.loadout: Optional[OrderedDictT[str, Any]] = None
+this.fleet: Optional[str] = None
 this.shipswap = False  # just swapped ship
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
-# this.last_update_time = config.getint(LAST_UPDATE_CONF_KEY)
 FLOOD_LIMIT_SECONDS = 30  # minimum time between sending events
 this.timer_run = True
 
@@ -68,7 +67,7 @@ this.station_marketid = None
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 
-def system_url(system_name):
+def system_url(system_name: str):
     if this.system_address:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={this.system_address}')
 
@@ -78,7 +77,7 @@ def system_url(system_name):
     return this.system
 
 
-def station_url(system_name, station_name):
+def station_url(system_name: str, station_name: str):
     if system_name:
         if station_name:
             return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
@@ -98,7 +97,7 @@ def plugin_start3(plugin_dir):
     return 'Inara'
 
 
-def plugin_app(parent):
+def plugin_app(parent: tk.Tk):
     this.system_link = parent.children['system']  # system label in main window
     this.station_link = parent.children['station']  # station label in main window
     this.system_link.bind_all('<<InaraLocation>>', update_location)
@@ -117,7 +116,7 @@ def plugin_stop():
     this.timer_run = False
 
 
-def plugin_prefs(parent, cmdr, is_beta):
+def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
     PADX = 10
     BUTTONX = 12  # indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
@@ -144,7 +143,7 @@ def plugin_prefs(parent, cmdr, is_beta):
     return frame
 
 
-def prefs_cmdr_changed(cmdr, is_beta):
+def prefs_cmdr_changed(cmdr: str, is_beta: bool):
     this.log_button['state'] = cmdr and not is_beta and tk.NORMAL or tk.DISABLED
     this.apikey['state'] = tk.NORMAL
     this.apikey.delete(0, tk.END)
@@ -159,7 +158,7 @@ def prefsvarchanged():
     this.label['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
 
 
-def prefs_changed(cmdr, is_beta):
+def prefs_changed(cmdr: str, is_beta: bool):
     changed = config.getint('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
@@ -191,7 +190,13 @@ def prefs_changed(cmdr, is_beta):
             call()
 
 
-def credentials(cmdr):
+def credentials(cmdr: str) -> Optional[str]:
+    """
+    credentials fetches the credentials for the given commander
+
+    :param cmdr: Commander name to search for credentials
+    :return: Credentials for the given commander or None
+    """
     # Credentials for cmdr
     if not cmdr:
         return None
@@ -203,8 +208,7 @@ def credentials(cmdr):
         return None
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state):
-
+def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]):
     # Send any unsent events when switching accounts
     if cmdr and cmdr != this.cmdr:
         call(force=True)
@@ -810,7 +814,7 @@ def cmdr_data(data, is_beta):
             this.lastcredits = float(data['commander']['credits'])
 
 
-def make_loadout(state):
+def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
     modules = []
     for m in state['Modules'].values():
         module = OrderedDict([
@@ -859,7 +863,15 @@ def make_loadout(state):
     ])
 
 
-def add_event(name, timestamp, data):
+def add_event(name: str, timestamp: str, data: Mapping[str, Any]):
+    """
+    Add an event to the event queue
+
+    :param name: name of the event
+    :param timestamp: timestamp for the event
+    :param data: data to be sent in the payload
+    """
+
     this.events.append(OrderedDict([
         ('eventName', name),
         ('eventTimestamp', timestamp),
@@ -868,6 +880,11 @@ def add_event(name, timestamp, data):
 
 
 def call_timer(wait=FLOOD_LIMIT_SECONDS):
+    """
+    call_timer runs in its own thread polling out to INARA once every FLOOD_LIMIT_SECONDS
+
+    :param wait: time to wait between polls, defaults to FLOOD_LIMIT_SECONDS
+    """
     while this.timer_run:
         time.sleep(wait)
         if this.timer_run:  # check again in here just in case we're closing and the stars align
@@ -877,6 +894,15 @@ def call_timer(wait=FLOOD_LIMIT_SECONDS):
 
 
 def call(callback=None, force=False):
+    """
+    call queues a call out to the inara API
+
+    Note that it will not allow a call more than once every FLOOD_LIMIT_SECONDS
+    unless the force parameter is True.
+
+    :param callback: Unused and ignored. , defaults to None
+    :param force: Whether or not to ignore flood limits, defaults to False
+    """
     if not this.events:
         return
 
@@ -902,6 +928,12 @@ def call(callback=None, force=False):
 
 
 def worker():
+    """
+    worker is the main thread worker and backbone of the plugin.
+
+    As events are added to `this.queue`, the worker thread will push them to the API
+    """
+
     while True:
         item = this.queue.get()
         if not item:
@@ -956,8 +988,14 @@ def worker():
                 plug.show_error(_("Error: Can't connect to Inara"))
 
 
-# Call inara_notify_location() in this and other interested plugins with Inara's response when changing system or station
+# TODO(A_D) event is unused
 def update_location(event=None):
+    """
+    Call inara_notify_location in this and other interested plugins with Inara's response when changing system
+    or station
+
+    :param event: Unused and ignored, defaults to None
+    """
     if this.lastlocation:
         for plugin in plug.provides('inara_notify_location'):
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
@@ -966,10 +1004,14 @@ def update_location(event=None):
 def inara_notify_location(eventData):
     pass
 
-# Call inara_notify_ship() in interested plugins with Inara's response when changing ship
 
-
+# TODO(A_D) event is unused
 def update_ship(event=None):
+    """
+    Call inara_notify_ship() in interested plugins with Inara's response when changing ship
+
+    :param event: Unused and ignored, defaults to None
+    """
     if this.lastship:
         for plugin in plug.provides('inara_notify_ship'):
             plug.invoke(plugin, None, 'inara_notify_ship', this.lastship)
