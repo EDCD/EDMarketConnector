@@ -12,6 +12,7 @@ on:
 
 jobs:
   check_access:
+    runs-on: ubuntu-18.04
     steps:
      - name: Check annotation access
        if: ${{ github.actor != 'AthanasiusTEST' }}
