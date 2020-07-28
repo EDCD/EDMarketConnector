@@ -11,21 +11,12 @@ on:
     branches: [ develop ]
 
 jobs:
-  set_allowed:
-    runs-on: ubuntu-18.04
-    outputs:
-      matrix: ${{ steps.set-allowed.outputs.allowed }}
-    steps:
-    - id: set-allowed
-      run: echo "::set-output name=allowed::{['Athanasius']}"
-
   flake8_annotate:
     runs-on: ubuntu-18.04
-    needs: set_allowed
 
     steps:
       - name: Checkout
-        if: ${{ contains(${{fromJson(needs.set_allowed.outputs.allowed)}}, github.actor) }}
+        if: ${{ contains(['Athanasius'], github.actor) }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
