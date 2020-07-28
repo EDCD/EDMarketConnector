@@ -1017,6 +1017,7 @@ def enforce_single_instance() -> None:
 def test_logging():
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
+
 # Run the app
 if __name__ == "__main__":
 
