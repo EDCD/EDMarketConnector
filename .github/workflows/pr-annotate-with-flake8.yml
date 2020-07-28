@@ -12,7 +12,6 @@ on:
 
 jobs:
   flake8_annotate:
-    needs: check_access
     runs-on: ubuntu-18.04
 
     steps:
