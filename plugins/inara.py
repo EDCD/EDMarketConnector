@@ -90,7 +90,7 @@ def station_url(system_name: str, station_name: str):
 
         return system_url(system_name)
 
-    return this.station or this.system
+    return this.station if this.station else this.system
 
 
 def plugin_start3(plugin_dir):
@@ -166,7 +166,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
 
 
 def prefs_cmdr_changed(cmdr: str, is_beta: bool):
-    this.log_button['state'] = cmdr and not is_beta and tk.NORMAL or tk.DISABLED
+    this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
     this.apikey['state'] = tk.NORMAL
     this.apikey.delete(0, tk.END)
     if cmdr:
@@ -896,8 +896,8 @@ def cmdr_data(data, is_beta):
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    this.system = this.system or data['lastSystem']['name']
-    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
+    this.system = this.system if this.system else data['lastSystem']['name']
+    this.station = data['lastStarport']['name'] if data['commander']['docked'] and not this.station else this.station
 
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
