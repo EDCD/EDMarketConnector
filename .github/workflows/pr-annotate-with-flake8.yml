@@ -26,7 +26,7 @@ jobs:
         run: |
           # Will exit with non-zero if no filenames ending in ".py" are in
           # the diff.
-          git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep -v '.py$'
+          git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$'
 
       - name: Set up Python 3.7
         if: ${{ success() }}
