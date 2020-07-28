@@ -28,6 +28,7 @@ jobs:
           # the diff.
           PYFILES=$(git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$')
           echo '::set-env name=PYFILES::${PYFILES}'
+          exit 0
 
       - name: Set up Python 3.7
         if: ${{ env.PYFILES != '' }}
