@@ -1020,13 +1020,15 @@ def test_logging():
 
 # Run the app
 if __name__ == "__main__":
-
-    enforce_single_instance()
+    # Keep this as the very first code run to be as sure as possible of no
+    # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
-        # unbuffered not allowed for text in python3, so use line buffering
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), 'wt', 1)
+        # unbuffered not allowed for text in python3, so use `1 for line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+
+    enforce_single_instance()
 
     logger = EDMCLogging.Logger(appname).get_logger()
 
