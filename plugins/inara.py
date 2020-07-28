@@ -84,7 +84,10 @@ def system_url(system_name: str):
 def station_url(system_name: str, station_name: str):
     if system_name:
         if station_name:
-            return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+            return requests.utils.requote_uri(
+                f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]'
+            )
+
         return system_url(system_name)
 
     return this.station or this.system
@@ -128,13 +131,28 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
-    HyperlinkLabel(frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    HyperlinkLabel(
+        frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
+    ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+
     this.log = tk.IntVar(value=config.getint('inara_out') and 1)
-    this.log_button = nb.Checkbutton(frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged)
+    this.log_button = nb.Checkbutton(
+        frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged
+    )
+
     this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
-    this.label = HyperlinkLabel(frame, text=_('Inara credentials'), background=nb.Label().cget('background'), url='https://inara.cz/settings-api', underline=True)  # Section heading in settings
+    
+    # Section heading in settings
+    this.label = HyperlinkLabel(
+        frame,
+        text=_('Inara credentials'),
+        background=nb.Label().cget('background'),
+        url='https://inara.cz/settings-api',
+        underline=True
+    )
+
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
@@ -156,11 +174,23 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool):
         if cred:
             this.apikey.insert(0, cred)
 
-    this.label['state'] = this.apikey_label['state'] = this.apikey['state'] = cmdr and not is_beta and this.log.get() and tk.NORMAL or tk.DISABLED
+    state = tk.DISABLED
+    if cmdr and not is_beta and this.log.get():
+        state = tk.NORMAL
+
+    this.label['state'] = state
+    this.apikey_label['state'] = state
+    this.apikey['state'] = state
 
 
 def prefsvarchanged():
-    this.label['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
+    state = tk.DISABLED
+    if this.log.get():
+        state = this.log_button['state']
+
+    this.label['state'] = state
+    this.apikey_label['state'] = state
+    this.apikey['state'] = state
 
 
 def prefs_changed(cmdr: str, is_beta: bool):
@@ -595,7 +625,12 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
             loadout = make_loadout(state)
             if this.loadout != loadout:
                 this.loadout = loadout
-                this.events = [x for x in this.events if x['eventName'] != 'setCommanderShipLoadout' or x['shipGameID'] != this.loadout['shipGameID']]  # Remove any unsent for this ship
+                # Remove any unsent for this ship
+                this.events = [
+                    e for e in this.events
+                    if e['eventName'] != 'setCommanderShipLoadout' or e['shipGameID'] != this.loadout['shipGameID']
+                ]
+
                 add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
 
         # Stored modules
@@ -698,7 +733,11 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
                 effect = OrderedDict([('minorfactionName', faction['Faction'])])
                 for influence in faction.get('Influence', []):
                     if 'Influence' in influence:
-                        effect['influenceGain'] = len(effect.get('influenceGain', '')) > len(influence['Influence']) and effect['influenceGain'] or influence['Influence']  # pick highest
+                        highest_gain = influence['Influence']
+                        if len(effect.get('influenceGain', '')) > len(highest_gain):
+                            highest_gain = effect['influenceGain']
+
+                        effect['influenceGain'] = highest_gain
 
                 if 'Reputation' in faction:
                     effect['reputationGain'] = faction['Reputation']
@@ -837,7 +876,14 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
-        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        to_set = this.station
+        if not to_set and this.system_population is not None:
+            if this.system_population > 0:
+                to_set = STATION_UNDOCKED
+            else:
+                to_set = ''
+
+        this.station_link['text'] = to_set
         this.station_link['url'] = station_url(this.system, this.station)
         this.station_link.update_idletasks()
 
