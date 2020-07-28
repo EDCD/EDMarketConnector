@@ -37,6 +37,5 @@ jobs:
       - name: Annotate with Flake8
         if: ${{ success() }}
         uses: "tayfun/flake8-your-pr@master"
-        needs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
