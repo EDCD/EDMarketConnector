@@ -30,13 +30,13 @@ jobs:
           echo '::set-env name=PYFILES::${PYFILES}'
 
       - name: Set up Python 3.7
-        if: ${{ env.PYFILES != "" }}
+        if: ${{ env.PYFILES != '' }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Annotate with Flake8
-        if: ${{ env.PYFILES != "" }}
+        if: ${{ env.PYFILES != '' }}
         uses: "tayfun/flake8-your-pr@master"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
