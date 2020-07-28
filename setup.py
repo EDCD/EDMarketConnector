@@ -73,7 +73,6 @@ if sys.platform=='darwin':
                   'optimize': 2,
                   'packages': [
                       'requests',
-                      'keyring.backends',
                       'sqlite3',	# Included for plugins
                   ],
                   'includes': [
@@ -119,7 +118,6 @@ elif sys.platform=='win32':
                   'optimize': 2,
                   'packages': [
                       'requests',
-                      'keyring.backends',
                       'sqlite3',	# Included for plugins
                   ],
                   'includes': [
