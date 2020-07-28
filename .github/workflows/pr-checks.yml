@@ -5,21 +5,30 @@
 #
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Push-Checks
+name: PR-Checks
 
 on:
-  push:
+  pull_request:
     branches: [ develop ]
 
 jobs:
-  build:
-
+  flake8:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+    -name: Checkout commits
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    -name: Checkout base ref
+      uses: actions/checkout@v2
+      with:
+        ref: ${{github.base_ref}}
+    -name: Checkout head of PR
+      uses: actions/checkout@v2
+      with:
+        ref: ${{github.head_ref}}
+
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
@@ -29,26 +38,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
     - name: Lint with flake8
       env:
-        ROOT_SHA: ${{github.base_ref}}
-        
+        BASE_REF: ${{github.base_ref}}
+
       run: |
-        DATA=$(python3 <<EOF
-        import json
-        import os
-        with open(os.getenv('GITHUB_EVENT_PATH')) as f:
-            data = json.load(f)
-        
-        typ = os.getenv('GITHUB_EVENT_NAME')
-        
-        if 'pull_request' in typ:
-            print(data['base']['ref'])
-        elif 'push' in typ:
-            print(data['before'])
-        EOF
-        )
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
-        git diff "$DATA" | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
+        git diff "${BASE_REF}" | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "$DATA" | flake8 . --count --exit-zero --statistics --diff
+        git diff "${BASE_REF}" | flake8 . --count --exit-zero --statistics --diff
