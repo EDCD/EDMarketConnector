@@ -14,10 +14,10 @@ jobs:
   set_allowed:
     runs-on: ubuntu-18.04
     outputs:
-      allowed: ${{ steps.set-allowed.outputs.allowed }}
+      matrix: ${{ steps.set-allowed.outputs.allowed }}
     steps:
     - id: set-allowed
-      run: echo '::set-output name=allowed::{["Athanasius"]}'
+      run: echo '::set-output name=allowed::{"allowed":["Athanasius"]}'
 
   flake8_annotate:
     runs-on: ubuntu-18.04
@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        if: ${{ contains(fromJson(needs.set_allowed.outputs.allowed.*), github.actor) }}
+        if: ${{ contains(fromJson(needs.set_allowed.outputs.allowed.allowed.*), github.actor) }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
