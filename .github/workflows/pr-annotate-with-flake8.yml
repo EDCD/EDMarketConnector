@@ -26,16 +26,17 @@ jobs:
         run: |
           # Will exit with non-zero if no filenames ending in ".py" are in
           # the diff.
-          git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$'
+          PYFILES=$(git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$')
+          echo '::set-env name=PYFILES::${PYFILES}'
 
       - name: Set up Python 3.7
-        if: ${{ success() }}
+        if: ${{ env.PYFILES != "" }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Annotate with Flake8
-        if: ${{ success() }}
+        if: ${{ env.PYFILES != "" }}
         uses: "tayfun/flake8-your-pr@master"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
