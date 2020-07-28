@@ -11,19 +11,13 @@ on:
     branches: [ develop ]
 
 jobs:
-  check_access:
-    runs-on: ubuntu-18.04
-    steps:
-     - name: Check annotation access
-       if: ${{ github.actor != 'AthanasiusTEST' }}
-       run: exit 1
-
   flake8_annotate:
     needs: check_access
     runs-on: ubuntu-18.04
 
     steps:
       - name: Checkout
+        if: ${{ github.actor != 'AthanasiusTEST' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
