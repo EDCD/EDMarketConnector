@@ -10,6 +10,30 @@ import logging
 from typing import Tuple
 
 
+# TODO: Tests:
+#
+#       1. Call from bare function in file.
+#       2. Call from `if __name__ == "__main__":` section
+#
+#       3. Call from 1st level function in 1st level Class in file
+#       4. Call from 2nd level function in 1st level Class in file
+#       5. Call from 3rd level function in 1st level Class in file
+#
+#       6. Call from 1st level function in 2nd level Class in file
+#       7. Call from 2nd level function in 2nd level Class in file
+#       8. Call from 3rd level function in 2nd level Class in file
+#
+#       9. Call from 1st level function in 3rd level Class in file
+#      10. Call from 2nd level function in 3rd level Class in file
+#      11. Call from 3rd level function in 3rd level Class in file
+#
+#      12. Call from 2nd level file, all as above.
+#
+#      13. Call from *module*
+#
+#      14. Call from *package*
+
+
 class Logger:
     """
     Wrapper class for all logging configuration and code.
