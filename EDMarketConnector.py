@@ -1014,6 +1014,9 @@ def enforce_single_instance() -> None:
         EnumWindows(enumwindowsproc, 0)
 
 
+def test_logging():
+    logger.debug('Test from EDMarketConnector.py top-level test_logging()')
+
 # Run the app
 if __name__ == "__main__":
 
@@ -1026,16 +1029,18 @@ if __name__ == "__main__":
 
     logger = EDMCLogging.Logger(appname).get_logger()
 
-    # Plain, not via `logger`
-    print(f'{applongname} {appversion}')
-
-    # TODO: unittest in place of this
+    # TODO: unittests in place of these
+    # logger.debug('Test from __main__')
+    # test_logging()
     class A(object):
         class B(object):
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
 
     # abinit = A.B()
+
+    # Plain, not via `logger`
+    print(f'{applongname} {appversion}')
 
     Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
 
