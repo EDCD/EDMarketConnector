@@ -26,9 +26,8 @@ jobs:
         run: |
           # Will exit with non-zero if no filenames ending in ".py" are in
           # the diff.
-          PYFILES=$(git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$')
-          echo '::set-env name=PYFILES::${PYFILES}'
-          exit 0
+          PYFILES=$(git diff --name-only "refs/remotes/origin/${BASE_REF}" -- | egrep '.py$' || true)
+          echo "::set-env name=PYFILES::${PYFILES}"
 
       - name: Set up Python 3.7
         if: ${{ env.PYFILES != '' }}
