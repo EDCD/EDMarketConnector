@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        if: ${{ contains(${{fromJson(needs.set_allowed.outputs.allowed)}}, github.actor) }}
+        if: ${{ contains(fromJson(needs.set_allowed.outputs.allowed), github.actor) }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
