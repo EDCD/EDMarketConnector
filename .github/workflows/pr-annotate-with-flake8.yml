@@ -17,7 +17,7 @@ jobs:
       matrix: ${{ steps.set-allowed.outputs.allowed }}
     steps:
     - id: set-allowed
-      run: echo '::set-output name=allowed::{["Athanasius"]}'
+      run: echo "::set-output name=allowed::{['Athanasius']}"
 
   flake8_annotate:
     runs-on: ubuntu-18.04
