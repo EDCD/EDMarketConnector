@@ -42,18 +42,18 @@ this.lastship = None  # eventData from the last addCommanderShip or setCommander
 this.events: List[OrderedDictT[str, Any]] = []  # Unsent events
 this.cmdr: Optional[str] = None
 this.FID: Optional[str] = None		# Frontier ID
-this.multicrew = False  # don't send captain's ship info to Inara while on a crew
-this.newuser = False  # just entered API Key - send state immediately
-this.newsession = True  # starting a new session - wait for Cargo event
-this.undocked = False  # just undocked
+this.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
+this.newuser: bool = False  # just entered API Key - send state immediately
+this.newsession: bool = True  # starting a new session - wait for Cargo event
+this.undocked: bool = False  # just undocked
 this.suppress_docked = False  # Skip initial Docked event if started docked
 this.cargo: Optional[OrderedDictT[str, Any]] = None
 this.materials: Optional[OrderedDictT[str, Any]] = None
-this.lastcredits = 0  # Send credit update soon after Startup / new game
+this.lastcredits: int = 0  # Send credit update soon after Startup / new game
 this.storedmodules: Optional[OrderedDictT[str, Any]] = None
 this.loadout: Optional[OrderedDictT[str, Any]] = None
 this.fleet: Optional[List[OrderedDictT[str, Any]]] = None
-this.shipswap = False  # just swapped ship
+this.shipswap: bool = False  # just swapped ship
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
@@ -1090,7 +1090,7 @@ def add_event(name: str, timestamp: str, data: Mapping[str, Any]):
     ]))
 
 
-def call_timer(wait=FLOOD_LIMIT_SECONDS):
+def call_timer(wait: int = FLOOD_LIMIT_SECONDS):
     """
     call_timer runs in its own thread polling out to INARA once every FLOOD_LIMIT_SECONDS
 
@@ -1100,8 +1100,6 @@ def call_timer(wait=FLOOD_LIMIT_SECONDS):
         time.sleep(wait)
         if this.timer_run:  # check again in here just in case we're closing and the stars align
             call()
-
-# Queue a call to Inara, handled in Worker thread
 
 
 def call(callback=None, force=False):
