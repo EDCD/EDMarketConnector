@@ -978,7 +978,9 @@ def cmdr_data(data, is_beta):
 
     # Only trust CAPI if these aren't yet set
     this.system = this.system if this.system else data['lastSystem']['name']
-    this.station = data['lastStarport']['name'] if data['commander']['docked'] and not this.station else this.station
+
+    if not this.station and data['commander'['docked']]:
+        this.station = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
