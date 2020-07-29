@@ -958,8 +958,8 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
     if config.get('station_provider') == 'Inara':
         to_set = this.station
-        if not to_set and this.system_population is not None:
-            if this.system_population > 0:
+        if not to_set:
+            if this.system_population is not None and this.system_population > 0:
                 to_set = STATION_UNDOCKED
             else:
                 to_set = ''
