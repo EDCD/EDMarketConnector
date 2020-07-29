@@ -882,8 +882,11 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
         # Community Goals
         if event_name == 'CommunityGoal':
-            this.events = [x for x in this.events if x['eventName'] not in [
-                'setCommunityGoal', 'setCommanderCommunityGoalProgress']]  # Remove any unsent
+            # Remove any unsent
+            this.events = list(filter(
+                lambda e: e['eventName'] not in ('setCommunityGoal', 'setCommanderCommunityGoalProgress'),
+                this.events
+            ))
 
             for goal in entry['CurrentGoals']:
                 data = OrderedDict([
