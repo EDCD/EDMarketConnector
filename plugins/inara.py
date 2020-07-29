@@ -156,7 +156,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
 
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
+    this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
     this.apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
     this.apikey = nb.Entry(frame)
     this.apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
