@@ -1206,7 +1206,6 @@ def worker():
                 plug.show_error(_("Error: Can't connect to Inara"))
 
 
-# TODO(A_D) event is unused
 def update_location(event=None):
     """
     Call inara_notify_location in this and other interested plugins with Inara's response when changing system
@@ -1223,7 +1222,6 @@ def inara_notify_location(eventData):
     pass
 
 
-# TODO(A_D) event is unused
 def update_ship(event=None):
     """
     Call inara_notify_ship() in interested plugins with Inara's response when changing ship
