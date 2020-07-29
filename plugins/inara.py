@@ -726,8 +726,8 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
             if this.storedmodules != modules:
                 # Only send on change
                 this.storedmodules = modules
-                this.events = [x for x in this.events if x['eventName']
-                               != 'setCommanderStorageModules']  # Remove any unsent
+                # Remove any unsent
+                this.events = list(filter(lambda e: e['eventName'] != 'setCommanderStorageModules', this.events))
                 add_event('setCommanderStorageModules', entry['timestamp'], this.storedmodules)
 
         # Missions
