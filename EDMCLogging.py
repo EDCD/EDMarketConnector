@@ -68,7 +68,7 @@ class Logger:
         self.logger_channel = logging.StreamHandler()
         self.logger_channel.setLevel(loglevel)
 
-        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(class)s: %(message)s')  # noqa: E501
+        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
         self.logger_formatter.default_msec_format = '%s.%03d'
 
