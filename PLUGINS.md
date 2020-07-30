@@ -65,7 +65,7 @@ for the location of this log file.
 
 A future version of EDMC will implement proper logging using the Python
 `logging` module.  Plugin developers should get their code ready for this by
-using the following code instead of simple `print(...)' statements
+using the following code instead of simple `print(...)` statements
 
 Insert this at the top-level of your load.py file (so not inside
 `plugin_start3()`):
