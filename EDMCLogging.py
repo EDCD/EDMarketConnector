@@ -35,6 +35,8 @@ from typing import Tuple
 #
 #      14. Call from *package*
 
+_default_loglevel = logging.DEBUG
+
 
 class Logger:
     """
@@ -47,7 +49,7 @@ class Logger:
     Users of this class should then call getLogger() to get the
     logging.Logger instance.
     """
-    def __init__(self, logger_name: str, loglevel: int = logging.DEBUG):
+    def __init__(self, logger_name: str, loglevel: int = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
         This includes using an EDMCContextFilter to add 'class' and 'qualname'
@@ -76,6 +78,33 @@ class Logger:
         :return: The logging.Logger instance.
         """
         return self.logger
+
+
+def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
+    """
+    'Found' plugins need their own logger to call out where the logging is
+    coming from, but we don't need to set up *everything* for them.
+
+    The name will be '{config.appname}.{plugin.name}', e.g.
+    'EDMarketConnector.miggytest'.  This means that any logging sent through
+    there *also* goes to the channels defined in the 'EDMarketConnector'
+    logger, so we can let that take care of the formatting.
+
+    If we add our own channel then the output gets duplicated (assuming same
+    logLevel set).
+
+    However we do need to attach our filter to this still.  That's not at
+    the channel level.
+    :param name: Name of this Logger.
+    :param loglevel: Optional logLevel for this Logger.
+    :return: logging.Logger instance, all set up.
+    """
+    plugin_logger = logging.getLogger(name)
+    plugin_logger.setLevel(loglevel)
+
+    plugin_logger.addFilter(EDMCContextFilter())
+
+    return plugin_logger
 
 
 class EDMCContextFilter(logging.Filter):
