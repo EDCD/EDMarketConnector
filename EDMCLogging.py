@@ -208,9 +208,14 @@ class EDMCContextFilter(logging.Filter):
             # Is this a 'found' plugin calling us?
             file_name = pathlib.Path(frame_info.filename).expanduser()
             plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
+            internal_plugin_dir = pathlib.Path(config.internal_plugin_dir).expanduser()
+
             if file_name.parent.parent == plugin_dir:
                 # Pre-pend 'plugins.<plugin folder>.' to module
                 module_name = f'<plugins>.{file_name.parent.name}.{module_name}'
+
+            elif file_name.parent == internal_plugin_dir:
+                module_name = f'plugins.{module_name}'
 
             # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
             del frame
