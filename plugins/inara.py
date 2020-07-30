@@ -3,9 +3,10 @@
 #
 
 from collections import OrderedDict
-from dataclasses import dataclass
 import json
-from typing import Any, Dict, List, Mapping, Optional, OrderedDict as OrderedDictT, TYPE_CHECKING
+from typing import Any, AnyStr, Dict, List, Mapping, Optional, OrderedDict as OrderedDictT, \
+    Sequence, TYPE_CHECKING, Union
+
 import requests
 import sys
 import time
@@ -82,7 +83,7 @@ def system_url(system_name: str):
     return this.system
 
 
-def station_url(system_name: str, station_name: str):
+def station_url(system_name: Optional[str], station_name: Optional[str]):
     if system_name:
         if station_name:
             return requests.utils.requote_uri(
@@ -700,7 +701,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
             modules = []
             for slot in sorted(items):
                 item = items[slot]
-                module = OrderedDict([
+                module: OrderedDictT[str, Any] = OrderedDict([
                     ('itemName', item['Name']),
                     ('itemValue', item['BuyPrice']),
                     ('isHot', item['Hot']),
@@ -791,7 +792,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
             factioneffects = []
             for faction in entry.get('FactionEffects', []):
-                effect = OrderedDict([('minorfactionName', faction['Faction'])])
+                effect: OrderedDictT[str, Any] = OrderedDict([('minorfactionName', faction['Faction'])])
                 for influence in faction.get('Influence', []):
                     if 'Influence' in influence:
                         highest_gain = influence['Influence']
@@ -842,7 +843,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
             add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
-            data = OrderedDict([
+            data: OrderedDictT[str, Any] = OrderedDict([
                 ('starsystemName', system),
                 ('isPlayer', entry['IsPlayer']),
                 ('isSuccess', entry['Success']),
@@ -1019,7 +1020,7 @@ def cmdr_data(data, is_beta):
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
     modules = []
     for m in state['Modules'].values():
-        module = OrderedDict([
+        module: OrderedDictT[str, Any] = OrderedDict([
             ('slotName', m['Slot']),
             ('itemName', m['Item']),
             ('itemHealth', m['Health']),
@@ -1040,7 +1041,7 @@ def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
             module['isHot'] = m['Hot']
 
         if 'Engineering' in m:
-            engineering = OrderedDict([
+            engineering: OrderedDictT[str, Any] = OrderedDict([
                 ('blueprintName', m['Engineering']['BlueprintName']),
                 ('blueprintLevel', m['Engineering']['Level']),
                 ('blueprintQuality', m['Engineering']['Quality']),
@@ -1051,7 +1052,7 @@ def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
 
             engineering['modifiers'] = []
             for mod in m['Engineering']['Modifiers']:
-                modifier = OrderedDict([
+                modifier: OrderedDictT[str, Any] = OrderedDict([
                     ('name', mod['Label']),
                 ])
 
@@ -1076,7 +1077,10 @@ def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
     ])
 
 
-def add_event(name: str, timestamp: str, data: Mapping[str, Any]):
+EVENT_DATA = Mapping[AnyStr, Any]
+
+
+def add_event(name: str, timestamp: str, data: Union[EVENT_DATA, Sequence[EVENT_DATA]]):
     """
     Add an event to the event queue
 
