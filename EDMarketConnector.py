@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
     logger = EDMCLogging.Logger(appname).get_logger()
 
     # TODO: unittests in place of these
-    # logger.debug('Test from __main__')
+    logger.debug('Test from __main__')
     # test_logging()
     class A(object):
         class B(object):
