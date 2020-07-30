@@ -181,8 +181,8 @@ class EDMCContextFilter(logging.Filter):
             # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
             frame_info = inspect.getframeinfo(frame)
             args, _, _, value_dict = inspect.getargvalues(frame)
-            if len(args) and args[0] == 'self':
-                frame_class = value_dict['self']
+            if len(args) and args[0] in ('self', 'cls'):
+                frame_class = value_dict[args[0]]
 
                 if frame_class:
                     # Find __qualname__ of the caller
@@ -203,6 +203,9 @@ class EDMCContextFilter(logging.Filter):
                 caller_class_names = '<none>'
                 caller_qualname = frame_info.function
 
+            ###################################################################
+            # Fixups for EDMC plugins
+            ###################################################################
             # TODO: This assumes caller is only one level into the plugin folder
             #       Need to walk back up checking.
             # Is this a 'found' plugin calling us?
@@ -210,12 +213,36 @@ class EDMCContextFilter(logging.Filter):
             plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
             internal_plugin_dir = pathlib.Path(config.internal_plugin_dir).expanduser()
 
-            if file_name.parent.parent == plugin_dir:
-                # Pre-pend 'plugins.<plugin folder>.' to module
-                module_name = f'<plugins>.{file_name.parent.name}.{module_name}'
+            # Find the first parent called 'plugins'
+            plugin_top = file_name
+            while plugin_top and plugin_top.name != '':
+                if plugin_top.parent.name == 'plugins':
+                    break
 
-            elif file_name.parent == internal_plugin_dir:
-                module_name = f'plugins.{module_name}'
+                plugin_top = plugin_top.parent
+
+            # Check we didn't walk up to the root/anchor
+            if plugin_top.name != '':
+                # And this check means we must still be inside config.app_dir
+                if plugin_top.parent == plugin_dir:
+                    # In case of deeper callers we need a range of the file_name
+                    pt_len = len(plugin_top.parts)
+                    name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+                    module_name = f'<plugins>.{name_path}.{module_name}'
+
+                # Or in this case the installation folder
+                elif file_name.parent == internal_plugin_dir:
+                    # Is this a deeper caller ?
+                    pt_len = len(plugin_top.parts)
+                    name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+                    # Pre-pend 'plugins.<plugin folder>.' to module
+                    if name_path == '':
+                        # No sub-folder involved so module_name is sufficient
+                        module_name = f'plugins.{module_name}'
+                    else:
+                        # Sub-folder(s) involved, so include them
+                        module_name = f'plugins.{name_path}.{module_name}'
+            ###################################################################
 
             # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
             del frame
