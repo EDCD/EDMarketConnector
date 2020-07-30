@@ -1,4 +1,6 @@
 """
+Set up required logging for the application.
+
 This module provides for a common logging-powered log facility.
 Mostly it implements a logging.Filter() in order to get two extra
 members on the logging.LogRecord instance for use in logging.Formatter()
@@ -51,9 +53,11 @@ class Logger:
     Users of this class should then call getLogger() to get the
     logging.Logger instance.
     """
+
     def __init__(self, logger_name: str, loglevel: int = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
+
         This includes using an EDMCContextFilter to add 'class' and 'qualname'
         expansions for logging.Formatter().
         """
@@ -77,13 +81,17 @@ class Logger:
 
     def get_logger(self) -> logging.Logger:
         """
-        :return: The logging.Logger instance.
+        Obtain the self.logger of the class instance.
+
+        Not to be confused with logging.getLogger().
         """
         return self.logger
 
 
 def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
     """
+    Return a logger suitable for a plugin.
+
     'Found' plugins need their own logger to call out where the logging is
     coming from, but we don't need to set up *everything* for them.
 
@@ -111,24 +119,27 @@ def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.L
 
 class EDMCContextFilter(logging.Filter):
     """
+    Implements filtering to add extra format specifiers, and tweak others.
+
     logging.Filter sub-class to place extra attributes of the calling site
     into the record.
     """
+
     def filter(self, record: logging.LogRecord) -> bool:
         """
-        Attempt to set the following in the LogRecord:
+        Attempt to set/change fields in the LogRecord.
 
-            1. class = class name(s) of the call site, if applicable
-            2. qualname = __qualname__ of the call site.  This simplifies
-             logging.Formatter() as you can use just this no matter if there is
-             a class involved or not, so you get a nice clean:
-                 <file/module>.<classA>[.classB....].<function>
+        1. class = class name(s) of the call site, if applicable
+        2. qualname = __qualname__ of the call site.  This simplifies
+         logging.Formatter() as you can use just this no matter if there is
+         a class involved or not, so you get a nice clean:
+             <file/module>.<classA>[.classB....].<function>
 
         If we fail to be able to properly set either then:
 
-            1. Use print() to alert, to be SURE a message is seen.
-            2. But also return strings noting the error, so there'll be
-             something in the log output if it happens.
+        1. Use print() to alert, to be SURE a message is seen.
+        2. But also return strings noting the error, so there'll be
+         something in the log output if it happens.
 
         :param record: The LogRecord we're "filtering"
         :return: bool - Always true in order for this record to be logged.
@@ -150,13 +161,15 @@ class EDMCContextFilter(logging.Filter):
         return True
 
     @classmethod
-    def caller_attributes(cls, module_name: str = ''):
+    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:
         """
-        Figure out our caller's class name(s) and qualname
+        Determine extra or changed fields for the caller.
 
-        Ref: <https://gist.github.com/techtonik/2151726#gistcomment-2333747>
-
-        :return: Tuple[str, str, str]: The caller's class name(s), qualname and module_name
+        1. qualname finds the relevant object and its __qualname__
+        2. caller_class_names is just the full class names of the calling
+         class if relevant.
+        3. module is munged if we detect the caller is an EDMC plugin,
+         whether internal or found.
         """
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
@@ -206,8 +219,7 @@ class EDMCContextFilter(logging.Filter):
             ###################################################################
             # Fixups for EDMC plugins
             ###################################################################
-            # TODO: This assumes caller is only one level into the plugin folder
-            #       Need to walk back up checking.
+            # TODO: Refactor this bit out into another function
             # Is this a 'found' plugin calling us?
             file_name = pathlib.Path(frame_info.filename).expanduser()
             plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
