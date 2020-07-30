@@ -110,14 +110,14 @@ Then replace `print(...)` statements with one of the following:
 
     try:
         ...
-    catch Exception:
+    except Exception:
         # This logs at 'ERROR' level.
         # Also automatically includes exception information.
         logger.exception('An exception occurred')
 
     try:
         ...
-    catch Exception as e:
+    except Exception as e:
         logger.debug('Exception we only note in debug output', exc_info=e)
 ```
 
