@@ -9,8 +9,10 @@ strings.
 from sys import _getframe as getframe
 import inspect
 import logging
+import pathlib
 from typing import Tuple
 
+from config import config
 
 # TODO: Tests:
 #
@@ -131,10 +133,11 @@ class EDMCContextFilter(logging.Filter):
         :param record: The LogRecord we're "filtering"
         :return: bool - Always true in order for this record to be logged.
         """
-        class_name = qualname = ''
-        # Don't even call in if both already set.
-        if not getattr(record, 'class', None) or not getattr(record, 'qualname', None):
-            (class_name, qualname) = self.caller_class_and_qualname()
+        (class_name, qualname, module_name) = self.caller_attributes(module_name=getattr(record, 'module'))
+
+        # Only set if we got a useful value
+        if module_name:
+            setattr(record, 'module', module_name)
 
         # Only set if not already provided by logging itself
         if getattr(record, 'class', None) is None:
@@ -147,13 +150,13 @@ class EDMCContextFilter(logging.Filter):
         return True
 
     @classmethod
-    def caller_class_and_qualname(cls) -> Tuple[str, str]:
+    def caller_attributes(cls, module_name: str = ''):
         """
         Figure out our caller's class name(s) and qualname
 
         Ref: <https://gist.github.com/techtonik/2151726#gistcomment-2333747>
 
-        :return: Tuple[str, str]: The caller's class name(s) and qualname
+        :return: Tuple[str, str, str]: The caller's class name(s), qualname and module_name
         """
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
@@ -200,6 +203,15 @@ class EDMCContextFilter(logging.Filter):
                 caller_class_names = '<none>'
                 caller_qualname = frame_info.function
 
+            # TODO: This assumes caller is only one level into the plugin folder
+            #       Need to walk back up checking.
+            # Is this a 'found' plugin calling us?
+            file_name = pathlib.Path(frame_info.filename).expanduser()
+            plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
+            if file_name.parent.parent == plugin_dir:
+                # Pre-pend 'plugins.<plugin folder>.' to module
+                module_name = f'<plugins>.{file_name.parent.name}.{module_name}'
+
             # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
             del frame
 
@@ -211,4 +223,4 @@ class EDMCContextFilter(logging.Filter):
             print('ALERT!  Something went wrong with finding caller class name(s) for logging!')
             caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
 
-        return caller_class_names, caller_qualname
+        return caller_class_names, caller_qualname, module_name
