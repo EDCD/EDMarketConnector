@@ -17,7 +17,7 @@ import myNotebook as nb  # noqa: N813
 from config import config, appname
 import EDMCLogging
 
-logger = EDMCLogging.EDMCLoggerAdapter(logging.getLogger(appname), {'from': __name__})
+logger = logging.getLogger(appname)
 
 # Dashboard Flags constants
 FlagsDocked = 1 << 0  # on a landing pad

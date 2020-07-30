@@ -9,7 +9,7 @@ strings.
 from sys import _getframe as getframe
 import inspect
 import logging
-from typing import Any, MutableMapping, Tuple
+from typing import Tuple
 
 
 # TODO: Tests:
@@ -55,14 +55,13 @@ class Logger:
         This includes using an EDMCContextFilter to add 'class' and 'qualname'
         expansions for logging.Formatter().
         """
-        # Using a LoggerAdapter, so make the actual Logger internal
-        self._logger = logging.getLogger(logger_name)
+        self.logger = logging.getLogger(logger_name)
         # Configure the logging.Logger
-        self._logger.setLevel(loglevel)
+        self.logger.setLevel(loglevel)
 
         # Set up filter for adding class name
         self.logger_filter = EDMCContextFilter()
-        self._logger.addFilter(self.logger_filter)
+        self.logger.addFilter(self.logger_filter)
 
         self.logger_channel = logging.StreamHandler()
         self.logger_channel.setLevel(loglevel)
@@ -72,18 +71,16 @@ class Logger:
         self.logger_formatter.default_msec_format = '%s.%03d'
 
         self.logger_channel.setFormatter(self.logger_formatter)
-        self._logger.addHandler(self.logger_channel)
+        self.logger.addHandler(self.logger_channel)
 
-        self.logger = EDMCLoggerAdapter(self._logger, {'from': self.__class__.__qualname__})
-
-    def get_logger(self) -> logging.LoggerAdapter:
+    def get_logger(self) -> logging.Logger:
         """
         :return: The logging.Logger instance.
         """
         return self.logger
 
 
-def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.LoggerAdapter:
+def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
     """
     'Found' plugins need their own logger to call out where the logging is
     coming from, but we don't need to set up *everything* for them.
@@ -107,7 +104,7 @@ def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.L
 
     plugin_logger.addFilter(EDMCContextFilter())
 
-    return EDMCLoggerAdapter(plugin_logger, {'from': __name__})
+    return plugin_logger
 
 
 class EDMCContextFilter(logging.Filter):
@@ -215,8 +212,3 @@ class EDMCContextFilter(logging.Filter):
             caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
 
         return caller_class_names, caller_qualname
-
-
-class EDMCLoggerAdapter(logging.LoggerAdapter):
-    def process(self, msg: Any, kwargs: MutableMapping[str, Any]) -> Tuple[Any, MutableMapping[str, Any]]:
-        return f'ADAPTED {msg}', kwargs
