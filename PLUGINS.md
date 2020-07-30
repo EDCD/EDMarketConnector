@@ -47,6 +47,9 @@ breaking with future code changes.**
  
 `from monitor import gamerunning` - in case a plugin needs to know if we
  think the game is running.
+
+`import timeout_session` - provides a method called `new_session` that creates a requests.session with a default timeout
+on all requests. Recommended to reduce noise in HTTP requests
  
 
 ```python
