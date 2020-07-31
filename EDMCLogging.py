@@ -160,7 +160,7 @@ class EDMCContextFilter(logging.Filter):
 
         return True
 
-    @classmethod
+    @classmethod  # noqa: CCR001 - this is as refactored as is sensible
     def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:
         """
         Determine extra or changed fields for the caller.
@@ -171,23 +171,7 @@ class EDMCContextFilter(logging.Filter):
         3. module is munged if we detect the caller is an EDMC plugin,
          whether internal or found.
         """
-        # Go up through stack frames until we find the first with a
-        # type(f_locals.self) of logging.Logger.  This should be the start
-        # of the frames internal to logging.
-        frame: 'frame' = getframe(0)
-        while frame:
-            if isinstance(frame.f_locals.get('self'), logging.Logger):
-                frame = frame.f_back  # Want to start on the next frame below
-                break
-            frame = frame.f_back
-
-        # Now continue up through frames until we find the next one where
-        # that is *not* true, as it should be the call site of the logger
-        # call
-        while frame:
-            if not isinstance(frame.f_locals.get('self'), logging.Logger):
-                break  # We've found the frame we want
-            frame = frame.f_back
+        frame = cls.find_caller_frame()
 
         caller_qualname = caller_class_names = ''
         if frame:
@@ -216,45 +200,7 @@ class EDMCContextFilter(logging.Filter):
                 caller_class_names = '<none>'
                 caller_qualname = frame_info.function
 
-            ###################################################################
-            # Fixups for EDMC plugins
-            ###################################################################
-            # TODO: Refactor this bit out into another function
-            # Is this a 'found' plugin calling us?
-            file_name = pathlib.Path(frame_info.filename).expanduser()
-            plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
-            internal_plugin_dir = pathlib.Path(config.internal_plugin_dir).expanduser()
-
-            # Find the first parent called 'plugins'
-            plugin_top = file_name
-            while plugin_top and plugin_top.name != '':
-                if plugin_top.parent.name == 'plugins':
-                    break
-
-                plugin_top = plugin_top.parent
-
-            # Check we didn't walk up to the root/anchor
-            if plugin_top.name != '':
-                # And this check means we must still be inside config.app_dir
-                if plugin_top.parent == plugin_dir:
-                    # In case of deeper callers we need a range of the file_name
-                    pt_len = len(plugin_top.parts)
-                    name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-                    module_name = f'<plugins>.{name_path}.{module_name}'
-
-                # Or in this case the installation folder
-                elif file_name.parent == internal_plugin_dir:
-                    # Is this a deeper caller ?
-                    pt_len = len(plugin_top.parts)
-                    name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-                    # Pre-pend 'plugins.<plugin folder>.' to module
-                    if name_path == '':
-                        # No sub-folder involved so module_name is sufficient
-                        module_name = f'plugins.{module_name}'
-                    else:
-                        # Sub-folder(s) involved, so include them
-                        module_name = f'plugins.{name_path}.{module_name}'
-            ###################################################################
+            module_name = cls.munge_module_name(frame_info, module_name)
 
             # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
             del frame
@@ -268,3 +214,80 @@ class EDMCContextFilter(logging.Filter):
             caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
 
         return caller_class_names, caller_qualname, module_name
+
+    @classmethod
+    def find_caller_frame(cls):
+        """
+        Find the stack frame of the logging caller.
+
+        :returns: 'frame' object such as from sys._getframe()
+        """
+        # Go up through stack frames until we find the first with a
+        # type(f_locals.self) of logging.Logger.  This should be the start
+        # of the frames internal to logging.
+        frame: 'frame' = getframe(0)
+        while frame:
+            if isinstance(frame.f_locals.get('self'), logging.Logger):
+                frame = frame.f_back  # Want to start on the next frame below
+                break
+            frame = frame.f_back
+        # Now continue up through frames until we find the next one where
+        # that is *not* true, as it should be the call site of the logger
+        # call
+        while frame:
+            if not isinstance(frame.f_locals.get('self'), logging.Logger):
+                break  # We've found the frame we want
+            frame = frame.f_back
+        return frame
+
+    @classmethod
+    def munge_module_name(cls, frame_info: inspect.FrameInfo, module_name: str) -> str:
+        """
+        Adjust module_name based on the file path for the given frame.
+
+        We want to distinguish between other code and both our internal plugins
+        and the 'found' ones.
+
+        For internal plugins we want "plugins.<filename>".
+        For 'found' plugins we want "<plugins>.<plugin_name>...".
+
+        :param frame_info: The frame_info of the caller.
+        :param module_name: The module_name string to munge.
+        :return: The munged module_name.
+        """
+        file_name = pathlib.Path(frame_info.filename).expanduser()
+        plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
+        internal_plugin_dir = pathlib.Path(config.internal_plugin_dir).expanduser()
+        # Find the first parent called 'plugins'
+        plugin_top = file_name
+        while plugin_top and plugin_top.name != '':
+            if plugin_top.parent.name == 'plugins':
+                break
+
+            plugin_top = plugin_top.parent
+
+        # Check we didn't walk up to the root/anchor
+        if plugin_top.name != '':
+            # Check we're still inside config.plugin_dir
+            if plugin_top.parent == plugin_dir:
+                # In case of deeper callers we need a range of the file_name
+                pt_len = len(plugin_top.parts)
+                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+                module_name = f'<plugins>.{name_path}.{module_name}'
+
+            # Check we're still inside the installation folder.
+            elif file_name.parent == internal_plugin_dir:
+                # Is this a deeper caller ?
+                pt_len = len(plugin_top.parts)
+                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+
+                # Pre-pend 'plugins.<plugin folder>.' to module
+                if name_path == '':
+                    # No sub-folder involved so module_name is sufficient
+                    module_name = f'plugins.{module_name}'
+
+                else:
+                    # Sub-folder(s) involved, so include them
+                    module_name = f'plugins.{name_path}.{module_name}'
+
+        return module_name
