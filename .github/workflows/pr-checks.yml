@@ -16,16 +16,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     ####################################################################
-    # Show full github context to aid debugging.
-    ####################################################################
-    steps:
-    - name: Show github context
-      run: |
-        env
-        cat $GITHUB_EVENT_PATH
-    ####################################################################
-
-    ####################################################################
     # Checkout the necessary commits
     ####################################################################
     # We need the commits from the 'head' of the PR, not what it's
@@ -50,6 +40,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; elif [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
+    ####################################################################
+
+    ####################################################################
+    # Show full github context to aid debugging.
+    ####################################################################
+    steps:
+    - name: Show github context
+      run: |
+        env
+        cat $GITHUB_EVENT_PATH
     ####################################################################
 
     ####################################################################
