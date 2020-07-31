@@ -75,8 +75,13 @@ jobs:
         BASE_REF: ${{github.base_ref}}
 
       run: |
-        # stop the build if there are Python syntax errors or undefined names, ignore existing 
+        # Explicitly check for some errors
+        # E9 - Runtime (syntax and the like)
+        # F63 - 'tests' checking
+        # F7 - syntax errors
+        # F82 - undefined checking
         git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --exit-zero --statistics --diff
+        # Can optionally add `--exit-zero` to the flake8 arguments so that
+        # this doesn't fail the build.
+        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --statistics --diff
     ####################################################################
