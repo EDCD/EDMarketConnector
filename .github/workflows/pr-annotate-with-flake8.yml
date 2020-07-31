@@ -27,6 +27,7 @@ jobs:
           HEAD_REPO_OWNER: ${{github.event.pull_request.head.repo.owner.login}}
           BASE_REF: ${{github.base_ref}}
         run: |
+          # Just to be running something
           env
       ##################################################################
 
