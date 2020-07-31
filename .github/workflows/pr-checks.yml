@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+    # https://github.com/actions/checkout
     - name: Checkout commits
       uses: actions/checkout@v2
       with:
@@ -30,6 +31,9 @@ jobs:
       with:
         ref: ${{github.head_ref}}
         fetch-depth: 0
+
+    -name: Show github context
+      -run: cat $GITHUB_EVENT_PATH
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
