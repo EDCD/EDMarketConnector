@@ -75,6 +75,7 @@ jobs:
         BASE_REF: ${{github.base_ref}}
 
       run: |
+        # TODO: Add some output of current head/log
         # Explicitly check for some errors
         # E9 - Runtime (syntax and the like)
         # F63 - 'tests' checking
