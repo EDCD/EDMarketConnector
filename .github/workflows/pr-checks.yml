@@ -32,7 +32,7 @@ jobs:
       # https://github.com/actions/checkout
       uses: actions/checkout@v2
       with:
-        repository: ${{github.head.repo.full_name}}
+        repository: ${{github.event.head.repo.full_name}}
         fetch-depth: 0
     ####################################################################
 
@@ -55,7 +55,7 @@ jobs:
     ####################################################################
     - name: Lint with flake8
       env:
-        BASE_REPO: ${{github.base.repo.full_name}}
+        BASE_REPO: ${{github.event.base.repo.full_name}}
         BASE_REF: ${{github.base_ref}}
 
       run: |
