@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - name: Checkout
+        # This check isn't correct, it only worked for branches within the
+        # repo.
         if: ${{ github.actor == 'Athanasius' }}
         uses: actions/checkout@v2
         with:
