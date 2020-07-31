@@ -21,6 +21,7 @@ jobs:
     steps:
     - name: Show github context
       run: |
+        env
         cat $GITHUB_EVENT_PATH
     ####################################################################
 
@@ -56,12 +57,15 @@ jobs:
     ####################################################################
     - name: Lint with flake8
       env:
-        BASE_REPO: ${{github.event.pull_request.base.repo.owner.login}}
+        BASE_REPO_URL: ${{github.event.pull_request.base.repo.url}}
+        BASE_REPO_OWNER: ${{github.event.pull_request.base.repo.owner.login}}
         BASE_REF: ${{github.base_ref}}
 
       run: |
+        git remote add ${BASE_REPO_OWNER} ${BASE_REPO_URL}
+        git fetch ${BASE_REPO_OWNER}
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
-        git diff "refs/remotes/${BASE_REPO}/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
+        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "refs/remotes/${BASE_REPO}/${BASE_REF}" -- | flake8 . --count --exit-zero --statistics --diff
+        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --exit-zero --statistics --diff
     ####################################################################
