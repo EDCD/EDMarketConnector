@@ -20,7 +20,7 @@ class TimeoutAdapter(HTTPAdapter):
         if kwargs["timeout"] is None:
             kwargs["timeout"] = self.default_timeout
 
-        super().send(*args, **kwargs)
+        return super().send(*args, **kwargs)
 
 
 def new_session(timeout: int = REQUEST_TIMEOUT, session: requests.Session = None) -> requests.Session:
