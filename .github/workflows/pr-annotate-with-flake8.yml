@@ -1,7 +1,9 @@
 # This workflow will:
 #
-#   install Python dependencies
-#   Run flake8 to add annotations to the PR
+#   1. Store some github context in env vars.
+#   2. Only checkout if base and head ref owners are the same.
+#   3. Check if any *.py files are in the diff.
+#   4. Only then install python and perform the annotation with flake8.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: PR-annotate-flake8
@@ -16,11 +18,21 @@ jobs:
 
     steps:
       ##################################################################
+      # Check if the base and head repos are the same, if not we won't
+      # be able to add annotations.
+      ##################################################################
+      - name: Check head and base repo same
+        env:
+          BASE_REPO_OWNER: ${{github.event.pull_request.base.repo.owner.login}}
+          HEAD_REPO_OWNER: ${{github.event.pull_request.head.repo.owner.login}}
+          BASE_REF: ${{github.base_ref}}
+      ##################################################################
+
+      ##################################################################
+      # Perform the checkout
       ##################################################################
       - name: Checkout
-        # This check isn't correct, it only worked for branches within the
-        # repo.
-        if: ${{ github.actor == 'Athanasius' }}
+        if: ${{ env.BASE_REPO_OWNER == env.HEAD_REPO_OWNER }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -31,8 +43,6 @@ jobs:
       # So we check if any were affected and store that in env
       ##################################################################
       - name: Check for PY files
-        env:
-          BASE_REF: ${{github.base_ref}}
         run: |
           # Checkout might not have happened.
           if [ ! -d ".git" ]; then exit 0 ; fi
