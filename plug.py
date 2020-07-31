@@ -8,12 +8,14 @@ import importlib
 import sys
 import operator
 import threading  # noqa: F401 - We don't use it, but plugins might
+from typing import Optional
 import logging
 import tkinter as tk
 
 import myNotebook as nb  # noqa: N813
 
 from config import config, appname
+import EDMCLogging
 
 logger = logging.getLogger(appname)
 
@@ -79,7 +81,7 @@ last_error = {
 
 class Plugin(object):
 
-    def __init__(self, name, loadfile):
+    def __init__(self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]):
         """
         Load a single plugin
         :param name: module name
@@ -90,6 +92,7 @@ class Plugin(object):
         self.name = name  # Display name.
         self.folder = name  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
+        self.logger = plugin_logger
 
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
@@ -173,7 +176,7 @@ def load_plugins(master):
     for name in sorted(os.listdir(config.internal_plugin_dir)):
         if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name))
+                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name), logger)
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except Exception as e:
@@ -191,12 +194,17 @@ def load_plugins(master):
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
-            found.append(Plugin(name, None))
+            found.append(Plugin(name, None, logger))
         else:
             try:
                 # Add plugin's folder to load path in case plugin has internal package dependencies
                 sys.path.append(os.path.join(config.plugin_dir, name))
-                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py')))
+
+                # Create a logger for this 'found' plugin.  Must be before the
+                # load.py is loaded.
+                plugin_logger = EDMCLogging.get_plugin_logger(f'{appname}.{name}')
+
+                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
