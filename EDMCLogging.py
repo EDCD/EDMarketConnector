@@ -5,7 +5,6 @@ members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
 """
 
-# A small comment
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 import inspect
