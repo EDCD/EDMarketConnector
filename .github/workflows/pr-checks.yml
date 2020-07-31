@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    # https://github.com/actions/checkout
     - name: Checkout commits
+      # https://github.com/actions/checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
