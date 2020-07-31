@@ -21,6 +21,7 @@ import myNotebook as nb
 
 from config import appname, applongname, appversion, config
 import plug
+import timeout_session
 logger = logging.getLogger(appname)
 
 if TYPE_CHECKING:
@@ -34,7 +35,7 @@ CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a 
 
 
 this: Any = sys.modules[__name__]  # For holding module globals
-this.session = requests.Session()
+this.session = timeout_session.new_session()
 this.queue = Queue()  # Items to be sent to Inara by worker thread
 this.lastlocation = None  # eventData from the last Commander's Flight Log event
 this.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
