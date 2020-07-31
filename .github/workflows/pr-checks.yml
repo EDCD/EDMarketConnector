@@ -62,7 +62,11 @@ jobs:
         BASE_REF: ${{github.base_ref}}
 
       run: |
+        # We have checked out the 'head' repo, so we need the references
+        # for the 'base' repo in order to do the 'git diff' below
+        # So, add the 'base' repo as a new remote
         git remote add ${BASE_REPO_OWNER} ${BASE_REPO_URL}
+        # And then fetch its references
         git fetch ${BASE_REPO_OWNER}
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
         git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
