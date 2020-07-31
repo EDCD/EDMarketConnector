@@ -17,6 +17,7 @@ jobs:
 
     steps:
     - name: Checkout commits
+      # https://github.com/actions/checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -30,6 +31,9 @@ jobs:
       with:
         ref: ${{github.head_ref}}
         fetch-depth: 0
+
+    -name: Show github context
+      -run: cat $GITHUB_EVENT_PATH
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
