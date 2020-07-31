@@ -46,6 +46,7 @@ jobs:
       # So we check if any were affected and store that in env
       ##################################################################
       - name: Check for PY files
+        if: ${{ github.event.pull_request.base.repo.owner.login == github.event.pull_request.head.repo.owner.login }}
         run: |
           # Checkout might not have happened.
           if [ ! -d ".git" ]; then exit 0 ; fi
