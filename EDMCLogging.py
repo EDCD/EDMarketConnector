@@ -241,7 +241,7 @@ class EDMCContextFilter(logging.Filter):
         return frame
 
     @classmethod
-    def munge_module_name(cls, frame_info: inspect.FrameInfo, module_name: str) -> str:
+    def munge_module_name(cls, frame_info: inspect.Traceback, module_name: str) -> str:
         """
         Adjust module_name based on the file path for the given frame.
 
