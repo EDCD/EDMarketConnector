@@ -35,7 +35,7 @@ jobs:
       # Perform the checkout
       ##################################################################
       - name: Checkout
-        if: ${{ env.BASE_REPO_OWNER == env.HEAD_REPO_OWNER }}
+        if: ${{ github.event.pull_request.base.repo.owner.login == github.event.pull_request.head.repo.owner.login }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
