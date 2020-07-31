@@ -26,6 +26,8 @@ jobs:
           BASE_REPO_OWNER: ${{github.event.pull_request.base.repo.owner.login}}
           HEAD_REPO_OWNER: ${{github.event.pull_request.head.repo.owner.login}}
           BASE_REF: ${{github.base_ref}}
+        run: |
+          env
       ##################################################################
 
       ##################################################################
