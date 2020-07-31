@@ -55,7 +55,7 @@ jobs:
     ####################################################################
     - name: Lint with flake8
       env:
-        BASE_REPO: ${{github.base.full_name}}
+        BASE_REPO: ${{github.base.repo.full_name}}
         BASE_REF: ${{github.base_ref}}
 
       run: |
