@@ -38,19 +38,19 @@ this.commodities = this.outfitting = this.shipyard = None
 
 class EDDN(object):
 
-    ### SERVER = 'http://localhost:8081'	# testing
+    # SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
     UPLOAD = '%s/upload/' % SERVER
-    REPLAYPERIOD = 400	# Roughly two messages per second, accounting for send delays [ms]
-    REPLAYFLUSH = 20	# Update log on disk roughly every 10 seconds
-    TIMEOUT= 10	# requests timeout
+    REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
+    REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
+    TIMEOUT = 10  # requests timeout
     MODULE_RE = re.compile('^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
 
     def __init__(self, parent):
         self.parent = parent
         self.session = requests.Session()
-        self.replayfile = None	# For delayed messages
+        self.replayfile = None  # For delayed messages
         self.replaylog = []
 
     def load(self):
@@ -94,7 +94,7 @@ class EDDN(object):
         msg = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header',     OrderedDict([
-                ('softwareName',    '%s [%s]' % (applongname, sys.platform=='darwin' and "Mac OS" or system())),
+                ('softwareName',    '%s [%s]' % (applongname, sys.platform == 'darwin' and "Mac OS" or system())),
                 ('softwareVersion', appversion),
                 ('uploaderID',      uploaderID),
             ])),
@@ -119,7 +119,7 @@ class EDDN(object):
         if len(self.replaylog) == 1:
             status['text'] = _('Sending data to EDDN...')
         else:
-            status['text'] = '%s [%d]' % (_('Sending data to EDDN...').replace('...',''), len(self.replaylog))
+            status['text'] = '%s [%d]' % (_('Sending data to EDDN...').replace('...', ''), len(self.replaylog))
         self.parent.update_idletasks()
         try:
             cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
@@ -166,9 +166,9 @@ class EDDN(object):
                 ]))
                 if commodity['statusFlags']:
                     commodities[-1]['statusFlags'] = commodity['statusFlags']
-        commodities.sort(key = lambda c: c['name'])
+        commodities.sort(key=lambda c: c['name'])
 
-        if commodities and this.commodities != commodities:	# Don't send empty commodities list - schema won't allow it
+        if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
             message = OrderedDict([
                 ('timestamp',   data['timestamp']),
                 ('systemName',  data['lastSystem']['name']),
@@ -181,24 +181,25 @@ class EDDN(object):
             if 'prohibited' in data['lastStarport']:
                 message['prohibited'] = sorted(list([x for x in (data['lastStarport']['prohibited'] or {}).values()]))
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
-                'message'    : message,
+                '$schemaRef': 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
+                'message':    message,
             })
         this.commodities = commodities
 
     def export_outfitting(self, data, is_beta):
         economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
+        ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"), prison or rescue Megaships, or under Pirate Attack etc
         horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
                     any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
                     any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.values() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
-        if outfitting and this.outfitting != (horizons, outfitting):	# Don't send empty modules list - schema won't allow it
+        # Don't send empty modules list - schema won't allow it
+        if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
+                '$schemaRef': 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
+                'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
@@ -212,15 +213,16 @@ class EDDN(object):
     def export_shipyard(self, data, is_beta):
         economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
+        ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
         horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
                     any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
                     any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
         shipyard = sorted([ship['name'].lower() for ship in list((ships['shipyard_list'] or {}).values()) + ships['unavailable_list']])
-        if shipyard and this.shipyard != (horizons, shipyard):	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
+        # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
+        if shipyard and this.shipyard != (horizons, shipyard):
             self.send(data['commander']['name'], {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
+                '$schemaRef': 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
+                'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
@@ -242,12 +244,12 @@ class EDDN(object):
             ('sellPrice',     commodity['SellPrice']),
             ('demand',        commodity['Demand']),
             ('demandBracket', commodity['DemandBracket']),
-        ]) for commodity in items], key = lambda c: c['name'])
+        ]) for commodity in items], key=lambda c: c['name'])
 
-        if commodities and this.commodities != commodities:	# Don't send empty commodities list - schema won't allow it
+        if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
             self.send(cmdr, {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
+                '$schemaRef': 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
+                'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -261,10 +263,11 @@ class EDDN(object):
         modules = entry.get('Items') or []
         horizons = entry.get('Horizons', False)
         outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name']) for module in modules if module['Name'] != 'int_planetapproachsuite'])
-        if outfitting and this.outfitting != (horizons, outfitting):	# Don't send empty modules list - schema won't allow it
+        # Don't send empty modules list - schema won't allow it
+        if outfitting and this.outfitting != (horizons, outfitting):
             self.send(cmdr, {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
+                '$schemaRef': 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
+                'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -279,10 +282,11 @@ class EDDN(object):
         ships = entry.get('PriceList') or []
         horizons = entry.get('Horizons', False)
         shipyard = sorted([ship['ShipType'] for ship in ships])
-        if shipyard and this.shipyard != (horizons, shipyard):	# Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
+        # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
+        if shipyard and this.shipyard != (horizons, shipyard):
             self.send(cmdr, {
-                '$schemaRef' : 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
-                'message'    : OrderedDict([
+                '$schemaRef': 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
+                'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -295,8 +299,8 @@ class EDDN(object):
 
     def export_journal_entry(self, cmdr, is_beta, entry):
         msg = {
-            '$schemaRef' : 'https://eddn.edcd.io/schemas/journal/1' + (is_beta and '/test' or ''),
-            'message'    : entry
+            '$schemaRef': 'https://eddn.edcd.io/schemas/journal/1' + (is_beta and '/test' or ''),
+            'message': entry
         }
         if self.replayfile or self.load():
             # Store the entry
@@ -304,9 +308,8 @@ class EDDN(object):
             self.replayfile.write('%s\n' % self.replaylog[-1])
 
             if (entry['event'] == 'Docked' or
-                (entry['event'] == 'Location' and entry['Docked']) or
-                not (config.getint('output') & config.OUT_SYS_DELAY)):
-                self.parent.after(self.REPLAYPERIOD, self.sendreplay)	# Try to send this and previous entries
+                (entry['event'] == 'Location' and entry['Docked']) or not (config.getint('output') & config.OUT_SYS_DELAY)):
+                self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
         else:
             # Can't access replay file! Send immediately.
             status = self.parent.children['status']
@@ -325,53 +328,60 @@ class EDDN(object):
 def plugin_start3(plugin_dir):
     return 'EDDN'
 
+
 def plugin_app(parent):
     this.parent = parent
     this.eddn = EDDN(parent)
     # Try to obtain exclusive lock on journal cache, even if we don't need it yet
     if not this.eddn.load():
-        this.status['text'] = 'Error: Is another copy of this app already running?'	# Shouldn't happen - don't bother localizing
+        # Shouldn't happen - don't bother localizing
+        this.status['text'] = 'Error: Is another copy of this app already running?'
+
 
 def plugin_prefs(parent, cmdr, is_beta):
 
     PADX = 10
-    BUTTONX = 12	# indent Checkbuttons and Radiobuttons
+    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
-        output = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)	# default settings
+        output = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
     else:
         output = config.getint('output')
 
     eddnframe = nb.Frame(parent)
 
-    HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)	# Don't translate
-    this.eddn_station= tk.IntVar(value = (output & config.OUT_MKT_EDDN) and 1)
-    this.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=this.eddn_station, command=prefsvarchanged)	# Output setting
-    this.eddn_station_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-    this.eddn_system = tk.IntVar(value = (output & config.OUT_SYS_EDDN) and 1)
-    this.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=this.eddn_system, command=prefsvarchanged)	# Output setting new in E:D 2.2
-    this.eddn_system_button.grid(padx=BUTTONX, pady=(5,0), sticky=tk.W)
-    this.eddn_delay= tk.IntVar(value = (output & config.OUT_SYS_DELAY) and 1)
-    this.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=this.eddn_delay)	# Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-    this.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
+    HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)  # Don't translate
+    this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
+    this.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=this.eddn_station, command=prefsvarchanged)  # Output setting
+    this.eddn_station_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.eddn_system = tk.IntVar(value=(output & config.OUT_SYS_EDDN) and 1)
+    this.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=this.eddn_system, command=prefsvarchanged)  # Output setting new in E:D 2.2
+    this.eddn_system_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.eddn_delay = tk.IntVar(value=(output & config.OUT_SYS_DELAY) and 1)
+    # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
+    this.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=this.eddn_delay) this.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
 
     return eddnframe
 
+
 def prefsvarchanged(event=None):
     this.eddn_station_button['state'] = tk.NORMAL
-    this.eddn_system_button['state']= tk.NORMAL
+    this.eddn_system_button['state'] = tk.NORMAL
     this.eddn_delay_button['state'] = this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
+
 
 def prefs_changed(cmdr, is_beta):
     config.set('output',
-               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP |config.OUT_MKT_MANUAL)) +
+               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
                (this.eddn_station.get() and config.OUT_MKT_EDDN) +
                (this.eddn_system.get() and config.OUT_SYS_EDDN) +
                (this.eddn_delay.get() and config.OUT_SYS_DELAY))
 
+
 def plugin_stop():
     this.eddn.close()
+
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
 
@@ -381,9 +391,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         for k, v in d.items():
             if k.endswith('_Localised'):
                 pass
-            elif hasattr(v, 'items'):	# dict -> recurse
+            elif hasattr(v, 'items'):  # dict -> recurse
                 filtered[k] = filter_localised(v)
-            elif isinstance(v, list):	# list of dicts -> recurse
+            elif isinstance(v, list):  # list of dicts -> recurse
                 filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
             else:
                 filtered[k] = v
@@ -398,7 +408,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
         elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates = None	# Docked event doesn't include coordinates
+            this.coordinates = None  # Docked event doesn't include coordinates
         this.systemaddress = entry.get('SystemAddress')
     elif entry['event'] == 'ApproachBody':
         this.planet = entry['Body']
@@ -408,13 +418,13 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Send interesting events to EDDN, but not when on a crew
     if (config.getint('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
-        ('StarPos' in entry or this.coordinates)):
+            ('StarPos' in entry or this.coordinates)):
         # strip out properties disallowed by the schema
         for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
             entry.pop(thing, None)
         if 'Factions' in entry:
             # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
-            entry['Factions'] = [ {k: v for k, v in f.items() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
+            entry['Factions'] = [{k: v for k, v in f.items() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
 
         # add planet to Docked event for planetary stations if known
         if entry['event'] == 'Docked' and this.planet:
