@@ -50,8 +50,7 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 #
 # 2, a good few of these methods are static or could be classmethods. they should be created as such.
 
-class EDDN(object):
-
+class EDDN:
     # SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
     UPLOAD = f'{SERVER}/upload/'
