@@ -232,8 +232,8 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "Nyelv";
 
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "Utoljára frissítve %H:%M:%S";
+/* [EDMarketConnector.py] - Leave '{HH}:{MM}:{SS}' as-is */
+"Last updated at {HH}:{MM}:{SS}" = "Utoljára frissítve {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Hadnagy";
