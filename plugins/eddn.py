@@ -1,12 +1,13 @@
 # Export to EDDN
 
 from collections import OrderedDict
+import itertools
 import json
 from os import SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import exists, join
 from platform import system
 import re
-from typing import Any
+from typing import Any, Mapping, TYPE_CHECKING
 import requests
 import sys
 import logging
@@ -23,6 +24,9 @@ if sys.platform != 'win32':
 from config import appname, applongname, appversion, config
 from companion import category_map
 
+if TYPE_CHECKING:
+    def _(x): return x
+
 logger = logging.getLogger(appname)
 
 this: Any = sys.modules[__name__]  # For holding module globals
@@ -36,6 +40,15 @@ this.planet = None
 this.marketId = None
 this.commodities = this.outfitting = this.shipyard = None
 
+HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+
+
+# TODO:
+# 1, this does a bunch of magic checks for whether or not the given commander has horizons. We can get that directly
+# from  CAPI via commander.capabilities.Horizons -- Should this be changed to use that? did such a thing exist when
+# this was written?
+#
+# 2, a good few of these methods are static or could be classmethods. they should be created as such.
 
 class EDDN(object):
 
@@ -88,11 +101,13 @@ class EDDN(object):
         self.replayfile.truncate()
         for line in self.replaylog:
             self.replayfile.write('%s\n' % line)
+
         self.replayfile.flush()
 
     def close(self):
         if self.replayfile:
             self.replayfile.close()
+
         self.replayfile = None
 
     def send(self, cmdr, msg):
@@ -195,7 +210,9 @@ class EDDN(object):
             ])
 
             if 'economies' in data['lastStarport']:
-                message['economies'] = sorted(list([x for x in (data['lastStarport']['economies'] or {}).values()]), key=lambda x: x['name'])
+                message['economies'] = sorted(
+                    list([x for x in (data['lastStarport']['economies'] or {}).values()]), key=lambda x: x['name']
+                )
 
             if 'prohibited' in data['lastStarport']:
                 message['prohibited'] = sorted(list([x for x in (data['lastStarport']['prohibited'] or {}).values()]))
@@ -209,14 +226,25 @@ class EDDN(object):
 
     def export_outfitting(self, data, is_beta):
         economies = data['lastStarport'].get('economies') or {}
-        modules = data['lastStarport'].get('modules') or {}
+        modules: Mapping[str, Any] = data['lastStarport'].get('modules') or {}
         ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
-        # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"), prison or rescue Megaships, or under Pirate Attack etc
-        horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
-                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
-                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
+        # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
+        # prison or rescue Megaships, or under Pirate Attack etc
+        horizons = (
+            any(economy['name'] == 'Colony' for economy in economies.values()) or
+            any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
+            any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
+        )
 
-        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['name'].lower()) for module in modules.values() if self.MODULE_RE.search(module['name']) and module.get('sku') in [None, 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'] and module['name'] != 'Int_PlanetApproachSuite'])
+        to_search = filter(
+            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
+            m['name'] != 'Int_PlanetApproachSuite',
+            modules.values()
+        )
+
+        outfitting = sorted(
+            self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
+        )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
@@ -237,11 +265,18 @@ class EDDN(object):
         economies = data['lastStarport'].get('economies') or {}
         modules = data['lastStarport'].get('modules') or {}
         ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
-        horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
-                    any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
-                    any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
+        horizons = (
+            any(economy['name'] == 'Colony' for economy in economies.values()) or
+            any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
+            any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
+        )
 
-        shipyard = sorted([ship['name'].lower() for ship in list((ships['shipyard_list'] or {}).values()) + ships['unavailable_list']])
+        shipyard = sorted(
+            itertools.chain(
+                (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
+                ships['unavailable_list']
+            )
+        )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send(data['commander']['name'], {
@@ -288,7 +323,12 @@ class EDDN(object):
     def export_journal_outfitting(self, cmdr, is_beta, entry):
         modules = entry.get('Items') or []
         horizons = entry.get('Horizons', False)
-        outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name']) for module in modules if module['Name'] != 'int_planetapproachsuite'])
+        # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
+        # for module in modules if module['Name'] != 'int_planetapproachsuite'])
+        outfitting = sorted(
+            self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
+            filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
+        )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(cmdr, {
@@ -336,8 +376,10 @@ class EDDN(object):
             self.replaylog.append(json.dumps([cmdr, msg]))
             self.replayfile.write('%s\n' % self.replaylog[-1])
 
-            if (entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not (config.getint('output') & config.OUT_SYS_DELAY)):
-
+            if (
+                entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
+                (config.getint('output') & config.OUT_SYS_DELAY)
+             ):
                 self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
 
         else:
@@ -381,16 +423,41 @@ def plugin_prefs(parent, cmdr, is_beta):
 
     eddnframe = nb.Frame(parent)
 
-    HyperlinkLabel(eddnframe, text='Elite Dangerous Data Network', background=nb.Label().cget('background'), url='https://github.com/EDSM-NET/EDDN/wiki', underline=True).grid(padx=PADX, sticky=tk.W)  # Don't translate
+    HyperlinkLabel(
+        eddnframe,
+        text='Elite Dangerous Data Network',
+        background=nb.Label().cget('background'),
+        url='https://github.com/EDSM-NET/EDDN/wiki',
+        underline=True
+    ).grid(padx=PADX, sticky=tk.W)  # Don't translate
+
     this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
-    this.eddn_station_button = nb.Checkbutton(eddnframe, text=_('Send station data to the Elite Dangerous Data Network'), variable=this.eddn_station, command=prefsvarchanged)  # Output setting
+    this.eddn_station_button = nb.Checkbutton(
+        eddnframe,
+        text=_('Send station data to the Elite Dangerous Data Network'),
+        variable=this.eddn_station,
+        command=prefsvarchanged
+    )  # Output setting
+
     this.eddn_station_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
     this.eddn_system = tk.IntVar(value=(output & config.OUT_SYS_EDDN) and 1)
-    this.eddn_system_button = nb.Checkbutton(eddnframe, text=_('Send system and scan data to the Elite Dangerous Data Network'), variable=this.eddn_system, command=prefsvarchanged)  # Output setting new in E:D 2.2
+    # Output setting new in E:D 2.2
+    this.eddn_system_button = nb.Checkbutton(
+        eddnframe,
+        text=_('Send system and scan data to the Elite Dangerous Data Network'),
+        variable=this.eddn_system,
+        command=prefsvarchanged
+    )
+
     this.eddn_system_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
     this.eddn_delay = tk.IntVar(value=(output & config.OUT_SYS_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-    this.eddn_delay_button = nb.Checkbutton(eddnframe, text=_('Delay sending until docked'), variable=this.eddn_delay) this.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
+    this.eddn_delay_button = nb.Checkbutton(
+        eddnframe,
+        text=_('Delay sending until docked'),
+        variable=this.eddn_delay
+    )
+    this.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
 
     return eddnframe
 
@@ -402,11 +469,13 @@ def prefsvarchanged(event=None):
 
 
 def prefs_changed(cmdr, is_beta):
-    config.set('output',
-               (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
-               (this.eddn_station.get() and config.OUT_MKT_EDDN) +
-               (this.eddn_system.get() and config.OUT_SYS_EDDN) +
-               (this.eddn_delay.get() and config.OUT_SYS_DELAY))
+    config.set(
+        'output',
+        (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
+        (this.eddn_station.get() and config.OUT_MKT_EDDN) +
+        (this.eddn_system.get() and config.OUT_SYS_EDDN) +
+        (this.eddn_delay.get() and config.OUT_SYS_DELAY)
+    )
 
 
 def plugin_stop():
@@ -460,12 +529,29 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             ('StarPos' in entry or this.coordinates)):
 
         # strip out properties disallowed by the schema
-        for thing in ['ActiveFine', 'CockpitBreach', 'BoostUsed', 'FuelLevel', 'FuelUsed', 'JumpDist', 'Latitude', 'Longitude', 'Wanted']:
+        for thing in [
+            'ActiveFine',
+            'CockpitBreach',
+            'BoostUsed',
+            'FuelLevel',
+            'FuelUsed',
+            'JumpDist',
+            'Latitude',
+            'Longitude',
+            'Wanted'
+        ]:
             entry.pop(thing, None)
 
         if 'Factions' in entry:
             # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
-            entry['Factions'] = [{k: v for k, v in f.items() if k not in ['HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction']} for f in entry['Factions']]
+            entry['Factions'] = [
+                {
+                    k: v for k, v in f.items() if k not in [
+                        'HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction'
+                    ]
+                }
+                for f in entry['Factions']
+            ]
 
         # add planet to Docked event for planetary stations if known
         if entry['event'] == 'Docked' and this.planet:
@@ -510,7 +596,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = entry['MarketID']
 
-            with open(join(config.get('journaldir') or config.default_journal_dir, '%s.json' % entry['event']), 'rb') as h:
+            with open(
+                join(config.get('journaldir') or config.default_journal_dir, '%s.json' % entry['event']), 'rb'
+            ) as h:
                 entry = json.load(h)
                 if entry['event'] == 'Market':
                     this.eddn.export_journal_commodities(cmdr, is_beta, entry)
