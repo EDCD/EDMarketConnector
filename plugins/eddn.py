@@ -57,7 +57,7 @@ class EDDN:
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
-    MODULE_RE = re.compile('^Hpt_|^Int_|Armour_', re.IGNORECASE)
+    MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
 
     def __init__(self, parent):
