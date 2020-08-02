@@ -3,7 +3,7 @@
 from collections import OrderedDict
 import itertools
 import json
-from os import SEEK_SET, SEEK_CUR, SEEK_END
+from os import SEEK_SET
 from os.path import exists, join
 from platform import system
 import re
