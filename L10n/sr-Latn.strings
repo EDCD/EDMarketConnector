@@ -235,8 +235,8 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "Jezik";
 
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "Poslednji put osveženo %H:%M:%S";
+/* [EDMarketConnector.py] - Leave '{HH}:{MM}:{SS}' as-is */
+"Last updated at {HH}:{MM}:{SS}" = "Poslednji put osveženo {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Lieutenant";
