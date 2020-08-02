@@ -217,7 +217,7 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "Valoda";
 
-/* [EDMarketConnector.py] */
+/* [EDMarketConnector.py] - Leave '{HH}:{MM}:{SS}' as-is */
 "Last updated at {HH}:{MM}:{SS}" = "Pēdējo reizi atjaunināts {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */

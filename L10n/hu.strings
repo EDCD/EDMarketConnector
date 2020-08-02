@@ -232,7 +232,7 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "Nyelv";
 
-/* [EDMarketConnector.py] */
+/* [EDMarketConnector.py] - Leave '{HH}:{MM}:{SS}' as-is */
 "Last updated at {HH}:{MM}:{SS}" = "Utoljára frissítve {HH}:{MM}:{SS}";
 
 /* Federation rank. [stats.py] */

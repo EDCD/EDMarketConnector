@@ -1,5 +1,6 @@
 import numbers
 import sys
+import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
@@ -12,7 +13,7 @@ appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.0.3'  #-rc1+a872b5f'
+appversion = '4.0.4'  #-rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
@@ -367,25 +368,13 @@ class Config(object):
     # Common
 
     def get_password(self, account):
-        try:
-            import keyring
-            return keyring.get_password(self.identifier, account)
-        except ImportError:
-            return None
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def set_password(self, account, password):
-        try:
-            import keyring
-            keyring.set_password(self.identifier, account, password)
-        except ImportError:
-            pass
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def delete_password(self, account):
-        try:
-            import keyring
-            keyring.delete_password(self.identifier, account)
-        except:
-            pass	# don't care - silently fail
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
 # singleton
 config = Config()
