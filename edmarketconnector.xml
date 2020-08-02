@@ -607,7 +607,7 @@ If any of your plugins are listed in that section then they will need updating, 
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
 				sparkle:version="4.0.4"
-				length="11325440"
+				length="11411456"
 				type="application/octet-stream"
 			/>
 		</item>
