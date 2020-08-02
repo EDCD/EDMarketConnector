@@ -54,7 +54,7 @@ class EDDN(object):
 
     # SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
-    UPLOAD = '%s/upload/' % SERVER
+    UPLOAD = f'{SERVER}/upload/'
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
@@ -100,7 +100,7 @@ class EDDN(object):
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
-            self.replayfile.write('%s\n' % line)
+            self.replayfile.write(f'{line}\n')
 
         self.replayfile.flush()
 
@@ -115,12 +115,12 @@ class EDDN(object):
 
         msg = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
-            ('header',     OrderedDict([
-                ('softwareName',    '%s [%s]' % (applongname, sys.platform == 'darwin' and "Mac OS" or system())),
+            ('header', OrderedDict([
+                ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
                 ('softwareVersion', appversion),
                 ('uploaderID',      uploaderID),
             ])),
-            ('message',    msg['message']),
+            ('message', msg['message']),
         ])
 
         r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
@@ -138,12 +138,12 @@ class EDDN(object):
         if not self.replaylog:
             status['text'] = ''
             return
-
+        localized = _('Sending data to EDDN...')
         if len(self.replaylog) == 1:
-            status['text'] = _('Sending data to EDDN...')
+            status['text'] = localized
 
         else:
-            status['text'] = '%s [%d]' % (_('Sending data to EDDN...').replace('...', ''), len(self.replaylog))
+            status['text'] = f'{localized.replace("...", "")} [{len(self.replaylog)}]'
 
         self.parent.update_idletasks()
 
@@ -374,12 +374,12 @@ class EDDN(object):
         if self.replayfile or self.load():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
-            self.replayfile.write('%s\n' % self.replaylog[-1])
+            self.replayfile.write(f'{self.replaylog[-1]}\n')
 
             if (
                 entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
                 (config.getint('output') & config.OUT_SYS_DELAY)
-             ):
+            ):
                 self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
 
         else:
@@ -597,7 +597,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.marketId = entry['MarketID']
 
             with open(
-                join(config.get('journaldir') or config.default_journal_dir, '%s.json' % entry['event']), 'rb'
+                join(config.get('journaldir') or config.default_journal_dir, f'{entry["event"]}.json'), 'rb'
             ) as h:
                 entry = json.load(h)
                 if entry['event'] == 'Market':
