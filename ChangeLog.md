@@ -4,6 +4,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 Release 4.0.4
 ===
 
+ * Built using Python 3.7.8.  Prior 4.0.x releases used 3.7.7.
  * Don't crash if no non-default Journal Directory has been set.
  * Only send to Inara API at most once every 30 seconds.  This should avoid
  the "Inara 400 Too much requests, slow down, cowboy. ;) ..." message and
