@@ -168,10 +168,32 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.0.3</title>
+			<title>Release 4.0.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.0.4</h2>
+<ul>
+<li>
+<p>Don't crash if no non-default Journal Directory has been set.</p>
+</li>
+<li>
+<p>Only send to Inara API at most once every 30 seconds.  This should avoid
+the "Inara 400 Too much requests, slow down, cowboy. ;) ..." message and
+being locked out from the API for an hour as a result.  Any events that
+require data to be sent during the 30s cooldown will be queued and sent when
+that timer expires.</p>
+<p>This was caused by previous changes in an attempt to send cargo events
+to Inara more often.  This fix retains that enhancement.</p>
+<p>Note that if you log out and stop EDMC within 30 seconds you might have
+some events not sent.  If we tried to force a send then it might hit the
+limit when you want to log back in and continue playing.  As it is you can
+re-run EDMC and log back into the game to ensure Inara is synchronised
+properly.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.0.3</h2>
 <p><strong>NB: Anyone who installed a 4.0.3-rcX release candidate version should first
@@ -578,10 +600,10 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.3/EDMarketConnector_win_4.0.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.4/EDMarketConnector_win_4.0.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.0.3"
+				sparkle:version="4.0.4"
 				length="11325440"
 				type="application/octet-stream"
 			/>
