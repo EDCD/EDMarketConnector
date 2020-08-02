@@ -235,8 +235,8 @@
 /* Appearance setting prompt. [prefs.py] */
 "Language" = "Мова";
 
-/* [EDMarketConnector.py] */
-"Last updated at {HH}:{MM}:{SS}" = "Останнє оновлення було {HH}:{MM}:{SS}";
+/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
+"Last updated at %H:%M:%S" = "Останнє оновлення було %H:%M:%S";
 
 /* Federation rank. [stats.py] */
 "Lieutenant" = "Лейтенант";
@@ -489,6 +489,9 @@
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Оновлення";
+
+/* Option to use alternate URL method on shipyard links [prefs.py] */
+"Use alternate URL method" = "Використовувати альтернативний URL-метод";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Вартість";
