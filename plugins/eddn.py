@@ -211,11 +211,11 @@ class EDDN(object):
 
             if 'economies' in data['lastStarport']:
                 message['economies'] = sorted(
-                    list([x for x in (data['lastStarport']['economies'] or {}).values()]), key=lambda x: x['name']
+                    (x for x in (data['lastStarport']['economies'] or {}).values()), key=lambda x: x['name']
                 )
 
             if 'prohibited' in data['lastStarport']:
-                message['prohibited'] = sorted(list([x for x in (data['lastStarport']['prohibited'] or {}).values()]))
+                message['prohibited'] = sorted(x for x in (data['lastStarport']['prohibited'] or {}).values())
 
             self.send(data['commander']['name'], {
                 '$schemaRef': 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
@@ -295,7 +295,7 @@ class EDDN(object):
 
     def export_journal_commodities(self, cmdr, is_beta, entry):
         items = entry.get('Items') or []
-        commodities = sorted([OrderedDict([
+        commodities = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -304,7 +304,7 @@ class EDDN(object):
             ('sellPrice',     commodity['SellPrice']),
             ('demand',        commodity['Demand']),
             ('demandBracket', commodity['DemandBracket']),
-        ]) for commodity in items], key=lambda c: c['name'])
+        ]) for commodity in items), key=lambda c: c['name'])
 
         if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
             self.send(cmdr, {
@@ -348,7 +348,7 @@ class EDDN(object):
     def export_journal_shipyard(self, cmdr, is_beta, entry):
         ships = entry.get('PriceList') or []
         horizons = entry.get('Horizons', False)
-        shipyard = sorted([ship['ShipType'] for ship in ships])
+        shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send(cmdr, {
