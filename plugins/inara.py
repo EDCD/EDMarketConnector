@@ -21,7 +21,6 @@ import plug
 if __debug__:
     from traceback import print_exc
 
-
 _TIMEOUT = 20
 FAKE = ['CQC', 'Training', 'Destination']	# Fake systems that shouldn't be sent to Inara
 CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
@@ -50,8 +49,11 @@ this.loadout = None
 this.fleet = None
 this.shipswap = False	# just swapped ship
 
-this.last_update_time = time.time()  # last time we updated (set to now because we're going to update quickly)
-FLOOD_LIMIT_SECONDS = 45  # minimum time between sending non-major cargo triggered messages
+# last time we updated, if unset in config this is 0, which means an instant update
+LAST_UPDATE_CONF_KEY = 'inara_last_update'
+# this.last_update_time = config.getint(LAST_UPDATE_CONF_KEY)
+FLOOD_LIMIT_SECONDS = 30  # minimum time between sending events
+this.timer_run = True
 
 
 # Main window clicks
@@ -86,6 +88,10 @@ def plugin_start3(plugin_dir):
     this.thread = Thread(target = worker, name = 'Inara worker')
     this.thread.daemon = True
     this.thread.start()
+
+    this.timer_thread = Thread(target=call_timer, name='Inara timer')
+    this.timer_thread.daemon = True
+    this.timer_thread.start()
     return 'Inara'
 
 def plugin_app(parent):
@@ -97,10 +103,13 @@ def plugin_app(parent):
 def plugin_stop():
     # Send any unsent events
     call()
+    time.sleep(0.1)  # Sleep for 100ms to allow call to go out, and to force a context switch to our other threads
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
     this.thread = None
+
+    this.timer_run = False
 
 def plugin_prefs(parent, cmdr, is_beta):
 
@@ -189,7 +198,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # Send any unsent events when switching accounts
     if cmdr and cmdr != this.cmdr:
-        call()
+        call(force=True)
 
     this.cmdr = cmdr
     this.FID = state['FID']
@@ -246,8 +255,6 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         try:
-            old_events = len(this.events)	# Will only send existing events if we add a new event below
-
             # Dump starting state to Inara
 
             if (this.newuser or
@@ -306,6 +313,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
                     this.loadout = make_loadout(state)
                     add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
+          
+                call()  # Call here just to be sure that if we can send, we do, otherwise it'll get it in the next tick
 
 
             # Promotions
@@ -435,34 +444,20 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
             cargo = [OrderedDict([('itemName', k), ('itemCount', state['Cargo'][k])]) for k in sorted(state['Cargo'])]
 
-            # if our cargo differers from last we checked, we're at a station,
-            # and our flood limit isnt covered, queue an update
-            should_poll = this.cargo != cargo and time.time() - this.last_update_time > FLOOD_LIMIT_SECONDS
-            
-            # Send event(s) to Inara
-            if entry['event'] == 'ShutDown' or len(this.events) > old_events or should_poll:
-
-                # Send cargo and materials if changed
-                if this.cargo != cargo:
-                    add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
-                    this.cargo = cargo
-                materials = []
-                for category in ['Raw', 'Manufactured', 'Encoded']:
-                    materials.extend([ OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category]) ])
-                if this.materials != materials:
-                    add_event('setCommanderInventoryMaterials', entry['timestamp'],  materials)
-                    this.materials = materials
-
-                # Queue a call to Inara
-                call()
+            # Send cargo and materials if changed
+            if this.cargo != cargo:
+                add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
+                this.cargo = cargo
+            materials = []
+            for category in ['Raw', 'Manufactured', 'Encoded']:
+                materials.extend([ OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category]) ])
+            if this.materials != materials:
+                add_event('setCommanderInventoryMaterials', entry['timestamp'],  materials)
+                this.materials = materials
 
         except Exception as e:
             if __debug__: print_exc()
             return str(e)
-
-        #
-        # Events that don't need to be sent immediately but will be sent on the next mandatory event
-        #
 
         # Send credits and stats to Inara on startup only - otherwise may be out of date
         if entry['event'] == 'LoadGame':
@@ -857,14 +852,22 @@ def add_event(name, timestamp, data):
         ('eventData', data),
     ]))
 
+def call_timer(wait=FLOOD_LIMIT_SECONDS):
+    while this.timer_run:
+        time.sleep(wait)
+        if this.timer_run:  # check again in here just in case we're closing and the stars align
+            call()
 
 # Queue a call to Inara, handled in Worker thread
-def call(callback=None):
+def call(callback=None, force=False):
     if not this.events:
         return
 
-    this.last_update_time = time.time()
-    
+    if (time.time() - config.getint(LAST_UPDATE_CONF_KEY)) <= FLOOD_LIMIT_SECONDS and not force:      
+        return
+
+    config.set(LAST_UPDATE_CONF_KEY, int(time.time()))
+    print(f"INARA: {time.asctime()} sending {len(this.events)} entries to inara (call)")
     data = OrderedDict([
         ('header', OrderedDict([
             ('appName', applongname),
@@ -887,6 +890,8 @@ def worker():
         else:
             (url, data, callback) = item
 
+        print(f"INARA: {time.asctime()} sending {len(data['events'])} entries to inara (worker)")
+
         retrying = 0
         while retrying < 3:
             try:
@@ -896,28 +901,35 @@ def worker():
                 status = reply['header']['eventStatus']
                 if callback:
                     callback(reply)
-                elif status // 100 != 2:	# 2xx == OK (maybe with warnings)
+                elif status // 100 != 2:  # 2xx == OK (maybe with warnings)
                     # Log fatal errors
                     print('Inara\t%s %s' % (reply['header']['eventStatus'], reply['header'].get('eventStatusText', '')))
                     print(json.dumps(data, indent=2, separators = (',', ': ')))
-                    plug.show_error(_('Error: Inara {MSG}').format(MSG = reply['header'].get('eventStatusText', status)))
+                    plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
                 else:
                     # Log individual errors and warnings
                     for data_event, reply_event in zip(data['events'], reply['events']):
                         if reply_event['eventStatus'] != 200:
                             print('Inara\t%s %s\t%s' % (reply_event['eventStatus'], reply_event.get('eventStatusText', ''), json.dumps(data_event)))
                             if reply_event['eventStatus'] // 100 != 2:
-                                plug.show_error(_('Error: Inara {MSG}').format(MSG = '%s, %s' % (data_event['eventName'], reply_event.get('eventStatusText', reply_event['eventStatus']))))
-                        if data_event['eventName'] in ['addCommanderTravelCarrierJump', 'addCommanderTravelDock', 'addCommanderTravelFSDJump', 'setCommanderTravelLocation']:
+                                plug.show_error(_('Error: Inara {MSG}').format(
+                                    MSG=f'{data_event["eventName"]},'
+                                        f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'))
+                        if data_event['eventName'] in ('addCommanderTravelCarrierJump',
+                                                       'addCommanderTravelDock',
+                                                       'addCommanderTravelFSDJump',
+                                                       'setCommanderTravelLocation'):
                             this.lastlocation = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraLocation>>', when="tail")	# calls update_location in main thread
+                            # calls update_location in main thread
+                            this.system_link.event_generate('<<InaraLocation>>', when="tail")
                         elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
                             this.lastship = reply_event.get('eventData', {})
-                            this.system_link.event_generate('<<InaraShip>>', when="tail")	# calls update_ship in main thread
+                            # calls update_ship in main thread
+                            this.system_link.event_generate('<<InaraShip>>', when="tail")
 
                 break
-            except:
-                if __debug__: print_exc()
+            except Exception:
+                logger.debug('Sending events', exc_info=e)
                 retrying += 1
         else:
             if callback:
