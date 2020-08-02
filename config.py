@@ -1,5 +1,6 @@
 import numbers
 import sys
+import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
@@ -367,25 +368,13 @@ class Config(object):
     # Common
 
     def get_password(self, account):
-        try:
-            import keyring
-            return keyring.get_password(self.identifier, account)
-        except ImportError:
-            return None
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def set_password(self, account, password):
-        try:
-            import keyring
-            keyring.set_password(self.identifier, account, password)
-        except ImportError:
-            pass
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def delete_password(self, account):
-        try:
-            import keyring
-            keyring.delete_password(self.identifier, account)
-        except:
-            pass	# don't care - silently fail
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
 # singleton
 config = Config()
