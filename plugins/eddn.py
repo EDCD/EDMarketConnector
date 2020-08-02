@@ -528,7 +528,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             ('StarPos' in entry or this.coordinates)):
 
         # strip out properties disallowed by the schema
-        for thing in [
+        for thing in (
             'ActiveFine',
             'CockpitBreach',
             'BoostUsed',
@@ -538,16 +538,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             'Latitude',
             'Longitude',
             'Wanted'
-        ]:
+        ):
             entry.pop(thing, None)
 
         if 'Factions' in entry:
             # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
             entry['Factions'] = [
                 {
-                    k: v for k, v in f.items() if k not in [
+                    k: v for k, v in f.items() if k not in (
                         'HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction'
-                    ]
+                    )
                 }
                 for f in entry['Factions']
             ]
@@ -588,7 +588,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return str(e)
 
     elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-            entry['event'] in ['Market', 'Outfitting', 'Shipyard']):
+            entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
 
         try:
             if this.marketId != entry['MarketID']:
