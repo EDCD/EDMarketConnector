@@ -14,7 +14,7 @@ import logging
 
 import tkinter as tk
 from ttkHyperlinkLabel import HyperlinkLabel
-import myNotebook as nb
+import myNotebook as nb  # noqa: N813
 
 from prefs import prefsVersion
 
@@ -111,14 +111,14 @@ class EDDN(object):
         self.replayfile = None
 
     def send(self, cmdr, msg):
-        uploaderID = cmdr
+        uploader_id = cmdr
 
         msg = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
                 ('softwareVersion', appversion),
-                ('uploaderID',      uploaderID),
+                ('uploaderID',      uploader_id),
             ])),
             ('message', msg['message']),
         ])
