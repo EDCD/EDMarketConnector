@@ -7,12 +7,17 @@ from os import SEEK_SET
 from os.path import exists, join
 from platform import system
 import re
-from typing import Any, Mapping, TYPE_CHECKING
+from typing import (
+    Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional,
+    Sequence, TYPE_CHECKING, OrderedDict as OrderedDictT, TextIO, Tuple, Union
+)
+
 import requests
 import sys
 import logging
 
 import tkinter as tk
+from myNotebook import Frame
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb  # noqa: N813
 
@@ -25,7 +30,8 @@ from config import appname, applongname, appversion, config
 from companion import category_map
 
 if TYPE_CHECKING:
-    def _(x): return x
+    def _(x: str) -> str:
+        return x
 
 logger = logging.getLogger(appname)
 
@@ -60,13 +66,13 @@ class EDDN:
     MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, parent: tk.Tk):
+        self.parent: tk.Tk = parent
         self.session = requests.Session()
-        self.replayfile = None  # For delayed messages
-        self.replaylog = []
+        self.replayfile: Optional[TextIO] = None  # For delayed messages
+        self.replaylog: List[str] = []
 
-    def load(self):
+    def load(self) -> bool:
         # Try to obtain exclusive access to the journal cache
         filename = join(config.app_dir, 'replay.jsonl')
         try:
@@ -109,10 +115,10 @@ class EDDN:
 
         self.replayfile = None
 
-    def send(self, cmdr, msg):
+    def send(self, cmdr: str, msg: Mapping[str, Any]):
         uploader_id = cmdr
 
-        msg = OrderedDict([
+        to_send: OrderedDictT[str, str] = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
@@ -122,7 +128,7 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
+        r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
             logger.debug(f':\nStatus\t{r.status_code}URL\t{r.url}Headers\t{r.headers}Content:\n{r.text}')
 
@@ -132,12 +138,13 @@ class EDDN:
         if not self.replayfile:
             return  # Probably closing app
 
-        status = self.parent.children['status']
+        status: Dict[str, Any] = self.parent.children['status']
 
         if not self.replaylog:
             status['text'] = ''
             return
-        localized = _('Sending data to EDDN...')
+
+        localized: str = _('Sending data to EDDN...')
         if len(self.replaylog) == 1:
             status['text'] = localized
 
@@ -148,6 +155,7 @@ class EDDN:
 
         try:
             cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
+
         except json.JSONDecodeError as e:
             # Couldn't decode - shouldn't happen!
             logger.debug(f'\n{self.replaylog[0]}\n', exc_info=e)
@@ -157,7 +165,7 @@ class EDDN:
         else:
             # Rewrite old schema name
             if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
-                msg['$schemaRef'] = 'https://eddn.edcd.io/schemas/' + msg['$schemaRef'][38:]
+                msg['$schemaRef'] = 'https://eddn.edcd.io/schemas/' + msg['$schemaRef'][38:]  # TODO: 38?!
 
             try:
                 self.send(cmdr, msg)
@@ -177,8 +185,8 @@ class EDDN:
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data, is_beta):
-        commodities = []
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool):
+        commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
             if (category_map.get(commodity['categoryname'], True)
@@ -200,7 +208,7 @@ class EDDN:
         commodities.sort(key=lambda c: c['name'])
 
         if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
-            message = OrderedDict([
+            message: OrderedDictT[str, Any] = OrderedDict([
                 ('timestamp',   data['timestamp']),
                 ('systemName',  data['lastSystem']['name']),
                 ('stationName', data['lastStarport']['name']),
@@ -217,16 +225,19 @@ class EDDN:
                 message['prohibited'] = sorted(x for x in (data['lastStarport']['prohibited'] or {}).values())
 
             self.send(data['commander']['name'], {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message':    message,
             })
 
         this.commodities = commodities
 
-    def export_outfitting(self, data, is_beta):
-        economies = data['lastStarport'].get('economies') or {}
-        modules: Mapping[str, Any] = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
+    def export_outfitting(self, data: Mapping[str, Any], is_beta: bool):
+        economies: Dict[str, Any] = data['lastStarport'].get('economies') or {}
+        modules: Dict[str, Any] = data['lastStarport'].get('modules') or {}
+        ships: Dict[str, Union[Dict[str, Any], List]] = data['lastStarport'].get('ships') or {
+            'shipyard_list': {}, 'unavailable_list': []
+        }
+
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
         horizons = (
@@ -235,19 +246,19 @@ class EDDN:
             any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
         )
 
-        to_search = filter(
+        to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
             m['name'] != 'Int_PlanetApproachSuite',
             modules.values()
         )
 
-        outfitting = sorted(
+        outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
         )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
@@ -260,17 +271,17 @@ class EDDN:
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data, is_beta):
-        economies = data['lastStarport'].get('economies') or {}
-        modules = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
-        horizons = (
+    def export_shipyard(self, data: Dict[str, Any], is_beta: bool):
+        economies: Dict[str, Any] = data['lastStarport'].get('economies') or {}
+        modules: Dict[str, Any] = data['lastStarport'].get('modules') or {}
+        ships: Dict[str, Any] = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
+        horizons: bool = (
             any(economy['name'] == 'Colony' for economy in economies.values()) or
             any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
             any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
         )
 
-        shipyard = sorted(
+        shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
                 ships['unavailable_list']
@@ -279,7 +290,7 @@ class EDDN:
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send(data['commander']['name'], {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
@@ -292,9 +303,9 @@ class EDDN:
 
         this.shipyard = (horizons, shipyard)
 
-    def export_journal_commodities(self, cmdr, is_beta, entry):
-        items = entry.get('Items') or []
-        commodities = sorted((OrderedDict([
+    def export_journal_commodities(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]):
+        items: List[Mapping[str, Any]] = entry.get('Items') or []
+        commodities: Sequence[OrderedDictT[AnyStr, Any]] = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -307,7 +318,7 @@ class EDDN:
 
         if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
             self.send(cmdr, {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
@@ -317,21 +328,21 @@ class EDDN:
                 ]),
             })
 
-        this.commodities = commodities
+        this.commodities: OrderedDictT[str, Any] = commodities
 
-    def export_journal_outfitting(self, cmdr, is_beta, entry):
-        modules = entry.get('Items') or []
-        horizons = entry.get('Horizons', False)
+    def export_journal_outfitting(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]):
+        modules: List[Mapping[str, Any]] = entry.get('Items', [])
+        horizons: bool = entry.get('Horizons', False)
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
-        outfitting = sorted(
+        outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
             filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
         )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(cmdr, {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/outfitting/2' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
@@ -344,14 +355,14 @@ class EDDN:
 
         this.outfitting = (horizons, outfitting)
 
-    def export_journal_shipyard(self, cmdr, is_beta, entry):
-        ships = entry.get('PriceList') or []
-        horizons = entry.get('Horizons', False)
+    def export_journal_shipyard(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]):
+        ships: List[Mapping[str, Any]] = entry.get('PriceList') or []
+        horizons: bool = entry.get('Horizons', False)
         shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send(cmdr, {
-                '$schemaRef': 'https://eddn.edcd.io/schemas/shipyard/2' + (is_beta and '/test' or ''),
+                '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
@@ -364,9 +375,9 @@ class EDDN:
 
         this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr, is_beta, entry):
+    def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]):
         msg = {
-            '$schemaRef': 'https://eddn.edcd.io/schemas/journal/1' + (is_beta and '/test' or ''),
+            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -383,13 +394,13 @@ class EDDN:
 
         else:
             # Can't access replay file! Send immediately.
-            status = self.parent.children['status']
+            status: MutableMapping[str, str] = self.parent.children['status']
             status['text'] = _('Sending data to EDDN...')
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             status['text'] = ''
 
-    def canonicalise(self, item):
+    def canonicalise(self, item: str) -> str:
         match = self.CANONICALISE_RE.match(item)
         return match and match.group(1) or item
 
@@ -400,7 +411,7 @@ def plugin_start3(plugin_dir):
     return 'EDDN'
 
 
-def plugin_app(parent):
+def plugin_app(parent: tk.Tk):
     this.parent = parent
     this.eddn = EDDN(parent)
     # Try to obtain exclusive lock on journal cache, even if we don't need it yet
@@ -409,16 +420,15 @@ def plugin_app(parent):
         this.status['text'] = 'Error: Is another copy of this app already running?'
 
 
-def plugin_prefs(parent, cmdr, is_beta):
-    PADX = 10
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-    PADY = 2		# close spacing
+def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
+    PADX = 10  # noqa: N806
+    BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
-        output = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
+        output: int = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
 
     else:
-        output = config.getint('output')
+        output: int = config.getint('output')
 
     eddnframe = nb.Frame(parent)
 
@@ -467,7 +477,7 @@ def prefsvarchanged(event=None):
     this.eddn_delay_button['state'] = this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
 
-def prefs_changed(cmdr, is_beta):
+def prefs_changed(cmdr: str, is_beta: bool):
     config.set(
         'output',
         (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
@@ -481,10 +491,12 @@ def plugin_stop():
     this.eddn.close()
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state):
+def journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
+) -> Optional[str]:
     # Recursively filter '*_Localised' keys from dict
-    def filter_localised(d):
-        filtered = OrderedDict()
+    def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+        filtered: OrderedDictT[str, Any] = OrderedDict()
         for k, v in d.items():
             if k.endswith('_Localised'):
                 pass
@@ -501,25 +513,25 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         return filtered
 
     # Track location
-    if entry['event'] in ['Location', 'FSDJump', 'Docked', 'CarrierJump']:
+    if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            this.planet: Optional[str] = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
         elif entry['event'] == 'FSDJump':
-            this.planet = None
+            this.planet: Optional[str] = None
 
         if 'StarPos' in entry:
-            this.coordinates = tuple(entry['StarPos'])
+            this.coordinates: Optional[Tuple[int, int, int]] = tuple(entry['StarPos'])
 
         elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates = None  # Docked event doesn't include coordinates
+            this.coordinates: Optional[Tuple[int, int, int]] = None  # Docked event doesn't include coordinates
 
-        this.systemaddress = entry.get('SystemAddress')
+        this.systemaddress: Optional[str] = entry.get('SystemAddress')
 
     elif entry['event'] == 'ApproachBody':
         this.planet = entry['Body']
 
-    elif entry['event'] in ['LeaveBody', 'SupercruiseEntry']:
+    elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
         this.planet = None
 
     # Send interesting events to EDDN, but not when on a crew
@@ -560,19 +572,19 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
-                return("system is None, can't add StarSystem")
+                return "system is None, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                return("this.coordinates is None, can't add StarPos")
+                return "this.coordinates is None, can't add StarPos"
 
             entry['StarPos'] = list(this.coordinates)
 
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
-                return("this.systemaddress is None, can't add SystemAddress")
+                return "this.systemaddress is None, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
 
@@ -596,7 +608,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
                 this.marketId = entry['MarketID']
 
             with open(
-                join(config.get('journaldir') or config.default_journal_dir, f'{entry["event"]}.json'), 'rb'
+                join(str(config.get('journaldir') or config.default_journal_dir), f'{entry["event"]}.json'), 'rb'
             ) as h:
                 entry = json.load(h)
                 if entry['event'] == 'Market':
@@ -617,7 +629,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return str(e)
 
 
-def cmdr_data(data, is_beta):
+def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
     if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
         try:
             if this.marketId != data['lastStarport']['id']:
