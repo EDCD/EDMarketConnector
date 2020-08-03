@@ -59,7 +59,9 @@ this.shipswap: bool = False  # just swapped ship
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
-FLOOD_LIMIT_SECONDS = 30  # minimum time between sending events
+EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
+WORKER_WAIT_TIME = 35  # Minimum time for worker to wait between sends
+
 this.timer_run = True
 
 
@@ -1097,7 +1099,7 @@ def add_event(name: str, timestamp: str, data: Union[EVENT_DATA, Sequence[EVENT_
     ]))
 
 
-def call_timer(wait: int = FLOOD_LIMIT_SECONDS):
+def call_timer(wait: int = EVENT_COLLECT_TIME):
     """
     call_timer runs in its own thread polling out to INARA once every FLOOD_LIMIT_SECONDS
 
@@ -1123,7 +1125,7 @@ def call(callback=None, force=False):
         return
 
     # Still only do this once every FLOOD_LIMIT_SECONDS, otherwise queue will be flooded with events and never catch up
-    if (time.time() - config.getint(LAST_UPDATE_CONF_KEY)) <= FLOOD_LIMIT_SECONDS and not force:
+    if (time.time() - config.getint(LAST_UPDATE_CONF_KEY)) <= EVENT_COLLECT_TIME and not force:
         return
 
     config.set(LAST_UPDATE_CONF_KEY, int(time.time()))
@@ -1158,7 +1160,7 @@ def worker():
 
         url, data, _ = to_send
         try_send_data(url, data)
-        time.sleep(FLOOD_LIMIT_SECONDS)
+        time.sleep(WORKER_WAIT_TIME)
 
 
 def try_send_data(url: str, data: OrderedDictT[str, Any]):
