@@ -5,7 +5,7 @@
 from collections import OrderedDict
 import json
 from typing import Any, AnyStr, Dict, List, Mapping, Optional, OrderedDict as OrderedDictT, \
-    Sequence, TYPE_CHECKING, Union
+    Sequence, TYPE_CHECKING, Tuple, Union
 
 import requests
 import sys
@@ -1122,6 +1122,7 @@ def call(callback=None, force=False):
     if not this.events:
         return
 
+    # Still only do this once every FLOOD_LIMIT_SECONDS, otherwise queue will be flooded with events and never catch up
     if (time.time() - config.getint(LAST_UPDATE_CONF_KEY)) <= FLOOD_LIMIT_SECONDS and not force:
         return
 
@@ -1141,74 +1142,84 @@ def call(callback=None, force=False):
     this.events = []
     this.queue.put(('https://inara.cz/inapi/v1/', data, None))
 
-# Worker thread
-
 
 def worker():
     """
     worker is the main thread worker and backbone of the plugin.
 
-    As events are added to `this.queue`, the worker thread will push them to the API
+    As events are added to `this.queue`, the worker thread will push them to the API, and then wait the flood limit
+    before checking for new events.
     """
-
     while True:
-        item = this.queue.get()
-        if not item:
-            return  # Closing
-        else:
-            (url, data, callback) = item
+        to_send: Tuple[str, OrderedDictT[str, Any], None] = this.queue.get()
+        if to_send is None:
+            # Asked to exit
+            return
 
-        retrying = 0
-        while retrying < 3:
-            try:
-                r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
-                r.raise_for_status()
-                reply = r.json()
-                status = reply['header']['eventStatus']
-                if callback:
-                    callback(reply)
+        url, data, _ = to_send
+        try_send_data(url, data)
+        time.sleep(FLOOD_LIMIT_SECONDS)
 
-                elif status // 100 != 2:  # 2xx == OK (maybe with warnings)
-                    # Log fatal errors
-                    logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
-                    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
-                    plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
 
-                else:
-                    # Log individual errors and warnings
-                    for data_event, reply_event in zip(data['events'], reply['events']):
-                        if reply_event['eventStatus'] != 200:
-                            logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
-                            logger.debug(f'JSON data:\n{json.dumps(data_event)}')
-                            if reply_event['eventStatus'] // 100 != 2:
-                                plug.show_error(_('Error: Inara {MSG}').format(
-                                    MSG=f'{data_event["eventName"]},'
-                                        f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'))
-
-                        if data_event['eventName'] in ('addCommanderTravelCarrierJump',
-                                                       'addCommanderTravelDock',
-                                                       'addCommanderTravelFSDJump',
-                                                       'setCommanderTravelLocation'):
-                            this.lastlocation = reply_event.get('eventData', {})
-                            # calls update_location in main thread
-                            this.system_link.event_generate('<<InaraLocation>>', when="tail")
-
-                        elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
-                            this.lastship = reply_event.get('eventData', {})
-                            # calls update_ship in main thread
-                            this.system_link.event_generate('<<InaraShip>>', when="tail")
-
+def try_send_data(url: str, data: OrderedDictT[str, Any]):
+    for i in range(3):
+        logger.debug(f"sending data to API, retry #{i}")
+        try:
+            if send_data(url, data):
                 break
 
-            except Exception as e:
-                logger.debug('Unable to send events', exc_info=e)
-                retrying += 1
-        else:
-            if callback:
-                callback(None)
+        except Exception as e:
+            logger.debug('unable to send events', exc_info=e)
+            return
 
-            else:
-                plug.show_error(_("Error: Can't connect to Inara"))
+
+def send_data(url: str, data: OrderedDictT[str, Any]) -> bool:
+    """
+    write a set of events to the inara API
+
+    :param url: the target URL to post to
+    :param data: the data to POST
+    :return: success state
+    """
+    r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
+    r.raise_for_status()
+    reply = r.json()
+    status = reply['header']['eventStatus']
+
+    if status // 100 != 2:  # 2xx == OK (maybe with warnings)
+        # Log fatal errors
+        logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
+        logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+        plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
+
+    else:
+        # Log individual errors and warnings
+        for data_event, reply_event in zip(data['events'], reply['events']):
+            if reply_event['eventStatus'] != 200:
+                logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
+                logger.debug(f'JSON data:\n{json.dumps(data_event)}')
+                if reply_event['eventStatus'] // 100 != 2:
+                    plug.show_error(_('Error: Inara {MSG}').format(
+                        MSG=f'{data_event["eventName"]},'
+                            f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'
+                    ))
+
+            if data_event['eventName'] in (
+                'addCommanderTravelCarrierJump',
+                'addCommanderTravelDock',
+                'addCommanderTravelFSDJump',
+                'setCommanderTravelLocation'
+            ):
+                this.lastlocation = reply_event.get('eventData', {})
+                # calls update_location in main thread
+                this.system_link.event_generate('<<InaraLocation>>', when="tail")
+
+            elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
+                this.lastship = reply_event.get('eventData', {})
+                # calls update_ship in main thread
+                this.system_link.event_generate('<<InaraShip>>', when="tail")
+
+    return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
 
 def update_location(event=None):
