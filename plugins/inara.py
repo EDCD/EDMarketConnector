@@ -632,7 +632,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
         # Selling / swapping ships
         if event_name == 'ShipyardNew':
-            add_event(
+            new_add_event(
                 'addCommanderShip',
                 entry['timestamp'],
                 {'shipType': entry['ShipType'], 'shipGameID': entry['NewShipID']}
