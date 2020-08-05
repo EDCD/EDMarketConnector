@@ -32,7 +32,7 @@ You will need several pieces of software installed, or the files from their
  "Windows Software Development Kit - Windows 10.0.18362.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
 1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.
- [v3.7.7](https://www.python.org/downloads/release/python-377/) is the most
+ [v3.7.8](https://www.python.org/downloads/release/python-378/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
 1. [py2exe](https://github.com/albertosottile/py2exe):
