@@ -639,18 +639,21 @@ def journal_entry(
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
+                logger.warn("system is None, can't add StarSystem")
                 return "system is None, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
+                logger.warn("this.coordinates is None, can't add StarPos")
                 return "this.coordinates is None, can't add StarPos"
 
             entry['StarPos'] = list(this.coordinates)
 
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
+                logger.warn("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
