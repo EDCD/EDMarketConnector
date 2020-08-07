@@ -3,6 +3,7 @@
 import itertools
 import json
 import logging
+import pathlib
 import re
 import sys
 import tkinter as tk
@@ -684,10 +685,9 @@ def journal_entry(
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = entry['MarketID']
 
-            with open(
-                join(str(config.get('journaldir') or config.default_journal_dir), f'{entry["event"]}.json'), 'rb'
-            ) as h:
-                entry = json.load(h)
+            path = pathlib.Path(str(config.get('journaldir') or config.default_journal_dir)) / f'{entry["event"]}.json'
+            with path.open('rb') as f:
+                entry = json.load(f)
                 if entry['event'] == 'Market':
                     this.eddn.export_journal_commodities(cmdr, is_beta, entry)
 
