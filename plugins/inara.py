@@ -2,31 +2,28 @@
 # Inara sync
 #
 
-from collections import OrderedDict, defaultdict
-import json
-from typing import Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional, OrderedDict as OrderedDictT, \
-    Sequence, TYPE_CHECKING, Tuple, Union
 import dataclasses
-
-import requests
+import json
+import logging
 import sys
 import time
+import tkinter as tk
+# For new impl
+from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
 from queue import Queue
 from threading import Lock, Thread
-import logging
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
+from typing import OrderedDict as OrderedDictT
+from typing import Sequence, Union
 
-import tkinter as tk
-from ttkHyperlinkLabel import HyperlinkLabel
-import myNotebook as nb
+import requests
 
-from config import appname, applongname, appversion, config
+import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
-
-# For new impl
-from collections import deque
-
+from config import applongname, appname, appversion, config
+from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = logging.getLogger(appname)
 
