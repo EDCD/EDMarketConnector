@@ -630,7 +630,8 @@ def journal_entry(
             entry.pop(thing, None)
 
         if 'Factions' in entry:
-            # Filter faction state. `entry` is a shallow copy so replace 'Factions' value rather than modify in-place.
+            # Filter faction state to comply with schema restrictions regarding personal data. `entry` is a shallow copy
+            # so replace 'Factions' value rather than modify in-place.
             entry['Factions'] = [
                 {
                     k: v for k, v in f.items() if k not in (
