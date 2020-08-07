@@ -55,6 +55,72 @@ import myNotebook as nb
 ```
 For creating UI elements.
 
+---
+### Logging
+Currently (still in 4.0.3) the only way to provide any logged output from a
+plugin is to use `print(...)` statements.  When running the application from
+the packaged executeable all output is redirected to a log file.  See
+[Reporting a problem](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#reporting-a-problem)
+for the location of this log file.
+
+A future version of EDMC will implement proper logging using the Python
+`logging` module.  Plugin developers should get their code ready for this by
+using the following code instead of simple `print(...)` statements
+
+Insert this at the top-level of your load.py file (so not inside
+`plugin_start3()`):
+```python
+import logging
+
+from config import appname
+
+# This could also be returned from plugin_start3()
+plugin_name = os.path.basename(os.path.dirname(__file__))
+
+# A Logger is used per 'found' plugin to make it easy to include the plugin's
+# folder name in the logging output format.
+logger = logging.getLogger(f'{appname}.{plugin_name}')
+
+# If the Logger has handlers then it was already set up by the core code, else
+# it needs setting up here.
+if not logger.hasHandlers():
+    level = logging.INFO  # So logger.info(...) is equivalent to print()
+
+    logger.setLevel(level)
+    logger_channel = logging.StreamHandler()
+    logger_channel.setLevel(level)
+    logger_formatter = logging.Formatter(f'%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s')
+    logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
+    logger_formatter.default_msec_format = '%s.%03d'
+    logger_channel.setFormatter(logger_formatter)
+    logger.addHandler(logger_channel)
+```
+
+Then replace `print(...)` statements with one of the following:
+```python
+    logger.info('some info message')  # instead of print(...)
+
+    logger.debug('something only for debug')
+
+    logger.warning('Something needs warning about')
+
+    logger.error('Some error happened')
+
+    logger.critical('Something went wrong in a critical manner')
+
+    try:
+        ...
+    except Exception:
+        # This logs at 'ERROR' level.
+        # Also automatically includes exception information.
+        logger.exception('An exception occurred')
+
+    try:
+        ...
+    except Exception as e:
+        logger.debug('Exception we only note in debug output', exc_info=e)
+```
+
 
 ---
 ### Startup
