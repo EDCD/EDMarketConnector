@@ -1,33 +1,31 @@
 # Export to EDDN
 
-from collections import OrderedDict
 import itertools
 import json
+import logging
+import re
+import sys
+import tkinter as tk
+from collections import OrderedDict
 from os import SEEK_SET
 from os.path import exists, join
 from platform import system
-import re
-from typing import (
-    Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional,
-    Sequence, TYPE_CHECKING, OrderedDict as OrderedDictT, TextIO, Tuple, Union
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional
+from typing import OrderedDict as OrderedDictT
+from typing import Sequence, TextIO, Tuple, Union
 
 import requests
-import sys
-import logging
 
-import tkinter as tk
-from myNotebook import Frame
-from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb  # noqa: N813
-
+from companion import category_map
+from config import applongname, appname, appversion, config
+from myNotebook import Frame
 from prefs import prefsVersion
+from ttkHyperlinkLabel import HyperlinkLabel
 
 if sys.platform != 'win32':
     from fcntl import lockf, LOCK_EX, LOCK_NB
 
-from config import appname, applongname, appversion, config
-from companion import category_map
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
