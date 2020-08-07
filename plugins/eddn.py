@@ -185,7 +185,10 @@ class EDDN:
         else:
             # Rewrite old schema name
             if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
-                msg['$schemaRef'] = 'https://eddn.edcd.io/schemas/' + msg['$schemaRef'][38:]  # TODO: 38?!
+                msg['$schemaRef'] = str(msg['$schemaRef']).replace(
+                    'http://schemas.elite-markets.net/eddn/',
+                    'https://eddn.edcd.io/schemas/'
+                )
 
             try:
                 self.send(cmdr, msg)
