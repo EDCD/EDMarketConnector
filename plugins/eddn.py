@@ -50,12 +50,7 @@ this.shipyard = None
 HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
 
-# TODO:
-# 1, this does a bunch of magic checks for whether or not the given commander has horizons. We can get that directly
-# from  CAPI via commander.capabilities.Horizons -- Should this be changed to use that? did such a thing exist when
-# this was written?
-#
-# 2, a good few of these methods are static or could be classmethods. they should be created as such.
+# TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 
 class EDDN:
     # SERVER = 'http://localhost:8081'	# testing
