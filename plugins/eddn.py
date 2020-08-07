@@ -265,19 +265,15 @@ class EDDN:
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
-        economies: Dict[str, Any] = data['lastStarport'].get('economies') or {}
         modules: Dict[str, Any] = data['lastStarport'].get('modules') or {}
-        ships: Dict[str, Union[Dict[str, Any], List]] = data['lastStarport'].get('ships') or {
-            'shipyard_list': {}, 'unavailable_list': []
-        }
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
-        horizons = (
-            any(economy['name'] == 'Colony' for economy in economies.values()) or
-            any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
-            any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
-        )
+        horizons: bool = is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            data['lastStarport'].get('ships', {'shipyard_list': {}, 'unavailable_list': []})
+            )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
@@ -312,14 +308,12 @@ class EDDN:
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
-        economies: Dict[str, Any] = data['lastStarport'].get('economies') or {}
-        modules: Dict[str, Any] = data['lastStarport'].get('modules') or {}
-        ships: Dict[str, Any] = data['lastStarport'].get('ships') or {'shipyard_list': {}, 'unavailable_list': []}
-        horizons: bool = (
-            any(economy['name'] == 'Colony' for economy in economies.values()) or
-            any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
-            any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
-        )
+        ships: Dict[str, Any] = data['lastStarport'].get('ships', {'shipyard_list': {}, 'unavailable_list': []})
+        horizons: bool = is_horizons(
+            data['lastStarport'].get('economies', {}),
+            data['lastStarport'].get('modules', {}),
+            ships
+            )
 
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
@@ -728,3 +722,14 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
         except Exception as e:
             logger.debug('Failed exporting data', exc_info=e)
             return str(e)
+
+
+MAP_STR_ANY = Mapping[str, Any]
+
+
+def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+    return (
+        any(economy['name'] == 'Colony' for economy in economies.values()) or
+        any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
+        any(ship.get('sku') == HORIZ_SKU for ship in (ships['shipyard_list'] or {}).values())
+    )
