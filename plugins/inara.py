@@ -85,7 +85,7 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 class Credentials(NamedTuple):
     """
-    Credentials holds an inara API payload
+    Credentials holds the set of credentials required to identify an inara API payload to inara
     """
     cmdr: str
     fid: str
@@ -1211,7 +1211,7 @@ def try_send_data(url: str, data: Mapping[str, Any]):
     :param data: the payload
     """
     for i in range(3):
-        logger.debug(f"sending data to API, retry #{i}")
+        logger.debug(f"sending data to API, attempt #{i}")
         try:
             if send_data(url, data):
                 break
