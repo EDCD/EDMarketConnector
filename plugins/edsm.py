@@ -12,18 +12,21 @@
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
 import json
-import requests
+import logging
 import sys
+import tkinter as tk
+import urllib.error
+import urllib.parse
+import urllib.request
 from queue import Queue
 from threading import Thread
-import logging
 
-import tkinter as tk
-from ttkHyperlinkLabel import HyperlinkLabel
+import requests
+
 import myNotebook as nb  # noqa: N813
-
-from config import appname, applongname, appversion, config
 import plug
+from config import applongname, appname, appversion, config
+from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = logging.getLogger(appname)
 
