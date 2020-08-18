@@ -39,7 +39,7 @@ EDSM_POLL = 0.1
 _TIMEOUT = 20
 
 
-this = sys.modules[__name__]  # For holding module globals
+this: Any = sys.modules[__name__]  # For holding module globals
 this.session = requests.Session()
 this.queue = Queue()		# Items to be sent to EDSM by worker thread
 this.discardedEvents = []  # List discarded events from EDSM
@@ -97,15 +97,19 @@ def plugin_start3(plugin_dir):
         if isinstance(config.get('cmdrs'), list) and config.get('edsm_usernames') and config.get('edsm_apikeys'):
             # Migrate <= 2.34 settings
             config.set('edsm_cmdrs', config.get('cmdrs'))
+
         elif config.get('edsm_cmdrname'):
             # Migrate <= 2.25 settings. edsm_cmdrs is unknown at this time
             config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
             config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
+
         config.delete('edsm_cmdrname')
         config.delete('edsm_apikey')
+
     if config.getint('output') & 256:
         # Migrate <= 2.34 setting
         config.set('edsm_out', 1)
+
     config.delete('edsm_autoopen')
     config.delete('edsm_historical')
 
@@ -140,16 +144,13 @@ def plugin_prefs(parent, cmdr, is_beta):
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
-    HyperlinkLabel(frame, text='Elite Dangerous Star Map', background=nb.Label().cget('background'),
-                   url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    HyperlinkLabel(frame, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
     this.log = tk.IntVar(value=config.getint('edsm_out') and 1)
-    this.log_button = nb.Checkbutton(frame, text=_('Send flight log and Cmdr status to EDSM'),
-                                     variable=this.log, command=prefsvarchanged)
+    this.log_button = nb.Checkbutton(frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged)
     this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
-    this.label = HyperlinkLabel(frame, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget(
-        'background'), url='https://www.edsm.net/settings/api', underline=True)  # Section heading in settings
+    this.label = HyperlinkLabel(frame, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)  # Section heading in settings
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
@@ -181,11 +182,14 @@ def prefs_cmdr_changed(cmdr, is_beta):
     if cmdr:
         this.cmdr_text['text'] = cmdr + (is_beta and ' [Beta]' or '')
         cred = credentials(cmdr)
+
         if cred:
             this.user.insert(0, cred[0])
             this.apikey.insert(0, cred[1])
+
     else:
         this.cmdr_text['text'] = _('None') 	# No hotkey/shortcut currently defined
+
     this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = cmdr and not is_beta and this.log.get() and tk.NORMAL or tk.DISABLED
 
 
@@ -206,10 +210,12 @@ def prefs_changed(cmdr, is_beta):
             usernames[idx] = this.user.get().strip()
             apikeys.extend([''] * (1 + idx - len(apikeys)))
             apikeys[idx] = this.apikey.get().strip()
+
         else:
             config.set('edsm_cmdrs', cmdrs + [cmdr])
             usernames.append(this.user.get().strip())
             apikeys.append(this.apikey.get().strip())
+
         config.set('edsm_usernames', usernames)
         config.set('edsm_apikeys', apikeys)
 
@@ -228,6 +234,7 @@ def credentials(cmdr):
     if cmdr in cmdrs and config.get('edsm_usernames') and config.get('edsm_apikeys'):
         idx = cmdrs.index(cmdr)
         return (config.get('edsm_usernames')[idx], config.get('edsm_apikeys')[idx])
+
     else:
         return None
 
@@ -275,6 +282,7 @@ entry: {entry!r}'''
     this.multicrew = bool(state['Role'])
     if 'StarPos' in entry:
         this.coordinates = entry['StarPos']
+
     elif entry['event'] == 'LoadGame':
         this.coordinates = None
 
@@ -282,14 +290,17 @@ entry: {entry!r}'''
         this.newgame = True
         this.newgame_docked = False
         this.navbeaconscan = 0
+
     elif entry['event'] == 'StartUp':
         this.newgame = False
         this.newgame_docked = False
         this.navbeaconscan = 0
+
     elif entry['event'] == 'Location':
         this.newgame = True
         this.newgame_docked = entry.get('Docked', False)
         this.navbeaconscan = 0
+
     elif entry['event'] == 'NavBeaconScan':
         this.navbeaconscan = entry['NumBodies']
 
@@ -302,6 +313,7 @@ entry: {entry!r}'''
             '_stationName': station,
             '_shipId': state['ShipID'],
         }
+
         entry.update(transient)
 
         if entry['event'] == 'LoadGame':
@@ -330,6 +342,7 @@ def cmdr_data(data, is_beta):
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid:
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+
     # Only trust CAPI if these aren't yet set
     this.system = this.system or data['lastSystem']['name']
     this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
@@ -340,11 +353,14 @@ def cmdr_data(data, is_beta):
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
+
     if config.get('station_provider') == 'EDSM':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
+
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
             this.station_link['text'] = STATION_UNDOCKED
+
         else:
             this.station_link['text'] = ''
 
@@ -361,7 +377,6 @@ def cmdr_data(data, is_beta):
 
 # Worker thread
 def worker():
-
     pending = []  # Unsent events
     closing = False
 
@@ -409,9 +424,7 @@ def worker():
                     if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
-                        logger.debug(f'''CarrierJump (or FSDJump): Attempting API call
-data: {data_elided!r}'''
-                                     )
+                        logger.debug(f'CarrierJump (or FSDJump): Attempting API call\ndata: {data_elided!r}')
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
                     reply = r.json()
@@ -423,6 +436,7 @@ data: {data_elided!r}'''
                     if msgnum // 100 == 2:
                         logger.warning(f'EDSM\t{msgnum} {msg}\t{json.dumps(pending, separators = (",", ": "))}')
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+
                     else:
                         for e, r in zip(pending, reply['events']):
                             if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump', 'CarrierJump']:
@@ -430,15 +444,18 @@ data: {data_elided!r}'''
                                 this.lastlookup = r
                                 # calls update_status in main thread
                                 this.system_link.event_generate('<<EDSMStatus>>', when="tail")
+
                             elif r['msgnum'] // 100 != 1:
                                 logger.warning(f'EDSM\t{r["msgnum"]} {r["msg"]}\t'
                                                f'{json.dumps(e, separators = (",", ": "))}')
+
                         pending = []
 
                 break
             except Exception as e:
                 logger.debug('Sending API events', exc_info=e)
                 retrying += 1
+
         else:
             plug.show_error(_("Error: Can't connect to EDSM"))
 
@@ -455,6 +472,7 @@ def should_send(entries):
             this.navbeaconscan -= 1
             if this.navbeaconscan:
                 return False
+
         else:
             assert(False)
             this.navbeaconscan = 0
@@ -465,12 +483,15 @@ def should_send(entries):
             this.newgame = False
             this.newgame_docked = False
             return True
+
         elif this.newgame:
             pass
+
         elif entry['event'] not in ['CommunityGoal',  # Spammed periodically
                                     'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
                                     'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap']:  # "
             return True
+
     return False
 
 
@@ -486,10 +507,13 @@ def edsm_notify_system(reply):
     if not reply:
         this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
+
     elif reply['msgnum'] // 100 not in (1, 4):
         this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
+
     elif reply.get('systemCreated'):
         this.system_link['image'] = this._IMG_NEW
+
     else:
         this.system_link['image'] = this._IMG_KNOWN
