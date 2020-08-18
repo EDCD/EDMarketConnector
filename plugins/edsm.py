@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 from queue import Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple
 
 import requests
 
@@ -40,24 +40,24 @@ _TIMEOUT = 20
 
 
 this: Any = sys.modules[__name__]  # For holding module globals
-this.session = requests.Session()
-this.queue = Queue()		# Items to be sent to EDSM by worker thread
-this.discardedEvents = []  # List discarded events from EDSM
-this.lastlookup = False		# whether the last lookup succeeded
+this.session: requests.Session = requests.Session()
+this.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
+this.discardedEvents: List[str] = []  # List discarded events from EDSM
+this.lastlookup: bool = False		# whether the last lookup succeeded
 
 # Game state
-this.multicrew = False		# don't send captain's ship info to EDSM while on a crew
-this.coordinates = None
-this.newgame = False		# starting up - batch initial burst of events
-this.newgame_docked = False  # starting up while docked
-this.navbeaconscan = 0		# batch up burst of Scan events after NavBeaconScan
-this.system_link = None
-this.system = None
-this.system_address = None  # Frontier SystemAddress
-this.system_population = None
-this.station_link = None
-this.station = None
-this.station_marketid = None  # Frontier MarketID
+this.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
+this.coordinates: Optional[Tuple[int, int, int]] = None
+this.newgame: bool = False  # starting up - batch initial burst of events
+this.newgame_docked: bool = False  # starting up while docked
+this.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
+this.system_link: tk.Tk = None
+this.system: tk.Tk = None
+this.system_address: Optional[int] = None  # Frontier SystemAddress
+this.system_population: Optional[int] = None
+this.station_link: tk.Tk = None
+this.station: Optional[str] = None
+this.station_marketid: Optional[int] = None  # Frontier MarketID
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 __cleanup = str.maketrans({' ': None, '\n': None})
 IMG_KNOWN_B64 = """
@@ -87,7 +87,7 @@ plEAADs=
 
 
 # Main window clicks
-def system_url(system_name):
+def system_url(system_name: str) -> str:
     if this.system_address:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
 
@@ -97,7 +97,7 @@ def system_url(system_name):
     return ''
 
 
-def station_url(system_name, station_name):
+def station_url(system_name: str, station_name: str) -> str:
     if system_name and station_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}')
 
@@ -110,7 +110,7 @@ def station_url(system_name, station_name):
 
     return ''
 
-def plugin_start3(plugin_dir):
+def plugin_start3(plugin_dir: str) -> str:
     # Can't be earlier since can only call PhotoImage after window is created
     this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
     this._IMG_UNKNOWN = tk.PhotoImage(data=IMG_UNKNOWN_B64)  # red circle
@@ -145,13 +145,13 @@ def plugin_start3(plugin_dir):
     return 'EDSM'
 
 
-def plugin_app(parent):
+def plugin_app(parent: tk.Tk) -> None:
     this.system_link = parent.children['system']  # system label in main window
     this.system_link.bind_all('<<EDSMStatus>>', update_status)
     this.station_link = parent.children['station']  # station label in main window
 
 
-def plugin_stop():
+def plugin_stop() -> None:
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
@@ -160,7 +160,7 @@ def plugin_stop():
     this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
 
 
-def plugin_prefs(parent, cmdr, is_beta):
+def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     PADX = 10
     BUTTONX = 12  # indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
@@ -172,7 +172,7 @@ def plugin_prefs(parent, cmdr, is_beta):
         frame,
         text='Elite Dangerous Star Map',
         background=nb.Label().cget('background'),
-        url='https://www.edsm.net/', 
+        url='https://www.edsm.net/',
         underline=True
     ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
 
@@ -215,7 +215,7 @@ def plugin_prefs(parent, cmdr, is_beta):
     return frame
 
 
-def prefs_cmdr_changed(cmdr, is_beta):
+def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
     this.log_button['state'] = cmdr and not is_beta and tk.NORMAL or tk.DISABLED
     this.user['state'] = tk.NORMAL
     this.user.delete(0, tk.END)
@@ -239,7 +239,7 @@ def prefs_cmdr_changed(cmdr, is_beta):
     set_prefs_ui_states(to_set)
 
 
-def prefsvarchanged():
+def prefsvarchanged() -> None:
     to_set = tk.DISABLED
     if this.log.get():
         to_set = this.log_button['state']
@@ -262,13 +262,13 @@ def set_prefs_ui_states(state: str) -> None:
     this.apikey['state'] = state
 
 
-def prefs_changed(cmdr, is_beta):
+def prefs_changed(cmdr: str, is_beta: bool) -> None:
     config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
         cmdrs = config.get('edsm_cmdrs')
-        usernames = config.get('edsm_usernames') or []
-        apikeys = config.get('edsm_apikeys') or []
+        usernames: List[str] = config.get('edsm_usernames') or []
+        apikeys: List[str] = config.get('edsm_apikeys') or []
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             usernames.extend([''] * (1 + idx - len(usernames)))
@@ -285,7 +285,7 @@ def prefs_changed(cmdr, is_beta):
         config.set('edsm_apikeys', apikeys)
 
 
-def credentials(cmdr):
+def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     # Credentials for cmdr
     if not cmdr:
         return None
@@ -304,7 +304,9 @@ def credentials(cmdr):
         return None
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state):
+def journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
+) -> None:
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.debug(f'''{entry["event"]}
 Commander: {cmdr}
@@ -313,7 +315,6 @@ Station: {station}
 state: {state!r}
 entry: {entry!r}'''
                     )
-
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -412,7 +413,7 @@ Queueing: {entry!r}'''
 
 
 # Update system data
-def cmdr_data(data, is_beta):
+def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
     system = data['lastSystem']['name']
 
     # Always store initially, even if we're not the *current* system provider.
@@ -452,12 +453,12 @@ def cmdr_data(data, is_beta):
 
 
 # Worker thread
-def worker():
+def worker() -> None:
     pending = []  # Unsent events
     closing = False
 
     while True:
-        item = this.queue.get()
+        item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
             (cmdr, entry) = item
         else:
@@ -466,6 +467,7 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
+                # TODO: Technically entry can be unbound here.
                 if item and entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
                     logger.debug(f'{entry["event"]}')
 
@@ -488,7 +490,7 @@ def worker():
                     if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
                         logger.debug('CarrierJump (or FSDJump) in pending and it passed should_send()')
 
-                    (username, apikey) = credentials(cmdr)
+                    (username, apikey) = credentials(cmdr)  # TODO: This raises if credentials returns None
                     data = {
                         'commanderName': username.encode('utf-8'),
                         'apiKey': apikey,
@@ -540,7 +542,7 @@ def worker():
 
 
 # Whether any of the entries should be sent immediately
-def should_send(entries):
+def should_send(entries: List[Mapping[str, Any]]) -> bool:
 
     # batch up burst of Scan events after NavBeaconScan
     if this.navbeaconscan:
@@ -574,7 +576,7 @@ def should_send(entries):
 
 # Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location',
 # 'FSDJump' or 'CarrierJump' event
-def update_status(event=None):
+def update_status(event=None) -> None:
     for plugin in plug.provides('edsm_notify_system'):
         plug.invoke(plugin, None, 'edsm_notify_system', this.lastlookup)
 
@@ -582,7 +584,7 @@ def update_status(event=None):
 # Called with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event.
 # https://www.edsm.net/en/api-journal-v1
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
-def edsm_notify_system(reply):
+def edsm_notify_system(reply: Mapping[str, Any]) -> None:
     if not reply:
         this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
