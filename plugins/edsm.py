@@ -20,6 +20,7 @@ import urllib.parse
 import urllib.request
 from queue import Queue
 from threading import Thread
+from typing import TYPE_CHECKING, Any
 
 import requests
 
@@ -27,6 +28,10 @@ import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appname, appversion, config
 from ttkHyperlinkLabel import HyperlinkLabel
+
+if TYPE_CHECKING:
+    def _(x: str) -> str:
+        return x
 
 logger = logging.getLogger(appname)
 
