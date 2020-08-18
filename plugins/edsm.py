@@ -59,6 +59,31 @@ this.station_link = None
 this.station = None
 this.station_marketid = None  # Frontier MarketID
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
+__cleanup = str.maketrans({' ': None, '\n': None})
+IMG_KNOWN_B64 = """
+R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7r
+MpvNV4q932VSuRiPjQQAOw==
+""".translate(__cleanup)
+
+IMG_UNKNOWN_B64 = """
+R0lGODlhEAAQAKEDAGVLJ+ddWO5fW////yH5BAEKAAMALAAAAAAQABAAAAItnI+pywYRQBtA2CtVvTwjDgrJFlreEJRXgKSqwB5keQ6vOKq1E+7IE5kIh4kC
+ADs=
+""".translate(__cleanup)
+
+IMG_NEW_B64 = """
+R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXO
+PvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//j
+d//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/s
+lv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP//////////////
+/////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xH
+Jk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+G
+BAcUCIIBBDSYYGiAAUMALFR6FAgAOw==
+""".translate(__cleanup)
+
+IMG_ERR_B64 = """
+R0lGODlhEAAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAQABAAAAIwlBWpeR0AIwwNPRmZuVNJinyWuClhBlZjpm5fqnIAHJPtOd3Hou9mL6NVgj2L
+plEAADs=
+""".translate(__cleanup)
 
 
 # Main window clicks
@@ -87,10 +112,10 @@ def station_url(system_name, station_name):
 
 def plugin_start3(plugin_dir):
     # Can't be earlier since can only call PhotoImage after window is created
-    this._IMG_KNOWN = tk.PhotoImage(data='R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7rMpvNV4q932VSuRiPjQQAOw==')  # green circle
-    this._IMG_UNKNOWN = tk.PhotoImage(data='R0lGODlhEAAQAKEDAGVLJ+ddWO5fW////yH5BAEKAAMALAAAAAAQABAAAAItnI+pywYRQBtA2CtVvTwjDgrJFlreEJRXgKSqwB5keQ6vOKq1E+7IE5kIh4kCADs=')  # red circle
-    this._IMG_NEW = tk.PhotoImage(data='R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXOPvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//jd//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/slv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP///////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xHJk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+GBAcUCIIBBDSYYGiAAUMALFR6FAgAOw==')
-    this._IMG_ERROR = tk.PhotoImage(data='R0lGODlhEAAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAQABAAAAIwlBWpeR0AIwwNPRmZuVNJinyWuClhBlZjpm5fqnIAHJPtOd3Hou9mL6NVgj2LplEAADs=')  # BBC Mode 5 '?'
+    this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
+    this._IMG_UNKNOWN = tk.PhotoImage(data=IMG_UNKNOWN_B64)  # red circle
+    this._IMG_NEW = tk.PhotoImage(data=IMG_NEW_B64)
+    this._IMG_ERROR = tk.PhotoImage(data=IMG_ERR_B64)  # BBC Mode 5 '?'
 
     # Migrate old settings
     if not config.get('edsm_cmdrs'):
@@ -136,7 +161,6 @@ def plugin_stop():
 
 
 def plugin_prefs(parent, cmdr, is_beta):
-
     PADX = 10
     BUTTONX = 12  # indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
@@ -144,13 +168,31 @@ def plugin_prefs(parent, cmdr, is_beta):
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
-    HyperlinkLabel(frame, text='Elite Dangerous Star Map', background=nb.Label().cget('background'), url='https://www.edsm.net/', underline=True).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    HyperlinkLabel(
+        frame,
+        text='Elite Dangerous Star Map',
+        background=nb.Label().cget('background'),
+        url='https://www.edsm.net/', 
+        underline=True
+    ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+
     this.log = tk.IntVar(value=config.getint('edsm_out') and 1)
-    this.log_button = nb.Checkbutton(frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged)
+    this.log_button = nb.Checkbutton(
+        frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
+    )
+
     this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
-    this.label = HyperlinkLabel(frame, text=_('Elite Dangerous Star Map credentials'), background=nb.Label().cget('background'), url='https://www.edsm.net/settings/api', underline=True)  # Section heading in settings
+    # Section heading in settings
+    this.label = HyperlinkLabel(
+        frame,
+        text=_('Elite Dangerous Star Map credentials'),
+        background=nb.Label().cget('background'),
+        url='https://www.edsm.net/settings/api',
+        underline=True
+    )
+
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
@@ -190,11 +232,34 @@ def prefs_cmdr_changed(cmdr, is_beta):
     else:
         this.cmdr_text['text'] = _('None') 	# No hotkey/shortcut currently defined
 
-    this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = cmdr and not is_beta and this.log.get() and tk.NORMAL or tk.DISABLED
+    to_set = tk.DISABLED
+    if cmdr and not is_beta and this.log.get():
+        to_set = tk.NORMAL
+
+    set_prefs_ui_states(to_set)
 
 
 def prefsvarchanged():
-    this.label['state'] = this.cmdr_label['state'] = this.cmdr_text['state'] = this.user_label['state'] = this.user['state'] = this.apikey_label['state'] = this.apikey['state'] = this.log.get() and this.log_button['state'] or tk.DISABLED
+    to_set = tk.DISABLED
+    if this.log.get():
+        to_set = this.log_button['state']
+
+    set_prefs_ui_states(to_set)
+
+
+def set_prefs_ui_states(state: str) -> None:
+    """
+    Set the state of various config UI entries
+
+    :param state: the state to set each entry to
+    """
+    this.label['state'] = state
+    this.cmdr_label['state'] = state
+    this.cmdr_text['state'] = state
+    this.user_label['state'] = state
+    this.user['state'] = state
+    this.apikey_label['state'] = state
+    this.apikey['state'] = state
 
 
 def prefs_changed(cmdr, is_beta):
@@ -269,7 +334,15 @@ entry: {entry!r}'''
         this.station_marketid = None
 
     if config.get('station_provider') == 'EDSM':
-        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        to_set = this.station
+        if not this.station:
+            if this.system_population and this.system_population > 0:
+                to_set = STATION_UNDOCKED
+
+            else:
+                to_set = ''
+
+        this.station_link['text'] = to_set
         this.station_link['url'] = station_url(this.system, this.station)
         this.station_link.update_idletasks()
 
@@ -305,7 +378,10 @@ entry: {entry!r}'''
         this.navbeaconscan = entry['NumBodies']
 
     # Send interesting events to EDSM
-    if config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and entry['event'] not in this.discardedEvents:
+    if (
+        config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
+        entry['event'] not in this.discardedEvents
+    ):
         # Introduce transient states into the event
         transient = {
             '_systemName': system,
@@ -405,8 +481,8 @@ def worker():
                     this.discardedEvents = set(r.json())
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
                     assert this.discardedEvents			# wouldn't expect this to be empty
-                    pending = [x for x in pending if x['event']
-                               not in this.discardedEvents]  # Filter out unwanted events
+                    # Filter out unwanted events
+                    pending = [x for x in pending if x['event'] not in this.discardedEvents]
 
                 if should_send(pending):
                     if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
@@ -487,21 +563,24 @@ def should_send(entries):
         elif this.newgame:
             pass
 
-        elif entry['event'] not in ['CommunityGoal',  # Spammed periodically
-                                    'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
-                                    'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap']:  # "
+        elif entry['event'] not in [
+                'CommunityGoal',  # Spammed periodically
+                'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
+                'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap']:  # "
             return True
 
     return False
 
 
-# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event
+# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location',
+# 'FSDJump' or 'CarrierJump' event
 def update_status(event=None):
     for plugin in plug.provides('edsm_notify_system'):
         plug.invoke(plugin, None, 'edsm_notify_system', this.lastlookup)
 
 
-# Called with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event. https://www.edsm.net/en/api-journal-v1
+# Called with EDSM's response to a 'StartUp', 'Location', 'FSDJump' or 'CarrierJump' event.
+# https://www.edsm.net/en/api-journal-v1
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply):
     if not reply:
