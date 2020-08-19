@@ -161,9 +161,9 @@ def plugin_stop() -> None:
 
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
-    PADX = 10
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-    PADY = 2		# close spacing
+    PADX = 10  # noqa: N806
+    BUTTONX = 12  # indent Checkbuttons and Radiobuttons # noqa: N806
+    PADY = 2		# close spacing # noqa: N806
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
@@ -222,7 +222,7 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
     this.apikey['state'] = tk.NORMAL
     this.apikey.delete(0, tk.END)
     if cmdr:
-        this.cmdr_text['text'] = cmdr + (is_beta and ' [Beta]' or '')
+        this.cmdr_text['text'] = f'{cmdr}{" [Beta]" if is_beta else ""}'
         cred = credentials(cmdr)
 
         if cred:
@@ -266,9 +266,10 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
-        cmdrs = config.get('edsm_cmdrs')
-        usernames: List[str] = config.get('edsm_usernames') or []
-        apikeys: List[str] = config.get('edsm_apikeys') or []
+        # TODO: remove this when config is rewritten.
+        cmdrs: List[str] = list(config.get('edsm_cmdrs') or [])
+        usernames: List[str] = list(config.get('edsm_usernames') or [])
+        apikeys: List[str] = list(config.get('edsm_apikeys') or [])
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             usernames.extend([''] * (1 + idx - len(usernames)))
@@ -344,7 +345,7 @@ entry: {entry!r}'''
                 to_set = ''
 
         this.station_link['text'] = to_set
-        this.station_link['url'] = station_url(this.system, this.station)
+        this.station_link['url'] = station_url(this.system, str(this.station))
         this.station_link.update_idletasks()
 
     # Update display of 'EDSM Status' image
@@ -506,13 +507,13 @@ def worker() -> None:
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
                     reply = r.json()
-                    (msgnum, msg) = reply['msgnum'], reply['msg']
+                    (msg_num, msg) = reply['msgnum'], reply['msg']
                     # 1xx = OK
                     # 2xx = fatal error
                     # 3&4xx not generated at top-level
                     # 5xx = error but events saved for later processing
-                    if msgnum // 100 == 2:
-                        logger.warning(f'EDSM\t{msgnum} {msg}\t{json.dumps(pending, separators = (",", ": "))}')
+                    if msg_num // 100 == 2:
+                        logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
 
                     else:
