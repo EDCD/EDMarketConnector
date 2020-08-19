@@ -491,7 +491,11 @@ def worker() -> None:
                     if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
                         logger.debug('CarrierJump (or FSDJump) in pending and it passed should_send()')
 
-                    (username, apikey) = credentials(cmdr)  # TODO: This raises if credentials returns None
+                    creds = credentials(cmdr)  # TODO: possibly unbound
+                    if creds is None:
+                        raise ValueError("Unexpected lack of credentials")
+
+                    (username, apikey) = creds
                     data = {
                         'commanderName': username.encode('utf-8'),
                         'apiKey': apikey,
