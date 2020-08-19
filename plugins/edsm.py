@@ -543,7 +543,6 @@ def worker() -> None:
 
 # Whether any of the entries should be sent immediately
 def should_send(entries: List[Mapping[str, Any]]) -> bool:
-
     # batch up burst of Scan events after NavBeaconScan
     if this.navbeaconscan:
         if entries and entries[-1]['event'] == 'Scan':
