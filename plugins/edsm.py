@@ -468,13 +468,14 @@ def worker() -> None:
         retrying = 0
         while retrying < 3:
             try:
-                # TODO: Technically entry can be unbound here.
-                if item and entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-                    logger.debug(f'{entry["event"]}')
+                if TYPE_CHECKING:
+                    # Tell the type checker that these two are bound.
+                    # TODO: While this works because of the item check below, these names are still technically unbound
+                    # TODO: in some cases, therefore this should be refactored.
+                    cmdr: str = ""
+                    entry: Mapping[str, Any] = {}
 
-                if item and entry['event'] not in this.discardedEvents:
-                    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-                        logger.debug(f'{entry["event"]} event not in discarded list')
+                if item and entry['event'] not in this.discardedEvents:  # TODO: Technically entry can be unbound here.
                     pending.append(entry)
 
                 # Get list of events to discard
