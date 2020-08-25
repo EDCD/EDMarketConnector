@@ -294,7 +294,7 @@ def cmdr_data(data, is_beta):
     this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
-    if config.get('station_provider') == 'EDSM':
+    if config.get('system_provider') == 'EDSM':
         this.system_link['text'] = this.system
         this.system_link['url'] = system_url(this.system)
         this.system_link.update_idletasks()
