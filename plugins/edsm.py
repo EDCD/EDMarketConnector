@@ -216,7 +216,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
 
 def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
-    this.log_button['state'] = cmdr and not is_beta and tk.NORMAL or tk.DISABLED
+    this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
     this.user['state'] = tk.NORMAL
     this.user.delete(0, tk.END)
     this.apikey['state'] = tk.NORMAL
@@ -350,7 +350,7 @@ entry: {entry!r}'''
 
     # Update display of 'EDSM Status' image
     if this.system_link['text'] != system:
-        this.system_link['text'] = system or ''
+        this.system_link['text'] = system if system else ''
         this.system_link['image'] = ''
         this.system_link.update_idletasks()
 
@@ -418,12 +418,16 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
     system = data['lastSystem']['name']
 
     # Always store initially, even if we're not the *current* system provider.
-    if not this.station_marketid:
-        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+    if not this.station_marketid and data['commander']['docked']:
+        this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    this.system = this.system or data['lastSystem']['name']
-    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
+    if not this.system:
+        this.system = data['lastSystem']['name']
+
+    if not this.station and data['commander']['docked']:
+        this.station = data['lastStarport']['name']
+
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
     if config.get('system_provider') == 'EDSM':
@@ -486,7 +490,7 @@ def worker() -> None:
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
                     assert this.discardedEvents			# wouldn't expect this to be empty
                     # Filter out unwanted events
-                    pending = [x for x in pending if x['event'] not in this.discardedEvents]
+                    pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
 
                 if should_send(pending):
                     if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
