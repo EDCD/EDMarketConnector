@@ -319,8 +319,8 @@ entry: {entry!r}'''
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress') or this.system_address
-        this.system = entry.get('StarSystem') or this.system
+        this.system_address = entry.get('SystemAddress', this.system_address)
+        this.system = entry.get('StarSystem', this.system)
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -328,8 +328,8 @@ entry: {entry!r}'''
     if pop is not None:
         this.system_population = pop
 
-    this.station = entry.get('StationName') or this.station
-    this.station_marketid = entry.get('MarketID') or this.station_marketid
+    this.station = entry.get('StationName', this.station)
+    this.station_marketid = entry.get('MarketID', this.station)
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
         this.station = None
