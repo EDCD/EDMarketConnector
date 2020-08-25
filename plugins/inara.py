@@ -244,13 +244,6 @@ def prefs_changed(cmdr: str, is_beta: bool):
     changed = config.getint('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
-    # Override standard URL functions
-    if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = system_url(this.system)
-
-    if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = station_url(this.system, this.station)
-
     if cmdr and not is_beta:
         this.cmdr = cmdr
         this.FID = None
@@ -998,7 +991,8 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
     # Only actually change URLs if we are current provider.
     if config.get('system_provider') == 'Inara':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
@@ -1010,7 +1004,8 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
                 to_set = ''
 
         this.station_link['text'] = to_set
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
 
@@ -1030,7 +1025,8 @@ def cmdr_data(data, is_beta):
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
@@ -1043,7 +1039,8 @@ def cmdr_data(data, is_beta):
         else:
             this.station_link['text'] = ''
 
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
