@@ -70,11 +70,9 @@ def plugin_app(parent):
     this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
 
 def prefs_changed(cmdr, is_beta):
-    # Override standard URL functions
-    if config.get('system_provider') == 'eddb':
-        this.system_link['url'] = system_url(this.system)
-    if config.get('station_provider') == 'eddb':
-        this.station_link['url'] = station_url(this.system, this.station)
+    # Do *NOT* set 'url' here, as it's set to a function that will call
+    # through correctly.  We don't want a static string.
+    pass
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
@@ -98,13 +96,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Only actually change URLs if we are current provider.
     if config.get('system_provider') == 'eddb':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)  # Override standard URL function
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     # But only actually change the URL if we are current station provider.
     if config.get('station_provider') == 'eddb':
         this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
-        this.station_link['url'] = station_url(this.system, this.station)  # Override standard URL function
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
 
@@ -119,7 +119,8 @@ def cmdr_data(data, is_beta):
     # Override standard URL functions
     if config.get('system_provider') == 'eddb':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
     if config.get('station_provider') == 'eddb':
         if data['commander']['docked']:
@@ -129,6 +130,7 @@ def cmdr_data(data, is_beta):
         else:
             this.station_link['text'] = ''
 
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
