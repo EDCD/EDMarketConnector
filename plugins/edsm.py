@@ -361,7 +361,7 @@ entry: {entry!r}'''
     elif entry['event'] == 'LoadGame':
         this.coordinates = None
 
-    if entry['event'] in ['LoadGame', 'Commander', 'NewCommander']:
+    if entry['event'] in ('LoadGame', 'Commander', 'NewCommander'):
         this.newgame = True
         this.newgame_docked = False
         this.navbeaconscan = 0
@@ -523,7 +523,7 @@ def worker() -> None:
 
                     else:
                         for e, r in zip(pending, reply['events']):
-                            if not closing and e['event'] in ['StartUp', 'Location', 'FSDJump', 'CarrierJump']:
+                            if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
                                 # Update main window's system status
                                 this.lastlookup = r
                                 # calls update_status in main thread
@@ -558,7 +558,7 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:
 
         else:
             assert(False)
-            this.navbeaconscan = 0
+            this.navbeaconscan = 0  # TODO: Unreachable code?
 
     for entry in entries:
         if (entry['event'] == 'Cargo' and not this.newgame_docked) or entry['event'] == 'Docked':
@@ -570,10 +570,10 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:
         elif this.newgame:
             pass
 
-        elif entry['event'] not in [
+        elif entry['event'] not in (
                 'CommunityGoal',  # Spammed periodically
                 'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
-                'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap']:  # "
+                'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'):  # "
             return True
 
     return False
