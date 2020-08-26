@@ -168,10 +168,19 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.0.4</title>
+			<title>Release 4.0.5</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.0.5</h2>
+<ul>
+<li>Built using Python 3.7.9.</li>
+<li>Fix EDSM plugin so the System provider actually updates the URLs for
+jumps to new systems.</li>
+</ul>
+<p>In general this cleans up the code for all three System and Station Providers;
+EDDB, EDSM, Inara.</p>
 
 <h2>Release 4.0.4</h2>
 <ul>
@@ -603,11 +612,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.4/EDMarketConnector_win_4.0.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.4/EDMarketConnector_win_4.0.5.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.0.4"
-				length="11419648"
+				sparkle:version="4.0.5"
+				length="11317248"
 				type="application/octet-stream"
 			/>
 		</item>
