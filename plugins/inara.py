@@ -76,12 +76,13 @@ def system_url(system_name):
     return this.system
 
 def station_url(system_name, station_name):
+    if system_name and station_name:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+
     if system_name:
-        if station_name:
-            return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
         return system_url(system_name)
 
-    return this.station or this.system
+    return ''
 
 
 def plugin_start3(plugin_dir):
