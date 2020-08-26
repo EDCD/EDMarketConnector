@@ -1055,10 +1055,10 @@ if __name__ == "__main__":
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
             # Yes, this is horribly hacky so as to be sure we match the key
             # that we told Translators to use.
-            popup_text = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "\
-                         "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "\
-                         "updated version available, else alert the developer that they need to update the code for "\
-                         "Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on "\
+            popup_text = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the " \
+                         "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an " \
+                         "updated version available, else alert the developer that they need to update the code for " \
+                         "Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on " \
                          "the end of the name."
             popup_text = popup_text.replace('\n', '\\n')
             popup_text = popup_text.replace('\r', '\\r')
@@ -1069,6 +1069,7 @@ if __name__ == "__main__":
             # And now we do need these to be actual \r\n
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
+
             tk.messagebox.showinfo(
                 _('EDMC: Plugins Without Python 3.x Support'),
                 popup_text
