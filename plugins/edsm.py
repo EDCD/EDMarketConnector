@@ -57,6 +57,9 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 # Main window clicks
 def system_url(system_name):
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
+
     if system_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}')
 
@@ -65,6 +68,10 @@ def system_url(system_name):
 def station_url(system_name, station_name):
     if system_name and station_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}')
+
+    # monitor state might think these are gone, but we don't yet
+    if this.system and this.station:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}')
 
     if system_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL')
