@@ -1,6 +1,36 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.5
+===
+
+ * Built using Python 3.7.9.
+ * Fix EDSM plugin so the System provider actually updates the URLs for
+   jumps to new systems.
+   
+ In general this cleans up the code for all three System and Station Providers;
+ EDDB, EDSM, Inara.
+
+Release 4.0.4
+===
+
+ * Built using Python 3.7.8.  Prior 4.0.x releases used 3.7.7.
+ * Don't crash if no non-default Journal Directory has been set.
+ * Only send to Inara API at most once every 30 seconds.  This should avoid
+ the "Inara 400 Too much requests, slow down, cowboy. ;) ..." message and
+ being locked out from the API for an hour as a result.  Any events that
+ require data to be sent during the 30s cooldown will be queued and sent when
+ that timer expires.
+ 
+    This was caused by previous changes in an attempt to send cargo events
+    to Inara more often.  This fix retains that enhancement.
+    
+    Note that if you log out and stop EDMC within 30 seconds you might have
+    some events not sent.  If we tried to force a send then it might hit the
+    limit when you want to log back in and continue playing.  As it is you can
+    re-run EDMC and log back into the game to ensure Inara is synchronised
+    properly.
+
 Release 4.0.3
 ===
 
