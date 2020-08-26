@@ -1,6 +1,16 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.5
+===
+
+ * Built using Python 3.7.9.
+ * Fix EDSM plugin so the System provider actually updates the URLs for
+   jumps to new systems.
+   
+ In general this cleans up the code for all three System and Station Providers;
+ EDDB, EDSM, Inara.
+
 Release 4.0.4
 ===
 
