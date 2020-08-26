@@ -217,9 +217,11 @@ def credentials(cmdr):
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
-    # Always update, even if we're not the *current* system or station provider.
-    this.system_address = entry.get('SystemAddress') or this.system_address
-    this.system = entry.get('StarSystem') or this.system
+    # Always update our system address even if we're not currently the provider for system or station, but dont update
+    # on events that contain "future" data, such as FSDTarget
+    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
+        this.system_address = entry.get('SystemAddress') or this.system_address
+        this.system = entry.get('StarSystem') or this.system
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
