@@ -961,7 +961,7 @@ if __name__ == "__main__":
             # Now the string should match, so try translation
             popup_text = _(popup_text)
             # And substitute in the other words.
-            popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled')
+            popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled')
             # And now we do need these to be actual \r\n
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
