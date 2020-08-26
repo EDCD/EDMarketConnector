@@ -131,7 +131,7 @@ def system_url(system_name: str):
     elif system_name:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
 
-    return this.system
+    return ''
 
 def station_url(system_name, station_name):
     if system_name and station_name:
