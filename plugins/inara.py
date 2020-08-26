@@ -133,18 +133,14 @@ def system_url(system_name: str):
 
     return this.system
 
+def station_url(system_name, station_name):
+    if system_name and station_name:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
 
-def station_url(system_name: Optional[str], station_name: Optional[str]):
     if system_name:
-        if station_name:
-            return requests.utils.requote_uri(
-                f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]'
-            )
-
         return system_url(system_name)
 
-    return this.station if this.station else this.system
-
+    return ''
 
 def plugin_start3(plugin_dir):
     this.thread = Thread(target=new_worker, name='Inara worker')

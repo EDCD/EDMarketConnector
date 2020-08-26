@@ -14,9 +14,6 @@
 import json
 import requests
 import sys
-import urllib.request
-import urllib.error
-import urllib.parse
 from queue import Queue
 from threading import Thread
 import logging
@@ -60,14 +57,19 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 # Main window clicks
 def system_url(system_name):
-    return 'https://www.edsm.net/en/system?systemName=%s' % urllib.parse.quote(system_name)
+    if system_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}')
+
+    return ''
 
 def station_url(system_name, station_name):
-    if station_name:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib.parse.quote(system_name), urllib.parse.quote(station_name))
-    else:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=ALL' % urllib.parse.quote(system_name)
+    if system_name and station_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}')
 
+    if system_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL')
+
+    return ''
 
 def plugin_start3(plugin_dir):
     # Can't be earlier since can only call PhotoImage after window is created

@@ -51,20 +51,17 @@ def system_url(system_name: str) -> str:
     if this.system_address:
         return requests.utils.requote_uri(f'https://eddb.io/system/ed-address/{this.system_address}')
 
-    elif system_name:
+    if system_name:
         return requests.utils.requote_uri(f'https://eddb.io/system/name/{system_name}')
 
-    else:
-        return ''
+    return ''
 
 
 def station_url(system_name: str, station_name: str) -> str:
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
 
-    else:
-        return system_url('')
-
+    return system_url(system_name)
 
 def plugin_start3(plugin_dir):
     return 'eddb'
