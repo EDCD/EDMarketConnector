@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.6
+===
+
+ * Correct the three System Provider plugins to *not* show the *next* system
+  in a plotted route instead of the current system.
+   
 Release 4.0.5
 ===
 
