@@ -79,6 +79,10 @@ def station_url(system_name, station_name):
     if system_name and station_name:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
 
+    # monitor state might think these are gone, but we don't yet
+    if this.system and this.station:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={this.system}%20[{this.station}]')
+
     if system_name:
         return system_url(system_name)
 
