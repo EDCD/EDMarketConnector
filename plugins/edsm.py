@@ -14,8 +14,6 @@
 import json
 import requests
 import sys
-import time
-import urllib.request, urllib.error, urllib.parse
 from queue import Queue
 from threading import Thread
 
@@ -59,14 +57,26 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 # Main window clicks
 def system_url(system_name):
-    return 'https://www.edsm.net/en/system?systemName=%s' % urllib.parse.quote(system_name)
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
+
+    if system_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}')
+
+    return ''
 
 def station_url(system_name, station_name):
-    if station_name:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=%s' % (urllib.parse.quote(system_name), urllib.parse.quote(station_name))
-    else:
-        return 'https://www.edsm.net/en/system?systemName=%s&stationName=ALL' % urllib.parse.quote(system_name)
+    if system_name and station_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}')
 
+    # monitor state might think these are gone, but we don't yet
+    if this.system and this.station:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}')
+
+    if system_name:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL')
+
+    return ''
 
 def plugin_start3(plugin_dir):
     # Can't be earlier since can only call PhotoImage after window is created
@@ -207,9 +217,11 @@ def credentials(cmdr):
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
-    # Always update, even if we're not the *current* system or station provider.
-    this.system_address = entry.get('SystemAddress') or this.system_address
-    this.system = entry.get('StarSystem') or this.system
+    # Always update our system address even if we're not currently the provider for system or station, but dont update
+    # on events that contain "future" data, such as FSDTarget
+    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
+        this.system_address = entry.get('SystemAddress') or this.system_address
+        this.system = entry.get('StarSystem') or this.system
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -294,9 +306,10 @@ def cmdr_data(data, is_beta):
     this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
-    if config.get('station_provider') == 'EDSM':
+    if config.get('system_provider') == 'EDSM':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
     if config.get('station_provider') == 'EDSM':
         if data['commander']['docked']:
@@ -306,7 +319,8 @@ def cmdr_data(data, is_beta):
         else:
             this.station_link['text'] = ''
 
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
 
         this.station_link.update_idletasks()
 

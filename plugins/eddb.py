@@ -46,16 +46,17 @@ this.station_marketid = None
 def system_url(system_name: str) -> str:
     if this.system_address:
         return requests.utils.requote_uri(f'https://eddb.io/system/ed-address/{this.system_address}')
-    elif system_name:
+
+    if system_name:
         return requests.utils.requote_uri(f'https://eddb.io/system/name/{system_name}')
-    else:
-        return ''
+
+    return ''
 
 def station_url(system_name: str, station_name: str) -> str:
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
-    else:
-        return system_url('')
+
+    return system_url(system_name)
 
 def plugin_start3(plugin_dir):
     return 'eddb'
@@ -70,17 +71,17 @@ def plugin_app(parent):
     this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
 
 def prefs_changed(cmdr, is_beta):
-    # Override standard URL functions
-    if config.get('system_provider') == 'eddb':
-        this.system_link['url'] = system_url(this.system)
-    if config.get('station_provider') == 'eddb':
-        this.station_link['url'] = station_url(this.system, this.station)
+    # Do *NOT* set 'url' here, as it's set to a function that will call
+    # through correctly.  We don't want a static string.
+    pass
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
-    # Always update, even if we're not the *current* system or station provider.
-    this.system_address = entry.get('SystemAddress') or this.system_address
-    this.system = entry.get('StarSystem') or this.system
+    # Always update our system address even if we're not currently the provider for system or station, but dont update
+    # on events that contain "future" data, such as FSDTarget
+    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
+        this.system_address = entry.get('SystemAddress') or this.system_address
+        this.system = entry.get('StarSystem') or this.system
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -98,13 +99,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Only actually change URLs if we are current provider.
     if config.get('system_provider') == 'eddb':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)  # Override standard URL function
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     # But only actually change the URL if we are current station provider.
     if config.get('station_provider') == 'eddb':
         this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
-        this.station_link['url'] = station_url(this.system, this.station)  # Override standard URL function
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
 
@@ -119,7 +122,8 @@ def cmdr_data(data, is_beta):
     # Override standard URL functions
     if config.get('system_provider') == 'eddb':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
     if config.get('station_provider') == 'eddb':
         if data['commander']['docked']:
@@ -129,6 +133,7 @@ def cmdr_data(data, is_beta):
         else:
             this.station_link['text'] = ''
 
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 

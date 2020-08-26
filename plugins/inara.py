@@ -73,15 +73,20 @@ def system_url(system_name):
     elif system_name:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
 
-    return this.system
+    return ''
 
 def station_url(system_name, station_name):
+    if system_name and station_name:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+
+    # monitor state might think these are gone, but we don't yet
+    if this.system and this.station:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={this.system}%20[{this.station}]')
+
     if system_name:
-        if station_name:
-            return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
         return system_url(system_name)
 
-    return this.station or this.system
+    return ''
 
 
 def plugin_start3(plugin_dir):
@@ -155,12 +160,6 @@ def prefs_changed(cmdr, is_beta):
     changed = config.getint('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
-    # Override standard URL functions
-    if config.get('system_provider') == 'Inara':
-        this.system_link['url'] = system_url(this.system)
-    if config.get('station_provider') == 'Inara':
-        this.station_link['url'] = station_url(this.system, this.station)
-
     if cmdr and not is_beta:
         this.cmdr = cmdr
         this.FID = None
@@ -232,9 +231,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     elif entry['event'] in ['ShipyardNew', 'ShipyardSwap'] or (entry['event'] == 'Location' and entry['Docked']):
         this.suppress_docked = True
 
-    # Always update, even if we're not the *current* system or station provider.
-    this.system_address = entry.get('SystemAddress') or this.system_address
-    this.system = entry.get('StarSystem') or this.system
+    # Always update our system address even if we're not currently the provider for system or station, but dont update
+    # on events that contain "future" data, such as FSDTarget
+    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
+        this.system_address = entry.get('SystemAddress') or this.system_address
+        this.system = entry.get('StarSystem') or this.system
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -752,12 +753,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Only actually change URLs if we are current provider.
     if config.get('system_provider') == 'Inara':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
         this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
 def cmdr_data(data, is_beta):
@@ -773,7 +776,8 @@ def cmdr_data(data, is_beta):
     # Override standard URL functions
     if config.get('system_provider') == 'Inara':
         this.system_link['text'] = this.system
-        this.system_link['url'] = system_url(this.system)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
     if config.get('station_provider') == 'Inara':
         if data['commander']['docked']:
@@ -783,7 +787,8 @@ def cmdr_data(data, is_beta):
         else:
             this.station_link['text'] = ''
 
-        this.station_link['url'] = station_url(this.system, this.station)
+        # Do *NOT* set 'url' here, as it's set to a function that will call
+        # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
     if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
