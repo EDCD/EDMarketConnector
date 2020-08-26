@@ -612,7 +612,7 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.4/EDMarketConnector_win_4.0.5.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.5/EDMarketConnector_win_4.0.5.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
 				sparkle:version="4.0.5"
