@@ -168,11 +168,16 @@
 		<!-- Windows -->
 
 		<item>
+<<<<<<< HEAD
 			<title>Release 4.0.6</title>
+=======
+			<title>Release 4.0.4</title>
+>>>>>>> 62ff0424163ea4cff05d3d0b759d4bbc6645e702
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
+<<<<<<< HEAD
 <h2>Release 4.0.6</h2>
 <ul>
 <li>Correct the three System Provider plugins to <em>not</em> show the <em>next</em> system
@@ -188,6 +193,8 @@ jumps to new systems.</li>
 <p>In general this cleans up the code for all three System and Station Providers;
 EDDB, EDSM, Inara.</p>
 
+=======
+>>>>>>> 62ff0424163ea4cff05d3d0b759d4bbc6645e702
 <h2>Release 4.0.4</h2>
 <ul>
 <li>
