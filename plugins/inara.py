@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     def _(x):
         return x
 
+
 _TIMEOUT = 20
 FAKE = ('CQC', 'Training', 'Destination')  # Fake systems that shouldn't be sent to Inara
 CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session

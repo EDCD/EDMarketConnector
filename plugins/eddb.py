@@ -56,6 +56,7 @@ def system_url(system_name: str) -> str:
 
     return ''
 
+
 def station_url(system_name: str, station_name: str) -> str:
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
@@ -74,6 +75,7 @@ def plugin_app(parent: 'Tk'):
     this.station_marketid = None  # Frontier MarketID
     this.station_link = parent.children['station']  # station label in main window
     this.station_link.configure(popup_copy=lambda x: x != STATION_UNDOCKED)
+
 
 def prefs_changed(cmdr, is_beta):
     # Do *NOT* set 'url' here, as it's set to a function that will call
