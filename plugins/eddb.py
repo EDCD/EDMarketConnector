@@ -24,23 +24,27 @@
 
 
 import sys
+from typing import Any, Optional, TYPE_CHECKING
 import requests
 
 from config import config
 
+if TYPE_CHECKING:
+    from tkinter import Tk
 
-STATION_UNDOCKED: str = u'×'	# "Station" name to display when not docked = U+00D7
 
-this = sys.modules[__name__]	# For holding module globals
+STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
+
+this: Any = sys.modules[__name__]  # For holding module globals
 
 # Main window clicks
-this.system_link = None
-this.system = None
-this.system_address = None
-this.system_population = None
-this.station_link = None
-this.station = None
-this.station_marketid = None
+this.system_link: Optional[str] = None
+this.system: Optional[str] = None
+this.system_address: Optional[str] = None
+this.system_population: Optional[int] = None
+this.station_link: 'Optional[Tk]' = None
+this.station: Optional[str] = None
+this.station_marketid: Optional[int] = None
 
 
 def system_url(system_name: str) -> str:
@@ -61,20 +65,20 @@ def station_url(system_name: str, station_name: str) -> str:
 def plugin_start3(plugin_dir):
     return 'eddb'
 
-def plugin_app(parent):
-    this.system_link  = parent.children['system']  # system label in main window
+
+def plugin_app(parent: 'Tk'):
+    this.system_link = parent.children['system']  # system label in main window
     this.system = None
     this.system_address = None
     this.station = None
     this.station_marketid = None  # Frontier MarketID
     this.station_link = parent.children['station']  # station label in main window
-    this.station_link.configure(popup_copy = lambda x: x != STATION_UNDOCKED)
+    this.station_link.configure(popup_copy=lambda x: x != STATION_UNDOCKED)
 
 def prefs_changed(cmdr, is_beta):
     # Do *NOT* set 'url' here, as it's set to a function that will call
     # through correctly.  We don't want a static string.
     pass
-
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     # Always update our system address even if we're not currently the provider for system or station, but dont update
@@ -105,7 +109,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     # But only actually change the URL if we are current station provider.
     if config.get('station_provider') == 'eddb':
-        this.station_link['text'] = this.station or (this.system_population and this.system_population > 0 and STATION_UNDOCKED or '')
+        text = this.station
+        if not text:
+            if this.system_population is not None and this.system_population > 0:
+                text = STATION_UNDOCKED
+
+            else:
+                text = ''
+
+        this.station_link['text'] = text
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
@@ -113,11 +125,15 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
 def cmdr_data(data, is_beta):
     # Always store initially, even if we're not the *current* system provider.
-    if not this.station_marketid:
-        this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
+    if not this.station_marketid and data['commander']['docked']:
+        this.station_marketid = data['lastStarport']['id']
+
     # Only trust CAPI if these aren't yet set
-    this.system = this.system or data['lastSystem']['name']
-    this.station = this.station or data['commander']['docked'] and data['lastStarport']['name']
+    if not this.system:
+        this.system = data['lastSystem']['name']
+
+    if not this.station and data['commander']['docked']:
+        this.station = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get('system_provider') == 'eddb':
@@ -125,15 +141,17 @@ def cmdr_data(data, is_beta):
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
+
     if config.get('station_provider') == 'eddb':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
+
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
             this.station_link['text'] = STATION_UNDOCKED
+
         else:
             this.station_link['text'] = ''
 
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
-

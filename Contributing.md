@@ -184,14 +184,14 @@ Coding Conventions
 Yes:
 
 ```python
-if somethingTrue:
-    Things_we_then_do()
+if something_true:
+    one_thing_we_do()
 ```
   
 No:
 
 ```python
-if somethingTrue: One_thing_we_do()
+if something_true: one_thing_we_do()
 ```
   
   Yes, some existing code still flouts this rule.
@@ -224,6 +224,43 @@ No:
 * Going forwards please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions, both their arguments and return
   types.
 
+* Use `logging` not `print()`, and definitely not `sys.stdout.write()`!
+ `EDMarketConnector.py` sets up a `logging.Logger` for this under the
+ `appname`, so:
+ 
+        import logging
+        from config import appname
+        logger = logging.getLogger(appname)
+        
+        logger.info(f'Some message with a {variable}')
+        
+        try:
+            something
+        except Exception as e:  # Try to be more specific
+            logger.error(f'Error in ... with ...', exc_info=e)
+
+    **DO NOT** use the following, as you might cause a circular import:
+    
+        from EDMarketConnector import logger
+    
+    We have implemented a `logging.Filter` that adds support for the following
+    in `logging.Formatter()` strings:
+    
+    1. `%(qualname)s` which gets the full `<module>.ClassA(.ClassB...).func`
+     of the calling function.
+    1. `%(class)s` which gets just the enclosing class name(s) of the calling
+     function.
+     
+    If you want to see how we did this, check `EDMCLogging.py`.
+    
+    So don't worry about adding anything about the class or function you're
+    logging from, it's taken care of.
+    
+    *Do use a pertinent message, even when using `exc_info=...` to log an
+    exception*.  e.g. Logging will know you were in your `get_foo()` function
+    but you should still tell it what actually (failed to have) happened
+    in there.
+    
 * In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
 
 ---
