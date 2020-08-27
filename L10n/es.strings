@@ -236,7 +236,6 @@
 "Language" = "Idioma";
 
 /* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
->>>>>>> develop
 "Last updated at %H:%M:%S" = "Última actualización: %H:%M:%S";
 
 /* Federation rank. [stats.py] */
