@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath
 from sys import platform
 import webbrowser
@@ -10,13 +9,15 @@ from tkinter import colorchooser as tkColorChooser
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
-from config import applongname, config, appversion
+from config import appname, applongname, config, appversion
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from theme import theme
 
 import plug
+import logging
+logger = logging.getLogger(appname)
 
 ###########################################################################
 # Versioned preferences, so we know whether to set an 'on' default on
@@ -289,7 +290,20 @@ class PreferencesDialog(tk.Toplevel):
         self.station_button.configure(width = 15)
         self.station_button.grid(row=33, column=1, sticky=tk.W)
 
-        nb.Label(configframe).grid(sticky=tk.W)	# big spacer
+        # Set loglevel
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        nb.Label(configframe, text=_('Log Level')).grid(row=35, padx=PADX, pady=2*PADY, sticky=tk.W)  # Set the current loglevel
+        current_loglevel = config.get('loglevel')
+        if not current_loglevel:
+            current_loglevel = logging.getLevelName(logging.INFO)
+        self.select_loglevel = tk.StringVar(value=current_loglevel)
+        loglevels = [logging.getLevelName(l) for l in (logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)]
+        self.loglevel_dropdown = nb.OptionMenu(configframe, self.select_loglevel, self.select_loglevel.get(), *loglevels)
+        self.loglevel_dropdown.configure(width=15)
+        self.loglevel_dropdown.grid(row=35, column=1, sticky=tk.W)
+
+        # Big spacer
+        nb.Label(configframe).grid(sticky=tk.W)
 
         notebook.add(configframe, text=_('Configuration'))	# Tab heading in settings
 
