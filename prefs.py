@@ -620,6 +620,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('shipyard_provider', self.shipyard_provider.get())
         config.set('system_provider', self.system_provider.get())
         config.set('station_provider', self.station_provider.get())
+        config.set('loglevel', self.select_loglevel.get())
 
         lang_codes = { v: k for k, v in self.languages.items() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
