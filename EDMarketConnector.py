@@ -14,6 +14,7 @@ from time import time, localtime, strftime
 import webbrowser
 
 import EDMCLogging
+import logging
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
@@ -1031,6 +1032,10 @@ if __name__ == "__main__":
     enforce_single_instance()
 
     logger = EDMCLogging.Logger(appname).get_logger()
+    loglevel = config.get('loglevel')
+    if not loglevel:
+        loglevel = logging.INFO
+    logger.setLevel(loglevel)
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
