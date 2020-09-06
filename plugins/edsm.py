@@ -107,6 +107,7 @@ def station_url(system_name: str, station_name: str) -> str:
 
     return ''
 
+
 def plugin_start3(plugin_dir: str) -> str:
     # Can't be earlier since can only call PhotoImage after window is created
     this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
@@ -190,22 +191,28 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     )
 
+    cur_row = 10
+
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
-    this.cmdr_label.grid(row=10, padx=PADX, sticky=tk.W)
+    this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
-    this.cmdr_text.grid(row=10, column=1, padx=PADX, pady=PADY, sticky=tk.W)
+    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
+
+    cur_row += 1
 
     this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
-    this.user_label.grid(row=11, padx=PADX, sticky=tk.W)
+    this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.user = nb.Entry(frame)
-    this.user.grid(row=11, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+
+    cur_row += 1
 
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
-    this.apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
+    this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.apikey = nb.Entry(frame)
-    this.apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
