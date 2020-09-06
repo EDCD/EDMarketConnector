@@ -15,9 +15,6 @@ import json
 import logging
 import sys
 import tkinter as tk
-import urllib.error
-import urllib.parse
-import urllib.request
 from queue import Queue
 from threading import Thread
 from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple
