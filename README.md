@@ -41,7 +41,8 @@ Please see the [Troubleshooting](https://github.com/EDCD/EDMarketConnector/wiki/
 
 Reporting a problem
 ---
-Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new). Please wait for the error to occur and zip up and attach this app's log file to the new issue:
+Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=).
+Please wait for the error to occur and zip up and attach this app's log file to the new issue:
 
 Mac:
 
