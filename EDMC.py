@@ -28,16 +28,21 @@ import loadout
 import edshipyard
 import shipyard
 import stats
-from config import appcmdname, appversion, config
+from config import appname, appcmdname, appversion, config
 from update import Updater, EDMCVersion
 from monitor import monitor
+
+import EDMCLogging
+import logging
+logger = EDMCLogging.Logger(appname).get_logger()
+logger.setLevel(logging.INFO)
 
 sys.path.append(config.internal_plugin_dir)
 import eddn
 
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR = range(6)
+EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
 
 JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
@@ -73,6 +78,7 @@ def main():
         )
 
         parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
+        parser.add_argument('--loglevel', metavar='loglevel', help='Set the logging loglevel to one of: CRITICAL, ERROR, WARNING, INFO, DEBUG')
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -95,37 +101,47 @@ def main():
                 print(appversion)
             sys.exit(EXIT_SUCCESS)
 
+        if args.loglevel:
+            if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'):
+                print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG', file=sys.stderr)
+                sys.exit(EXIT_ARGS)
+            logger.setLevel(args.loglevel)
+
         if args.j:
+            logger.debug('Import and collate from JSON dump')
             # Import and collate from JSON dump
             data = json.load(open(args.j))
             config.set('querytime', int(getmtime(args.j)))
 
         else:
             # Get state from latest Journal file
+            logger.debug('Getting state from latest journal file')
             try:
                 logdir = config.get('journaldir') or config.default_journal_dir
+                logger.debug(f'logdir = "{logdir}"')
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
 
                 logfile = join(logdir, logfiles[-1])
 
+                logger.debug(f'Using logfile "{logfile}"')
                 with open(logfile, 'r') as loghandle:
                     for line in loghandle:
                         try:
                             monitor.parse_entry(line)
                         except Exception:
-                            if __debug__:
-                                print(f'Invalid journal entry {line!r}')
+                            logger.debug(f'Invalid journal entry {line!r}')
 
-            except Exception as e:
-                print(f"Can't read Journal file: {str(e)}", file=sys.stderr)
+            except Exception:
+                logger.exception("Can't read Journal file")
                 sys.exit(EXIT_SYS_ERR)
 
             if not monitor.cmdr:
-                print('Not available while E:D is at the main menu', file=sys.stderr)
+                logger.error('Not available while E:D is at the main menu')
                 sys.exit(EXIT_SYS_ERR)
 
             # Get data from Companion API
             if args.p:
+                logger.debug(f'Attempting to use commander "{args.p}"')
                 cmdrs = config.get('cmdrs') or []
                 if args.p in cmdrs:
                     idx = cmdrs.index(args.p)
@@ -141,6 +157,7 @@ def main():
                 companion.session.login(cmdrs[idx], monitor.is_beta)
 
             else:
+                logger.debug(f'Attempting to use commander "{monitor.cmdr}" from Journal File')
                 cmdrs = config.get('cmdrs') or []
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
@@ -153,25 +170,25 @@ def main():
 
         # Validation
         if not deep_get(data, 'commander', 'name', default='').strip():
-            print('Who are you?!', file=sys.stderr)
+            logger.error("No data['command']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
         elif not deep_get(data, 'lastSystem', 'name') or \
                 data['commander'].get('docked') and not \
                 deep_get(data, 'lastStarport', 'name'):  # Only care if docked
 
-            print('Where are you?!', file=sys.stderr)  # Shouldn't happen
+            logger.error("No data['lastSystem']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
         elif not deep_get(data, 'ship', 'modules') or not deep_get(data, 'ship', 'name', default=''):
-            print('What are you flying?!', file=sys.stderr)  # Shouldn't happen
+            logger.error("No data['ship']['modules'] from CAPI")
             sys.exit(EXIT_SERVER)
 
         elif args.j:
             pass  # Skip further validation
 
         elif data['commander']['name'] != monitor.cmdr:
-            print('Wrong Cmdr', file=sys.stderr)  # Companion API return doesn't match Journal
+            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')
             sys.exit(EXIT_CREDENTIALS)
 
         elif data['lastSystem']['name'] != monitor.system or \
@@ -179,25 +196,30 @@ def main():
                 data['ship']['id'] != monitor.state['ShipID'] or \
                 data['ship']['name'].lower() != monitor.state['ShipType']:
 
-            print('Frontier server is lagging', file=sys.stderr)
+            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')
             sys.exit(EXIT_LAGGING)
 
         # stuff we can do when not docked
         if args.d:
+            logger.debug(f'Writing raw JSON data to "{args.d}"')
             out = json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
             with open(args.d, 'wb') as f:
                 f.write(out.encode("utf-8"))
 
         if args.a:
+            logger.debug(f'Writing Ship Loadout in Companion API JSON format to "{args.a}"')
             loadout.export(data, args.a)
 
         if args.e:
+            logger.debug(f'Writing Ship Loadout in ED Shipyard plain text format to "{args.e}"')
             edshipyard.export(data, args.e)
 
         if args.l:
+            logger.debug(f'Writing Ship Locations in CSV format to "{args.l}"')
             stats.export_ships(data, args.l)
 
         if args.t:
+            logger.debug(f'Writing Player Status in CSV format to "{args.t}"')
             stats.export_status(data, args.t)
 
         if data['commander'].get('docked'):
@@ -211,16 +233,16 @@ def main():
 
         if (args.m or args.o or args.s or args.n or args.j):
             if not data['commander'].get('docked'):
-                print("You're not docked at a station!", file=sys.stderr)
+                logger.error("Can't use -m, -o, -s, -n or -j because you're not currently docked!")
                 sys.exit(EXIT_SUCCESS)
 
             elif not deep_get(data, 'lastStarport', 'name'):
-                print("Unknown station!", file=sys.stderr)
+                logger.error(f"No data['lastStarport']['name'] from CAPI")
                 sys.exit(EXIT_LAGGING)
 
             # Ignore possibly missing shipyard info
             elif not data['lastStarport'].get('commodities') or data['lastStarport'].get('modules'):
-                print("Station doesn't have anything!", file=sys.stderr)
+                logger.error("No commodities or outfitting (modules) in CAPI data")
                 sys.exit(EXIT_SUCCESS)
 
         else:
@@ -229,26 +251,29 @@ def main():
         # Finally - the data looks sane and we're docked at a station
 
         if args.j:
+            logger.debug(f'Importing data from the CAPI return...')
             # Collate from JSON dump
             collate.addcommodities(data)
             collate.addmodules(data)
             collate.addships(data)
 
         if args.m:
+            logger.debug(f'Writing Station Commodity Market Data in CSV format to "{args.m}"')
             if data['lastStarport'].get('commodities'):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
                 commodity.export(fixed, COMMODITY_DEFAULT, args.m)
 
             else:
-                print("Station doesn't have a market", file=sys.stderr)
+                logger.error("Station doesn't have a market")
 
         if args.o:
             if data['lastStarport'].get('modules'):
+                logger.debug(f'Writing Station Outfitting in CSV format to "{args.o}"')
                 outfitting.export(data, args.o)
 
             else:
-                print("Station doesn't supply outfitting", file=sys.stderr)
+                logger.error("Station doesn't supply outfitting")
 
         if (args.s or args.n) and not args.j and not \
                 data['lastStarport'].get('ships') and data['lastStarport']['services'].get('shipyard'):
@@ -265,36 +290,38 @@ def main():
 
         if args.s:
             if deep_get(data, 'lastStarport', 'ships', 'shipyard_list'):
+                logger.debug(f'Writing Station Shipyard in CSV format to "{args.s}"')
                 shipyard.export(data, args.s)
 
             elif not args.j and monitor.stationservices and 'Shipyard' in monitor.stationservices:
-                print("Failed to get shipyard data", file=sys.stderr)
+                logger.error('Failed to get shipyard data')
 
             else:
-                print("Station doesn't have a shipyard", file=sys.stderr)
+                logger.error("Station doesn't have a shipyard")
 
         if args.n:
             try:
                 eddn_sender = eddn.EDDN(None)
+                logger.debug('Sending Market, Outfitting and Shipyard data to EDDN...')
                 eddn_sender.export_commodities(data, monitor.is_beta)
                 eddn_sender.export_outfitting(data, monitor.is_beta)
                 eddn_sender.export_shipyard(data, monitor.is_beta)
 
             except Exception as e:
-                print(f"Failed to send data to EDDN: {str(e)}", file=sys.stderr)
+                logger.exception(f'Failed to send data to EDDN')
 
         sys.exit(EXIT_SUCCESS)
 
     except companion.ServerError:
-        print('Server is down', file=sys.stderr)
+        logger.error('Frontier CAPI Server returned an error')
         sys.exit(EXIT_SERVER)
 
     except companion.SKUError:
-        print('Server SKU problem', file=sys.stderr)
+        logger.error('Frontier CAPI Server SKU problem')
         sys.exit(EXIT_SERVER)
 
     except companion.CredentialsError:
-        print('Invalid Credentials', file=sys.stderr)
+        logger.error('Frontier CAPI Server: Invalid Credentials')
         sys.exit(EXIT_CREDENTIALS)
 
 
