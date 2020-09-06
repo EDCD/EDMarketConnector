@@ -131,8 +131,8 @@ def main():
                         except Exception:
                             logger.debug(f'Invalid journal entry {line!r}')
 
-            except Exception as e:
-                logger.error(f"Can't read Journal file: {str(e)}")
+            except Exception:
+                logger.exception("Can't read Journal file")
                 sys.exit(EXIT_SYS_ERR)
 
             if not monitor.cmdr:
