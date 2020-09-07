@@ -1031,11 +1031,11 @@ if __name__ == "__main__":
 
     enforce_single_instance()
 
-    logger = EDMCLogging.Logger(appname).get_logger()
     loglevel = config.get('loglevel')
     if not loglevel:
         loglevel = logging.INFO
-    logger.setLevel(loglevel)
+    logger = EDMCLogging.Logger(appname, loglevel=loglevel).get_logger()
+    logger.info('Startup')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
@@ -1083,3 +1083,5 @@ if __name__ == "__main__":
 
     root.after(0, messagebox_not_py3)
     root.mainloop()
+
+    logger.info('Exiting')

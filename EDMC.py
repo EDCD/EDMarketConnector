@@ -5,41 +5,39 @@
 
 import argparse
 import json
-import sys
+import logging
 import os
+import re
+import sys
+from os.path import getmtime, join
+from time import sleep, time
 from typing import Any, Optional
+
+import collate
+import commodity
+import companion
+import eddn
+import EDMCLogging
+import edshipyard
+import l10n
+import loadout
+import outfitting
+import shipyard
+import stats
+from commodity import COMMODITY_DEFAULT
+from config import appcmdname, appversion, config
+from monitor import monitor
+from update import EDMCVersion, Updater
 
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
 
-from os.path import getmtime, join
-from time import time, sleep
-import re
-
-import l10n
 l10n.Translations.install_dummy()
 
-import collate
-import companion
-import commodity
-from commodity import COMMODITY_DEFAULT
-import outfitting
-import loadout
-import edshipyard
-import shipyard
-import stats
-from config import appname, appcmdname, appversion, config
-from update import Updater, EDMCVersion
-from monitor import monitor
-
-import EDMCLogging
-import logging
-logger = EDMCLogging.Logger(appname).get_logger()
+logger = EDMCLogging.Logger(appcmdname).get_logger()
 logger.setLevel(logging.INFO)
 
 sys.path.append(config.internal_plugin_dir)
-import eddn
-
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
@@ -78,7 +76,7 @@ def main():
         )
 
         parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
-        parser.add_argument('--loglevel', metavar='loglevel', help='Set the logging loglevel to one of: CRITICAL, ERROR, WARNING, INFO, DEBUG')
+        parser.add_argument('--loglevel', metavar='loglevel', help='Set the logging loglevel to one of: CRITICAL, ERROR, WARNING, INFO, DEBUG')  # noqa: E501
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -99,13 +97,16 @@ def main():
                 print(f'{appversion} ({newversion.title!r} is available)')
             else:
                 print(appversion)
-            sys.exit(EXIT_SUCCESS)
+
+            return
 
         if args.loglevel:
             if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'):
                 print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG', file=sys.stderr)
                 sys.exit(EXIT_ARGS)
             logger.setLevel(args.loglevel)
+
+        logger.debug('Startup')
 
         if args.j:
             logger.debug('Import and collate from JSON dump')
@@ -119,7 +120,8 @@ def main():
             try:
                 logdir = config.get('journaldir') or config.default_journal_dir
                 logger.debug(f'logdir = "{logdir}"')
-                logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)), key=lambda x: x.split('.')[1:])
+                logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
+                                  key=lambda x: x.split('.')[1:])
 
                 logfile = join(logdir, logfiles[-1])
 
@@ -188,7 +190,7 @@ def main():
             pass  # Skip further validation
 
         elif data['commander']['name'] != monitor.cmdr:
-            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')
+            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')  # noqa: E501
             sys.exit(EXIT_CREDENTIALS)
 
         elif data['lastSystem']['name'] != monitor.system or \
@@ -196,7 +198,7 @@ def main():
                 data['ship']['id'] != monitor.state['ShipID'] or \
                 data['ship']['name'].lower() != monitor.state['ShipType']:
 
-            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')
+            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')  # noqa: E501
             sys.exit(EXIT_LAGGING)
 
         # stuff we can do when not docked
@@ -234,24 +236,24 @@ def main():
         if (args.m or args.o or args.s or args.n or args.j):
             if not data['commander'].get('docked'):
                 logger.error("Can't use -m, -o, -s, -n or -j because you're not currently docked!")
-                sys.exit(EXIT_SUCCESS)
+                return
 
             elif not deep_get(data, 'lastStarport', 'name'):
-                logger.error(f"No data['lastStarport']['name'] from CAPI")
+                logger.error("No data['lastStarport']['name'] from CAPI")
                 sys.exit(EXIT_LAGGING)
 
             # Ignore possibly missing shipyard info
             elif not data['lastStarport'].get('commodities') or data['lastStarport'].get('modules'):
                 logger.error("No commodities or outfitting (modules) in CAPI data")
-                sys.exit(EXIT_SUCCESS)
+                return
 
         else:
-            sys.exit(EXIT_SUCCESS)
+            return
 
         # Finally - the data looks sane and we're docked at a station
 
         if args.j:
-            logger.debug(f'Importing data from the CAPI return...')
+            logger.debug('Importing data from the CAPI return...')
             # Collate from JSON dump
             collate.addcommodities(data)
             collate.addmodules(data)
@@ -307,10 +309,8 @@ def main():
                 eddn_sender.export_outfitting(data, monitor.is_beta)
                 eddn_sender.export_shipyard(data, monitor.is_beta)
 
-            except Exception as e:
-                logger.exception(f'Failed to send data to EDDN')
-
-        sys.exit(EXIT_SUCCESS)
+            except Exception:
+                logger.exception('Failed to send data to EDDN')
 
     except companion.ServerError:
         logger.error('Frontier CAPI Server returned an error')
@@ -327,3 +327,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    logger.debug('Exiting')
+    sys.exit(EXIT_SUCCESS)
