@@ -39,7 +39,7 @@ from config import config
 #
 #      14. Call from *package*
 
-_default_loglevel = logging.DEBUG
+_default_loglevel = logging.INFO
 
 
 class Logger:
