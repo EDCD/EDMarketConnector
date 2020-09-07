@@ -14,7 +14,6 @@ import logging
 import logging.handlers
 import pathlib
 import tempfile
-from os import mkdir
 from typing import Tuple
 
 from config import config, appname
@@ -72,7 +71,7 @@ class Logger:
         self.logger_filter = EDMCContextFilter()
         self.logger.addFilter(self.logger_filter)
 
-        ## Our basic channel handling stdout
+        # Our basic channel handling stdout
         self.logger_channel = logging.StreamHandler()
         # Do *NOT* set here, want logger's level to work: self.logger_channel.setLevel(loglevel)
 
@@ -83,9 +82,9 @@ class Logger:
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
 
-        ## Rotating Handler in sub-directory
-        ## We want the files in %TEMP%\{appname}\ as {logger_name}.log and rotated versions
-        ## This is {logger_name} so that EDMC.py logs to a different file.
+        # Rotating Handler in sub-directory
+        # We want the files in %TEMP%\{appname}\ as {logger_name}.log and rotated versions
+        # This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
         logfile_rotating = logfile_rotating / f'{appname}'
         logfile_rotating.mkdir(exist_ok=True)
@@ -93,7 +92,11 @@ class Logger:
 
         _MAXBYTES = 1024 * 1024  # 1MiB
         _BACKUPS = 10
-        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, mode='a', maxBytes=_MAXBYTES, backupCount=_BACKUPS, encoding='utf-8', delay=False)
+        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, mode='a',
+                                                                            maxBytes=_MAXBYTES,
+                                                                            backupCount=_BACKUPS,
+                                                                            encoding='utf-8',
+                                                                            delay=False)
         # Do *NOT* set here, want logger's level to work: self.logger_channel_rotating.setLevel(loglevel)
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
