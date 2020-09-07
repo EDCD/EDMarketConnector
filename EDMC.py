@@ -97,6 +97,7 @@ def main():
                 print(f'{appversion} ({newversion.title!r} is available)')
             else:
                 print(appversion)
+
             return
 
         if args.loglevel:
