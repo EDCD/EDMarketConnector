@@ -34,7 +34,7 @@ from monitor import monitor
 
 import EDMCLogging
 import logging
-logger = EDMCLogging.Logger(appname).get_logger()
+logger = EDMCLogging.Logger(appcmdname).get_logger()
 logger.setLevel(logging.INFO)
 
 sys.path.append(config.internal_plugin_dir)
@@ -99,13 +99,15 @@ def main():
                 print(f'{appversion} ({newversion.title!r} is available)')
             else:
                 print(appversion)
-            sys.exit(EXIT_SUCCESS)
+            return
 
         if args.loglevel:
             if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'):
                 print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG', file=sys.stderr)
                 sys.exit(EXIT_ARGS)
             logger.setLevel(args.loglevel)
+
+        logger.debug('Startup')
 
         if args.j:
             logger.debug('Import and collate from JSON dump')
@@ -234,7 +236,7 @@ def main():
         if (args.m or args.o or args.s or args.n or args.j):
             if not data['commander'].get('docked'):
                 logger.error("Can't use -m, -o, -s, -n or -j because you're not currently docked!")
-                sys.exit(EXIT_SUCCESS)
+                return
 
             elif not deep_get(data, 'lastStarport', 'name'):
                 logger.error(f"No data['lastStarport']['name'] from CAPI")
@@ -243,10 +245,10 @@ def main():
             # Ignore possibly missing shipyard info
             elif not data['lastStarport'].get('commodities') or data['lastStarport'].get('modules'):
                 logger.error("No commodities or outfitting (modules) in CAPI data")
-                sys.exit(EXIT_SUCCESS)
+                return
 
         else:
-            sys.exit(EXIT_SUCCESS)
+            return
 
         # Finally - the data looks sane and we're docked at a station
 
@@ -310,7 +312,6 @@ def main():
             except Exception as e:
                 logger.exception(f'Failed to send data to EDDN')
 
-        sys.exit(EXIT_SUCCESS)
 
     except companion.ServerError:
         logger.error('Frontier CAPI Server returned an error')
@@ -327,3 +328,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    logger.debug('Exiting')
+    sys.exit(EXIT_SUCCESS)
