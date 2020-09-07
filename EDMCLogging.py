@@ -7,16 +7,16 @@ members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
 """
 
-# So that any warning about accessing a protected member is only in one place.
-from sys import _getframe as getframe
 import inspect
 import logging
 import logging.handlers
 import pathlib
 import tempfile
+# So that any warning about accessing a protected member is only in one place.
+from sys import _getframe as getframe
 from typing import Tuple
 
-from config import config, appname
+from config import appname, config
 
 # TODO: Tests:
 #
@@ -90,13 +90,14 @@ class Logger:
         logfile_rotating.mkdir(exist_ok=True)
         logfile_rotating = logfile_rotating / f'{logger_name}.log'
 
-        _MAXBYTES = 1024 * 1024  # 1MiB
-        _BACKUPS = 10
-        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, mode='a',
-                                                                            maxBytes=_MAXBYTES,
-                                                                            backupCount=_BACKUPS,
-                                                                            encoding='utf-8',
-                                                                            delay=False)
+        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(
+            logfile_rotating,
+            mode='a',
+            maxBytes=1024 * 1024,  # 1MiB
+            backupCount=10,
+            encoding='utf-8',
+            delay=False
+        )
         # Do *NOT* set here, want logger's level to work: self.logger_channel_rotating.setLevel(loglevel)
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
