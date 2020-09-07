@@ -60,18 +60,18 @@ For creating UI elements.
 
 ---
 ### Logging
-Currently (still in 4.0.3) the only way to provide any logged output from a
-plugin is to use `print(...)` statements.  When running the application from
+In the past the only way to provide any logged output from a
+plugin was to use `print(...)` statements.  When running the application from
 the packaged executeable all output is redirected to a log file.  See
 [Reporting a problem](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#reporting-a-problem)
 for the location of this log file.
 
-A future version of EDMC will implement proper logging using the Python
-`logging` module.  Plugin developers should get their code ready for this by
-using the following code instead of simple `print(...)` statements
+EDMC now implements proper logging using the Python `logging` module.  Plugin
+developers should now use the following code instead of simple `print(...)`
+statements.
 
 Insert this at the top-level of your load.py file (so not inside
-`plugin_start3()`):
+`plugin_start3()` ):
 ```python
 import logging
 
@@ -91,7 +91,6 @@ if not logger.hasHandlers():
 
     logger.setLevel(level)
     logger_channel = logging.StreamHandler()
-    logger_channel.setLevel(level)
     logger_formatter = logging.Formatter(f'%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s')
     logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
     logger_formatter.default_msec_format = '%s.%03d'
@@ -99,7 +98,16 @@ if not logger.hasHandlers():
     logger.addHandler(logger_channel)
 ```
 
-Then replace `print(...)` statements with one of the following:
+If running with 4.1.0-beta1 or later of EDMC the logging setup happens in
+the core code and will include the extra logfile destinations.  If your
+plugin is run under a pre-4.1.0 version of EDMC then the above will set up
+basic logging only to the console (and thus redirected to the log file).
+
+If you're certain your plugin will only be run under EDMC 4.1.0 or newer then
+you can remove the `if` clause.
+
+Replace all `print(...)` statements with one of the following:
+
 ```python
     logger.info('some info message')  # instead of print(...)
 
@@ -124,6 +132,12 @@ Then replace `print(...)` statements with one of the following:
         logger.debug('Exception we only note in debug output', exc_info=e)
 ```
 
+Remember you can use fstrings to include variables, and even the returns of
+functions, in the output.
+
+```python
+    logger.debug(f"Couldn't frob the {thing} with the {wotsit()}")
+```
 
 ---
 ### Startup
