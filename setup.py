@@ -121,7 +121,9 @@ elif sys.platform=='win32':
                       'sqlite3',	# Included for plugins
                   ],
                   'includes': [
+                      'dataclasses',
                       'shutil',         # Included for plugins
+                      'timeout_session',
                       'zipfile',        # Included for plugins
                   ],
                   'excludes': [ 'distutils', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
