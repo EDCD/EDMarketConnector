@@ -1036,6 +1036,7 @@ if __name__ == "__main__":
     if not loglevel:
         loglevel = logging.INFO
     logger.setLevel(loglevel)
+    logger.info('Startup')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
@@ -1083,3 +1084,5 @@ if __name__ == "__main__":
 
     root.after(0, messagebox_not_py3)
     root.mainloop()
+
+    logger.info('Exiting')

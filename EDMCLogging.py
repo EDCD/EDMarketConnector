@@ -11,10 +11,13 @@ strings.
 from sys import _getframe as getframe
 import inspect
 import logging
+import logging.handlers
 import pathlib
+import tempfile
+from os import mkdir
 from typing import Tuple
 
-from config import config
+from config import config, appname
 
 # TODO: Tests:
 #
@@ -69,8 +72,9 @@ class Logger:
         self.logger_filter = EDMCContextFilter()
         self.logger.addFilter(self.logger_filter)
 
+        ## Our basic channel handling stdout
         self.logger_channel = logging.StreamHandler()
-        self.logger_channel.setLevel(loglevel)
+        # Do *NOT* set here, want logger's level to work: self.logger_channel.setLevel(loglevel)
 
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
@@ -78,6 +82,24 @@ class Logger:
 
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
+
+        ## Rotating Handler in sub-directory
+        ## We want the files in %TEMP%\{appname}\ as {logger_name}.log and rotated versions
+        ## This is {logger_name} so that EDMC.py logs to a different file.
+        logfile_rotating = pathlib.Path(tempfile.gettempdir())
+        logfile_rotating = logfile_rotating / f'{appname}'
+        try:
+            mkdir(logfile_rotating)
+        except FileExistsError:
+            pass
+        logfile_rotating = logfile_rotating / f'{logger_name}.log'
+
+        _MAXBYTES = 1024 * 1024  # 1MiB
+        _BACKUPS = 10
+        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, mode='a', maxBytes=_MAXBYTES, backupCount=_BACKUPS, encoding='utf-8', delay=False)
+        # Do *NOT* set here, want logger's level to work: self.logger_channel_rotating.setLevel(loglevel)
+        self.logger_channel_rotating.setFormatter(self.logger_formatter)
+        self.logger.addHandler(self.logger_channel_rotating)
 
     def get_logger(self) -> logging.Logger:
         """
