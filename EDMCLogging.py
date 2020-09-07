@@ -88,10 +88,7 @@ class Logger:
         ## This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
         logfile_rotating = logfile_rotating / f'{appname}'
-        try:
-            mkdir(logfile_rotating)
-        except FileExistsError:
-            pass
+        logfile_rotating.mkdir(exist_ok=True)
         logfile_rotating = logfile_rotating / f'{logger_name}.log'
 
         _MAXBYTES = 1024 * 1024  # 1MiB
