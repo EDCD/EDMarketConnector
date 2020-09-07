@@ -1,6 +1,42 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta1
+===
+
+This pre-release contains the result of a lot of code cleanup on several files
+and the addition of a proper logging paradigm, which should aid in tracking
+down bugs.
+
+None of the code cleanups *should* change actual program behaviour, but as we
+don't yet have the code in a state to have proper tests it's possible we've
+broken something.
+
+ * EDMC.py now uses proper logging and has a new `--loglevel` command-line
+   argument.  See `EDMC.py -h` for the possible values.  It defaults to 'INFO',
+   which, unless there's an error, should yield the same output as before.
+ * EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
+   to change the loglevel.  Default is 'INFO' and advised for normal use.
+   If reporting a bug it will be very helpful to change this to 'DEBUG' and
+   then reproduce the bug.
+ * Both programs not only log to their old locations (console for EDMC, and
+   `%TEMP%\EDMarketConnector.log` for the main application), but now also to
+   a size-limited and rotated logfile inside the folder
+   `%TEMP%\EDMarketConnector\ `.
+    1. A new file is only started if/when it reaches the 1 MiB size limit.
+    1. We'll keep at most 10 backups of each file, so the maximum disk space
+    used by this will be 22 MiB.
+    1. The base filename inside there is `EDMarketConnector.log` for the main
+    program and `EDMC.log` for the command-line program.
+    1. Only actually *logged* output goes to these files, which currently is
+    far from all the traditional output that goes to the old file/console.
+
+Plugin Authors
+---
+Please change your code to using proper logging, as per the new 'Logging'
+section of PLUGINS.md.
+
+
 Release 4.0.6
 ===
 
