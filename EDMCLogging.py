@@ -65,7 +65,9 @@ class Logger:
         """
         self.logger = logging.getLogger(logger_name)
         # Configure the logging.Logger
-        self.logger.setLevel(loglevel)
+        # This needs to always be DEBUG in order to let DEBUG level messages
+        # through to check the *handler* levels.
+        self.logger.setLevel(logging.DEBUG)
 
         # Set up filter for adding class name
         self.logger_filter = EDMCContextFilter()
@@ -73,7 +75,8 @@ class Logger:
 
         # Our basic channel handling stdout
         self.logger_channel = logging.StreamHandler()
-        # Do *NOT* set here, want logger's level to work: self.logger_channel.setLevel(loglevel)
+        # This should be affected by the user configured log level
+        self.logger_channel.setLevel(loglevel)
 
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
@@ -110,6 +113,13 @@ class Logger:
         Not to be confused with logging.getLogger().
         """
         return self.logger
+
+    def get_streamhandler(self) -> logging.Handler:
+        """
+        Obtain the self.logger_channel StreamHandler instance.
+        :return: logging.StreamHandler
+        """
+        return self.logger_channel
 
 
 def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
@@ -315,3 +325,10 @@ class EDMCContextFilter(logging.Filter):
                     module_name = f'plugins.{name_path}.{module_name}'
 
         return module_name
+
+# Singleton
+loglevel = config.get('loglevel')
+if not loglevel:
+    loglevel = logging.INFO
+edmclogger = Logger(appname, loglevel=loglevel)
+logger = edmclogger.get_logger()

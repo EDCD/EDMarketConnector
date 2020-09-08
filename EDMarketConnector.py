@@ -13,8 +13,6 @@ import html
 from time import time, localtime, strftime
 import webbrowser
 
-import EDMCLogging
-import logging
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
 if getattr(sys, 'frozen', False):
@@ -1031,10 +1029,7 @@ if __name__ == "__main__":
 
     enforce_single_instance()
 
-    loglevel = config.get('loglevel')
-    if not loglevel:
-        loglevel = logging.INFO
-    logger = EDMCLogging.Logger(appname, loglevel=loglevel).get_logger()
+    from EDMCLogging import logger
     logger.info('Startup')
 
     # TODO: unittests in place of these

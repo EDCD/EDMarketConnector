@@ -18,6 +18,7 @@ from theme import theme
 import plug
 import logging
 logger = logging.getLogger(appname)
+from EDMCLogging import edmclogger
 
 ###########################################################################
 # Versioned preferences, so we know whether to set an 'on' default on
@@ -621,7 +622,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('system_provider', self.system_provider.get())
         config.set('station_provider', self.station_provider.get())
         config.set('loglevel', self.select_loglevel.get())
-        logger.setLevel(self.select_loglevel.get())
+        edmclogger.get_streamhandler().setLevel(self.select_loglevel.get())
 
         lang_codes = { v: k for k, v in self.languages.items() }	# Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
