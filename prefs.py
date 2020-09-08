@@ -342,10 +342,8 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)  # Select UI scaling
         ui_scaling = config.get('ui_scaling')
-        if not ui_scaling:
-            ui_scaling = 1.0
         self.ui_scaling = tk.StringVar(value=ui_scaling)
-        ui_scales = ( 0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
+        ui_scales = ( 'default', 0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
         self.uiscale_dropdown = nb.OptionMenu(themeframe, self.ui_scaling, self.ui_scaling.get(), *ui_scales)
         self.uiscale_dropdown.configure(width=15)
         self.uiscale_dropdown.grid(row=23, column=1, sticky=tk.W)
@@ -642,11 +640,12 @@ class PreferencesDialog(tk.Toplevel):
         config.set('language', lang_codes.get(self.lang.get()) or '')
         Translations.install(config.get('language') or None)
 
+        config.set('ui_scaling', self.ui_scaling.get())
+        #self.tk.call('tk', 'scaling', self.ui_scaling.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
-        #self.tk.call('tk', 'scaling', 2.0)
         theme.apply(self.parent)
 
         # Notify
