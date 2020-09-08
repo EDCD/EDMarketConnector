@@ -143,7 +143,7 @@ class EDDN:
 
         r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
-            logger.debug(f':\nStatus\t{r.status_code}URL\t{r.url}Headers\t{r.headers}Content:\n{r.text}')
+            logger.debug(f':\nStatus\t{r.status_code}URL\t{r.url}Headers\t{r.headers}Content:\n{r.text}\nMsg:\n{msg}\n')
 
         r.raise_for_status()
 
