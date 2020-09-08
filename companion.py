@@ -138,25 +138,33 @@ def listify(thing):
 class ServerError(Exception):
     def __init__(self, *args):
         # Raised when cannot contact the Companion API server
-        self.args = args if args else (_('Error: Frontier server is down'),)
+        self.args = args
+        if not args:
+            self.args = (_('Error: Frontier server is down'),)
 
 
 class ServerLagging(Exception):
     def __init__(self, *args):
         # Raised when Companion API server is returning old data, e.g. when the servers are too busy
-        self.args = args if args else (_('Error: Frontier server is lagging'),)
+        self.args = args
+        if not args:
+            self.args = (_('Error: Frontier server is lagging'),)
 
 
 class SKUError(Exception):
     def __init__(self, *args):
         # Raised when the Companion API server thinks that the user has not purchased E:D
         # i.e. doesn't have the correct 'SKU'
-        self.args = args if args else (_('Error: Frontier server SKU problem'),)
+        self.args = args
+        if not args:
+            self.args = (_('Error: Frontier server SKU problem'),)
 
 
 class CredentialsError(Exception):
     def __init__(self, *args):
-        self.args = args if args else (_('Error: Invalid Credentials'),)
+        self.args = args
+        if not args:
+            self.args = (_('Error: Invalid Credentials'),)
 
 
 class CmdrError(Exception):
@@ -164,7 +172,9 @@ class CmdrError(Exception):
         # Raised when the user has multiple accounts and the username/password setting is not for
         # the account they're currently playing OR the user has reset their Cmdr and the Companion API
         # server is still returning data for the old Cmdr
-        self.args = args if args else (_('Error: Wrong Cmdr'),)
+        self.args = args
+        if not args:
+            self.args = (_('Error: Wrong Cmdr'),)
 
 
 class Auth(object):
@@ -176,12 +186,19 @@ class Auth(object):
 
     def refresh(self):
         # Try refresh token. Returns new refresh token if successful, otherwise makes new authorization request.
+        logger.debug(f'Trying for "{self.cmdr}"')
+
         self.verifier = None
         cmdrs = config.get('cmdrs')
+        logger.debug(f'Cmdrs: {cmdrs}')
+
         idx = cmdrs.index(self.cmdr)
+        logger.debug(f'idx = {idx}')
+
         tokens = config.get('fdev_apikeys') or []
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
+            logger.debug('We have a refresh token for that idx')
             try:
                 data = {
                     'grant_type': 'refresh_token',
@@ -189,6 +206,7 @@ class Auth(object):
                     'refresh_token': tokens[idx],
                 }
 
+                logger.debug('Attempting refresh with Frontier...')
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
@@ -214,6 +232,7 @@ class Auth(object):
         s = random.SystemRandom().getrandbits(8 * 32)
         self.state = self.base64_url_encode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
+        logger.debug(f'Trying auth from scratch for Commander "{self.cmdr}"')
         webbrowser.open(
             '{server_auth}{url_auth}?response_type=code&audience=frontier&scope=capi&client_id={client_id}&code_challenge={challenge}&code_challenge_method=S256&state={state}&redirect_uri={redirect}'.format(  # noqa: E501 # I cant make this any shorter
                 server_auth=SERVER_AUTH,
@@ -226,10 +245,11 @@ class Auth(object):
         )
 
     def authorize(self, payload):
+        logger.debug('Checking oAuth authorization callback')
         # Handle OAuth authorization code callback.
         # Returns access token if successful, otherwise raises CredentialsError
         if '?' not in payload:
-            logger.error(f'Frontier CAPI Auth: Malformed response\n{payload}\n')
+            logger.error(f'Frontier CAPI Auth: Malformed response (no "?" in payload)\n{payload}\n')
             raise CredentialsError('malformed payload')  # Not well formed
 
         data = urllib.parse.parse_qs(payload[(payload.index('?') + 1):])
@@ -238,13 +258,14 @@ class Auth(object):
             raise CredentialsError('Unexpected response from authorization {!r}'.format(payload))  # Unexpected reply
 
         if not data.get('code'):
-            logger.error(f'Frontier CAPI Auth: Negative response\n{payload}\n')
+            logger.error(f'Frontier CAPI Auth: Negative response (no "code" in returned data)\n{payload}\n')
             error = next(
                 (data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',)
             )
             raise CredentialsError('Error: {!r}'.format(error)[0])
 
         try:
+            logger.debug('Got code, posting it back...')
             r = None
             data = {
                 'grant_type': 'authorization_code',
@@ -311,23 +332,29 @@ class Session(object):
     def login(self, cmdr=None, is_beta=None):
         # Returns True if login succeeded, False if re-authorization initiated.
         if not CLIENT_ID:
+            logger.error('CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
 
+        # TODO: WTF is the intent behind this logic ?
         if not cmdr or is_beta is None:
             # Use existing credentials
             if not self.credentials:
+                logger.error('self.credentials is None')
                 raise CredentialsError('Missing credentials')  # Shouldn't happen
 
             elif self.state == Session.STATE_OK:
+                logger.debug('already logged in')
                 return True  # already logged in
 
         else:
             credentials = {'cmdr': cmdr, 'beta': is_beta}
             if self.credentials == credentials and self.state == Session.STATE_OK:
+                logger.debug('already logged in (is_beta)')
                 return True  # already logged in
 
             else:
                 # changed account or retrying login during auth
+                logger.debug('changed account or retrying login during auth')
                 self.close()
                 self.credentials = credentials
 
@@ -337,45 +364,55 @@ class Session(object):
 
         access_token = self.auth.refresh()
         if access_token:
+            logger.debug('We have an access_token')
             self.auth = None
             self.start(access_token)
             return True
 
         else:
+            logger.debug('We do NOT have an access_token')
             self.state = Session.STATE_AUTH
             return False
             # Wait for callback
 
     # Callback from protocol handler
     def auth_callback(self):
+        logger.debug('Handling callback from edmc:// handler')
         if self.state != Session.STATE_AUTH:
             # Shouldn't be getting a callback
+            logger.debug('Got an auth callback while not doing auth')
             raise CredentialsError('Got an auth callback while not doing auth')
 
         try:
+            logger.debug('Trying authorize with payload from handler')
             self.start(self.auth.authorize(protocolhandler.lastpayload))
             self.auth = None
 
         except Exception:
+            logger.exception('Failed, will try again next login or query')
             self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
 
     def start(self, access_token):
+        logger.debug('Starting session')
         self.session = requests.Session()
         self.session.headers['Authorization'] = 'Bearer {}'.format(access_token)
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
     def query(self, endpoint):
+        logger.debug(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
                 return self.query(endpoint)
 
         elif self.state == Session.STATE_AUTH:
+            logger.error('cannot make a query when unauthorized')
             raise CredentialsError('cannot make a query when unauthorized')
 
         try:
+            logger.debug('Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
         except Exception as e:
@@ -383,6 +420,7 @@ class Session(object):
             raise ServerError(f'unable to get endpoint {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
+            logger.debug('Redirected back to Auth Server')
             # Redirected back to Auth server - force full re-authentication
             self.dump(r)
             self.invalidate()
@@ -392,6 +430,7 @@ class Session(object):
 
         elif 500 <= r.status_code < 600:
             # Server error. Typically 500 "Internal Server Error" if server is down
+            logger.debug('500 status back from CAPI')
             self.dump(r)
             raise ServerError('Received error {} from server'.format(r.status_code))
 
@@ -405,13 +444,14 @@ class Session(object):
             self.close()
 
             if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
+                logger.error('Frontier CAPI Auth: query failed after refresh')
                 self.invalidate()
                 self.retrying = False
                 self.login()
-                logger.error('Frontier CAPI Auth: query failed after refresh')
                 raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
+                logger.debug('Maybe our token expired.')
                 self.retrying = True
                 return self.query(endpoint)
 
@@ -422,6 +462,7 @@ class Session(object):
 
         self.retrying = False
         if 'timestamp' not in data:
+            logger.debug('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
 
         return data
@@ -467,6 +508,7 @@ class Session(object):
         self.session = None
 
     def invalidate(self):
+        logger.debug('Forcing a full re-authentication')
         # Force a full re-authentication
         self.close()
         Auth.invalidate(self.credentials['cmdr'])
