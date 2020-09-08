@@ -98,7 +98,8 @@ class Logger:
             encoding='utf-8',
             delay=False
         )
-        # Do *NOT* set here, want logger's level to work: self.logger_channel_rotating.setLevel(loglevel)
+        # Yes, we always want these rotated files to be at DEBUG level
+        self.logger_channel_rotating.setLevel(logging.DEBUG)
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
