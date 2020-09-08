@@ -641,7 +641,7 @@ class PreferencesDialog(tk.Toplevel):
         Translations.install(config.get('language') or None)
 
         config.set('ui_scaling', self.ui_scaling.get())
-        #self.tk.call('tk', 'scaling', self.ui_scaling.get())
+        # self.tk.call('tk', 'scaling', self.ui_scaling.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
