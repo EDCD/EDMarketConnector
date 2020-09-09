@@ -83,5 +83,6 @@ jobs:
         git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # Can optionally add `--exit-zero` to the flake8 arguments so that
         # this doesn't fail the build.
-        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --statistics --diff
+        # explicitly ignore docstring errors (start with D)
+        git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --statistics --diff --extend-ignore D
     ####################################################################
