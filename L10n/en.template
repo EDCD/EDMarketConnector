@@ -531,3 +531,6 @@
 
 /* Text describing that value '0.0' means 'default' [prefs.py] */
 "0.0 means Default" = "0.0 means Default";
+
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Log Level";
