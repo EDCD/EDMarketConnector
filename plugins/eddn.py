@@ -9,11 +9,11 @@ import sys
 import tkinter as tk
 from collections import OrderedDict
 from os import SEEK_SET
-from os.path import exists, join
+from os.path import join
 from platform import system
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, TextIO, Tuple, Union
+from typing import Sequence, TextIO, Tuple
 
 import requests
 
@@ -139,7 +139,12 @@ class EDDN:
 
         r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
-            logger.debug(f'Status from POST wasn\'t OK:\nStatus\t{r.status_code}\nURL\t{r.url}\nHeaders\t{r.headers}\nContent:\n{r.text}\nMsg:\n{msg}')
+            logger.debug(f'''Status from POST wasn't OK:
+Status\t{r.status_code}
+URL\t{r.url}
+Headers\t{r.headers}
+Content:\n{r.text}
+Msg:\n{msg}''')
 
         r.raise_for_status()
 
@@ -556,7 +561,7 @@ def plugin_stop() -> None:
     this.eddn.close()
 
 
-def journal_entry(
+def journal_entry(  # noqa: C901
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> Optional[str]:
     # Recursively filter '*_Localised' keys from dict
