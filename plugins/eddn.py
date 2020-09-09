@@ -87,7 +87,7 @@ class EDDN:
             if sys.platform != 'win32':  # open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX | LOCK_NB)
 
-        except Exception:
+        except OSError:
             logger.exception('Failed opening "replay.jsonl"')
             if self.replayfile:
                 self.replayfile.close()
@@ -95,8 +95,9 @@ class EDDN:
             self.replayfile = None
             return False
 
-        self.replaylog = [line.strip() for line in self.replayfile]
-        return True
+        else:
+            self.replaylog = [line.strip() for line in self.replayfile]
+            return True
 
     def flush(self):
         """
