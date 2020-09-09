@@ -1,14 +1,13 @@
-Guidelines for contributing to EDMC
-===
+# Guidelines for contributing to EDMC
 
-Work on Issues
----
+## Work on Issues
+
 If you are not part of the core development team then you should only be performing work that addresses an open issue.
 
 So, if what you think needs doing isn't currently referred to in an [open issue](https://github.com/EDCD/EDMarketConnector/issues), then you should first [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new/choose) **please use the correct template if applicable**.
 
-Check with us first
----
+## Check with us first
+
 Whilst we welcome all efforts to improve the program it's best to ensure that you're not duplicating, or worse,
 wasting effort.
 
@@ -18,8 +17,8 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 ---
 
-Version conventions
----
+## Version conventions
+
 Please see [Version Strings](docs/Releasing.md#version-strings)
 for a description of the currently used version strings.
 
@@ -37,50 +36,64 @@ of [the release process](docs/Releasing.md#distribution).
 
 ---
 
-Git branch structure and tag conventions
-===
+## Git branch structure and tag conventions
+
 Somewhat based on git-flow, but our particular take on it:
 
-### Branches
-* `stable` - This will either have `HEAD` pointing to the latest stable
-release code *or* might have extra code merged in for a hotfix that will
-shortly be in the next stable release.  If you want the latest stable release
-code then use the appropriate `Release/A.B.C` tag!
+## Branches
 
-* `beta` - If we run any pre-release betas *with actual builds released, not
-  just a branch to be run from source*, then this branch will contain that
-  code.  As per `stable` above, this branch might be ahead of the latest
-  pre-release due to merging of hotfixes.  Use the appropriate tag if you want
-  to be sure of the code you checkout.
-  *If there hasn't yet been a new beta version this could be far behind all
-  of: `main`, `develop`, `stable`.*
+### `stable`
 
-* `develop` - This is the branch where all current development is integrated.  No commits should be made directly
-  to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
-  resolving that Pull Request.
+This will either have `HEAD` pointing to the latest stable release code *or* might have extra code merged in for a
+hotfix that will shortly be in the next stable release. If you want the latest stable release code then use the
+appropriate `Release/A.B.C` tag!
 
-* `main` - Yes, we've renamed this from `master`.  See
- "[Using 'main' as the primary branch in Git](https://github.com/EDCD/EDMarketConnector/wiki/Git-Using-Main-Branch)"
-  for instructions on ensuring you're cleanly using it in any local clone.
- 
-    This branch should contain anything from `develop` that is considered well
-     tested and ready for the next `stable` merge.
+### `beta`
 
-* `master` - **This is no longer used.  If the branch is even present then it's no longer updated.  You should be using `main` instead.**
+If we run any pre-release betas *with actual builds released, not
+just a branch to be run from source*, then this branch will contain that
+code.  As per `stable` above, this branch might be ahead of the latest
+pre-release due to merging of hotfixes.  Use the appropriate tag if you want
+to be sure of the code you checkout.
+*If there hasn't yet been a new beta version this could be far behind all
+of: `main`, `develop`, `stable`.*
 
-* `releases` - Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
+### `develop`
+
+This is the branch where all current development is integrated.  No commits should be made directly
+to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
+resolving that Pull Request.
+
+### `main`
+
+Yes, we've renamed this from `master`.  See
+"[Using 'main' as the primary branch in Git](https://github.com/EDCD/EDMarketConnector/wiki/Git-Using-Main-Branch)"
+for instructions on ensuring you're cleanly using it in any local clone.
+
+  This branch should contain anything from `develop` that is considered well
+    tested and ready for the next `stable` merge.
+
+### `master`
+
+ **This is no longer used.  If the branch is even present then it's no longer updated.  You should be using `main` instead.**
+
+### `releases`
+
+Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
 but some care will be necessary to ensure no users are left behind (their client checking the `releases` branch which
 then no longer exists).  For the time being this should always be kept in sync with `stable` as each new release is
 made.
 
-### Tags
+## Tags
 
-#### Stable Releases
+### Stable Releases
+
 All stable releases **MUST** have a tag of the form `Release/Major.Minor.Patch`
 on the commit that was `HEAD` when the installer for it was built.
 
-#### Pre-Releases
+### Pre-Releases
+
 Tags for pre-releases should be of one of two forms, following [Version
  Strings](docs/Releasing.md#version-strings) conventions.
 
@@ -90,7 +103,7 @@ Tags for pre-releases should be of one of two forms, following [Version
 
     with the `<serial>` starting with `1` and incrementing with each new beta
     pre-release.
-    
+
 * Release candidates should have versions of the form:
 
     `Major.Minor.Patch-rc<serial>`
@@ -104,13 +117,14 @@ The Semantic Versioning `+<build metadata>` should never be a part of the tag.
 
 ---
 
-### Work in progress conventions
----
-Remember, you should always be working versus a single issue, even if the work is part of a Milestone or Project. 
+## Work in progress conventions
+
+Remember, you should always be working versus a single issue, even if the work is part of a Milestone or Project.
 There might be cases where issues aren't duplicates, but your work still addresses more than one.  In that case
 pick one for the naming scheme below, but mention all in commit messages and the Pull Request.
 
 In all cases the branch should be named as per the scheme `<class>/<issue number>-<title>`:
+
 * `<class>` - We have several classes of WIP branch:
   * `fix` - For working on bug fixes, e.g. `fix/184-crash-in-startup`
   * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192-add-thing-to-wotsit`
@@ -131,8 +145,7 @@ your WIP branch.  If there are any non-trivial conflicts when we merge your Pull
 to rebase your WIP branch on the latest version of the source branch.  Otherwise we'll work out how to best
 merge your changes via comments in the Pull Request.
 
-
-#### Linting
+### Linting
 
 We use flake8 for linting all python source.
 
@@ -142,7 +155,7 @@ your files.
 
 Note that if your PR does not cleanly (or mostly cleanly) pass a linting scan, your PR may be put on hold pending fixes.
 
-#### Unit testing
+### Unit testing
 
 Where possible please write unit tests for your PRs, especially in the case of bug fixes, having regression tests help
 ensure that we don't accidentally re-introduce a bug down the line.
@@ -151,8 +164,7 @@ We use the python stdlib library `unittest` for unit testing.
 
 ---
 
-General workflow
----
+## General workflow
 
 1. You will need a GitHub account.
 1. Fork the repository on GitHub into your account there (hereafter referred to as 'your fork').
@@ -174,12 +186,17 @@ and another for the Pull Request, merging or cherry-picking commits as needed.
 
 ---
 
-Coding Conventions
-===
-* Adhere to the spelling conventions of the libraries and modules used in the project.  Yes, this means using 'color'
-  rather than 'colour', and in general will mean US, not British, spellings.
-* **ALWAYS** place a single-statement control flow body, for control statements such as `if`, `else`, `for`, `foreach`,
-  on a separate line, with consistent indentation.
+## Coding Conventions
+
+### In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
+
+### Adhere to the spelling conventions of the libraries and modules used in the project
+
+Yes, this means using 'color' rather than 'colour', and in general will mean US, not British, spellings.
+
+## **ALWAYS** place a single-statement control flow body
+
+e.g." control statements such as `if`, `else`, `for`, `foreach`,  on a separate line, with consistent indentation.
   
 Yes:
 
@@ -196,7 +213,7 @@ if something_true: one_thing_we_do()
   
   Yes, some existing code still flouts this rule.
 
-* **Always** use Line breaks after scope changes. It makes reading code far easier
+### **Always** use Line breaks after scope changes. It makes reading code far easier
 
 Yes:
 
@@ -220,53 +237,70 @@ No:
   return
 ```
 
+### Use Type hints
 
-* Going forwards please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions, both their arguments and return
-  types.
+Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,
+both their arguments and return types.
 
-* Use `logging` not `print()`, and definitely not `sys.stdout.write()`!
- `EDMarketConnector.py` sets up a `logging.Logger` for this under the
- `appname`, so:
- 
-        import logging
-        from config import appname
-        logger = logging.getLogger(appname)
-        
-        logger.info(f'Some message with a {variable}')
-        
-        try:
-            something
-        except Exception as e:  # Try to be more specific
-            logger.error(f'Error in ... with ...', exc_info=e)
+### Use `logging` not `print()`, and definitely not `sys.stdout.write()`
 
-    **DO NOT** use the following, as you might cause a circular import:
-    
-        from EDMarketConnector import logger
-    
-    We have implemented a `logging.Filter` that adds support for the following
-    in `logging.Formatter()` strings:
-    
-    1. `%(qualname)s` which gets the full `<module>.ClassA(.ClassB...).func`
-     of the calling function.
-    1. `%(class)s` which gets just the enclosing class name(s) of the calling
-     function.
-     
-    If you want to see how we did this, check `EDMCLogging.py`.
-    
-    So don't worry about adding anything about the class or function you're
-    logging from, it's taken care of.
-    
-    *Do use a pertinent message, even when using `exc_info=...` to log an
-    exception*.  e.g. Logging will know you were in your `get_foo()` function
-    but you should still tell it what actually (failed to have) happened
-    in there.
-    
-* In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/).
+`EDMarketConnector.py` sets up a `logging.Logger` for this under the
+`appname`, so:
+
+```python
+import logging
+from config import appname
+logger = logging.getLogger(appname)
+
+logger.info(f'Some message with a {variable}')
+
+try:
+    something
+except Exception as e:  # Try to be more specific
+    logger.error(f'Error in ... with ...', exc_info=e)
+```
+
+**DO NOT** use the following, as you might cause a circular import:
+
+```python
+    from EDMarketConnector import logger
+```
+
+We have implemented a `logging.Filter` that adds support for the following
+in `logging.Formatter()` strings:
+
+1. `%(qualname)s` which gets the full `<module>.ClassA(.ClassB...).func`
+  of the calling function.
+1. `%(class)s` which gets just the enclosing class name(s) of the calling
+  function.
+
+If you want to see how we did this, check `EDMCLogging.py`.
+
+So don't worry about adding anything about the class or function you're
+logging from, it's taken care of.
+
+*Do use a pertinent message, even when using `exc_info=...` to log an
+exception*.  e.g. Logging will know you were in your `get_foo()` function
+but you should still tell it what actually (failed to have) happened
+in there.
+
+### Prefer fstrings to modulo-formatting and .format
+
+[fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
+than more opaque formatting calls.
+
+As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
+literals.
+
+### Docstrings
+
+Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
+We use the `sphinx` formatting style, which for pycharm users is the default.
 
 ---
 
-Git commit conventions
-===
+## Git commit conventions
+
 * Please use the standard Git convention of a short title in the first line and fuller body text in subsequent lines.
 * Please reference issue numbers using the "hashtag" format #123 in your commit message wherever possible.
   This lets GitHub create two-way hyperlinks between the issue report and the commit.
@@ -277,20 +311,20 @@ Git commit conventions
   
 ---
 
-Build process
-===
+## Build process
+
 See [Releasing.md](docs/Releasing.md) for the environment and procedure necessary for building the application into
 a .exe and Windows installer file.
 
 ---
 
-Translations
-===
+## Translations
+
 See [Translations.md](docs/Translations.md) for how to ensure any new phrases your code adds can be easily
 translated.
 
 ---
 
-Acknowledgement
----
+## Acknowledgement
+
 The overall structure, and some of the contents, of this document were taken from the [EDDI Contributing.md](https://github.com/EDCD/EDDI/blob/develop/docs/Contributing.md).
