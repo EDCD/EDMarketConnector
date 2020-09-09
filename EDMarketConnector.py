@@ -15,6 +15,16 @@ import webbrowser
 
 from config import appname, applongname, appversion, appversion_nobuild, copyright, config
 
+# TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
+if __name__ == "__main__":
+    # Keep this as the very first code run to be as sure as possible of no
+    # output until after this redirect is done, if needed.
+    if getattr(sys, 'frozen', False):
+        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+        import tempfile
+        # unbuffered not allowed for text in python3, so use `1 for line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
     if platform == 'win32':
@@ -1019,14 +1029,6 @@ def test_logging():
 
 # Run the app
 if __name__ == "__main__":
-    # Keep this as the very first code run to be as sure as possible of no
-    # output until after this redirect is done, if needed.
-    if getattr(sys, 'frozen', False):
-        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
-        # unbuffered not allowed for text in python3, so use `1 for line buffering
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
-
     enforce_single_instance()
 
     from EDMCLogging import logger
