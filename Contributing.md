@@ -194,9 +194,9 @@ and another for the Pull Request, merging or cherry-picking commits as needed.
 
 Yes, this means using 'color' rather than 'colour', and in general will mean US, not British, spellings.
 
-## **ALWAYS** place a single-statement control flow body
+## Control flow
 
-e.g." control statements such as `if`, `else`, `for`, `foreach`,  on a separate line, with consistent indentation.
+Never oneline any control flow (`if`, `else`, `for`), as it makes spotting what happens next difficult.
   
 Yes:
 
@@ -213,7 +213,9 @@ if something_true: one_thing_we_do()
   
   Yes, some existing code still flouts this rule.
 
-### **Always** use Line breaks after scope changes. It makes reading code far easier
+### Scope changes
+
+**Always** use Line breaks after scope changes. It makes seeing where scope has changed far easier on a quick skim
 
 Yes:
 
