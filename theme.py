@@ -115,6 +115,7 @@ class _Theme(object):
         self.widgets_pair = []
         self.defaults = {}
         self.current = {}
+        self.default_ui_scale = None  # None == not yet known
 
     def register(self, widget):
         # Note widget and children for later application of a theme. Note if the widget has explicit fg or bg attributes.

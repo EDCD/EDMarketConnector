@@ -1054,6 +1054,7 @@ if __name__ == "__main__":
     if not ui_scaling:
         ui_scaling = '0.0'
         config.set('ui_scaling', ui_scaling)
+    theme.default_ui_scale = root.tk.call('tk', 'scaling')
     if ui_scaling != '0.0':
         root.tk.call('tk', 'scaling', float(ui_scaling))
     app = AppWindow(root)
