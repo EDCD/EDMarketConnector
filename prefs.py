@@ -340,7 +340,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # UI Scaling
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)  # Select UI scaling
+        nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)
         self.ui_scaling = tk.DoubleVar()
         self.ui_scaling.set(float(config.get('ui_scaling')))
         self.uiscale_bar = tk.Scale(
