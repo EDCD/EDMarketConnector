@@ -9,11 +9,11 @@ import sys
 import tkinter as tk
 from collections import OrderedDict
 from os import SEEK_SET
-from os.path import exists, join
+from os.path import join
 from platform import system
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, TextIO, Tuple, Union
+from typing import Sequence, TextIO, Tuple
 
 import requests
 
@@ -81,26 +81,23 @@ class EDDN:
                 # Try to open existing file
                 self.replayfile = open(filename, 'r+', buffering=1)
 
-            except Exception:
-                if exists(filename):
-                    raise  # Couldn't open existing file
-
-                else:
-                    self.replayfile = open(filename, 'w+', buffering=1)  # Create file
+            except FileNotFoundError:
+                self.replayfile = open(filename, 'w+', buffering=1)  # Create file
 
             if sys.platform != 'win32':  # open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX | LOCK_NB)
 
-        except Exception as e:
-            logger.debug('Failed opening "replay.jsonl"', exc_info=e)
+        except OSError:
+            logger.exception('Failed opening "replay.jsonl"')
             if self.replayfile:
                 self.replayfile.close()
 
             self.replayfile = None
             return False
 
-        self.replaylog = [line.strip() for line in self.replayfile]
-        return True
+        else:
+            self.replaylog = [line.strip() for line in self.replayfile]
+            return True
 
     def flush(self):
         """
@@ -143,7 +140,12 @@ class EDDN:
 
         r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
-            logger.debug(f':\nStatus\t{r.status_code}URL\t{r.url}Headers\t{r.headers}Content:\n{r.text}')
+            logger.debug(f'''Status from POST wasn't OK:
+Status\t{r.status_code}
+URL\t{r.url}
+Headers\t{r.headers}
+Content:\n{r.text}
+Msg:\n{msg}''')
 
         r.raise_for_status()
 
@@ -179,6 +181,9 @@ class EDDN:
             self.replaylog.pop(0)
 
         else:
+            # TODO: Check message against *current* relevant schema so we don't try
+            #       to send an old message that's now invalid.
+
             # Rewrite old schema name
             if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
                 msg['$schemaRef'] = str(msg['$schemaRef']).replace(
@@ -557,7 +562,7 @@ def plugin_stop() -> None:
     this.eddn.close()
 
 
-def journal_entry(
+def journal_entry(  # noqa: C901
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> Optional[str]:
     # Recursively filter '*_Localised' keys from dict
@@ -639,21 +644,21 @@ def journal_entry(
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
-                logger.warn("system is None, can't add StarSystem")
+                logger.warning("system is None, can't add StarSystem")
                 return "system is None, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                logger.warn("this.coordinates is None, can't add StarPos")
+                logger.warning("this.coordinates is None, can't add StarPos")
                 return "this.coordinates is None, can't add StarPos"
 
             entry['StarPos'] = list(this.coordinates)
 
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
-                logger.warn("this.systemaddress is None, can't add SystemAddress")
+                logger.warning("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
