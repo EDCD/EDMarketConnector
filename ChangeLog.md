@@ -1,6 +1,27 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta2
+===
+
+* The rotated set of log files are now always at DEBUG level, whereas the old
+  log file continues to follow the user-set logging level.
+* New UI Scaling option!  Find the setting on the 'Appearance' tab of Settings.
+    1. This will only actually take effect after restarting the application.
+    1. The 'Default' theme's menu names won't be resized due to using the
+       default font.  The other two themes work properly though as they use
+       a custom font for those texts.
+    1. As per the note next to the settings bar, "0.0" means "default", so set
+       it to that if you decide you don't need the UI scaling.
+    1. 4K users *probably* want something around 2.0, experiment and let us
+       know!
+* Minor tweak to EDDN plugin logging so we know what message we tried to send
+  if it fails.
+* More logging added to companion.py to aid diagnosing Frontier Auth issues.
+
+Translators: There are three new strings to translate related to Log Levels
+and the new UI Scaling.
+
 Pre-Release 4.1.0-beta1
 ===
 
@@ -493,4 +514,3 @@ Release 3.00
  * Updates your entire fleet on EDSM and/or Inara whenever you visit the shipyard in game.
  * Updates your current ship's loadout on EDSM and/or Inara whenever it changes.
  * Plugin access to your dashboard status.
-
