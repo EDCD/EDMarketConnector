@@ -341,12 +341,20 @@ class PreferencesDialog(tk.Toplevel):
         # UI Scaling
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)  # Select UI scaling
-        ui_scaling = config.get('ui_scaling')
-        self.ui_scaling = tk.StringVar(value=ui_scaling)
-        ui_scales = ( 'default', 0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
-        self.uiscale_dropdown = nb.OptionMenu(themeframe, self.ui_scaling, self.ui_scaling.get(), *ui_scales)
-        self.uiscale_dropdown.configure(width=15)
-        self.uiscale_dropdown.grid(row=23, column=1, sticky=tk.W)
+        self.ui_scaling = tk.DoubleVar()
+        self.ui_scaling.set(float(config.get('ui_scaling')))
+        self.uiscale_bar = tk.Scale(
+            themeframe,
+            variable=self.ui_scaling,
+            orient=tk.HORIZONTAL,
+            length=300,
+            from_=0.0,
+            to=4.0,
+            tickinterval=0.5,
+            resolution=0.1,
+        )
+        self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
+        self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
 
         # Always on top
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
@@ -640,7 +648,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('language', lang_codes.get(self.lang.get()) or '')
         Translations.install(config.get('language') or None)
 
-        config.set('ui_scaling', self.ui_scaling.get())
+        config.set('ui_scaling', str(self.ui_scaling.get()))
         # self.tk.call('tk', 'scaling', self.ui_scaling.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
