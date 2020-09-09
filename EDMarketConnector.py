@@ -1048,6 +1048,12 @@ if __name__ == "__main__":
     Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
 
     root = tk.Tk(className=appname.lower())
+    ui_scaling = config.get('ui_scaling')
+    if not ui_scaling:
+        ui_scaling = '0.0'
+        config.set('ui_scaling', ui_scaling)
+    if ui_scaling != '0.0':
+        root.tk.call('tk', 'scaling', float(ui_scaling))
     app = AppWindow(root)
 
     def messagebox_not_py3():

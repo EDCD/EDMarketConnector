@@ -526,3 +526,8 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} needs permission to use shortcuts";
 
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scaling" = "UI Scaling";
+
+/* Text describing that value '0.0' means 'default' [prefs.py] */
+"0.0 means Default" = "0.0 means Default";

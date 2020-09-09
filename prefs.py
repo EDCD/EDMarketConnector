@@ -337,6 +337,26 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
         self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='grey4', command=lambda:self.themecolorbrowse(1))	# Do not translate
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+
+        # UI Scaling
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.ui_scaling = tk.DoubleVar()
+        self.ui_scaling.set(float(config.get('ui_scaling')))
+        self.uiscale_bar = tk.Scale(
+            themeframe,
+            variable=self.ui_scaling,
+            orient=tk.HORIZONTAL,
+            length=300,
+            from_=0.0,
+            to=4.0,
+            tickinterval=0.5,
+            resolution=0.1,
+        )
+        self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
+        self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
+
+        # Always on top
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
         self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
         self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)	# Appearance setting
@@ -628,6 +648,8 @@ class PreferencesDialog(tk.Toplevel):
         config.set('language', lang_codes.get(self.lang.get()) or '')
         Translations.install(config.get('language') or None)
 
+        config.set('ui_scaling', str(self.ui_scaling.get()))
+        # self.tk.call('tk', 'scaling', self.ui_scaling.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
