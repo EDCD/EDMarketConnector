@@ -191,7 +191,7 @@ Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.
 
 ```python
-import Tkinter as tk
+import tkinter as tk
 import myNotebook as nb
 from config import config
 
