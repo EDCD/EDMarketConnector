@@ -1032,7 +1032,13 @@ if __name__ == "__main__":
     enforce_single_instance()
 
     from EDMCLogging import logger
-    logger.info('Startup')
+    logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
+    logger.debug(f'''Platform: {sys.platform}
+argv[0]: {sys.argv[0]}
+exec_prefix: {sys.exec_prefix}
+executable: {sys.executable}
+sys.path: {sys.path}'''
+    )
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
