@@ -340,21 +340,24 @@ class PreferencesDialog(tk.Toplevel):
 
         # UI Scaling
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(themeframe, text=_('UI Scaling')).grid(row = 23, padx=PADX, pady=2*PADY, sticky=tk.W)
-        self.ui_scaling = tk.DoubleVar()
-        self.ui_scaling.set(float(config.get('ui_scaling')))
+        nb.Label(themeframe, text=_('UI Scale Percentage')).grid(row=23, padx=PADX, pady=2*PADY, sticky=tk.W)
+        self.ui_scale = tk.IntVar()
+        self.ui_scale.set(config.getint('ui_scale'))
         self.uiscale_bar = tk.Scale(
             themeframe,
-            variable=self.ui_scaling,
+            variable=self.ui_scale,
             orient=tk.HORIZONTAL,
             length=300,
-            from_=0.0,
-            to=4.0,
-            tickinterval=0.5,
-            resolution=0.1,
+            from_=0,
+            to=400,
+            tickinterval=50,
+            resolution=10,
         )
         self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
-        self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
+        self.ui_scaling_defaultis = nb.Label(
+            themeframe,
+            text=_('0 means Default{CR}Restart Required for{CR}changes to take effect!')
+        ).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
 
         # Always on top
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
@@ -648,8 +651,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('language', lang_codes.get(self.lang.get()) or '')
         Translations.install(config.get('language') or None)
 
-        config.set('ui_scaling', str(self.ui_scaling.get()))
-        # self.tk.call('tk', 'scaling', self.ui_scaling.get())
+        config.set('ui_scale', self.ui_scale.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
