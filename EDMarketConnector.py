@@ -1038,7 +1038,7 @@ argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
 sys.path: {sys.path}'''
-    )
+)
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
@@ -1056,13 +1056,13 @@ sys.path: {sys.path}'''
     Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
 
     root = tk.Tk(className=appname.lower())
-    ui_scaling = config.get('ui_scaling')
-    if not ui_scaling:
-        ui_scaling = '0.0'
-        config.set('ui_scaling', ui_scaling)
+    ui_scale = config.getint('ui_scale')
+    if not ui_scale:
+        ui_scale = 0
+        config.set('ui_scale', ui_scale)
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
-    if ui_scaling != '0.0':
-        root.tk.call('tk', 'scaling', float(ui_scaling))
+    if ui_scale != 0:
+        root.tk.call('tk', 'scaling', float(ui_scale) / 100.0)
     app = AppWindow(root)
 
     def messagebox_not_py3():
