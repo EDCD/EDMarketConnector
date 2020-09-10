@@ -354,7 +354,8 @@ class PreferencesDialog(tk.Toplevel):
             resolution=0.1,
         )
         self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
-        self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
+        #self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default') + '\n' + _('Restart Required for') + '\n' + _('changes to take effect!')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
+        self.ui_scaling_defaultis = nb.Label(themeframe, text=_('0.0 means Default{CR}Restart Required for{CR}changes to take effect!')).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
 
         # Always on top
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
