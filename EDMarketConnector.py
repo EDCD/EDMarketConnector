@@ -6,6 +6,7 @@ from builtins import object
 import sys
 from sys import platform
 import json
+import locale
 from os import chdir, environ
 from os.path import dirname, isdir, join
 import re
@@ -1037,7 +1038,12 @@ if __name__ == "__main__":
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
-sys.path: {sys.path}'''
+sys.path: {sys.path}
+Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
+Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
+Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
+Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
+Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 )
 
     # TODO: unittests in place of these
