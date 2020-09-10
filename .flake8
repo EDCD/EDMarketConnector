@@ -17,9 +17,6 @@ per-file-ignores = ./EDMC.py:E402
 # https://github.com/Melevir/flake8-cognitive-complexity
 # Provides cognitive complexity checking
 
-# https://github.com/gforcada/flake8-pep3101
-# Marks modulo-formatting as an error, as .format formatting is clearer and preferred in this codebase
-
 # https://github.com/adamchainz/flake8-comprehensions
 # Checks list/dict/set/* comprehensions for simplification or replacement
 
@@ -29,5 +26,18 @@ per-file-ignores = ./EDMC.py:E402
 # https://github.com/best-doctor/flake8-annotations-coverage
 # Checks code for type annotations
 
+# https://pypi.org/project/flake8-isort/
+# Ensures imports are well sorted
+
+# https://pypi.org/project/flake8-noqa/
+# Ensures that noqa statements are correctly formed
+
+# https://github.com/MichaelKim0407/flake8-use-fstring
+# Prefers fstrings over .format and modulo based formatters
 
 max-cognitive-complexity = 15
+
+# require that all noqa directves disable specific errors
+noqa-require-code = True
+
+docstring-convention = numpy
