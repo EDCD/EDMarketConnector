@@ -1,6 +1,31 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta3
+===
+
+We hit a bug with the UI scaling code to do with locales that use something
+other than `.` as their decimals separator.  This is a tk/tkinter bug with
+using a floating point number.  So, we've changed to using an integer instead.
+
+* The setting is now 'ui_scale' and a REG_DWORD in Windows, instead of the old
+  'ui_scaling' as a REG_SZ.  So any setting you'd already played with will
+  be ignored when first running beta3.
+* The displayed values are now from 0 to 400 instead of 0.0 to 4.0.  The
+  increments are equivalent to the old ones.
+* The default setting is now `0` instead of `0.0`.  Making `100` the default
+  would be problematic because tkinter's actual default is unlikely to simply
+  be 1.0. On a 2560x1440 monitor with a 27" diagonal it's ~1.33 for instance.
+* There's a little extra DEBUG logging at startup so we can be sure of some
+  things like Python version used (pertinent if running from source).
+
+Plugin Authors: If you are doing per-pixel things in your UI then there's
+`import theme from theme` and `theme.default_ui_scale` to check the tk
+`scaling` value.  Note that this is the float value that tk uses internally,
+with `1.0` being equivalent to our `100` now we're using integers for this.
+
+Translators: Yes, the new strings have changed a bit again, apologies!
+
 Pre-Release 4.1.0-beta2
 ===
 
