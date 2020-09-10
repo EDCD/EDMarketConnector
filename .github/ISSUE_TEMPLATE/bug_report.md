@@ -10,6 +10,7 @@ assignees: ''
 **Please complete the following information:**
  - Version [e.g. 4.0.6 - See 'Help > About E:D Market Connector']
  - OS: [e.g. Windows 10]
+ - OS Locale: [e.g. English, French, Serbian...]
  - If applicable: Browser [e.g. chrome, safari]
  - Please attach the file `%TEMP%\EDMarketConnector.log` from *immediately* after the bug occurs (re-running the application overwrites this file).  Use the Icon that looks like `_`, `|` and `^` all in one character towards the right of the toolbar above.
 
