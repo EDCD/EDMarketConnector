@@ -1068,11 +1068,13 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
     We scale the UI relative to what we find tk-scaling is on startup.
     """
     ui_scale = config.getint('ui_scale')
+    # NB: This *also* catches a literal 0 value to re-set to the default 100
     if not ui_scale:
         ui_scale = 100
         config.set('ui_scale', ui_scale)
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
     logger.debug(f'Default tk scaling = {theme.default_ui_scale}')
+    theme.startup_ui_scale = ui_scale
     root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
     app = AppWindow(root)
 
