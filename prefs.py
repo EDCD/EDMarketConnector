@@ -262,9 +262,9 @@ class PreferencesDialog(tk.Toplevel):
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
         self.outdir = tk.StringVar()
-        self.outdir.set(config.get('outdir'))
+        self.outdir.set(str(config.get('outdir')))
         self.outdir_label = nb.Label(outframe, text=_('File location')+':')  # Section heading in settings
-        self.outdir_label.grid(padx=PADX, pady=(5, 0), sticky=tk.W)
+        self.outdir_label.grid(padx=PADX, pady=(5, 0), sticky=tk.W)  # type: ignore # 2 tuple does each side
         self.outdir_entry = nb.Entry(outframe, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=PADX, pady=(0, PADY), sticky=tk.EW)
         self.outbutton = nb.Button(
@@ -288,7 +288,7 @@ class PreferencesDialog(tk.Toplevel):
         configframe.columnconfigure(1, weight=1)
 
         self.logdir = tk.StringVar()
-        self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
+        self.logdir.set(str(config.get('journaldir') or config.default_journal_dir or ''))
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
         # Location of the new Journal file in E:D 2.2
@@ -341,8 +341,13 @@ class PreferencesDialog(tk.Toplevel):
                         padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
             else:
                 self.hotkey_text = nb.Entry(configframe, width=(platform == 'darwin' and 20 or 30), justify=tk.CENTER)
-                self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(
-                    self.hotkey_code, self.hotkey_mods) or _('None'))  # No hotkey/shortcut currently defined
+                self.hotkey_text.insert(
+                    0,
+                    # No hotkey/shortcut currently defined
+                    self.hotkey_code and hotkeymgr.display(  # type: ignore # Only shows up on darwin or windows
+                        self.hotkey_code, self.hotkey_mods
+                    ) or _('None')
+                )
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=20, column=1, columnspan=2, pady=(5, 0), sticky=tk.W)
@@ -384,8 +389,9 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)
 
         self.shipyard_provider = tk.StringVar(
-            value=(config.get('shipyard_provider') in plug.provides('shipyard_url')
-                   and config.get('shipyard_provider') or 'EDSY')
+            value=str(
+                config.get('shipyard_provider') in plug.provides('shipyard_url')
+                and config.get('shipyard_provider') or 'EDSY')
         )
         # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
         nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -403,8 +409,8 @@ class PreferencesDialog(tk.Toplevel):
         self.alt_shipyard_open_btn.grid(row=31, column=2, sticky=tk.W)
 
         self.system_provider = tk.StringVar(
-            value=config.get('system_provider') in plug.provides('system_url')
-            and config.get('system_provider') or 'EDSM'
+            value=str(config.get('system_provider') in plug.provides('system_url')
+                      and config.get('system_provider') or 'EDSM')
         )
 
         nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -418,8 +424,8 @@ class PreferencesDialog(tk.Toplevel):
         self.system_button.grid(row=32, column=1, sticky=tk.W)
 
         self.station_provider = tk.StringVar(
-            value=config.get('station_provider') in plug.provides('station_url')
-            and config.get('station_provider') or 'eddb'
+            value=str(config.get('station_provider') in plug.provides('station_url')
+                      and config.get('station_provider') or 'eddb')
         )
 
         nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -445,7 +451,7 @@ class PreferencesDialog(tk.Toplevel):
         current_loglevel = config.get('loglevel')
         if not current_loglevel:
             current_loglevel = logging.getLevelName(logging.INFO)
-        self.select_loglevel = tk.StringVar(value=current_loglevel)
+        self.select_loglevel = tk.StringVar(value=str(current_loglevel))
         loglevels = [
             logging.getLevelName(l) for l in (
                 logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
@@ -469,7 +475,7 @@ class PreferencesDialog(tk.Toplevel):
         self.languages = Translations.available_names()
         # Appearance theme and language setting
         self.lang = tk.StringVar(value=self.languages.get(config.get('language'), _('Default')))
-        self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
+        self.always_ontop = tk.BooleanVar(value=bool(config.getint('always_ontop')))
         self.theme = tk.IntVar(value=config.getint('theme'))
         self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
         self.theme_prompts = [
@@ -530,7 +536,7 @@ class PreferencesDialog(tk.Toplevel):
         self.ui_scale.set(config.getint('ui_scale'))
         self.uiscale_bar = tk.Scale(
             themeframe,
-            variable=self.ui_scale,
+            variable=self.ui_scale,  # TODO: intvar, but annotated as DoubleVar
             orient=tk.HORIZONTAL,
             length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),
             from_=0,
@@ -848,7 +854,7 @@ class PreferencesDialog(tk.Toplevel):
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')
-        Translations.install(config.get('language') or None)
+        Translations.install(config.get('language') or None)  # type: ignore # This sets self in weird ways.
 
         config.set('ui_scale', self.ui_scale.get())
         config.set('always_ontop', self.always_ontop.get())
@@ -877,7 +883,7 @@ class PreferencesDialog(tk.Toplevel):
             # popup System Preferences dialog
             try:
                 # http://stackoverflow.com/questions/6652598/cocoa-button-opens-a-system-preference-page/6658201
-                from ScriptingBridge import SBApplication
+                from ScriptingBridge import SBApplication  # type: ignore
                 sysprefs = 'com.apple.systempreferences'
                 prefs = SBApplication.applicationWithBundleIdentifier_(sysprefs)
                 pane = [x for x in prefs.panes() if x.id() == 'com.apple.preference.security'][0]
