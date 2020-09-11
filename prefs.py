@@ -34,9 +34,10 @@ class PrefsVersion(object):
         '3.4.6.0': 3,
         '3.5.1.0': 4,
         # Only add new versions that add new Preferences
-        # Should always match the last specific version, but only increment after you've added the new version.  Guess at it if anticipating a new version.
+        # Should always match the last specific version, but only increment after you've added the new version.
+        # Guess at it if anticipating a new version.
         'current': 4,
-        }
+    }
 
     def __init__(self):
         return
@@ -74,7 +75,11 @@ class PrefsVersion(object):
             aa = self.versions[addedAfter]
             # Sanity check, if something was added after then current should be greater
             if aa >= self.versions['current']:
-                raise Exception('ERROR: Call to prefs.py:PrefsVersion.shouldSetDefaults() with "addedAfter" >= current latest in "versions" table.  You probably need to increase "current" serial number.')
+                raise Exception(
+                    'ERROR: Call to prefs.py:PrefsVersion.shouldSetDefaults() with '
+                    '"addedAfter" >= current latest in "versions" table.'
+                    '  You probably need to increase "current" serial number.'
+                )
 
         # If this preference was added after the saved PrefsVersion we should set defaults
         if aa >= pv:
@@ -93,9 +98,18 @@ if platform == 'darwin':
     try:
         from ApplicationServices import AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
     except:
-        HIServices = objc.loadBundle('HIServices', globals(), '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework')
-        objc.loadBundleFunctions(HIServices, globals(), [('AXIsProcessTrusted', 'B'),
-                                                         ('AXIsProcessTrustedWithOptions', 'B@')])
+        HIServices = objc.loadBundle(
+            'HIServices',
+            globals(),
+            '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework'
+        )
+
+        objc.loadBundleFunctions(
+            HIServices,
+            globals(),
+            [('AXIsProcessTrusted', 'B'), ('AXIsProcessTrustedWithOptions', 'B@')]
+        )
+
         objc.loadBundleVariables(HIServices, globals(), [('kAXTrustedCheckOptionPrompt', '@^{__CFString=}')])
     was_accessible_at_launch = AXIsProcessTrusted()
 
@@ -118,11 +132,27 @@ elif platform == 'win32':
     BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
 
     class BROWSEINFO(ctypes.Structure):
-        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
+        _fields_ = [
+            ("hwndOwner", HWND),
+            ("pidlRoot", LPVOID),
+            ("pszDisplayName", LPWSTR),
+            ("lpszTitle", LPCWSTR),
+            ("ulFlags", UINT),
+            ("lpfn", BrowseCallbackProc),
+            ("lParam", LPCWSTR),
+            ("iImage", ctypes.c_int)
+        ]
 
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-        CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+        CalculatePopupWindowPosition.argtypes = [
+            ctypes.POINTER(POINT),
+            ctypes.POINTER(SIZE),
+            UINT,
+            ctypes.POINTER(RECT),
+            ctypes.POINTER(RECT)
+        ]
+
         GetParent = ctypes.windll.user32.GetParent
         GetParent.argtypes = [HWND]
         GetWindowRect = ctypes.windll.user32.GetWindowRect
@@ -182,17 +212,44 @@ class PreferencesDialog(tk.Toplevel):
         #      the middle without worrying about updating `row=X` elements.
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
-        self.out_csv = tk.IntVar(value = (output & config.OUT_MKT_CSV ) and 1)
-        self.out_csv_button = nb.Checkbutton(outframe, text=_('Market data in CSV format file'), variable=self.out_csv, command=self.outvarchanged)
+        self.out_csv = tk.IntVar(value=(output & config.OUT_MKT_CSV) and 1)
+        self.out_csv_button = nb.Checkbutton(
+            outframe,
+            text=_('Market data in CSV format file'),
+            variable=self.out_csv,
+            command=self.outvarchanged
+        )
+
         self.out_csv_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_td = tk.IntVar(value=(output & config.OUT_MKT_TD) and 1)
-        self.out_td_button = nb.Checkbutton(outframe, text=_('Market data in Trade Dangerous format file'), variable=self.out_td, command=self.outvarchanged)
+        self.out_td_button = nb.Checkbutton(
+            outframe,
+            text=_('Market data in Trade Dangerous format file'),
+            variable=self.out_td,
+            command=self.outvarchanged
+        )
+
         self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
         self.out_ship = tk.IntVar(value=(output & config.OUT_SHIP and 1))
-        self.out_ship_button = nb.Checkbutton(outframe, text=_('Ship loadout'), variable=self.out_ship, command=self.outvarchanged)  # Output setting
+
+        # Output setting
+        self.out_ship_button = nb.Checkbutton(
+            outframe,
+            text=_('Ship loadout'),
+            variable=self.out_ship,
+            command=self.outvarchanged
+        )
         self.out_ship_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
         self.out_auto = tk.IntVar(value=0 if output & config.OUT_MKT_MANUAL else 1)  # inverted
-        self.out_auto_button = nb.Checkbutton(outframe, text=_('Automatically update on docking'), variable=self.out_auto, command=self.outvarchanged)  # Output setting
+
+        # Output setting
+        self.out_auto_button = nb.Checkbutton(
+            outframe,
+            text=_('Automatically update on docking'),
+            variable=self.out_auto,
+            command=self.outvarchanged
+        )
+
         self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
         self.outdir = tk.StringVar()
@@ -201,9 +258,12 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_label.grid(padx=PADX, pady=(5, 0), sticky=tk.W)
         self.outdir_entry = nb.Entry(outframe, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=PADX, pady=(0, PADY), sticky=tk.EW)
-        self.outbutton = nb.Button(outframe, text=(platform == 'darwin' and _('Change...') or  # Folder selection button on OSX
-                                                   _('Browse...')),  # Folder selection button on Windows
-                                   command=lambda: self.filebrowse(_('File location'), self.outdir))
+        self.outbutton = nb.Button(
+            outframe,
+            text=(platform == 'darwin' and _('Change...') or _('Browse...')),
+            command=lambda: self.filebrowse(_('File location'), self.outdir)
+        )
+
         self.outbutton.grid(column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         nb.Frame(outframe).grid(pady=5)  # bottom spacer
 
@@ -222,14 +282,28 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(config.get('journaldir') or config.default_journal_dir or '')
         self.logdir_entry = nb.Entry(configframe, takefocus=False)
 
-        nb.Label(configframe, text=_('E:D journal file location')+':').grid(columnspan=4, padx=PADX, sticky=tk.W)  # Location of the new Journal file in E:D 2.2
+        # Location of the new Journal file in E:D 2.2
+        nb.Label(
+            configframe,
+            text=_('E:D journal file location')+':'
+        ).grid(columnspan=4, padx=PADX, sticky=tk.W)
+
         self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0, PADY), sticky=tk.EW)
-        self.logbutton = nb.Button(configframe, text=(platform == 'darwin' and _('Change...') or  # Folder selection button on OSX
-                                                      _('Browse...')),  # Folder selection button on Windows
-                                   command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir))
+        self.logbutton = nb.Button(
+            configframe,
+            text=(platform == 'darwin' and _('Change...') or _('Browse...')),
+            command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir)
+        )
+
         self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
         if config.default_journal_dir:
-            nb.Button(configframe, text=_('Default'), command=self.logdir_reset, state=config.get('journaldir') and tk.NORMAL or tk.DISABLED).grid(row=10, column=2, pady=PADY, sticky=tk.EW)  # Appearance theme and language setting
+            # Appearance theme and language setting
+            nb.Button(
+                configframe,
+                text=_('Default'),
+                command=self.logdir_reset,
+                state=config.get('journaldir') and tk.NORMAL or tk.DISABLED
+            ).grid(row=10, column=2, pady=PADY, sticky=tk.EW)
 
         if platform in ['darwin', 'win32']:
             ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
@@ -246,8 +320,14 @@ class PreferencesDialog(tk.Toplevel):
                     nb.Label(configframe, text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
                              foreground='firebrick').grid(padx=PADX, sticky=tk.W)  # Shortcut settings prompt on OSX
                 else:
-                    nb.Label(configframe, text=_('{APP} needs permission to use shortcuts').format(
-                        APP=applongname), foreground='firebrick').grid(columnspan=4, padx=PADX, sticky=tk.W)		# Shortcut settings prompt on OSX
+                    # Shortcut settings prompt on OSX
+                    nb.Label(
+                        configframe,
+                        text=_('{APP} needs permission to use shortcuts').format(
+                            APP=applongname
+                        ),
+                        foreground='firebrick'
+                    ).grid(columnspan=4, padx=PADX, sticky=tk.W)
                     nb.Button(configframe, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
                         padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
             else:
@@ -257,23 +337,47 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=20, column=1, columnspan=2, pady=(5, 0), sticky=tk.W)
-                self.hotkey_only_btn = nb.Checkbutton(configframe, text=_('Only when Elite: Dangerous is the active app'), variable=self.hotkey_only, state=self.hotkey_code and tk.NORMAL or tk.DISABLED)  # Hotkey/Shortcut setting
+
+                # Hotkey/Shortcut setting
+                self.hotkey_only_btn = nb.Checkbutton(
+                    configframe,
+                    text=_('Only when Elite: Dangerous is the active app'),
+                    variable=self.hotkey_only,
+                    state=self.hotkey_code and tk.NORMAL or tk.DISABLED
+                )
+
                 self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5, 0), sticky=tk.W)
-                self.hotkey_play_btn = nb.Checkbutton(configframe, text=_('Play sound'), variable=self.hotkey_play, state=self.hotkey_code and tk.NORMAL or tk.DISABLED)  # Hotkey/Shortcut setting
+
+                # Hotkey/Shortcut setting
+                self.hotkey_play_btn = nb.Checkbutton(
+                    configframe,
+                    text=_('Play sound'),
+                    variable=self.hotkey_play,
+                    state=self.hotkey_code and tk.NORMAL or tk.DISABLED
+                )
+
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
         # Option to disabled Automatic Check For Updates whilst in-game
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.getint('disable_autoappupdatecheckingame'))
-        self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(configframe, text=_(
-            'Disable Automatic Application Updates Check when in-game'), variable=self.disable_autoappupdatecheckingame, command=self.disable_autoappupdatecheckingame_changed)
+        self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
+            configframe,
+            text=_('Disable Automatic Application Updates Check when in-game'),
+            variable=self.disable_autoappupdatecheckingame,
+            command=self.disable_autoappupdatecheckingame_changed
+        )
+
         self.disable_autoappupdatecheckingame_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
 
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         # Settings prompt for preferred ship loadout, system and station info websites
         nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)
 
-        self.shipyard_provider = tk.StringVar(value=config.get('shipyard_provider') in plug.provides('shipyard_url') and config.get('shipyard_provider') or 'EDSY')
+        self.shipyard_provider = tk.StringVar(
+            value=(config.get('shipyard_provider') in plug.provides('shipyard_url')
+                   and config.get('shipyard_provider') or 'EDSY')
+        )
         # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
         nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)
         self.shipyard_button = nb.OptionMenu(configframe, self.shipyard_provider,
@@ -289,28 +393,62 @@ class PreferencesDialog(tk.Toplevel):
                                                     )
         self.alt_shipyard_open_btn.grid(row=31, column=2, sticky=tk.W)
 
-        self.system_provider = tk.StringVar(value=config.get('system_provider') in plug.provides(
-            'system_url') and config.get('system_provider') or 'EDSM')
+        self.system_provider = tk.StringVar(
+            value=config.get('system_provider') in plug.provides('system_url')
+            and config.get('system_provider') or 'EDSM'
+        )
+
         nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
-        self.system_button = nb.OptionMenu(configframe, self.system_provider,self.system_provider.get(), *plug.provides('system_url'))
+        self.system_button = nb.OptionMenu(
+            configframe,
+            self.system_provider,
+            self.system_provider.get(),
+            *plug.provides('system_url')
+        )
         self.system_button.configure(width=15)
         self.system_button.grid(row=32, column=1, sticky=tk.W)
 
-        self.station_provider = tk.StringVar(value=config.get('station_provider') in plug.provides('station_url') and config.get('station_provider') or 'eddb')
+        self.station_provider = tk.StringVar(
+            value=config.get('station_provider') in plug.provides('station_url')
+            and config.get('station_provider') or 'eddb'
+        )
+
         nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
-        self.station_button = nb.OptionMenu(configframe, self.station_provider, self.station_provider.get(), *plug.provides('station_url'))
+        self.station_button = nb.OptionMenu(
+            configframe,
+            self.station_provider,
+            self.station_provider.get(),
+            *plug.provides('station_url')
+        )
+
         self.station_button.configure(width=15)
         self.station_button.grid(row=33, column=1, sticky=tk.W)
 
         # Set loglevel
         ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(configframe, text=_('Log Level')).grid(row=35, padx=PADX, pady=2*PADY, sticky=tk.W)  # Set the current loglevel
+
+        # Set the current loglevel
+        nb.Label(
+            configframe,
+            text=_('Log Level')
+        ).grid(row=35, padx=PADX, pady=2*PADY, sticky=tk.W)
+
         current_loglevel = config.get('loglevel')
         if not current_loglevel:
             current_loglevel = logging.getLevelName(logging.INFO)
         self.select_loglevel = tk.StringVar(value=current_loglevel)
-        loglevels = [logging.getLevelName(l) for l in (logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)]
-        self.loglevel_dropdown = nb.OptionMenu(configframe, self.select_loglevel, self.select_loglevel.get(), *loglevels)
+        loglevels = [
+            logging.getLevelName(l) for l in (
+                logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
+            )
+        ]
+
+        self.loglevel_dropdown = nb.OptionMenu(
+            configframe,
+            self.select_loglevel,
+            self.select_loglevel.get(),
+            *loglevels
+        )
         self.loglevel_dropdown.configure(width=15)
         self.loglevel_dropdown.grid(row=35, column=1, sticky=tk.W)
 
@@ -320,7 +458,8 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(configframe, text=_('Configuration'))  # Tab heading in settings
 
         self.languages = Translations.available_names()
-        self.lang = tk.StringVar(value=self.languages.get(config.get('language'), _('Default')))  # Appearance theme and language setting
+        # Appearance theme and language setting
+        self.lang = tk.StringVar(value=self.languages.get(config.get('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
         self.theme = tk.IntVar(value=config.getint('theme'))
         self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
@@ -340,15 +479,32 @@ class PreferencesDialog(tk.Toplevel):
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(
             columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme setting
         if platform == 'win32':
-            nb.Radiobutton(themeframe, text=_('Transparent'), variable=self.theme, value=2, command=self.themevarchanged).grid(
-                columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme setting
+            nb.Radiobutton(
+                themeframe,
+                text=_('Transparent'),  # Appearance theme setting
+                variable=self.theme,
+                value=2,
+                command=self.themevarchanged
+            ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
         self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
-        self.theme_button_0 = nb.ColoredButton(themeframe, text=_('Station'), background='grey4', command=lambda: self.themecolorbrowse(0))  # Main window
+
+        # Main window
+        self.theme_button_0 = nb.ColoredButton(
+            themeframe,
+            text=_('Station'),
+            background='grey4',
+            command=lambda: self.themecolorbrowse(0)
+        )
         self.theme_button_0.grid(row=20, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
-        self.theme_button_1 = nb.ColoredButton(themeframe, text='  Hutton Orbital  ', background='grey4', command=lambda: self.themecolorbrowse(1))  # Do not translate
+        self.theme_button_1 = nb.ColoredButton(
+            themeframe,
+            text='  Hutton Orbital  ',  # Do not translate
+            background='grey4',
+            command=lambda: self.themecolorbrowse(1)
+        )
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
 
         # UI Scaling
@@ -381,7 +537,13 @@ class PreferencesDialog(tk.Toplevel):
 
         # Always on top
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        self.ontop_button = nb.Checkbutton(themeframe, text=_('Always on top'), variable=self.always_ontop, command=self.themevarchanged)
+        self.ontop_button = nb.Checkbutton(
+            themeframe,
+            text=_('Always on top'),
+            variable=self.always_ontop,
+            command=self.themevarchanged
+        )
+
         self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance setting
         nb.Label(themeframe).grid(sticky=tk.W)  # big spacer
 
@@ -398,16 +560,25 @@ class PreferencesDialog(tk.Toplevel):
         self.displaypath(plugdir, plugdirentry)
         plugdirentry.grid(row=10, padx=PADX, sticky=tk.EW)
 
-        nb.Button(plugsframe, text=_('Open'),  # Button that opens a folder in Explorer/Finder
-                  command=lambda: webbrowser.open('file:///%s' % plugdir.get())).grid(row=10, column=1, padx=(0, PADX), sticky=tk.NSEW)
+        nb.Button(
+            plugsframe,
+            text=_('Open'),  # Button that opens a folder in Explorer/Finder
+            command=lambda: webbrowser.open('file:///%s' % plugdir.get())
+        ).grid(row=10, column=1, padx=(0, PADX), sticky=tk.NSEW)
 
-        nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(  # Help text in settings
-            columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
+        nb.Label(
+            plugsframe,
+            # Help text in settings
+            text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
+        ).grid(columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
 
         enabled_plugins = [x for x in plug.PLUGINS if x.folder and x.module]
         if len(enabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
-            nb.Label(plugsframe, text=_('Enabled Plugins')+':').grid(padx=PADX, sticky=tk.W)  # List of plugins in settings
+            nb.Label(
+                plugsframe,
+                text=_('Enabled Plugins')+':'  # List of plugins in settings
+            ).grid(padx=PADX, sticky=tk.W)
             for plugin in enabled_plugins:
                 if plugin.name == plugin.folder:
                     label = nb.Label(plugsframe, text=plugin.name)
@@ -434,7 +605,11 @@ class PreferencesDialog(tk.Toplevel):
         disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
         if len(disabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
-            nb.Label(plugsframe, text=_('Disabled Plugins')+':').grid(padx=PADX, sticky=tk.W)  # List of plugins in settings
+            nb.Label(
+                plugsframe,
+                text=_('Disabled Plugins')+':'  # List of plugins in settings
+            ).grid(padx=PADX, sticky=tk.W)
+
             for plugin in disabled_plugins:
                 nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
 
@@ -503,7 +678,11 @@ class PreferencesDialog(tk.Toplevel):
         logdir = self.logdir.get()
         logvalid = logdir and exists(logdir)
 
-        self.out_label['state'] = self.out_csv_button['state'] = self.out_td_button['state'] = self.out_ship_button['state'] = tk.NORMAL or tk.DISABLED
+        self.out_label['state'] = tk.NORMAL
+        self.out_csv_button['state'] = tk.NORMAL
+        self.out_td_button['state'] = tk.NORMAL
+        self.out_ship_button['state'] = tk.NORMAL
+
         local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
         self.out_auto_button['state'] = local and logvalid and tk.NORMAL or tk.DISABLED
         self.outdir_label['state'] = local and tk.NORMAL or tk.DISABLED
@@ -542,9 +721,13 @@ class PreferencesDialog(tk.Toplevel):
                 except:
                     display.append(components[i])
             entryfield.insert(0, '\\'.join(display))
-        elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):  # None if path doesn't exist
+
+        #                                                   None if path doesn't exist
+        elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
             if pathvar.get().startswith(config.home):
-                display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):]
+                display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[
+                    len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):
+                ]
             else:
                 display = NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())
             entryfield.insert(0, '/'.join(display))
@@ -632,7 +815,10 @@ class PreferencesDialog(tk.Toplevel):
                    (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
                    (self.out_ship.get() and config.OUT_SHIP) +
                    (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY)))
-        config.set('outdir', self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get())
+        config.set(
+            'outdir',
+            self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get()
+        )
 
         logdir = self.logdir.get()
         if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
