@@ -181,7 +181,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # position over parent
         if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+            self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
 
         # remove decoration
         if platform == 'win32':
@@ -569,7 +569,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Button(
             plugsframe,
             text=_('Open'),  # Button that opens a folder in Explorer/Finder
-            command=lambda: webbrowser.open('file:///%s' % plugdir.get())
+            command=lambda: webbrowser.open(f'file:///{plugdir.get()}')
         ).grid(row=10, column=1, padx=(0, PADX), sticky=tk.NSEW)
 
         nb.Label(
@@ -589,7 +589,7 @@ class PreferencesDialog(tk.Toplevel):
                 if plugin.name == plugin.folder:
                     label = nb.Label(plugsframe, text=plugin.name)
                 else:
-                    label = nb.Label(plugsframe, text='%s (%s)' % (plugin.folder, plugin.name))
+                    label = nb.Label(plugsframe, text=f'{plugin.folder} ({plugin.name})')
                 label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
 
         ############################################################
@@ -653,7 +653,7 @@ class PreferencesDialog(tk.Toplevel):
             if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
                                             SIZE(position.right - position.left, position.bottom - position.top),
                                             0x10000, None, position):
-                self.geometry("+%d+%d" % (position.left, position.top))
+                self.geometry("+{position.left}+{position.top}")
 
     def cmdrchanged(self, event=None):
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
