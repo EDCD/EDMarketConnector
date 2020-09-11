@@ -3,6 +3,7 @@
 # Command-line interface. Requires prior setup through the GUI.
 #
 
+
 import argparse
 import json
 import logging
@@ -16,7 +17,6 @@ from typing import Any, Optional
 import collate
 import commodity
 import companion
-import eddn
 import EDMCLogging
 import edshipyard
 import l10n
@@ -29,6 +29,13 @@ from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater
 
+sys.path.append(config.internal_plugin_dir)
+# This import must be after the sys.path.append.
+# The sys.path.append has to be after `import sys` and `from config import config`
+# isort: off
+import eddn  # noqa: E402
+# isort: on
+
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
 
@@ -37,7 +44,6 @@ l10n.Translations.install_dummy()
 logger = EDMCLogging.Logger(appcmdname).get_logger()
 logger.setLevel(logging.INFO)
 
-sys.path.append(config.internal_plugin_dir)
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
