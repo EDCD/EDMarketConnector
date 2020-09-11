@@ -1062,13 +1062,18 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
     Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
 
     root = tk.Tk(className=appname.lower())
+
+    # UI Scaling
+    """
+    We scale the UI relative to what we find tk-scaling is on startup.
+    """
     ui_scale = config.getint('ui_scale')
     if not ui_scale:
-        ui_scale = 0
+        ui_scale = 100
         config.set('ui_scale', ui_scale)
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
-    if ui_scale != 0:
-        root.tk.call('tk', 'scaling', float(ui_scale) / 100.0)
+    logger.debug(f'Default tk scaling = {theme.default_ui_scale}')
+    root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
     app = AppWindow(root)
 
     def messagebox_not_py3():

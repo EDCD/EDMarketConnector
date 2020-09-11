@@ -339,6 +339,13 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
 
         # UI Scaling
+        """
+        The provided UI Scale setting is a percentage value relative to the
+        tk-scaling setting on startup.
+
+        So, if at startup we find tk-scaling is 1.33 and have a user setting
+        of 200 we'll end up setting 2.66 as the tk-scaling value.
+        """
         ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
         nb.Label(themeframe, text=_('UI Scale Percentage')).grid(row=23, padx=PADX, pady=2*PADY, sticky=tk.W)
         self.ui_scale = tk.IntVar()
@@ -347,8 +354,8 @@ class PreferencesDialog(tk.Toplevel):
             themeframe,
             variable=self.ui_scale,
             orient=tk.HORIZONTAL,
-            length=300,
-            from_=0,
+            length=300 * (float(config.getint('ui_scale')) / 100.0 * theme.default_ui_scale),
+            from_=10,
             to=400,
             tickinterval=50,
             resolution=10,
@@ -356,7 +363,7 @@ class PreferencesDialog(tk.Toplevel):
         self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
         self.ui_scaling_defaultis = nb.Label(
             themeframe,
-            text=_('0 means Default{CR}Restart Required for{CR}changes to take effect!')
+            text=_('100 means Default{CR}Restart Required for{CR}changes to take effect!')
         ).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
 
         # Always on top
