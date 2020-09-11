@@ -4,9 +4,9 @@ import tkinter as tk
 import webbrowser
 from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
-from tkinter import colorchooser as tkColorChooser
+from tkinter import colorchooser as tkColorChooser  # type: ignore
 from tkinter import ttk
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import myNotebook as nb
 import plug
@@ -98,10 +98,12 @@ prefsVersion = PrefsVersion()
 ###########################################################################
 
 if platform == 'darwin':
-    import objc
-    from Foundation import NSFileManager
+    import objc  # type: ignore
+    from Foundation import NSFileManager  # type: ignore
     try:
-        from ApplicationServices import AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
+        from ApplicationServices import (  # type: ignore
+            AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
+        )
     except ImportError:
         HIServices = objc.loadBundle(
             'HIServices',
@@ -117,11 +119,12 @@ if platform == 'darwin':
 
         objc.loadBundleVariables(HIServices, globals(), [('kAXTrustedCheckOptionPrompt', '@^{__CFString=}')])
 
-    was_accessible_at_launch = AXIsProcessTrusted()
+    was_accessible_at_launch = AXIsProcessTrusted()  # type: ignore
 
 elif platform == 'win32':
     # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
     import ctypes
+    import ctypes.windll  # type: ignore # I promise pylance, its there.
     from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
 
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
