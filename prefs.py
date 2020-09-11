@@ -6,6 +6,7 @@ from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
 from tkinter import colorchooser as tkColorChooser
 from tkinter import ttk
+from typing import Callable, TYPE_CHECKING
 
 import myNotebook as nb
 import plug
@@ -18,6 +19,10 @@ from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = logging.getLogger(appname)
+
+if TYPE_CHECKING:
+    def _(x: str) -> str:
+        return x
 
 ###########################################################################
 # Versioned preferences, so we know whether to set an 'on' default on
@@ -97,7 +102,7 @@ if platform == 'darwin':
     from Foundation import NSFileManager
     try:
         from ApplicationServices import AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
-    except:
+    except ImportError:
         HIServices = objc.loadBundle(
             'HIServices',
             globals(),
@@ -111,12 +116,13 @@ if platform == 'darwin':
         )
 
         objc.loadBundleVariables(HIServices, globals(), [('kAXTrustedCheckOptionPrompt', '@^{__CFString=}')])
+
     was_accessible_at_launch = AXIsProcessTrusted()
 
 elif platform == 'win32':
     # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
     import ctypes
-    from ctypes.wintypes import *
+    from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
 
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
     SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
@@ -157,7 +163,7 @@ elif platform == 'win32':
         GetParent.argtypes = [HWND]
         GetWindowRect = ctypes.windll.user32.GetWindowRect
         GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-    except:  # Not supported under Wine 4.0
+    except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None
 
 
@@ -718,7 +724,7 @@ class PreferencesDialog(tk.Toplevel):
                         display.append(buf.value)
                     else:
                         display.append(components[i])
-                except:
+                except Exception:
                     display.append(components[i])
             entryfield.insert(0, '\\'.join(display))
 
@@ -876,6 +882,6 @@ class PreferencesDialog(tk.Toplevel):
                 anchor = [x for x in pane.anchors() if x.name() == 'Privacy_Accessibility'][0]
                 anchor.reveal()
                 prefs.activate()
-            except:
+            except Exception:
                 AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
             self.parent.event_generate('<<Quit>>', when="tail")
