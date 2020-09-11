@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 # May be imported by plugins
 
 
-class PrefsVersion(object):
+class PrefsVersion:
     versions = {
         '0.0.0.0': 1,
         '1.0.0.0': 2,
