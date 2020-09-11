@@ -1,6 +1,29 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta4
+===
+
+**Users of prior 4.1.0 betas who have set a non-default UI Scale probably want
+to set it to default (0 or 0.0 in the older versions) before installing this
+version.**
+
+This is mostly another iteration on the UI Scaling functionality, but also
+fixes EDMC.exe to actually work again.
+
+* Fix import order in EDMC.py so the CL utility actually runs.
+* This also involved updating the *development* modules we use, you only need
+  to worry if you're using flake8 or the like in helping develop this
+  application.
+* UI Scaling is now versus what it would otherwise have been at startup.
+    1. 100 is now the default.
+    1. If you select 0 it will become 100 on the next startup.
+    1. The UI Scale bar will now size correctly per current scaling rather
+       than getting ahead of itself and sizing as per the next-start scaling
+       you now have set.
+    1. We now strictly have a range of 10% to 400% of your default scaling
+       rather than a somewhat arbitrary range that hopefully includes it.
+
 Pre-Release 4.1.0-beta3
 ===
 
