@@ -526,3 +526,9 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} требуется разрешение на использование глобальных сочетаний клавиш";
 
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scaling" = "Масштабирование интерфейса";
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Уровень лога
+  ";

@@ -490,6 +490,9 @@
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualizacja";
 
+/* Option to use alternate URL method on shipyard links [prefs.py] */
+"Use alternate URL method" = "Użyj alternatywnej metody URL";
+
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Wartość";
 
@@ -522,4 +525,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} wymaga uprawnień by{CR}móc korzystać ze skrótów klawiszowych.";
-

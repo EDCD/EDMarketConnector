@@ -1,3 +1,12 @@
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Procenta UI škálování";
+
+
+/* Text describing that value '0' means 'default', and changes require a restart [prefs.py] */
+"0 means Default{CR}Restart Required for{CR}changes to take effect!" = "0 je výchozí hodnota{CR}Je potřeba restartovat{CR}aby se změna projevila!";
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 je výchozí hodnota{CR}je potřeba restartovat,{CR}aby se změna projevila!";
+
 /* Language name */
 "!Language" = "Čeština";
 
@@ -526,3 +535,8 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} vyžaduje oprávnění pro použití klávesových zkratek";
 
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scaling" = "UI škálování";
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Míra logování";

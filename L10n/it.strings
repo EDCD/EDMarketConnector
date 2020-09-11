@@ -526,3 +526,8 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
 
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scaling" = "Adattamento UI";
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Livello di Log";
