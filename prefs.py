@@ -76,6 +76,7 @@ class PrefsVersion:
         if addedAfter not in self.versions:
             # Assume it was added at the start
             aa = 1
+
         else:
             aa = self.versions[addedAfter]
             # Sanity check, if something was added after then current should be greater
@@ -104,6 +105,7 @@ if platform == 'darwin':
         from ApplicationServices import (  # type: ignore
             AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
         )
+
     except ImportError:
         HIServices = objc.loadBundle(
             'HIServices',
@@ -166,12 +168,12 @@ elif platform == 'win32':
         GetParent.argtypes = [HWND]
         GetWindowRect = ctypes.windll.user32.GetWindowRect
         GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
+
     except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None
 
 
 class PreferencesDialog(tk.Toplevel):
-
     def __init__(self, parent, callback):
         tk.Toplevel.__init__(self, parent)
 
@@ -189,9 +191,11 @@ class PreferencesDialog(tk.Toplevel):
         # remove decoration
         if platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
+
         elif platform == 'darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
+
         self.resizable(tk.FALSE, tk.FALSE)
 
         self.cmdr = False  # Note if Cmdr changes in the Journal
@@ -213,6 +217,7 @@ class PreferencesDialog(tk.Toplevel):
 
         if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
             output = config.OUT_SHIP  # default settings
+
         else:
             output = config.getint('output')
 
@@ -328,6 +333,7 @@ class PreferencesDialog(tk.Toplevel):
                 if AXIsProcessTrusted():
                     nb.Label(configframe, text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
                              foreground='firebrick').grid(padx=PADX, sticky=tk.W)  # Shortcut settings prompt on OSX
+
                 else:
                     # Shortcut settings prompt on OSX
                     nb.Label(
@@ -339,6 +345,7 @@ class PreferencesDialog(tk.Toplevel):
                     ).grid(columnspan=4, padx=PADX, sticky=tk.W)
                     nb.Button(configframe, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
                         padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
+
             else:
                 self.hotkey_text = nb.Entry(configframe, width=(platform == 'darwin' and 20 or 30), justify=tk.CENTER)
                 self.hotkey_text.insert(
@@ -348,6 +355,7 @@ class PreferencesDialog(tk.Toplevel):
                         self.hotkey_code, self.hotkey_mods
                     ) or _('None')
                 )
+
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
                 self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
                 self.hotkey_text.grid(row=20, column=1, columnspan=2, pady=(5, 0), sticky=tk.W)
@@ -395,17 +403,21 @@ class PreferencesDialog(tk.Toplevel):
         )
         # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
         nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)
-        self.shipyard_button = nb.OptionMenu(configframe, self.shipyard_provider,
-                                             self.shipyard_provider.get(), *plug.provides('shipyard_url'))
+        self.shipyard_button = nb.OptionMenu(
+            configframe, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
+        )
+
         self.shipyard_button.configure(width=15)
         self.shipyard_button.grid(row=31, column=1, sticky=tk.W)
         # Option for alternate URL opening
         self.alt_shipyard_open = tk.IntVar(value=config.getint('use_alt_shipyard_open'))
-        self.alt_shipyard_open_btn = nb.Checkbutton(configframe,
-                                                    text=_('Use alternate URL method'),
-                                                    variable=self.alt_shipyard_open,
-                                                    command=self.alt_shipyard_open_changed,
-                                                    )
+        self.alt_shipyard_open_btn = nb.Checkbutton(
+            configframe,
+            text=_('Use alternate URL method'),
+            variable=self.alt_shipyard_open,
+            command=self.alt_shipyard_open_changed,
+        )
+
         self.alt_shipyard_open_btn.grid(row=31, column=2, sticky=tk.W)
 
         self.system_provider = tk.StringVar(
@@ -420,6 +432,7 @@ class PreferencesDialog(tk.Toplevel):
             self.system_provider.get(),
             *plug.provides('system_url')
         )
+
         self.system_button.configure(width=15)
         self.system_button.grid(row=32, column=1, sticky=tk.W)
 
@@ -464,6 +477,7 @@ class PreferencesDialog(tk.Toplevel):
             self.select_loglevel.get(),
             *loglevels
         )
+
         self.loglevel_dropdown.configure(width=15)
         self.loglevel_dropdown.grid(row=35, column=1, sticky=tk.W)
 
@@ -493,6 +507,7 @@ class PreferencesDialog(tk.Toplevel):
             columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(
             columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme setting
+
         if platform == 'win32':
             nb.Radiobutton(
                 themeframe,
@@ -501,6 +516,7 @@ class PreferencesDialog(tk.Toplevel):
                 value=2,
                 command=self.themevarchanged
             ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
+
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
         self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
 
@@ -511,6 +527,7 @@ class PreferencesDialog(tk.Toplevel):
             background='grey4',
             command=lambda: self.themecolorbrowse(0)
         )
+
         self.theme_button_0.grid(row=20, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
         self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
         self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
@@ -520,6 +537,7 @@ class PreferencesDialog(tk.Toplevel):
             background='grey4',
             command=lambda: self.themecolorbrowse(1)
         )
+
         self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
 
         # UI Scaling
@@ -544,6 +562,7 @@ class PreferencesDialog(tk.Toplevel):
             tickinterval=50,
             resolution=10,
         )
+
         self.uiscale_bar.grid(row=23, column=1, sticky=tk.W)
         self.ui_scaling_defaultis = nb.Label(
             themeframe,
@@ -594,9 +613,11 @@ class PreferencesDialog(tk.Toplevel):
                 plugsframe,
                 text=_('Enabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=PADX, sticky=tk.W)
+
             for plugin in enabled_plugins:
                 if plugin.name == plugin.folder:
                     label = nb.Label(plugsframe, text=plugin.name)
+
                 else:
                     label = nb.Label(plugsframe, text=f'{plugin.folder} ({plugin.name})')
                 label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
@@ -607,14 +628,17 @@ class PreferencesDialog(tk.Toplevel):
         if len(plug.PLUGINS_not_py3):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
             nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=PADX, sticky=tk.W)
+
             for plugin in plug.PLUGINS_not_py3:
                 if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
                     nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
-            HyperlinkLabel(plugsframe, text=_('Information on migrating plugins'),
-                           background=nb.Label().cget('background'),
-                           url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
-                           underline=True
-                           ).grid(columnspan=2, padx=PADX, sticky=tk.W)
+
+            HyperlinkLabel(
+                plugsframe, text=_('Information on migrating plugins'),
+                background=nb.Label().cget('background'),
+                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
+                underline=True
+            ).grid(columnspan=2, padx=PADX, sticky=tk.W)
         ############################################################
 
         disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
@@ -632,6 +656,7 @@ class PreferencesDialog(tk.Toplevel):
 
         if platform == 'darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
+
         else:
             buttonframe = ttk.Frame(frame)
             buttonframe.grid(padx=PADX, pady=PADX, sticky=tk.NSEW)
@@ -659,9 +684,11 @@ class PreferencesDialog(tk.Toplevel):
         if platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
-            if CalculatePopupWindowPosition(POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                                            SIZE(position.right - position.left, position.bottom - position.top),
-                                            0x10000, None, position):
+            if CalculatePopupWindowPosition(
+                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
+                SIZE(position.right - position.left, position.bottom - position.top),
+                0x10000, None, position
+            ):
                 self.geometry("+{position.left}+{position.top}")
 
     def cmdrchanged(self, event=None):
@@ -669,6 +696,7 @@ class PreferencesDialog(tk.Toplevel):
             # Cmdr has changed - update settings
             if self.cmdr is not False:		# Don't notify on first run
                 plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
+
             self.cmdr = monitor.cmdr
             self.is_beta = monitor.is_beta
 
@@ -726,16 +754,19 @@ class PreferencesDialog(tk.Toplevel):
             components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
             pidsRes = ctypes.c_int()
-            for i in range(start, len(components)):
+            for i in range(start, len(components)):  # TODO: enumerate
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
                             LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
                         display.append(buf.value)
+
                     else:
                         display.append(components[i])
+
                 except Exception:
                     display.append(components[i])
-            entryfield.insert(0, '\\'.join(display))
+
+            entryfield.insert(0, '\\'.join(display))  # TODO raw string
 
         #                                                   None if path doesn't exist
         elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
@@ -743,19 +774,24 @@ class PreferencesDialog(tk.Toplevel):
                 display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[
                     len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):
                 ]
+
             else:
                 display = NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())
+
             entryfield.insert(0, '/'.join(display))
         else:
             if pathvar.get().startswith(config.home):
                 entryfield.insert(0, '~' + pathvar.get()[len(config.home):])
+
             else:
                 entryfield.insert(0, pathvar.get())
+
         entryfield['state'] = 'readonly'
 
     def logdir_reset(self):
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
+
         self.outvarchanged()
 
     def disable_autoappupdatecheckingame_changed(self):
@@ -767,7 +803,9 @@ class PreferencesDialog(tk.Toplevel):
 
     def themecolorbrowse(self, index):
         (rgb, color) = tkColorChooser.askcolor(
-            self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent)
+            self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent
+        )
+
         if color:
             self.theme_colors[index] = color
             self.themevarchanged()
@@ -807,29 +845,37 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_only_btn['state'] = tk.NORMAL
                 self.hotkey_play_btn['state'] = tk.NORMAL
                 self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
+
         else:
             if good is None: 	# clear
                 (self.hotkey_code, self.hotkey_mods) = (0, 0)
             event.widget.delete(0, tk.END)
+
             if self.hotkey_code:
                 event.widget.insert(0, hotkeymgr.display(self.hotkey_code, self.hotkey_mods))
                 self.hotkey_only_btn['state'] = tk.NORMAL
                 self.hotkey_play_btn['state'] = tk.NORMAL
+
             else:
                 event.widget.insert(0, _('None'))  # No hotkey/shortcut currently defined
                 self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
+
             self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
+
         return('break')  # stops further processing - insertion, Tab traversal etc
 
     def apply(self):
         config.set('PrefsVersion', prefsVersion.stringToSerial(appversion))
-        config.set('output',
-                   (self.out_td.get() and config.OUT_MKT_TD) +
-                   (self.out_csv.get() and config.OUT_MKT_CSV) +
-                   (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
-                   (self.out_ship.get() and config.OUT_SHIP) +
-                   (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY)))
+        config.set(
+            'output',
+            (self.out_td.get() and config.OUT_MKT_TD) +
+            (self.out_csv.get() and config.OUT_MKT_CSV) +
+            (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
+            (self.out_ship.get() and config.OUT_SHIP) +
+            (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY))
+        )
+
         config.set(
             'outdir',
             self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get()
@@ -838,6 +884,7 @@ class PreferencesDialog(tk.Toplevel):
         logdir = self.logdir.get()
         if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
             config.set('journaldir', '')  # default location
+
         else:
             config.set('journaldir', logdir)
 
@@ -846,6 +893,7 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
+
         config.set('shipyard_provider', self.shipyard_provider.get())
         config.set('system_provider', self.system_provider.get())
         config.set('station_provider', self.station_provider.get())
@@ -866,6 +914,7 @@ class PreferencesDialog(tk.Toplevel):
         # Notify
         if self.callback:
             self.callback()
+
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
@@ -874,6 +923,7 @@ class PreferencesDialog(tk.Toplevel):
         if self.cmdrchanged_alarm is not None:
             self.after_cancel(self.cmdrchanged_alarm)
             self.cmdrchanged_alarm = None
+
         self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
         self.destroy()
 
@@ -891,6 +941,8 @@ class PreferencesDialog(tk.Toplevel):
                 anchor = [x for x in pane.anchors() if x.name() == 'Privacy_Accessibility'][0]
                 anchor.reveal()
                 prefs.activate()
+
             except Exception:
                 AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
+
             self.parent.event_generate('<<Quit>>', when="tail")
