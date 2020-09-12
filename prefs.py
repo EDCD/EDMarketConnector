@@ -495,7 +495,7 @@ class PreferencesDialog(tk.Toplevel):
             current_loglevel = logging.getLevelName(logging.INFO)
         self.select_loglevel = tk.StringVar(value=str(current_loglevel))
         loglevels = [
-            logging.getLevelName(l) for l in (
+            logging.getLevelName(level) for level in (
                 logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
             )
         ]
@@ -781,8 +781,8 @@ class PreferencesDialog(tk.Toplevel):
             mustexist=tk.TRUE
         )
 
-        if d:
-            pathvar.set(d)
+        if directory:
+            pathvar.set(directory)
             self.outvarchanged()
 
     def displaypath(self, pathvar: tk.StringVar, entryfield: tk.Entry) -> None:
