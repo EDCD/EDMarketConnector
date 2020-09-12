@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""EDMC preferences library."""
+
 import logging
 import tkinter as tk
 import webbrowser
@@ -6,7 +8,7 @@ from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
 from tkinter import colorchooser as tkColorChooser  # type: ignore
 from tkinter import ttk
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import myNotebook as nb
 import plug
@@ -24,6 +26,8 @@ if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
 
+# TODO: Decouple this from platform as far as possible
+
 ###########################################################################
 # Versioned preferences, so we know whether to set an 'on' default on
 # 'new' preferences, or not.
@@ -33,6 +37,12 @@ if TYPE_CHECKING:
 
 
 class PrefsVersion:
+    """
+    PrefsVersion contains versioned preferences.
+
+    It allows new defaults to be set as they are added if they are found to be missing
+    """
+
     versions = {
         '0.0.0.0': 1,
         '1.0.0.0': 2,
@@ -47,7 +57,7 @@ class PrefsVersion:
     def __init__(self):
         return
 
-    def stringToSerial(self, versionStr: str) -> int:
+    def stringToSerial(self, versionStr: str) -> int:  # noqa: N802 # used in plugins
         """
         Convert a version string into a preferences version serial number.
 
@@ -66,7 +76,15 @@ class PrefsVersion:
     #
     # config.get('PrefsVersion') is the version preferences we last saved for
     ###########################################################################
-    def shouldSetDefaults(self, addedAfter: str, oldTest: bool = True) -> bool:
+    def shouldSetDefaults(self, addedAfter: str, oldTest: bool = True) -> bool:  # noqa: N802,N803 # used in plugins
+        """
+        Whether or not defaults should be set if they were added after the specified version.
+
+        :param addedAfter: The version after which these settings were added
+        :param oldTest: Default, if we have no current settings version, defaults to True
+        :raises ValueError: on serial number after the current latest
+        :return: bool indicating the answer
+        """
         pv = config.getint('PrefsVersion')
         # If no PrefsVersion yet exists then return oldTest
         if not pv:
@@ -81,7 +99,7 @@ class PrefsVersion:
             aa = self.versions[addedAfter]
             # Sanity check, if something was added after then current should be greater
             if aa >= self.versions['current']:
-                raise Exception(
+                raise ValueError(
                     'ERROR: Call to prefs.py:PrefsVersion.shouldSetDefaults() with '
                     '"addedAfter" >= current latest in "versions" table.'
                     '  You probably need to increase "current" serial number.'
@@ -95,7 +113,7 @@ class PrefsVersion:
     ###########################################################################
 
 
-prefsVersion = PrefsVersion()
+prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
 ###########################################################################
 
 if platform == 'darwin':
@@ -143,6 +161,13 @@ elif platform == 'win32':
     BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
 
     class BROWSEINFO(ctypes.Structure):
+        """
+        BROWSEINFO class for use in calls to win32 file browser invocation.
+
+        See https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/ns-shlobj_core-browseinfoa for more
+        information regarding this structure
+        """
+
         _fields_ = [
             ("hwndOwner", HWND),
             ("pidlRoot", LPVOID),
@@ -174,7 +199,9 @@ elif platform == 'win32':
 
 
 class PreferencesDialog(tk.Toplevel):
-    def __init__(self, parent, callback):
+    """The EDMC preferences dialog."""
+
+    def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
@@ -200,7 +227,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.cmdr = False  # Note if Cmdr changes in the Journal
         self.is_beta = False  # Note if Beta status changes in the Journal
-        self.cmdrchanged_alarm = None
+        self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
@@ -329,6 +356,7 @@ class PreferencesDialog(tk.Toplevel):
                      _('Keyboard shortcut') or  # Hotkey/Shortcut settings prompt on OSX
                      _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
                      ).grid(row=20, padx=PADX, sticky=tk.W)
+
             if platform == 'darwin' and not was_accessible_at_launch:
                 if AXIsProcessTrusted():
                     nb.Label(configframe, text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
@@ -343,6 +371,7 @@ class PreferencesDialog(tk.Toplevel):
                         ),
                         foreground='firebrick'
                     ).grid(columnspan=4, padx=PADX, sticky=tk.W)
+
                     nb.Button(configframe, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
                         padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
 
@@ -692,6 +721,11 @@ class PreferencesDialog(tk.Toplevel):
                 self.geometry("+{position.left}+{position.top}")
 
     def cmdrchanged(self, event=None):
+        """
+        Notify plugins of cmdr change.
+
+        :param event: Unused, defaults to None
+        """
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
             if self.cmdr is not False:		# Don't notify on first run
@@ -703,7 +737,7 @@ class PreferencesDialog(tk.Toplevel):
         # Poll
         self.cmdrchanged_alarm = self.after(1000, self.cmdrchanged)
 
-    def tabchanged(self, event):
+    def tabchanged(self, event: tk.Event) -> None:
         self.outvarchanged()
         if platform == 'darwin':
             # Hack to recompute size so that buttons show up under Mojave
@@ -714,7 +748,7 @@ class PreferencesDialog(tk.Toplevel):
             temp.update_idletasks()
             temp.destroy()
 
-    def outvarchanged(self, event=None):
+    def outvarchanged(self, event: Optional[tk.Event] = None) -> None:
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
 
@@ -733,6 +767,12 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry['state'] = local and 'readonly' or tk.DISABLED
 
     def filebrowse(self, title, pathvar):
+        """
+        Open a directory selection dialog.
+
+        :param title: Title of the window
+        :param pathvar: the path to start the dialog on
+        """
         import tkinter.filedialog
         d = tkinter.filedialog.askdirectory(
             parent=self,
@@ -745,7 +785,14 @@ class PreferencesDialog(tk.Toplevel):
             pathvar.set(d)
             self.outvarchanged()
 
-    def displaypath(self, pathvar, entryfield):
+    def displaypath(self, pathvar: tk.StringVar, entryfield: tk.Entry) -> None:
+        """
+        Display a path in a locked tk.Entry.
+
+        :param pathvar: the path to display
+        :param entryfield: the entry in which to display the path
+        """
+        # TODO: This is awful.
         entryfield['state'] = tk.NORMAL  # must be writable to update
         entryfield.delete(0, tk.END)
         if platform == 'win32':
@@ -754,7 +801,7 @@ class PreferencesDialog(tk.Toplevel):
             components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
             pidsRes = ctypes.c_int()
-            for i in range(start, len(components)):  # TODO: enumerate
+            for i in range(start, len(components)):
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
                             LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
@@ -766,7 +813,7 @@ class PreferencesDialog(tk.Toplevel):
                 except Exception:
                     display.append(components[i])
 
-            entryfield.insert(0, '\\'.join(display))  # TODO raw string
+            entryfield.insert(0, '\\'.join(display))
 
         #                                                   None if path doesn't exist
         elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
@@ -788,21 +835,29 @@ class PreferencesDialog(tk.Toplevel):
 
         entryfield['state'] = 'readonly'
 
-    def logdir_reset(self):
+    def logdir_reset(self) -> None:
+        """Reset the log dir to the default."""
         if config.default_journal_dir:
             self.logdir.set(config.default_journal_dir)
 
         self.outvarchanged()
 
-    def disable_autoappupdatecheckingame_changed(self):
+    def disable_autoappupdatecheckingame_changed(self) -> None:
+        """Save out the auto update check in game config."""
         config.set('disable_autoappupdatecheckingame', self.disable_autoappupdatecheckingame.get())
         # If it's now False, re-enable WinSparkle ?  Need access to the AppWindow.updater variable to call down
 
-    def alt_shipyard_open_changed(self):
+    def alt_shipyard_open_changed(self) -> None:
+        """Save out the status of the alt shipyard config."""
         config.set('use_alt_shipyard_open', self.alt_shipyard_open.get())
 
-    def themecolorbrowse(self, index):
-        (rgb, color) = tkColorChooser.askcolor(
+    def themecolorbrowse(self, index: int) -> None:
+        """
+        Show a color browser.
+
+        :param index: Index of the color type, 0 for dark text, 1 for dark highlight
+        """
+        (_, color) = tkColorChooser.askcolor(
             self.theme_colors[index], title=self.theme_prompts[index], parent=self.parent
         )
 
@@ -810,7 +865,8 @@ class PreferencesDialog(tk.Toplevel):
             self.theme_colors[index] = color
             self.themevarchanged()
 
-    def themevarchanged(self):
+    def themevarchanged(self) -> None:
+        """Update theme examples."""
         self.theme_button_0['foreground'], self.theme_button_1['foreground'] = self.theme_colors
 
         state = self.theme.get() and tk.NORMAL or tk.DISABLED
@@ -819,13 +875,15 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_0['state'] = state
         self.theme_button_1['state'] = state
 
-    def hotkeystart(self, event):
+    def hotkeystart(self, event: 'tk.Event[Any]') -> None:
+        """Start listening for hotkeys."""
         event.widget.bind('<KeyPress>', self.hotkeylisten)
         event.widget.bind('<KeyRelease>', self.hotkeylisten)
         event.widget.delete(0, tk.END)
         hotkeymgr.acquire_start()
 
-    def hotkeyend(self, event):
+    def hotkeyend(self, event: 'tk.Event[Any]') -> None:
+        """Stop listening for hotkeys."""
         event.widget.unbind('<KeyPress>')
         event.widget.unbind('<KeyRelease>')
         hotkeymgr.acquire_stop()  # in case focus was lost while in the middle of acquiring
@@ -833,7 +891,13 @@ class PreferencesDialog(tk.Toplevel):
         self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(
             self.hotkey_code, self.hotkey_mods) or _('None'))  # No hotkey/shortcut currently defined
 
-    def hotkeylisten(self, event):
+    def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
+        """
+        Hotkey handler.
+
+        :param event: tkinter event for the hotkey
+        :return: "break" as a literal, to halt processing
+        """
         good = hotkeymgr.fromevent(event)
         if good:
             (hotkey_code, hotkey_mods) = good
@@ -863,9 +927,10 @@ class PreferencesDialog(tk.Toplevel):
 
             self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
 
-        return('break')  # stops further processing - insertion, Tab traversal etc
+        return 'break'  # stops further processing - insertion, Tab traversal etc
 
-    def apply(self):
+    def apply(self) -> None:
+        """Update the config with the options set on the dialog."""
         config.set('PrefsVersion', prefsVersion.stringToSerial(appversion))
         config.set(
             'output',
@@ -919,7 +984,8 @@ class PreferencesDialog(tk.Toplevel):
 
         self._destroy()
 
-    def _destroy(self):
+    def _destroy(self) -> None:
+        """widget.destroy wrapper that does some extra cleanup."""
         if self.cmdrchanged_alarm is not None:
             self.after_cancel(self.cmdrchanged_alarm)
             self.cmdrchanged_alarm = None
@@ -928,7 +994,7 @@ class PreferencesDialog(tk.Toplevel):
         self.destroy()
 
     if platform == 'darwin':
-        def enableshortcuts(self):
+        def enableshortcuts(self) -> None:
             self.apply()
             # popup System Preferences dialog
             try:
