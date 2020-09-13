@@ -8,7 +8,7 @@ from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
 from tkinter import colorchooser as tkColorChooser  # type: ignore
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import myNotebook as nb
 import plug
@@ -202,17 +202,19 @@ class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
     def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
+        # TODO: Ive read books shorter than this method.
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
         self.callback = callback
-        self.title(platform == 'darwin' and _('Preferences') or _('Settings'))
+        self.title(_('Preferences') if platform == 'darwin' else _('Settings'))
 
         if parent.winfo_viewable():
             self.transient(parent)
 
         # position over parent
         if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+            # TODO this is fixed supposedly.
             self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
 
         # remove decoration
@@ -225,8 +227,8 @@ class PreferencesDialog(tk.Toplevel):
 
         self.resizable(tk.FALSE, tk.FALSE)
 
-        self.cmdr = False  # Note if Cmdr changes in the Journal
-        self.is_beta = False  # Note if Beta status changes in the Journal
+        self.cmdr: Union[str, bool, None] = False  # Note if Cmdr changes in the Journal
+        self.is_beta: bool = False  # Note if Beta status changes in the Journal
         self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
 
         frame = ttk.Frame(self)
@@ -253,7 +255,7 @@ class PreferencesDialog(tk.Toplevel):
         #      the middle without worrying about updating `row=X` elements.
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
-        self.out_csv = tk.IntVar(value=(output & config.OUT_MKT_CSV) and 1)
+        self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
             outframe,
             text=_('Market data in CSV format file'),
@@ -262,7 +264,7 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         self.out_csv_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_td = tk.IntVar(value=(output & config.OUT_MKT_TD) and 1)
+        self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(
             outframe,
             text=_('Market data in Trade Dangerous format file'),
@@ -271,7 +273,7 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
-        self.out_ship = tk.IntVar(value=(output & config.OUT_SHIP and 1))
+        self.out_ship = tk.IntVar(value=1 if (output & config.OUT_SHIP) else 0)
 
         # Output setting
         self.out_ship_button = nb.Checkbutton(
@@ -301,7 +303,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry.grid(columnspan=2, padx=PADX, pady=(0, PADY), sticky=tk.EW)
         self.outbutton = nb.Button(
             outframe,
-            text=(platform == 'darwin' and _('Change...') or _('Browse...')),
+            text=(_('Change...') if platform == 'darwin' else _('Browse...')),
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
 
@@ -332,7 +334,7 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0, PADY), sticky=tk.EW)
         self.logbutton = nb.Button(
             configframe,
-            text=(platform == 'darwin' and _('Change...') or _('Browse...')),
+            text=(_('Change...') if platform == 'darwin' else _('Browse...')),
             command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir)
         )
 
@@ -343,7 +345,7 @@ class PreferencesDialog(tk.Toplevel):
                 configframe,
                 text=_('Default'),
                 command=self.logdir_reset,
-                state=config.get('journaldir') and tk.NORMAL or tk.DISABLED
+                state=tk.NORMAL if config.get('journaldir') else tk.DISABLED
             ).grid(row=10, column=2, pady=PADY, sticky=tk.EW)
 
         if platform in ['darwin', 'win32']:
@@ -352,10 +354,12 @@ class PreferencesDialog(tk.Toplevel):
             self.hotkey_mods = config.getint('hotkey_mods')
             self.hotkey_only = tk.IntVar(value=not config.getint('hotkey_always'))
             self.hotkey_play = tk.IntVar(value=not config.getint('hotkey_mute'))
-            nb.Label(configframe, text=platform == 'darwin' and
-                     _('Keyboard shortcut') or  # Hotkey/Shortcut settings prompt on OSX
-                     _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
-                     ).grid(row=20, padx=PADX, sticky=tk.W)
+            nb.Label(
+                configframe,
+                text=_('Keyboard shortcut') if  # Hotkey/Shortcut settings prompt on OSX
+                platform == 'darwin' else
+                _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
+            ).grid(row=20, padx=PADX, sticky=tk.W)
 
             if platform == 'darwin' and not was_accessible_at_launch:
                 if AXIsProcessTrusted():
@@ -376,13 +380,12 @@ class PreferencesDialog(tk.Toplevel):
                         padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
 
             else:
-                self.hotkey_text = nb.Entry(configframe, width=(platform == 'darwin' and 20 or 30), justify=tk.CENTER)
+                self.hotkey_text = nb.Entry(configframe, width=(20 if platform == 'darwin' else 30), justify=tk.CENTER)
                 self.hotkey_text.insert(
                     0,
                     # No hotkey/shortcut currently defined
-                    self.hotkey_code and hotkeymgr.display(  # type: ignore # Only shows up on darwin or windows
-                        self.hotkey_code, self.hotkey_mods
-                    ) or _('None')
+                    # TODO: display Only shows up on darwin or windows
+                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None')
                 )
 
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
@@ -394,7 +397,7 @@ class PreferencesDialog(tk.Toplevel):
                     configframe,
                     text=_('Only when Elite: Dangerous is the active app'),
                     variable=self.hotkey_only,
-                    state=self.hotkey_code and tk.NORMAL or tk.DISABLED
+                    state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
 
                 self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5, 0), sticky=tk.W)
@@ -404,7 +407,7 @@ class PreferencesDialog(tk.Toplevel):
                     configframe,
                     text=_('Play sound'),
                     variable=self.hotkey_play,
-                    state=self.hotkey_code and tk.NORMAL or tk.DISABLED
+                    state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
 
                 self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
@@ -449,9 +452,9 @@ class PreferencesDialog(tk.Toplevel):
 
         self.alt_shipyard_open_btn.grid(row=31, column=2, sticky=tk.W)
 
+        system_provider = config.get('system_provider')
         self.system_provider = tk.StringVar(
-            value=str(config.get('system_provider') in plug.provides('system_url')
-                      and config.get('system_provider') or 'EDSM')
+            value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
         )
 
         nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -465,9 +468,9 @@ class PreferencesDialog(tk.Toplevel):
         self.system_button.configure(width=15)
         self.system_button.grid(row=32, column=1, sticky=tk.W)
 
+        station_provider = config.get('station_provider')
         self.station_provider = tk.StringVar(
-            value=str(config.get('station_provider') in plug.provides('station_url')
-                      and config.get('station_provider') or 'eddb')
+            value=str(station_provider if station_provider in plug.provides('station_url') else 'eddb')
         )
 
         nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
@@ -494,11 +497,9 @@ class PreferencesDialog(tk.Toplevel):
         if not current_loglevel:
             current_loglevel = logging.getLevelName(logging.INFO)
         self.select_loglevel = tk.StringVar(value=str(current_loglevel))
-        loglevels = [
-            logging.getLevelName(level) for level in (
-                logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
-            )
-        ]
+        loglevels = list(
+            map(logging.getLevelName, (logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG))
+        )
 
         self.loglevel_dropdown = nb.OptionMenu(
             configframe,
@@ -635,7 +636,7 @@ class PreferencesDialog(tk.Toplevel):
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
         ).grid(columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
 
-        enabled_plugins = [x for x in plug.PLUGINS if x.folder and x.module]
+        enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if len(enabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
             nb.Label(
@@ -649,6 +650,7 @@ class PreferencesDialog(tk.Toplevel):
 
                 else:
                     label = nb.Label(plugsframe, text=f'{plugin.folder} ({plugin.name})')
+
                 label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
 
         ############################################################
@@ -670,7 +672,7 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(columnspan=2, padx=PADX, sticky=tk.W)
         ############################################################
 
-        disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
+        disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
         if len(disabled_plugins):
             ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
             nb.Label(
@@ -753,18 +755,18 @@ class PreferencesDialog(tk.Toplevel):
         self.displaypath(self.logdir, self.logdir_entry)
 
         logdir = self.logdir.get()
-        logvalid = logdir and exists(logdir)
+        logvalid = exists(logdir) if logdir else False
 
         self.out_label['state'] = tk.NORMAL
         self.out_csv_button['state'] = tk.NORMAL
         self.out_td_button['state'] = tk.NORMAL
         self.out_ship_button['state'] = tk.NORMAL
 
-        local = self.out_td.get() or self.out_csv.get() or self.out_ship.get()
-        self.out_auto_button['state'] = local and logvalid and tk.NORMAL or tk.DISABLED
-        self.outdir_label['state'] = local and tk.NORMAL or tk.DISABLED
-        self.outbutton['state'] = local and tk.NORMAL or tk.DISABLED
-        self.outdir_entry['state'] = local and 'readonly' or tk.DISABLED
+        local = any((self.out_td.get(), self.out_csv.get(), self.out_ship.get()))
+        self.out_auto_button['state'] = tk.NORMAL if local and logvalid else tk.DISABLED
+        self.outdir_label['state'] = tk.NORMAL if local else tk.DISABLED
+        self.outbutton['state'] = tk.NORMAL if local else tk.DISABLED
+        self.outdir_entry['state'] = tk.NORMAL if local else tk.DISABLED
 
     def filebrowse(self, title, pathvar):
         """
@@ -774,7 +776,7 @@ class PreferencesDialog(tk.Toplevel):
         :param pathvar: the path to start the dialog on
         """
         import tkinter.filedialog
-        d = tkinter.filedialog.askdirectory(
+        directory = tkinter.filedialog.askdirectory(
             parent=self,
             initialdir=expanduser(pathvar.get()),
             title=title,
@@ -796,7 +798,7 @@ class PreferencesDialog(tk.Toplevel):
         entryfield['state'] = tk.NORMAL  # must be writable to update
         entryfield.delete(0, tk.END)
         if platform == 'win32':
-            start = pathvar.get().lower().startswith(config.home.lower()) and len(config.home.split('\\')) or 0
+            start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
             display = []
             components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
@@ -869,7 +871,7 @@ class PreferencesDialog(tk.Toplevel):
         """Update theme examples."""
         self.theme_button_0['foreground'], self.theme_button_1['foreground'] = self.theme_colors
 
-        state = self.theme.get() and tk.NORMAL or tk.DISABLED
+        state = tk.NORMAL if self.theme.get() else tk.DISABLED
         self.theme_label_0['state'] = state
         self.theme_label_1['state'] = state
         self.theme_button_0['state'] = state
@@ -888,8 +890,10 @@ class PreferencesDialog(tk.Toplevel):
         event.widget.unbind('<KeyRelease>')
         hotkeymgr.acquire_stop()  # in case focus was lost while in the middle of acquiring
         event.widget.delete(0, tk.END)
-        self.hotkey_text.insert(0, self.hotkey_code and hotkeymgr.display(
-            self.hotkey_code, self.hotkey_mods) or _('None'))  # No hotkey/shortcut currently defined
+        self.hotkey_text.insert(
+            0,
+            # No hotkey/shortcut currently defined
+            hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None'))
 
     def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
         """
@@ -943,7 +947,7 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set(
             'outdir',
-            self.outdir.get().startswith('~') and join(config.home, self.outdir.get()[2:]) or self.outdir.get()
+            join(config.home, self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
         )
 
         logdir = self.logdir.get()
@@ -966,7 +970,7 @@ class PreferencesDialog(tk.Toplevel):
         edmclogger.get_streamhandler().setLevel(self.select_loglevel.get())
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
-        config.set('language', lang_codes.get(self.lang.get()) or '')
+        config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above
         Translations.install(config.get('language') or None)  # type: ignore # This sets self in weird ways.
 
         config.set('ui_scale', self.ui_scale.get())
@@ -990,7 +994,7 @@ class PreferencesDialog(tk.Toplevel):
             self.after_cancel(self.cmdrchanged_alarm)
             self.cmdrchanged_alarm = None
 
-        self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+        self.parent.wm_attributes('-topmost', 1 if config.getint('always_ontop') else 0)
         self.destroy()
 
     if platform == 'darwin':
