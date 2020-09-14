@@ -6,11 +6,12 @@ import tkinter as tk
 import webbrowser
 from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
-from tkinter import colorchooser as tkColorChooser  # type: ignore
+from tkinter import Variable, colorchooser as tkColorChooser  # type: ignore
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import myNotebook as nb
+from myNotebook import Notebook
 import plug
 from config import applongname, appname, appversion, config
 from EDMCLogging import edmclogger
@@ -202,7 +203,6 @@ class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
     def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
-        # TODO: Ive read books shorter than this method.
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
@@ -237,11 +237,57 @@ class PreferencesDialog(tk.Toplevel):
         notebook = nb.Notebook(frame)
         notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
 
-        PADX = 10
-        BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-        PADY = 2  # close spacing
+        self.PADX = 10
+        self.BUTTONX = 12  # indent Checkbuttons and Radiobuttons
+        self.PADY = 2  # close spacing
 
-        outframe = nb.Frame(notebook)
+        # Set up different tabs
+        # TODO: modify these to be "__create_$tab_tab" and have them return the frame rather than set it up themselves
+        self.__setup_output_tab(notebook)
+        self.__setup_plugin_tabs(notebook)
+        self.__setup_config_tab(notebook)
+        self.__setup_theme_tab(notebook)
+        self.__setup_plugin_tab(notebook)
+
+        if platform == 'darwin':
+            self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
+
+        else:
+            buttonframe = ttk.Frame(frame)
+            buttonframe.grid(padx=self.PADX, pady=self.PADX, sticky=tk.NSEW)
+            buttonframe.columnconfigure(0, weight=1)
+            ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
+            button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
+            button.grid(row=0, column=1, sticky=tk.E)
+            button.bind("<Return>", lambda event: self.apply())
+            self.protocol("WM_DELETE_WINDOW", self._destroy)
+
+        # Selectively disable buttons depending on output settings
+        self.cmdrchanged()
+        self.themevarchanged()
+
+        # disable hotkey for the duration
+        hotkeymgr.unregister()
+
+        # wait for window to appear on screen before calling grab_set
+        self.parent.update_idletasks()
+        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear ontop of parent on OSX & Linux
+        self.wait_visibility()
+        self.grab_set()
+
+        # Ensure fully on-screen
+        if platform == 'win32' and CalculatePopupWindowPosition:
+            position = RECT()
+            GetWindowRect(GetParent(self.winfo_id()), position)
+            if CalculatePopupWindowPosition(
+                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
+                SIZE(position.right - position.left, position.bottom - position.top),
+                0x10000, None, position
+            ):
+                self.geometry(f"+{position.left}+{position.top}")
+
+    def __setup_output_tab(self, root_notebook: nb.Notebook) -> None:
+        outframe = nb.Frame(root_notebook)
         outframe.columnconfigure(0, weight=1)
 
         if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
@@ -250,11 +296,16 @@ class PreferencesDialog(tk.Toplevel):
         else:
             output = config.getint('output')
 
+        row = 0
+
         # TODO: *All* of this needs to use a 'row' variable, incremented after
         #      adding one to keep track, so it's easier to insert new rows in
         #      the middle without worrying about updating `row=X` elements.
         self.out_label = nb.Label(outframe, text=_('Please choose what data to save'))
-        self.out_label.grid(columnspan=2, padx=PADX, sticky=tk.W)
+        self.out_label.grid(columnspan=2, padx=self.PADX, sticky=tk.W, row=row)
+
+        row += 1
+
         self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
             outframe,
@@ -262,8 +313,10 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.out_csv,
             command=self.outvarchanged
         )
+        self.out_csv_button.grid(columnspan=2, padx=self.BUTTONX, sticky=tk.W, row=row)
 
-        self.out_csv_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        row += 1
+
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(
             outframe,
@@ -271,9 +324,10 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.out_td,
             command=self.outvarchanged
         )
-
-        self.out_td_button.grid(columnspan=2, padx=BUTTONX, sticky=tk.W)
+        self.out_td_button.grid(columnspan=2, padx=self.BUTTONX, sticky=tk.W, row=row)
         self.out_ship = tk.IntVar(value=1 if (output & config.OUT_SHIP) else 0)
+
+        row += 1
 
         # Output setting
         self.out_ship_button = nb.Checkbutton(
@@ -282,8 +336,10 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.out_ship,
             command=self.outvarchanged
         )
-        self.out_ship_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+        self.out_ship_button.grid(columnspan=2, padx=self.BUTTONX, pady=(5, 0), sticky=tk.W, row=row)
         self.out_auto = tk.IntVar(value=0 if output & config.OUT_MKT_MANUAL else 1)  # inverted
+
+        row += 1
 
         # Output setting
         self.out_auto_button = nb.Checkbutton(
@@ -292,32 +348,42 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.out_auto,
             command=self.outvarchanged
         )
+        self.out_auto_button.grid(columnspan=2, padx=self.BUTTONX, pady=(5, 0), sticky=tk.W, row=row)
 
-        self.out_auto_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+        row += 1
 
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get('outdir')))
         self.outdir_label = nb.Label(outframe, text=_('File location')+':')  # Section heading in settings
-        self.outdir_label.grid(padx=PADX, pady=(5, 0), sticky=tk.W)  # type: ignore # 2 tuple does each side
+        self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row)  # type: ignore # 2 tuple, each side
+        
+        row += 1
+        
         self.outdir_entry = nb.Entry(outframe, takefocus=False)
-        self.outdir_entry.grid(columnspan=2, padx=PADX, pady=(0, PADY), sticky=tk.EW)
+        self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row)
+
+        row += 1
+        
         self.outbutton = nb.Button(
             outframe,
             text=(_('Change...') if platform == 'darwin' else _('Browse...')),
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
+        self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=row)
+        
+        row += 1
+        
+        nb.Frame(outframe).grid(row=row)  # bottom spacer # TODO: does nothing?
 
-        self.outbutton.grid(column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
-        nb.Frame(outframe).grid(pady=5)  # bottom spacer
+        root_notebook.add(outframe, text=_('Output'))		# Tab heading in settings
 
-        notebook.add(outframe, text=_('Output'))		# Tab heading in settings
-
-        # build plugin prefs tabs
+    def __setup_plugin_tabs(self, notebook: Notebook) -> None:
         for plugin in plug.PLUGINS:
             plugframe = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
             if plugframe:
                 notebook.add(plugframe, text=plugin.name)
 
+    def __setup_config_tab(self, notebook: Notebook) -> None:
         configframe = nb.Frame(notebook)
         configframe.columnconfigure(1, weight=1)
 
@@ -329,16 +395,16 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(
             configframe,
             text=_('E:D journal file location')+':'
-        ).grid(columnspan=4, padx=PADX, sticky=tk.W)
+        ).grid(columnspan=4, padx=self.PADX, sticky=tk.W)
 
-        self.logdir_entry.grid(columnspan=4, padx=PADX, pady=(0, PADY), sticky=tk.EW)
+        self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW)
         self.logbutton = nb.Button(
             configframe,
             text=(_('Change...') if platform == 'darwin' else _('Browse...')),
             command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir)
         )
 
-        self.logbutton.grid(row=10, column=3, padx=PADX, pady=PADY, sticky=tk.EW)
+        self.logbutton.grid(row=10, column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW)
         if config.default_journal_dir:
             # Appearance theme and language setting
             nb.Button(
@@ -346,10 +412,10 @@ class PreferencesDialog(tk.Toplevel):
                 text=_('Default'),
                 command=self.logdir_reset,
                 state=tk.NORMAL if config.get('journaldir') else tk.DISABLED
-            ).grid(row=10, column=2, pady=PADY, sticky=tk.EW)
+            ).grid(row=10, column=2, pady=self.PADY, sticky=tk.EW)
 
         if platform in ['darwin', 'win32']:
-            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+            ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
             self.hotkey_code = config.getint('hotkey_code')
             self.hotkey_mods = config.getint('hotkey_mods')
             self.hotkey_only = tk.IntVar(value=not config.getint('hotkey_always'))
@@ -359,12 +425,12 @@ class PreferencesDialog(tk.Toplevel):
                 text=_('Keyboard shortcut') if  # Hotkey/Shortcut settings prompt on OSX
                 platform == 'darwin' else
                 _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
-            ).grid(row=20, padx=PADX, sticky=tk.W)
+            ).grid(row=20, padx=self.PADX, sticky=tk.W)
 
             if platform == 'darwin' and not was_accessible_at_launch:
                 if AXIsProcessTrusted():
                     nb.Label(configframe, text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
-                             foreground='firebrick').grid(padx=PADX, sticky=tk.W)  # Shortcut settings prompt on OSX
+                             foreground='firebrick').grid(padx=self.PADX, sticky=tk.W)  # Shortcut settings prompt on OSX
 
                 else:
                     # Shortcut settings prompt on OSX
@@ -374,10 +440,10 @@ class PreferencesDialog(tk.Toplevel):
                             APP=applongname
                         ),
                         foreground='firebrick'
-                    ).grid(columnspan=4, padx=PADX, sticky=tk.W)
+                    ).grid(columnspan=4, padx=self.PADX, sticky=tk.W)
 
                     nb.Button(configframe, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
-                        padx=PADX, sticky=tk.E)		# Shortcut settings button on OSX
+                        padx=self.PADX, sticky=tk.E)		# Shortcut settings button on OSX
 
             else:
                 self.hotkey_text = nb.Entry(configframe, width=(20 if platform == 'darwin' else 30), justify=tk.CENTER)
@@ -400,7 +466,7 @@ class PreferencesDialog(tk.Toplevel):
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
 
-                self.hotkey_only_btn.grid(columnspan=4, padx=PADX, pady=(5, 0), sticky=tk.W)
+                self.hotkey_only_btn.grid(columnspan=4, padx=self.PADX, pady=(5, 0), sticky=tk.W)
 
                 # Hotkey/Shortcut setting
                 self.hotkey_play_btn = nb.Checkbutton(
@@ -410,10 +476,10 @@ class PreferencesDialog(tk.Toplevel):
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
 
-                self.hotkey_play_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
+                self.hotkey_play_btn.grid(columnspan=4, padx=self.PADX, sticky=tk.W)
 
         # Option to disabled Automatic Check For Updates whilst in-game
-        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.getint('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
             configframe,
@@ -422,11 +488,11 @@ class PreferencesDialog(tk.Toplevel):
             command=self.disable_autoappupdatecheckingame_changed
         )
 
-        self.disable_autoappupdatecheckingame_btn.grid(columnspan=4, padx=PADX, sticky=tk.W)
+        self.disable_autoappupdatecheckingame_btn.grid(columnspan=4, padx=self.PADX, sticky=tk.W)
 
-        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
         # Settings prompt for preferred ship loadout, system and station info websites
-        nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=PADX, sticky=tk.W)
+        nb.Label(configframe, text=_('Preferred websites')).grid(row=30, columnspan=4, padx=self.PADX, sticky=tk.W)
 
         self.shipyard_provider = tk.StringVar(
             value=str(
@@ -434,7 +500,7 @@ class PreferencesDialog(tk.Toplevel):
                 and config.get('shipyard_provider') or 'EDSY')
         )
         # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
-        nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=PADX, pady=2*PADY, sticky=tk.W)
+        nb.Label(configframe, text=_('Shipyard')).grid(row=31, padx=self.PADX, pady=2*self.PADY, sticky=tk.W)
         self.shipyard_button = nb.OptionMenu(
             configframe, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
         )
@@ -457,7 +523,7 @@ class PreferencesDialog(tk.Toplevel):
             value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
         )
 
-        nb.Label(configframe, text=_('System')).grid(row=32, padx=PADX, pady=2*PADY, sticky=tk.W)
+        nb.Label(configframe, text=_('System')).grid(row=32, padx=self.PADX, pady=2*self.PADY, sticky=tk.W)
         self.system_button = nb.OptionMenu(
             configframe,
             self.system_provider,
@@ -473,7 +539,7 @@ class PreferencesDialog(tk.Toplevel):
             value=str(station_provider if station_provider in plug.provides('station_url') else 'eddb')
         )
 
-        nb.Label(configframe, text=_('Station')).grid(row=33, padx=PADX, pady=2*PADY, sticky=tk.W)
+        nb.Label(configframe, text=_('Station')).grid(row=33, padx=self.PADX, pady=2*self.PADY, sticky=tk.W)
         self.station_button = nb.OptionMenu(
             configframe,
             self.station_provider,
@@ -485,13 +551,13 @@ class PreferencesDialog(tk.Toplevel):
         self.station_button.grid(row=33, column=1, sticky=tk.W)
 
         # Set loglevel
-        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        ttk.Separator(configframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
 
         # Set the current loglevel
         nb.Label(
             configframe,
             text=_('Log Level')
-        ).grid(row=35, padx=PADX, pady=2*PADY, sticky=tk.W)
+        ).grid(row=35, padx=self.PADX, pady=2*self.PADY, sticky=tk.W)
 
         current_loglevel = config.get('loglevel')
         if not current_loglevel:
@@ -526,17 +592,19 @@ class PreferencesDialog(tk.Toplevel):
             _('Normal text'),		# Dark theme color setting
             _('Highlighted text'),  # Dark theme color setting
         ]
+
+    def __setup_theme_tab(self, notebook: Notebook) -> None:
         themeframe = nb.Frame(notebook)
         themeframe.columnconfigure(2, weight=1)
-        nb.Label(themeframe, text=_('Language')).grid(row=10, padx=PADX, sticky=tk.W)  # Appearance setting prompt
+        nb.Label(themeframe, text=_('Language')).grid(row=10, padx=self.PADX, sticky=tk.W)  # Appearance setting prompt
         self.lang_button = nb.OptionMenu(themeframe, self.lang, self.lang.get(), *self.languages.values())
-        self.lang_button.grid(row=10, column=1, columnspan=2, padx=PADX, sticky=tk.W)
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=PADX, sticky=tk.W)  # Appearance setting
+        self.lang_button.grid(row=10, column=1, columnspan=2, padx=self.PADX, sticky=tk.W)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
+        nb.Label(themeframe, text=_('Theme')).grid(columnspan=3, padx=self.PADX, sticky=tk.W)  # Appearance setting
         nb.Radiobutton(themeframe, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(
-            columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme and language setting
+            columnspan=3, padx=self.BUTTONX, sticky=tk.W)  # Appearance theme and language setting
         nb.Radiobutton(themeframe, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(
-            columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance theme setting
+            columnspan=3, padx=self.BUTTONX, sticky=tk.W)  # Appearance theme setting
 
         if platform == 'win32':
             nb.Radiobutton(
@@ -545,10 +613,10 @@ class PreferencesDialog(tk.Toplevel):
                 variable=self.theme,
                 value=2,
                 command=self.themevarchanged
-            ).grid(columnspan=3, padx=BUTTONX, sticky=tk.W)
+            ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W)
 
         self.theme_label_0 = nb.Label(themeframe, text=self.theme_prompts[0])
-        self.theme_label_0.grid(row=20, padx=PADX, sticky=tk.W)
+        self.theme_label_0.grid(row=20, padx=self.PADX, sticky=tk.W)
 
         # Main window
         self.theme_button_0 = nb.ColoredButton(
@@ -558,9 +626,9 @@ class PreferencesDialog(tk.Toplevel):
             command=lambda: self.themecolorbrowse(0)
         )
 
-        self.theme_button_0.grid(row=20, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        self.theme_button_0.grid(row=20, column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW)
         self.theme_label_1 = nb.Label(themeframe, text=self.theme_prompts[1])
-        self.theme_label_1.grid(row=21, padx=PADX, sticky=tk.W)
+        self.theme_label_1.grid(row=21, padx=self.PADX, sticky=tk.W)
         self.theme_button_1 = nb.ColoredButton(
             themeframe,
             text='  Hutton Orbital  ',  # Do not translate
@@ -568,7 +636,7 @@ class PreferencesDialog(tk.Toplevel):
             command=lambda: self.themecolorbrowse(1)
         )
 
-        self.theme_button_1.grid(row=21, column=1, padx=PADX, pady=PADY, sticky=tk.NSEW)
+        self.theme_button_1.grid(row=21, column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW)
 
         # UI Scaling
         """
@@ -578,8 +646,8 @@ class PreferencesDialog(tk.Toplevel):
         So, if at startup we find tk-scaling is 1.33 and have a user setting
         of 200 we'll end up setting 2.66 as the tk-scaling value.
         """
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=PADX, pady=PADY*4, sticky=tk.EW)
-        nb.Label(themeframe, text=_('UI Scale Percentage')).grid(row=23, padx=PADX, pady=2*PADY, sticky=tk.W)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
+        nb.Label(themeframe, text=_('UI Scale Percentage')).grid(row=23, padx=self.PADX, pady=2*self.PADY, sticky=tk.W)
         self.ui_scale = tk.IntVar()
         self.ui_scale.set(config.getint('ui_scale'))
         self.uiscale_bar = tk.Scale(
@@ -600,7 +668,7 @@ class PreferencesDialog(tk.Toplevel):
         ).grid(row=23, column=3, padx=PADX, pady=2*PADY, sticky=tk.E)
 
         # Always on top
-        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY*4, sticky=tk.EW)
+        ttk.Separator(themeframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW)
         self.ontop_button = nb.Checkbutton(
             themeframe,
             text=_('Always on top'),
@@ -608,41 +676,43 @@ class PreferencesDialog(tk.Toplevel):
             command=self.themevarchanged
         )
 
-        self.ontop_button.grid(columnspan=3, padx=BUTTONX, sticky=tk.W)  # Appearance setting
+        self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W)  # Appearance setting
         nb.Label(themeframe).grid(sticky=tk.W)  # big spacer
 
         notebook.add(themeframe, text=_('Appearance'))  # Tab heading in settings
 
+    def __setup_plugin_tab(self, notebook: Notebook) -> None:
+        # Plugin tab itself
         # Plugin settings and info
         plugsframe = nb.Frame(notebook)
         plugsframe.columnconfigure(0, weight=1)
         plugdir = tk.StringVar()
         plugdir.set(config.plugin_dir)
 
-        nb.Label(plugsframe, text=_('Plugins folder')+':').grid(padx=PADX, sticky=tk.W)  # Section heading in settings
+        nb.Label(plugsframe, text=_('Plugins folder')+':').grid(padx=self.PADX, sticky=tk.W)  # Section heading in settings
         plugdirentry = nb.Entry(plugsframe, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
-        plugdirentry.grid(row=10, padx=PADX, sticky=tk.EW)
+        plugdirentry.grid(row=10, padx=self.PADX, sticky=tk.EW)
 
         nb.Button(
             plugsframe,
             text=_('Open'),  # Button that opens a folder in Explorer/Finder
             command=lambda: webbrowser.open(f'file:///{plugdir.get()}')
-        ).grid(row=10, column=1, padx=(0, PADX), sticky=tk.NSEW)
+        ).grid(row=10, column=1, padx=(0, self.PADX), sticky=tk.NSEW)
 
         nb.Label(
             plugsframe,
             # Help text in settings
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-        ).grid(columnspan=2, padx=PADX, pady=10, sticky=tk.NSEW)
+        ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if len(enabled_plugins):
-            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW)
             nb.Label(
                 plugsframe,
                 text=_('Enabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=PADX, sticky=tk.W)
+            ).grid(padx=self.PADX, sticky=tk.W)
 
             for plugin in enabled_plugins:
                 if plugin.name == plugin.folder:
@@ -651,76 +721,39 @@ class PreferencesDialog(tk.Toplevel):
                 else:
                     label = nb.Label(plugsframe, text=f'{plugin.folder} ({plugin.name})')
 
-                label.grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+                label.grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
 
         ############################################################
         # Show which plugins don't have Python 3.x support
         ############################################################
         if len(plug.PLUGINS_not_py3):
-            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
-            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=PADX, sticky=tk.W)
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW)
+            nb.Label(plugsframe, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
 
             for plugin in plug.PLUGINS_not_py3:
                 if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
-                    nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+                    nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
 
             HyperlinkLabel(
                 plugsframe, text=_('Information on migrating plugins'),
                 background=nb.Label().cget('background'),
                 url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
                 underline=True
-            ).grid(columnspan=2, padx=PADX, sticky=tk.W)
+            ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
         ############################################################
 
         disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
         if len(disabled_plugins):
-            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=PADX, pady=PADY * 8, sticky=tk.EW)
+            ttk.Separator(plugsframe, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW)
             nb.Label(
                 plugsframe,
                 text=_('Disabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=PADX, sticky=tk.W)
+            ).grid(padx=self.PADX, sticky=tk.W)
 
             for plugin in disabled_plugins:
-                nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=PADX*2, sticky=tk.W)
+                nb.Label(plugsframe, text=plugin.name).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
 
         notebook.add(plugsframe, text=_('Plugins'))		# Tab heading in settings
-
-        if platform == 'darwin':
-            self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
-
-        else:
-            buttonframe = ttk.Frame(frame)
-            buttonframe.grid(padx=PADX, pady=PADX, sticky=tk.NSEW)
-            buttonframe.columnconfigure(0, weight=1)
-            ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
-            button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
-            button.grid(row=0, column=1, sticky=tk.E)
-            button.bind("<Return>", lambda event: self.apply())
-            self.protocol("WM_DELETE_WINDOW", self._destroy)
-
-        # Selectively disable buttons depending on output settings
-        self.cmdrchanged()
-        self.themevarchanged()
-
-        # disable hotkey for the duration
-        hotkeymgr.unregister()
-
-        # wait for window to appear on screen before calling grab_set
-        self.parent.update_idletasks()
-        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear ontop of parent on OSX & Linux
-        self.wait_visibility()
-        self.grab_set()
-
-        # Ensure fully on-screen
-        if platform == 'win32' and CalculatePopupWindowPosition:
-            position = RECT()
-            GetWindowRect(GetParent(self.winfo_id()), position)
-            if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),
-                0x10000, None, position
-            ):
-                self.geometry("+{position.left}+{position.top}")
 
     def cmdrchanged(self, event=None):
         """
