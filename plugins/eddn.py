@@ -271,12 +271,12 @@ Msg:\n{msg}''')
         :param is_beta: whether or not we're currently in beta mode
         """
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
-        if not modules:
+        if modules is None:
             logger.debug('modules was None')
             modules = {}
 
         ships: Dict[str, Any] = data['lastStarport'].get('ships')
-        if not ships:
+        if ships is None:
             logger.debug('ships was None')
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
@@ -322,12 +322,12 @@ Msg:\n{msg}''')
         :param is_beta: whether or not we are in beta mode
         """
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
-        if not modules:
+        if modules is None:
             logger.debug('modules was None')
             modules = {}
 
         ships: Dict[str, Any] = data['lastStarport'].get('ships')
-        if not ships:
+        if ships is None:
             logger.debug('ships was None')
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
