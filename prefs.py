@@ -498,30 +498,13 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry['state']      = local and 'readonly' or tk.DISABLED
 
     def filebrowse(self, title, pathvar):
-        if platform != 'win32':
-            import tkinter.filedialog
-            d = tkinter.filedialog.askdirectory(parent=self, initialdir=expanduser(pathvar.get()), title=title, mustexist=tk.TRUE)
-        else:
-            def browsecallback(hwnd, uMsg, lParam, lpData):
-                # set initial folder
-                if uMsg==BFFM_INITIALIZED and lpData:
-                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData);
-                return 0
-
-            browseInfo = BROWSEINFO()
-            browseInfo.lpszTitle = title
-            browseInfo.ulFlags = BIF_RETURNONLYFSDIRS|BIF_USENEWUI
-            browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            browseInfo.lParam = pathvar.get().startswith('~') and join(config.home, pathvar.get()[2:]) or pathvar.get()
-            ctypes.windll.ole32.CoInitialize(None)
-            pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
-            if pidl:
-                path = ctypes.create_unicode_buffer(MAX_PATH)
-                ctypes.windll.shell32.SHGetPathFromIDListW(pidl, path)
-                ctypes.windll.ole32.CoTaskMemFree(pidl)
-                d = path.value
-            else:
-                d = None
+        import tkinter.filedialog
+        d = tkinter.filedialog.askdirectory(
+            parent=self,
+            initialdir=expanduser(pathvar.get()),
+            title=title,
+            mustexist=tk.TRUE
+        )
 
         if d:
             pathvar.set(d)

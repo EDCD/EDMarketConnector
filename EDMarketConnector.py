@@ -1046,6 +1046,15 @@ Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
 Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 )
 
+    # Change locale to a utf8 one
+    # First make sure the local is actually set as per locale's idea of defaults
+    locale.setlocale(locale.LC_ALL, '')
+    # Now find out the current locale, mostly the language
+    locale_startup = locale.getlocale(locale.LC_ALL)
+    # Now set that same language, but utf8 encoding (it was probably cp1252
+    # or equivalent for other languages).
+    locale.setlocale(locale.LC_ALL, (locale_startup[0], 'utf8'))
+
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
     # test_logging()
