@@ -270,14 +270,22 @@ Msg:\n{msg}''')
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
-        modules: Dict[str, Any] = data['lastStarport'].get('modules') or {}
+        modules: Dict[str, Any] = data['lastStarport'].get('modules')
+        if not modules:
+            logger.debug('modules was None')
+            modules = {}
+
+        ships: Dict[str, Any] = data['lastStarport'].get('ships')
+        if not ships:
+            logger.debug('ships was None')
+            ships = {'shipyard_list': {}, 'unavailable_list': []}
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
         horizons: bool = is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
-            data['lastStarport'].get('ships', {'shipyard_list': {}, 'unavailable_list': []})
+            ships
             )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
@@ -313,10 +321,19 @@ Msg:\n{msg}''')
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
-        ships: Dict[str, Any] = data['lastStarport'].get('ships', {'shipyard_list': {}, 'unavailable_list': []})
+        modules: Dict[str, Any] = data['lastStarport'].get('modules')
+        if not modules:
+            logger.debug('modules was None')
+            modules = {}
+
+        ships: Dict[str, Any] = data['lastStarport'].get('ships')
+        if not ships:
+            logger.debug('ships was None')
+            ships = {'shipyard_list': {}, 'unavailable_list': []}
+
         horizons: bool = is_horizons(
             data['lastStarport'].get('economies', {}),
-            data['lastStarport'].get('modules', {}),
+            modules,
             ships
             )
 
@@ -735,7 +752,7 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+def is_horizons(economies: MAP_STR_ANY, modules: Dict, ships: MAP_STR_ANY) -> bool:
     return (
         any(economy['name'] == 'Colony' for economy in economies.values()) or
         any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
