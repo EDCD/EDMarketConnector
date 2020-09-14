@@ -752,7 +752,7 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def is_horizons(economies: MAP_STR_ANY, modules: Dict, ships: MAP_STR_ANY) -> bool:
+def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
     return (
         any(economy['name'] == 'Colony' for economy in economies.values()) or
         any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
