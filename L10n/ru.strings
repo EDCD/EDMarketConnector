@@ -530,5 +530,4 @@
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scaling" = "Масштабирование интерфейса";
 /* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Уровень лога
-  ";
+"Log Level" = "Уровень лога";
