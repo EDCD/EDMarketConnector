@@ -13,6 +13,7 @@ import logging
 import numbers
 import os
 import random
+import requests
 import time
 import urllib.parse
 import webbrowser
@@ -21,22 +22,19 @@ from email.utils import parsedate
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, NewType, Union
-
-import requests
+from typing import TYPE_CHECKING, Dict, List, NewType, Union
 
 from config import appname, appversion, config
 from protocol import protocolhandler
 
 logger = logging.getLogger(appname)
 
-
 if TYPE_CHECKING:
     _ = lambda x: x  # noqa: E731 # to make flake8 stop complaining that the hacked in _ method doesnt exist
 
 
 # Define custom type for the dicts that hold CAPI data
-CAPIData = NewType('CAPIData', Mapping[str, Any])
+CAPIData = NewType('CAPIData', Dict)
 
 holdoff = 60  # be nice
 timeout = 10  # requests timeout
@@ -220,11 +218,13 @@ class Auth(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.verifier = self.state = None
 
-    def refresh(self) -> None:
+    def refresh(self) -> Union[str, None]:
         """
         Attempt use of Refresh Token to get a valid Access Token.
 
         If the Refresh Token doesn't work, make a new authorization request.
+
+        :return: Access Token if retrieved, else None.
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
@@ -239,14 +239,14 @@ class Auth(object):
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
             logger.debug('We have a refresh token for that idx')
-            try:
-                data = {
-                    'grant_type': 'refresh_token',
-                    'client_id': CLIENT_ID,
-                    'refresh_token': tokens[idx],
-                }
+            data = {
+                'grant_type':   'refresh_token',
+                'client_id':     CLIENT_ID,
+                'refresh_token': tokens[idx],
+            }
 
-                logger.debug('Attempting refresh with Frontier...')
+            logger.debug('Attempting refresh with Frontier...')
+            try:
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
@@ -259,7 +259,7 @@ class Auth(object):
                     logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
                     self.dump(r)
 
-            except Exception:
+            except (ValueError, requests.RequestException, ):
                 logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
 
         else:
@@ -300,9 +300,9 @@ class Auth(object):
             )
             raise CredentialsError(f'Error: {error[0]!r}')
 
+        r = None
         try:
             logger.debug('Got code, posting it back...')
-            r = None
             data = {
                 'grant_type': 'authorization_code',
                 'client_id': CLIENT_ID,
@@ -365,6 +365,7 @@ class Session(object):
 
     def __init__(self):
         self.state = Session.STATE_INIT
+        self.server = None
         self.credentials = None
         self.session = None
         self.auth = None
@@ -532,7 +533,7 @@ class Session(object):
 
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
-            if (last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id'])):
+            if last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id']):
                 raise ServerLagging()
 
             else:
@@ -540,7 +541,7 @@ class Session(object):
 
         if services.get('outfitting') or services.get('shipyard'):
             shipdata = self.query(URL_SHIPYARD)
-            if (last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id'])):
+            if last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id']):
                 raise ServerLagging()
 
             else:
@@ -646,7 +647,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     datacopy = data.copy()
     datacopy['lastStarport'] = data['lastStarport'].copy()
     datacopy['lastStarport']['commodities'] = commodities
-    return datacopy
+    return CAPIData(datacopy)
 
 
 def ship(data: CAPIData) -> CAPIData:
