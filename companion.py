@@ -21,7 +21,7 @@ from email.utils import parsedate
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, NewType, Union
 
 import requests
 
@@ -34,6 +34,9 @@ logger = logging.getLogger(appname)
 if TYPE_CHECKING:
     _ = lambda x: x  # noqa: E731 # to make flake8 stop complaining that the hacked in _ method doesnt exist
 
+
+# Define custom type for the dicts that hold CAPI data
+CAPIData = NewType('CAPIData', Mapping[str, Any])
 
 holdoff = 60  # be nice
 timeout = 10  # requests timeout
@@ -445,7 +448,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def query(self, endpoint: str) -> Mapping[str, Any]:
+    def query(self, endpoint: str) -> CAPIData:
         """Perform a query against the specified CAPI endpoint."""
         logger.debug(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
@@ -512,11 +515,11 @@ class Session(object):
 
         return data
 
-    def profile(self) -> Mapping[str, Any]:
+    def profile(self) -> CAPIData:
         """Perform general CAPI /profile endpoint query."""
         return self.query(URL_QUERY)
 
-    def station(self) -> Union[Mapping[str, Any], None]:
+    def station(self) -> Union[CAPIData, None]:
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
         if not data['commander'].get('docked'):
@@ -569,7 +572,7 @@ class Session(object):
         logger.error(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason and r.reason or "None"} {r.text}')
 
 
-def fixup(data: Mapping[str, Any]) -> Mapping[str, Any]:  # noqa: C901, CCR001 # Can't be usefully simplified
+def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully simplified
     """
     Fix up commodity names to English & miscellaneous anomalies fixes.
 
@@ -646,9 +649,9 @@ def fixup(data: Mapping[str, Any]) -> Mapping[str, Any]:  # noqa: C901, CCR001 #
     return datacopy
 
 
-def ship(data: Mapping[str, Any]) -> Mapping[str, Any]:
+def ship(data: CAPIData) -> CAPIData:
     """Construct a subset of the received data describing the current ship."""
-    def filter_ship(d: Mapping[str, Any]) -> Mapping[str, Any]:
+    def filter_ship(d: CAPIData) -> CAPIData:
         """Filter provided ship data."""
         filtered = {}
         for k, v in d.items():
