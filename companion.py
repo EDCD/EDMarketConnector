@@ -298,7 +298,7 @@ class Auth(object):
             error = next(
                 (data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',)
             )
-            raise CredentialsError(f'Error: {error[0]!r}')
+            raise CredentialsError(f'Error: {error!r}')
 
         r = None
         try:
@@ -335,7 +335,7 @@ class Auth(object):
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
         self.dump(r)
         error = next((data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',))
-        raise CredentialsError(f'Error: {error[0]!r}')
+        raise CredentialsError(f'Error: {error!r}')
 
     @staticmethod
     def invalidate(cmdr: str) -> None:
@@ -349,11 +349,13 @@ class Auth(object):
         config.set('fdev_apikeys', tokens)
         config.save()  # Save settings now for use by command-line app
 
+    # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
         """Dump details of HTTP failure from oAuth attempt."""
         logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
 
-    def base64_url_encode(self, text: str) -> str:
+    # noinspection PyMethodMayBeStatic
+    def base64_url_encode(self, text: bytes) -> str:
         """Base64 encode text for URL."""
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
@@ -568,6 +570,7 @@ class Session(object):
         self.close()
         Auth.invalidate(self.credentials['cmdr'])
 
+    # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
         """Log, as error, status of requests.Response from CAPI request."""
         logger.error(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason and r.reason or "None"} {r.text}')
@@ -654,9 +657,9 @@ def ship(data: CAPIData) -> CAPIData:
     """Construct a subset of the received data describing the current ship."""
     def filter_ship(d: CAPIData) -> CAPIData:
         """Filter provided ship data."""
-        filtered = {}
+        filtered: CAPIData = CAPIData({})
         for k, v in d.items():
-            if v == []:
+            if not v:
                 pass  # just skip empty fields for brevity
 
             elif k in ('alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining',
