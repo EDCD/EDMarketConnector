@@ -300,7 +300,8 @@ class Auth(object):
         if not data.get('code'):
             logger.error(f'Frontier CAPI Auth: Negative response (no "code" in returned data)\n{payload}\n')
             error = next(
-                (data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',)
+                (data[k] for k in ('error_description', 'error', 'message') if k in data),
+                '<unknown error>'
             )
             raise CredentialsError(f'Error: {error!r}')
 
@@ -338,7 +339,10 @@ class Auth(object):
 
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
         self.dump(r)
-        error = next((data[k] for k in ('error_description', 'error', 'message') if k in data), ('<unknown error>',))
+        error = next(
+            (data[k] for k in ('error_description', 'error', 'message') if k in data),
+            '<unknown error>'
+        )
         raise CredentialsError(f'Error: {error!r}')
 
     @staticmethod
