@@ -13,7 +13,6 @@ import logging
 import numbers
 import os
 import random
-import requests
 import time
 import urllib.parse
 import webbrowser
@@ -23,6 +22,8 @@ from email.utils import parsedate
 from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
 from typing import TYPE_CHECKING, Dict, List, NewType, Union
+
+import requests
 
 from config import appname, appversion, config
 from protocol import protocolhandler
