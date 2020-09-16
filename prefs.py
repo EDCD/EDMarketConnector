@@ -754,7 +754,7 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.always_ontop,
             command=self.themevarchanged
         )
-        self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=cur_row)  # Appearance setting
+        self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
         
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
