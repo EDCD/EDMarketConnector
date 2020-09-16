@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 """EDMC preferences library."""
 
+import contextlib
 import logging
 import tkinter as tk
-from types import TracebackType
 import webbrowser
 from os.path import exists, expanduser, expandvars, join, normpath
 from sys import platform
-from tkinter import Variable, colorchooser as tkColorChooser  # type: ignore
+from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
+from types import TracebackType
 from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 
-import myNotebook as nb
-from myNotebook import Notebook
+import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appname, appversion, config
 from EDMCLogging import edmclogger
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
+from myNotebook import Notebook
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
-
-import contextlib
 
 logger = logging.getLogger(appname)
 
@@ -116,6 +115,7 @@ class PrefsVersion:
         return False
     ###########################################################################
 
+
 prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
 
 
@@ -154,11 +154,12 @@ class AutoInc(contextlib.AbstractContextManager):
     def __exit__(
         self,
         exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType]
-            ) -> Optional[bool]:
+    ) -> Optional[bool]:
         """Do nothing."""
         return None
 
 ###########################################################################
+
 
 if platform == 'darwin':
     import objc  # type: ignore
@@ -186,44 +187,21 @@ if platform == 'darwin':
     was_accessible_at_launch = AXIsProcessTrusted()  # type: ignore
 
 elif platform == 'win32':
-    # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
-    # TODO: Remove this
     import ctypes
-    from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
-
-    SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
-    SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
-
-    LoadString = ctypes.windll.user32.LoadStringW
-    LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
-    BIF_RETURNONLYFSDIRS = 0x00000001
-    BIF_USENEWUI = 0x00000050
-    BFFM_INITIALIZED = 1
-    BFFM_SETSELECTION = 0x00000467
-    BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
-
-    class BROWSEINFO(ctypes.Structure):
-        """
-        BROWSEINFO class for use in calls to win32 file browser invocation.
-
-        See https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/ns-shlobj_core-browseinfoa for more
-        information regarding this structure
-        """
-
-        _fields_ = [
-            ("hwndOwner", HWND),
-            ("pidlRoot", LPVOID),
-            ("pszDisplayName", LPWSTR),
-            ("lpszTitle", LPCWSTR),
-            ("ulFlags", UINT),
-            ("lpfn", BrowseCallbackProc),
-            ("lParam", LPCWSTR),
-            ("iImage", ctypes.c_int)
-        ]
-
+    import winreg
+    from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
+    is_wine = False
     try:
+        WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
+        reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        winreg.OpenKey(reg, WINE_REGISTRY_KEY)
+        is_wine = True
+
+    except OSError:
+        pass
+
+    CalculatePopupWindowPosition = None
+    if not is_wine:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
         CalculatePopupWindowPosition.argtypes = [
             ctypes.POINTER(POINT),
@@ -238,8 +216,11 @@ elif platform == 'win32':
         GetWindowRect = ctypes.windll.user32.GetWindowRect
         GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
 
-    except Exception:  # Not supported under Wine 4.0
-        CalculatePopupWindowPosition = None
+    SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
+    SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
+
+    LoadString = ctypes.windll.user32.LoadStringW
+    LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
 
 
 class PreferencesDialog(tk.Toplevel):
@@ -390,7 +371,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
-        
+
         self.outdir_entry = nb.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
@@ -400,7 +381,7 @@ class PreferencesDialog(tk.Toplevel):
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
         self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=row.get())
-        
+
         nb.Frame(output_frame).grid(row=row.get())  # bottom spacer # TODO: does nothing?
 
         root_notebook.add(output_frame, text=_('Output'))		# Tab heading in settings
@@ -532,7 +513,7 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
             columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
         )
-        
+
         # Settings prompt for preferred ship loadout, system and station info websites
         nb.Label(config_frame, text=_('Preferred websites')).grid(
             columnspan=4, padx=self.PADX, sticky=tk.W, row=row.get()
@@ -662,15 +643,16 @@ class PreferencesDialog(tk.Toplevel):
 
         # Appearance setting
         nb.Label(appearance_frame, text=_('Theme')).grid(columnspan=3, padx=self.PADX, sticky=tk.W, row=row.get())
-        
+
         # Appearance theme and language setting
-        nb.Radiobutton(appearance_frame, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged).grid(
-            columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get()
-        )
+        nb.Radiobutton(
+            appearance_frame, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged
+        ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         # Appearance theme setting
-        nb.Radiobutton(appearance_frame, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged).grid(
-            columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
+        nb.Radiobutton(
+            appearance_frame, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged
+        ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         if platform == 'win32':
             nb.Radiobutton(
@@ -694,7 +676,7 @@ class PreferencesDialog(tk.Toplevel):
             )
 
             self.theme_button_0.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=cur_row)
-        
+
         with row as cur_row:
             self.theme_label_1 = nb.Label(appearance_frame, text=self.theme_prompts[1])
             self.theme_label_1.grid(padx=self.PADX, sticky=tk.W, row=cur_row)
@@ -754,7 +736,7 @@ class PreferencesDialog(tk.Toplevel):
             command=self.themevarchanged
         )
         self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
-        
+
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
         notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
@@ -789,7 +771,9 @@ class PreferencesDialog(tk.Toplevel):
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if len(enabled_plugins):
-            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW)
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW
+            )
             nb.Label(
                 plugins_frame,
                 text=_('Enabled Plugins')+':'  # List of plugins in settings
