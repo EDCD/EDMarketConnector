@@ -74,11 +74,6 @@ class PrefsVersion:
 
         return self.versions['current']
 
-    ###########################################################################
-    # Should defaults be set, given the settings were added after 'addedAfter' ?
-    #
-    # config.get('PrefsVersion') is the version preferences we last saved for
-    ###########################################################################
     def shouldSetDefaults(self, addedAfter: str, oldTest: bool = True) -> bool:  # noqa: N802,N803 # used in plugins
         """
         Whether or not defaults should be set if they were added after the specified version.
@@ -88,6 +83,8 @@ class PrefsVersion:
         :raises ValueError: on serial number after the current latest
         :return: bool indicating the answer
         """
+
+        # config.get('PrefsVersion') is the version preferences we last saved for
         pv = config.getint('PrefsVersion')
         # If no PrefsVersion yet exists then return oldTest
         if not pv:
@@ -113,7 +110,6 @@ class PrefsVersion:
             return True
 
         return False
-    ###########################################################################
 
 
 prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
@@ -157,8 +153,6 @@ class AutoInc(contextlib.AbstractContextManager):
     ) -> Optional[bool]:
         """Do nothing."""
         return None
-
-###########################################################################
 
 
 if platform == 'darwin':
@@ -266,7 +260,6 @@ class PreferencesDialog(tk.Toplevel):
         self.PADY = 2  # close spacing
 
         # Set up different tabs
-        # TODO: modify these to be "__create_$tab_tab" and have them return the frame rather than set it up themselves
         self.__setup_output_tab(notebook)
         self.__setup_plugin_tabs(notebook)
         self.__setup_config_tab(notebook)
@@ -322,9 +315,6 @@ class PreferencesDialog(tk.Toplevel):
 
         row = AutoInc(start=1)
 
-        # TODO: *All* of this needs to use a 'row' variable, incremented after
-        #      adding one to keep track, so it's easier to insert new rows in
-        #      the middle without worrying about updating `row=X` elements.
         self.out_label = nb.Label(output_frame, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=self.PADX, sticky=tk.W, row=row.get())
 
@@ -742,7 +732,6 @@ class PreferencesDialog(tk.Toplevel):
         notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
 
     def __setup_plugin_tab(self, notebook: Notebook) -> None:
-        # Plugin tab itself
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
@@ -1061,7 +1050,7 @@ class PreferencesDialog(tk.Toplevel):
         else:
             config.set('journaldir', logdir)
 
-        if platform in ['darwin', 'win32']:
+        if platform in ('darwin', 'win32'):
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
