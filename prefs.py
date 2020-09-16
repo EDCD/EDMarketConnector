@@ -189,7 +189,6 @@ elif platform == 'win32':
     # sigh tkFileDialog.askdirectory doesn't support unicode on Windows
     # TODO: Remove this
     import ctypes
-    import ctypes.windll  # type: ignore # I promise pylance, its there.
     from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
 
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
