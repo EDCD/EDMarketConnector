@@ -1,11 +1,15 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report an issue with the program
 title: ''
 labels: bug, unconfirmed
 assignees: ''
 
 ---
+
+**Please check the
+[Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618)
+in case this has already been reported.**
 
 **Please complete the following information:**
  - Version [e.g. 4.0.6 - See 'Help > About E:D Market Connector']
