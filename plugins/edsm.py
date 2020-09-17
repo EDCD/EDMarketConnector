@@ -1,6 +1,4 @@
-#
-# System display and EDSM lookup
-#
+"""System display and EDSM lookup."""
 
 # TODO:
 #  1) Re-factor EDSM API calls out of journal_entry() into own function.
@@ -85,6 +83,7 @@ plEAADs=
 
 # Main window clicks
 def system_url(system_name: str) -> str:
+    """Get a URL for the current system."""
     if this.system_address:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
 
@@ -95,20 +94,28 @@ def system_url(system_name: str) -> str:
 
 
 def station_url(system_name: str, station_name: str) -> str:
+    """Get a URL for the current station."""
     if system_name and station_name:
-        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}')
+        return requests.utils.requote_uri(
+            f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}'
+        )
 
     # monitor state might think these are gone, but we don't yet
     if this.system and this.station:
-        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}')
+        return requests.utils.requote_uri(
+            f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}'
+        )
 
     if system_name:
-        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL')
+        return requests.utils.requote_uri(
+            f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL'
+        )
 
     return ''
 
 
 def plugin_start3(plugin_dir: str) -> str:
+    """Plugin setup hook."""
     # Can't be earlier since can only call PhotoImage after window is created
     this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
     this._IMG_UNKNOWN = tk.PhotoImage(data=IMG_UNKNOWN_B64)  # red circle
@@ -144,21 +151,24 @@ def plugin_start3(plugin_dir: str) -> str:
 
 
 def plugin_app(parent: tk.Tk) -> None:
+    """Plugin UI setup."""
     this.system_link = parent.children['system']  # system label in main window
     this.system_link.bind_all('<<EDSMStatus>>', update_status)
     this.station_link = parent.children['station']  # station label in main window
 
 
 def plugin_stop() -> None:
+    """Plugin exit hook."""
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
     this.thread = None
-    # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors
+    # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
     this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
 
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
+    """Plugin preferences setup hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # indent Checkbuttons and Radiobuttons # noqa: N806
     PADY = 2		# close spacing # noqa: N806
@@ -220,6 +230,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
 
 def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
+    """Commanders changed hook."""
     this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
     this.user['state'] = tk.NORMAL
     this.user.delete(0, tk.END)
@@ -244,6 +255,7 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def prefsvarchanged() -> None:
+    """Preferences screen closed hook."""
     to_set = tk.DISABLED
     if this.log.get():
         to_set = this.log_button['state']
@@ -253,7 +265,7 @@ def prefsvarchanged() -> None:
 
 def set_prefs_ui_states(state: str) -> None:
     """
-    Set the state of various config UI entries
+    Set the state of various config UI entries.
 
     :param state: the state to set each entry to
     """
@@ -267,6 +279,7 @@ def set_prefs_ui_states(state: str) -> None:
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
+    """Preferences changed hook."""
     config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
@@ -291,6 +304,12 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
+    """
+    Get credentials for the given commander, if they exist.
+
+    :param cmdr: The commander to get credentials for
+    :return: The credentials, or None
+    """
     # Credentials for cmdr
     if not cmdr:
         return None
@@ -312,6 +331,7 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
 def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> None:
+    """Journal Entry hook."""
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.debug(f'''{entry["event"]}
 Commander: {cmdr}
@@ -419,6 +439,7 @@ Queueing: {entry!r}'''
 
 # Update system data
 def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
+    """CAPI Entry Hook."""
     system = data['lastSystem']['name']
 
     # Always store initially, even if we're not the *current* system provider.
@@ -463,6 +484,11 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
 
 # Worker thread
 def worker() -> None:
+    """
+    Upload worker.
+
+    Works based the `this.queue` queue, loops infinitely until the item returned from the queue is None.
+    """
     pending = []  # Unsent events
     closing = False
 
@@ -555,8 +581,13 @@ def worker() -> None:
             return
 
 
-# Whether any of the entries should be sent immediately
 def should_send(entries: List[Mapping[str, Any]]) -> bool:
+    """
+    Whether or not any of the given entries should be sent immediately.
+
+    :param entries: The entries to check
+    :return: bool indicating whether or not to send said entries
+    """
     # batch up burst of Scan events after NavBeaconScan
     if this.navbeaconscan:
         if entries and entries[-1]['event'] == 'Scan':
@@ -590,9 +621,8 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:
     return False
 
 
-# Call edsm_notify_system() in this and other interested plugins with EDSM's response to a 'StartUp', 'Location',
-# 'FSDJump' or 'CarrierJump' event
 def update_status(event=None) -> None:
+    """Update listening plugins with our response to StartUp, Location, FSDJump, or CarrierJump."""
     for plugin in plug.provides('edsm_notify_system'):
         plug.invoke(plugin, None, 'edsm_notify_system', this.lastlookup)
 
@@ -601,6 +631,7 @@ def update_status(event=None) -> None:
 # https://www.edsm.net/en/api-journal-v1
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply: Mapping[str, Any]) -> None:
+    """Update the image next to the system link."""
     if not reply:
         this.system_link['image'] = this._IMG_ERROR
         plug.show_error(_("Error: Can't connect to EDSM"))
