@@ -565,8 +565,11 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:
                 return False
 
         else:
-            assert(False)
-            this.navbeaconscan = 0  # TODO: Unreachable code?
+            logger.error(
+                'Invalid state NavBeaconScan exists, but passed entries either '
+                "doesn't exist or doesn't have the expected content"
+            )
+            this.navbeaconscan = 0
 
     for entry in entries:
         if (entry['event'] == 'Cargo' and not this.newgame_docked) or entry['event'] == 'Docked':
