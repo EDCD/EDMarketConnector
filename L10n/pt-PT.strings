@@ -1,3 +1,9 @@
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Percentagem da escala de UI";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Predefinido{CR}Requer reinício para{CR}que as mudanças façam efeito!";
+
 /* Language name */
 "!Language" = "Português (Portugal)";
 
@@ -526,3 +532,5 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "A {APP} precisa de autorização para usar atalhos";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Nível de Log";
