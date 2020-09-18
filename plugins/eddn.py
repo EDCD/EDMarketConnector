@@ -286,7 +286,7 @@ Msg:\n{msg}''')
             # Set a safe value
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
-        return (modules, ships)
+        return modules, ships
 
     def export_outfitting(self, data: Mapping[str, Any], is_beta: bool) -> None:
         """
@@ -296,7 +296,7 @@ Msg:\n{msg}''')
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
-        (modules, ships) = self.safe_modules_and_ships(data)
+        modules, ships = self.safe_modules_and_ships(data)
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
@@ -339,7 +339,7 @@ Msg:\n{msg}''')
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
-        (modules, ships) = self.safe_modules_and_ships(data)
+        modules, ships = self.safe_modules_and_ships(data)
 
         horizons: bool = is_horizons(
             data['lastStarport'].get('economies', {}),
