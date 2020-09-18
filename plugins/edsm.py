@@ -487,7 +487,7 @@ def worker() -> None:
     """
     Upload worker.
 
-    Works based the `this.queue` queue, loops infinitely until the item returned from the queue is None.
+    Processes `this.queue` until the queued item is None.
     """
     pending = []  # Unsent events
     closing = False
@@ -583,7 +583,7 @@ def worker() -> None:
 
 def should_send(entries: List[Mapping[str, Any]]) -> bool:
     """
-    Whether or not any of the given entries should be sent immediately.
+    Whether or not any of the given entries should be sent to EDSM.
 
     :param entries: The entries to check
     :return: bool indicating whether or not to send said entries
