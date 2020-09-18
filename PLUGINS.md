@@ -23,6 +23,12 @@ others.
 
 ---
 
+### Examples
+
+We have some example plugins available in the docs/examples directory. See the readme in each folder for more info.
+
+---
+
 ### Available imports
 
 **`import`ing anything from the core EDMarketConnector code that is not
@@ -73,8 +79,7 @@ EDMC now implements proper logging using the Python `logging` module.  Plugin
 developers should now use the following code instead of simple `print(...)`
 statements.
 
-Insert this at the top-level of your load.py file (so not inside
-`plugin_start3()` ):
+Insert this at the top-level of your load.py file (so not inside `plugin_start3()` ):
 
 ```python
 import logging
@@ -145,7 +150,7 @@ Replace all `print(...)` statements with one of the following:
         logger.debug('Exception we only note in debug output', exc_info=e)
 ```
 
-Remember you can use fstrings to include variables, and even the returns of
+Remember you can use [fstrings](https://www.python.org/dev/peps/pep-0498/) to include variables, and even the returns of
 functions, in the output.
 
 ```python
@@ -160,11 +165,11 @@ EDMC will import the `load.py` file as a module and then call the
 `plugin_start3()` function.
 
 ```python
-def plugin_start3(plugin_dir):
+def plugin_start3(plugin_dir: str) -> str:
    """
    Load this plugin into EDMC
    """
-   print("I am loaded! My plugin folder is {}".format(plugin_dir))
+   print(f"I am loaded! My plugin folder is {plugin_dir}")
    return "Test"
 ```
 
@@ -179,7 +184,7 @@ Mac, and `$TMP/EDMarketConnector.log` on Linux.
 This gets called when the user closes the program:
 
 ```python
-def plugin_stop():
+def plugin_stop() -> None:
     """
     EDMC is closing
     """
@@ -210,20 +215,23 @@ numbers in a locale-independent way.
 
 ```python
 import tkinter as tk
+from tkinter import ttk
 import myNotebook as nb
 from config import config
+from typing import Optional
 
-this = sys.modules[__name__]  # For holding module globals
+my_setting: Optional[tk.IntVar] = None
 
-def plugin_prefs(parent, cmdr, is_beta):
+def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
    """
    Return a TK Frame for adding to the EDMC settings dialog.
    """
-   this.mysetting = tk.IntVar(value=config.getint("MyPluginSetting"))  # Retrieve saved value from config
+   global my_setting
+   my_setting = tk.IntVar(value=config.getint("MyPluginSetting"))  # Retrieve saved value from config
    frame = nb.Frame(parent)
    nb.Label(frame, text="Hello").grid()
    nb.Label(frame, text="Commander").grid()
-   nb.Checkbutton(frame, text="My Setting", variable=this.mysetting).grid()
+   nb.Checkbutton(frame, text="My Setting", variable=my_setting).grid()
 
    return frame
 ```
@@ -231,11 +239,11 @@ def plugin_prefs(parent, cmdr, is_beta):
 This gets called when the user dismisses the settings dialog:
 
 ```python
-def prefs_changed(cmdr, is_beta):
+def prefs_changed(cmdr: str, is_beta: bool) -> None:
    """
    Save settings.
    """
-   config.set('MyPluginSetting', this.mysetting.getint())  # Store new value in config
+   config.set('MyPluginSetting', my_setting.get())  # Store new value in config
 ```
 
 ### Display
@@ -251,19 +259,26 @@ You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format
 numbers in your widgets in a locale-independent way.
 
 ```python
-this = sys.modules[__name__]  # For holding module globals
+from typing import Optional, Tuple
+import tkinter as tk
 
-def plugin_app(parent):
+status: Optional[tk.Label]
+
+
+def plugin_app(parent: tk.Frame) -> Tuple[tk.Label, tk.Label]:
     """
     Create a pair of TK widgets for the EDMC main window
     """
+    global status
     label = tk.Label(parent, text="Status:")  # By default widgets inherit the current theme's colors
-    this.status = tk.Label(parent, text="", foreground="yellow")  # Override theme's foreground color
-    return (label, this.status)
+    status = tk.Label(parent, text="", foreground="yellow")  # Override theme's foreground color
+    return (label, status)
 
 # later on your event functions can update the contents of these widgets
-    this.status["text"] = "Happy!"
-    this.status["foreground"] = "green"
+def some_other_function() -> None:
+    global status
+    status["text"] = "Happy!"
+    status["foreground"] = "green"
 ```
 
 You can dynamically add and remove widgets on the main window by returning a
@@ -551,7 +566,7 @@ plugin's folder:
 If there are any external dependencies then include them in the plugin's
 folder.
 
-Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive.
+Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive, as well as the `__pycache__` directory.
 
 ## Disable a plugin
 
@@ -561,10 +576,14 @@ plugin folder to append ".disabled". Eg,
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
+## Glossary / Quick lookup
+
+TODO -- List of all functions / imports mentioned above with simple descriptions.
+
 ## Migration
 
 Starting with pre-release 3.5 EDMC uses Python **3.7**.   The first full
-release under Python 3.7 will be 4.0.0.0.  This is a brief outline of the steps
+release under Python 3.7 was 4.0.0.0.  This is a brief outline of the steps
 required to migrate a plugin from earlier versions of EDMC:
 
 - Rename the function `plugin_start` to `plugin_start3(plugin_dir)`.
