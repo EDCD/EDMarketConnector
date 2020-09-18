@@ -1,6 +1,35 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta5
+===
+
+* We are now explicitly setting a UTF8 encoding at startup.  This *shouldn't*
+  have any side effects and has allowed us to switch to the native tkinter
+  file dialogues rather than some custom code.
+  
+  If you do encounter errors that might be related to this then it would be
+  useful to see the logging output that details the Locale settings at
+  various points during startup.  Examples might include incorrect text being
+  rendered for your language when you have it set, or issues with filenames
+  and their content, but any of these are unlikely.
+  
+* The error `'list' object has no attribute 'values'` should now be fixed.
+
+* Code dealing with Frontier's CAPI was cleaned up, so please report any
+  issues related to that (mostly when just docked or when you press the Update
+  button).
+
+* Extra logging added for when we process FSDJump and CarrierJump events for
+  EDSM.  This is aimed at checking if we do have a bug with CarrierJump events,
+  but having FSDJump trigger the logging as well made it easier to test.
+  
+* Default `logging` level for plugins is now DEBUG.  This won't change what's
+  actually logged, it just ensures that everything gets through to the two
+  channels that then decide what is output.
+
+* Translations updated.  Thanks again to all contributors!
+
 Pre-Release 4.1.0-beta4
 ===
 
