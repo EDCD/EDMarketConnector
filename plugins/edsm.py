@@ -518,7 +518,13 @@ def worker() -> None:
                     r.raise_for_status()
                     this.discardedEvents = set(r.json())
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
-                    assert this.discardedEvents			# wouldn't expect this to be empty
+                    if not this.discardedEvents:
+                        logger.error(
+                            'Unexpected empty discarded events list from EDSM. Bailing out of send: '
+                            f'{type(this.discardedEvents)} -- {this.discardedEvents}'
+                        )
+                        continue
+
                     # Filter out unwanted events
                     pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
 
