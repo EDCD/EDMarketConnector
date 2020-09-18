@@ -3,6 +3,7 @@
 Plugins allow you to customise and extend the behavior of EDMC.
 
 ## Installing a Plugin
+
 See [Plugins](https://github.com/EDCD/EDMarketConnector/wiki/Plugins) on the
 wiki.
 
@@ -12,16 +13,16 @@ Plugins are loaded when EDMC starts up.
 
 Each plugin has it's own folder in the `plugins` directory:
 
-* Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins`
-* Mac: `~/Library/Application Support/EDMarketConnector/plugins`
-* Linux: `$XDG_DATA_HOME/EDMarketConnector/plugins`, or
- `~/.local/share/EDMarketConnector/plugins` if `$XDG_DATA_HOME` is unset.
+- Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins`
+- Mac: `~/Library/Application Support/EDMarketConnector/plugins`
+- Linux: `$XDG_DATA_HOME/EDMarketConnector/plugins`, or `~/.local/share/EDMarketConnector/plugins` if `$XDG_DATA_HOME` is unset.
 
 Plugins are python files. The plugin folder must have a file named `load.py`
 that must provide one module level function and optionally provide a few
 others.
 
 ---
+
 ### Available imports
 
 **`import`ing anything from the core EDMarketConnector code that is not
@@ -32,34 +33,36 @@ breaking with future code changes.**
 
 `from theme import theme` - So plugins can theme their own UI elements to
  match the main UI.
- 
+
 `from config import appname, applongname, appcmdname, appversion
 , copyright, config` - to access config.
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
 `from companion import category_map` - Or any of the other static date
- contained therein.   NB: There's a plan to move such to a `data` module.
+contained therein.   NB: There's a plan to move such to a `data` module.
 
 `import plug` - Mostly for using `plug.show_error()`.  Also the flags
- for `dashboard_entry()` to be useful (see example below).  Relying on anything
- else isn't supported.
- 
+for `dashboard_entry()` to be useful (see example below).  Relying on anything
+else isn't supported.
+
 `from monitor import gamerunning` - in case a plugin needs to know if we
  think the game is running.
 
 `import timeout_session` - provides a method called `new_session` that creates a requests.session with a default timeout
 on all requests. Recommended to reduce noise in HTTP requests
- 
 
 ```python
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 ```
+
 For creating UI elements.
 
 ---
+
 ### Logging
+
 In the past the only way to provide any logged output from a
 plugin was to use `print(...)` statements.  When running the application from
 the packaged executeable all output is redirected to a log file.  See
@@ -72,6 +75,7 @@ statements.
 
 Insert this at the top-level of your load.py file (so not inside
 `plugin_start3()` ):
+
 ```python
 import logging
 
@@ -149,7 +153,9 @@ functions, in the output.
 ```
 
 ---
+
 ### Startup
+
 EDMC will import the `load.py` file as a module and then call the
 `plugin_start3()` function.
 
@@ -161,6 +167,7 @@ def plugin_start3(plugin_dir):
    print("I am loaded! My plugin folder is {}".format(plugin_dir))
    return "Test"
 ```
+
 The string you return is used as the internal name of the plugin.
 
 Any errors or print statements from your plugin will appear in
@@ -168,6 +175,7 @@ Any errors or print statements from your plugin will appear in
 Mac, and `$TMP/EDMarketConnector.log` on Linux.
 
 ### Shutdown
+
 This gets called when the user closes the program:
 
 ```python
@@ -182,7 +190,8 @@ If your plugin uses one or more threads to handle Events then stop and join()
 the threads before returning from this function.
 
 ## Plugin Hooks
-### Configuration 
+
+### Configuration
 
 If you want your plugin to be configurable via the GUI you can define a frame
 (panel) to be displayed on its own tab in EDMC's settings dialog. The tab
@@ -204,7 +213,7 @@ import tkinter as tk
 import myNotebook as nb
 from config import config
 
-this = sys.modules[__name__]	# For holding module globals
+this = sys.modules[__name__]  # For holding module globals
 
 def plugin_prefs(parent, cmdr, is_beta):
    """
@@ -242,7 +251,7 @@ You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format
 numbers in your widgets in a locale-independent way.
 
 ```python
-this = sys.modules[__name__]	# For holding module globals
+this = sys.modules[__name__]  # For holding module globals
 
 def plugin_app(parent):
     """
@@ -251,7 +260,7 @@ def plugin_app(parent):
     label = tk.Label(parent, text="Status:")  # By default widgets inherit the current theme's colors
     this.status = tk.Label(parent, text="", foreground="yellow")  # Override theme's foreground color
     return (label, this.status)
-   
+
 # later on your event functions can update the contents of these widgets
     this.status["text"] = "Happy!"
     this.status["foreground"] = "green"
@@ -314,7 +323,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 ```
 
 This gets called when EDMC sees a new entry in the game's journal.
- 
+
 - `cmdr` is a `str` denoting the current Commander Name.
 - `is_beta` is a `bool` denoting if data came from a beta version of the game.
 - `system` is a `str` holding the name of the current system, or `None` if not
@@ -324,38 +333,37 @@ This gets called when EDMC sees a new entry in the game's journal.
 - `entry` is an `OrderedDict` holding the Journal event.
 - `state` is a `dictionary` containing information about the Cmdr and their
  ship and cargo (including the effect of the current journal entry).
-    - `Captain` - `str` of name of Commander's crew you joined in multi-crew,
-     else `None`
-    - `Cargo` - `dict` with details of current cargo.
-    - `Credits` - Current credit balance.
-    - `FID` - Frontier Cmdr ID
-    - `Horizons` - `bool` denoting if Horizons expansion active.
-    - `Loan` - Current loan amount, else None.
-    - `Raw` - `dict` with details of "Raw" materials held.
-    - `Manufactured` - `dict` with details of "Manufactured" materials held.
-    - `Encoded` - `dict` with details of "Encoded" materials held.
-    - `Engineers` - `dict` with details of Rank Progress for Engineers.
-    - `Rank` - `dict` of current Ranks.  Each entry is a `tuple` of
-     (<rank `int`>, <progress %age `int`>)
-    - `Reputation` - `dict` of Major Faction reputations, scale is -100 to +100
-     See Frontier's Journal Manual for detail of bands.
-    - `Statistics` - `dict` of a Journal "Statistics" event, i.e. data shown
-     in the statistics panel on the right side of the cockpit.  See Frontier's
-     Journal Manual for details.
-    - `Role` - Crew role if multi-crewing in another Commander's ship:
-        - `None`
-        - "Idle"
-        - "FireCon"
-        - "FighterCon"
-    - `Friends` -`set` of online friends.
-    - `ShipID` - `int` that denotes Frontier internal ID for your current ship.
-    - `ShipIdent` - `str` of your current ship's textual ID (which you set).
-    - `ShipName` - `str` of your current ship's textual Name (which you set).
-    - `ShipType` - `str` of your current ship's model, e.g. "CobraMkIII".
-    - `HullValue` - `int` of current ship's credits value, excluding modules.
-    - `ModulesValue` - `int` of current ship's module's total credits value.
-    - `Rebuy` - `int` of current ship's rebuy cost in credits.
-    - `Modules` - `dict` with data on currently fitted modules.
+  - `Captain` - `str` of name of Commander's crew you joined in multi-crew,
+   else `None`
+  - `Cargo` - `dict` with details of current cargo.
+  - `Credits` - Current credit balance.
+  - `FID` - Frontier Cmdr ID
+  - `Horizons` - `bool` denoting if Horizons expansion active.
+  - `Loan` - Current loan amount, else None.
+  - `Raw` - `dict` with details of "Raw" materials held.
+  - `Manufactured` - `dict` with details of "Manufactured" materials held.
+  - `Encoded` - `dict` with details of "Encoded" materials held.
+  - `Engineers` - `dict` with details of Rank Progress for Engineers.
+  - `Rank` - `dict` of current Ranks.  Each entry is a 2 `tuple` of ints, rank and age
+  - `Reputation` - `dict` of Major Faction reputations, scale is -100 to +100
+   See Frontier's Journal Manual for detail of bands.
+  - `Statistics` - `dict` of a Journal "Statistics" event, i.e. data shown
+   in the statistics panel on the right side of the cockpit.  See Frontier's
+   Journal Manual for details.
+  - `Role` - Crew role if multi-crewing in another Commander's ship:
+    - `None`
+    - "Idle"
+    - "FireCon"
+    - "FighterCon"
+  - `Friends` -`set` of online friends.
+  - `ShipID` - `int` that denotes Frontier internal ID for your current ship.
+  - `ShipIdent` - `str` of your current ship's textual ID (which you set).
+  - `ShipName` - `str` of your current ship's textual Name (which you set).
+  - `ShipType` - `str` of your current ship's model, e.g. "CobraMkIII".
+  - `HullValue` - `int` of current ship's credits value, excluding modules.
+  - `ModulesValue` - `int` of current ship's module's total credits value.
+  - `Rebuy` - `int` of current ship's rebuy cost in credits.
+  - `Modules` - `dict` with data on currently fitted modules.
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
@@ -365,7 +373,6 @@ cumulative effect of these missed events.
 Similarly, a special "ShutDown" entry is sent when the game is quitted while
 EDMC is running. This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
-
 
 #### Player Dashboard
 
@@ -379,16 +386,16 @@ def dashboard_entry(cmdr, is_beta, entry):
 
 This gets called when something on the player's cockpit display changes -
 typically about once a second when in orbital flight.
- 
 
 - `cmdr` is a `str` denoting the current Commander Name.
 - `is_beta` is a `bool` denoting if data came from a beta version of the game.
 - `entry` is a `dict` loaded from the Status.json file the game writes.
- See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661)
- for the available `entry` properties and for the list of available `"Flags"`.
- Ask on the EDCD Discord server to be sure you have the latest version.
- Refer to the source code of [plug.py](./plug.py) for the list of available
- constants.
+    See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661)
+    for the available `entry` properties and for the list of available `"Flags"`.
+    Ask on the EDCD Discord server to be sure you have the latest version.
+    Refer to the source code of [plug.py](./plug.py) for the list of available
+    constants.
+
 #### Getting Commander Data
 
 ```python
@@ -404,10 +411,10 @@ Frontier's servers.
 
 - `data` is a dictionary containing the response from Frontier to a CAPI
 `/profile` request, augmented with two extra keys:
-    - `marketdata` - contains the CAPI data from the `/market` endpoint, if
-     docked and the station has the commodites service.
-    - `shipdata` - contains the CAPI data from the `/shipyard` endpoint, if
-     docked and the station has the shipyard service.
+  - `marketdata` - contains the CAPI data from the `/market` endpoint, if
+   docked and the station has the commodities service.
+  - `shipdata` - contains the CAPI data from the `/shipyard` endpoint, if
+   docked and the station has the shipyard service.
 - `is_beta` is a `bool` denoting if data came from a beta version of the game.
 
 #### Plugin-specific events
@@ -432,21 +439,24 @@ called when the player starts the game or enters a new system. It is called
 some time after the corresponding `journal_entry()` event.
 
 ---
+
 ```python
 def inara_notify_location(eventData):
     """
     `eventData` holds the response to one of the "Commander's Flight Log" events https://inara.cz/inara-api-docs/#event-29
     """
     if eventData.get('starsystemInaraID'):
-        sys.stderr.write('Now in Inara system {ID} at {URL}\n'.format(ID=eventData['starsystemInaraID'],
-                                                                      URL=eventData['starsystemInaraURL'])
-        )
+        sys.stderr.write('Now in Inara system {ID} at {URL}\n'.format(
+            ID=eventData['starsystemInaraID'],
+            URL=eventData['starsystemInaraURL']
+        ))
     else:
         sys.stderr.write('System not known to Inara\n')
     if eventData.get('stationInaraID'):
-        sys.stderr.write('Docked at Inara station {ID} at {URL}\n'.format(ID=eventData['stationInaraID'],
-                                                                          URL=eventData['stationInaraURL'])
-        )
+        sys.stderr.write('Docked at Inara station {ID} at {URL}\n'.format(
+            ID=eventData['stationInaraID'],
+            URL=eventData['stationInaraURL']
+        ))
     else:
         sys.stderr.write('Undocked or station unknown to Inara\n')
 ```
@@ -457,15 +467,17 @@ undocks. It is called some time after the corresponding `journal_entry()`
 event.
 
 ---
+
 ```python
 def inara_notify_ship(eventData):
     """
     `eventData` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
     """
     if eventData.get('shipInaraID'):
-        sys.stderr.write('Now in Inara ship {ID} at {URL}\n'.format(ID=eventData['shipInaraID'],
-                                                                    URL=eventData['shipInaraURL'])
-        )
+        sys.stderr.write('Now in Inara ship {ID} at {URL}\n'.format(
+            ID=eventData['shipInaraID'],
+            URL=eventData['shipInaraURL']
+        ))
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
@@ -517,7 +529,6 @@ See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/master/L1
 folder for the list of supported language codes and for example translation
 files.
 
-
 ## Python Package Plugins
 
 A _Package Plugin_ is both a standard Python package (i.e. contains an
@@ -528,15 +539,14 @@ before any non-Package plugins.
 Other plugins can access features in a Package Plugin by `import`ing the
 package by name in the usual way.
 
-
 ## Distributing a Plugin
 
 To package your plugin for distribution simply create a `.zip` archive of your
 plugin's folder:
 
-* Windows: In Explorer right click on your plugin's folder and choose Send to
-  &rarr; Compressed (zipped) folder.
-* Mac: In Finder right click on your plugin's folder and choose Compress.
+- Windows: In Explorer right click on your plugin's folder and choose Send to
+    &rarr; Compressed (zipped) folder.
+- Mac: In Finder right click on your plugin's folder and choose Compress.
 
 If there are any external dependencies then include them in the plugin's
 folder.
@@ -558,19 +568,22 @@ release under Python 3.7 will be 4.0.0.0.  This is a brief outline of the steps
 required to migrate a plugin from earlier versions of EDMC:
 
 - Rename the function `plugin_start` to `plugin_start3(plugin_dir)`.
- Plugins without a `plugin_start3` function are listed as disabled on EDMC's
- "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating"
- appears in the log. Such plugins are also listed in a section "Plugins Without
- Python 3.x Support:" on the Settings > Plugins tab.
+    Plugins without a `plugin_start3` function are listed as disabled on EDMC's
+    "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating"
+    appears in the log. Such plugins are also listed in a section "Plugins Without
+    Python 3.x Support:" on the Settings > Plugins tab.
+
 - Check that callback functions `plugin_prefs`, `prefs_changed`,
- `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with
- the correct number of arguments.  Older versions of this app were tolerant
- of missing arguments in these function declarations.
+    `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with
+    the correct number of arguments.  Older versions of this app were tolerant
+    of missing arguments in these function declarations.
+
 - Port the code to Python 3.7. The [2to3](https://docs.python.org/3/library/2to3.html)
- tool can automate much of this work.
+    tool can automate much of this work.
 
 Depending on the complexity of the plugin it may be feasible to make it
 compatible with both EDMC 3.4 + Python 2.7 and EDMC 3.5 + Python 3.7.
+
 [Here's](https://python-future.org/compatible_idioms.html) a guide on writing
 Python 2/3 compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06)
 an example of the changes required for a simple plugin.
