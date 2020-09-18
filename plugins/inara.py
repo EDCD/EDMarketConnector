@@ -11,9 +11,11 @@ from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
 from queue import Queue
 from threading import Lock, Thread
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
+from typing import (
+    TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, MutableMapping, NamedTuple, Optional
+)
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, Union
+from typing import Sequence, Union, cast
 
 import requests
 
@@ -313,7 +315,7 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
 ) -> None:
     """Journal entry hook."""
-    event_name = entry['event']
+    event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']
     this.multicrew = bool(state['Role'])
@@ -358,7 +360,7 @@ def journal_entry(
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
-    pop = entry.get('Population')
+    pop: Optional[int] = entry.get('Population')
     if pop is not None:
         this.system_population = pop
 
@@ -373,10 +375,7 @@ def journal_entry(
         current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
             # Dump starting state to Inara
-            if (this.newuser or
-                event_name == 'StartUp' or
-                    (this.newsession and event_name == 'Cargo')):
-
+            if (this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo')):
                 this.newuser = False
                 this.newsession = False
 
@@ -400,7 +399,7 @@ def journal_entry(
                 )
 
                 if state['Engineers']:  # Not populated < 3.3
-                    to_send = []
+                    to_send: List[Mapping[str, Any]] = []
                     for k, v in state['Engineers'].items():
                         e = {'engineerName': k}
                         if isinstance(v, tuple):
@@ -461,6 +460,7 @@ def journal_entry(
                         )
 
             elif event_name == 'EngineerProgress' and 'Engineer' in entry:
+                # TODO: due to this var name being used above, the types are weird
                 to_send = {'engineerName': entry['Engineer']}
                 if 'Rank' in entry:
                     to_send['rankValue'] = entry['Rank']
@@ -498,7 +498,7 @@ def journal_entry(
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
-                cur_ship = {
+                cur_ship: Dict[str, Any] = {
                     'shipType': state['ShipType'],
                     'shipGameID': state['ShipID'],
                     'shipName': state['ShipName'],  # Can be None
@@ -616,7 +616,7 @@ def journal_entry(
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
-            materials = []
+            materials: List[Mapping[str, Any]] = []
             for category in ('Raw', 'Manufactured', 'Encoded'):
                 materials.extend(
                     [OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category])]
@@ -950,7 +950,7 @@ def journal_entry(
             # ))
 
             for goal in entry['CurrentGoals']:
-                data = OrderedDict([
+                data: MutableMapping[str, Any] = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('communitygoalName', goal['Title']),
                     ('starsystemName', goal['SystemName']),
@@ -973,7 +973,7 @@ def journal_entry(
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data = OrderedDict([
+                data: MutableMapping[str, Any] = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('contribution', goal['PlayerContribution']),
                     ('percentileBand', goal['PlayerPercentileBand']),
@@ -1019,7 +1019,7 @@ def journal_entry(
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
-        to_set = this.station
+        to_set: str = cast(str, this.station)
         if not to_set:
             if this.system_population is not None and this.system_population > 0:
                 to_set = STATION_UNDOCKED
@@ -1217,7 +1217,7 @@ def new_worker():
         time.sleep(WORKER_WAIT_TIME)
 
 
-def get_events(clear=True) -> Dict[Credentials, List[Event]]:
+def get_events(clear: bool = True) -> Dict[Credentials, List[Event]]:
     """
     Fetch a frozen copy of all events from the current queue.
 
@@ -1234,7 +1234,7 @@ def get_events(clear=True) -> Dict[Credentials, List[Event]]:
     return out
 
 
-def try_send_data(url: str, data: Mapping[str, Any]):
+def try_send_data(url: str, data: Mapping[str, Any]) -> None:
     """
     Attempt repeatedly to send the payload forward.
 
@@ -1301,7 +1301,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
     return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
 
-def update_location(event=None):
+def update_location(event: Dict[str, Any] = None) -> None:
     """
     Update other plugins with our response to system and station changes.
 
@@ -1312,12 +1312,12 @@ def update_location(event=None):
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
 
 
-def inara_notify_location(eventData):
+def inara_notify_location(eventData: Dict[str, Any]) -> None:
     """Unused."""
     pass
 
 
-def update_ship(event=None):
+def update_ship(event: Dict[str, Any] = None) -> None:
     """
     Update other plugins with our response to changing.
 
