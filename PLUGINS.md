@@ -82,6 +82,8 @@ plugin_name = os.path.basename(os.path.dirname(__file__))
 
 # A Logger is used per 'found' plugin to make it easy to include the plugin's
 # folder name in the logging output format.
+# NB: plugin_name here *must* be the plugin's folder name as per the preceding
+#     code, else the logger won't be properly set up.
 logger = logging.getLogger(f'{appname}.{plugin_name}')
 
 # If the Logger has handlers then it was already set up by the core code, else
@@ -97,6 +99,13 @@ if not logger.hasHandlers():
     logger_channel.setFormatter(logger_formatter)
     logger.addHandler(logger_channel)
 ```
+
+Note the admonishment about `plugin_name` being the folder name of your plugin.
+It can't be anything else (such as a different string returned from
+`plugin_start3()`) because the code in plug.py that sets up the logger uses
+exactly the folder name.  Our custom `qualname` and `class` formatters won't
+work with a 'bare' logger, and will cause your code to throw exceptions if
+you're not using our supplied logger.
 
 If running with 4.1.0-beta1 or later of EDMC the logging setup happens in
 the core code and will include the extra logfile destinations.  If your
