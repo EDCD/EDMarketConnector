@@ -552,7 +552,8 @@ def worker() -> None:
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
                     reply = r.json()
-                    (msg_num, msg) = reply['msgnum'], reply['msg']
+                    msg_num = reply['msgnum']
+                    msg = reply['msg']
                     # 1xx = OK
                     # 2xx = fatal error
                     # 3&4xx not generated at top-level
