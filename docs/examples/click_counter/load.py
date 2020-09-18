@@ -1,7 +1,7 @@
 """
 Example EDMC plugin.
 
-It adds a single button to the EDMC interface that displays the number of times it has been reset.
+It adds a single button to the EDMC interface that displays the number of times it has been clicked.
 """
 
 import logging
@@ -13,7 +13,7 @@ from config import appname, config
 
 PLUGIN_NAME = "ClickCounter"
 
-logger = logging.getLogger(f"{appname}")
+logger = logging.getLogger(f"{appname}.{PLUGIN_NAME}")
 
 
 class ClickCounter:
