@@ -41,9 +41,10 @@ breaking with future code changes.**
 `from companion import category_map` - Or any of the other static date
  contained therein.   NB: There's a plan to move such to a `data` module.
 
-`import plug` - Mostly for using `plug.show_error()`.  Also the flags
+`import plug` - Mostly for using `plug.show_error()`.  Also for the flags
  for `dashboard_entry()` to be useful (see example below).  Relying on anything
  else isn't supported.
+ TODO: Inter-plugin API
  
 `from monitor import gamerunning` - in case a plugin needs to know if we
  think the game is running.
@@ -462,6 +463,12 @@ def inara_notify_ship(eventData):
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
 gets called when the player starts the game or switches ship. It is called some
 time after the corresponding `journal_entry()` event.
+
+## Inter-Plugin API
+
+As with the above Plugin-specific Events it is possible to have your plugin
+receive data from other plugins.  If you wish to either provider such a method,
+or make use of one in other plugins please read this section thoroughly first.
 
 ## Error messages
 
