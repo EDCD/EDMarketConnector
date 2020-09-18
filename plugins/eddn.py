@@ -271,8 +271,13 @@ Msg:\n{msg}''')
         :param is_beta: whether or not we're currently in beta mode
         """
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
-        if modules is None:
-            logger.debug('modules was None')
+        if modules is None or isinstance(modules, list):
+            if modules is None:
+                logger.debug('modules was None')
+            elif modules == []:
+                logger.debug('modules is empty list')
+            else:
+                logger.error(f'modules is non-empty list: {modules!r}')
             modules = {}
 
         ships: Dict[str, Any] = data['lastStarport'].get('ships')
@@ -322,8 +327,13 @@ Msg:\n{msg}''')
         :param is_beta: whether or not we are in beta mode
         """
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
-        if modules is None:
-            logger.debug('modules was None')
+        if modules is None or isinstance(modules, list):
+            if modules is None:
+                logger.debug('modules was None')
+            elif modules == []:
+                logger.debug('modules is empty list')
+            else:
+                logger.error(f'modules is non-empty list: {modules!r}')
             modules = {}
 
         ships: Dict[str, Any] = data['lastStarport'].get('ships')
