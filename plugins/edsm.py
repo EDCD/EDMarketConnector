@@ -536,7 +536,7 @@ def worker() -> None:
                     if creds is None:
                         raise ValueError("Unexpected lack of credentials")
 
-                    (username, apikey) = creds
+                    username, apikey = creds
                     data = {
                         'commanderName': username.encode('utf-8'),
                         'apiKey': apikey,
