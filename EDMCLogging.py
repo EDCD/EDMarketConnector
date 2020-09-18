@@ -41,7 +41,7 @@ from config import appname, config
 #
 #      14. Call from *package*
 
-_default_loglevel = logging.INFO
+_default_loglevel = logging.DEBUG
 
 
 class Logger:
@@ -325,6 +325,7 @@ class EDMCContextFilter(logging.Filter):
                     module_name = f'plugins.{name_path}.{module_name}'
 
         return module_name
+
 
 # Singleton
 loglevel = config.get('loglevel')
