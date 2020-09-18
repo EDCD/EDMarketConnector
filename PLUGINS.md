@@ -250,7 +250,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 You can also have your plugin add an item to the EDMC main window and update
 from your event hooks. This works in the same way as `plugin_prefs()`. For a
-simple one-line item return a tk.Label widget or a pair of widgets as a tuple.
+simple one-line item return a `tk.Label` widget or a 2 tuple of widgets.
 For a more complicated item create a tk.Frame widget and populate it with other
 ttk widgets. Return `None` if you just want to use this as a callback after the
 main window and all other plugins are initialised.
@@ -286,22 +286,27 @@ tk.Frame from `plugin_app()` and later creating and destroying child widgets
 of that frame.
 
 ```python
+from typing import Option
+import tkinter as tk
+
 from theme import theme
 
-this = sys.modules[__name__]  # For holding module globals
+frame: Optional[tk.Frame] = None
 
-def plugin_app(parent):
+def plugin_app(parent: tk.Frame) -> tk.Frame:
     """
     Create a frame for the EDMC main window
     """
-    this.frame = tk.Frame(parent)
-    return this.frame
+    global frame
+    frame = tk.Frame(parent)
+    return frame
 
+def some_other_function_called_later() -> None:
 # later on your event functions can add or remove widgets
-    row = this.frame.grid_size()[1]
-    new_widget_1 = tk.Label(this.frame, text="Status:")
+    row = frame.grid_size()[1]
+    new_widget_1 = tk.Label(frame, text="Status:")
     new_widget_1.grid(row=row, column=0, sticky=tk.W)
-    new_widget_2 = tk.Label(this.frame, text="Unhappy!", foreground="red")  # Override theme's foreground color
+    new_widget_2 = tk.Label(frame, text="Unhappy!", foreground="red")  # Override theme's foreground color
     new_widget_2.grid(row=row, column=1, sticky=tk.W)
     theme.update(this.frame)  # Apply theme colours to the frame and its children, including the new widgets
 ```
@@ -328,13 +333,16 @@ for an example of these techniques.
 #### Journal Entry
 
 ```python
-def journal_entry(cmdr, is_beta, system, station, entry, state):
+def journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
+) -> None:
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
-            sys.stderr.write("Arrived at {} ({},{},{})\n".format(entry['StarSystem'], *tuple(entry['StarPos'])))
+            logger.info(f'Arrived at {entry["StarSystem"]} {entry["StarPos"')
+
         else:
-            sys.stderr.write("Arrived at {}\n".format(entry['StarSystem']))
+            logger.info(f'Arrived at {entry["StarSystem"]}')
 ```
 
 This gets called when EDMC sees a new entry in the game's journal.
@@ -418,7 +426,10 @@ def cmdr_data(data, is_beta):
     """
     We have new data on our commander
     """
-    sys.stderr.write(data.get('commander') and data.get('commander').get('name') or '')
+    if data.get('commander') is None or data['commander'].get('name') is None:
+        raise ValueError("this isn't possible")
+
+    logger.info(data['commander']['name'])
 ```
 
 This gets called when EDMC has just fetched fresh Cmdr and station data from
@@ -440,13 +451,16 @@ def edsm_notify_system(reply):
     `reply` holds the response from a call to https://www.edsm.net/en/api-journal-v1
     """
     if not reply:
-        sys.stderr.write("Error: Can't connect to EDSM\n")
+        logger.info("Error: Can't connect to EDSM")
+
     elif reply['msgnum'] // 100 not in (1,4):
-        sys.stderr.write('Error: EDSM {MSG}\n').format(MSG=reply['msg'])
+        logger.info(f'Error: EDSM {reply["msg"]}')
+
     elif reply.get('systemCreated'):
-        sys.stderr.write('New EDSM system!\n')
+        logger.info('New EDSM system!')
+
     else:
-        sys.stderr.write('Known EDSM system\n')
+        logger.info('Known EDSM system')
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to EDSM" this gets
@@ -461,19 +475,15 @@ def inara_notify_location(eventData):
     `eventData` holds the response to one of the "Commander's Flight Log" events https://inara.cz/inara-api-docs/#event-29
     """
     if eventData.get('starsystemInaraID'):
-        sys.stderr.write('Now in Inara system {ID} at {URL}\n'.format(
-            ID=eventData['starsystemInaraID'],
-            URL=eventData['starsystemInaraURL']
-        ))
+        logging.info(f'Now in Inara system {eventData["starsystemInaraID"]} at {eventData["starsystemInaraURL"]}')
     else:
-        sys.stderr.write('System not known to Inara\n')
+        logger.info('System not known to Inara')
+
     if eventData.get('stationInaraID'):
-        sys.stderr.write('Docked at Inara station {ID} at {URL}\n'.format(
-            ID=eventData['stationInaraID'],
-            URL=eventData['stationInaraURL']
-        ))
+        logger.info(f'Docked at Inara station {eventData["stationInaraID"]} at {eventData["stationInaraURL"]}')
+
     else:
-        sys.stderr.write('Undocked or station unknown to Inara\n')
+        logger.info('Undocked or station unknown to Inara')
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
@@ -489,10 +499,9 @@ def inara_notify_ship(eventData):
     `eventData` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
     """
     if eventData.get('shipInaraID'):
-        sys.stderr.write('Now in Inara ship {ID} at {URL}\n'.format(
-            ID=eventData['shipInaraID'],
-            URL=eventData['shipInaraURL']
-        ))
+        logger.info(
+            f'Now in Inara ship {eventData['shipInaraID'],} at {eventData['shipInaraURL']}
+        )
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
@@ -526,7 +535,7 @@ _ = functools.partial(l10n.Translations.translate, context=__file__)
 Wrap each string that needs translating with the `_()` function, e.g.:
 
 ```python
-    this.status["text"] = _('Happy!')  # Main window status
+    status["text"] = _('Happy!')  # Main window status
 ```
 
 If you display localized strings in EDMC's main window you should refresh them
