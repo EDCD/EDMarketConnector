@@ -530,11 +530,11 @@ class Session(object):
         """Perform general CAPI /profile endpoint query."""
         return self.query(URL_QUERY)
 
-    def station(self) -> Union[CAPIData, None]:
+    def station(self) -> CAPIData:
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
         if not data['commander'].get('docked'):
-            return None
+            return data
 
         services = data['lastStarport'].get('services', {})
 
