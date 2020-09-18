@@ -534,7 +534,7 @@ class Session(object):
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
         if not data['commander'].get('docked'):
-            return None
+            return data
 
         services = data['lastStarport'].get('services', {})
 
