@@ -217,6 +217,15 @@ def credentials(cmdr):
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
+    if entry['event'] == 'CarrierJump':
+        logger.debug(f'''CarrierJump
+Commander: {cmdr}
+System: {system}
+Station: {station}
+state: {state!r}
+entry: {entry!r}'''
+                    )
+
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -291,6 +300,10 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             materials.update(transient)
             this.queue.put((cmdr, materials))
 
+        if entry['event'] == 'CarrierJump':
+            logger.debug(f'''CarrierJump
+Queueing: {entry!r}'''
+                         )
         this.queue.put((cmdr, entry))
 
 
@@ -346,7 +359,12 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
+                if item and entry['event'] == 'CarrierJump':
+                    logger.debug('CarrierJump')
+
                 if item and entry['event'] not in this.discardedEvents:
+                    if entry['event'] == 'CarrierJump':
+                        logger.debug(f'CarrierJump event not in discarded list')
                     pending.append(entry)
 
                 # Get list of events to discard
@@ -359,6 +377,9 @@ def worker():
                     pending = [x for x in pending if x['event'] not in this.discardedEvents]	# Filter out unwanted events
 
                 if should_send(pending):
+                    if any([p for p in pending if p['event'] == 'CarrierJump']):
+                        logger.debug('CarrierJump in pending and it passed should_send()')
+
                     (username, apikey) = credentials(cmdr)
                     data = {
                         'commanderName': username.encode('utf-8'),
@@ -367,6 +388,13 @@ def worker():
                         'fromSoftwareVersion': appversion,
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
+
+                    if any([p for p in pending if p['event'] == 'CarrierJump']):
+                        data_elided = data.copy()
+                        data_elided['apiKey'] = '<elided>'
+                        logger.debug(f'''CarrierJump: Attempting API call
+data: {data_elided!r}'''
+                                     )
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
                     reply = r.json()
@@ -448,4 +476,3 @@ def edsm_notify_system(reply):
         this.system_link['image'] = this._IMG_NEW
     else:
         this.system_link['image'] = this._IMG_KNOWN
-
