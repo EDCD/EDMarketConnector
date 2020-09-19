@@ -11,6 +11,8 @@ assignees: ''
 [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618)
 in case this has already been reported.**
 
+**Please also check if the issue is covered in our [Troubleshooting Guide](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting).** It might be something with a known work around, or where a third party (such as EDSM) is causing logging that is harmless.
+
 **Please complete the following information:**
  - Version [e.g. 4.0.6 - See 'Help > About E:D Market Connector']
  - OS: [e.g. Windows 10]
