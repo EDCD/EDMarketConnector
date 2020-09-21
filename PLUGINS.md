@@ -179,6 +179,11 @@ Any errors or print statements from your plugin will appear in
 `%TMP%\EDMarketConnector.log` on Windows, `$TMPDIR/EDMarketConnector.log` on
 Mac, and `$TMP/EDMarketConnector.log` on Linux.
 
+| Parameter    | Type  | Description                                             |
+| :----------- | :---: | :------------------------------------------------------ |
+| `plugin_dir` | `str` | The directory that your plugin is located in.           |
+| `RETURN`     | `str` | The name you want to be used for your plugin internally |
+
 ### Shutdown
 
 This gets called when the user closes the program:
@@ -191,8 +196,8 @@ def plugin_stop() -> None:
     print("Farewell cruel world!")
 ```
 
-If your plugin uses one or more threads to handle Events then stop and join()
-the threads before returning from this function.
+If your plugin uses one or more threads to handle Events then `stop()` and `join()`
+(to wait for their exit -- Recommended, not required) the threads before returning from this function.
 
 ## Plugin Hooks
 
@@ -236,6 +241,12 @@ def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.F
    return frame
 ```
 
+| Parameter |     Type      | Description                                      |
+| :-------- | :-----------: | :----------------------------------------------- |
+| `parent`  | `nb.Notebook` | Root Notebook object the preferences window uses |
+| `cmdr`    |     `str`     | The current commander                            |
+| `is_beta` |    `bool`     | If the game is currently a beta version          |
+
 This gets called when the user dismisses the settings dialog:
 
 ```python
@@ -245,6 +256,11 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
    """
    config.set('MyPluginSetting', my_setting.get())  # Store new value in config
 ```
+
+| Parameter |  Type  | Description                             |
+| :-------- | :----: | :-------------------------------------- |
+| `cmdr`    | `str`  | The current commander                   |
+| `is_beta` | `bool` | If the game is currently a beta version |
 
 ### Display
 
@@ -281,9 +297,17 @@ def some_other_function() -> None:
     status["foreground"] = "green"
 ```
 
-You can dynamically add and remove widgets on the main window by returning a
-tk.Frame from `plugin_app()` and later creating and destroying child widgets
-of that frame.
+| Parameter |                      Type                       | Description                                                 |
+| :-------- | :---------------------------------------------: | :---------------------------------------------------------- |
+| `parent`  |                   `tk.Frame`                    | The root EDMC window                                        |
+| `RETURN`  | `Union[tk.Widget, Tuple[tk.Widget, tk.Widget]]` | A widget to add to the main window. See below for more info |
+
+The return from plugin_app can either be any widget (Frame, Label, Notebook, etc.), or a 2 tuple of widgets. In the case of
+a 2 tuple, indices 0 and 1 are placed automatically in the outer grid on column indices 0 and 1. Otherwise, the only thing done
+to your return widget is it is set to use a columnspan of 2, and placed on the grid.
+
+You can dynamically add and remove widgets on the main window by returning a tk.Frame from `plugin_app()` and later
+creating and destroying child widgets of that frame.
 
 ```python
 from typing import Option
@@ -347,46 +371,40 @@ def journal_entry(
 
 This gets called when EDMC sees a new entry in the game's journal.
 
-- `cmdr` is a `str` denoting the current Commander Name.
-- `is_beta` is a `bool` denoting if data came from a beta version of the game.
-- `system` is a `str` holding the name of the current system, or `None` if not
- yet known.
-- `station` is a `str` holding the name of the current station, or `None` if
- not yet known or appropriate.
-- `entry` is an `OrderedDict` holding the Journal event.
-- `state` is a `dictionary` containing information about the Cmdr and their
- ship and cargo (including the effect of the current journal entry).
-  - `Captain` - `str` of name of Commander's crew you joined in multi-crew,
-   else `None`
-  - `Cargo` - `dict` with details of current cargo.
-  - `Credits` - Current credit balance.
-  - `FID` - Frontier Cmdr ID
-  - `Horizons` - `bool` denoting if Horizons expansion active.
-  - `Loan` - Current loan amount, else None.
-  - `Raw` - `dict` with details of "Raw" materials held.
-  - `Manufactured` - `dict` with details of "Manufactured" materials held.
-  - `Encoded` - `dict` with details of "Encoded" materials held.
-  - `Engineers` - `dict` with details of Rank Progress for Engineers.
-  - `Rank` - `dict` of current Ranks.  Each entry is a 2 `tuple` of ints, rank and age
-  - `Reputation` - `dict` of Major Faction reputations, scale is -100 to +100
-   See Frontier's Journal Manual for detail of bands.
-  - `Statistics` - `dict` of a Journal "Statistics" event, i.e. data shown
-   in the statistics panel on the right side of the cockpit.  See Frontier's
-   Journal Manual for details.
-  - `Role` - Crew role if multi-crewing in another Commander's ship:
-    - `None`
-    - "Idle"
-    - "FireCon"
-    - "FighterCon"
-  - `Friends` -`set` of online friends.
-  - `ShipID` - `int` that denotes Frontier internal ID for your current ship.
-  - `ShipIdent` - `str` of your current ship's textual ID (which you set).
-  - `ShipName` - `str` of your current ship's textual Name (which you set).
-  - `ShipType` - `str` of your current ship's model, e.g. "CobraMkIII".
-  - `HullValue` - `int` of current ship's credits value, excluding modules.
-  - `ModulesValue` - `int` of current ship's module's total credits value.
-  - `Rebuy` - `int` of current ship's rebuy cost in credits.
-  - `Modules` - `dict` with data on currently fitted modules.
+| Parameter |       Type       | Description                                                            |
+| :-------- | :--------------: | :--------------------------------------------------------------------- |
+| `cmdr`    |      `str`       | Current commander name                                                 |
+| `is_beta` |      `bool`      | Is the game currently in beta                                          |
+| `system`  | `Optional[str]`  | Current system, if known                                               |
+| `station` | `Optional[str]`  | Current station, if any                                                |
+| `entry`   | `Dict[str, Any]` | The journal event                                                      |
+| `state`   | `Dict[str, Any]` | More info about the commander, their ship, and their cargo (see below) |
+
+Content of `state` (updated to the current journal entry):
+
+| Field          |            Type             | Description                                                                                                     |
+| :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
+| `Captian`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Cargo`        |           `dict`            | Current cargo                                                                                                   |
+| `Credits`      |            `int`            | Current credits balance                                                                                         |
+| `FID`          |            `str`            | Frontier commander ID                                                                                           |
+| `Loan`         |       `Optional[int]`       | Current loan amount, if any                                                                                     |
+| `Raw`          |           `dict`            | Current raw engineering materials                                                                               |
+| `Manufactured` |           `dict`            | Current manufactured engineering materials                                                                      |
+| `Encoded`      |           `dict`            | Current encoded engineering materials                                                                           |
+| `Engineers`    |           `dict`            | Current Raw engineering materials                                                                               |
+| `Rank`         | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
+| `Statistics`   |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
+| `Role`         |       `Optional[str]`       | Current role if in multi-crew, one of `Idle`, `FireCon`, `FighterCon`                                           |
+| `Friends`      |            `set`            | Currently online friend                                                                                         |
+| `ShipID`       |            `int`            | Frontier ID of current ship                                                                                     |
+| `ShipIdent`    |            `str`            | Current user-set ship ID                                                                                        |
+| `ShipName`     |            `str`            | Current user-set ship name                                                                                      |
+| `ShipType`     |            `str`            | Internal name for the current ship type                                                                         |
+| `HullValue`    |            `int`            | Current ship value, excluding modules                                                                           |
+| `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
+| `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
+| `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
@@ -402,7 +420,7 @@ machine so you should not *rely* on receiving this event.
 ```python
 import plug
 
-def dashboard_entry(cmdr, is_beta, entry):
+def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]):
     is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
@@ -410,14 +428,13 @@ def dashboard_entry(cmdr, is_beta, entry):
 This gets called when something on the player's cockpit display changes -
 typically about once a second when in orbital flight.
 
-- `cmdr` is a `str` denoting the current Commander Name.
-- `is_beta` is a `bool` denoting if data came from a beta version of the game.
-- `entry` is a `dict` loaded from the Status.json file the game writes.
-    See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661)
-    for the available `entry` properties and for the list of available `"Flags"`.
-    Ask on the EDCD Discord server to be sure you have the latest version.
-    Refer to the source code of [plug.py](./plug.py) for the list of available
-    constants.
+| Parameter |  Type  | Description                       |
+| :-------- | :----: | :-------------------------------- |
+| `cmdr`    | `str`  | Current command name              |
+| `is_beta` | `bool` | if the game is currently in beta  |
+| `entry`   | `dict` | Data from status.json (see below) |
+
+ For more info on `status.json`, See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available  constants.
 
 #### Getting Commander Data
 
@@ -435,13 +452,10 @@ def cmdr_data(data, is_beta):
 This gets called when EDMC has just fetched fresh Cmdr and station data from
 Frontier's servers.
 
-- `data` is a dictionary containing the response from Frontier to a CAPI
-`/profile` request, augmented with two extra keys:
-  - `marketdata` - contains the CAPI data from the `/market` endpoint, if
-   docked and the station has the commodities service.
-  - `shipdata` - contains the CAPI data from the `/shipyard` endpoint, if
-   docked and the station has the shipyard service.
-- `is_beta` is a `bool` denoting if data came from a beta version of the game.
+| Parameter |       Type       | Description                                                                                              |
+| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`    | `Dict[str, Any]` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
+| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
 
 #### Plugin-specific events
 
@@ -467,20 +481,22 @@ If the player has chosen to "Send flight log and Cmdr status to EDSM" this gets
 called when the player starts the game or enters a new system. It is called
 some time after the corresponding `journal_entry()` event.
 
----
+| Parameter |       Type       | Description                                                                                    |
+| :-------- | :--------------: | :--------------------------------------------------------------------------------------------- |
+| `reply`   | `Dict[str, Any]` | Response to an API call to [EDSM's journal API target](https://www.edsm.net/en/api-journal-v1) |
 
 ```python
-def inara_notify_location(eventData):
+def inara_notify_location(event_data):
     """
-    `eventData` holds the response to one of the "Commander's Flight Log" events https://inara.cz/inara-api-docs/#event-29
+    `event_data` holds the response to one of the "Commander's Flight Log" events https://inara.cz/inara-api-docs/#event-29
     """
-    if eventData.get('starsystemInaraID'):
-        logging.info(f'Now in Inara system {eventData["starsystemInaraID"]} at {eventData["starsystemInaraURL"]}')
+    if event_data.get('starsystemInaraID'):
+        logging.info(f'Now in Inara system {event_data["starsystemInaraID"]} at {event_data["starsystemInaraURL"]}')
     else:
         logger.info('System not known to Inara')
 
-    if eventData.get('stationInaraID'):
-        logger.info(f'Docked at Inara station {eventData["stationInaraID"]} at {eventData["stationInaraURL"]}')
+    if event_data.get('stationInaraID'):
+        logger.info(f'Docked at Inara station {event_data["stationInaraID"]} at {event_data["stationInaraURL"]}')
 
     else:
         logger.info('Undocked or station unknown to Inara')
@@ -491,22 +507,30 @@ gets called when the player starts the game, enters a new system, docks or
 undocks. It is called some time after the corresponding `journal_entry()`
 event.
 
+| Parameter    |       Type       | Description                                                                                                  |
+| :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------- |
+| `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `Commander Flight Log` event](https://inara.cz/inara-api-docs/#event-29) |
+
 ---
 
 ```python
-def inara_notify_ship(eventData):
+def inara_notify_ship(event_data):
     """
-    `eventData` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
+    `event_data` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
     """
-    if eventData.get('shipInaraID'):
+    if event_data.get('shipInaraID'):
         logger.info(
-            f'Now in Inara ship {eventData['shipInaraID'],} at {eventData['shipInaraURL']}
+            f'Now in Inara ship {event_data['shipInaraID'],} at {event_data['shipInaraURL']}
         )
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
 gets called when the player starts the game or switches ship. It is called some
 time after the corresponding `journal_entry()` event.
+
+| Parameter    |       Type       | Description                                                                                                                    |
+| :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------------------------- |
+| `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `addCommanderShip` or `setCommanderShip` event](https://inara.cz/inara-api-docs/#event-11) |
 
 ## Error messages
 
