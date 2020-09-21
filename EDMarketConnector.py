@@ -1071,8 +1071,9 @@ sys.path: {sys.path}'''
     logger.debug(f'Locale LC_ALL: {locale_startup}')
     # Now set that same language, but utf8 encoding (it was probably cp1252
     # or equivalent for other languages).
-    locale.setlocale(locale.LC_ALL, (locale_startup[0], 'utf8'))
-    log_locale('After switching to utf8 encoding (same language)')
+    # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
+    locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+    log_locale('After switching to UTF-8 encoding (same language)')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
