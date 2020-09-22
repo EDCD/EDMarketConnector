@@ -9,7 +9,6 @@ protocol used for the callback.
 import base64
 import csv
 import hashlib
-import logging
 import numbers
 import os
 import random
@@ -26,9 +25,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, NewType, Union
 import requests
 
 from config import appname, appversion, config
+from EDMCLogging import get_main_logger
 from protocol import protocolhandler
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 if TYPE_CHECKING:
     _ = lambda x: x  # noqa: E731 # to make flake8 stop complaining that the hacked in _ method doesnt exist

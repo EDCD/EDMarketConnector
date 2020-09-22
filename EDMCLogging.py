@@ -10,13 +10,14 @@ strings.
 import inspect
 import logging
 import logging.handlers
+import os
 import pathlib
 import tempfile
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from typing import Tuple
 
-from config import appname, config
+from config import appcmdname, appname, config
 
 # TODO: Tests:
 #
@@ -122,7 +123,7 @@ class Logger:
         return self.logger_channel
 
 
-def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
+def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> logging.Logger:
     """
     Return a logger suitable for a plugin.
 
@@ -143,7 +144,12 @@ def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.L
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """
-    plugin_logger = logging.getLogger(name)
+    if not os.getenv('EDMC_NO_UI'):
+        base_logger_name = appname
+    else:
+        base_logger_name = appcmdname
+
+    plugin_logger = logging.getLogger(f'{base_logger_name}.{plugin_name}')
     plugin_logger.setLevel(loglevel)
 
     plugin_logger.addFilter(EDMCContextFilter())
@@ -325,6 +331,17 @@ class EDMCContextFilter(logging.Filter):
                     module_name = f'plugins.{name_path}.{module_name}'
 
         return module_name
+
+
+def get_main_logger() -> logging.Logger:
+    """Return the correct logger for how the program is being run."""
+
+    if not os.getenv("EDMC_NO_UI"):
+        # GUI app being run
+        return logging.getLogger(appname)
+    else:
+        # Must be the CLI
+        return logging.getLogger(appcmdname)
 
 
 # Singleton
