@@ -13,7 +13,7 @@ import tkinter as tk
 
 import myNotebook as nb  # noqa: N813
 
-from config import config, appname
+from config import appcmdname, appname, config
 from EDMCLogging import get_main_logger
 import logging
 
@@ -203,7 +203,11 @@ def load_plugins(master):
                 # Create a logger for this 'found' plugin.  Must be before the
                 # load.py is loaded.
                 import EDMCLogging
-                plugin_logger = EDMCLogging.get_plugin_logger(f'{appname}.{name}')
+                if not os.getenv('EDMC_NO_UI'):
+                    base_logger_name = appname
+                else:
+                    base_logger_name = appcmdname
+                plugin_logger = EDMCLogging.get_plugin_logger(f'{base_logger_name}.{name}')
 
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
             except Exception as e:
