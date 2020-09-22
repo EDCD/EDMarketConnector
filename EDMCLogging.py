@@ -123,7 +123,7 @@ class Logger:
         return self.logger_channel
 
 
-def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.Logger:
+def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> logging.Logger:
     """
     Return a logger suitable for a plugin.
 
@@ -144,7 +144,12 @@ def get_plugin_logger(name: str, loglevel: int = _default_loglevel) -> logging.L
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """
-    plugin_logger = logging.getLogger(name)
+    if not os.getenv('EDMC_NO_UI'):
+        base_logger_name = appname
+    else:
+        base_logger_name = appcmdname
+
+    plugin_logger = logging.getLogger(f'{base_logger_name}.{plugin_name}')
     plugin_logger.setLevel(loglevel)
 
     plugin_logger.addFilter(EDMCContextFilter())

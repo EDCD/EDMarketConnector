@@ -203,12 +203,8 @@ def load_plugins(master):
                 # Create a logger for this 'found' plugin.  Must be before the
                 # load.py is loaded.
                 import EDMCLogging
-                if not os.getenv('EDMC_NO_UI'):
-                    base_logger_name = appname
-                else:
-                    base_logger_name = appcmdname
-                plugin_logger = EDMCLogging.get_plugin_logger(f'{base_logger_name}.{name}')
 
+                plugin_logger = EDMCLogging.get_plugin_logger(name)
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')
