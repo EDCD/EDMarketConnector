@@ -2,7 +2,6 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
-from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, expanduser, isdir, join
 from sys import platform
@@ -18,7 +17,9 @@ if __debug__:
 
 from config import config
 from companion import ship_file_name
+from EDMCLogging import get_main_logger
 
+logger = get_main_logger()
 
 if platform == 'darwin':
     from AppKit import NSWorkspace
@@ -173,9 +174,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
 
-        if __debug__:
-            print('{} Journal {!r}'.format('Polling' if polling else 'Monitoring', self.currentdir))
-            print('Start logfile {!r}'.format(self.logfile))
+        logger.info(f'{"Polling" if polling else "Monitoring"} Journal Folder: {self.currentdir}')
+        logger.info(f'Start Journal File: {self.logfile}')
 
         if not self.running():
             self.thread = threading.Thread(target=self.worker, name='Journal worker')
