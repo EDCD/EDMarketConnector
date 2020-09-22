@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # vim: textwidth=0 wrapmargin=0 tabstop=4 shiftwidth=4 softtabstop=4 smartindent smarttab
+"""Plugin that tests that modules we bundle for plugins are present and working."""
 
-import os
-import sys
-import sqlite3
-import shutil
-import zipfile
 import logging
+import os
+import shutil
+import sqlite3
+import sys
+import zipfile
+
+from SubA import SubA
 
 from config import appname
-
-from subA import subA
 
 # This could also be returned from plugin_start3()
 plugin_name = os.path.basename(os.path.dirname(__file__))
@@ -31,12 +32,14 @@ if not logger.hasHandlers():
     logger.addHandler(logger_channel)
 
 
-this = sys.modules[__name__]        # For holding module globals
-this.DBFILE = 'miggytest.db'
+this = sys.modules[__name__]  # For holding module globals
+this.DBFILE = 'plugintest.db'
 this.mt = None
 
 
-class miggytest(object):
+class PluginTest(object):
+    """Class that performs actual tests on bundled modules."""
+
     def __init__(self, directory: str):
         logger.debug(f'directory = "{directory}')
         dbfile = os.path.join(directory, this.DBFILE)
@@ -59,28 +62,60 @@ class miggytest(object):
         except sqlite3.OperationalError:
             logger.exception('sqlite3.OperationalError when CREATE TABLE entries:')
 
-    def store(self, timestamp: str, cmdrname: str, system: str, station: str, event: str):
+    def store(self, timestamp: str, cmdrname: str, system: str, station: str, event: str) -> None:
+        """
+        Store the provided data in sqlite database.
+
+        :param timestamp:
+        :param cmdrname:
+        :param system:
+        :param station:
+        :param event:
+        :return: None
+        """
         logger.debug(f'timestamp = "{timestamp}", cmdr = "{cmdrname}", system = "{system}", station = "{station}", event = "{event}"')  # noqa: E501
         self.sqlc.execute('INSERT INTO entries VALUES(?, ?, ?, ?, ?)', (timestamp, cmdrname, system, station, event))
         self.sqlconn.commit()
         return None
 
 
-def plugin_start3(plugin_dir: str):
-    logger.info(f'Folder is {plugin_dir}')
-    this.mt = miggytest(plugin_dir)
+def plugin_start3(plugin_dir: str) -> str:
+    """
+    Plugin startup method.
 
-    this.suba = subA(logger)
+    :param plugin_dir:
+    :return: 'Pretty' name of this plugin.
+    """
+    logger.info(f'Folder is {plugin_dir}')
+    this.mt = PluginTest(plugin_dir)
+
+    this.suba = SubA(logger)
 
     this.suba.ping()
 
     return plugin_name
 
 
-def plugin_stop():
+def plugin_stop() -> None:
+    """
+    Plugin stop method.
+
+    :return:
+    """
     logger.info('Stopping')
 
 
-def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry: dict, state: dict):
+def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry: dict, state: dict) -> None:
+    """
+    Handle the given journal entry.
+
+    :param cmdrname:
+    :param is_beta:
+    :param system:
+    :param station:
+    :param entry:
+    :param state:
+    :return: None
+    """
     logger.debug(f'cmdr = "{cmdrname}", is_beta = "{is_beta}", system = "{system}", station = "{station}"')
     this.mt.store(entry['timestamp'], cmdrname, system, station, entry['event'])
