@@ -2,7 +2,6 @@
 
 import dataclasses
 import json
-import logging
 import sys
 import time
 import tkinter as tk
@@ -22,10 +21,11 @@ import requests
 import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
-from config import applongname, appname, appversion, config
+from config import applongname, appversion, config
+from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -1178,7 +1178,7 @@ def new_add_event(
 
     api_key = credentials(this.cmdr)
     if api_key is None:
-        logger.warn(f"cannot find an API key for cmdr {this.cmdr!r}")
+        logger.warning(f"cannot find an API key for cmdr {this.cmdr!r}")
         return
 
     key = Credentials(str(cmdr), str(fid), api_key)  # this fails type checking due to `this` weirdness, hence str()

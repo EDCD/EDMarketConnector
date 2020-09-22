@@ -2,7 +2,6 @@
 
 import itertools
 import json
-import logging
 import pathlib
 import re
 import sys
@@ -19,7 +18,8 @@ import requests
 
 import myNotebook as nb  # noqa: N813
 from companion import category_map
-from config import applongname, appname, appversion, config
+from config import applongname, appversion, config
+from EDMCLogging import get_main_logger
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 this: Any = sys.modules[__name__]  # For holding module globals
 

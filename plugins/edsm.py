@@ -10,7 +10,6 @@
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
 import json
-import logging
 import sys
 import tkinter as tk
 from queue import Queue
@@ -21,14 +20,15 @@ import requests
 
 import myNotebook as nb  # noqa: N813
 import plug
-from config import applongname, appname, appversion, config
+from config import applongname, appversion, config
+from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 EDSM_POLL = 0.1
 _TIMEOUT = 20
