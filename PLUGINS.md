@@ -609,10 +609,6 @@ plugin folder to append ".disabled". Eg,
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
-## Glossary / Quick lookup
-
-TODO -- List of all functions / imports mentioned above with simple descriptions.
-
 ## Migration
 
 Starting with pre-release 3.5 EDMC uses Python **3.7**.   The first full
