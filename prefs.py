@@ -9,16 +9,15 @@ from tkinter import colorchooser as tkColorChooser
 from ttkHyperlinkLabel import HyperlinkLabel
 import myNotebook as nb
 
-from config import appname, applongname, config, appversion
+from config import applongname, config, appversion
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from theme import theme
 
 import plug
-import logging
-logger = logging.getLogger(appname)
-from EDMCLogging import edmclogger
+from EDMCLogging import edmclogger, get_main_logger
+logger = get_main_logger()
 
 ###########################################################################
 # Versioned preferences, so we know whether to set an 'on' default on

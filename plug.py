@@ -9,15 +9,15 @@ import sys
 import operator
 import threading  # noqa: F401 - We don't use it, but plugins might
 from typing import Optional
-import logging
 import tkinter as tk
 
 import myNotebook as nb  # noqa: N813
 
 from config import config, appname
+from EDMCLogging import get_main_logger
 import logging
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 # Dashboard Flags constants
 FlagsDocked = 1 << 0  # on a landing pad
