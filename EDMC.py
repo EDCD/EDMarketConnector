@@ -6,6 +6,7 @@
 
 import argparse
 import json
+import locale
 import logging
 import os
 import re
@@ -13,6 +14,9 @@ import sys
 from os.path import getmtime, join
 from time import sleep, time
 from typing import Any, Optional
+
+# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
+os.environ["EDMC_NO_UI"] = "1"
 
 import collate
 import commodity
@@ -36,14 +40,31 @@ sys.path.append(config.internal_plugin_dir)
 import eddn  # noqa: E402
 # isort: on
 
-# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
-os.environ["EDMC_NO_UI"] = "1"
-
-l10n.Translations.install_dummy()
-
 logger = EDMCLogging.Logger(appcmdname).get_logger()
 logger.setLevel(logging.INFO)
 
+logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
+logger.debug(f'''Platform: {sys.platform}
+argv[0]: {sys.argv[0]}
+exec_prefix: {sys.exec_prefix}
+executable: {sys.executable}
+sys.path: {sys.path}'''
+             )
+
+
+def log_locale(prefix: str) -> None:
+    logger.debug(f'''Locale: {prefix}
+Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
+Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
+Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
+Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
+Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
+                 )
+
+
+log_locale('Initial Locale')
+
+l10n.Translations.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
