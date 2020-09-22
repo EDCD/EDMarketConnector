@@ -1,6 +1,4 @@
-#
-# Inara sync
-#
+"""Inara Sync."""
 
 import dataclasses
 import json
@@ -13,9 +11,11 @@ from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
 from queue import Queue
 from threading import Lock, Thread
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
+from typing import (
+    TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, MutableMapping, NamedTuple, Optional
+)
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, Union
+from typing import Sequence, Union, cast
 
 import requests
 
@@ -28,7 +28,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 logger = logging.getLogger(appname)
 
 if TYPE_CHECKING:
-    def _(x):
+    def _(x: str) -> str:
         return x
 
 
@@ -81,9 +81,8 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 
 class Credentials(NamedTuple):
-    """
-    Credentials holds the set of credentials required to identify an inara API payload to inara
-    """
+    """Credentials holds the set of credentials required to identify an inara API payload to inara."""
+
     cmdr: str
     fid: str
     api_key: str
@@ -93,9 +92,8 @@ EVENT_DATA = Union[Mapping[AnyStr, Any], Sequence[Mapping[AnyStr, Any]]]
 
 
 class Event(NamedTuple):
-    """
-    Event represents an event for the Inara API
-    """
+    """Event represents an event for the Inara API."""
+
     name: str
     timestamp: str
     data: EVENT_DATA
@@ -103,12 +101,19 @@ class Event(NamedTuple):
 
 @dataclasses.dataclass
 class NewThis:
+    """
+    NewThis is where the plugin stores all of its data.
+
+    It is named NewThis as it is currently being migrated to. Once migration is complete it will be renamed to This.
+    """
+
     events: Dict[Credentials, Deque[Event]] = dataclasses.field(default_factory=lambda: defaultdict(deque))
     event_lock: Lock = dataclasses.field(default_factory=Lock)  # protects events, for use when rewriting events
 
-    def filter_events(self, key: Credentials, predicate: Callable[[Event], bool]):
+    def filter_events(self, key: Credentials, predicate: Callable[[Event], bool]) -> None:
         """
         filter_events is the equivalent of running filter() on any event list in the events dict.
+
         it will automatically handle locking, and replacing the event list with the filtered version.
 
         :param key: the key to filter
@@ -124,7 +129,8 @@ new_this = NewThis()
 TARGET_URL = 'https://inara.cz/inapi/v1/'
 
 
-def system_url(system_name: str):
+def system_url(system_name: str) -> str:
+    """Get a URL for the current system."""
     if this.system_address:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={this.system_address}')
 
@@ -133,7 +139,17 @@ def system_url(system_name: str):
 
     return ''
 
-def station_url(system_name, station_name):
+
+def station_url(system_name: str, station_name: str) -> str:
+    """
+    Get a URL for the current station.
+
+    If there is no station, the system URL is returned.
+
+    :param system_name: The name of the current system
+    :param station_name: The name of the current station, if any
+    :return: A URL to inara for the given system and station
+    """
     if system_name and station_name:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
 
@@ -146,7 +162,9 @@ def station_url(system_name, station_name):
 
     return ''
 
-def plugin_start3(plugin_dir):
+
+def plugin_start3(plugin_dir: str) -> str:
+    """Plugin start Hook."""
     this.thread = Thread(target=new_worker, name='Inara worker')
     this.thread.daemon = True
     this.thread.start()
@@ -154,14 +172,16 @@ def plugin_start3(plugin_dir):
     return 'Inara'
 
 
-def plugin_app(parent: tk.Tk):
+def plugin_app(parent: tk.Tk) -> None:
+    """Plugin UI setup Hook."""
     this.system_link = parent.children['system']  # system label in main window
     this.station_link = parent.children['station']  # station label in main window
     this.system_link.bind_all('<<InaraLocation>>', update_location)
     this.system_link.bind_all('<<InaraShip>>', update_ship)
 
 
-def plugin_stop():
+def plugin_stop() -> None:
+    """Plugin shutdown hook."""
     # Signal thread to close and wait for it
     this.queue.put(None)
     # this.thread.join()
@@ -170,7 +190,8 @@ def plugin_stop():
     this.timer_run = False
 
 
-def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
+def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
+    """Plugin Preferences UI hook."""
     PADX = 10
     BUTTONX = 12  # indent Checkbuttons and Radiobuttons
     PADY = 2		# close spacing
@@ -212,7 +233,8 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool):
     return frame
 
 
-def prefs_cmdr_changed(cmdr: str, is_beta: bool):
+def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
+    """Plugin commander change hook."""
     this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
     this.apikey['state'] = tk.NORMAL
     this.apikey.delete(0, tk.END)
@@ -231,6 +253,7 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool):
 
 
 def prefsvarchanged():
+    """Preferences window change hook."""
     state = tk.DISABLED
     if this.log.get():
         state = this.log_button['state']
@@ -240,7 +263,8 @@ def prefsvarchanged():
     this.apikey['state'] = state
 
 
-def prefs_changed(cmdr: str, is_beta: bool):
+def prefs_changed(cmdr: str, is_beta: bool) -> None:
+    """Preferences window closed hook."""
     changed = config.getint('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
@@ -264,14 +288,14 @@ def prefs_changed(cmdr: str, is_beta: bool):
 
         if this.log.get() and changed:
             this.newuser = True  # Send basic info at next Journal event
-            new_add_event('getCommanderProfile', time.strftime(
-                '%Y-%m-%dT%H:%M:%SZ', time.gmtime()), {'searchName': cmdr})
-            # call()
+            new_add_event(
+                'getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), {'searchName': cmdr}
+            )
 
 
 def credentials(cmdr: str) -> Optional[str]:
     """
-    credentials fetches the credentials for the given commander
+    Get the credentials for the current commander.
 
     :param cmdr: Commander name to search for credentials
     :return: Credentials for the given commander or None
@@ -287,12 +311,11 @@ def credentials(cmdr: str) -> Optional[str]:
         return None
 
 
-def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]):
-    # Send any unsent events when switching accounts
-    # if cmdr and cmdr != this.cmdr:
-    #     call(force=True)
-
-    event_name = entry['event']
+def journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
+) -> None:
+    """Journal entry hook."""
+    event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']
     this.multicrew = bool(state['Role'])
@@ -337,7 +360,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
-    pop = entry.get('Population')
+    pop: Optional[int] = entry.get('Population')
     if pop is not None:
         this.system_population = pop
 
@@ -352,10 +375,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
         current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
             # Dump starting state to Inara
-            if (this.newuser or
-                event_name == 'StartUp' or
-                    (this.newsession and event_name == 'Cargo')):
-
+            if (this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo')):
                 this.newuser = False
                 this.newsession = False
 
@@ -379,7 +399,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
                 )
 
                 if state['Engineers']:  # Not populated < 3.3
-                    to_send = []
+                    to_send: List[Mapping[str, Any]] = []
                     for k, v in state['Engineers'].items():
                         e = {'engineerName': k}
                         if isinstance(v, tuple):
@@ -440,6 +460,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
                         )
 
             elif event_name == 'EngineerProgress' and 'Engineer' in entry:
+                # TODO: due to this var name being used above, the types are weird
                 to_send = {'engineerName': entry['Engineer']}
                 if 'Rank' in entry:
                     to_send['rankValue'] = entry['Rank']
@@ -477,7 +498,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
-                cur_ship = {
+                cur_ship: Dict[str, Any] = {
                     'shipType': state['ShipType'],
                     'shipGameID': state['ShipID'],
                     'shipName': state['ShipName'],  # Can be None
@@ -595,7 +616,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
-            materials = []
+            materials: List[Mapping[str, Any]] = []
             for category in ('Raw', 'Manufactured', 'Encoded'):
                 materials.extend(
                     [OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category])]
@@ -929,7 +950,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
             # ))
 
             for goal in entry['CurrentGoals']:
-                data = OrderedDict([
+                data: MutableMapping[str, Any] = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('communitygoalName', goal['Title']),
                     ('starsystemName', goal['SystemName']),
@@ -952,7 +973,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data = OrderedDict([
+                data: MutableMapping[str, Any] = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('contribution', goal['PlayerContribution']),
                     ('percentileBand', goal['PlayerPercentileBand']),
@@ -998,7 +1019,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
         this.system_link.update_idletasks()
 
     if config.get('station_provider') == 'Inara':
-        to_set = this.station
+        to_set: str = cast(str, this.station)
         if not to_set:
             if this.system_population is not None and this.system_population > 0:
                 to_set = STATION_UNDOCKED
@@ -1012,6 +1033,7 @@ def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: Di
 
 
 def cmdr_data(data, is_beta):
+    """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
     # Always store initially, even if we're not the *current* system provider.
@@ -1049,7 +1071,8 @@ def cmdr_data(data, is_beta):
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             new_this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
-                lambda e: e.name != 'setCommanderCredits')
+                lambda e: e.name != 'setCommanderCredits'
+            )
 
             # this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']  # Remove any unsent
             new_add_event(
@@ -1065,6 +1088,12 @@ def cmdr_data(data, is_beta):
 
 
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Construct an inara loadout from an event.
+
+    :param state: The event / state to construct the event from
+    :return: The constructed loadout
+    """
     modules = []
     for m in state['Modules'].values():
         module: OrderedDictT[str, Any] = OrderedDict([
@@ -1132,8 +1161,9 @@ def new_add_event(
     fid: Optional[str] = None
 ):
     """
-    add a journal event to the queue, to be sent to inara at the next opportunity. If provided, use the given cmdr
-    name over the current one
+    Add a journal event to the queue, to be sent to inara at the next opportunity.
+
+    If provided, use the given cmdr name over the current one
 
     :param name: name of the event
     :param timestamp: timestamp of the event
@@ -1158,6 +1188,11 @@ def new_add_event(
 
 
 def new_worker():
+    """
+    Queue worker.
+
+    Will only ever send one message per WORKER_WAIT_TIME, regardless of status.
+    """
     while True:
         events = get_events()
         for creds, event_list in events.items():
@@ -1182,9 +1217,9 @@ def new_worker():
         time.sleep(WORKER_WAIT_TIME)
 
 
-def get_events(clear=True) -> Dict[Credentials, List[Event]]:
+def get_events(clear: bool = True) -> Dict[Credentials, List[Event]]:
     """
-    get_events fetches all events from the current queue and returns a frozen version of them
+    Fetch a frozen copy of all events from the current queue.
 
     :param clear: whether or not to clear the queues as we go, defaults to True
     :return: the frozen event list
@@ -1199,9 +1234,9 @@ def get_events(clear=True) -> Dict[Credentials, List[Event]]:
     return out
 
 
-def try_send_data(url: str, data: Mapping[str, Any]):
+def try_send_data(url: str, data: Mapping[str, Any]) -> None:
     """
-    attempt repeatedly to send the payload forward
+    Attempt repeatedly to send the payload forward.
 
     :param url: target URL for the payload
     :param data: the payload
@@ -1219,7 +1254,7 @@ def try_send_data(url: str, data: Mapping[str, Any]):
 
 def send_data(url: str, data: Mapping[str, Any]) -> bool:
     """
-    write a set of events to the inara API
+    Write a set of events to the inara API.
 
     :param url: the target URL to post to
     :param data: the data to POST
@@ -1266,10 +1301,9 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
     return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
 
-def update_location(event=None):
+def update_location(event: Dict[str, Any] = None) -> None:
     """
-    Call inara_notify_location in this and other interested plugins with Inara's response when changing system
-    or station
+    Update other plugins with our response to system and station changes.
 
     :param event: Unused and ignored, defaults to None
     """
@@ -1278,13 +1312,14 @@ def update_location(event=None):
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
 
 
-def inara_notify_location(eventData):
+def inara_notify_location(eventData: Dict[str, Any]) -> None:
+    """Unused."""
     pass
 
 
-def update_ship(event=None):
+def update_ship(event: Dict[str, Any] = None) -> None:
     """
-    Call inara_notify_ship() in interested plugins with Inara's response when changing ship
+    Update other plugins with our response to changing.
 
     :param event: Unused and ignored, defaults to None
     """
