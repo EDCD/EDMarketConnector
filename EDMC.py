@@ -43,14 +43,6 @@ import eddn  # noqa: E402
 logger = EDMCLogging.Logger(appcmdname).get_logger()
 logger.setLevel(logging.INFO)
 
-logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
-logger.debug(f'''Platform: {sys.platform}
-argv[0]: {sys.argv[0]}
-exec_prefix: {sys.exec_prefix}
-executable: {sys.executable}
-sys.path: {sys.path}'''
-             )
-
 
 def log_locale(prefix: str) -> None:
     logger.debug(f'''Locale: {prefix}
@@ -61,8 +53,6 @@ Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
 Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
-
-log_locale('Initial Locale')
 
 l10n.Translations.install_dummy()
 
@@ -133,7 +123,15 @@ def main():
                 sys.exit(EXIT_ARGS)
             logger.setLevel(args.loglevel)
 
-        logger.debug('Startup')
+        logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
+        logger.debug(f'''Platform: {sys.platform}
+argv[0]: {sys.argv[0]}
+exec_prefix: {sys.exec_prefix}
+executable: {sys.executable}
+sys.path: {sys.path}'''
+                     )
+
+        log_locale('Initial Locale')
 
         if args.j:
             logger.debug('Import and collate from JSON dump')
