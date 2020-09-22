@@ -1,6 +1,22 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta6
+===
+
+* Include a manifest in both EDMarketConnector.exe and EDMC.exe to specify
+  they're Unicode applications so that they default to using the UTF-8
+  codepage.  Fixes [#711](https://github.com/EDCD/EDMarketConnector/issues/711).
+
+* Add extra debug logging to EDSM plugin for `CarrierJump`, `FSDJump`,
+  `Location` and `Docked` events.  Hopefully this will help track down the
+   cause of [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
+  
+* Various code cleanups which shouldn't impact user experience.
+
+* EDMC.exe will now log useful startup state information if run with the
+  `--loglevel DEBUG` arguments.
+
 Pre-Release 4.1.0-beta5
 ===
 
