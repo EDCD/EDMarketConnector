@@ -10,13 +10,14 @@ strings.
 import inspect
 import logging
 import logging.handlers
+import os
 import pathlib
 import tempfile
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from typing import Tuple
 
-from config import appname, config
+from config import appcmdname, appname, config
 
 # TODO: Tests:
 #
@@ -325,6 +326,17 @@ class EDMCContextFilter(logging.Filter):
                     module_name = f'plugins.{name_path}.{module_name}'
 
         return module_name
+
+
+def get_main_logger() -> logging.Logger:
+    """Return the correct logger for how the program is being run."""
+
+    if not os.getenv("EDMC_NO_UI"):
+        # GUI app being run
+        return logging.getLogger(appname)
+    else:
+        # Must be the CLI
+        return logging.getLogger(appcmdname)
 
 
 # Singleton
