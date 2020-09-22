@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from os.path import dirname, expanduser, expandvars, exists, isdir, join, normpath
 from sys import platform
 import webbrowser
