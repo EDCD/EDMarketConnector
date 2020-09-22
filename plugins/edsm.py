@@ -217,7 +217,7 @@ def credentials(cmdr):
 
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
-    if entry['event'] in ('CarrierJump', 'FSDJump'):
+    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.debug(f'''{entry["event"]}
 Commander: {cmdr}
 System: {system}
@@ -300,7 +300,7 @@ entry: {entry!r}'''
             materials.update(transient)
             this.queue.put((cmdr, materials))
 
-        if entry['event'] in ('CarrierJump', 'FSDJump'):
+        if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
             logger.debug(f'''{entry["event"]}
 Queueing: {entry!r}'''
                          )
@@ -359,11 +359,11 @@ def worker():
         retrying = 0
         while retrying < 3:
             try:
-                if item and entry['event'] in ('CarrierJump', 'FSDJump'):
+                if item and entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
                     logger.debug(f'{entry["event"]}')
 
                 if item and entry['event'] not in this.discardedEvents:
-                    if entry['event'] in ('CarrierJump', 'FSDJump'):
+                    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
                         logger.debug(f'{entry["event"]} event not in discarded list')
                     pending.append(entry)
 
@@ -377,7 +377,7 @@ def worker():
                     pending = [x for x in pending if x['event'] not in this.discardedEvents]	# Filter out unwanted events
 
                 if should_send(pending):
-                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump')]):
+                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
                         logger.debug('CarrierJump (or FSDJump) in pending and it passed should_send()')
 
                     (username, apikey) = credentials(cmdr)
@@ -389,7 +389,7 @@ def worker():
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
-                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump')]):
+                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
                         logger.debug(f'''CarrierJump (or FSDJump): Attempting API call
