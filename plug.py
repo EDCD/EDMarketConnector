@@ -9,15 +9,15 @@ import sys
 import operator
 import threading  # noqa: F401 - We don't use it, but plugins might
 from typing import Optional
-import logging
 import tkinter as tk
 
 import myNotebook as nb  # noqa: N813
 
-from config import config, appname
+from config import appcmdname, appname, config
+from EDMCLogging import get_main_logger
 import logging
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 # Dashboard Flags constants
 FlagsDocked = 1 << 0  # on a landing pad
@@ -203,8 +203,8 @@ def load_plugins(master):
                 # Create a logger for this 'found' plugin.  Must be before the
                 # load.py is loaded.
                 import EDMCLogging
-                plugin_logger = EDMCLogging.get_plugin_logger(f'{appname}.{name}')
 
+                plugin_logger = EDMCLogging.get_plugin_logger(name)
                 found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')

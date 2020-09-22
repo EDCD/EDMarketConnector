@@ -1,3 +1,9 @@
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Процент масштабирования интерфейса";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 - значение по умолчанию{CR}требуется перезапуск для вступления в силу изменений{CR}!";
+
 /* Language name */
 "!Language" = "Русский";
 
@@ -56,7 +62,7 @@
 "Chief Petty Officer" = "Главный старшина";
 
 /* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Командир";
+"Cmdr" = "КМДР";
 
 /* Ranking. [stats.py] */
 "Combat" = "Боевой";
@@ -86,7 +92,7 @@
 "Dangerous" = "Опасный";
 
 /* Appearance theme setting. [prefs.py] */
-"Dark" = "Темная";
+"Dark" = "Тёмная";
 
 /* Combat rank. [stats.py] */
 "Deadly" = "Смертоносный";
@@ -101,7 +107,7 @@
 "Delay sending until docked" = "Отложить отправку данных до завершения стыковки";
 
 /* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "Отключить автоматическое обновление приложения во время нахождения в игре.";
+"Disable Automatic Application Updates Check when in-game" = "Отключить автоматическое обновление приложения во время нахождения в игре";
 
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Отключенные плагины";
@@ -125,13 +131,13 @@
 "Elite" = "Элита";
 
 /* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Учетные данные Elite Dangerous Star Map";
+"Elite Dangerous Star Map credentials" = "Учётные данные Elite Dangerous Star Map";
 
 /* Ranking. [stats.py] */
 "Empire" = "Империя";
 
 /* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Включенные плагины";
+"Enabled Plugins" = "Включённые плагины";
 
 /* Federation rank. [stats.py] */
 "Ensign" = "Энсин";
@@ -221,7 +227,7 @@
 "Hotkey" = "Горячая клавиша";
 
 /* Section heading in settings. [inara.py] */
-"Inara credentials" = "Учетные данные Inara";
+"Inara credentials" = "Учётные данные Inara";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сочетание клавиш";
@@ -302,7 +308,7 @@
 "Open" = "Открыть";
 
 /* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Открыты «Системные настройки»";
+"Open System Preferences" = "Открыты «Настройки системы»";
 
 /* Tab heading in settings. [prefs.py] */
 "Output" = "Данные";
@@ -356,7 +362,7 @@
 "Post Commander" = "Начальник гарнизона";
 
 /* Ranking. [stats.py] */
-"Powerplay" = "Ранг в Игре Сил";
+"Powerplay" = "Ранг у галактических держав";
 
 /* [prefs.py] */
 "Preferences" = "Настройки";
@@ -416,13 +422,13 @@
 "Semi Professional" = "Полупрофессионал";
 
 /* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Отправлять данные полетного журнала и информацию статусе командира в EDSM";
+"Send flight log and Cmdr status to EDSM" = "Отправлять данные журнала полёта и информацию статусе командира в EDSM";
 
 /* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Отправлять журнал полёта и состояние командира в Inara";
+"Send flight log and Cmdr status to Inara" = "Отправлять данные журнала полёта и информацию статусе командира в Inara";
 
 /* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Отправлять станционную информацию на Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "Отправлять информацию о станциях на Elite Dangerous Data Network";
 
 /* Output setting new in E:D 2.2. [eddn.py] */
 "Send system and scan data to the Elite Dangerous Data Network" = "Отправлять данные о системе и данные сканирования в Elite Dangerous Data Network";
@@ -437,13 +443,13 @@
 "Settings" = "Настройки";
 
 /* Main window. [EDMarketConnector.py] */
-"Ship" = "Судно";
+"Ship" = "Корабль";
 
 /* Output setting. [prefs.py] */
-"Ship loadout" = "Оборудование судна";
+"Ship loadout" = "Оборудование корабля";
 
 /* Status dialog title. [stats.py] */
-"Ships" = "Суда";
+"Ships" = "Корабли";
 
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Верфи";
@@ -491,7 +497,7 @@
 "Update" = "Обновить данные";
 
 /* Option to use alternate URL method on shipyard links [prefs.py] */
-"Use alternate URL method" = "Альтернативный URL(адрес)";
+"Use alternate URL method" = "Альтернативный URL (адрес)";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Стоимость";
@@ -509,7 +515,7 @@
 "Warrant Officer" = "Уорент-офицер";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Невозможно определить тип судна!";
+"What are you flying?!" = "Невозможно определить тип корабля!";
 
 /* Shouldn't happen. [EDMarketConnector.py] */
 "Where are you?!" = "Невозможно определить местоположение!";
@@ -521,13 +527,10 @@
 "Window" = "Окно";
 
 /* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Ваше судно не пристыковано к станции!";
+"You're not docked at a station!" = "Ваш корабль не пристыкован к станции!";
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} требуется разрешение на использование глобальных сочетаний клавиш";
 
-
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scaling" = "Масштабирование интерфейса";
 /* Label for user configured level of logging [prefs.py] */
 "Log Level" = "Уровень лога";

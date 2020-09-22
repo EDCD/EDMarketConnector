@@ -172,6 +172,7 @@ setup(
                  'version': BASEVERSION,
                  'product_version': VERSION,
                  'copyright': COPYRIGHT,
+                 'other_resources': [(24, 1, open(APPCMDNAME+'.manifest').read())],
              } ],
     data_files = DATA_FILES,
     options = OPTIONS,

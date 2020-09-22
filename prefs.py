@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appname, appversion, config
-from EDMCLogging import edmclogger
+from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -23,7 +23,7 @@ from myNotebook import Notebook
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
-logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 if TYPE_CHECKING:
     def _(x: str) -> str:

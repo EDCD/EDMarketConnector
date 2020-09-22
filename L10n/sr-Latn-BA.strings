@@ -1,9 +1,6 @@
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "Procenat UI skaliranja";
 
-
-/* Text describing that value '0' means 'default', and changes require a restart [prefs.py] */
-"0 means Default{CR}Restart Required for{CR}changes to take effect!" = "0 je standardna vrijednost{CR}Potreban je restart{CR}za primjenu podešavanja!";
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 je standardna vrijednost{CR}Potreban je restart{CR}za primjenu podešavanja!";
 
@@ -535,8 +532,5 @@
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi prečice";
 
-
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scaling" = "UI skaliranje";
 /* Label for user configured level of logging [prefs.py] */
 "Log Level" = "Log nivo";

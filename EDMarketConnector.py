@@ -23,6 +23,7 @@ if __name__ == "__main__":
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
+
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
 
@@ -45,6 +46,7 @@ if __debug__:
     if platform != 'win32':
         import pdb
         import signal
+
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
 import companion
@@ -60,7 +62,6 @@ from monitor import monitor
 from protocol import protocolhandler
 from dashboard import dashboard
 from theme import theme
-
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -81,7 +82,6 @@ SHIPYARD_HTML_TEMPLATE = """
 
 
 class AppWindow(object):
-
     # Tkinter Event types
     EVENT_KEYPRESS = 2
     EVENT_BUTTON = 4
@@ -104,10 +104,14 @@ class AppWindow(object):
             if platform == 'win32':
                 self.w.wm_iconbitmap(default='EDMarketConnector.ico')
             else:
-                self.w.tk.call('wm', 'iconphoto', self.w, '-default', tk.PhotoImage(file=join(config.respath, 'EDMarketConnector.png')))  # noqa: E501
-            self.theme_icon = tk.PhotoImage(data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-            self.theme_minimize = tk.BitmapImage(data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-            self.theme_close = tk.BitmapImage(data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
+                self.w.tk.call('wm', 'iconphoto', self.w, '-default',
+                               tk.PhotoImage(file=join(config.respath, 'EDMarketConnector.png')))  # noqa: E501
+            self.theme_icon = tk.PhotoImage(
+                data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
+            self.theme_minimize = tk.BitmapImage(
+                data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
+            self.theme_close = tk.BitmapImage(
+                data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
         frame = tk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
@@ -152,7 +156,8 @@ class AppWindow(object):
         row = frame.grid_size()[1]
         self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
-        theme.register_alternate((self.button, self.theme_button, self.theme_button), {'row': row, 'columnspan': 2, 'sticky': tk.NSEW})  # noqa: E501
+        theme.register_alternate((self.button, self.theme_button, self.theme_button),
+                                 {'row': row, 'columnspan': 2, 'sticky': tk.NSEW})  # noqa: E501
         self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
@@ -291,6 +296,7 @@ class AppWindow(object):
                     # Check that the titlebar will be at least partly on screen
                     import ctypes
                     from ctypes.wintypes import POINT
+
                     # https://msdn.microsoft.com/en-us/library/dd145064
                     MONITOR_DEFAULTTONULL = 0  # noqa: N806
                     if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
@@ -322,6 +328,7 @@ class AppWindow(object):
 
         # Load updater after UI creation (for WinSparkle)
         import update
+
         if getattr(sys, 'frozen', False):
             # Running in frozen .exe, so use (Win)Sparkle
             self.updater = update.Updater(tkroot=self.w, provider='external')
@@ -453,7 +460,7 @@ class AppWindow(object):
         if not retrying:
             if time() < self.holdofftime:  # Was invoked by key while in cooldown
                 self.status['text'] = ''
-                if play_sound and (self.holdofftime-time()) < companion.holdoff*0.75:
+                if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
                 return
             elif play_sound:
@@ -493,7 +500,7 @@ class AppWindow(object):
                     if isdir('dump'):
                         with open('dump/{system}{station}.{timestamp}.json'.format(
                                 system=data['lastSystem']['name'],
-                                station=data['commander'].get('docked') and '.'+data['lastStarport']['name'] or '',
+                                station=data['commander'].get('docked') and '.' + data['lastStarport']['name'] or '',
                                 timestamp=strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wb') as h:
                             h.write(json.dumps(data,
                                                ensure_ascii=False,
@@ -525,7 +532,7 @@ class AppWindow(object):
                             self.status['text'] = _("You're not docked at a station!")
                             play_bad = True
                     # Ignore possibly missing shipyard info
-                    elif (config.getint('output') & config.OUT_MKT_EDDN)\
+                    elif (config.getint('output') & config.OUT_MKT_EDDN) \
                             and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                         if not self.status['text']:
                             self.status['text'] = _("Station doesn't have anything!")
@@ -585,12 +592,12 @@ class AppWindow(object):
             if not data['commander'].get('docked'):
                 # might have un-docked while we were waiting for retry in which case station data is unreliable
                 pass
-            elif (data.get('lastSystem',   {}).get('name') == monitor.system and
+            elif (data.get('lastSystem', {}).get('name') == monitor.system and
                   data.get('lastStarport', {}).get('name') == monitor.station and
                   data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
                 self.eddn.export_shipyard(data, monitor.is_beta)
             elif tries > 1:  # bogus data - retry
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.retry_for_shipyard(tries-1))
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.retry_for_shipyard(tries - 1))
         except Exception:
             pass
 
@@ -600,11 +607,11 @@ class AppWindow(object):
         def crewroletext(role):
             # Return translated crew role. Needs to be dynamic to allow for changing language.
             return {
-                None: '',
-                'Idle': '',
+                None        : '',
+                'Idle'      : '',
                 'FighterCon': _('Fighter'),  # Multicrew role
-                'FireCon':    _('Gunner'),  # Multicrew role
-                'FlightCon':  _('Helm'),  # Multicrew role
+                'FireCon'   : _('Gunner'),  # Multicrew role
+                'FlightCon' : _('Helm'),  # Multicrew role
             }.get(role, role)
 
         while True:
@@ -626,8 +633,8 @@ class AppWindow(object):
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship.configure(
                     text=monitor.state['ShipName']
-                    or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
-                    or '',
+                         or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                         or '',
                     url=self.shipyard_url)
             else:
                 self.cmdr['text'] = ''
@@ -673,7 +680,7 @@ class AppWindow(object):
                     logger.info("Can't start Status monitoring")
 
             # Export loadout
-            if entry['event'] == 'Loadout' and not monitor.state['Captain']\
+            if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
                     and config.getint('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
@@ -690,10 +697,10 @@ class AppWindow(object):
                     hotkeymgr.play_bad()
 
             # Auto-Update after docking, but not if auth callback is pending
-            if entry['event'] in ('StartUp', 'Location', 'Docked')\
-                    and monitor.station\
-                    and not config.getint('output') & config.OUT_MKT_MANUAL\
-                    and config.getint('output') & config.OUT_STATION_ANY\
+            if entry['event'] in ('StartUp', 'Location', 'Docked') \
+                    and monitor.station \
+                    and not config.getint('output') & config.OUT_MKT_MANUAL \
+                    and config.getint('output') & config.OUT_STATION_ANY \
                     and companion.session.state != companion.Session.STATE_AUTH:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
@@ -760,10 +767,10 @@ class AppWindow(object):
         return f'file://localhost/{file_name}'
 
     def system_url(self, system):
-        return plug.invoke(config.get('system_provider'),   'EDSM', 'system_url', monitor.system)
+        return plug.invoke(config.get('system_provider'), 'EDSM', 'system_url', monitor.system)
 
     def station_url(self, station):
-        return plug.invoke(config.get('station_provider'),  'eddb', 'station_url', monitor.system, monitor.station)
+        return plug.invoke(config.get('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
     def cooldown(self):
         if time() < self.holdofftime:
@@ -837,7 +844,7 @@ class AppWindow(object):
 
             ############################################################
             # version <link to changelog>
-            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion)
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
@@ -855,7 +862,7 @@ class AppWindow(object):
 
             ############################################################
             # <copyright>
-            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             self.copyright = tk.Label(frame, text=copyright)
             self.copyright.grid(row=row, columnspan=3, sticky=tk.EW)
@@ -864,7 +871,7 @@ class AppWindow(object):
 
             ############################################################
             # OK button to close the window
-            ttk.Label(frame).grid(row=row, column=0)        # spacer
+            ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             button = ttk.Button(frame, text=_('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
@@ -895,7 +902,7 @@ class AppWindow(object):
             last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
             last_starport: str = ''
             if data['commander'].get('docked'):
-                last_starport = '.'+data.get('lastStarport', {}).get('name', 'Unknown')
+                last_starport = '.' + data.get('lastStarport', {}).get('name', 'Unknown')
             timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
             f = tkinter.filedialog.asksaveasfilename(parent=self.w,
                                                      defaultextension=default_extension,
@@ -971,6 +978,7 @@ def enforce_single_instance() -> None:
     if platform == 'win32':
         import ctypes
         from ctypes.wintypes import HWND, LPWSTR, LPCWSTR, INT, BOOL, LPARAM
+
         EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
         GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
         GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]  # noqa: N806
@@ -1004,9 +1012,9 @@ def enforce_single_instance() -> None:
         def enumwindowsproc(window_handle, l_param):
             # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
             cls = ctypes.create_unicode_buffer(257)
-            if GetClassName(window_handle, cls, 257)\
-                    and cls.value == 'TkTopLevel'\
-                    and window_title(window_handle) == applongname\
+            if GetClassName(window_handle, cls, 257) \
+                    and cls.value == 'TkTopLevel' \
+                    and window_title(window_handle) == applongname \
                     and GetProcessHandleFromHwnd(window_handle):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
@@ -1028,38 +1036,53 @@ def test_logging():
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
 
-# Run the app
-if __name__ == "__main__":
-    enforce_single_instance()
-
-    from EDMCLogging import logger
-    logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
-    logger.debug(f'''Platform: {sys.platform}
-argv[0]: {sys.argv[0]}
-exec_prefix: {sys.exec_prefix}
-executable: {sys.executable}
-sys.path: {sys.path}
+def log_locale(prefix: str) -> None:
+    logger.debug(f'''Locale: {prefix}
 Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
 Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
 Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
 Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
 Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
-)
+                 )
+
+
+# Run the app
+if __name__ == "__main__":
+    enforce_single_instance()
+
+    from EDMCLogging import logger
+
+    logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
+    logger.debug(f'''Platform: {sys.platform}
+argv[0]: {sys.argv[0]}
+exec_prefix: {sys.exec_prefix}
+executable: {sys.executable}
+sys.path: {sys.path}'''
+                 )
 
     # Change locale to a utf8 one
-    # First make sure the local is actually set as per locale's idea of defaults
+    # Log what we have at startup
+    log_locale('Initial Locale')
+    # Make sure the local is actually set as per locale's idea of defaults
     locale.setlocale(locale.LC_ALL, '')
+    log_locale('After LC_ALL defaults set')
     # Now find out the current locale, mostly the language
     locale_startup = locale.getlocale(locale.LC_ALL)
+    logger.debug(f'Locale LC_ALL: {locale_startup}')
     # Now set that same language, but utf8 encoding (it was probably cp1252
     # or equivalent for other languages).
-    locale.setlocale(locale.LC_ALL, (locale_startup[0], 'utf8'))
+    # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
+    locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+    log_locale('After switching to UTF-8 encoding (same language)')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
     # test_logging()
+
     class A(object):
+
         class B(object):
+
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
 
@@ -1102,7 +1125,8 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
             # Now the string should match, so try translation
             popup_text = _(popup_text)
             # And substitute in the other words.
-            popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled')
+            popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'),
+                                           DISABLED='.disabled')
             # And now we do need these to be actual \r\n
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
