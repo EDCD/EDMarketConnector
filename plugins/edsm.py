@@ -339,7 +339,7 @@ System: {system}
 Station: {station}
 state: {state!r}
 entry: {entry!r}'''
-                    )
+                     )
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -529,7 +529,7 @@ def worker() -> None:
                     pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
 
                 if should_send(pending):
-                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
+                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         logger.debug('CarrierJump (or FSDJump) in pending and it passed should_send()')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
@@ -545,10 +545,11 @@ def worker() -> None:
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
-                    if any([p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')]):
+                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
                         logger.debug(f'CarrierJump (or FSDJump): Attempting API call\ndata: {data_elided!r}')
+
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
                     reply = r.json()
