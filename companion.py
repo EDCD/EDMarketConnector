@@ -405,7 +405,7 @@ class Session(object):
         else:
             credentials = {'cmdr': cmdr, 'beta': is_beta}
             if self.credentials == credentials and self.state == Session.STATE_OK:
-                logger.debug('already logged in (is_beta)')
+                logger.debug(f'already logged in (is_beta = {is_beta})')
                 return True  # already logged in
 
             else:

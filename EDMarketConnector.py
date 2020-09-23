@@ -602,7 +602,13 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event):
+    def journal_event(self, event: str):
+        """
+        Handle a Journal event passed through event queue from monitor.py.
+
+        :param event: string JSON data of the event
+        :return:
+        """
 
         def crewroletext(role):
             # Return translated crew role. Needs to be dynamic to allow for changing language.
@@ -617,6 +623,7 @@ class AppWindow(object):
         while True:
             entry = monitor.get_entry()
             if not entry:
+                logger.debug('No entry from monitor.get_entry()')
                 return
 
             # Update main window
@@ -668,9 +675,11 @@ class AppWindow(object):
                 self.login()
 
             if not entry['event'] or not monitor.mode:
+                logger.debug('Startup or in CQC, returning')
                 return  # Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+                logger.info('Startup or LoadGame event')
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)

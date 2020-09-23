@@ -530,7 +530,13 @@ def worker() -> None:
 
                 if should_send(pending):
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.debug('CarrierJump (or FSDJump) in pending and it passed should_send()')
+                        logger.debug("pending has at least one of "
+                                     "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                                     " and it passed should_send()")
+                        for p in pending:
+                            if p['event'] in ('Location'):
+                                logger.debug('"Location" event in pending passed should_send(), '
+                                             f'timestamp: {p["timestamp"]}')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
                     if creds is None:
@@ -548,7 +554,14 @@ def worker() -> None:
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
-                        logger.debug(f'CarrierJump (or FSDJump): Attempting API call\ndata: {data_elided!r}')
+                        logger.debug("pending has at least one of "
+                                     "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                                     " Attempting API cal...")
+
+                        for p in pending:
+                            if p['event'] in ('Location'):
+                                logger.debug('Attempting API call for "Location" event with timestamp: '
+                                             f'{p["timestamp"]}')
 
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
                     r.raise_for_status()
