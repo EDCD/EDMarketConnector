@@ -1,5 +1,6 @@
 """Inara Sync."""
 
+from companion import CAPIData
 import dataclasses
 import json
 import sys
@@ -1032,7 +1033,7 @@ def journal_entry(
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data, is_beta):
+def cmdr_data(data: CAPIData, is_beta):
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 

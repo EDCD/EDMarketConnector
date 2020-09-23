@@ -9,6 +9,7 @@
 #  4) Ensure the EDSM API call(back) for setting the image at end of system
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
+from companion import CAPIData
 import json
 import sys
 import tkinter as tk
@@ -438,7 +439,7 @@ Queueing: {entry!r}'''
 
 
 # Update system data
-def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
+def cmdr_data(data: CAPIData, is_beta: bool) -> None:
     """CAPI Entry Hook."""
     system = data['lastSystem']['name']
 
