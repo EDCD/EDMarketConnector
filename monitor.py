@@ -340,7 +340,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
-                logger.inof("We're not meant to be running, exiting...")
+                logger.info("We're not meant to be running, exiting...")
                 return  # Terminate
 
             if self.game_was_running:
