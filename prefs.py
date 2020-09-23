@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 
 import myNotebook as nb  # noqa: N813
 import plug
-from config import applongname, appname, appversion, config
+from config import applongname, appversion, config
 from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import Translations
@@ -1060,7 +1060,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('system_provider', self.system_provider.get())
         config.set('station_provider', self.station_provider.get())
         config.set('loglevel', self.select_loglevel.get())
-        edmclogger.get_streamhandler().setLevel(self.select_loglevel.get())
+        edmclogger.set_console_loglevel(self.select_loglevel.get())
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above

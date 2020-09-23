@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import argparse
 from builtins import str
 from builtins import object
 import sys
@@ -1059,7 +1060,32 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 if __name__ == "__main__":
     enforce_single_instance()
 
-    from EDMCLogging import logger
+    # Command-line arguments
+    parser = argparse.ArgumentParser(
+        prog=appname,
+        description="Utilises Elite Dangerous Journal files and the Frontier "
+                    "Companion API (CAPI) service to gather data about a "
+                    "player's state and actions to upload to third-party sites "
+                    "such as EDSM, Inara.cz and EDDB."
+    )
+
+    parser.add_argument('--trace',
+                        help='Set the Debug logging loglevel to TRACE',
+                        action='store_true',
+                        )
+
+    args = parser.parse_args()
+
+    from EDMCLogging import edmclogger, logger, logging
+    # isort: off
+    from logging import trace, TRACE  # type: ignore # noqa: F401
+    # isort: on
+
+    if args.trace:
+        logger.setLevel(logging.TRACE)
+        edmclogger.set_channels_loglevel(logging.TRACE)
+    else:
+        edmclogger.set_channels_loglevel(logging.DEBUG)
 
     logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform}
@@ -1114,7 +1140,7 @@ sys.path: {sys.path}'''
         ui_scale = 100
         config.set('ui_scale', ui_scale)
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
-    logger.debug(f'Default tk scaling = {theme.default_ui_scale}')
+    logger.trace(f'Default tk scaling = {theme.default_ui_scale}')
     theme.startup_ui_scale = ui_scale
     root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
     app = AppWindow(root)

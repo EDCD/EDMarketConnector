@@ -44,6 +44,17 @@ from config import appcmdname, appname, config
 
 _default_loglevel = logging.DEBUG
 
+# Define a TRACE level
+LEVEL_TRACE = 5
+logging.addLevelName(LEVEL_TRACE, "TRACE")
+logging.TRACE = LEVEL_TRACE  # type: ignore
+logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type: ignore
+    logging.TRACE,  # type: ignore
+    message,
+    args,
+    **kwargs
+)
+
 
 class Logger:
     """
@@ -66,9 +77,9 @@ class Logger:
         """
         self.logger = logging.getLogger(logger_name)
         # Configure the logging.Logger
-        # This needs to always be DEBUG in order to let DEBUG level messages
+        # This needs to always be TRACE in order to let TRACE level messages
         # through to check the *handler* levels.
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.TRACE)  # type: ignore
 
         # Set up filter for adding class name
         self.logger_filter = EDMCContextFilter()
@@ -102,8 +113,8 @@ class Logger:
             encoding='utf-8',
             delay=False
         )
-        # Yes, we always want these rotated files to be at DEBUG level
-        self.logger_channel_rotating.setLevel(logging.DEBUG)
+        # Yes, we always want these rotated files to be at TRACE level
+        self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
@@ -118,9 +129,32 @@ class Logger:
     def get_streamhandler(self) -> logging.Handler:
         """
         Obtain the self.logger_channel StreamHandler instance.
+
         :return: logging.StreamHandler
         """
         return self.logger_channel
+
+    def set_channels_loglevel(self, level: int) -> None:
+        """
+        Set the specified log level on the channels.
+
+        :param level: A valid `logging` level.
+        :return: None
+        """
+        self.logger_channel.setLevel(level)
+        self.logger_channel_rotating.setLevel(level)
+
+    def set_console_loglevel(self, level: int) -> None:
+        """
+        Set the specified log level on the console channel.
+
+        :param level: A valid `logging` level.
+        :return: None
+        """
+        if self.logger_channel.level != logging.TRACE:  # type: ignore
+            self.logger_channel.setLevel(level)
+        else:
+            logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
 def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> logging.Logger:
@@ -335,7 +369,6 @@ class EDMCContextFilter(logging.Filter):
 
 def get_main_logger() -> logging.Logger:
     """Return the correct logger for how the program is being run."""
-
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
         return logging.getLogger(appname)
