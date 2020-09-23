@@ -2,20 +2,27 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from builtins import str
-from builtins import object
-import sys
-from sys import platform
+import html
 import json
 import locale
+import re
+import sys
+import webbrowser
+from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, isdir, join
-import re
-import html
-from time import time, localtime, strftime
-import webbrowser
+from sys import platform
+from time import localtime, strftime, time
+from typing import TYPE_CHECKING
 
-from config import appname, applongname, appversion, appversion_nobuild, copyright, config
+from EDMCLogging import edmclogger, logger, logging
+
+# isort: off
+if TYPE_CHECKING:
+    from logging import trace, TRACE  # type: ignore # noqa: F401
+# isort: on
+
+from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
 # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 if __name__ == "__main__":
@@ -37,10 +44,11 @@ if getattr(sys, 'frozen', False):
         environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
 
 import tkinter as tk
-from tkinter import ttk
 import tkinter.filedialog
 import tkinter.font
 import tkinter.messagebox
+from tkinter import ttk
+
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
@@ -50,18 +58,18 @@ if __debug__:
 
         signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
 
-import companion
 import commodity
-from commodity import COMMODITY_CSV
-import td
-import stats
-import prefs
+import companion
 import plug
+import prefs
+import stats
+import td
+from commodity import COMMODITY_CSV
+from dashboard import dashboard
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from protocol import protocolhandler
-from dashboard import dashboard
 from theme import theme
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
@@ -614,11 +622,11 @@ class AppWindow(object):
         def crewroletext(role):
             # Return translated crew role. Needs to be dynamic to allow for changing language.
             return {
-                None        : '',
-                'Idle'      : '',
+                None:         '',
+                'Idle':       '',
                 'FighterCon': _('Fighter'),  # Multicrew role
-                'FireCon'   : _('Gunner'),  # Multicrew role
-                'FlightCon' : _('Helm'),  # Multicrew role
+                'FireCon':    _('Gunner'),  # Multicrew role
+                'FlightCon':  _('Helm'),  # Multicrew role
             }.get(role, role)
 
         while True:
@@ -641,8 +649,8 @@ class AppWindow(object):
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship.configure(
                     text=monitor.state['ShipName']
-                         or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
-                         or '',
+                    or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    or '',
                     url=self.shipyard_url)
             else:
                 self.cmdr['text'] = ''
@@ -935,7 +943,8 @@ class AppWindow(object):
     def onexit(self, event=None):
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
-            config.set('geometry', '+{1}+{2}'.format(*self.w.geometry().split('+')))
+            x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
+            config.set('geometry', f'+{x}+{y}')
         self.w.withdraw()  # Following items can take a few seconds, so hide the main window while they happen
         protocolhandler.close()
         hotkeymgr.unregister()
@@ -987,13 +996,13 @@ def enforce_single_instance() -> None:
     # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
     if platform == 'win32':
         import ctypes
-        from ctypes.wintypes import HWND, LPWSTR, LPCWSTR, INT, BOOL, LPARAM
+        from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
         EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
         GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
-        GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]  # noqa: N806
+        GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
         GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
-        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]  # noqa: N806
+        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
         GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
         GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
 
@@ -1075,11 +1084,6 @@ if __name__ == "__main__":
                         )
 
     args = parser.parse_args()
-
-    from EDMCLogging import edmclogger, logger, logging
-    # isort: off
-    from logging import trace, TRACE  # type: ignore # noqa: F401
-    # isort: on
 
     if args.trace:
         logger.setLevel(logging.TRACE)

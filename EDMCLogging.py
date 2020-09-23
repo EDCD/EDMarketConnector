@@ -381,5 +381,11 @@ def get_main_logger() -> logging.Logger:
 loglevel = config.get('loglevel')
 if not loglevel:
     loglevel = logging.INFO
-edmclogger = Logger(appname, loglevel=loglevel)
+
+if not os.getenv('EDMC_NO_UI'):
+    base_logger_name = appname
+else:
+    base_logger_name = appcmdname
+
+edmclogger = Logger(base_logger_name, loglevel=loglevel)
 logger = edmclogger.get_logger()
