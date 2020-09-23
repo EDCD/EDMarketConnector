@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta7
+===
+
+* Add extra logging to how "Location" journal events are handled to further
+  tracking down [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
+
 Pre-Release 4.1.0-beta6
 ===
 
