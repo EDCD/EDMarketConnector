@@ -333,7 +333,7 @@ def journal_entry(
 ) -> None:
     """Journal Entry hook."""
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-        logger.debug(f'''{entry["event"]}
+        logger.trace(f'''{entry["event"]}
 Commander: {cmdr}
 System: {system}
 Station: {station}
@@ -431,7 +431,7 @@ entry: {entry!r}'''
             this.queue.put((cmdr, materials))
 
         if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-            logger.debug(f'''{entry["event"]}
+            logger.trace(f'''{entry["event"]}
 Queueing: {entry!r}'''
                          )
         this.queue.put((cmdr, entry))
@@ -530,12 +530,12 @@ def worker() -> None:
 
                 if should_send(pending):
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.debug("pending has at least one of "
+                        logger.trace("pending has at least one of "
                                      "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                                      " and it passed should_send()")
                         for p in pending:
                             if p['event'] in ('Location'):
-                                logger.debug('"Location" event in pending passed should_send(), '
+                                logger.trace('"Location" event in pending passed should_send(), '
                                              f'timestamp: {p["timestamp"]}')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
@@ -554,13 +554,13 @@ def worker() -> None:
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
-                        logger.debug("pending has at least one of "
+                        logger.trace("pending has at least one of "
                                      "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                                      " Attempting API cal...")
 
                         for p in pending:
                             if p['event'] in ('Location'):
-                                logger.debug('Attempting API call for "Location" event with timestamp: '
+                                logger.trace('Attempting API call for "Location" event with timestamp: '
                                              f'{p["timestamp"]}')
 
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)

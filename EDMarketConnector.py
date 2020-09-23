@@ -632,7 +632,7 @@ class AppWindow(object):
         while True:
             entry = monitor.get_entry()
             if not entry:
-                logger.debug('No entry from monitor.get_entry()')
+                logger.trace('No entry from monitor.get_entry()')
                 return
 
             # Update main window
@@ -684,7 +684,7 @@ class AppWindow(object):
                 self.login()
 
             if not entry['event'] or not monitor.mode:
-                logger.debug('Startup or in CQC, returning')
+                logger.trace('Startup or in CQC, returning')
                 return  # Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:

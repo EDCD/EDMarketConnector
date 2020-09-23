@@ -243,7 +243,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             for line in loghandle:
                 try:
                     if b'"event":"Location"' in line:
-                        logger.debug('"Location" event in the past at startup')
+                        logger.trace('"Location" event in the past at startup')
 
                     self.parse_entry(line)  # Some events are of interest even in the past
 
@@ -327,7 +327,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
                     if b'"event":"Location"' in line:
-                        logger.debug('Found "Location" event, appending to event_queue')
+                        logger.trace('Found "Location" event, appending to event_queue')
 
                     self.event_queue.append(line)
 
@@ -538,7 +538,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
                     if event_type == 'Location':
-                        logger.debug('"Location" event')
+                        logger.trace('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
@@ -827,7 +827,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry = self.parse_entry(self.event_queue.pop(0))
 
             if entry['event'] == 'Location':
-                logger.debug('"Location" event')
+                logger.trace('"Location" event')
 
             if not self.live and entry['event'] not in (None, 'Fileheader'):
                 # Game not running locally, but Journal has been updated
@@ -856,7 +856,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     ])
 
                 if entry['event'] == 'Location':
-                    logger.debug('Appending "Location" event to event_queue')
+                    logger.trace('Appending "Location" event to event_queue')
 
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 
