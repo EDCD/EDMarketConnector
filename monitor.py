@@ -2,23 +2,21 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
-from operator import itemgetter
 from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
-from typing import Any, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING
+from typing import Any, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import tkinter
 
-if __debug__:
-    from traceback import print_exc
-
 from config import config
 from companion import ship_file_name
+from EDMCLogging import get_main_logger
 
+logger = get_main_logger()
 
 if platform == 'darwin':
     from AppKit import NSWorkspace
@@ -128,16 +126,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         if journal_dir is None:
             journal_dir = ''
-        
+
         # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
         # When that is refactored, remove the magic comment
         logdir = expanduser(journal_dir)  # type: ignore # config is weird
 
         if not logdir or not isdir(logdir):
+            logger.error(f'Journal Directory is invalid: "{logdir}"')
             self.stop()
             return False
 
         if self.currentdir and self.currentdir != logdir:
+            logger.debug(f'Journal Directory changed?  Was "{self.currentdir}", now "{logdir}"')
             self.stop()
 
         self.currentdir = logdir
@@ -153,6 +153,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore # config is weird
 
         except Exception:
+            logger.exception('Failed to find latest logfile')
             self.logfile = None
             return False
 
@@ -173,11 +174,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
 
-        if __debug__:
-            print('{} Journal {!r}'.format('Polling' if polling else 'Monitoring', self.currentdir))
-            print('Start logfile {!r}'.format(self.logfile))
+        logger.info(f'{"Polling" if polling else "Monitoring"} Journal Folder: "{self.currentdir}"')
+        logger.info(f'Start Journal File: "{self.logfile}"')
 
         if not self.running():
+            logger.debug('Starting Journal worker')
             self.thread = threading.Thread(target=self.worker, name='Journal worker')
             self.thread.daemon = True
             self.thread.start()
@@ -231,6 +232,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # event_generate() is the only safe way to poke the main thread from this thread:
         # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
 
+        logger.debug(f'Starting on logfile "{self.logfile}"')
         # Seek to the end of the latest log file
         logfile = self.logfile
         if logfile:
@@ -240,11 +242,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             for line in loghandle:
                 try:
+                    if b'"event":"Location"' in line:
+                        logger.debug('"Location" event in the past at startup')
+
                     self.parse_entry(line)  # Some events are of interest even in the past
 
-                except Exception:
-                    if __debug__:
-                        print('Invalid journal entry {!r}'.format(line))
+                except Exception as ex:
+                    logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
 
             log_pos = loghandle.tell()
 
@@ -302,12 +306,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     newlogfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
 
                 except Exception:
-                    if __debug__:
-                        print_exc()
-
+                    logger.exception('Failed to find latest logfile')
                     newlogfile = None
 
             if logfile != newlogfile:
+                logger.info(f'New Journal File. Was "{logfile}", now "{newlogfile}"')
                 logfile = newlogfile
                 if loghandle:
                     loghandle.close()
@@ -319,13 +322,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     log_pos = 0
 
-                if __debug__:
-                    print('New logfile {!r}'.format(logfile))
-
             if logfile:
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
+                    if b'"event":"Location"' in line:
+                        logger.debug('Found "Location" event, appending to event_queue')
+
                     self.event_queue.append(line)
 
                 if self.event_queue:
@@ -337,10 +340,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
+                logger.inof("We're not meant to be running, exiting...")
                 return  # Terminate
 
             if self.game_was_running:
                 if not self.game_running():
+                    logger.info('Detected exit from game, synthesising ShutDown event')
                     self.event_queue.append(
                         '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
                     )
@@ -478,11 +483,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Players *can* also purposefully set " " as the name, but anyone
                 # doing that gets to live with EDMC showing ShipType instead.
                 if entry['ShipName'] and entry['ShipName'] not in ('', ' '):
-                    self.state['ShipName']  = entry['ShipName']
+                    self.state['ShipName'] = entry['ShipName']
 
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')  # not present on exiting Outfitting
-                self.state['ModulesValue'] = entry.get('ModulesValue')  #   "
+                self.state['ModulesValue'] = entry.get('ModulesValue')  # not present on exiting Outfitting
                 self.state['Rebuy'] = entry.get('Rebuy')
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
@@ -531,6 +536,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+
+                    if event_type == 'Location':
+                        logger.debug('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
@@ -777,11 +785,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Friends'].discard(entry['Name'])
 
             return entry
-        except Exception:
-            if __debug__:
-                print('Invalid journal entry {!r}'.format(line))
-                print_exc()
-
+        except Exception as ex:
+            logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
             return {'event': None}
 
     # Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount",
@@ -808,12 +813,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return item.capitalize()
 
-    def get_entry(self):
+    def get_entry(self) -> Union[OrderedDictT[str, Any], None]:
+        """
+        Pull the next Journal event from the event_queue.
+
+        :return: dict representing the event
+        """
         if not self.event_queue:
+            logger.debug('Called with no event_queue')
             return None
 
         else:
             entry = self.parse_entry(self.event_queue.pop(0))
+
+            if entry['event'] == 'Location':
+                logger.debug('"Location" event')
+
             if not self.live and entry['event'] not in (None, 'Fileheader'):
                 # Game not running locally, but Journal has been updated
                 self.live = True
@@ -839,6 +854,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         ('StarPos', self.coordinates),
                         ('SystemAddress', self.systemaddress),
                     ])
+
+                if entry['event'] == 'Location':
+                    logger.debug('Appending "Location" event to event_queue')
 
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 

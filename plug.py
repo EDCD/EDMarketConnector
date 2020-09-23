@@ -303,6 +303,9 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
+    if entry['event'] in ('Location'):
+        logger.debug('Notifying plugins of "Location" event')
+
     error = None
     for plugin in PLUGINS:
         journal_entry = plugin._get_func('journal_entry')
