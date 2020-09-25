@@ -1,0 +1,1 @@
+EDMarketConnector.exe --trace
