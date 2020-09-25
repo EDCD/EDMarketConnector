@@ -18,9 +18,14 @@
 	</compatibility>
 	<asmv3:application>
 		<asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+			<!-- dpiAware needs to be under the 2005 schema -->
 			<dpiAware>true</dpiAware>
 			<!-- Declare that we want to use the UTF-8 code page -->
 			<activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
+		</asmv3:windowsSettings>
+		<asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2017/WindowsSettings">
+			<!-- gdiScaling needs to be under the 2017 schema -->
+			<gdiScaling>true</gdiScaling>
 		</asmv3:windowsSettings>
 	</asmv3:application>
 	<dependency>
