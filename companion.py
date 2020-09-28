@@ -274,7 +274,7 @@ class Auth(object):
         s = random.SystemRandom().getrandbits(8 * 32)
         self.state = self.base64_url_encode(s.to_bytes(32, byteorder='big'))
         # Won't work under IE: https://blogs.msdn.microsoft.com/ieinternals/2011/07/13/understanding-protocols/
-        logger.debug(f'Trying auth from scratch for Commander "{self.cmdr}"')
+        logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
             f'{SERVER_AUTH}{URL_AUTH}?response_type=code&audience=frontier&scope=capi&client_id={CLIENT_ID}&code_challenge={challenge}&code_challenge_method=S256&state={self.state}&redirect_uri={protocolhandler.redirect}'  # noqa: E501 # I cant make this any shorter
@@ -399,7 +399,7 @@ class Session(object):
                 raise CredentialsError('Missing credentials')  # Shouldn't happen
 
             elif self.state == Session.STATE_OK:
-                logger.debug('already logged in')
+                logger.debug('already logged in (state == STATE_OK)')
                 return True  # already logged in
 
         else:
@@ -409,7 +409,6 @@ class Session(object):
                 return True  # already logged in
 
             else:
-                # changed account or retrying login during auth
                 logger.debug('changed account or retrying login during auth')
                 self.close()
                 self.credentials = credentials
@@ -461,7 +460,7 @@ class Session(object):
 
     def query(self, endpoint: str) -> CAPIData:
         """Perform a query against the specified CAPI endpoint."""
-        logger.debug(f'Performing query for endpoint "{endpoint}"')
+        logger.trace(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
                 return self.query(endpoint)
@@ -471,7 +470,7 @@ class Session(object):
             raise CredentialsError('cannot make a query when unauthorized')
 
         try:
-            logger.debug('Trying...')
+            logger.trace('Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)
 
         except Exception as e:
@@ -479,7 +478,7 @@ class Session(object):
             raise ServerError(f'unable to get endpoint {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
-            logger.debug('Redirected back to Auth Server')
+            logger.info('Redirected back to Auth Server')
             # Redirected back to Auth server - force full re-authentication
             self.dump(r)
             self.invalidate()
@@ -521,7 +520,7 @@ class Session(object):
 
         self.retrying = False
         if 'timestamp' not in data:
-            logger.debug('timestamp not in data, adding from response headers')
+            logger.trace('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
         return data

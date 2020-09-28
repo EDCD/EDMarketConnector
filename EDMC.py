@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
-#
-# Command-line interface. Requires prior setup through the GUI.
-#
+"""Command-line interface. Requires prior setup through the GUI."""
 
 
 import argparse
 import json
 import locale
-import logging
 import os
 import re
 import sys
 from os.path import getmtime, join
 from time import sleep, time
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
+
+# See EDMCLogging.py docs.
+# isort: off
+from EDMCLogging import edmclogger, logger, logging
+if TYPE_CHECKING:
+    from logging import trace, TRACE  # type: ignore # noqa: F401
+# isort: on
+edmclogger.set_channels_loglevel(logging.INFO)
 
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
@@ -21,7 +26,6 @@ os.environ["EDMC_NO_UI"] = "1"
 import collate
 import commodity
 import companion
-import EDMCLogging
 import edshipyard
 import l10n
 import loadout
@@ -40,11 +44,9 @@ sys.path.append(config.internal_plugin_dir)
 import eddn  # noqa: E402
 # isort: on
 
-logger = EDMCLogging.Logger(appcmdname).get_logger()
-logger.setLevel(logging.INFO)
-
 
 def log_locale(prefix: str) -> None:
+    """Log the current state of locale settings."""
     logger.debug(f'''Locale: {prefix}
 Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
 Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
@@ -62,12 +64,30 @@ EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EX
 JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
 
-# quick and dirty version comparison assuming "strict" numeric only version numbers
 def versioncmp(versionstring):
+    """Quick and dirty version comparison assuming "strict" numeric only version numbers."""
     return list(map(int, versionstring.split('.')))
 
 
 def deep_get(target: dict, *args: str, default=None) -> Any:
+    """
+    Walk into a dict and return the specified deep value.
+
+    Example usage:
+
+        >>> thing = {'a': {'b': {'c': 'foo'} } }
+        >>> deep_get(thing, ('a', 'b', 'c'), None)
+        'foo'
+        >>> deep_get(thing, ('a', 'b'), None)
+        {'c': 'foo'}
+        >>> deep_get(thing, ('a', 'd'), None)
+        None
+
+    :param target: The dict to walk into for the desired value.
+    :param args: The list of keys to walk down through.
+    :param default: What to return if the target has no value.
+    :return: The value at the target deep key.
+    """
     if not hasattr(target, 'get'):
         raise ValueError(f"Cannot call get on {target} ({type(target)})")
 
@@ -83,6 +103,7 @@ def deep_get(target: dict, *args: str, default=None) -> Any:
 
 
 def main():
+    """Run the main code of the program."""
     try:
         # arg parsing
         parser = argparse.ArgumentParser(
@@ -93,7 +114,16 @@ def main():
         )
 
         parser.add_argument('-v', '--version', help='print program version and exit', action='store_const', const=True)
-        parser.add_argument('--loglevel', metavar='loglevel', help='Set the logging loglevel to one of: CRITICAL, ERROR, WARNING, INFO, DEBUG')  # noqa: E501
+        group_loglevel = parser.add_mutually_exclusive_group()
+        group_loglevel.add_argument('--loglevel',
+                                    metavar='loglevel',
+                                    help='Set the logging loglevel to one of: '
+                                         'CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE',
+                                    )
+        group_loglevel.add_argument('--trace',
+                                    help='Set the Debug logging loglevel to TRACE',
+                                    action='store_true',
+                                    )
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -117,11 +147,14 @@ def main():
 
             return
 
-        if args.loglevel:
-            if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'):
-                print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG', file=sys.stderr)
+        if args.trace:
+            edmclogger.set_channels_loglevel(logging.TRACE)
+
+        elif args.loglevel:
+            if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'):
+                print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE', file=sys.stderr)
                 sys.exit(EXIT_ARGS)
-            logger.setLevel(args.loglevel)
+            edmclogger.set_channels_loglevel(args.loglevel)
 
         logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
         logger.debug(f'''Platform: {sys.platform}
@@ -250,10 +283,9 @@ sys.path: {sys.path}'''
             stats.export_status(data, args.t)
 
         if data['commander'].get('docked'):
-            print('{},{}'.format(
-                deep_get(data, 'lastSystem', 'name', default='Unknown'),
-                deep_get(data, 'lastStarport', 'name', default='Unknown')
-            ))
+            print(f'{deep_get(data, "lastSystem", "name", default="Unknown")},'
+                  f'{deep_get(data, "lastStarport", "name", default="Unknown")}'
+                  )
 
         else:
             print(deep_get(data, 'lastSystem', 'name', default='Unknown'))

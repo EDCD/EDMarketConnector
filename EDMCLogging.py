@@ -5,6 +5,34 @@ This module provides for a common logging-powered log facility.
 Mostly it implements a logging.Filter() in order to get two extra
 members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
+
+If type checking, e.g. mypy, objects to `logging.trace(...)` then include this
+stanza:
+
+    # See EDMCLogging.py docs.
+    # isort: off
+    if TYPE_CHECKING:
+        from logging import trace, TRACE  # type: ignore # noqa: F401
+    # isort: on
+
+This is needed because we add the TRACE level and the trace() function
+ourselves at runtime.
+
+To utilise logging in core code, or internal plugins, include this:
+
+    from EDMCLogging import get_main_logger
+
+    logger = get_main_logger()
+
+To utilise logging in a 'found' (third-party) plugin, include this:
+
+    import os
+    import logging
+
+    plugin_name = os.path.basename(os.path.dirname(__file__))
+    # plugin_name here *must* be the name of the folder the plugin resides in
+    # See, plug.py:load_plugins()
+    logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
 
 import inspect
@@ -44,6 +72,17 @@ from config import appcmdname, appname, config
 
 _default_loglevel = logging.DEBUG
 
+# Define a TRACE level
+LEVEL_TRACE = 5
+logging.addLevelName(LEVEL_TRACE, "TRACE")
+logging.TRACE = LEVEL_TRACE  # type: ignore
+logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type: ignore
+    logging.TRACE,  # type: ignore
+    message,
+    args,
+    **kwargs
+)
+
 
 class Logger:
     """
@@ -66,9 +105,9 @@ class Logger:
         """
         self.logger = logging.getLogger(logger_name)
         # Configure the logging.Logger
-        # This needs to always be DEBUG in order to let DEBUG level messages
+        # This needs to always be TRACE in order to let TRACE level messages
         # through to check the *handler* levels.
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.TRACE)  # type: ignore
 
         # Set up filter for adding class name
         self.logger_filter = EDMCContextFilter()
@@ -102,8 +141,8 @@ class Logger:
             encoding='utf-8',
             delay=False
         )
-        # Yes, we always want these rotated files to be at DEBUG level
-        self.logger_channel_rotating.setLevel(logging.DEBUG)
+        # Yes, we always want these rotated files to be at TRACE level
+        self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
@@ -118,9 +157,32 @@ class Logger:
     def get_streamhandler(self) -> logging.Handler:
         """
         Obtain the self.logger_channel StreamHandler instance.
+
         :return: logging.StreamHandler
         """
         return self.logger_channel
+
+    def set_channels_loglevel(self, level: int) -> None:
+        """
+        Set the specified log level on the channels.
+
+        :param level: A valid `logging` level.
+        :return: None
+        """
+        self.logger_channel.setLevel(level)
+        self.logger_channel_rotating.setLevel(level)
+
+    def set_console_loglevel(self, level: int) -> None:
+        """
+        Set the specified log level on the console channel.
+
+        :param level: A valid `logging` level.
+        :return: None
+        """
+        if self.logger_channel.level != logging.TRACE:  # type: ignore
+            self.logger_channel.setLevel(level)
+        else:
+            logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
 def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> logging.Logger:
@@ -131,16 +193,21 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> lo
     coming from, but we don't need to set up *everything* for them.
 
     The name will be '{config.appname}.{plugin.name}', e.g.
-    'EDMarketConnector.miggytest'.  This means that any logging sent through
-    there *also* goes to the channels defined in the 'EDMarketConnector'
-    logger, so we can let that take care of the formatting.
+    'EDMarketConnector.plugintest', or using appcmdname for EDMC CLI tool.
+      Note that `plugin_name` must be the same as the name of the folder the
+    plugin resides in.
+      This means that any logging sent through there *also* goes to the channels
+    defined in the 'EDMarketConnector' (or 'EDMC') logger, so we can let that
+    take care of the formatting.
 
     If we add our own channel then the output gets duplicated (assuming same
     logLevel set).
 
     However we do need to attach our filter to this still.  That's not at
     the channel level.
-    :param name: Name of this Logger.
+
+    :param plugin_name: Name of this Logger.  **Must** be the name of the
+        folder the plugin resides in.
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """
@@ -335,7 +402,6 @@ class EDMCContextFilter(logging.Filter):
 
 def get_main_logger() -> logging.Logger:
     """Return the correct logger for how the program is being run."""
-
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
         return logging.getLogger(appname)
@@ -348,5 +414,11 @@ def get_main_logger() -> logging.Logger:
 loglevel = config.get('loglevel')
 if not loglevel:
     loglevel = logging.INFO
-edmclogger = Logger(appname, loglevel=loglevel)
+
+if not os.getenv('EDMC_NO_UI'):
+    base_logger_name = appname
+else:
+    base_logger_name = appcmdname
+
+edmclogger = Logger(base_logger_name, loglevel=loglevel)
 logger = edmclogger.get_logger()
