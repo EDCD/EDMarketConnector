@@ -1,0 +1,67 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: check-merge-conflict 
+      - id: debug-statements 
+      - id: end-of-file-fixer 
+      - id: mixed-line-ending
+
+        #-   repo: https://github.com/pre-commit/mirrors-autopep8
+        #    rev: ''
+        #    hooks:
+        #      - id: autopep8
+
+# flake8 --show-source <file>
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: ''
+    hooks:
+      - id: flake8
+
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: ''
+    hooks:
+      - id: python-no-eval 
+      - id: python-no-log-warn 
+# This is a pain where a comment begins with the word 'type' otherwise
+#      - id: python-use-type-annotations 
+
+# mypy - static type checking
+# mypy --follow-imports skip <file>
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: ''
+    hooks:
+      - id: mypy
+        args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
+
+### # pydocstyle.exe <file>
+### -   repo: https://github.com/FalconSocial/pre-commit-mirrors-pep257
+###     rev: ''
+###     hooks:
+###       - id: pep257  # docstring conventions
+###       # Alternate https://github.com/PyCQA/pydocstyle
+
+# -   repo: https://github.com/digitalpulp/pre-commit-php
+#     rev: ''
+#     hooks:
+#       -id: php-unit 
+
+# safety.exe check -r requirements.txt
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: ''
+    hooks:
+      - id: python-safety-dependencies-check 
+        entry: safety
+        args: [check, --bare, -r]
+        language: system
+
+default_language_version:
+    python: python3.7
+
+default_stages: [ commit, push ]
+
+#files: '([^\.].+/)*.py'
+
+exclude: cp37-setup-new.py
