@@ -221,6 +221,9 @@
 					<Component Guid="{3117D2CF-1D87-4B99-BE44-7BDDFE8C8E60}">
 						<File KeyPath="yes" Source="SourceDir\WinSparkle.dll" />
 					</Component>
+					<Component Id="EDMarketConnector_TRACE.bat" Guid="*">
+					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - TRACE.bat" />
+					</Component>
 					<Directory Id="L10n" Name="L10n">
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\cs.strings" />
@@ -528,7 +531,7 @@
 
 			<Directory Id="ProgramMenuFolder" Name="Programs">
 			</Directory>
-			
+
 		</Directory>
 
 		<Feature Id='Complete' Level='1'>
@@ -589,6 +592,7 @@
 			<ComponentRef Id="unicodedata.pyd" />
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />
+			<ComponentRef Id="EDMarketConnector_TRACE.bat" />
 			<ComponentRef Id="zh_CN.strings" />
 			<ComponentRef Id="auto.tcl" />
 			<ComponentRef Id="clock.tcl" />
