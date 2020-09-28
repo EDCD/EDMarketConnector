@@ -15,6 +15,9 @@ stanza:
         from logging import trace, TRACE  # type: ignore # noqa: F401
     # isort: on
 
+This is needed because we add the TRACE level and the trace() function
+ourselves at runtime.
+
 To utilise logging in core code, or internal plugins, include this:
 
     from EDMCLogging import get_main_logger
