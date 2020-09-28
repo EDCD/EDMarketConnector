@@ -103,7 +103,7 @@ class EDDN(object):
             ('message',    msg['message']),
         ])
 
-        r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
             print('Status\t%s' % r.status_code)
             print('URL\t%s' % r.url)
@@ -266,7 +266,13 @@ class EDDN(object):
             ('demandBracket', commodity['DemandBracket']),
         ]) for commodity in items], key = lambda c: c['name'])
 
-        if commodities and this.commodities != commodities:	# Don't send empty commodities list - schema won't allow it
+        # This used to have a check `commodities and ` at the start so as to
+        # not send an empty commodities list, as the EDDN Schema doesn't allow
+        # it (as of 2020-09-28).
+        # BUT, Fleet Carriers can go from having buy/sell orders to having
+        # none and that really does need to be recorded over EDDN so that, e.g.
+        # EDDB can update in a timely manner.
+        if this.commodities != commodities:
             self.send(cmdr, {
                 '$schemaRef' : 'https://eddn.edcd.io/schemas/commodity/3' + (is_beta and '/test' or ''),
                 'message'    : OrderedDict([
@@ -467,7 +473,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             return str(e)
 
     elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-          entry['event'] in ['Market', 'Outfitting', 'Shipyard']):
+            entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
+        # Market.json, Outfitting.json or Shipyard.json to process
+
         try:
             if this.marketId != entry['MarketID']:
                 this.commodities = this.outfitting = this.shipyard = None
