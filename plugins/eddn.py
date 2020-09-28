@@ -103,19 +103,16 @@ class EDDN(object):
             ('message',    msg['message']),
         ])
 
-        r = self.session.post(self.UPLOAD, data=json.dumps(msg), timeout=self.TIMEOUT)
-        if __debug__ and r.status_code != requests.codes.ok:
-            print('Status\t%s'  % r.status_code)
-            print('URL\t%s'  % r.url)
-            print('Headers\t%s' % r.headers)
-            print('Content:\n%s' % r.text)
+        r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
             if r.status_code == 400 \
-                and msg['$schemaRef'] == 'https://eddn.edcd.io/schemas/commodity/3' \
-                and this.commodities == [] \
-                and r.text == "FAIL: [<ValidationError: '[] is too short'>]":
+                    and msg['$schemaRef'] == 'https://eddn.edcd.io/schemas/commodity/3' \
+                    and msg['message']['commodities'] == [] \
+                    and r.text == "FAIL: [<ValidationError: '[] is too short'>]":
                 print("EDDN is still objecting to empty commodities data")
+                return  # We want to silence warnings otherwise
 
         r.raise_for_status()
 
