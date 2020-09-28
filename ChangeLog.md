@@ -1,6 +1,35 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta8
+===
+
+* This version will *attempt* to send empty market commodity lists over EDDN.
+  The benefit of this is it will show when a Fleet Carrier no longer has any
+  buy or sell orders active.
+  
+  At this time the EDDN Gateway will reject these messages.  We're catching
+  and suppressing that (but log a message at TRACE level).  If/when the EDDN
+  schema is updated and the Gateway starts using that this will mean,
+  e.g. EDDB, can start better tracking Fleet Carrier markets.
+
+* EDMarketConnector.exe now has `gdiScaling` set to true in its manifest.  This
+  results in better Windows OS scaling of the UI (radio buttons scale correctly
+  now).  This might negate the need for our own UI Scaling, but we're leaving
+  the functionality in for anyone who finds it useful.  NB: default theme fonts
+  still don't scale with our scaling.
+
+* We now have a TRACE level of log output.  By default this is turned off.
+  Run either EDMarketConnector or EDMC with `--trace` flag to enable.  This is
+  intended for use where we need finer-grained tracing to track down a bug,
+  but the output would be too spammy in normal use.
+  
+  To make it easy for users to run with TRACE logging there's a new file
+  `EDMarketConnector - TRACE.bat`.  Running this should result in the program
+  running with tracing.  Recommended use is to navigate a Windows File
+  Explorer window to where EDMarketConnector.exe is installed then double-click
+  this `.bat` file.
+  
 Pre-Release 4.1.0-beta7
 ===
 
