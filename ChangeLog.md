@@ -1,6 +1,17 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-beta9
+===
+
+Changes in beta8 had inadvertently broken the way printed output from the
+program is redirected to the logfile.  This had two consequences:
+
+1. Anything using proper logging wouldn't appear in the Temp log file.
+1. A popup would appear on program exit, as the way we package the .exe causes
+   any output to go to a file in the current working directory.  This isn't
+   writable with the way we install.
+
 Pre-Release 4.1.0-beta8
 ===
 
