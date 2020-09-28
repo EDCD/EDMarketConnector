@@ -15,14 +15,6 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING
 
-from EDMCLogging import edmclogger, logger, logging
-
-# See EDMCLogging.py docs.
-# isort: off
-if TYPE_CHECKING:
-    from logging import trace, TRACE  # type: ignore # noqa: F401
-# isort: on
-
 from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
 # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
@@ -35,6 +27,15 @@ if __name__ == "__main__":
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+
+from EDMCLogging import edmclogger, logger, logging
+
+# See EDMCLogging.py docs.
+# isort: off
+if TYPE_CHECKING:
+    from logging import trace, TRACE  # type: ignore # noqa: F401
+# isort: on
+
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
