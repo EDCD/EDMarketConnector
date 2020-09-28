@@ -5,6 +5,31 @@ This module provides for a common logging-powered log facility.
 Mostly it implements a logging.Filter() in order to get two extra
 members on the logging.LogRecord instance for use in logging.Formatter()
 strings.
+
+If type checking, e.g. mypy, objects to `logging.trace(...)` then include this
+stanza:
+
+    # See EDMCLogging.py docs.
+    # isort: off
+    if TYPE_CHECKING:
+        from logging import trace, TRACE  # type: ignore # noqa: F401
+    # isort: on
+
+To utilise logging in core code, or internal plugins, include this:
+
+    from EDMCLogging import get_main_logger
+
+    logger = get_main_logger()
+
+To utilise logging in a 'found' (third-party) plugin, include this:
+
+    import os
+    import logging
+
+    plugin_name = os.path.basename(os.path.dirname(__file__))
+    # plugin_name here *must* be the name of the folder the plugin resides in
+    # See, plug.py:load_plugins()
+    logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
 
 import inspect
@@ -165,16 +190,21 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> lo
     coming from, but we don't need to set up *everything* for them.
 
     The name will be '{config.appname}.{plugin.name}', e.g.
-    'EDMarketConnector.miggytest'.  This means that any logging sent through
-    there *also* goes to the channels defined in the 'EDMarketConnector'
-    logger, so we can let that take care of the formatting.
+    'EDMarketConnector.plugintest', or using appcmdname for EDMC CLI tool.
+      Note that `plugin_name` must be the same as the name of the folder the
+    plugin resides in.
+      This means that any logging sent through there *also* goes to the channels
+    defined in the 'EDMarketConnector' (or 'EDMC') logger, so we can let that
+    take care of the formatting.
 
     If we add our own channel then the output gets duplicated (assuming same
     logLevel set).
 
     However we do need to attach our filter to this still.  That's not at
     the channel level.
-    :param name: Name of this Logger.
+
+    :param plugin_name: Name of this Logger.  **Must** be the name of the
+        folder the plugin resides in.
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """

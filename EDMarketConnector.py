@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 
 from EDMCLogging import edmclogger, logger, logging
 
+# See EDMCLogging.py docs.
 # isort: off
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401

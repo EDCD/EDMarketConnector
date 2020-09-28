@@ -12,6 +12,7 @@ from os.path import getmtime, join
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, Optional
 
+# See EDMCLogging.py docs.
 # isort: off
 from EDMCLogging import edmclogger, logger, logging
 if TYPE_CHECKING:
