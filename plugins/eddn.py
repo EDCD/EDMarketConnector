@@ -409,7 +409,13 @@ Msg:\n{msg}'''
             ('demandBracket', commodity['DemandBracket']),
         ]) for commodity in items), key=lambda c: c['name'])
 
-        if commodities and this.commodities != commodities:  # Don't send empty commodities list - schema won't allow it
+        # This used to have a check `commodities and ` at the start so as to
+        # not send an empty commodities list, as the EDDN Schema doesn't allow
+        # it (as of 2020-09-28).
+        # BUT, Fleet Carriers can go from having buy/sell orders to having
+        # none and that really does need to be recorded over EDDN so that, e.g.
+        # EDDB can update in a timely manner.
+        if this.commodities != commodities:
             self.send(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -722,6 +728,7 @@ def journal_entry(  # noqa: C901
 
     elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
             entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
+        # Market.json, Outfitting.json or Shipyard.json to process
 
         try:
             if this.marketId != entry['MarketID']:
