@@ -142,10 +142,10 @@ class EDDN:
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
-            if r.status_code == 400 \
-                    and msg['$schemaRef'] == 'https://eddn.edcd.io/schemas/commodity/3' \
-                    and msg['message']['commodities'] == [] \
-                    and r.text == "FAIL: [<ValidationError: '[] is too short'>]":
+            if (r.status_code == 400
+                    and msg['$schemaRef'] == 'https://eddn.edcd.io/schemas/commodity/3'
+                    and msg['message']['commodities'] == []
+                    and r.text == "FAIL: [<ValidationError: '[] is too short'>]"):
                 logger.trace("EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
