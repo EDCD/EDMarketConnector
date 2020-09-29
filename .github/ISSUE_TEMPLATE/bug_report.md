@@ -18,7 +18,7 @@ assignees: ''
  - If applicable: Browser [e.g. chrome, safari]
  - Please attach log files:
      1. Always attach `%TEMP%\EDMarketConnector.log` from *immediately* after the bug occurs (re-running the application overwrites this file).
-     1. If running 4.1.0 (including betas) or later: `%TEMP%\EDMarketConnector\EDMarketConnector.log`.  See [Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files).
+     1. If running 4.1.0 (including betas) or later: `%TEMP%\EDMarketConnector\EDMarketConnector-debug.log`.  See [Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files).
    
    Use the Icon that looks like `_`, `|` and `^` all in one character towards the right of the toolbar above.
 
