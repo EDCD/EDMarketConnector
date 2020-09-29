@@ -1,167 +1,7 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-Pre-Release 4.1.0-beta9
-===
-
-Changes in beta8 had inadvertently broken the way printed output from the
-program is redirected to the logfile.  This had two consequences:
-
-1. Anything using proper logging wouldn't appear in the Temp log file.
-1. A popup would appear on program exit, as the way we package the .exe causes
-   any output to go to a file in the current working directory.  This isn't
-   writable with the way we install.
-
-Pre-Release 4.1.0-beta8
-===
-
-* This version will *attempt* to send empty market commodity lists over EDDN.
-  The benefit of this is it will show when a Fleet Carrier no longer has any
-  buy or sell orders active.
-  
-  At this time the EDDN Gateway will reject these messages.  We're catching
-  and suppressing that (but log a message at TRACE level).  If/when the EDDN
-  schema is updated and the Gateway starts using that this will mean,
-  e.g. EDDB, can start better tracking Fleet Carrier markets.
-
-* EDMarketConnector.exe now has `gdiScaling` set to true in its manifest.  This
-  results in better Windows OS scaling of the UI (radio buttons scale correctly
-  now).  This might negate the need for our own UI Scaling, but we're leaving
-  the functionality in for anyone who finds it useful.  NB: default theme fonts
-  still don't scale with our scaling.
-
-* We now have a TRACE level of log output.  By default this is turned off.
-  Run either EDMarketConnector or EDMC with `--trace` flag to enable.  This is
-  intended for use where we need finer-grained tracing to track down a bug,
-  but the output would be too spammy in normal use.
-  
-  To make it easy for users to run with TRACE logging there's a new file
-  `EDMarketConnector - TRACE.bat`.  Running this should result in the program
-  running with tracing.  Recommended use is to navigate a Windows File
-  Explorer window to where EDMarketConnector.exe is installed then double-click
-  this `.bat` file.
-  
-Pre-Release 4.1.0-beta7
-===
-
-* Add extra logging to how "Location" journal events are handled to further
-  tracking down [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
-
-Pre-Release 4.1.0-beta6
-===
-
-* Include a manifest in both EDMarketConnector.exe and EDMC.exe to specify
-  they're Unicode applications so that they default to using the UTF-8
-  codepage.  Fixes [#711](https://github.com/EDCD/EDMarketConnector/issues/711).
-
-* Add extra debug logging to EDSM plugin for `CarrierJump`, `FSDJump`,
-  `Location` and `Docked` events.  Hopefully this will help track down the
-   cause of [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
-  
-* Various code cleanups which shouldn't impact user experience.
-
-* EDMC.exe will now log useful startup state information if run with the
-  `--loglevel DEBUG` arguments.
-
-Pre-Release 4.1.0-beta5
-===
-
-* We are now explicitly setting a UTF8 encoding at startup.  This *shouldn't*
-  have any side effects and has allowed us to switch to the native tkinter
-  file dialogues rather than some custom code.
-  
-  If you do encounter errors that might be related to this then it would be
-  useful to see the logging output that details the Locale settings at
-  various points during startup.  Examples might include incorrect text being
-  rendered for your language when you have it set, or issues with filenames
-  and their content, but any of these are unlikely.
-  
-* The error `'list' object has no attribute 'values'` should now be fixed.
-
-* Code dealing with Frontier's CAPI was cleaned up, so please report any
-  issues related to that (mostly when just docked or when you press the Update
-  button).
-
-* Extra logging added for when we process FSDJump and CarrierJump events for
-  EDSM.  This is aimed at checking if we do have a bug with CarrierJump events,
-  but having FSDJump trigger the logging as well made it easier to test.
-  
-* Default `logging` level for plugins is now DEBUG.  This won't change what's
-  actually logged, it just ensures that everything gets through to the two
-  channels that then decide what is output.
-
-* Translations updated.  Thanks again to all contributors!
-
-Pre-Release 4.1.0-beta4
-===
-
-**Users of prior 4.1.0 betas who have set a non-default UI Scale probably want
-to set it to default (0 or 0.0 in the older versions) before installing this
-version.**
-
-This is mostly another iteration on the UI Scaling functionality, but also
-fixes EDMC.exe to actually work again.
-
-* Fix import order in EDMC.py so the CL utility actually runs.
-* This also involved updating the *development* modules we use, you only need
-  to worry if you're using flake8 or the like in helping develop this
-  application.
-* UI Scaling is now versus what it would otherwise have been at startup.
-    1. 100 is now the default.
-    1. If you select 0 it will become 100 on the next startup.
-    1. The UI Scale bar will now size correctly per current scaling rather
-       than getting ahead of itself and sizing as per the next-start scaling
-       you now have set.
-    1. We now strictly have a range of 10% to 400% of your default scaling
-       rather than a somewhat arbitrary range that hopefully includes it.
-
-Pre-Release 4.1.0-beta3
-===
-
-We hit a bug with the UI scaling code to do with locales that use something
-other than `.` as their decimals separator.  This is a tk/tkinter bug with
-using a floating point number.  So, we've changed to using an integer instead.
-
-* The setting is now 'ui_scale' and a REG_DWORD in Windows, instead of the old
-  'ui_scaling' as a REG_SZ.  So any setting you'd already played with will
-  be ignored when first running beta3.
-* The displayed values are now from 0 to 400 instead of 0.0 to 4.0.  The
-  increments are equivalent to the old ones.
-* The default setting is now `0` instead of `0.0`.  Making `100` the default
-  would be problematic because tkinter's actual default is unlikely to simply
-  be 1.0. On a 2560x1440 monitor with a 27" diagonal it's ~1.33 for instance.
-* There's a little extra DEBUG logging at startup so we can be sure of some
-  things like Python version used (pertinent if running from source).
-
-Plugin Authors: If you are doing per-pixel things in your UI then there's
-`import theme from theme` and `theme.default_ui_scale` to check the tk
-`scaling` value.  Note that this is the float value that tk uses internally,
-with `1.0` being equivalent to our `100` now we're using integers for this.
-
-Translators: Yes, the new strings have changed a bit again, apologies!
-
-Pre-Release 4.1.0-beta2
-===
-
-* The rotated set of log files are now always at DEBUG level, whereas the old
-  log file continues to follow the user-set logging level.
-* New UI Scaling option!  Find the setting on the 'Appearance' tab of Settings.
-    1. This will only actually take effect after restarting the application.
-    1. The 'Default' theme's menu names won't be resized due to using the
-       default font.  The other two themes work properly though as they use
-       a custom font for those texts.
-    1. As per the note next to the settings bar, "0.0" means "default", so set
-       it to that if you decide you don't need the UI scaling.
-    1. 4K users *probably* want something around 2.0, experiment and let us
-       know!
-* Minor tweak to EDDN plugin logging so we know what message we tried to send
-  if it fails.
-* More logging added to companion.py to aid diagnosing Frontier Auth issues.
-
-Translators: There are three new strings to translate related to Log Levels
-and the new UI Scaling.
-
-Pre-Release 4.1.0-beta1
+Pre-Release 4.1.0-rc1
 ===
 
 This pre-release contains the result of a lot of code cleanup on several files
@@ -172,30 +12,120 @@ None of the code cleanups *should* change actual program behaviour, but as we
 don't yet have the code in a state to have proper tests it's possible we've
 broken something.
 
- * EDMC.py now uses proper logging and has a new `--loglevel` command-line
-   argument.  See `EDMC.py -h` for the possible values.  It defaults to 'INFO',
-   which, unless there's an error, should yield the same output as before.
- * EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
-   to change the loglevel.  Default is 'INFO' and advised for normal use.
-   If reporting a bug it will be very helpful to change this to 'DEBUG' and
-   then reproduce the bug.
- * Both programs not only log to their old locations (console for EDMC, and
-   `%TEMP%\EDMarketConnector.log` for the main application), but now also to
-   a size-limited and rotated logfile inside the folder
-   `%TEMP%\EDMarketConnector\ `.
-    1. A new file is only started if/when it reaches the 1 MiB size limit.
-    1. We'll keep at most 10 backups of each file, so the maximum disk space
-    used by this will be 22 MiB.
-    1. The base filename inside there is `EDMarketConnector.log` for the main
-    program and `EDMC.log` for the command-line program.
-    1. Only actually *logged* output goes to these files, which currently is
-    far from all the traditional output that goes to the old file/console.
+* The error `'list' object has no attribute 'values'` should now be fixed.
 
-Plugin Authors
----
-Please change your code to using proper logging, as per the new 'Logging'
-section of PLUGINS.md.
+* This version will *attempt* to send empty market commodity lists over EDDN.
+  The benefit of this is it will show when a Fleet Carrier no longer has any
+  buy or sell orders active.
+  
+  At this time the EDDN Gateway will reject these messages.  We're catching
+  and suppressing that (but log a message at TRACE level).  If/when the EDDN
+  schema is updated and the Gateway starts using that this will mean,
+  e.g. EDDB, can start better tracking Fleet Carrier markets.
+  
+* We are now explicitly a Unicode application:
 
+  1. A manifest setting in both EDMarketConnector.exe and EDMC.exe now
+  specifies they're Unicode applications so that they default to using the
+  UTF-8 codepage.
+  
+  1. We are now explicitly setting a UTF8 encoding at startup.  NB: This is
+  still necessary so that users running from source code are also using the
+  UTF-8 encoding, there's no manifest in that scenario.
+  
+      This *shouldn't* have any side effects and has allowed us to switch to
+      the native tkinter file dialogues rather than some custom code.
+  
+  If you do encounter errors that might be related to this then it would be
+  useful to see the logging output that details the Locale settings at
+  various points during startup.  Examples might include incorrect text being
+  rendered for your language when you have it set, or issues with filenames
+  and their content, but any of these are unlikely.
+  
+* EDMarketConnector.exe now has `gdiScaling` set to true in its manifest.  This
+  results in better Windows OS scaling of the UI (radio buttons scale correctly
+  now).  This might negate the need for our own UI Scaling (see below), but
+  we're leaving the functionality in for anyone who finds it useful.
+   
+* New UI Scaling option!  Find the setting on the 'Appearance' tab of Settings.
+    1. This will only actually take effect after restarting the application.
+    1. The 'Default' theme's menu names won't be resized due to using the
+       default font.  The other two themes work properly though as they use
+       a custom font for those texts.
+    1. As per the note next to the settings bar, "100" means "default", so set
+       it to that if you decide you don't need the UI scaling.
+    1. If you select 0 it will become 100 on the next startup.
+       
+    Plugin Authors: If you are doing per-pixel things in your UI then you'll
+    want to check `config.get('ui_scale')` and adjust accordingly.  `100`
+    means default scaling with other values being a percentage relative to
+    that (so 150 means you need to scale everything x1.5).
+       
+* Code dealing with Frontier's CAPI was cleaned up, so please report any
+  issues related to that (mostly when just docked or when you press the Update
+  button).
+  
+* We now have proper logging available, using the python module of that name.
+  Plugin Authors, please change your code to using proper logging, as per the
+  new 'Logging' section of PLUGINS.md.
+
+  1. We have a TRACE level of log output.  By default this is turned off.
+  Run either EDMarketConnector or EDMC with `--trace` flag to enable.  This is
+  intended for use where we need finer-grained tracing to track down a bug,
+  but the output would be too spammy in normal use.
+  
+      To make it easy for users to run with TRACE logging there's a new file
+    `EDMarketConnector - TRACE.bat`.  Running this should result in the program
+    running with tracing.  Recommended use is to navigate a Windows File
+    Explorer window to where EDMarketConnector.exe is installed then
+    double-click this `.bat` file.
+
+  1. EDMC.py has a new `--loglevel` command-line argument.  See `EDMC.py -h`
+  for the possible values.  It defaults to 'INFO', which, unless there's an
+  error, should yield the same output as before.
+   
+  1. EDMC.exe will now log useful startup state information if run with the
+  `--loglevel DEBUG` arguments.
+  
+  1. EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
+  to change the loglevel.  Default is 'INFO' and advised for normal use.
+  If reporting a bug it will be very helpful to change this to 'DEBUG' and
+  then reproduce the bug.
+  
+  1. Both programs not only log to their old locations (console for EDMC, and
+  `%TEMP%\EDMarketConnector.log` for the main application), but now also to
+  a size-limited and rotated logfile inside the folder
+  `%TEMP%\EDMarketConnector\ `.
+     1. A new file is only started if/when it reaches the 1 MiB size limit.
+     1. We'll keep at most 10 backups of each file, so the maximum disk space
+     used by this will be 22 MiB.
+     1. The base filename inside there is `EDMarketConnector-debug.log` for the
+     main program and `EDMC-debug.log` for the command-line program.
+     1. Only actually *logged* output goes to these files, which currently is
+     far from all the traditional output that goes to the old file/console.
+     Anything using `print(...)` will not appear in these new files.
+     1. These files always default to DEBUG level, whereas the old log file
+     continues to follow the user-set logging level.
+   
+  1. Default `logging` level for plugins is DEBUG.  This won't change what's
+  actually logged, it just ensures that everything gets through to the two
+  channels that then decide what is output.
+
+* There's a little extra DEBUG logging at startup so we can be sure of some
+  things like Python version used (pertinent if running from source).
+
+* Minor tweak to EDDN plugin logging so we know what message we tried to send
+  if it fails.
+  
+* More logging added to companion.py to aid diagnosing Frontier Auth issues.
+
+* Extra TRACE level logging added for when we process `Location`, `Docked
+  `, `FSDJump` and `CarrierJump` events for EDSM. This was added to help track
+  down the cause of [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
+   
+
+Translators: There are new strings to translate related to Log Levels
+and the new UI Scaling.  Thanks to those who already updated!
 
 Release 4.0.6
 ===
