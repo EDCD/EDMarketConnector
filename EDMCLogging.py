@@ -126,12 +126,13 @@ class Logger:
         self.logger.addHandler(self.logger_channel)
 
         # Rotating Handler in sub-directory
-        # We want the files in %TEMP%\{appname}\ as {logger_name}.log and rotated versions
+        # We want the files in %TEMP%\{appname}\ as {logger_name}-debug.log and
+        # rotated versions.
         # This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
         logfile_rotating = logfile_rotating / f'{appname}'
         logfile_rotating.mkdir(exist_ok=True)
-        logfile_rotating = logfile_rotating / f'{logger_name}.log'
+        logfile_rotating = logfile_rotating / f'{logger_name}-debug.log'
 
         self.logger_channel_rotating = logging.handlers.RotatingFileHandler(
             logfile_rotating,
