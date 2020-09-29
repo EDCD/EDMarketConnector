@@ -120,7 +120,7 @@ broken something.
 * More logging added to companion.py to aid diagnosing Frontier Auth issues.
 
 * Extra TRACE level logging added for when we process `Location`, `Docked`,
- `FSDJump` and `CarrierJump` events for EDSM. This was added to help track
+ t pu`FSDJump` and `CarrierJump` events for EDSM. This was added to help track
   down the cause of [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
    
 
