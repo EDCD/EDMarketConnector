@@ -5,7 +5,7 @@ Pre-Release 4.1.0-rc1
 ===
 
 This pre-release contains the result of a lot of code cleanup on several files
-and the addition of a proper logging paradigm, which should aid in tracking
+and the addition of a proper logging paradigm, which should aid us in tracking
 down bugs.
 
 None of the code cleanups *should* change actual program behaviour, but as we
@@ -34,7 +34,7 @@ broken something.
   UTF-8 encoding, there's no manifest in that scenario.
   
       This *shouldn't* have any side effects and has allowed us to switch to
-      the native tkinter file dialogues rather than some custom code.
+      the native tkinter file dialogs rather than some custom code.
   
   If you do encounter errors that might be related to this then it would be
   useful to see the logging output that details the Locale settings at
@@ -119,8 +119,8 @@ broken something.
   
 * More logging added to companion.py to aid diagnosing Frontier Auth issues.
 
-* Extra TRACE level logging added for when we process `Location`, `Docked
-  `, `FSDJump` and `CarrierJump` events for EDSM. This was added to help track
+* Extra TRACE level logging added for when we process `Location`, `Docked`,
+ `FSDJump` and `CarrierJump` events for EDSM. This was added to help track
   down the cause of [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
    
 
