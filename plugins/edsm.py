@@ -566,7 +566,10 @@ def worker() -> None:
                                 logger.trace('Attempting API call for "Location" event with timestamp: '
                                              f'{p["timestamp"]}')
 
+                        logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
+
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
+                    logger.trace(f'API response content: {r.content}')
                     r.raise_for_status()
                     reply = r.json()
                     msg_num = reply['msgnum']
@@ -575,11 +578,22 @@ def worker() -> None:
                     # 2xx = fatal error
                     # 3&4xx not generated at top-level
                     # 5xx = error but events saved for later processing
+
                     if msg_num // 100 == 2:
                         logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
 
                     else:
+
+                        if msg_num // 100 == 1:
+                            logger.trace('Overall OK')
+
+                        elif msg_num // 100 == 5:
+                            logger.trace('Event(s) not currently processed, but saved for later')
+
+                        else:
+                            logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
+
                         for e, r in zip(pending, reply['events']):
                             if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
                                 # Update main window's system status
@@ -587,15 +601,15 @@ def worker() -> None:
                                 # calls update_status in main thread
                                 this.system_link.event_generate('<<EDSMStatus>>', when="tail")
 
-                            elif r['msgnum'] // 100 != 1:
-                                logger.warning(f'EDSM\t{r["msgnum"]} {r["msg"]}\t'
+                            if r['msgnum'] // 100 != 1:
+                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n{r["msg"]}\n'
                                                f'{json.dumps(e, separators = (",", ": "))}')
 
                         pending = []
 
-                break
+                break  # No exception, so assume success
             except Exception as e:
-                logger.debug('Sending API events', exc_info=e)
+                logger.debug(f'Attempt to send API events: retrying == {retrying}', exc_info=e)
                 retrying += 1
 
         else:
