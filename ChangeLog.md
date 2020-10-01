@@ -1,6 +1,15 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.1.0-rc2
+===
+
+* Use LC_CTYPE, not LC_ALL, as the source of language for when we set UTF-8
+  encoding.  Fixes [#725](https://github.com/EDCD/EDMarketConnector/issues/725).
+
+* Finer-grained logging (mostly TRACE) added to EDSM API calls to further
+  check [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
+  
 Pre-Release 4.1.0-rc1
 ===
 
