@@ -1108,8 +1108,8 @@ sys.path: {sys.path}'''
     locale.setlocale(locale.LC_ALL, '')
     log_locale('After LC_ALL defaults set')
     # Now find out the current locale, mostly the language
-    locale_startup = locale.getlocale(locale.LC_ALL)
-    logger.debug(f'Locale LC_ALL: {locale_startup}')
+    locale_startup = locale.getlocale(locale.LC_CTYPE)
+    logger.debug(f'Locale LC_CTYPE: {locale_startup}')
     # Now set that same language, but utf8 encoding (it was probably cp1252
     # or equivalent for other languages).
     # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
