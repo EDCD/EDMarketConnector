@@ -19,7 +19,10 @@ if TYPE_CHECKING:
 
 if platform == 'win32':
     import ctypes
-    from ctypes.wintypes import *
+    from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
+    if TYPE_CHECKING:
+        import ctypes.windll  # type: ignore
+
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
         CalculatePopupWindowPosition.argtypes = [
@@ -29,7 +32,8 @@ if platform == 'win32':
         GetParent.argtypes = [HWND]
         GetWindowRect = ctypes.windll.user32.GetWindowRect
         GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-    except:  # Not supported under Wine 4.0
+
+    except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None
 
 
@@ -333,7 +337,8 @@ class StatsResults(tk.Toplevel):
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),
+                # - is evidently supported on the C side
+                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
                 0x10000, None, position
             ):
                 self.geometry("+%d+%d" % (position.left, position.top))
