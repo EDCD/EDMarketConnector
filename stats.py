@@ -1,27 +1,33 @@
-from collections import OrderedDict
 import csv
-from sys import platform
-from functools import partial
 import time
+from collections import OrderedDict
+from functools import partial
+from sys import platform
+from typing import TYPE_CHECKING
+
 if __debug__:
     from traceback import print_exc
 
 import tkinter as tk
 from tkinter import ttk
-import myNotebook as nb
 
 import companion
+import myNotebook as nb
 from companion import ship_map
 from l10n import Locale
 from monitor import monitor
-import prefs
+
+if TYPE_CHECKING:
+    def _(x: str) -> str: ...
 
 if platform=='win32':
     import ctypes
     from ctypes.wintypes import *
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-        CalculatePopupWindowPosition.argtypes = [ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)]
+        CalculatePopupWindowPosition.argtypes = [
+            ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)
+        ]
         GetParent = ctypes.windll.user32.GetParent
         GetParent.argtypes = [HWND]
         GetWindowRect = ctypes.windll.user32.GetWindowRect
@@ -37,99 +43,99 @@ def status(data):
             [_('Loan'),    str(data['commander'].get('debt', 0))],	# Cmdr stats
     ]
 
-    RANKS = [	# in output order
-        (_('Combat')     , 'combat'),		# Ranking
-        (_('Trade')      , 'trade'),		# Ranking
-        (_('Explorer')   , 'explore'),		# Ranking
-        (_('CQC')        , 'cqc'),		# Ranking
-        (_('Federation') , 'federation'),	# Ranking
-        (_('Empire')     , 'empire'),		# Ranking
-        (_('Powerplay')  , 'power'),		# Ranking
-        # ???            , 'crime'),		# Ranking
-        # ???            , 'service'),		# Ranking
+    RANKS = [  # in output order
+        (_('Combat')     , 'combat'),  # Ranking
+        (_('Trade')      , 'trade'),  # Ranking
+        (_('Explorer')   , 'explore'),  # Ranking
+        (_('CQC')        , 'cqc'),  # Ranking
+        (_('Federation') , 'federation'),  # Ranking
+        (_('Empire')     , 'empire'),  # Ranking
+        (_('Powerplay')  , 'power'),  # Ranking
+        # ???            , 'crime'),  # Ranking
+        # ???            , 'service'),  # Ranking
     ]
 
     RANK_NAMES = {
 
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
-        'combat'     : [_('Harmless'),		# Combat rank
-                        _('Mostly Harmless'),	# Combat rank
-                        _('Novice'),		# Combat rank
-                        _('Competent'),		# Combat rank
-                        _('Expert'),		# Combat rank
-                        _('Master'),		# Combat rank
-                        _('Dangerous'),		# Combat rank
-                        _('Deadly'),		# Combat rank
-                        _('Elite')],		# Top rank
-        'trade'      : [_('Penniless'),		# Trade rank
-                        _('Mostly Penniless'),	# Trade rank
-                        _('Peddler'),		# Trade rank
-                        _('Dealer'),		# Trade rank
-                        _('Merchant'),		# Trade rank
-                        _('Broker'),		# Trade rank
-                        _('Entrepreneur'),	# Trade rank
-                        _('Tycoon'),		# Trade rank
-                        _('Elite')],		# Top rank
-        'explore'    : [_('Aimless'),		# Explorer rank
-                        _('Mostly Aimless'),	# Explorer rank
-                        _('Scout'),		# Explorer rank
-                        _('Surveyor'),		# Explorer rank
-                        _('Trailblazer'),	# Explorer rank
-                        _('Pathfinder'),	# Explorer rank
-                        _('Ranger'),		# Explorer rank
-                        _('Pioneer'),		# Explorer rank
-                        _('Elite')],		# Top rank
-        'cqc'        : [_('Helpless'),		# CQC rank
-                        _('Mostly Helpless'),	# CQC rank
-                        _('Amateur'),		# CQC rank
-                        _('Semi Professional'),	# CQC rank
-                        _('Professional'),	# CQC rank
-                        _('Champion'),		# CQC rank
-                        _('Hero'),		# CQC rank
-                        _('Gladiator'),		# CQC rank
-                        _('Elite')],		# Top rank
+        'combat'     : [_('Harmless'),  # Combat rank
+                        _('Mostly Harmless'),  # Combat rank
+                        _('Novice'),  # Combat rank
+                        _('Competent'),  # Combat rank
+                        _('Expert'),  # Combat rank
+                        _('Master'),  # Combat rank
+                        _('Dangerous'),  # Combat rank
+                        _('Deadly'),  # Combat rank
+                        _('Elite')],  # Top rank
+        'trade'      : [_('Penniless'),  # Trade rank
+                        _('Mostly Penniless'),  # Trade rank
+                        _('Peddler'),  # Trade rank
+                        _('Dealer'),  # Trade rank
+                        _('Merchant'),  # Trade rank
+                        _('Broker'),  # Trade rank
+                        _('Entrepreneur'),  # Trade rank
+                        _('Tycoon'),  # Trade rank
+                        _('Elite')],  # Top rank
+        'explore'    : [_('Aimless'),  # Explorer rank
+                        _('Mostly Aimless'),  # Explorer rank
+                        _('Scout'),  # Explorer rank
+                        _('Surveyor'),  # Explorer rank
+                        _('Trailblazer'),  # Explorer rank
+                        _('Pathfinder'),  # Explorer rank
+                        _('Ranger'),  # Explorer rank
+                        _('Pioneer'),  # Explorer rank
+                        _('Elite')],  # Top rank
+        'cqc'        : [_('Helpless'),  # CQC rank
+                        _('Mostly Helpless'),  # CQC rank
+                        _('Amateur'),  # CQC rank
+                        _('Semi Professional'),  # CQC rank
+                        _('Professional'),  # CQC rank
+                        _('Champion'),  # CQC rank
+                        _('Hero'),  # CQC rank
+                        _('Gladiator'),  # CQC rank
+                        _('Elite')],  # Top rank
 
         # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
-        'federation' : [_('None'),		# No rank
-                        _('Recruit'),		# Federation rank
-                        _('Cadet'),		# Federation rank
-                        _('Midshipman'),	# Federation rank
-                        _('Petty Officer'),	# Federation rank
-                        _('Chief Petty Officer'),	# Federation rank
-                        _('Warrant Officer'),	# Federation rank
-                        _('Ensign'),		# Federation rank
-                        _('Lieutenant'),	# Federation rank
-                        _('Lieutenant Commander'),	# Federation rank
-                        _('Post Commander'),	# Federation rank
-                        _('Post Captain'),	# Federation rank
-                        _('Rear Admiral'),	# Federation rank
-                        _('Vice Admiral'),	# Federation rank
-                        _('Admiral')],		# Federation rank
+        'federation' : [_('None'),  # No rank
+                        _('Recruit'),  # Federation rank
+                        _('Cadet'),  # Federation rank
+                        _('Midshipman'),  # Federation rank
+                        _('Petty Officer'),  # Federation rank
+                        _('Chief Petty Officer'),  # Federation rank
+                        _('Warrant Officer'),  # Federation rank
+                        _('Ensign'),  # Federation rank
+                        _('Lieutenant'),  # Federation rank
+                        _('Lieutenant Commander'),  # Federation rank
+                        _('Post Commander'),  # Federation rank
+                        _('Post Captain'),  # Federation rank
+                        _('Rear Admiral'),  # Federation rank
+                        _('Vice Admiral'),  # Federation rank
+                        _('Admiral')],  # Federation rank
 
         # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
-        'empire'     : [_('None'),		# No rank
-                        _('Outsider'),		# Empire rank
-                        _('Serf'),		# Empire rank
-                        _('Master'),		# Empire rank
-                        _('Squire'),		# Empire rank
-                        _('Knight'),		# Empire rank
-                        _('Lord'),		# Empire rank
-                        _('Baron'),		# Empire rank
-                        _('Viscount'),		# Empire rank
-                        _('Count'),		# Empire rank
-                        _('Earl'),		# Empire rank
-                        _('Marquis'),		# Empire rank
-                        _('Duke'),		# Empire rank
-                        _('Prince'),		# Empire rank
-                        _('King')],		# Empire rank
+        'empire'     : [_('None'),  # No rank
+                        _('Outsider'),  # Empire rank
+                        _('Serf'),  # Empire rank
+                        _('Master'),  # Empire rank
+                        _('Squire'),  # Empire rank
+                        _('Knight'),  # Empire rank
+                        _('Lord'),  # Empire rank
+                        _('Baron'),  # Empire rank
+                        _('Viscount'),  # Empire rank
+                        _('Count'),  # Empire rank
+                        _('Earl'),  # Empire rank
+                        _('Marquis'),  # Empire rank
+                        _('Duke'),  # Empire rank
+                        _('Prince'),  # Empire rank
+                        _('King')],  # Empire rank
 
         # http://elite-dangerous.wikia.com/wiki/Ratings
-        'power'      : [_('None'),		# No rank
-                        _('Rating 1'),		# Power rank
-                        _('Rating 2'),		# Power rank
-                        _('Rating 3'),		# Power rank
-                        _('Rating 4'),		# Power rank
-                        _('Rating 5')],		# Power rank
+        'power'      : [_('None'),  # No rank
+                        _('Rating 1'),  # Power rank
+                        _('Rating 2'),  # Power rank
+                        _('Rating 3'),  # Power rank
+                        _('Rating 4'),  # Power rank
+                        _('Rating 5')],  # Power rank
     }
 
     ranks = data['commander'].get('rank', {})
@@ -153,7 +159,6 @@ def export_status(data, filename):
 
 # Returns id,name,shipName,system,station,value
 def ships(data):
-
     ships = companion.listify(data.get('ships'))
     current = data['commander'].get('currentShipId')
 
@@ -162,10 +167,35 @@ def ships(data):
 
         if not data['commander'].get('docked'):
             # Set current system, not last docked
-            return ([ (str(ships[0]['id']), ship_map.get(ships[0]['name'].lower(), ships[0]['name']), ships[0].get('shipName', ''), data['lastSystem']['name'], '', str(ships[0]['value']['total'])) ] +
-                    [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships[1:] if ship])
+            return (
+                [(
+                        str(ships[0]['id']),
+                        ship_map.get(ships[0]['name'].lower(),
+                        ships[0]['name']),
+                        ships[0].get('shipName', ''),
+                        data['lastSystem']['name'],
+                        '', str(ships[0]['value']['total'])
+                    )] +
+                    [(
+                        str(ship['id']), ship_map.get(ship['name'].lower(),
+                        ship['name']),
+                        ship.get('shipName', ''),
+                        ship['starsystem']['name'],
+                        ship['station']['name'],
+                        str(ship['value']['total'])) for ship in ships[1:] if ship
+                    ])
 
-    return [ (str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']), ship.get('shipName', ''), ship['starsystem']['name'], ship['station']['name'], str(ship['value']['total'])) for ship in ships if ship]
+    return [
+        (
+            str(ship['id']),
+            ship_map.get(ship['name'].lower(), ship['name']),
+            ship.get('shipName', ''),
+            ship['starsystem']['name'],
+            ship['station']['name'],
+            str(ship['value']['total'])
+        ) for ship in ships if ship
+    ]
+
 
 def export_ships(data, filename):
     h = csv.writer(open(filename, 'w'))
@@ -190,9 +220,11 @@ class StatsDialog():
 
         try:
             data = companion.session.profile()
+
         except companion.ServerError as e:
             self.status['text'] = str(e)
             return
+
         except Exception as e:
             if __debug__: print_exc()
             self.status['text'] = str(e)
@@ -200,10 +232,18 @@ class StatsDialog():
 
         if not data.get('commander') or not data['commander'].get('name','').strip():
             self.status['text'] = _("Who are you?!")		# Shouldn't happen
-        elif not data.get('lastSystem') or not data['lastSystem'].get('name','').strip() or not data.get('lastStarport') or not data['lastStarport'].get('name','').strip():
+
+        elif (
+            not data.get('lastSystem')
+            or not data['lastSystem'].get('name','').strip()
+            or not data.get('lastStarport')
+            or not data['lastStarport'].get('name','').strip()
+        ):
             self.status['text'] = _("Where are you?!")		# Shouldn't happen
+
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name','').strip():
             self.status['text'] = _("What are you flying?!")	# Shouldn't happen
+
         else:
             self.status['text'] = ''
             StatsResults(self.parent, data)
@@ -242,8 +282,10 @@ class StatsResults(tk.Toplevel):
         page = self.addpage(notebook)
         for thing in stats[1:3]:
             self.addpagerow(page, [thing[0], self.credits(int(thing[1]))])	# assumes things two and three are money
+
         for thing in stats[3:]:
             self.addpagerow(page, thing)
+
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Status'))		# Status dialog title
 
@@ -257,6 +299,7 @@ class StatsResults(tk.Toplevel):
         shiplist = ships(data)
         for thing in shiplist:
             self.addpagerow(page, list(thing[1:-1]) + [self.credits(int(thing[-1]))])	# skip id, last item is money
+
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
 
@@ -286,6 +329,7 @@ class StatsResults(tk.Toplevel):
         page.columnconfigure(0, weight=1)
         if header:
             self.addpageheader(page, header, align=align)
+
         return page
 
     def addpageheader(self, parent, header, align=None):
@@ -301,8 +345,10 @@ class StatsResults(tk.Toplevel):
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)
                 row = parent.grid_size()[1]-1
+
             elif align is None and i == len(content) - 1:	# Assumes last column right justified if unspecified
                 label.grid(row=row, column=i, padx=10, sticky=tk.E)
+
             else:
                 label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
 
