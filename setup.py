@@ -147,7 +147,6 @@ elif sys.platform=='win32':
             'systems.p',
             '%s.VisualElementsManifest.xml' % APPNAME,
             '%s.ico' % APPNAME,
-            '%s/DLLs/sqlite3.dll' % (sys.base_prefix),
             'EDMarketConnector - TRACE.bat',
             'EDMarketConnector - localserver-auth.bat',
         ]),
