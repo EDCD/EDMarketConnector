@@ -117,7 +117,6 @@ elif sys.platform=='win32':
                  {'dist_dir': dist_dir,
                   'optimize': 2,
                   'packages': [
-                      'requests',
                       'sqlite3',	# Included for plugins
                   ],
                   'includes': [
