@@ -36,9 +36,8 @@ You will need several pieces of software installed, or the files from their
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
 1. [py2exe](https://github.com/albertosottile/py2exe) - Install the python
- module.  You will need at least the [pre-release of 0.10.0.1](https://bintray.com/alby128/py2exe/py2exe/0.10.0.1#files)
- as we found 0.10.0.0 still had an issue with certifi and cacert.pem.
-	
+ module.  You will need at least [version 0.10.0.1](https://github.com/albertosottile/py2exe/releases/tag/v0.10.0.1),
+specifically [py2exe-0.10.0.1-cp38-none-win32.whl](https://github.com/albertosottile/py2exe/releases/download/v0.10.0.1/py2exe-0.10.0.1-cp38-none-win32.whl).
 
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
@@ -234,7 +233,7 @@ else you might need this, which assumes correct python.exe is in your PATH:
 	
 else you'll have to specify the path to python.exe, e.g.:
 
-		"C:\Program Files (x86)\Python38-32\python.exe" setup.py py2exe
+		"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
 
 Output will be something like (`...` denoting parts elided for brevity):
 
