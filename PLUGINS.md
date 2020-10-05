@@ -649,6 +649,7 @@ Disabled and enabled plugins are listed on the "Plugins" Settings tab
 Starting with pre-release 3.5 EDMC used Python 3.7.   The first full
 release under Python 3.7 was 4.0.0.0.   The 4.1.x series was the last to use
 Python 3.7, with releases moving on to latest Python 3.8.x after that.
+
 This is a brief outline of the steps required to migrate a plugin from earlier
 versions of EDMC:
 
