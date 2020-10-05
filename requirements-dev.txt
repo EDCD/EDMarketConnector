@@ -20,9 +20,12 @@ autopep8==1.5.4
 grip>=4.5.2
 
 # Packaging
-# This isn't available via 'pip install', so has to be commented out in order for
-# GitHub Action Workflows to not error out
-#py2exe==0.9.3.2
+# This isn't available via 'pip install', but is via git@tag
+# Refs:
+#	<https://pip.pypa.io/en/stable/user_guide/#requirements-files>
+#	<https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support>
+#py2exe==0.10.0.1
+git+https://github.com/albertosottile/py2exe.git@v0.10.0.1#egg=py2exe
 
 # All of the normal requirements
 -r requirements.txt
