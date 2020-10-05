@@ -113,11 +113,17 @@
 						<File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
 						<Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)" Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_asyncio.pyd" />
+					</Component>
 					<Component Guid="{842DC919-EC3D-48EF-A6B3-9A81608E0FB9}">
 						<File KeyPath="yes" Source="SourceDir\_bz2.pyd" />
 					</Component>
 					<Component Guid="{433C38E1-F736-4546-AA83-FCD8B0AAA39B}">
 						<File KeyPath="yes" Source="SourceDir\_ctypes.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_decimal.pyd" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\_elementtree.pyd" />
@@ -127,6 +133,12 @@
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\_lzma.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_multiprocessing.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_overlapped.pyd" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\_queue.pyd" />
@@ -139,6 +151,9 @@
 					</Component>
 					<Component Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
 						<File KeyPath="yes" Source="SourceDir\_ssl.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_testcapi.pyd" />
 					</Component>
 					<Component Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
 						<File KeyPath="yes" Source="SourceDir\_tkinter.pyd" />
@@ -167,6 +182,9 @@
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\libcrypto-1_1.dll" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\libffi-7.dll" />
+					</Component>
 					<Component Guid="{A18814B6-B491-42AB-A433-2AD66A823AD7}">
 						<File KeyPath="yes" Source="SourceDir\library.zip" />
 					</Component>
@@ -179,8 +197,8 @@
 					<Component Guid="{87A99AAA-792F-4092-9D00-5106D99D00AD}">
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
-					<Component Guid="{685773F2-78E4-4A16-BE0D-C7AB9575C856}">
-						<File KeyPath="yes" Source="SourceDir\python37.dll" />
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\python38.dll" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />
@@ -537,15 +555,20 @@
 		<Feature Id='Complete' Level='1'>
 			<ComponentRef Id="RegistryEntries" />
 			<ComponentRef Id="MainExecutable" />
+			<ComponentRef Id="_asyncio.pyd" />
 			<ComponentRef Id="_bz2.pyd" />
 			<ComponentRef Id="_ctypes.pyd" />
+			<ComponentRef Id="_decimal.pyd" />
 			<ComponentRef Id="_elementtree.pyd" />
 			<ComponentRef Id="_hashlib.pyd" />
 			<ComponentRef Id="_lzma.pyd" />
+			<ComponentRef Id="_multiprocessing.pyd" />
+			<ComponentRef Id="_overlapped.pyd" />
 			<ComponentRef Id="_queue.pyd" />
 			<ComponentRef Id="_socket.pyd" />
 			<ComponentRef Id="_sqlite3.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
+			<ComponentRef Id="_testcapi.pyd" />
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="ChangeLog.md" />
@@ -563,16 +586,17 @@
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />
 			<ComponentRef Id="libcrypto_1_1.dll" />
+			<ComponentRef Id="libffi_7.dll" />
 			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="libssl_1_1.dll" />
-			<ComponentRef Id="lv.strings" />
 			<ComponentRef Id="modules.p" />
+			<ComponentRef Id="lv.strings" />
 			<ComponentRef Id="nl.strings" />
 			<ComponentRef Id="pl.strings" />
 			<ComponentRef Id="pt_BR.strings" />
 			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
-			<ComponentRef Id="python37.dll" />
+			<ComponentRef Id="python38.dll" />
 			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
