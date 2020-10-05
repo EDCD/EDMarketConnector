@@ -1,19 +1,10 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-Pre-Release 4.1.0-rc2
+Release 4.1.0
 ===
 
-* Use LC_CTYPE, not LC_ALL, as the source of language for when we set UTF-8
-  encoding.  Fixes [#725](https://github.com/EDCD/EDMarketConnector/issues/725).
-
-* Finer-grained logging (mostly TRACE) added to EDSM API calls to further
-  check [#713](https://github.com/EDCD/EDMarketConnector/issues/713).
-  
-Pre-Release 4.1.0-rc1
-===
-
-This pre-release contains the result of a lot of code cleanup on several files
+This release contains the result of a lot of code cleanup on several files
 and the addition of a proper logging paradigm, which should aid us in tracking
 down bugs.
 
@@ -76,7 +67,8 @@ broken something.
   
 * We now have proper logging available, using the python module of that name.
   Plugin Authors, please change your code to using proper logging, as per the
-  new 'Logging' section of PLUGINS.md.
+  new 'Logging' section of PLUGINS.md, rather than simple `print(...)`
+  statements.
 
   1. We have a TRACE level of log output.  By default this is turned off.
   Run either EDMarketConnector or EDMC with `--trace` flag to enable.  This is
@@ -99,17 +91,18 @@ broken something.
   1. EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
   to change the loglevel.  Default is 'INFO' and advised for normal use.
   If reporting a bug it will be very helpful to change this to 'DEBUG' and
-  then reproduce the bug.
+  then reproduce the bug.  Changes to this will take effect immediately, no
+  need for a restart.
   
   1. Both programs not only log to their old locations (console for EDMC, and
   `%TEMP%\EDMarketConnector.log` for the main application), but now also to
   a size-limited and rotated logfile inside the folder
   `%TEMP%\EDMarketConnector\ `.
+     1. The base filename inside there is `EDMarketConnector-debug.log` for the
+     main program and `EDMC-debug.log` for the command-line program.
      1. A new file is only started if/when it reaches the 1 MiB size limit.
      1. We'll keep at most 10 backups of each file, so the maximum disk space
      used by this will be 22 MiB.
-     1. The base filename inside there is `EDMarketConnector-debug.log` for the
-     main program and `EDMC-debug.log` for the command-line program.
      1. Only actually *logged* output goes to these files, which currently is
      far from all the traditional output that goes to the old file/console.
      Anything using `print(...)` will not appear in these new files.
@@ -135,6 +128,11 @@ broken something.
 
 Translators: There are new strings to translate related to Log Levels
 and the new UI Scaling.  Thanks to those who already updated!
+
+There was a series of betas and release candidates between 4.0.6 and 4.1.0,
+see their individual changelogs on
+[GitHub EDMarketConnector Releases](https://github.com/edcd/edmarketconnector/releases?after=Release%2F4.1.0).
+All the pertinent changes in them were folded into the text above.
 
 Release 4.0.6
 ===

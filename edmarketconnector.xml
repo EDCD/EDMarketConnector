@@ -168,10 +168,161 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.0.6</title>
+			<title>Release 4.1.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.0</h2>
+<p>This release contains the result of a lot of code cleanup on several files
+and the addition of a proper logging paradigm, which should aid us in tracking
+down bugs.</p>
+<p>None of the code cleanups <em>should</em> change actual program behaviour, but as we
+don't yet have the code in a state to have proper tests it's possible we've
+broken something.</p>
+<ul>
+<li>
+<p>The error <code>'list' object has no attribute 'values'</code> should now be fixed.</p>
+</li>
+<li>
+<p>This version will <em>attempt</em> to send empty market commodity lists over EDDN.
+The benefit of this is it will show when a Fleet Carrier no longer has any
+buy or sell orders active.</p>
+<p>At this time the EDDN Gateway will reject these messages.  We're catching
+and suppressing that (but log a message at TRACE level).  If/when the EDDN
+schema is updated and the Gateway starts using that this will mean,
+e.g. EDDB, can start better tracking Fleet Carrier markets.</p>
+</li>
+<li>
+<p>We are now explicitly a Unicode application:</p>
+<ol>
+<li>
+<p>A manifest setting in both EDMarketConnector.exe and EDMC.exe now
+specifies they're Unicode applications so that they default to using the
+UTF-8 codepage.</p>
+</li>
+<li>
+<p>We are now explicitly setting a UTF8 encoding at startup.  NB: This is
+still necessary so that users running from source code are also using the
+UTF-8 encoding, there's no manifest in that scenario.</p>
+<p>This <em>shouldn't</em> have any side effects and has allowed us to switch to
+the native tkinter file dialogs rather than some custom code.</p>
+</li>
+</ol>
+<p>If you do encounter errors that might be related to this then it would be
+useful to see the logging output that details the Locale settings at
+various points during startup.  Examples might include incorrect text being
+rendered for your language when you have it set, or issues with filenames
+and their content, but any of these are unlikely.</p>
+</li>
+<li>
+<p>EDMarketConnector.exe now has <code>gdiScaling</code> set to true in its manifest.  This
+results in better Windows OS scaling of the UI (radio buttons scale correctly
+now).  This might negate the need for our own UI Scaling (see below), but
+we're leaving the functionality in for anyone who finds it useful.</p>
+</li>
+<li>
+<p>New UI Scaling option!  Find the setting on the 'Appearance' tab of Settings.</p>
+<ol>
+<li>This will only actually take effect after restarting the application.</li>
+<li>The 'Default' theme's menu names won't be resized due to using the
+default font.  The other two themes work properly though as they use
+a custom font for those texts.</li>
+<li>As per the note next to the settings bar, "100" means "default", so set
+it to that if you decide you don't need the UI scaling.</li>
+<li>If you select 0 it will become 100 on the next startup.</li>
+</ol>
+<p>Plugin Authors: If you are doing per-pixel things in your UI then you'll
+want to check <code>config.get('ui_scale')</code> and adjust accordingly.  <code>100</code>
+means default scaling with other values being a percentage relative to
+that (so 150 means you need to scale everything x1.5).</p>
+</li>
+<li>
+<p>Code dealing with Frontier's CAPI was cleaned up, so please report any
+issues related to that (mostly when just docked or when you press the Update
+button).</p>
+</li>
+<li>
+<p>We now have proper logging available, using the python module of that name.
+Plugin Authors, please change your code to using proper logging, as per the
+new 'Logging' section of PLUGINS.md, rather than simple <code>print(...)</code>
+statements.</p>
+<ol>
+<li>
+<p>We have a TRACE level of log output.  By default this is turned off.
+Run either EDMarketConnector or EDMC with <code>--trace</code> flag to enable.  This is
+intended for use where we need finer-grained tracing to track down a bug,
+but the output would be too spammy in normal use.</p>
+<p>To make it easy for users to run with TRACE logging there's a new file
+<code>EDMarketConnector - TRACE.bat</code>.  Running this should result in the program
+running with tracing.  Recommended use is to navigate a Windows File
+Explorer window to where EDMarketConnector.exe is installed then
+double-click this <code>.bat</code> file.</p>
+</li>
+<li>
+<p>EDMC.py has a new <code>--loglevel</code> command-line argument.  See <code>EDMC.py -h</code>
+for the possible values.  It defaults to 'INFO', which, unless there's an
+error, should yield the same output as before.</p>
+</li>
+<li>
+<p>EDMC.exe will now log useful startup state information if run with the
+<code>--loglevel DEBUG</code> arguments.</p>
+</li>
+<li>
+<p>EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
+to change the loglevel.  Default is 'INFO' and advised for normal use.
+If reporting a bug it will be very helpful to change this to 'DEBUG' and
+then reproduce the bug.  Changes to this will take effect immediately, no
+need for a restart.</p>
+</li>
+<li>
+<p>Both programs not only log to their old locations (console for EDMC, and
+<code>%TEMP%\EDMarketConnector.log</code> for the main application), but now also to
+a size-limited and rotated logfile inside the folder
+<code>%TEMP%\EDMarketConnector\ </code>.</p>
+<ol>
+<li>The base filename inside there is <code>EDMarketConnector-debug.log</code> for the
+main program and <code>EDMC-debug.log</code> for the command-line program.</li>
+<li>A new file is only started if/when it reaches the 1 MiB size limit.</li>
+<li>We'll keep at most 10 backups of each file, so the maximum disk space
+used by this will be 22 MiB.</li>
+<li>Only actually <em>logged</em> output goes to these files, which currently is
+far from all the traditional output that goes to the old file/console.
+Anything using <code>print(...)</code> will not appear in these new files.</li>
+<li>These files always default to DEBUG level, whereas the old log file
+continues to follow the user-set logging level.</li>
+</ol>
+</li>
+<li>
+<p>Default <code>logging</code> level for plugins is DEBUG.  This won't change what's
+actually logged, it just ensures that everything gets through to the two
+channels that then decide what is output.</p>
+</li>
+</ol>
+</li>
+<li>
+<p>There's a little extra DEBUG logging at startup so we can be sure of some
+things like Python version used (pertinent if running from source).</p>
+</li>
+<li>
+<p>Minor tweak to EDDN plugin logging so we know what message we tried to send
+if it fails.</p>
+</li>
+<li>
+<p>More logging added to companion.py to aid diagnosing Frontier Auth issues.</p>
+</li>
+<li>
+<p>Extra TRACE level logging added for when we process <code>Location</code>, <code>Docked</code>,
+t pu<code>FSDJump</code> and <code>CarrierJump</code> events for EDSM. This was added to help track
+down the cause of <a href="https://github.com/EDCD/EDMarketConnector/issues/713">#713</a>.</p>
+</li>
+</ul>
+<p>Translators: There are new strings to translate related to Log Levels
+and the new UI Scaling.  Thanks to those who already updated!</p>
+<p>There was a series of betas and release candidates between 4.0.6 and 4.1.0,
+see their individual changelogs on
+<a href="https://github.com/edcd/edmarketconnector/releases?after=Release%2F4.1.0">GitHub EDMarketConnector Releases</a>.
+All the pertinent changes in them were folded into the text above.</p>
 
 <h2>Release 4.0.6</h2>
 <ul>
@@ -618,10 +769,10 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.0.6/EDMarketConnector_win_4.0.6.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.0/EDMarketConnector_win_4.1.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.0.6"
+				sparkle:version="4.1.0"
 				length="11317248"
 				type="application/octet-stream"
 			/>
