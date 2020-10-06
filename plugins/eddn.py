@@ -8,6 +8,7 @@ from platform import system
 import re
 import requests
 import sys
+from typing import Any, Dict, Mapping, Tuple
 import uuid
 
 import tkinter as tk
@@ -208,10 +209,35 @@ class EDDN(object):
             })
         this.commodities = commodities
 
+    def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[Dict, Dict]:
+        modules: Dict[str, Any] = data['lastStarport'].get('modules')
+        if modules is None or not isinstance(modules, dict):
+            if modules is None:
+                logger.debug('modules was None.  FC or Damaged Station?')
+            elif isinstance(modules, list):
+                if len(modules) == 0:
+                    logger.debug('modules is empty list. Damaged Station?')
+                else:
+                    logger.error(f'modules is non-empty list: {modules!r}')
+            else:
+                logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
+            # Set a safe value
+            modules = {}
+
+        ships: Dict[str, Any] = data['lastStarport'].get('ships')
+        if ships is None or not isinstance(ships, dict):
+            if ships is None:
+                logger.debug('ships was None')
+            else:
+                logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
+            # Set a safe value
+            ships = {'shipyard_list': {}, 'unavailable_list': []}
+
+        return modules, ships
+
     def export_outfitting(self, data, is_beta):
         economies = data['lastStarport'].get('economies') or {}
-        modules = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
+        modules, ships = self.safe_modules_and_ships(data)
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"), prison or rescue Megaships, or under Pirate Attack etc
         horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
                     any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
@@ -233,8 +259,7 @@ class EDDN(object):
 
     def export_shipyard(self, data, is_beta):
         economies = data['lastStarport'].get('economies') or {}
-        modules = data['lastStarport'].get('modules') or {}
-        ships = data['lastStarport'].get('ships') or { 'shipyard_list': {}, 'unavailable_list': [] }
+        modules, ships = self.safe_modules_and_ships(data)
         horizons = (any(economy['name'] == 'Colony' for economy in economies.values()) or
                     any(module.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for module in modules.values()) or
                     any(ship.get('sku') == 'ELITE_HORIZONS_V_PLANETARY_LANDINGS' for ship in list((ships['shipyard_list'] or {}).values())))
