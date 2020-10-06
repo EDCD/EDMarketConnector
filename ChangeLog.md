@@ -1,6 +1,23 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.0.7
+===
+
+  Due to the locale-related issues we're seeing with 4.1.0 this is a version
+based on 4.0.6, with a couple of fixes backported.
+
+* The error `'list' object has no attribute 'values'` should be fixed.
+
+* This version will *attempt* to send empty market commodity lists over EDDN.
+  The benefit of this is it will show when a Fleet Carrier no longer has any
+  buy or sell orders active.
+
+  At this time the EDDN Gateway will reject these messages.  We're catching
+  and suppressing that.  If/when the EDDN schema is updated and the Gateway
+  starts using that this will mean, e.g. EDDB, can start better tracking Fleet
+  Carrier markets.
+
 Release 4.0.6
 ===
 
