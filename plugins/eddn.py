@@ -118,7 +118,8 @@ class EDDN(object):
                     and msg['message']['commodities'] == []
                     and r.text == "FAIL: [<ValidationError: '[] is too short'>]"
             ):
-                print("EDDN is still objecting to empty commodities data")
+                # We don't want to log this, it'll be spammy as a print()
+                # print("EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
         r.raise_for_status()
@@ -213,23 +214,23 @@ class EDDN(object):
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
-                logger.debug('modules was None.  FC or Damaged Station?')
+                print('modules was None.  FC or Damaged Station?')
             elif isinstance(modules, list):
                 if len(modules) == 0:
-                    logger.debug('modules is empty list. Damaged Station?')
+                    print('modules is empty list. Damaged Station?')
                 else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
+                    print(f'modules is non-empty list: {modules!r}')
             else:
-                logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
+                print(f'modules was not None, a list, or a dict! type = {type(modules)}')
             # Set a safe value
             modules = {}
 
         ships: Dict[str, Any] = data['lastStarport'].get('ships')
         if ships is None or not isinstance(ships, dict):
             if ships is None:
-                logger.debug('ships was None')
+                print('ships was None')
             else:
-                logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
+                print(f'ships was neither None nor a Dict! Type = {type(ships)}')
             # Set a safe value
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
