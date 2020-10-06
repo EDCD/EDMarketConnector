@@ -168,10 +168,28 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.0</title>
+			<title>Release 4.1.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.1</h2>
+<p>This release should get the program running again for everyone who had issues
+with 4.1.0.</p>
+<ul>
+<li>
+<p>Catch any exception when we try to set UTF-8 encoding.  We'll log where this
+fails but the program should continue running.</p>
+</li>
+<li>
+<p>The use of the tkinter.filedialog code is now contingent on a UTF-8
+encoding being set.  If it isn't then we'll revert to the previous
+non-tkinter file dialog code.  The older OSes that can't handle a UTF-8
+encoding will get that slightly worse file dialog (that was previously
+always the case before 4.1.0).  Everyone else gets to enjoy the more up to
+date file dialog with all the shortcuts etc.</p>
+</li>
+</ul>
 
 <h2>Release 4.1.0</h2>
 <p>This release contains the result of a lot of code cleanup on several files
@@ -769,10 +787,10 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.0/EDMarketConnector_win_4.1.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.1/EDMarketConnector_win_4.1.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.0"
+				sparkle:version="4.1.1"
 				length="11354112"
 				type="application/octet-stream"
 			/>
