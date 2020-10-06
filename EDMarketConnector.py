@@ -1101,33 +1101,40 @@ executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
 
-    # Log the locale as set at startup
+
+    # We prefer a UTF-8 encoding gets set, but older Windows versions have
+    # issues with this.  From Windows 10 1903 onwards we can rely on the
+    # manifest ActiveCodePage to set this, but that is silently ignored on
+    # all previous Windows versions.
+    # Trying to set a UTF-8 encoding on those older versions will fail with
+    #   locale.Error: unsupported locale setting
+    # but we do need to make the attempt for when we're running from source.
     log_locale('Initial Locale')
-    # Older versions of Windows 10 (pre 1903) and Windows 7, 8, 8.1 don't work
-    # with UTF-8 encodings in locale.
-    # We still attempt to use the Unicode codepage via a manifest setting.
-    if sys.platform != 'win32' or not getattr(sys, 'frozen', False):
-        # Make sure the locale is actually set as per locale's idea of defaults
+
+    try:
+        locale.setlocale(locale.LC_ALL, '')
+
+    except locale.Error as e:
+        logger.error("Could not set LC_ALL to ''", exc_info=e)
+
+    else:
+        log_locale('After LC_ALL defaults set')
+
+        locale_startup = locale.getlocale(locale.LC_CTYPE)
+        logger.debug(f'Locale LC_CTYPE: {locale_startup}')
+
+        # Set that same language, but utf8 encoding (it was probably cp1252
+        # or equivalent for other languages).
+        # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
         try:
-            locale.setlocale(locale.LC_ALL, '')
+            # locale_startup[0] is the 'language' portion
+            locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+
         except locale.Error as e:
-            logger.error("Could not set LC_ALL to ''", exc_info=e)
+            logger.error(f"Could not set LC_ALL to ({locale_startup[0]}, 'UTF_8')", exc_info=e)
+            
         else:
-            log_locale('After LC_ALL defaults set')
-
-            # Find out the current locale, mostly the language
-            locale_startup = locale.getlocale(locale.LC_CTYPE)
-            logger.debug(f'Locale LC_CTYPE: {locale_startup}')
-
-            # Set that same language, but utf8 encoding (it was probably cp1252
-            # or equivalent for other languages).
-            # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
-            try:
-                locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
-            except locale.Error as e:
-                logger.error(f"Could not set LC_ALL to ({locale_startup[0]}, 'UTF_8')")
-            else:
-                log_locale('After switching to UTF-8 encoding (same language)')
+            log_locale('After switching to UTF-8 encoding (same language)')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
