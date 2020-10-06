@@ -1094,7 +1094,7 @@ if __name__ == "__main__":
         edmclogger.set_channels_loglevel(logging.DEBUG)
 
     logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
-    logger.debug(f'''Platform: {sys.platform}
+    logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
