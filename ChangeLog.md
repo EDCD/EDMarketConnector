@@ -1,6 +1,22 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.1
+===
+
+This release should get the program running again for everyone who had issues
+with 4.1.0.
+
+* Catch any exception when we try to set UTF-8 encoding.  We'll log where this
+  fails but the program should continue running.
+
+* The use of the tkinter.filedialog code is now contingent on a UTF-8
+  encoding being set.  If it isn't then we'll revert to the previous
+  non-tkinter file dialog code.  The older OSes that can't handle a UTF-8
+  encoding will get that slightly worse file dialog (that was previously
+  always the case before 4.1.0).  Everyone else gets to enjoy the more up to
+  date file dialog with all the shortcuts etc.
+
 Release 4.1.0
 ===
 
