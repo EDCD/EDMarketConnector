@@ -183,7 +183,7 @@ if platform == 'darwin':
 elif platform == 'win32':
     import ctypes
     import winreg
-    from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -193,6 +193,16 @@ elif platform == 'win32':
 
     except OSError:
         pass
+
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
+    BIF_RETURNONLYFSDIRS   = 0x00000001
+    BIF_USENEWUI           = 0x00000050
+    BFFM_INITIALIZED       = 1
+    BFFM_SETSELECTION      = 0x00000467
+    BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
+
+    class BROWSEINFO(ctypes.Structure):
+        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
     CalculatePopupWindowPosition = None
     if not is_wine:
@@ -868,13 +878,43 @@ class PreferencesDialog(tk.Toplevel):
         :param title: Title of the window
         :param pathvar: the path to start the dialog on
         """
-        import tkinter.filedialog
-        directory = tkinter.filedialog.askdirectory(
-            parent=self,
-            initialdir=expanduser(pathvar.get()),
-            title=title,
-            mustexist=tk.TRUE
-        )
+        import locale
+
+        # If encoding isn't UTF-8 we can't use the tkinter dialog
+        current_locale = locale.getlocale(locale.LC_CTYPE)
+        from sys import platform as sys_platform
+        directory = None
+        if sys_platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
+            def browsecallback(hwnd, uMsg, lParam, lpData):
+                # set initial folder
+                if uMsg == BFFM_INITIALIZED and lpData:
+                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData);
+                return 0
+
+            browseInfo = BROWSEINFO()
+            browseInfo.lpszTitle = title
+            browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI
+            browseInfo.lpfn = BrowseCallbackProc(browsecallback)
+            browseInfo.lParam = pathvar.get().startswith('~') and join(config.home,
+                                                                       pathvar.get()[2:]) or pathvar.get()
+            ctypes.windll.ole32.CoInitialize(None)
+            pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
+            if pidl:
+                path = ctypes.create_unicode_buffer(MAX_PATH)
+                ctypes.windll.shell32.SHGetPathFromIDListW(pidl, path)
+                ctypes.windll.ole32.CoTaskMemFree(pidl)
+                directory = path.value
+            else:
+                directory = None
+
+        else:
+            import tkinter.filedialog
+            directory = tkinter.filedialog.askdirectory(
+                parent=self,
+                initialdir=expanduser(pathvar.get()),
+                title=title,
+                mustexist=tk.TRUE
+            )
 
         if directory:
             pathvar.set(directory)
