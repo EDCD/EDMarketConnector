@@ -21,7 +21,7 @@ if platform == 'win32':
     import ctypes
     from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
     if TYPE_CHECKING:
-        import ctypes.windll  # type: ignore
+        import ctypes.windll  # type: ignore # Fake this into existing, its really a magic dll thing
 
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
@@ -159,7 +159,7 @@ def status(data):
         rank = ranks.get(thing)
         names = RANK_NAMES[thing]
         if isinstance(rank, int):
-            res.append([title, rank < len(names) and names[rank] or ('Rank %d' % rank)])
+            res.append([title, names[rank] if rank < len(names) else f'Rank {rank}'])
 
         else:
             res.append([title, _('None')])  # No rank
@@ -279,7 +279,7 @@ class StatsResults(tk.Toplevel):
 
         # position over parent
         if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            self.geometry("+%d+%d" % (parent.winfo_rootx(), parent.winfo_rooty()))
+            self.geometry(f"+{parent.winfo_rootx()}+{parent.winfo_rooty()}")
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
@@ -322,7 +322,7 @@ class StatsResults(tk.Toplevel):
 
         if platform != 'darwin':
             buttonframe = ttk.Frame(frame)
-            buttonframe.grid(padx=10, pady=(0, 10), sticky=tk.NSEW)
+            buttonframe.grid(padx=10, pady=(0, 10), sticky=tk.NSEW)  # type: ignore # the tuple is supported
             buttonframe.columnconfigure(0, weight=1)
             ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
             ttk.Button(buttonframe, text='OK', command=self.destroy).grid(row=0, column=1, sticky=tk.E)
@@ -341,7 +341,7 @@ class StatsResults(tk.Toplevel):
                 SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
                 0x10000, None, position
             ):
-                self.geometry("+%d+%d" % (position.left, position.top))
+                self.geometry(f"+{position.left}+{position.top}")
 
     def addpage(self, parent, header=[], align=None):
         page = nb.Frame(parent)
