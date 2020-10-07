@@ -173,6 +173,12 @@
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
+<h2>Release 4.1.2</h2>
+<ul>
+<li>Minor fix to EDMC.py to revert broken logic trying to detect when there is
+neither commodities nor outfitting data for a station.</li>
+</ul>
+
 <h2>Release 4.1.1</h2>
 <p>This release should get the program running again for everyone who had issues
 with 4.1.0.</p>
@@ -787,11 +793,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.1/EDMarketConnector_win_4.1.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.2/EDMarketConnector_win_4.1.2.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.1"
-				length="11354112"
+				sparkle:version="4.1.2"
+				length="11362304"
 				type="application/octet-stream"
 			/>
 		</item>
