@@ -171,7 +171,7 @@ def export_status(data, filename):
     h = csv.writer(open(filename, 'w'))
     h.writerow(['Category', 'Value'])
     for thing in status(data):
-        h.writerow([x for x in thing])
+        h.writerow(list(thing))
 
 
 # Returns id,name,shipName,system,station,value
@@ -217,7 +217,7 @@ def export_ships(data, filename):
     h = csv.writer(open(filename, 'w'))
     h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
     for thing in ships(data):
-        h.writerow([x for x in thing])
+        h.writerow(list(thing))
 
 
 class StatsDialog():
