@@ -300,7 +300,7 @@ sys.path: {sys.path}'''
                 sys.exit(EXIT_LAGGING)
 
             # Ignore possibly missing shipyard info
-            elif not data['lastStarport'].get('commodities') or data['lastStarport'].get('modules'):
+            elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 logger.error("No commodities or outfitting (modules) in CAPI data")
                 return
 
