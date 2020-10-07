@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.2
+===
+
+* Minor fix to EDMC.py to revert broken logic trying to detect when there is
+  neither commodities nor outfitting data for a station.
+  
 Release 4.1.1
 ===
 
