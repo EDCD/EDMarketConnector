@@ -1,6 +1,10 @@
+"""CMDR Status information."""
 import csv
 from sys import platform
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Sequence, Tuple, cast
+
+if TYPE_CHECKING:
+    from EDMarketConnector import AppWindow
 
 if __debug__:
     from traceback import print_exc
@@ -9,7 +13,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import companion
-import myNotebook as nb
+import myNotebook as nb  # noqa: N813
 from companion import ship_map
 from l10n import Locale
 from monitor import monitor
@@ -37,8 +41,13 @@ if platform == 'win32':
         CalculatePopupWindowPosition = None
 
 
-def status(data):
+def status(data: Dict[str, Any]) -> List[List[str]]:
+    """
+    Get the current status of the cmdr referred to by data.
 
+    :param data: Data to generate status from
+    :return: Status information about the given cmdr
+    """
     # StatsResults assumes these three things are first
     res = [
         [_('Cmdr'),    data['commander']['name']],
@@ -46,7 +55,8 @@ def status(data):
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # Cmdr stats
     ]
 
-    RANKS = [  # in output order
+    RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        # in output order
         (_('Combat'), 'combat'),          # Ranking
         (_('Trade'), 'trade'),            # Ranking
         (_('Explorer'), 'explore'),       # Ranking
@@ -58,7 +68,7 @@ def status(data):
         # ???            , 'service'),    # Ranking
     ]
 
-    RANK_NAMES = {
+    RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
         'combat': [
             _('Harmless'),                # Combat rank
@@ -167,39 +177,60 @@ def status(data):
     return res
 
 
-def export_status(data, filename):
+def export_status(data: Dict[str, Any], filename: AnyStr) -> None:
+    """
+    Export status data to a CSV file.
+
+    :param data: The data to generate the file from
+    :param filename: The target file
+    """
+    # TODO: Context manager
     h = csv.writer(open(filename, 'w'))
     h.writerow(['Category', 'Value'])
     for thing in status(data):
         h.writerow(list(thing))
 
 
-# Returns id,name,shipName,system,station,value
-def ships(data):
-    ships = companion.listify(data.get('ships'))
-    current = data['commander'].get('currentShipId')
+def ships(companion_data: Dict[str, Any]) -> List[Tuple[str, str, str, str, str, str]]:
+    # TODO: Replace this with a NamedTuple
+    """
+    Return a list of 5 tuples of ship information.
+
+    :param data: [description]
+    :return: A 5 tuple of strings containing: Ship ID, Ship Type Name (internal), Ship Name, System, Station, and Value
+    """
+    ships: List[Dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
+    current = companion_data['commander'].get('currentShipId')
 
     if isinstance(current, int) and current < len(ships) and ships[current]:
         ships.insert(0, ships.pop(current))  # Put current ship first
 
-        if not data['commander'].get('docked'):
+        if not companion_data['commander'].get('docked'):
+            out: List[Tuple[str, str, str, str, str, str]] = []
             # Set current system, not last docked
-            return (
-                [(
+            out.append(
+                (
                     str(ships[0]['id']),
-                    ship_map.get(ships[0]['name'].lower(),
-                                 ships[0]['name']),
-                    ships[0].get('shipName', ''),
-                    data['lastSystem']['name'],
-                    '', str(ships[0]['value']['total'])
-                )] +
-                [(
-                    str(ship['id']), ship_map.get(ship['name'].lower(), ship['name']),
+                    ship_map.get(ships[0]['name'].lower(), ships[0]['name']),
+                    str(ships[0].get('shipName', '')),
+                    companion_data['lastSystem']['name'],
+                    '',
+                    str(ships[0]['value']['total'])
+                )
+            )
+
+            out.extend(
+                (
+                    str(ship['id']),
+                    ship_map.get(ship['name'].lower(), ship['name']),
                     ship.get('shipName', ''),
                     ship['starsystem']['name'],
                     ship['station']['name'],
-                    str(ship['value']['total'])) for ship in ships[1:] if ship
-                 ])
+                    str(ship['value']['total'])
+                ) for ship in ships[1:] if ship
+            )
+
+            return out
 
     return [
         (
@@ -209,24 +240,34 @@ def ships(data):
             ship['starsystem']['name'],
             ship['station']['name'],
             str(ship['value']['total'])
-        ) for ship in ships if ship
+        ) for ship in ships if ship is not None
     ]
 
 
-def export_ships(data, filename):
+def export_ships(companion_data: Dict[str, Any], filename: AnyStr) -> None:
+    """
+    Export the current ships to a CSV file.
+
+    :param companion_data: Data from which to generate the ship list
+    :param filename: The target file
+    """
+    # TODO: context manager
     h = csv.writer(open(filename, 'w'))
     h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
-    for thing in ships(data):
+    for thing in ships(companion_data):
         h.writerow(list(thing))
 
 
 class StatsDialog():
-    def __init__(self, app):
-        self.parent = app.w
+    """Status dialog containing all of the current cmdr's stats."""
+
+    def __init__(self, app: 'AppWindow') -> None:
+        self.parent: tk.Tk = app.w
         self.status = app.status
         self.showstats()
 
-    def showstats(self):
+    def showstats(self) -> None:
+        """Show the status window for the current cmdr."""
         if not monitor.cmdr:
             return
 
@@ -266,7 +307,9 @@ class StatsDialog():
 
 
 class StatsResults(tk.Toplevel):
-    def __init__(self, parent, data):
+    """Status window."""
+
+    def __init__(self, parent: tk.Tk, data: Dict[str, Any]) -> None:
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
@@ -314,8 +357,9 @@ class StatsResults(tk.Toplevel):
         ])
 
         shiplist = ships(data)
-        for thing in shiplist:
-            self.addpagerow(page, list(thing[1:-1]) + [self.credits(int(thing[-1]))])  # skip id, last item is money
+        for ship_data in shiplist:
+            # skip id, last item is money
+            self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))])
 
         ttk.Frame(page).grid(pady=5)			# bottom spacer
         notebook.add(page, text=_('Ships'))		# Status dialog title
@@ -343,7 +387,16 @@ class StatsResults(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
-    def addpage(self, parent, header=[], align=None):
+    def addpage(self, parent, header: List[str] = [], align: Optional[str] = None) -> tk.Frame:
+        # TODO: mutable defaults is no beauno.
+        """
+        Add a page to the StatsResults screen.
+
+        :param parent: The parent widget to put this under
+        :param header: The headers for the table, defaults to []
+        :param align: Alignment to use for this page, defaults to None
+        :return: The Frame that was created
+        """
         page = nb.Frame(parent)
         page.grid(pady=10, sticky=tk.NSEW)
         page.columnconfigure(0, weight=1)
@@ -352,14 +405,29 @@ class StatsResults(tk.Toplevel):
 
         return page
 
-    def addpageheader(self, parent, header, align=None):
+    def addpageheader(self, parent: tk.Frame, header: Sequence[str], align: Optional[str] = None) -> None:
+        """
+        Add the column headers to the page, followed by a separator.
+
+        :param parent: The parent widget to add this to
+        :param header: The headers to add to the page
+        :param align: The alignment of the page, defaults to None
+        """
         self.addpagerow(parent, header, align=align)
         ttk.Separator(parent, orient=tk.HORIZONTAL).grid(columnspan=len(header), padx=10, pady=2, sticky=tk.EW)
 
-    def addpagespacer(self, parent):
+    def addpagespacer(self, parent) -> None:
+        """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent, content, align=None):
+    def addpagerow(self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None):
+        """
+        Add a single row to parent.
+
+        :param parent: The widget to add the data to
+        :param content: The columns of the row to add
+        :param align: The alignment of the data, defaults to tk.W
+        """
         row = -1  # To silence unbound warnings
         for i in range(len(content)):
             label = nb.Label(parent, text=content[i])
@@ -373,5 +441,7 @@ class StatsResults(tk.Toplevel):
             else:
                 label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
 
-    def credits(self, value):
-        return Locale.stringFromNumber(value, 0) + ' Cr'
+    def credits(self, value: int) -> str:
+        """Localised string of given int, including a trailing ` Cr`."""
+        # TODO: Locale is a class, this calls an instance method on it with an int as its `self`
+        return Locale.stringFromNumber(value, 0) + ' Cr'  # type: ignore
