@@ -360,6 +360,7 @@ class StatsResults(tk.Toplevel):
         self.addpagerow(parent, [''])
 
     def addpagerow(self, parent, content, align=None):
+        row = -1  # To silence unbound warnings
         for i in range(len(content)):
             label = nb.Label(parent, text=content[i])
             if i == 0:
