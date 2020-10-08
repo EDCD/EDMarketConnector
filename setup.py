@@ -243,22 +243,28 @@ setup(
 
 PKG = None
 if sys.platform == 'darwin':
-    if isdir('%s/%s.app' % (dist_dir, applongname)):	# from CFBundleName
-        os.rename('%s/%s.app' % (dist_dir, applongname), '%s/%s.app' % (dist_dir, appname))
+    if isdir(f'{dist_dir}/{applongname}.app'):  # from CFBundleName
+        os.rename(f'{dist_dir}/{applongname}.app', f'{dist_dir}/{appname}.app')
 
         # Generate OSX-style localization files
         for x in os.listdir('L10n'):
             if x.endswith('.strings'):
                 lang = x[:-len('.strings')]
-                path = '%s/%s.app/Contents/Resources/%s.lproj' % (dist_dir, appname, lang)
+                path = f'{dist_dir}/{appname}.app/Contents/Resources/{lang}.lproj'
                 os.mkdir(path)
-                codecs.open('%s/Localizable.strings' % path, 'w', 'utf-16').write(codecs.open('L10n/%s' % x, 'r', 'utf-8').read())
+                codecs.open(
+                    f'{path}/Localizable.strings',
+                    'w',
+                    'utf-16'
+                ).write(codecs.open(f'L10n/{x}', 'r', 'utf-8').read())
 
         if macdeveloperid:
-            os.system('codesign --deep -v -s "Developer ID Application: %s" %s/%s.app' % (macdeveloperid, dist_dir, appname))
+            os.system(f'codesign --deep -v -s "Developer ID Application: {macdeveloperid}" {dist_dir}/{appname}.app')
+
         # Make zip for distribution, preserving signature
-        PKG = '%s_mac_%s.zip' % (appname, appversion)
-        os.system('cd %s; ditto -ck --keepParent --sequesterRsrc %s.app ../%s; cd ..' % (dist_dir, appname, PKG))
+        PKG = f'{appname}_mac_{appversion}.zip'
+        os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{PKG}; cd ..')
+
 elif sys.platform == 'win32':
     os.system(r'"%s\candle.exe" -out %s\ %s.wxs' % (WIXPATH, dist_dir, appname))
     if not exists('%s/%s.wixobj' % (dist_dir, appname)):
