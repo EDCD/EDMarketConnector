@@ -12,7 +12,7 @@ import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import Iterable, Union
+from typing import Union
 
 import semantic_version
 
