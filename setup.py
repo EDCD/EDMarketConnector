@@ -160,27 +160,36 @@ if sys.platform == 'darwin':
     }
     DATA_FILES = []
 
-elif sys.platform=='win32':
-    OPTIONS =  { 'py2exe':
-                 {'dist_dir': dist_dir,
-                  'optimize': 2,
-                  'packages': [
-                      'sqlite3',	# Included for plugins
-                  ],
-                  'includes': [
-                      'dataclasses',
-                      'shutil',         # Included for plugins
-                      'timeout_session',
-                      'zipfile',        # Included for plugins
-                  ],
-                  'excludes': [ 'distutils', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
-              }
+elif sys.platform == 'win32':
+    OPTIONS = {
+        'py2exe': {
+            'dist_dir': dist_dir,
+            'optimize': 2,
+            'packages': [
+                'sqlite3',  # Included for plugins
+            ],
+            'includes': [
+                'dataclasses',
+                'shutil',  # Included for plugins
+                'timeout_session',
+                'zipfile',  # Included for plugins
+            ],
+            'excludes': [
+                'distutils',
+                '_markerlib',
+                'optparse',
+                'PIL',
+                'pkg_resources',
+                'simplejson',
+                'unittest'
+            ],
+        }
     }
 
     DATA_FILES = [
         ('', [
             'WinSparkle.dll',
-            'WinSparkle.pdb',	# For debugging - don't include in package
+            'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
             'Changelog.md',
             'commodity.csv',
@@ -191,11 +200,11 @@ elif sys.platform=='win32':
             'ships.p',
             'stations.p',
             'systems.p',
-            '%s.VisualElementsManifest.xml' % appname,
-            '%s.ico' % appname,
+            f'{appname}.VisualElementsManifest.xml',
+            f'{appname}.ico',
             'EDMarketConnector - TRACE.bat',
         ]),
-        ('L10n', [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')]),
+        ('L10n', [join('L10n', x) for x in os.listdir('L10n') if x.endswith('.strings')]),
         ('plugins', PLUGINS),
     ]
 
