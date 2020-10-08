@@ -1,6 +1,28 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.3
+===
+
+* Revert to not setting `gdiScaling` in the application manifest.  This should
+ fix [#734](https://github.com/EDCD/EDMarketConnector/issues/734)
+ and [#739](https://github.com/EDCD/EDMarketConnector/issues/739).
+ 
+  A side effect will be that the radio buttons in Preferences > Appearance
+ for the Theme selection will once more be improperly sized under any UI
+ scaling.  This is a Tcl/Tk bug which they have fixed in their code, but not
+ yet made a new release containing that fix.  We'll have it fixed when Tcl/Tk
+ release a fixed version *and* Python releases a fixed version, that we use,
+ that includes the fixed libraries.
+
+* Wraps some ctypes code in a try/except in order to fix
+ [#737](https://github.com/EDCD/EDMarketConnector/issues/737).  This should
+ benefit anyone running EDMC under any Wine version that doesn't set the
+ registry key we check for.
+ 
+  **Note, however, that we recommend running EDMarketConnector natively from
+  source if using Linux**.
+
 Release 4.1.2
 ===
 
