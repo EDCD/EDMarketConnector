@@ -303,7 +303,15 @@ if not exists(package_filename):
 appcast = open(f'appcast_{sys.platform == "darwin" and "mac" or "win"}_{appversion}.xml', 'w')
 
 if sys.platform == 'win32':
-    style = 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }'
+    style = '''body {
+    font-family:"Segoe UI","Tahoma";
+    font-size: 75%;
+}
+h2 {
+    font-family:"Segoe UI","Tahoma";
+    font-size: 105%;
+}
+'''
     package_os = 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes'
 
 elif sys.platform == 'darwin':
@@ -335,5 +343,4 @@ appcast.write(f'''
 \t\t\t\ttype="application/octet-stream"
 \t\t\t/>
 \t\t</item>
-'''
-)
+''')
