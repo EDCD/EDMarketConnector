@@ -175,7 +175,7 @@ class Config(object):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
         def get(self, key: str) -> Union[None, list, str]:
-            """Look up a non-int configuration value."""
+            """Look up a string configuration value."""
             val = self.settings.get(key)
             if val is None:
                 return None
@@ -187,7 +187,7 @@ class Config(object):
                 return None
 
         def getint(self, key: str) -> int:
-            """Look up an integer configuraiton value."""
+            """Look up an integer configuration value."""
             try:
                 return int(self.settings.get(key, 0))  # should already be int, but check by casting
             except Exception as e:
@@ -212,10 +212,9 @@ class Config(object):
             self.save()
             self.defaults = None
 
-    elif platform=='win32':
+    elif platform == 'win32':
 
         def __init__(self):
-
             self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
@@ -224,82 +223,155 @@ class Config(object):
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = join(dirname(getattr(sys, 'frozen', False) and sys.executable or __file__), u'plugins')
+            if getattr(sys, 'frozen', False):
+                self.internal_plugin_dir = join(dirname(sys.executable), 'plugins')
+                self.respath = dirname(sys.executable)
+
+            else:
+                self.internal_plugin_dir = join(dirname(__file__), 'plugins')
+                self.respath = dirname(__file__)
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
-            self.home = known_folder_path(FOLDERID_Profile) or u'\\'
+            self.home = known_folder_path(FOLDERID_Profile) or r'\\'
 
             journaldir = known_folder_path(FOLDERID_SavedGames)
-            self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
+            if journaldir:
+                self.default_journal_dir = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
 
-            self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
+            else:
+                self.default_journal_dir = None
 
             self.identifier = applongname
-
             self.hkey = HKEY()
             disposition = DWORD()
-            if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\Marginal\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(self.hkey), ctypes.byref(disposition)):
+            if RegCreateKeyEx(
+                    HKEY_CURRENT_USER,
+                    r'Software\Marginal\EDMarketConnector',
+                    0,
+                    None,
+                    0,
+                    KEY_ALL_ACCESS,
+                    None,
+                    ctypes.byref(self.hkey),
+                    ctypes.byref(disposition)
+            ):
                 raise Exception()
 
             # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
             edcdhkey = HKEY()
-            if RegCreateKeyEx(HKEY_CURRENT_USER, r'Software\EDCD\EDMarketConnector', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(edcdhkey), ctypes.byref(disposition)):
+            if RegCreateKeyEx(
+                    HKEY_CURRENT_USER,
+                    r'Software\EDCD\EDMarketConnector',
+                    0,
+                    None,
+                    0,
+                    KEY_ALL_ACCESS,
+                    None,
+                    ctypes.byref(edcdhkey),
+                    ctypes.byref(disposition)
+            ):
                 raise Exception()
 
             sparklekey = HKEY()
-            if not RegCreateKeyEx(edcdhkey, 'WinSparkle', 0, None, 0, KEY_ALL_ACCESS, None, ctypes.byref(sparklekey), ctypes.byref(disposition)):
+            if not RegCreateKeyEx(
+                    edcdhkey,
+                    'WinSparkle',
+                    0,
+                    None,
+                    0,
+                    KEY_ALL_ACCESS,
+                    None,
+                    ctypes.byref(sparklekey),
+                    ctypes.byref(disposition)
+            ):
                 if disposition.value == REG_CREATED_NEW_KEY:
                     buf = ctypes.create_unicode_buffer('1')
-                    RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf)*2)
+                    RegSetValueEx(sparklekey, 'CheckForUpdates', 0, 1, buf, len(buf) * 2)
+
                 buf = ctypes.create_unicode_buffer(str(update_interval))
-                RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf)*2)
+                RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf) * 2)
                 RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key):
-            typ  = DWORD()
-            size = DWORD()
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), None, ctypes.byref(size)) or typ.value not in [REG_SZ, REG_MULTI_SZ]:
+            """Look up a string configuration value."""
+            key_type = DWORD()
+            key_size = DWORD()
+            # Only strings are handled here.
+            if (
+                    key_type.value not in [REG_SZ, REG_MULTI_SZ]
+                    or RegQueryValueEx(
+                        self.hkey,
+                        key,
+                        0,
+                        ctypes.byref(key_type),
+                        None,
+                        ctypes.byref(key_size)
+                    )
+            ):
                 return None
-            buf = ctypes.create_unicode_buffer(int(size.value / 2))
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), buf, ctypes.byref(size)):
+
+            buf = ctypes.create_unicode_buffer(int(key_size.value / 2))
+            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(key_type), buf, ctypes.byref(key_size)):
                 return None
-            elif typ.value == REG_MULTI_SZ:
-                return [x for x in ctypes.wstring_at(buf, len(buf)-2).split(u'\x00')]
+
+            elif key_type.value == REG_MULTI_SZ:
+                return list(ctypes.wstring_at(buf, len(buf)-2).split(u'\x00'))
+
             else:
                 return str(buf.value)
 
         def getint(self, key):
-            typ  = DWORD()
-            size = DWORD(4)
-            val  = DWORD()
-            if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(typ), ctypes.byref(val), ctypes.byref(size)) or typ.value != REG_DWORD:
+            """Look up an integer configuration value."""
+            key_type = DWORD()
+            key_size = DWORD(4)
+            key_val = DWORD()
+            if (
+                    key_type.value != REG_DWORD
+                    or RegQueryValueEx(
+                        self.hkey,
+                        key,
+                        0,
+                        ctypes.byref(key_type),
+                        ctypes.byref(key_val),
+                        ctypes.byref(key_size)
+                    )
+            ):
                 return 0
+
             else:
-                return val.value
+                return key_val.value
 
         def set(self, key, val):
+            """Set value on the specified configuration key."""
             if isinstance(val, str):
                 buf = ctypes.create_unicode_buffer(val)
                 RegSetValueEx(self.hkey, key, 0, REG_SZ, buf, len(buf)*2)
+
             elif isinstance(val, numbers.Integral):
                 RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
-            elif hasattr(val, '__iter__'):	# iterable
-                stringval = u'\x00'.join([str(x) or u' ' for x in val] + [u''])	# null terminated non-empty strings
-                buf = ctypes.create_unicode_buffer(stringval)
+
+            elif hasattr(val, '__iter__'):
+                # null terminated non-empty strings
+                string_val = u'\x00'.join([str(x) or u' ' for x in val] + [u''])
+                buf = ctypes.create_unicode_buffer(string_val)
                 RegSetValueEx(self.hkey, key, 0, REG_MULTI_SZ, buf, len(buf)*2)
+
             else:
                 raise NotImplementedError()
 
         def delete(self, key):
+            """Delete the specified configuration key."""
             RegDeleteValue(self.hkey, key)
 
         def save(self):
-            pass	# Redundant since registry keys are written immediately
+            """Save current configuration to disk."""
+            pass  # Redundant since registry keys are written immediately
 
         def close(self):
+            """Close the configuration."""
             RegCloseKey(self.hkey)
             self.hkey = None
 
