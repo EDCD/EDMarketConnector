@@ -23,11 +23,11 @@ You will need several pieces of software installed, or the files from their
  into your checkout of the EDMC git files.
 1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
  This is needed for the internationalisation support in EDMC.
- [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338)
+ [Windows 10 SDK, version 2004 (10.0.19041.0)](https://go.microsoft.com/fwlink/p/?linkid=2120843)
  is the most recently tested version.  Technically you only need the following
  components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will
  auto-select some others).  NB: If you have need to uninstall this it's
- "Windows Software Development Kit - Windows 10.0.18362.1" in
+ "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
 1. [Python](https://python.org): 32-bit version of Python 3.8 for Windows.
  [v3.8.6](https://www.python.org/downloads/release/python-386/) is the most
