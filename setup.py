@@ -43,7 +43,7 @@ macdeveloperid = None
 
 # Windows paths
 WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.11\bin'
-SDKPATH = r'C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x86'
+SDKPATH = r'C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86'
 
 # OSX paths
 SPARKLE = '/Library/Frameworks/Sparkle.framework'
