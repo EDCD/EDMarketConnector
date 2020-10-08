@@ -26,8 +26,10 @@ if sys.platform == 'win32':
     assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
     import py2exe  # noqa: F401 # Yes, this *is* used
     dist_dir = 'dist.win32'
+
 elif sys.platform == 'darwin':
     dist_dir = 'dist.macosx'
+
 else:
     assert False, f'Unsupported platform {sys.platform}'
 
@@ -240,7 +242,7 @@ setup(
     options=OPTIONS,
 )
 
-PKG = None
+package_filename = None
 if sys.platform == 'darwin':
     if isdir(f'{dist_dir}/{applongname}.app'):  # from CFBundleName
         os.rename(f'{dist_dir}/{applongname}.app', f'{dist_dir}/{appname}.app')
@@ -261,8 +263,8 @@ if sys.platform == 'darwin':
             os.system(f'codesign --deep -v -s "Developer ID Application: {macdeveloperid}" {dist_dir}/{appname}.app')
 
         # Make zip for distribution, preserving signature
-        PKG = f'{appname}_mac_{appversion}.zip'
-        os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{PKG}; cd ..')
+        package_filename = f'{appname}_mac_{appversion}.zip'
+        os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
     os.system(f'"{WIXPATH}\\candle.exe" -out {dist_dir}\\ {appname}.wxs')
@@ -270,11 +272,11 @@ elif sys.platform == 'win32':
     if not exists(f'{dist_dir}/{appname}.wixobj'):
         raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
 
-    PKG = f'{appname}_win_{appversion}.msi'
-    os.system(f'"{WIXPATH}\\light.exe" -sacl -spdb -sw1076 {dist_dir}\\{appname}.wixobj -out {PKG}')
+    package_filename = f'{appname}_win_{appversion}.msi'
+    os.system(f'"{WIXPATH}\\light.exe" -sacl -spdb -sw1076 {dist_dir}\\{appname}.wixobj -out {package_filename}')
 
-    if not exists(PKG):
-        raise AssertionError(f'light.exe failed, no {PKG}')
+    if not exists(package_filename):
+        raise AssertionError(f'light.exe failed, no {package_filename}')
 
     # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
     # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
@@ -285,7 +287,7 @@ elif sys.platform == 'win32':
         ).group(1).split(',')
     ]
     assert lcids[0] == 1033, f'Default language is {lcids[0]}, should be 1033 (en_US)'
-    shutil.copyfile(PKG, join(gettempdir(), f'{appname}_1033.msi'))
+    shutil.copyfile(package_filename, join(gettempdir(), f'{appname}_1033.msi'))
     for lcid in lcids[1:]:
         shutil.copyfile(
             join(gettempdir(), f'{appname}_1033.msi'),
@@ -294,21 +296,36 @@ elif sys.platform == 'win32':
         # Don't care about codepage because the displayed strings come from msiexec not our msi
         os.system(f'cscript /nologo "{SDKPATH}\\WiLangId.vbs" {gettempdir()}\\{appname}_{lcid}.msi Product {lcid}')
         os.system(f'"{SDKPATH}\\MsiTran.Exe" -g {gettempdir()}\\{appname}_1033.msi {gettempdir()}\\{appname}_{lcid}.msi {gettempdir()}\\{lcid}.mst')  # noqa: E501 # Not going to get shorter
-        os.system(f'cscript /nologo "{SDKPATH}\\WiSubStg.vbs" {PKG} {gettempdir()}\\{lcid}.mst {lcid}')
+        os.system(f'cscript /nologo "{SDKPATH}\\WiSubStg.vbs" {package_filename} {gettempdir()}\\{lcid}.mst {lcid}')
 
 else:
     raise AssertionError('Unsupported platform')
 
-if not exists(PKG):
-    raise AssertionError('No %s found prior to appcast' % (PKG))
+if not exists(package_filename):
+    raise AssertionError(f'No {package_filename} found prior to appcast')
+
 # Make appcast entry
-appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', appversion), 'w')
-appcast.write('''
+appcast = open(f'appcast_{sys.platform == "darwin" and "mac" or "win"}_{appversion}.xml', 'w')
+
+if sys.platform == 'win32':
+    style = 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }'
+    package_os = 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes'
+
+elif sys.platform == 'darwin':
+    style = 'h2 { font-size: 105%; }'
+    package_os = 'macos'
+
+else:
+    raise AssertionError(f'Unknown platform for appcast {sys.platform}')
+
+length = os.stat(package_filename).st_size
+
+appcast.write(f'''
 \t\t<item>
 \t\t\t<title>Release {appversion}</title>
 \t\t\t<description>
 \t\t\t\t<![CDATA[
-<style>{STYLE}</style>
+<style>{style}</style>
 <h2>Release {appversion}</h2>
 <ul>
 
@@ -316,18 +333,12 @@ appcast.write('''
 \t\t\t\t]]>
 \t\t\t</description>
 \t\t\t<enclosure
-\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{appversion}/{PKG}"
-\t\t\t\tsparkle:os="{OS}"
+\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{appversion}/{package_filename}"
+\t\t\t\tsparkle:os="{package_os}"
 \t\t\t\tsparkle:version="{appversion}"
-\t\t\t\tlength="{LENGTH}"
+\t\t\t\tlength="{length}"
 \t\t\t\ttype="application/octet-stream"
 \t\t\t/>
 \t\t</item>
-'''.format(appversion=appversion,
-           STYLE='{}'.format(
-                sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' 
-                or 'h2 { font-size: 105%; }'),
-           PKG=PKG,
-           OS=''.format(sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos'),
-           LENGTH=os.stat(PKG).st_size)
+'''
 )
