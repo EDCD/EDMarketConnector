@@ -33,7 +33,7 @@ else:
 
 # Split version, as py2exe wants the 'base' for version
 semver = semantic_version.Version.coerce(appversion)
-BASEappversion = str(semver.truncate('patch'))
+base_appversion = str(semver.truncate('patch'))
 
 if dist_dir and len(dist_dir) > 1 and isdir(dist_dir):
     shutil.rmtree(dist_dir)
@@ -218,7 +218,7 @@ setup(
             'icon_resources': [(0, f'{appname}.ico')],
             'company_name': 'EDCD',  # Used by WinSparkle
             'product_name': appname,  # Used by WinSparkle
-            'version': BASEappversion,
+            'version': base_appversion,
             'product_version': appversion,
             'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appname}.manifest').read())],
@@ -230,7 +230,7 @@ setup(
             'script': APPCMD,
             'company_name': 'EDCD',
             'product_name': appname,
-            'version': BASEappversion,
+            'version': base_appversion,
             'product_version': appversion,
             'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appcmdname}.manifest').read())],
