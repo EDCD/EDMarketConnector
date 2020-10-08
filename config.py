@@ -1,9 +1,17 @@
+"""
+Code dealing with the configuration of the program.
+
+On Windows this uses the Registry to store values in a flat manner.
+Linux uses a file, but for commonality it's still a flat data structure.
+"""
+
 import numbers
 import sys
 import warnings
 from os import getenv, makedirs, mkdir, pardir
-from os.path import expanduser, dirname, exists, isdir, join, normpath
+from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
+
 import semantic_version
 
 # Any of these may be imported by plugins
@@ -13,7 +21,7 @@ appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.2.0-beta1'  #-rc1+a872b5f'
+appversion = '4.2.0-beta1'  # -rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
@@ -22,10 +30,10 @@ update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases
 update_interval = 8*60*60
 
 
-if platform=='darwin':
+if platform == 'darwin':
     from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
 
-elif platform=='win32':
+elif platform == 'win32':
     import ctypes
     from ctypes.wintypes import *
     import uuid
