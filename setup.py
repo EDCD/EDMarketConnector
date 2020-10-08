@@ -21,6 +21,8 @@ import semantic_version
 from config import appname as APPNAME, applongname as APPLONGNAME, appcmdname as APPCMDNAME, appversion as VERSION, copyright as COPYRIGHT
 from config import update_feed, update_interval
 
+if sys.version_info[0:2] != (3, 7):
+    raise AssertionError(f'Unexpected python version {sys.version}')
 
 if sys.platform=='win32':
     assert platform.architecture()[0]=='32bit', 'Assumes a Python built for 32bit'
