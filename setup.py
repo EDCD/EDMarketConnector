@@ -22,6 +22,9 @@ import semantic_version
 
 from config import appcmdname, applongname, appname, appversion, copyright, update_feed, update_interval
 
+if sys.version_info[0:2] != (3, 8):
+    raise AssertionError(f'Unexpected python version {sys.version}')
+
 if sys.platform == 'win32':
     assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
     import py2exe  # noqa: F401 # Yes, this *is* used
