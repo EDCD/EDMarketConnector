@@ -39,7 +39,7 @@ if platform == 'darwin':
 elif platform == 'win32':
     import ctypes
     import uuid
-    from ctypes.wintypes import DWORD, HANDLE, LONG, HKEY, LPCWSTR, LPCVOID
+    from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
 
     FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
