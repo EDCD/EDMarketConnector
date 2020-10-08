@@ -179,10 +179,13 @@ class Config(object):
             val = self.settings.get(key)
             if val is None:
                 return None
+
             elif isinstance(val, str):
                 return str(val)
-            elif hasattr(val, '__iter__'):
+
+            elif isinstance(val, list):
                 return list(val)  # make writeable
+
             else:
                 return None
 
