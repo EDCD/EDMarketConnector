@@ -265,26 +265,37 @@ if sys.platform == 'darwin':
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{PKG}; cd ..')
 
 elif sys.platform == 'win32':
-    os.system(r'"%s\candle.exe" -out %s\ %s.wxs' % (WIXPATH, dist_dir, appname))
-    if not exists('%s/%s.wixobj' % (dist_dir, appname)):
-        raise AssertionError('No %s/%s.wixobj: candle.exe failed?' % (dist_dir, appname))
+    os.system(f'"{WIXPATH}\\candle.exe" -out {dist_dir}\\ {appname}.wxs')
 
-    PKG = '%s_win_%s.msi' % (appname, appversion)
-    import subprocess
-    os.system(r'"%s\light.exe" -sacl -spdb -sw1076 %s\%s.wixobj -out %s' % (WIXPATH, dist_dir, appname, PKG))
+    if not exists(f'{dist_dir}/{appname}.wixobj'):
+        raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
+
+    PKG = f'{appname}_win_{appversion}.msi'
+    os.system(f'"{WIXPATH}\\light.exe" -sacl -spdb -sw1076 {dist_dir}\\{appname}.wixobj -out {PKG}')
+
     if not exists(PKG):
-        raise AssertionError('light.exe failed, no %s' % (PKG))
+        raise AssertionError(f'light.exe failed, no {PKG}')
 
     # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
     # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
-    lcids = [int(x) for x in re.search(r'Languages\s*=\s*"(.+?)"', open('%s.wxs' % appname).read()).group(1).split(',')]
-    assert lcids[0]==1033, 'Default language is %d, should be 1033 (en_US)' % lcids[0]
-    shutil.copyfile(PKG, join(gettempdir(), '%s_1033.msi' % appname))
+    lcids = [
+        int(x) for x in re.search(
+            r'Languages\s*=\s*"(.+?)"',
+            open(f'{appname}.wxs').read()
+        ).group(1).split(',')
+    ]
+    assert lcids[0] == 1033, f'Default language is {lcids[0]}, should be 1033 (en_US)'
+    shutil.copyfile(PKG, join(gettempdir(), f'{appname}_1033.msi'))
     for lcid in lcids[1:]:
-        shutil.copyfile(join(gettempdir(), '%s_1033.msi' % appname), join(gettempdir(), '%s_%d.msi' % (appname, lcid)))
-        os.system(r'cscript /nologo "%s\WiLangId.vbs" %s\%s_%d.msi Product %d' % (SDKPATH, gettempdir(), appname, lcid, lcid))	# Don't care about codepage because the displayed strings come from msiexec not our msi
-        os.system(r'"%s\MsiTran.Exe" -g %s\%s_1033.msi %s\%s_%d.msi %s\%d.mst' % (SDKPATH, gettempdir(), appname, gettempdir(), appname, lcid, gettempdir(), lcid))
-        os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
+        shutil.copyfile(
+            join(gettempdir(), f'{appname}_1033.msi'),
+            join(gettempdir(), f'{appname}_{lcid}.msi')
+        )
+        # Don't care about codepage because the displayed strings come from msiexec not our msi
+        os.system(f'cscript /nologo "{SDKPATH}\\WiLangId.vbs" {gettempdir()}\\{appname}_{lcid}.msi Product {lcid}')
+        os.system(f'"{SDKPATH}\\MsiTran.Exe" -g {gettempdir()}\\{appname}_1033.msi {gettempdir()}\\{appname}_{lcid}.msi {gettempdir()}\\{lcid}.mst')  # noqa: E501 # Not going to get shorter
+        os.system(f'cscript /nologo "{SDKPATH}\\WiSubStg.vbs" {PKG} {gettempdir()}\\{lcid}.mst {lcid}')
+
 else:
     raise AssertionError('Unsupported platform')
 
