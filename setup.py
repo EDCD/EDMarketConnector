@@ -16,25 +16,26 @@ import sys
 from distutils.core import setup
 from os.path import exists, isdir, join
 from tempfile import gettempdir
+from typing import Set
 
 import semantic_version
 
 from config import appcmdname, applongname, appname, appversion, copyright, update_feed, update_interval
 
-if sys.platform=='win32':
-    assert platform.architecture()[0]=='32bit', 'Assumes a Python built for 32bit'
-    import py2exe
+if sys.platform == 'win32':
+    assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
+    import py2exe  # noqa: F401 # Yes, this *is* used
     dist_dir = 'dist.win32'
-elif sys.platform=='darwin':
+elif sys.platform == 'darwin':
     dist_dir = 'dist.macosx'
 else:
-    assert False, 'Unsupported platform %s' % sys.platform
+    assert False, f'Unsupported platform {sys.platform}'
 
 # Split version, as py2exe wants the 'base' for version
 semver = semantic_version.Version.coerce(appversion)
 BASEappversion = str(semver.truncate('patch'))
 
-if dist_dir and len(dist_dir)>1 and isdir(dist_dir):
+if dist_dir and len(dist_dir) > 1 and isdir(dist_dir):
     shutil.rmtree(dist_dir)
 
 # "Developer ID Application" name for signing
@@ -47,67 +48,115 @@ SDKPATH = r'C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86'
 # OSX paths
 SPARKLE = '/Library/Frameworks/Sparkle.framework'
 
-# Patch py2app recipe enumerator to skip the sip recipe since it's too enthusiastic - we'll list additional Qt modules explicitly
-if sys.platform=='darwin':
-    from py2app import recipes
+if sys.platform == 'darwin':
+    # Patch py2app recipe enumerator to skip the sip recipe since it's too
+    # enthusiastic - we'll list additional Qt modules explicitly
     import py2app.build_app
-    def iterRecipes(module=recipes):
+    from py2app import recipes
+
+    def iter_recipes(module=recipes):
+        """Enumerate recipes via alternate method."""
         for name in dir(module):
-            if name.startswith('_') or name=='sip':
+            if name.startswith('_') or name == 'sip':
                 continue
             check = getattr(getattr(module, name), 'check', None)
             if check is not None:
                 yield (name, check)
-    py2app.build_app.iterRecipes = iterRecipes
+
+    py2app.build_app.iterRecipes = iter_recipes
 
 
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 SHORTappversion = ''.join(appversion.split('.')[:3])
-PLUGINS = [ 'plugins/coriolis.py', 'plugins/eddb.py', 'plugins/eddn.py', 'plugins/edsm.py', 'plugins/edsy.py', 'plugins/inara.py' ]
+PLUGINS = [
+    'plugins/coriolis.py',
+    'plugins/eddb.py',
+    'plugins/eddn.py',
+    'plugins/edsm.py',
+    'plugins/edsy.py',
+    'plugins/inara.py',
+]
 
-if sys.platform=='darwin':
-    OPTIONS =  { 'py2app':
-                 {'dist_dir': dist_dir,
-                  'optimize': 2,
-                  'packages': [
-                      'requests',
-                      'sqlite3',	# Included for plugins
-                  ],
-                  'includes': [
-                      'shutil',         # Included for plugins
-                      'zipfile',        # Included for plugins
-                  ],
-                  'frameworks': [ 'Sparkle.framework' ],
-                  'excludes': [ 'distutils', '_markerlib', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
-                  'iconfile': '%s.icns' % appname,
-                  'include_plugins': [('plugins', x) for x in PLUGINS],
-                  'resources': [ 'commodity.csv', 'rare_commodity.csv', 'snd_good.wav', 'snd_bad.wav', 'modules.p', 'ships.p', 'stations.p', 'systems.p'],
-                  'site_packages': False,
-                  'plist': {
-                      'CFBundleName': applongname,
-                      'CFBundleIdentifier': 'uk.org.marginal.%s' % appname.lower(),
-                      'CFBundleLocalizations': sorted(set([x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]) | set([x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')])),	# https://github.com/sparkle-project/Sparkle/issues/238
-                      'CFBundleShortVersionString': appversion,
-                      'CFBundleVersion':  appversion,
-                      'CFBundleURLTypes': [
-                          {
-                              'CFBundleTypeRole': 'Viewer',
-                              'CFBundleURLName': 'uk.org.marginal.%s.URLScheme' % appname.lower(),
-                              'CFBundleURLSchemes': ['edmc'],
-                          }
-                      ],
-                      'LSMinimumSystemVersion': '10.10',
-                      'NSAppleScriptEnabled': True,
-                      'NSHumanReadableCopyright': copyright,
-                      'SUEnableAutomaticChecks': True,
-                      'SUShowReleaseNotes': True,
-                      'SUAllowsAutomaticUpdates': False,
-                      'SUFeedURL': update_feed,
-                      'SUScheduledCheckInterval': update_interval,
-                  },
-                  'graph': True,	# output dependency graph in dist
-              }
+if sys.platform == 'darwin':
+    def get_cfbundle_localizations() -> Set:
+        """
+        Build a set of the localisation files.
+
+        See https://github.com/sparkle-project/Sparkle/issues/238
+        """
+        return sorted(
+            (
+                [x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]
+            ) | (
+                [x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')]
+            )
+        )
+
+    OPTIONS = {
+        'py2app': {
+            'dist_dir': dist_dir,
+            'optimize': 2,
+            'packages': [
+                'requests',
+                'sqlite3',  # Included for plugins
+            ],
+            'includes': [
+                'shutil',  # Included for plugins
+                'zipfile',  # Included for plugins
+            ],
+            'frameworks': [
+                'Sparkle.framework'
+            ],
+            'excludes': [
+                'distutils',
+                '_markerlib',
+                'PIL',
+                'pkg_resources',
+                'simplejson',
+                'unittest'
+            ],
+            'iconfile': f'{appname}.icns',
+            'include_plugins': [
+                ('plugins', x) for x in PLUGINS
+            ],
+            'resources': [
+                'commodity.csv',
+                'rare_commodity.csv',
+                'snd_good.wav',
+                'snd_bad.wav',
+                'modules.p',
+                'ships.p',
+                'stations.p',
+                'systems.p'
+            ],
+            'site_packages': False,
+            'plist': {
+                'CFBundleName': applongname,
+                'CFBundleIdentifier': f'uk.org.marginal.{appname.lower()}',
+                'CFBundleLocalizations': get_cfbundle_localizations(),
+                'CFBundleShortVersionString': appversion,
+                'CFBundleVersion':  appversion,
+                'CFBundleURLTypes': [
+                    {
+                        'CFBundleTypeRole': 'Viewer',
+                        'CFBundleURLName': f'uk.org.marginal.{appname.lower()}.URLScheme',
+                        'CFBundleURLSchemes': [
+                            'edmc'
+                        ],
+                    }
+                ],
+                'LSMinimumSystemVersion': '10.10',
+                'NSAppleScriptEnabled': True,
+                'NSHumanReadableCopyright': copyright,
+                'SUEnableAutomaticChecks': True,
+                'SUShowReleaseNotes': True,
+                'SUAllowsAutomaticUpdates': False,
+                'SUFeedURL': update_feed,
+                'SUScheduledCheckInterval': update_interval,
+            },
+            'graph': True,  # output dependency graph in dist
+        }
     }
     DATA_FILES = []
 
