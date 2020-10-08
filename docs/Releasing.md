@@ -23,39 +23,27 @@ You will need several pieces of software installed, or the files from their
  into your checkout of the EDMC git files.
 1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
  This is needed for the internationalisation support in EDMC.
- [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338)
+ [Windows 10 SDK, version 2004 (10.0.19041.0)](https://go.microsoft.com/fwlink/p/?linkid=2120843)
  is the most recently tested version.  Technically you only need the following
  components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will
  auto-select some others).  NB: If you have need to uninstall this it's
- "Windows Software Development Kit - Windows 10.0.18362.1" in
+ "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.
- [v3.7.9](https://www.python.org/downloads/release/python-379/) is the most
+1. [Python](https://python.org): 32-bit version of Python 3.8 for Windows.
+ [v3.8.6](https://www.python.org/downloads/release/python-386/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
-1. [py2exe](https://github.com/albertosottile/py2exe):
-	1. Install the python module.  There are two options here.
-		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2)
-	 	 and the current Marginal 'python3' branch as-is.  This contains a
-	 	 small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
-
-				pip install py2exe-0.9.3.2-cp37-none-win32.whl
-		1.  Or you can use a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225),
-		 which packages that DLL file correctly.
-
-				pip install py2exe-0.9.4.0-cp37-none-win32.whl
-		 You can then edit out the following line from `setup.py`, but it
-		 does no harm:
-
-				%s/DLLs/sqlite3.dll' % (sys.base_prefix),
+1. [py2exe](https://github.com/albertosottile/py2exe) - Install the python
+ module.  You will need at least [version 0.10.0.1](https://github.com/albertosottile/py2exe/releases/tag/v0.10.0.1),
+specifically [py2exe-0.10.0.1-cp38-none-win32.whl](https://github.com/albertosottile/py2exe/releases/download/v0.10.0.1/py2exe-0.10.0.1-cp38-none-win32.whl).
 
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
 	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
 	1. The easiest way is to utilise the `requirements-dev.txt` file:
-	 `python -m pip install -r requirements-dev.txt`. This will install all
-	 dependencies plus anything required for development *other than py2exe, see
-	 above*.
+	 `python -m pip install --user -r requirements-dev.txt`. This will install
+	 all dependencies plus anything required for development *other than
+	 py2exe, see above*.
 	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
 	 and ensure the modules listed there are installed as per the version
 	 requirements.
@@ -242,9 +230,9 @@ else you might need this, which assumes correct python.exe is in your PATH:
 
 		python.exe setup.py py2exe
 	
-else you'll have to specify the path to python.exe:
+else you'll have to specify the path to python.exe, e.g.:
 
-		"%LOCALAPPDATA%\Programs\Python\Python37-32\python.exe" setup.py py2exe
+		"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
 
 Output will be something like (`...` denoting parts elided for brevity):
 
@@ -281,6 +269,9 @@ without errors.
 Finally, uninstall your current version of ED Market Connector and re-install
 using the newly generated `EDMarketConnector_win_4.0.2.msi` file.  Check the
 resulting installation does work (the installer will run the program for you).
+If it doesn't then check if there are any files, particularly `.dll` or `.pyd`
+files in `dist.win32` that aren't yet specified in the `EDMarketConnector.wxs`
+file, i.e. they're not packaged into the installer.
 
 Update `edmarketconnector.xml` once more to set the `length=` attribute of the
 enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.

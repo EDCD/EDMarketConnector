@@ -11,7 +11,9 @@ flake8-noqa==1.0.5
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.1
 
+mypy==0.782
 pep8-naming==0.11.1
+safety==1.9.0
 
 # Code formatting tools
 autopep8==1.5.4
@@ -20,9 +22,12 @@ autopep8==1.5.4
 grip>=4.5.2
 
 # Packaging
-# This isn't available via 'pip install', so has to be commented out in order for
-# GitHub Action Workflows to not error out
-#py2exe==0.9.3.2
+# This isn't available via 'pip install', but is via git@tag
+# Refs:
+#	<https://pip.pypa.io/en/stable/user_guide/#requirements-files>
+#	<https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support>
+#py2exe==0.10.0.1
+git+https://github.com/albertosottile/py2exe.git@v0.10.0.1#egg=py2exe; sys_platform == 'win32'
 
 # All of the normal requirements
 -r requirements.txt
