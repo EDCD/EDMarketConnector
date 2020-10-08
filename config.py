@@ -5,6 +5,7 @@ On Windows this uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 """
 
+import logging
 import numbers
 import sys
 import warnings
@@ -30,6 +31,11 @@ copyright = u'© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 
+if getenv("EDMC_NO_UI"):
+    logger = logging.getLogger(appcmdname)
+
+else:
+    logger = logging.getLogger(appname)
 
 if platform == 'darwin':
     from Foundation import (
@@ -184,7 +190,8 @@ class Config(object):
             """Look up an integer configuraiton value."""
             try:
                 return int(self.settings.get(key, 0))  # should already be int, but check by casting
-            except:
+            except Exception as e:
+                logger.debug('The exception type is ...', exc_info=e)
                 return 0
 
         def set(self, key: str, val: Union[int, str]) -> None:
