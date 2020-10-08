@@ -31,17 +31,20 @@ update_interval = 8*60*60
 
 
 if platform == 'darwin':
-    from Foundation import NSBundle, NSUserDefaults, NSSearchPathForDirectoriesInDomains, NSApplicationSupportDirectory, NSDocumentDirectory, NSLibraryDirectory, NSUserDomainMask
+    from Foundation import (
+        NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains,
+        NSUserDefaults, NSUserDomainMask
+    )
 
 elif platform == 'win32':
     import ctypes
-    from ctypes.wintypes import *
     import uuid
+    from ctypes.wintypes import DWORD, HANDLE, LONG, HKEY, LPCWSTR, LPCVOID
 
-    FOLDERID_Documents    = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
+    FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
-    FOLDERID_Profile      = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
-    FOLDERID_SavedGames   = uuid.UUID('{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}')
+    FOLDERID_Profile = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
+    FOLDERID_SavedGames = uuid.UUID('{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}')
 
     SHGetKnownFolderPath = ctypes.windll.shell32.SHGetKnownFolderPath
     SHGetKnownFolderPath.argtypes = [ctypes.c_char_p, DWORD, HANDLE, ctypes.POINTER(ctypes.c_wchar_p)]
@@ -50,17 +53,19 @@ elif platform == 'win32':
     CoTaskMemFree.argtypes = [ctypes.c_void_p]
 
     # winreg in Python <= 3.7.4 handles REG_MULTI_SZ incorrectly, so do this instead. https://bugs.python.org/issue32587
-    HKEY_CURRENT_USER       = 0x80000001
-    KEY_ALL_ACCESS          = 0x000F003F
-    REG_CREATED_NEW_KEY     = 0x00000001
+    HKEY_CURRENT_USER = 0x80000001
+    KEY_ALL_ACCESS = 0x000F003F
+    REG_CREATED_NEW_KEY = 0x00000001
     REG_OPENED_EXISTING_KEY = 0x00000002
-    REG_SZ    = 1
+    REG_SZ = 1
     REG_DWORD = 4
     REG_MULTI_SZ = 7
 
     RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
     RegCreateKeyEx.restype = LONG
-    RegCreateKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, LPCVOID, DWORD, DWORD, LPCVOID, ctypes.POINTER(HKEY), ctypes.POINTER(DWORD)]
+    RegCreateKeyEx.argtypes = [
+        HKEY, LPCWSTR, DWORD, LPCVOID, DWORD, DWORD, LPCVOID, ctypes.POINTER(HKEY), ctypes.POINTER(DWORD)
+    ]
 
     RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
     RegOpenKeyEx.restype = LONG
@@ -90,39 +95,40 @@ elif platform == 'win32':
     RegDeleteValue.restype = LONG
     RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
-    def KnownFolderPath(guid):
+    def known_folder_path(guid):
+        """Look up a Windows GUID to actual folder path name."""
         buf = ctypes.c_wchar_p()
         if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
             return None
-        retval = buf.value	# copy data
-        CoTaskMemFree(buf)	# and free original
+        retval = buf.value  # copy data
+        CoTaskMemFree(buf)  # and free original
         return retval
 
-
-elif platform=='linux':
+elif platform == 'linux':
     import codecs
     from configparser import RawConfigParser
 
 
 class Config(object):
+    """Object that holds all configuration data."""
 
-    OUT_MKT_EDDN      = 1
-    # OUT_MKT_BPC     = 2	# No longer supported
-    OUT_MKT_TD        = 4
-    OUT_MKT_CSV       = 8
-    OUT_SHIP          = 16
-    # OUT_SHIP_EDS    = 16	# Replaced by OUT_SHIP
-    # OUT_SYS_FILE    = 32	# No longer supported
-    # OUT_STAT        = 64	# No longer available
+    OUT_MKT_EDDN = 1
+    # OUT_MKT_BPC = 2	# No longer supported
+    OUT_MKT_TD = 4
+    OUT_MKT_CSV = 8
+    OUT_SHIP = 16
+    # OUT_SHIP_EDS = 16	# Replaced by OUT_SHIP
+    # OUT_SYS_FILE = 32	# No longer supported
+    # OUT_STAT = 64	# No longer available
     # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY   = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV
-    # OUT_SYS_EDSM      = 256	# Now a plugin
-    # OUT_SYS_AUTO    = 512	# Now always automatic
-    OUT_MKT_MANUAL    = 1024
-    OUT_SYS_EDDN      = 2048
-    OUT_SYS_DELAY     = 4096
+    OUT_STATION_ANY = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV
+    # OUT_SYS_EDSM = 256	# Now a plugin
+    # OUT_SYS_AUTO = 512	# Now always automatic
+    OUT_MKT_MANUAL = 1024
+    OUT_SYS_EDDN = 2048
+    OUT_SYS_DELAY = 4096
 
-    if platform=='darwin':
+    if platform == 'darwin':
 
         def __init__(self):
             self.__in_shutdown = False  # Is the application currently shutting down ?
@@ -220,7 +226,7 @@ class Config(object):
             self.__in_shutdown = False  # Is the application currently shutting down ?
             self.__auth_force_localserver = False  # Should we use localhost for auth callback ?
 
-            self.app_dir = join(KnownFolderPath(FOLDERID_LocalAppData), appname)
+            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -231,9 +237,9 @@ class Config(object):
             self.internal_plugin_dir = join(dirname(getattr(sys, 'frozen', False) and sys.executable or __file__), u'plugins')
 
             # expanduser in Python 2 on Windows doesn't handle non-ASCII - http://bugs.python.org/issue13207
-            self.home = KnownFolderPath(FOLDERID_Profile) or u'\\'
+            self.home = known_folder_path(FOLDERID_Profile) or u'\\'
 
-            journaldir = KnownFolderPath(FOLDERID_SavedGames)
+            journaldir = known_folder_path(FOLDERID_SavedGames)
             self.default_journal_dir = journaldir and join(journaldir, 'Frontier Developments', 'Elite Dangerous') or None
 
             self.respath = dirname(getattr(sys, 'frozen', False) and sys.executable or __file__)
@@ -260,7 +266,7 @@ class Config(object):
                 RegCloseKey(sparklekey)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
-                self.set('outdir', KnownFolderPath(FOLDERID_Documents) or self.home)
+                self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key):
             typ  = DWORD()
