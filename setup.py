@@ -271,7 +271,7 @@ if sys.platform == 'darwin':
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
-    os.system(f'"{WIXPATH}\\candle.exe" -out {dist_dir}\\ {appname}.wxs')
+    os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
 
     if not exists(f'{dist_dir}/{appname}.wixobj'):
         raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
