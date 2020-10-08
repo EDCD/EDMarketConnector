@@ -210,29 +210,35 @@ elif sys.platform == 'win32':
     ]
 
 setup(
-    name = applongname,
-    version = appversion,
-    windows = [ {'dest_base': appname,
-                 'script': APP,
-                 'icon_resources': [(0, '%s.ico' % appname)],
-                 'company_name': 'EDCD',  # WinSparkle
-                 'product_name': appname,  # WinSparkle
-                 'version': BASEappversion,
-                 'product_version': appversion,
-                 'copyright': copyright,
-                 'other_resources': [(24, 1, open(appname+'.manifest').read())],
-             } ],
-    console = [ {'dest_base': appcmdname,
-                 'script': APPCMD,
-                 'company_name': 'EDCD',
-                 'product_name': appname,
-                 'version': BASEappversion,
-                 'product_version': appversion,
-                 'copyright': copyright,
-                 'other_resources': [(24, 1, open(appcmdname+'.manifest').read())],
-             } ],
-    data_files = DATA_FILES,
-    options = OPTIONS,
+    name=applongname,
+    version=appversion,
+    windows=[
+        {
+            'dest_base': appname,
+            'script': APP,
+            'icon_resources': [(0, f'{appname}.ico')],
+            'company_name': 'EDCD',  # Used by WinSparkle
+            'product_name': appname,  # Used by WinSparkle
+            'version': BASEappversion,
+            'product_version': appversion,
+            'copyright': copyright,
+            'other_resources': [(24, 1, open(f'{appname}.manifest').read())],
+        }
+    ],
+    console=[
+        {
+            'dest_base': appcmdname,
+            'script': APPCMD,
+            'company_name': 'EDCD',
+            'product_name': appname,
+            'version': BASEappversion,
+            'product_version': appversion,
+            'copyright': copyright,
+            'other_resources': [(24, 1, open(f'{appcmdname}.manifest').read())],
+        }
+    ],
+    data_files=DATA_FILES,
+    options=OPTIONS,
 )
 
 PKG = None
