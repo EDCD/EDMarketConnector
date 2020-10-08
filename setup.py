@@ -16,7 +16,7 @@ import sys
 from distutils.core import setup
 from os.path import exists, isdir, join
 from tempfile import gettempdir
-from typing import Set
+from typing import Any, Generator, Set
 
 import semantic_version
 
@@ -59,7 +59,8 @@ if sys.platform == 'darwin':
     import py2app.build_app
     from py2app import recipes
 
-    def iter_recipes(module=recipes):
+    # NB: 'Any' is because I don't have MacOS docs
+    def iter_recipes(module=recipes) -> Generator[str, Any]:
         """Enumerate recipes via alternate method."""
         for name in dir(module):
             if name.startswith('_') or name == 'sip':
@@ -284,7 +285,7 @@ elif sys.platform == 'win32':
     # Seriously, this is how you make Windows Installer use the user's display language for its dialogs. What a crock.
     # http://www.geektieguy.com/2010/03/13/create-a-multi-lingual-multi-language-msi-using-wix-and-custom-build-scripts
     lcids = [
-        int(x) for x in re.search(
+        int(x) for x in re.search(  # type: ignore
             r'Languages\s*=\s*"(.+?)"',
             open(f'{appname}.wxs').read()
         ).group(1).split(',')
