@@ -26,7 +26,7 @@ appcmdname = 'EDMC'
 appversion = '4.2.0-beta1'  # -rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
-copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
+copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
@@ -193,6 +193,11 @@ class Config(object):
             """Look up an integer configuration value."""
             try:
                 return int(self.settings.get(key, 0))  # should already be int, but check by casting
+
+            except ValueError as e:
+                logger.error(f"Failed to int({key=})", exc_info=e)
+                return 0
+
             except Exception as e:
                 logger.debug('The exception type is ...', exc_info=e)
                 return 0
@@ -321,7 +326,7 @@ class Config(object):
                 return None
 
             elif key_type.value == REG_MULTI_SZ:
-                return list(ctypes.wstring_at(buf, len(buf)-2).split(u'\x00'))
+                return list(ctypes.wstring_at(buf, len(buf)-2).split('\x00'))
 
             else:
                 return str(buf.value)
@@ -358,7 +363,7 @@ class Config(object):
 
             elif isinstance(val, list):
                 # null terminated non-empty strings
-                string_val = u'\x00'.join([str(x) or u' ' for x in val] + [u''])
+                string_val = '\x00'.join([str(x) or ' ' for x in val] + [''])
                 buf = ctypes.create_unicode_buffer(string_val)
                 RegSetValueEx(self.hkey, key, 0, REG_MULTI_SZ, buf, len(buf)*2)
 
@@ -408,7 +413,7 @@ class Config(object):
                     self.config.read_file(h)
 
             except Exception as e:
-                logger.debug('config section not yet present', exc_info=e)
+                logger.debug('Reading config failed, assuming we\'re making a new one...', exc_info=e)
                 self.config.add_section(self.SECTION)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
@@ -418,11 +423,11 @@ class Config(object):
             """Look up a string configuration value."""
             try:
                 val = self.config.get(self.SECTION, key)
-                if u'\n' in val:  # list
+                if '\n' in val:  # list
                     # ConfigParser drops the last entry if blank,
                     # so we add a spurious ';' entry in set() and remove it here
                     assert val.split('\n')[-1] == ';', val.split('\n')
-                    return [self._unescape(x) for x in val.split(u'\n')[:-1]]
+                    return [self._unescape(x) for x in val.split('\n')[:-1]]
                 else:
                     return self._unescape(val)
 
@@ -434,6 +439,10 @@ class Config(object):
             """Look up an integer configuration value."""
             try:
                 return self.config.getint(self.SECTION, key)
+
+            except ValueError as e:
+                logger.error(f"Failed to int({key=})", exc_info=e)
+                return 0
 
             except Exception as e:
                 logger.debug('And the exception type is...', exc_info=e)
@@ -448,7 +457,7 @@ class Config(object):
                 self.config.set(self.SECTION, key, self._escape(val))
 
             elif isinstance(val, list):
-                self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
+                self.config.set(self.SECTION, key, '\n'.join([self._escape(x) for x in val] + [';']))
 
             else:
                 raise NotImplementedError()
@@ -469,7 +478,7 @@ class Config(object):
 
         def _escape(self, val):
             """Escape a string for storage."""
-            return str(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
+            return str(val).replace('\\', '\\\\').replace('\n', '\\n').replace(';', '\\;')
 
         def _unescape(self, val):
             """Un-escape a string from storage."""
@@ -481,7 +490,7 @@ class Config(object):
                     if chars[i] == 'n':
                         chars[i] = '\n'
                 i += 1
-            return u''.join(chars)
+            return ''.join(chars)
 
     else:
         def __init__(self):
