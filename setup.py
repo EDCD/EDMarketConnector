@@ -277,7 +277,7 @@ elif sys.platform == 'win32':
         raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
 
     package_filename = f'{appname}_win_{appversion}.msi'
-    os.system(f'"{WIXPATH}\\light.exe" -sacl -spdb -sw1076 {dist_dir}\\{appname}.wixobj -out {package_filename}')
+    os.system(rf'"{WIXPATH}\light.exe" -sacl -spdb -sw1076 {dist_dir}\{appname}.wixobj -out {package_filename}')
 
     if not exists(package_filename):
         raise AssertionError(f'light.exe failed, no {package_filename}')
@@ -298,9 +298,9 @@ elif sys.platform == 'win32':
             join(gettempdir(), f'{appname}_{lcid}.msi')
         )
         # Don't care about codepage because the displayed strings come from msiexec not our msi
-        os.system(f'cscript /nologo "{SDKPATH}\\WiLangId.vbs" {gettempdir()}\\{appname}_{lcid}.msi Product {lcid}')
-        os.system(f'"{SDKPATH}\\MsiTran.Exe" -g {gettempdir()}\\{appname}_1033.msi {gettempdir()}\\{appname}_{lcid}.msi {gettempdir()}\\{lcid}.mst')  # noqa: E501 # Not going to get shorter
-        os.system(f'cscript /nologo "{SDKPATH}\\WiSubStg.vbs" {package_filename} {gettempdir()}\\{lcid}.mst {lcid}')
+        os.system(rf'cscript /nologo "{SDKPATH}\WiLangId.vbs" {gettempdir()}\{appname}_{lcid}.msi Product {lcid}')
+        os.system(rf'"{SDKPATH}\MsiTran.Exe" -g {gettempdir()}\{appname}_1033.msi {gettempdir()}\{appname}_{lcid}.msi {gettempdir()}\{lcid}.mst')  # noqa: E501 # Not going to get shorter
+        os.system(rf'cscript /nologo "{SDKPATH}\WiSubStg.vbs" {package_filename} {gettempdir()}\{lcid}.mst {lcid}')
 
 else:
     raise AssertionError('Unsupported platform')
