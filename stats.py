@@ -394,16 +394,18 @@ class StatsResults(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
-    def addpage(self, parent, header: List[str] = [], align: Optional[str] = None) -> tk.Frame:
-        # TODO: mutable defaults is no beauno.
+    def addpage(self, parent, header: List[str] = None, align: Optional[str] = None) -> tk.Frame:
         """
         Add a page to the StatsResults screen.
 
         :param parent: The parent widget to put this under
-        :param header: The headers for the table, defaults to []
+        :param header: The headers for the table, defaults to an empty list
         :param align: Alignment to use for this page, defaults to None
         :return: The Frame that was created
         """
+        if header is None:
+            header = []
+
         page = nb.Frame(parent)
         page.grid(pady=10, sticky=tk.NSEW)
         page.columnconfigure(0, weight=1)
