@@ -6,9 +6,6 @@ from typing import NamedTuple, TYPE_CHECKING, Any, AnyStr, Dict, List, Optional,
 if TYPE_CHECKING:
     from EDMarketConnector import AppWindow
 
-if __debug__:
-    from traceback import print_exc
-
 import tkinter as tk
 from tkinter import ttk
 
@@ -17,6 +14,9 @@ import myNotebook as nb  # noqa: N813
 from companion import ship_map
 from l10n import Locale
 from monitor import monitor
+import EDMCLogging
+
+logger = EDMCLogging.get_main_logger()
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -289,8 +289,7 @@ class StatsDialog():
             return
 
         except Exception as e:
-            if __debug__:
-                print_exc()
+            logger.exception("error while attempting to show status")
             self.status['text'] = str(e)
             return
 
