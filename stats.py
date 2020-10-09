@@ -1,7 +1,7 @@
 """CMDR Status information."""
 import csv
 from sys import platform
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Sequence, Tuple, cast
+from typing import NamedTuple, TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 if TYPE_CHECKING:
     from EDMarketConnector import AppWindow
@@ -184,15 +184,25 @@ def export_status(data: Dict[str, Any], filename: AnyStr) -> None:
     :param data: The data to generate the file from
     :param filename: The target file
     """
-    # TODO: Context manager
-    h = csv.writer(open(filename, 'w'))
-    h.writerow(['Category', 'Value'])
-    for thing in status(data):
-        h.writerow(list(thing))
+    with open(filename, 'w') as f:
+        h = csv.writer(f)
+        h.writerow(('Category', 'Value'))
+        for thing in status(data):
+            h.writerow(list(thing))
 
 
-def ships(companion_data: Dict[str, Any]) -> List[Tuple[str, str, str, str, str, str]]:
-    # TODO: Replace this with a NamedTuple
+class ShipRet(NamedTuple):
+    """ShipRet is a NamedTuple containing the return data from stats.ships."""
+
+    id: str
+    type: str
+    name: str
+    system: str
+    station: str
+    value: str
+
+
+def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
     """
     Return a list of 5 tuples of ship information.
 
@@ -206,40 +216,37 @@ def ships(companion_data: Dict[str, Any]) -> List[Tuple[str, str, str, str, str,
         ships.insert(0, ships.pop(current))  # Put current ship first
 
         if not companion_data['commander'].get('docked'):
-            out: List[Tuple[str, str, str, str, str, str]] = []
+            out: List[ShipRet] = []
             # Set current system, not last docked
-            out.append(
-                (
-                    str(ships[0]['id']),
-                    ship_map.get(ships[0]['name'].lower(), ships[0]['name']),
-                    str(ships[0].get('shipName', '')),
-                    companion_data['lastSystem']['name'],
-                    '',
-                    str(ships[0]['value']['total'])
-                )
-            )
-
+            out.append(ShipRet(
+                id=str(ships[0]['id']),
+                type=ship_map.get(ships[0]['name'].lower(), ships[0]['name']),
+                name=str(ships[0].get('shipName', '')),
+                system=companion_data['lastSystem']['name'],
+                station='',
+                value=str(ships[0]['value']['total'])
+            ))
             out.extend(
-                (
-                    str(ship['id']),
-                    ship_map.get(ship['name'].lower(), ship['name']),
-                    ship.get('shipName', ''),
-                    ship['starsystem']['name'],
-                    ship['station']['name'],
-                    str(ship['value']['total'])
+                ShipRet(
+                    id=str(ship['id']),
+                    type=ship_map.get(ship['name'].lower(), ship['name']),
+                    name=ship.get('shipName', ''),
+                    system=ship['starsystem']['name'],
+                    station=ship['station']['name'],
+                    value=str(ship['value']['total'])
                 ) for ship in ships[1:] if ship
             )
 
             return out
 
     return [
-        (
-            str(ship['id']),
-            ship_map.get(ship['name'].lower(), ship['name']),
-            ship.get('shipName', ''),
-            ship['starsystem']['name'],
-            ship['station']['name'],
-            str(ship['value']['total'])
+        ShipRet(
+            id=str(ship['id']),
+            type=ship_map.get(ship['name'].lower(), ship['name']),
+            name=ship.get('shipName', ''),
+            system=ship['starsystem']['name'],
+            station=ship['station']['name'],
+            value=str(ship['value']['total'])
         ) for ship in ships if ship is not None
     ]
 
@@ -251,11 +258,11 @@ def export_ships(companion_data: Dict[str, Any], filename: AnyStr) -> None:
     :param companion_data: Data from which to generate the ship list
     :param filename: The target file
     """
-    # TODO: context manager
-    h = csv.writer(open(filename, 'w'))
-    h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
-    for thing in ships(companion_data):
-        h.writerow(list(thing))
+    with open(filename, 'w') as f:
+        h = csv.writer(f)
+        h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
+        for thing in ships(companion_data):
+            h.writerow(list(thing))
 
 
 class StatsDialog():
