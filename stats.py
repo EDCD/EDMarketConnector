@@ -268,9 +268,9 @@ def export_ships(companion_data: Dict[str, Any], filename: AnyStr) -> None:
 class StatsDialog():
     """Status dialog containing all of the current cmdr's stats."""
 
-    def __init__(self, app: 'AppWindow') -> None:
-        self.parent: tk.Tk = app.w
-        self.status = app.status
+    def __init__(self, parent: tk.Tk, status: tk.Label) -> None:
+        self.parent: tk.Tk = parent
+        self.status = status
         self.showstats()
 
     def showstats(self) -> None:
@@ -294,7 +294,7 @@ class StatsDialog():
             return
 
         if not data.get('commander') or not data['commander'].get('name', '').strip():
-            self.status['text'] = _("Who are you?!")		# Shouldn't happen
+            self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
         elif (
             not data.get('lastSystem')
@@ -302,7 +302,7 @@ class StatsDialog():
             or not data.get('lastStarport')
             or not data['lastStarport'].get('name', '').strip()
         ):
-            self.status['text'] = _("Where are you?!")		# Shouldn't happen
+            self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name', '').strip():
             self.status['text'] = _("What are you flying?!")  # Shouldn't happen
@@ -351,15 +351,15 @@ class StatsResults(tk.Toplevel):
         for thing in stats[3:]:
             self.addpagerow(page, thing)
 
-        ttk.Frame(page).grid(pady=5)			# bottom spacer
-        notebook.add(page, text=_('Status'))		# Status dialog title
+        ttk.Frame(page).grid(pady=5)   # bottom spacer
+        notebook.add(page, text=_('Status'))  # Status dialog title
 
         page = self.addpage(notebook, [
-            _('Ship'),	   # Status dialog subtitle
+            _('Ship'),     # Status dialog subtitle
             '',
             _('System'),   # Main window
             _('Station'),  # Status dialog subtitle
-            _('Value'),	   # Status dialog subtitle - CR value of ship
+            _('Value'),    # Status dialog subtitle - CR value of ship
         ])
 
         shiplist = ships(data)
@@ -367,8 +367,8 @@ class StatsResults(tk.Toplevel):
             # skip id, last item is money
             self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))])
 
-        ttk.Frame(page).grid(pady=5)			# bottom spacer
-        notebook.add(page, text=_('Ships'))		# Status dialog title
+        ttk.Frame(page).grid(pady=5)         # bottom spacer
+        notebook.add(page, text=_('Ships'))  # Status dialog title
 
         if platform != 'darwin':
             buttonframe = ttk.Frame(frame)
