@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: ''
     hooks:
       - id: check-merge-conflict 
       - id: debug-statements 
@@ -58,10 +58,8 @@ repos:
         language: system
 
 default_language_version:
-    python: python3.7
+    python: python3.8
 
 default_stages: [ commit, push ]
 
 #files: '([^\.].+/)*.py'
-
-exclude: cp37-setup-new.py
