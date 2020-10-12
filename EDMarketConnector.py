@@ -281,7 +281,7 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master: tk.Tk):  # noqa: C901 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
@@ -672,7 +672,7 @@ class AppWindow(object):
                                    sort_keys=True,
                                    separators=(',', ': ')).encode('utf-8'))
 
-    def export_market_data(self, data: Mapping[str, Any]) -> bool:
+    def export_market_data(self, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -707,7 +707,7 @@ class AppWindow(object):
 
         return True
 
-    def getandsend(self, event=None, retrying=False):  # noqa: C901
+    def getandsend(self, event=None, retrying=False):  # noqa: C901, CCR001
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -830,7 +830,7 @@ class AppWindow(object):
         self.cooldown()
 
     # TODO: This has no users other than itself.
-    def retry_for_shipyard(self, tries):
+    def retry_for_shipyard(self, tries):  # noqa: CCR001
         """
         Try again to get shipyard data and send to EDDN.
 
@@ -865,7 +865,7 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event):  # noqa: C901
+    def journal_event(self, event):  # noqa: C901, CCR001
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -1212,7 +1212,7 @@ class AppWindow(object):
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self):
+    def save_raw(self):  # noqa: CCR001
         """Save newly acquired CAPI data in the configured file."""
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
@@ -1348,7 +1348,7 @@ class AppWindow(object):
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
-def enforce_single_instance() -> None:
+def enforce_single_instance() -> None:  # noqa: CCR001
     """
     Ensure only one copy of the app is running under this user account.
 
