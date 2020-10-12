@@ -14,7 +14,7 @@ from os import chdir, environ
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Mapping
 
 from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
@@ -460,7 +460,61 @@ class AppWindow(object):
 
         self.cooldown()
 
-    def getandsend(self, event=None, retrying=False):
+    def dump_capi_data(self, data):
+        """Dump CAPI data to file for examination."""
+        if isdir('dump'):
+            system = data['lastSystem']['name']
+
+            if data['commander'].get('docked'):
+                station = f'.{data["lastStarport"]["name"]}'
+
+            else:
+                station = ''
+
+            timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+                h.write(json.dumps(data,
+                                   ensure_ascii=False,
+                                   indent=2,
+                                   sort_keys=True,
+                                   separators=(',', ': ')).encode('utf-8'))
+
+    def export_market_data(self, data: Mapping[str, Any]) -> bool:
+        """
+        Export CAPI market data.
+
+        :return: True if all OK, else False to trigger play_bad in caller.
+        """
+        if config.getint('output') & (config.OUT_STATION_ANY):
+            if not data['commander'].get('docked'):
+                if not self.status['text']:
+                    # Signal as error because the user might actually be docked
+                    # but the server hosting the Companion API hasn't caught up
+                    self.status['text'] = _("You're not docked at a station!")
+                    return False
+
+            # Ignore possibly missing shipyard info
+            elif (config.getint('output') & config.OUT_MKT_EDDN) \
+                    and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
+                if not self.status['text']:
+                    self.status['text'] = _("Station doesn't have anything!")
+
+            elif not data['lastStarport'].get('commodities'):
+                if not self.status['text']:
+                    self.status['text'] = _("Station doesn't have a market!")
+
+            elif config.getint('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
+                # Fixup anomalies in the commodity data
+                fixed = companion.fixup(data)
+                if config.getint('output') & config.OUT_MKT_CSV:
+                    commodity.export(fixed, COMMODITY_CSV)
+
+                if config.getint('output') & config.OUT_MKT_TD:
+                    td.export(fixed)
+
+        return True
+
+    def getandsend(self, event=None, retrying=False):  # noqa: C901
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -484,9 +538,12 @@ class AppWindow(object):
                 self.status['text'] = ''
                 if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
+
                 return
+
             elif play_sound:
                 hotkeymgr.play_good()
+
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
@@ -522,22 +579,7 @@ class AppWindow(object):
 
             else:
                 if __debug__:  # Recording
-                    if isdir('dump'):
-                        system = data['lastSystem']['name']
-
-                        if data['commander'].get('docked'):
-                            station = f'.{data["lastStarport"]["name"]}'
-
-                        else:
-                            station = ''
-
-                        timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-                        with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
-                            h.write(json.dumps(data,
-                                               ensure_ascii=False,
-                                               indent=2,
-                                               sort_keys=True,
-                                               separators=(',', ': ')).encode('utf-8'))
+                    self.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
                     self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
@@ -555,32 +597,8 @@ class AppWindow(object):
                     play_bad = True
 
                 # Export market data
-                if config.getint('output') & (config.OUT_STATION_ANY):
-                    if not data['commander'].get('docked'):
-                        if not self.status['text']:
-                            # Signal as error because the user might actually be docked
-                            # but the server hosting the Companion API hasn't caught up
-                            self.status['text'] = _("You're not docked at a station!")
-                            play_bad = True
-
-                    # Ignore possibly missing shipyard info
-                    elif (config.getint('output') & config.OUT_MKT_EDDN) \
-                            and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have anything!")
-
-                    elif not data['lastStarport'].get('commodities'):
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have a market!")
-
-                    elif config.getint('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
-                        # Fixup anomalies in the commodity data
-                        fixed = companion.fixup(data)
-                        if config.getint('output') & config.OUT_MKT_CSV:
-                            commodity.export(fixed, COMMODITY_CSV)
-
-                        if config.getint('output') & config.OUT_MKT_TD:
-                            td.export(fixed)
+                if not self.export_market_data(data):
+                    play_bad = True
 
                 self.holdofftime = querytime + companion.holdoff
 
@@ -650,7 +668,7 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event: str):
+    def journal_event(self, event: str):  # noqa: C901
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -659,7 +677,11 @@ class AppWindow(object):
         """
 
         def crewroletext(role):
-            # Return translated crew role. Needs to be dynamic to allow for changing language.
+            """
+            Return translated crew role.
+
+            Needs to be dynamic to allow for changing language.
+            """
             return {
                 None:         '',
                 'Idle':       '',
@@ -680,17 +702,27 @@ class AppWindow(object):
                 self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
                 self.ship_label['text'] = _('Role') + ':'  # Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
+
             elif monitor.cmdr:
                 if monitor.group:
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
+
                 else:
                     self.cmdr['text'] = monitor.cmdr
+
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
-                self.ship.configure(
-                    text=monitor.state['ShipName']
-                    or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
-                    or '',
-                    url=self.shipyard_url)
+
+                if monitor.state['ShipName']:
+                    ship_text = monitor.state['ShipName']
+
+                else:
+                    ship_text = companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+
+                if not ship_text:
+                    ship_text = ''
+
+                self.ship.configure(text=ship_text, url=self.shipyard_url)
+
             else:
                 self.cmdr['text'] = ''
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
@@ -714,6 +746,7 @@ class AppWindow(object):
                     'Synthesis',
                     'JoinACrew'):
                 self.status['text'] = ''  # Periodically clear any old error
+
             self.w.update_idletasks()
 
             # Companion login
@@ -728,11 +761,13 @@ class AppWindow(object):
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
                 logger.info('Startup or LoadGame event')
+
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.getint('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
-                # Can start dashboard monitoring
+
+                # Can't start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
 
@@ -741,7 +776,6 @@ class AppWindow(object):
                     and config.getint('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            # Plugins
             err = plug.notify_journal_entry(monitor.cmdr,
                                             monitor.is_beta,
                                             monitor.system,
@@ -754,11 +788,13 @@ class AppWindow(object):
                     hotkeymgr.play_bad()
 
             # Auto-Update after docking, but not if auth callback is pending
-            if entry['event'] in ('StartUp', 'Location', 'Docked') \
-                    and monitor.station \
-                    and not config.getint('output') & config.OUT_MKT_MANUAL \
-                    and config.getint('output') & config.OUT_STATION_ANY \
-                    and companion.session.state != companion.Session.STATE_AUTH:
+            if (
+                    entry['event'] in ('StartUp', 'Location', 'Docked')
+                    and monitor.station
+                    and not config.getint('output') & config.OUT_MKT_MANUAL
+                    and config.getint('output') & config.OUT_STATION_ANY
+                    and companion.session.state != companion.Session.STATE_AUTH
+            ):
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             if entry['event'] == 'ShutDown':
@@ -767,7 +803,6 @@ class AppWindow(object):
                 self.updater.setAutomaticUpdatesCheck(True)
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
-    # cAPI auth
     def auth(self, event=None):
         """
         Handle Frontier auth callback.
