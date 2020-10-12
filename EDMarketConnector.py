@@ -406,17 +406,17 @@ class AppWindow(object):
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
 
         else:  # win32 or linux
-            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=False)
+            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.file_menu.add_command(command=lambda: stats.StatsDialog(self))
             self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
             self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, tearoff=False)
+            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
-            self.help_menu = tk.Menu(self.menubar, tearoff=False)
+            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
@@ -427,7 +427,7 @@ class AppWindow(object):
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
-                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=False)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
+                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'),
                                                  variable=self.always_ontop,
