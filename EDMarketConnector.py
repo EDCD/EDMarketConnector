@@ -984,7 +984,7 @@ class AppWindow(object):
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self) -> None:  # noqa: CCR001
+    def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
         """Save newly acquired CAPI data in the configured file."""
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
