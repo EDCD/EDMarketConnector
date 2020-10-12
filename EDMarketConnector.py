@@ -386,7 +386,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.edit_menu)
             self.w.bind('<Command-c>', self.copy)
             self.view_menu = tk.Menu(self.menubar, name='view')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
-            self.view_menu.add_command(command=lambda: stats.StatsDialog(self))
+            self.view_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.menubar.add_cascade(menu=self.view_menu)
             window_menu = tk.Menu(self.menubar, name='window')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.menubar.add_cascade(menu=window_menu)
@@ -404,10 +404,9 @@ class AppWindow(object):
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)  # click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
-
-        else:  # win32 or linux
+        else:
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
-            self.file_menu.add_command(command=lambda: stats.StatsDialog(self))
+            self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
