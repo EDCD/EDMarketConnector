@@ -14,7 +14,7 @@ from os import chdir, environ
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping, Tuple, Union
 
 from constants import applongname, appname, protocolhandler_redirect
 
@@ -447,7 +447,7 @@ class AppWindow(object):
                                       image=self.theme_icon, cursor='fleur',
                                       anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
-            self.drag_offset = None
+            self.drag_offset: Tuple[Union[None, int], Union[None, int]] = (None, None)
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
@@ -548,7 +548,7 @@ class AppWindow(object):
 
         self.postprefs(False)  # Companion login happens in callback from monitor
 
-    def postprefs(self, dologin=True):
+    def postprefs(self, dologin: bool = True):
         """Perform necessary actions after the Preferences dialog is applied."""
         self.prefsdialog = None
         self.set_labels()  # in case language has changed
@@ -653,7 +653,7 @@ class AppWindow(object):
 
         self.cooldown()
 
-    def dump_capi_data(self, data):
+    def dump_capi_data(self, data: Mapping[str, Any]):
         """Dump CAPI data to file for examination."""
         if isdir('dump'):
             system = data['lastSystem']['name']
@@ -707,7 +707,7 @@ class AppWindow(object):
 
         return True
 
-    def getandsend(self, event=None, retrying=False):  # noqa: C901, CCR001
+    def getandsend(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -829,41 +829,6 @@ class AppWindow(object):
 
         self.cooldown()
 
-    # TODO: This has no users other than itself.
-    def retry_for_shipyard(self, tries):  # noqa: CCR001
-        """
-        Try again to get shipyard data and send to EDDN.
-
-        Don't report errors if can't get or send the data.
-        """
-        try:
-            data = companion.session.station()
-            if data['commander'].get('docked'):
-                if data.get('lastStarport', {}).get('ships'):
-                    report = 'Success'
-
-                else:
-                    report = 'Failure'
-
-            else:
-                report = 'Undocked!'
-
-            logger.debug(f'Retry for shipyard - {report}')
-            if not data['commander'].get('docked'):
-                # might have un-docked while we were waiting for retry in which case station data is unreliable
-                pass
-
-            elif (data.get('lastSystem', {}).get('name') == monitor.system and
-                  data.get('lastStarport', {}).get('name') == monitor.station and
-                  data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
-                self.eddn.export_shipyard(data, monitor.is_beta)
-
-            elif tries > 1:  # bogus data - retry
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.retry_for_shipyard(tries - 1))
-
-        except Exception:
-            pass
-
     # Handle event(s) from the journal
     def journal_event(self, event):  # noqa: C901, CCR001
         """
@@ -873,7 +838,7 @@ class AppWindow(object):
         :return:
         """
 
-        def crewroletext(role):
+        def crewroletext(role: str) -> str:
             """
             Return translated crew role.
 
@@ -1004,7 +969,7 @@ class AppWindow(object):
                 self.updater.setAutomaticUpdatesCheck(True)
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
-    def auth(self, event=None):
+    def auth(self, event=None) -> None:
         """
         Handle Frontier auth callback.
 
@@ -1033,7 +998,7 @@ class AppWindow(object):
 
         self.cooldown()
 
-    def dashboard_event(self, event):
+    def dashboard_event(self, event) -> None:
         """
         Handle DashBoardEvent tk event.
 
@@ -1048,7 +1013,7 @@ class AppWindow(object):
                 if not config.getint('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-    def plugin_error(self, event=None):
+    def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
         if plug.last_error.get('msg'):
             self.status['text'] = plug.last_error['msg']
@@ -1056,7 +1021,7 @@ class AppWindow(object):
             if not config.getint('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname):
+    def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
         if not bool(config.getint("use_alt_shipyard_open")):
             return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
@@ -1075,15 +1040,15 @@ class AppWindow(object):
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system):
+    def system_url(self, system: str) -> str:
         """Despatch a system URL to the configured handler."""
         return plug.invoke(config.get('system_provider'), 'EDSM', 'system_url', monitor.system)
 
-    def station_url(self, station):
+    def station_url(self, station: str) -> str:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(config.get('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
-    def cooldown(self):
+    def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
         if time() < self.holdofftime:
             # Update button in main window
@@ -1099,26 +1064,26 @@ class AppWindow(object):
                                                                  monitor.system and
                                                                  tk.NORMAL or tk.DISABLED)
 
-    def ontop_changed(self, event=None):
+    def ontop_changed(self, event=None) -> None:
         """Set main window 'on top' state as appropriate."""
         config.set('always_ontop', self.always_ontop.get())
         self.w.wm_attributes('-topmost', self.always_ontop.get())
 
-    def copy(self, event=None):
+    def copy(self, event=None) -> None:
         """Copy system, and possible station, name to clipboard."""
         if monitor.system:
             self.w.clipboard_clear()
             self.w.clipboard_append(monitor.station and f'{monitor.system},{monitor.station}' or monitor.system)
 
-    def help_general(self, event=None):
+    def help_general(self, event=None) -> None:
         """Open Wiki Help page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
 
-    def help_privacy(self, event=None):
+    def help_privacy(self, event=None) -> None:
         """Open Wiki Privacy page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
 
-    def help_releases(self, event=None):
+    def help_releases(self, event=None) -> None:
         """Open Releases page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
@@ -1127,7 +1092,7 @@ class AppWindow(object):
 
         showing = False
 
-        def __init__(self, parent):
+        def __init__(self, parent: tk.Tk):
             if self.__class__.showing:
                 return
 
@@ -1202,17 +1167,17 @@ class AppWindow(object):
 
             logger.info(f'Current version is {appversion}')
 
-        def apply(self):
+        def apply(self) -> None:
             """Close the window."""
             self._destroy()
 
-        def _destroy(self):
+        def _destroy(self) -> None:
             """Set parent window's topmost appropriately as we close."""
             self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self):  # noqa: CCR001
+    def save_raw(self) -> None:  # noqa: CCR001
         """Save newly acquired CAPI data in the configured file."""
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
@@ -1252,7 +1217,7 @@ class AppWindow(object):
             logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
-    def onexit(self, event=None):
+    def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
@@ -1300,22 +1265,22 @@ class AppWindow(object):
         logger.info('Destroying app window...')
         self.w.destroy()
 
-    def drag_start(self, event):
+    def drag_start(self, event) -> None:
         """Initiate dragging the window."""
         self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
 
-    def drag_continue(self, event):
+    def drag_continue(self, event) -> None:
         """Continued handling of window drag."""
-        if self.drag_offset:
+        if self.drag_offset[0]:
             offset_x = event.x_root - self.drag_offset[0]
             offset_y = event.y_root - self.drag_offset[1]
             self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
 
-    def drag_end(self, event):
+    def drag_end(self, event) -> None:
         """Handle end of window dragging."""
-        self.drag_offset = None
+        self.drag_offset = (None, None)
 
-    def oniconify(self, event=None):
+    def oniconify(self, event=None) -> None:
         """Handle iconification of the application."""
         self.w.overrideredirect(0)  # Can't iconize while overrideredirect
         self.w.iconify()
@@ -1324,12 +1289,12 @@ class AppWindow(object):
         theme.active = None  # So theme will be re-applied on map
 
     # TODO: Confirm this is unused and remove.
-    def onmap(self, event=None):
+    def onmap(self, event=None) -> None:
         """Perform a now unused function."""
         if event.widget == self.w:
             theme.apply(self.w)
 
-    def onenter(self, event=None):
+    def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
         # TODO: This assumes that 1) transparent is at least 2, 2) there are
         #       no new themes added after that.
@@ -1338,7 +1303,7 @@ class AppWindow(object):
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
-    def onleave(self, event=None):
+    def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
         # TODO: This assumes that 1) transparent is at least 2, 2) there are
         #       no new themes added after that.
@@ -1416,7 +1381,7 @@ def enforce_single_instance() -> None:  # noqa: CCR001
         EnumWindows(enumwindowsproc, 0)
 
 
-def test_logging():
+def test_logging() -> None:
     """Simple test of top level logging."""
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
