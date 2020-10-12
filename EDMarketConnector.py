@@ -1149,6 +1149,7 @@ def enforce_single_instance() -> None:  # noqa: CCR001
                     ShowWindowAsync(window_handle, SW_RESTORE)
                     SetForegroundWindow(window_handle)
 
+                logger.info(f'A running {applongname} process was found, exiting.')
                 sys.exit(0)
 
             return True
