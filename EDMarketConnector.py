@@ -829,8 +829,7 @@ class AppWindow(object):
 
         self.cooldown()
 
-    # Handle event(s) from the journal
-    def journal_event(self, event):  # noqa: C901, CCR001
+    def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -1004,14 +1003,16 @@ class AppWindow(object):
 
         Event is sent by code in dashboard.py.
         """
+        if not dashboard.status:
+            return
+
         entry = dashboard.status
-        if entry:
-            # Currently we don't do anything with these events
-            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
-            if err:
-                self.status['text'] = err
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
+        # Currently we don't do anything with these events
+        err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+        if err:
+            self.status['text'] = err
+            if not config.getint('hotkey_mute'):
+                hotkeymgr.play_bad()
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
