@@ -14,7 +14,7 @@ from os import chdir, environ
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Mapping, Tuple, Union
+from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
 
 from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
@@ -264,7 +264,7 @@ class AppWindow(object):
                                       image=self.theme_icon, cursor='fleur',
                                       anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
-            self.drag_offset: Tuple[Union[None, int], Union[None, int]] = (None, None)
+            self.drag_offset: Tuple[Optional[int], Optional[int]] = (None, None)
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
