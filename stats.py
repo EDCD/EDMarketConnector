@@ -1,20 +1,16 @@
 """CMDR Status information."""
 import csv
-from sys import platform
-from typing import NamedTuple, TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Sequence, Tuple, Union, cast
-
-if TYPE_CHECKING:
-    from EDMarketConnector import AppWindow
-
 import tkinter as tk
+from sys import platform
 from tkinter import ttk
+from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, NamedTuple, Optional, Sequence, cast
 
 import companion
+import EDMCLogging
 import myNotebook as nb  # noqa: N813
 from companion import ship_map
 from l10n import Locale
 from monitor import monitor
-import EDMCLogging
 
 logger = EDMCLogging.get_main_logger()
 
