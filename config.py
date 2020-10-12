@@ -116,7 +116,7 @@ elif platform == 'linux':
     from configparser import RawConfigParser
 
 
-class Config(object):
+class Config():
     """Object that holds all configuration data."""
 
     OUT_MKT_EDDN = 1
