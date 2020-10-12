@@ -54,13 +54,6 @@ from tkinter import ttk
 
 from ttkHyperlinkLabel import HyperlinkLabel
 
-if __debug__:
-    if platform != 'win32':
-        import pdb
-        import signal
-
-        signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
-
 import commodity
 import companion
 import plug
@@ -101,7 +94,7 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master):
+    def __init__(self, master: tk):
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
