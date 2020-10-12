@@ -35,6 +35,7 @@ from EDMCLogging import edmclogger, logger, logging
 # isort: off
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
+    import update
 # isort: on
 
     def _(x: str) -> str:
@@ -127,7 +128,7 @@ class AppWindow(object):
             self.theme_close = tk.BitmapImage(
                 data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
-        frame = tk.Frame(self.w, name=appname.lower())
+        frame = tk.Frame(self.w, name=appname.lower())  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
@@ -141,8 +142,8 @@ class AppWindow(object):
         self.system_label.grid(row=3, column=0, sticky=tk.W)
         self.station_label.grid(row=4, column=0, sticky=tk.W)
 
-        self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
-        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
+        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
 
@@ -165,7 +166,7 @@ class AppWindow(object):
         # Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status = tk.Label(frame, name='status', anchor=tk.W)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
 
         row = frame.grid_size()[1]
         self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
@@ -182,7 +183,7 @@ class AppWindow(object):
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
         self.updater: update.Updater = None
-        
+
         self.menubar = tk.Menu()
         if platform == 'darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
@@ -191,23 +192,23 @@ class AppWindow(object):
             root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox resizable')
 
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
-            self.system_menu = tk.Menu(self.menubar, name='apple')
+            self.system_menu = tk.Menu(self.menubar, name='apple')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.system_menu.add_command(command=lambda: self.w.call('tk::mac::standardAboutPanel'))
             self.system_menu.add_command(command=lambda: self.updater.checkForUpdates())
             self.menubar.add_cascade(menu=self.system_menu)
-            self.file_menu = tk.Menu(self.menubar, name='file')
+            self.file_menu = tk.Menu(self.menubar, name='file')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.file_menu.add_command(command=self.save_raw)
             self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, name='edit')
+            self.edit_menu = tk.Menu(self.menubar, name='edit')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.edit_menu.add_command(accelerator='Command-c', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
             self.w.bind('<Command-c>', self.copy)
-            self.view_menu = tk.Menu(self.menubar, name='view')
+            self.view_menu = tk.Menu(self.menubar, name='view')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.view_menu.add_command(command=lambda: stats.StatsDialog(self))
             self.menubar.add_cascade(menu=self.view_menu)
-            window_menu = tk.Menu(self.menubar, name='window')
+            window_menu = tk.Menu(self.menubar, name='window')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.menubar.add_cascade(menu=window_menu)
-            self.help_menu = tk.Menu(self.menubar, name='help')
+            self.help_menu = tk.Menu(self.menubar, name='help')  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
             self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
@@ -223,17 +224,17 @@ class AppWindow(object):
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
 
         else:  # win32 or linux
-            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=False)
             self.file_menu.add_command(command=lambda: stats.StatsDialog(self))
             self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
             self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.edit_menu = tk.Menu(self.menubar, tearoff=False)
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
-            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.help_menu = tk.Menu(self.menubar, tearoff=False)
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
@@ -244,7 +245,7 @@ class AppWindow(object):
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
-                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=False)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'),
                                                  variable=self.always_ontop,
@@ -675,7 +676,7 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event: str):  # noqa: C901
+    def journal_event(self, event):  # noqa: C901
         """
         Handle a Journal event passed through event queue from monitor.py.
 
