@@ -12,7 +12,7 @@ import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import Union
+from typing import Optional, Union
 
 import semantic_version
 
@@ -102,7 +102,7 @@ elif platform == 'win32':
     RegDeleteValue.restype = LONG
     RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
-    def known_folder_path(guid):
+    def known_folder_path(guid: uuid.UUID) -> Optional[str]:
         """Look up a Windows GUID to actual folder path name."""
         buf = ctypes.c_wchar_p()
         if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
@@ -476,11 +476,11 @@ class Config():
             self.save()
             self.config = None
 
-        def _escape(self, val):
+        def _escape(self, val: str) -> str:
             """Escape a string for storage."""
             return str(val).replace('\\', '\\\\').replace('\n', '\\n').replace(';', '\\;')
 
-        def _unescape(self, val):
+        def _unescape(self, val: str) -> str:
             """Un-escape a string from storage."""
             chars = list(val)
             i = 0
@@ -498,15 +498,15 @@ class Config():
 
     # Common
 
-    def get_password(self, account):
+    def get_password(self, account: str) -> None:
         """Legacy password retrieval."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
-    def set_password(self, account, password):
+    def set_password(self, account: str, password: str) -> None:
         """Legacy password setting."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
-    def delete_password(self, account):
+    def delete_password(self, account: str) -> None:
         """Legacy password deletion."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
