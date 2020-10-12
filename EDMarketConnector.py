@@ -179,6 +179,10 @@ class AppWindow(object):
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
+        # The type needs defining for adding the menu entry, but won't be
+        # properly set until later
+        self.updater: update.Updater = None
+        
         self.menubar = tk.Menu()
         if platform == 'darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
