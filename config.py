@@ -309,8 +309,7 @@ class Config():
             key_size = DWORD()
             # Only strings are handled here.
             if (
-                    key_type.value not in [REG_SZ, REG_MULTI_SZ]
-                    or RegQueryValueEx(
+                    RegQueryValueEx(
                         self.hkey,
                         key,
                         0,
@@ -318,6 +317,7 @@ class Config():
                         None,
                         ctypes.byref(key_size)
                     )
+                    or key_type.value not in [REG_SZ, REG_MULTI_SZ]
             ):
                 return None
 
@@ -337,8 +337,7 @@ class Config():
             key_size = DWORD(4)
             key_val = DWORD()
             if (
-                    key_type.value != REG_DWORD
-                    or RegQueryValueEx(
+                    RegQueryValueEx(
                         self.hkey,
                         key,
                         0,
@@ -346,6 +345,7 @@ class Config():
                         ctypes.byref(key_val),
                         ctypes.byref(key_size)
                     )
+                    or key_type.value != REG_DWORD
             ):
                 return 0
 
