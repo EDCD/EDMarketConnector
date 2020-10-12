@@ -94,7 +94,7 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master: tk):
+    def __init__(self, master: tk.Tk):  # noqa: C901 # TODO - can possibly factor something out
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
@@ -110,9 +110,12 @@ class AppWindow(object):
         if platform != 'darwin':
             if platform == 'win32':
                 self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+
             else:
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default',
                                tk.PhotoImage(file=join(config.respath, 'EDMarketConnector.png')))
+
+            # TODO: Export to files and merge from them in future ?
             self.theme_icon = tk.PhotoImage(
                 data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
             self.theme_minimize = tk.BitmapImage(
@@ -210,7 +213,8 @@ class AppWindow(object):
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)  # click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
-        else:
+
+        else:  # win32 or linux
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.file_menu.add_command(command=lambda: stats.StatsDialog(self))
             self.file_menu.add_command(command=self.save_raw)
