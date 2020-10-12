@@ -37,6 +37,10 @@ if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
 # isort: on
 
+    def _(x: str) -> str:
+        """Fake the l10n translation functions for typing."""
+        return x
+
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
@@ -346,11 +350,6 @@ class AppWindow(object):
         else:
             self.updater = update.Updater(tkroot=self.w, provider='internal')
             self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
-
-        try:
-            config.get_password('')  # Prod SecureStorage on Linux to initialise
-        except RuntimeError:
-            pass
 
         # Migration from <= 3.30
         for username in config.get('fdev_usernames') or []:
