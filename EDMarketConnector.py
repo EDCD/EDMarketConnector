@@ -530,10 +530,16 @@ class AppWindow(object):
             else:
                 if __debug__:  # Recording
                     if isdir('dump'):
-                        with open('dump/{system}{station}.{timestamp}.json'.format(
-                                system=data['lastSystem']['name'],
-                                station=data['commander'].get('docked') and '.' + data['lastStarport']['name'] or '',
-                                timestamp=strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wb') as h:
+                        system = data['lastSystem']['name']
+
+                        if data['commander'].get('docked'):
+                            station = f'.{data["lastStarport"]["name"]}'
+
+                        else:
+                            station = ''
+
+                        timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+                        with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
                             h.write(json.dumps(data,
                                                ensure_ascii=False,
                                                indent=2,
@@ -1200,7 +1206,6 @@ executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
 
-
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
     # manifest ActiveCodePage to set this, but that is silently ignored on
@@ -1231,7 +1236,7 @@ sys.path: {sys.path}'''
 
         except locale.Error as e:
             logger.error(f"Could not set LC_ALL to ({locale_startup[0]}, 'UTF_8')", exc_info=e)
-            
+
         else:
             log_locale('After switching to UTF-8 encoding (same language)')
 
@@ -1243,7 +1248,7 @@ sys.path: {sys.path}'''
         """Simple top-level class."""
 
         class B(object):
-        """Simple second-level class."""
+            """Simple second-level class."""
 
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
