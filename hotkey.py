@@ -301,15 +301,20 @@ elif platform == 'win32':
             atexit.register(self.unregister)
 
         def register(self, root, keycode, modifiers):
+            """Register the hotkey handler."""
             self.root = root
 
             if self.thread:
+                logger.debug('Was already registered, unregistering...')
                 self.unregister()
 
             if keycode or modifiers:
-                self.thread = threading.Thread(target = self.worker, name = 'Hotkey "%x:%x"' % (keycode,modifiers), args = (keycode,modifiers))
+                logger.debug('Creating thread worker...')
+                self.thread = threading.Thread(target=self.worker, name=f'Hotkey "{keycode}:{modifiers}"', args=(keycode, modifiers))
                 self.thread.daemon = True
+                logger.debug('Starting thread worker...')
                 self.thread.start()
+                logger.debug('Done.')
 
         def unregister(self):
             """Unregister the hotkey handling."""
