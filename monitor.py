@@ -210,13 +210,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.thread = None  # Orphan the worker thread - will terminate at next poll
 
     def close(self):
+        """Close journal monitoring."""
+        logger.debug('Calling self.stop()...')
         self.stop()
-        if self.observer:
-            self.observer.stop()
+        logger.debug('Done')
 
         if self.observer:
+            logger.debug('Calling self.observer.stop()...')
+            self.observer.stop()
+            logger.debug('Done')
+
+        if self.observer:
+            logger.debug('Joining self.observer thread...')
             self.observer.join()
             self.observer = None
+            logger.debug('Done')
+
+        logger.debug('Done.')
 
     def running(self):
         return self.thread and self.thread.is_alive()
