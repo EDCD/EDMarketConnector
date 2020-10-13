@@ -1,4 +1,5 @@
 import json
+import logging
 from calendar import timegm
 from os import getenv
 from os.path import isdir, isfile, join, getsize
@@ -40,16 +41,21 @@ class Dashboard(FileSystemEventHandler):
         self.status = {}		# Current status for communicating status back to main thread
 
     def start(self, root, started):
+        """Start monitoring of Journal directory."""
+        logger.debug('Starting...')
         self.root = root
         self.session_start = started
 
         logdir = config.get('journaldir') or config.default_journal_dir
         if not logdir or not isdir(logdir):
+            logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
 
         if self.currentdir and self.currentdir != logdir:
+            logger.debug(f"{self.currentdir=} != {logdir=}")
             self.stop()
+
         self.currentdir = logdir
 
         # Set up a watchdog observer.
@@ -58,23 +64,31 @@ class Dashboard(FileSystemEventHandler):
         # any non-standard logdir might be on a network drive and poll instead.
         polling = platform != 'win32'
         if not polling and not self.observer:
+            logger.debug('Setting up observer...')
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
+            logger.debug('Done')
+
         elif polling and self.observer:
+            logger.debug('Using polling, stopping observer...')
             self.observer.stop()
             self.observer = None
+            logger.debug('Done')
 
         if not self.observed and not polling:
+            logger.debug('Starting observer...')
             self.observed = self.observer.schedule(self, self.currentdir)
+            logger.debug('Done')
 
-        if __debug__:
-            print('%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
+        logger.info(f'{polling and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
         # being supported on this filesystem.
+        logger.debug('Polling once to process pre-existing data, and check whether watchdog thread crashed...')
         self.root.after(int(self._POLL * 1000/2), self.poll, True)
+        logger.debug('Done.')
 
         return True
 
