@@ -5,9 +5,6 @@ from os.path import isdir, isfile, join, getsize
 from sys import platform
 import time
 
-if __debug__:
-    from traceback import print_exc
-
 from config import appcmdname, appname, config
 
 if getenv("EDMC_NO_UI"):
@@ -32,7 +29,7 @@ else:
 # Status.json handler
 class Dashboard(FileSystemEventHandler):
 
-    _POLL = 1		# Fallback polling interval
+    _POLL = 1  # Fallback polling interval
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
@@ -139,16 +136,20 @@ class Dashboard(FileSystemEventHandler):
         try:
             with open(join(self.currentdir, 'Status.json'), 'rb') as h:
                 data = h.read().strip()
-                if data:	# Can be empty if polling while the file is being re-written
+
+                if data:  # Can be empty if polling while the file is being re-written
                     entry = json.loads(data)
 
                     # Status file is shared between beta and live. So filter out status not in this game session.
-                    if (timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start and
-                        self.status != entry):
+                    if (
+                            timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start
+                            and self.status != entry
+                    ):
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
-        except:
-            if __debug__: print_exc()
+
+        except Exception as e:
+            logger.exception('Processing Status.json')
 
 # singleton
 dashboard = Dashboard()
