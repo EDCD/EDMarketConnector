@@ -43,6 +43,7 @@ import pathlib
 import tempfile
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
+from threading import get_native_id as thread_native_id
 from typing import Tuple
 
 from config import appcmdname, appname, config
@@ -118,7 +119,7 @@ class Logger:
         # This should be affected by the user configured log level
         self.logger_channel.setLevel(loglevel)
 
-        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
+        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
         self.logger_formatter.default_msec_format = '%s.%03d'
 
@@ -242,6 +243,7 @@ class EDMCContextFilter(logging.Filter):
          logging.Formatter() as you can use just this no matter if there is
          a class involved or not, so you get a nice clean:
              <file/module>.<classA>[.classB....].<function>
+        3. osthreadid = OS level thread ID.
 
         If we fail to be able to properly set either then:
 
@@ -266,10 +268,12 @@ class EDMCContextFilter(logging.Filter):
         if getattr(record, 'qualname', None) is None:
             setattr(record, 'qualname', qualname)
 
+        setattr(record, 'osthreadid', thread_native_id())
+
         return True
 
-    @classmethod  # noqa: CCR001 - this is as refactored as is sensible
-    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:
+    @classmethod
+    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:  # noqa: CCR001, E501 # this is as refactored as is sensible
         """
         Determine extra or changed fields for the caller.
 
