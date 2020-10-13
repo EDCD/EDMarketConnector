@@ -1059,18 +1059,43 @@ class AppWindow(object):
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
             config.set('geometry', f'+{x}+{y}')
-        self.w.withdraw()  # Following items can take a few seconds, so hide the main window while they happen
+
+        # Let the user know we're shutting down.
+        self.status['text'] = 'Shutting down...'
+        self.w.update_idletasks()
+        logger.info('Starting shutdown procedures...')
+
+        logger.info('Closing protocol handler...')
         protocolhandler.close()
+
+        logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
+
+        logger.info('Closing dashboard...')
         dashboard.close()
+
+        logger.info('Closing journal monitor...')
         monitor.close()
+
+        logger.info('Notifying plugins to stop...')
         plug.notify_stop()
+
+        logger.info('Closing update checker...')
         self.updater.close()
+
+        logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
+
+        logger.info('Closing config...')
         config.close()
+
+        logger.info('Destroying app window...')
         self.w.destroy()
 
-    def drag_start(self, event):
+        logger.info('Done.')
+
+    def drag_start(self, event) -> None:
+        """Initiate dragging the window."""
         self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
 
     def drag_continue(self, event):
