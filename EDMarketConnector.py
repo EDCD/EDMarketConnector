@@ -1139,7 +1139,8 @@ def enforce_single_instance() -> None:  # noqa: CCR001
                     and GetProcessHandleFromHwnd(window_handle):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
-                    # Browser invoked us directly with auth response. Forward the response to the other app instance.
+                    logger.debug('Browser invoked us directly with auth response. '
+                                 'Forwarding the response to the other app instance.')
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                     # Wait for it to be responsive to avoid ShellExecute recursing
                     ShowWindow(window_handle, SW_RESTORE)
