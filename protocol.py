@@ -245,6 +245,8 @@ else:	# Linux / Run from source
             else:
                 logger.debug('No thread')
 
+            logger.debug('Done')
+
         def worker(self):
             self.httpd.serve_forever()
 
