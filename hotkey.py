@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import os
-from os.path import dirname, join, normpath
-import sys
+import logging
+from os import getenv
+from os.path import join
 from sys import platform
 
-from config import config
+from config import appcmdname, appname, config
+
+if getenv("EDMC_NO_UI"):
+    logger = logging.getLogger(appcmdname)
+
+else:
+    logger = logging.getLogger(appname)
 
 if platform == 'darwin':
 
@@ -289,19 +295,31 @@ elif platform == 'win32':
 
         def register(self, root, keycode, modifiers):
             self.root = root
+
             if self.thread:
                 self.unregister()
+
             if keycode or modifiers:
                 self.thread = threading.Thread(target = self.worker, name = 'Hotkey "%x:%x"' % (keycode,modifiers), args = (keycode,modifiers))
                 self.thread.daemon = True
                 self.thread.start()
 
         def unregister(self):
+            """Unregister the hotkey handling."""
             thread = self.thread
+
             if thread:
+                logger.debug('Thread is/was running')
                 self.thread = None
+                logger.debug('Telling thread WM_QUIT')
                 PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
-                thread.join()	# Wait for it to unregister hotkey and quit
+                logger.debug('Joining thread')
+                thread.join()  # Wait for it to unregister hotkey and quit
+
+            else:
+                logger.debug('No thread')
+
+            logger.debug('Done.')
 
         def worker(self, keycode, modifiers):
 
