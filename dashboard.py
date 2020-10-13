@@ -1,7 +1,6 @@
 import json
 from calendar import timegm
-from operator import itemgetter
-from os import listdir
+from os import getenv
 from os.path import isdir, isfile, join, getsize
 from sys import platform
 import time
@@ -9,8 +8,13 @@ import time
 if __debug__:
     from traceback import print_exc
 
-from config import config
+from config import appcmdname, appname, config
 
+if getenv("EDMC_NO_UI"):
+    logger = logging.getLogger(appcmdname)
+
+else:
+    logger = logging.getLogger(appname)
 
 if platform=='darwin':
     from watchdog.observers import Observer
@@ -78,21 +82,37 @@ class Dashboard(FileSystemEventHandler):
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Dashboard')
+        """Stop monitoring dashboard."""
+        logger.debug('Stopping monitoring Dashboard')
         self.currentdir = None
+
         if self.observed:
+            logger.debug('Was observed')
             self.observed = None
+            logger.debug('Unscheduling all observer')
             self.observer.unschedule_all()
+            logger.debug('Done.')
+
         self.status = {}
+        logger.debug('Done.')
 
     def close(self):
+        """Close down dashboard."""
+        logger.debug('Calling self.stop()')
         self.stop()
+
         if self.observer:
+            logger.debug('Calling self.observer.stop()')
             self.observer.stop()
+            logger.debug('Done')
+
         if self.observer:
+            logger.debug('Joining self.observer...')
             self.observer.join()
+            logger.debug('Done')
             self.observer = None
+
+        logger.debug('Done.')
 
     def poll(self, first_time=False):
         if not self.currentdir:
