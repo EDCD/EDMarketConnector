@@ -1,18 +1,12 @@
 import json
-import logging
-from calendar import timegm
-from os import getenv
 from os.path import isdir, isfile, join, getsize
 from sys import platform
 import time
 
-from config import appcmdname, appname, config
+from config import config
+from EDMCLogging import get_main_logger
 
-if getenv("EDMC_NO_UI"):
-    logger = logging.getLogger(appcmdname)
-
-else:
-    logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 if platform=='darwin':
     from watchdog.observers import Observer
