@@ -121,10 +121,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         }
 
     def start(self, root: 'tkinter.Tk'):
+        """Start journal monitoring."""
+        logger.debug('Begin...')
         self.root = root
         journal_dir = config.get('journaldir') or config.default_journal_dir
 
         if journal_dir is None:
+            logger.debug('journal_dir was None, setting ""')
             journal_dir = ''
 
         # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
@@ -163,26 +166,34 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # any non-standard logdir might be on a network drive and poll instead.
         polling = bool(config.get('journaldir')) and platform != 'win32'
         if not polling and not self.observer:
+            logger.debug('Not polling, no observer, starting an observer...')
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
+            logger.debug('Done')
 
         elif polling and self.observer:
+            logger.debug('Polling, but observer, so stopping observer...')
             self.observer.stop()
             self.observer = None
+            logger.debug('Done')
 
         if not self.observed and not polling:
+            logger.debug('Not observed and not polling, setting observed...')
             self.observed = self.observer.schedule(self, self.currentdir)
+            logger.debug('Done')
 
         logger.info(f'{"Polling" if polling else "Monitoring"} Journal Folder: "{self.currentdir}"')
         logger.info(f'Start Journal File: "{self.logfile}"')
 
         if not self.running():
-            logger.debug('Starting Journal worker')
+            logger.debug('Starting Journal worker thread...')
             self.thread = threading.Thread(target=self.worker, name='Journal worker')
             self.thread.daemon = True
             self.thread.start()
+            logger.debug('Done')
 
+        logger.debug('Done.')
         return True
 
     def stop(self):
