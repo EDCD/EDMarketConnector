@@ -143,9 +143,11 @@ def plugin_start3(plugin_dir: str) -> str:
     config.delete('edsm_autoopen')
     config.delete('edsm_historical')
 
+    logger.debug('Starting worker thread...')
     this.thread = Thread(target=worker, name='EDSM worker')
     this.thread.daemon = True
     this.thread.start()
+    logger.debug('Done.')
 
     return 'EDSM'
 
@@ -158,13 +160,15 @@ def plugin_app(parent: tk.Tk) -> None:
 
 
 def plugin_stop() -> None:
-    """Plugin exit hook."""
+    """Stop this plugin."""
+    logger.debug('Signalling queue to close...')
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
     this.thread = None
     # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
     this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
+    logger.debug('Done.')
 
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
@@ -485,10 +489,11 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
 # Worker thread
 def worker() -> None:
     """
-    Upload worker.
+    Handle uploading events to EDSM API.
 
     Processes `this.queue` until the queued item is None.
     """
+    logger.debug('Starting...')
     pending = []  # Unsent events
     closing = False
 
@@ -496,7 +501,9 @@ def worker() -> None:
         item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
             (cmdr, entry) = item
+
         else:
+            logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
 
         retrying = 0
@@ -616,7 +623,10 @@ def worker() -> None:
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if closing:
+            logger.debug('closing, so returning.')
             return
+
+    logger.debug('Done.')
 
 
 def should_send(entries: List[Mapping[str, Any]]) -> bool:
