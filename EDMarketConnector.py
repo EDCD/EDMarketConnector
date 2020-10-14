@@ -1357,8 +1357,8 @@ def enforce_single_instance() -> None:  # noqa: CCR001
                     and GetProcessHandleFromHwnd(window_handle):
                 # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                 if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
-                    logger.debug('Browser invoked us directly with auth response. '
-                                 'Forwarding the response to the other app instance.')
+                    # logger.debug('Browser invoked us directly with auth response. '
+                    #              'Forwarding the response to the other app instance.')
                     CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                     # Wait for it to be responsive to avoid ShellExecute recursing
                     ShowWindow(window_handle, SW_RESTORE)
@@ -1368,12 +1368,13 @@ def enforce_single_instance() -> None:  # noqa: CCR001
                     ShowWindowAsync(window_handle, SW_RESTORE)
                     SetForegroundWindow(window_handle)
 
-                logger.info(f'A running {applongname} process was found, exiting.')
-                sys.exit(0)
+                # logger.info(f'A running {applongname} process was found, exiting.')
+                return False
 
             return True
 
-        EnumWindows(enumwindowsproc, 0)
+        if not EnumWindows(enumwindowsproc, 0):
+            sys.exit(0)
 
 
 def test_logging() -> None:
