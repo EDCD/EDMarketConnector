@@ -111,13 +111,13 @@ class EDDN:
         self.replayfile.flush()
 
     def close(self):
-        """
-        close closes the replay file
-        """
+        """Close the replay file."""
+        logger.debug('Closing replayfile...')
         if self.replayfile:
             self.replayfile.close()
 
         self.replayfile = None
+        logger.debug('Done.')
 
     def send(self, cmdr: str, msg: Mapping[str, Any]) -> None:
         """
@@ -619,7 +619,10 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def plugin_stop() -> None:
+    """Handle stopping this plugin."""
+    logger.debug('Calling this.eddn.close()')
     this.eddn.close()
+    logger.debug('Done.')
 
 
 def journal_entry(  # noqa: C901
