@@ -5,10 +5,8 @@ import json
 import sys
 import time
 import tkinter as tk
-# For new impl
 from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
-from queue import Queue
 from threading import Lock, Thread
 from typing import (
     TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, MutableMapping, NamedTuple, Optional
@@ -39,7 +37,6 @@ CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a 
 
 this: Any = sys.modules[__name__]  # For holding module globals
 this.session = timeout_session.new_session()
-this.queue = Queue()  # Items to be sent to Inara by worker thread
 this.lastlocation = None  # eventData from the last Commander's Flight Log event
 this.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
@@ -164,10 +161,16 @@ def station_url(system_name: str, station_name: str) -> str:
 
 
 def plugin_start3(plugin_dir: str) -> str:
-    """Plugin start Hook."""
+    """
+    Start this plugin.
+
+    Start the worker thread to handle sending to Inara API.
+    """
+    logger.debug('Starting worker thread...')
     this.thread = Thread(target=new_worker, name='Inara worker')
     this.thread.daemon = True
     this.thread.start()
+    logger.debug('Done.')
 
     return 'Inara'
 
@@ -182,12 +185,14 @@ def plugin_app(parent: tk.Tk) -> None:
 
 def plugin_stop() -> None:
     """Plugin shutdown hook."""
-    # Signal thread to close and wait for it
-    this.queue.put(None)
-    # this.thread.join()
-    # this.thread = None
+    logger.debug('We have no way to ask new_worker to stop, but...')
+    # The Newthis/new_worker doesn't have a method to ask the new_worker to
+    # stop.  We're relying on it being a daemon thread and thus exiting when
+    # there are no non-daemon (i.e. main) threads running.
 
     this.timer_run = False
+
+    logger.debug('Done.')
 
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
@@ -1189,12 +1194,14 @@ def new_add_event(
 
 def new_worker():
     """
-    Queue worker.
+    Handle sending events to the Inara API.
 
     Will only ever send one message per WORKER_WAIT_TIME, regardless of status.
     """
+    logger.debug('Starting...')
     while True:
         events = get_events()
+
         for creds, event_list in events.items():
             if not event_list:
                 continue
@@ -1215,6 +1222,8 @@ def new_worker():
             try_send_data(TARGET_URL, data)
 
         time.sleep(WORKER_WAIT_TIME)
+
+    logger.debug('Done.')
 
 
 def get_events(clear: bool = True) -> Dict[Credentials, List[Event]]:
