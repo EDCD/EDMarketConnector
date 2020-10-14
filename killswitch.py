@@ -1,4 +1,5 @@
 """Fetch kill switches from EDMC Repo."""
+from ast import parse
 from typing import Dict, List, NamedTuple, Optional, Union, cast
 
 import requests
@@ -49,7 +50,7 @@ class KillSwitchSet:
         return f'KillSwitchSet: {str(self.kill_switches)}'
 
     def __repr__(self) -> str:
-        """return __repr__ for KillSwitchSet."""
+        """Return __repr__ for KillSwitchSet."""
         return f'KillSwitchSet(kill_switches={self.kill_switches!r})'
 
 
@@ -115,6 +116,20 @@ def parse_kill_switches(data: KILL_SWITCH_JSON_DICT) -> List[KillSwitch]:
         out.append(ks)
 
     return out
+
+
+def get_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchSet]:
+    """
+    Get a kill switch set object.
+
+    :param target: the URL to fetch the killswitch JSON from, defaults to DEFAULT_KILLSWITCH_URL
+    :return: the KillSwitchSet for the URL, or None if there was an error
+    """
+    if (data := fetch_kill_switches(target)) is None:
+        logger.warning('could not get killswitches')
+        return None
+
+    return KillSwitchSet(parse_kill_switches(data))
 
 
 active: KillSwitchSet = KillSwitchSet([])
