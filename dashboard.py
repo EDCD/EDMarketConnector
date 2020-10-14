@@ -156,7 +156,7 @@ class Dashboard(FileSystemEventHandler):
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
 
-        except Exception as e:
+        except Exception:
             logger.exception('Processing Status.json')
 
 # singleton
