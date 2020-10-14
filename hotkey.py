@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import logging
-from os import getenv
 from os.path import join
 from sys import platform
 
-from config import appcmdname, appname, config
+from config import config
+from EDMCLogging import get_main_logger
 
-if getenv("EDMC_NO_UI"):
-    logger = logging.getLogger(appcmdname)
-
-else:
-    logger = logging.getLogger(appname)
+logger = get_main_logger()
 
 if platform == 'darwin':
 
