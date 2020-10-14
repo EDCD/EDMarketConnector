@@ -286,6 +286,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         else:
             loghandle = None
 
+        logger.debug('Now at end of latest file.')
+
         self.game_was_running = self.game_running()
 
         if self.live:
@@ -321,6 +323,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # watch, but that may have unforseen differences in behaviour.
         emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
 
+        logger.debug('Entering loop...')
         while True:
 
             # Check whether new log file started, e.g. client (re)started.
@@ -383,8 +386,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             if self.game_was_running:
                 if not self.game_running():
                     logger.info('Detected exit from game, synthesising ShutDown event')
+                    timestamp = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
                     self.event_queue.append(
-                        '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                        f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
                     )
 
                     if not config.shutting_down:
@@ -394,6 +398,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             else:
                 self.game_was_running = self.game_running()
+
+        logger.debug('Done.')
 
     def parse_entry(self, line: str):
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
