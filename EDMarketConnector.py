@@ -18,12 +18,6 @@ from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
 
 from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
-# TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
-# TODO: Move enforce_single_instance() call here ?  But then how do we notify
-#       the user if they already have a process ?
-#       We could propagate what that found all the way up and then do the stderr/out redirect
-#       in a non-truncate manner.  Need to double-check the existing process won't then overwrite
-#       due to its seek position.
 def no_other_instance_running() -> bool:  # noqa: CCR001
     """
     Ensure only one copy of the app is running under this user account.
@@ -116,6 +110,7 @@ if __name__ == "__main__":
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 from EDMCLogging import edmclogger, logger, logging
 
