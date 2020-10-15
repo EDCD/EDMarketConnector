@@ -1123,18 +1123,37 @@ sys.path: {sys.path}'''
         locale_startup = locale.getlocale(locale.LC_CTYPE)
         logger.debug(f'Locale LC_CTYPE: {locale_startup}')
 
-        # Set that same language, but utf8 encoding (it was probably cp1252
-        # or equivalent for other languages).
-        # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
-        try:
-            # locale_startup[0] is the 'language' portion
-            locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+        # Older Windows Versions and builds have issues with UTF-8, so only
+        # even attempt this where we think it will be safe.
 
-        except locale.Error as e:
-            logger.error(f"Could not set LC_ALL to ({locale_startup[0]}, 'UTF_8')", exc_info=e)
-            
-        else:
-            log_locale('After switching to UTF-8 encoding (same language)')
+        if sys.platform == 'win32':
+            windows_ver = sys.getwindowsversion()
+
+        # <https://en.wikipedia.org/wiki/Windows_10_version_history#Version_1903_(May_2019_Update)>
+        # Windows 19, 1903 was build 18362
+        if (
+                sys.platform != 'win32'
+                or (
+                    windows_ver.major == 10
+                    and windows_ver.build >= 18362
+                )
+                or windows_ver.major > 10  # Paranoid future check
+        ):
+            # Set that same language, but utf8 encoding (it was probably cp1252
+            # or equivalent for other languages).
+            # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
+            try:
+                # locale_startup[0] is the 'language' portion
+                locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+
+            except locale.Error:
+                logger.exception(f"Could not set LC_ALL to ('{locale_startup[0]}', 'UTF_8')")
+
+            except Exception:
+                logger.exception(f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+
+            else:
+                log_locale('After switching to UTF-8 encoding (same language)')
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')

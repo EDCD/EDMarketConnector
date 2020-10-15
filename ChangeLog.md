@@ -1,6 +1,17 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.4
+===
+
+The only change from 4.1.3 is to insert some Windows version checks before
+even attempting to set a UTF-8 encoding.  We'll now only attempt this if the
+user is *not* on Windows, or is on at least Windows 10 1903.
+
+For unknown reasons no exception was being thrown under some circumstances (in
+this case running under an earlier Windows 10, but with EDMarketConnector.exe
+set to run in Windows 7 compatibility mode for some unknown reason).
+
 Release 4.1.3
 ===
 
