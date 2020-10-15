@@ -206,19 +206,28 @@ elif platform == 'win32':
 
     CalculatePopupWindowPosition = None
     if not is_wine:
-        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-        CalculatePopupWindowPosition.argtypes = [
-            ctypes.POINTER(POINT),
-            ctypes.POINTER(SIZE),
-            UINT,
-            ctypes.POINTER(RECT),
-            ctypes.POINTER(RECT)
-        ]
+        try:
+            CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
 
-        GetParent = ctypes.windll.user32.GetParent
-        GetParent.argtypes = [HWND]
-        GetWindowRect = ctypes.windll.user32.GetWindowRect
-        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
+        except AttributeError as e:
+            logger.error(
+                'win32 and not is_wine, but ctypes.windll.user32.CalculatePopupWindowPosition invalid',
+                exc_info=e
+            )
+
+        else:
+            CalculatePopupWindowPosition.argtypes = [
+                ctypes.POINTER(POINT),
+                ctypes.POINTER(SIZE),
+                UINT,
+                ctypes.POINTER(RECT),
+                ctypes.POINTER(RECT)
+            ]
+
+            GetParent = ctypes.windll.user32.GetParent
+            GetParent.argtypes = [HWND]
+            GetWindowRect = ctypes.windll.user32.GetWindowRect
+            GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
 
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
     SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]

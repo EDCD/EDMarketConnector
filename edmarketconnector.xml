@@ -168,10 +168,33 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.1</title>
+			<title>Release 4.1.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.3</h2>
+<ul>
+<li>
+<p>Revert to not setting <code>gdiScaling</code> in the application manifest.  This should
+fix <a href="https://github.com/EDCD/EDMarketConnector/issues/734">#734</a>
+and <a href="https://github.com/EDCD/EDMarketConnector/issues/739">#739</a>.</p>
+<p>A side effect will be that the radio buttons in Preferences &gt; Appearance
+for the Theme selection will once more be improperly sized under any UI
+scaling.  This is a Tcl/Tk bug which they have fixed in their code, but not
+yet made a new release containing that fix.  We'll have it fixed when Tcl/Tk
+release a fixed version <em>and</em> Python releases a fixed version, that we use,
+that includes the fixed libraries.</p>
+</li>
+<li>
+<p>Wraps some ctypes code in a try/except in order to fix
+<a href="https://github.com/EDCD/EDMarketConnector/issues/737">#737</a>.  This should
+benefit anyone running EDMC under any Wine version that doesn't set the
+registry key we check for.</p>
+<p><strong>Note, however, that we recommend running EDMarketConnector natively from
+source if using Linux</strong>.</p>
+</li>
+</ul>
 
 <h2>Release 4.1.2</h2>
 <ul>
@@ -793,11 +816,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.2/EDMarketConnector_win_4.1.2.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.3/EDMarketConnector_win_4.1.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.2"
-				length="11362304"
+				sparkle:version="4.1.3"
+				length="11354112"
 				type="application/octet-stream"
 			/>
 		</item>
