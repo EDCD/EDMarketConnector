@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os
-from os.path import dirname, join, normpath
-import sys
+from os.path import join
 from sys import platform
 
 from config import config
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
 
 if platform == 'darwin':
 
@@ -181,7 +182,7 @@ elif platform == 'win32':
 
     import atexit
     import ctypes
-    from ctypes.wintypes import *
+    from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
     import threading
     import winsound
 
@@ -288,52 +289,88 @@ elif platform == 'win32':
             atexit.register(self.unregister)
 
         def register(self, root, keycode, modifiers):
+            """Register the hotkey handler."""
             self.root = root
+
             if self.thread:
+                logger.debug('Was already registered, unregistering...')
                 self.unregister()
+
             if keycode or modifiers:
-                self.thread = threading.Thread(target = self.worker, name = 'Hotkey "%x:%x"' % (keycode,modifiers), args = (keycode,modifiers))
+                logger.debug('Creating thread worker...')
+                self.thread = threading.Thread(target=self.worker, name=f'Hotkey "{keycode}:{modifiers}"', args=(keycode, modifiers))
                 self.thread.daemon = True
+                logger.debug('Starting thread worker...')
                 self.thread.start()
+                logger.debug('Done.')
 
         def unregister(self):
+            """Unregister the hotkey handling."""
             thread = self.thread
+
             if thread:
+                logger.debug('Thread is/was running')
                 self.thread = None
+                logger.debug('Telling thread WM_QUIT')
                 PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
-                thread.join()	# Wait for it to unregister hotkey and quit
+                logger.debug('Joining thread')
+                thread.join()  # Wait for it to unregister hotkey and quit
+
+            else:
+                logger.debug('No thread')
+
+            logger.debug('Done.')
 
         def worker(self, keycode, modifiers):
-
+            """Handle hotkeys."""
+            logger.debug('Begin...')
             # Hotkey must be registered by the thread that handles it
-            if not RegisterHotKey(None, 1, modifiers|MOD_NOREPEAT, keycode):
+            if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
+                logger.debug("We're not the right thread?")
                 self.thread = None
                 return
 
-            fake = INPUT(INPUT_KEYBOARD, INPUT_union(ki = KEYBDINPUT(keycode, keycode, 0, 0, None)))
+            fake = INPUT(INPUT_KEYBOARD, INPUT_union(ki=KEYBDINPUT(keycode, keycode, 0, 0, None)))
 
             msg = MSG()
+            logger.debug('Entering GetMessage() loop...')
             while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
+                logger.debug('Got message')
                 if msg.message == WM_HOTKEY:
-                    if config.getint('hotkey_always') or WindowTitle(GetForegroundWindow()).startswith('Elite - Dangerous'):
+                    logger.debug('WM_HOTKEY')
+
+                    if (
+                            config.getint('hotkey_always')
+                            or WindowTitle(GetForegroundWindow()).startswith('Elite - Dangerous')
+                    ):
+                        logger.debug('Sending event <<Invoke>>')
                         self.root.event_generate('<<Invoke>>', when="tail")
+
                     else:
-                        # Pass the key on
+                        logger.debug('Passing key on')
                         UnregisterHotKey(None, 1)
                         SendInput(1, fake, ctypes.sizeof(INPUT))
-                        if not RegisterHotKey(None, 1, modifiers|MOD_NOREPEAT, keycode):
+                        if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
+                            logger.debug("We aren't registered for this ?")
                             break
 
                 elif msg.message == WM_SND_GOOD:
-                    winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)	# synchronous
+                    logger.debug('WM_SND_GOOD')
+                    winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)  # synchronous
+
                 elif msg.message == WM_SND_BAD:
-                    winsound.PlaySound(self.snd_bad,  winsound.SND_MEMORY)	# synchronous
+                    logger.debug('WM_SND_BAD')
+                    winsound.PlaySound(self.snd_bad,  winsound.SND_MEMORY)  # synchronous
+
                 else:
+                    logger.debug('Something else')
                     TranslateMessage(ctypes.byref(msg))
                     DispatchMessage(ctypes.byref(msg))
 
+            logger.debug('Exited GetMessage() loop.')
             UnregisterHotKey(None, 1)
             self.thread = None
+            logger.debug('Done.')
 
         def acquire_start(self):
             pass

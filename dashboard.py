@@ -1,16 +1,13 @@
 import json
 from calendar import timegm
-from operator import itemgetter
-from os import listdir
 from os.path import isdir, isfile, join, getsize
 from sys import platform
 import time
 
-if __debug__:
-    from traceback import print_exc
-
 from config import config
+from EDMCLogging import get_main_logger
 
+logger = get_main_logger()
 
 if platform=='darwin':
     from watchdog.observers import Observer
@@ -28,7 +25,7 @@ else:
 # Status.json handler
 class Dashboard(FileSystemEventHandler):
 
-    _POLL = 1		# Fallback polling interval
+    _POLL = 1  # Fallback polling interval
 
     def __init__(self):
         FileSystemEventHandler.__init__(self)	# futureproofing - not need for current version of watchdog
@@ -39,16 +36,21 @@ class Dashboard(FileSystemEventHandler):
         self.status = {}		# Current status for communicating status back to main thread
 
     def start(self, root, started):
+        """Start monitoring of Journal directory."""
+        logger.debug('Starting...')
         self.root = root
         self.session_start = started
 
         logdir = config.get('journaldir') or config.default_journal_dir
         if not logdir or not isdir(logdir):
+            logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
 
         if self.currentdir and self.currentdir != logdir:
+            logger.debug(f"{self.currentdir=} != {logdir=}")
             self.stop()
+
         self.currentdir = logdir
 
         # Set up a watchdog observer.
@@ -57,42 +59,66 @@ class Dashboard(FileSystemEventHandler):
         # any non-standard logdir might be on a network drive and poll instead.
         polling = platform != 'win32'
         if not polling and not self.observer:
+            logger.debug('Setting up observer...')
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
+            logger.debug('Done')
+
         elif polling and self.observer:
+            logger.debug('Using polling, stopping observer...')
             self.observer.stop()
             self.observer = None
+            logger.debug('Done')
 
         if not self.observed and not polling:
+            logger.debug('Starting observer...')
             self.observed = self.observer.schedule(self, self.currentdir)
+            logger.debug('Done')
 
-        if __debug__:
-            print('%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
+        logger.info(f'{polling and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
         # being supported on this filesystem.
+        logger.debug('Polling once to process pre-existing data, and check whether watchdog thread crashed...')
         self.root.after(int(self._POLL * 1000/2), self.poll, True)
+        logger.debug('Done.')
 
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Dashboard')
+        """Stop monitoring dashboard."""
+        logger.debug('Stopping monitoring Dashboard')
         self.currentdir = None
+
         if self.observed:
+            logger.debug('Was observed')
             self.observed = None
+            logger.debug('Unscheduling all observer')
             self.observer.unschedule_all()
+            logger.debug('Done.')
+
         self.status = {}
+        logger.debug('Done.')
 
     def close(self):
+        """Close down dashboard."""
+        logger.debug('Calling self.stop()')
         self.stop()
+
         if self.observer:
+            logger.debug('Calling self.observer.stop()')
             self.observer.stop()
+            logger.debug('Done')
+
         if self.observer:
+            logger.debug('Joining self.observer...')
             self.observer.join()
+            logger.debug('Done')
             self.observer = None
+
+        logger.debug('Done.')
 
     def poll(self, first_time=False):
         if not self.currentdir:
@@ -119,16 +145,20 @@ class Dashboard(FileSystemEventHandler):
         try:
             with open(join(self.currentdir, 'Status.json'), 'rb') as h:
                 data = h.read().strip()
-                if data:	# Can be empty if polling while the file is being re-written
+
+                if data:  # Can be empty if polling while the file is being re-written
                     entry = json.loads(data)
 
                     # Status file is shared between beta and live. So filter out status not in this game session.
-                    if (timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start and
-                        self.status != entry):
+                    if (
+                            timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start
+                            and self.status != entry
+                    ):
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
-        except:
-            if __debug__: print_exc()
+
+        except Exception:
+            logger.exception('Processing Status.json')
 
 # singleton
 dashboard = Dashboard()

@@ -5,8 +5,9 @@ import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
 
-from config import appname
+from EDMCLogging import get_main_logger
 
+logger = get_main_logger()
 
 if sys.platform == 'win32':
     from ctypes import *
@@ -225,10 +226,20 @@ else:	# Linux / Run from source
         def close(self):
             thread = self.thread
             if thread:
+                logger.debug('Thread')
                 self.thread = None
+
                 if self.httpd:
+                    logger.info('Shutting down httpd')
                     self.httpd.shutdown()
-                thread.join()	# Wait for it to quit
+
+                logger.info('Joining thread')
+                thread.join()  # Wait for it to quit
+
+            else:
+                logger.debug('No thread')
+
+            logger.debug('Done.')
 
         def worker(self):
             self.httpd.serve_forever()
