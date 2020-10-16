@@ -541,6 +541,8 @@ def worker() -> None:
                     r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
                     r.raise_for_status()
                     this.discardedEvents = set(r.json())
+                    r.close()
+
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
                     if not this.discardedEvents:
                         logger.error(
@@ -632,7 +634,10 @@ def worker() -> None:
 
                         pending = []
 
+                    r.close()
+
                 break  # No exception, so assume success
+
             except Exception as e:
                 logger.debug(f'Attempt to send API events: retrying == {retrying}', exc_info=e)
                 retrying += 1
