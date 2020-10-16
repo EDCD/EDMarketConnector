@@ -1,5 +1,4 @@
 """Fetch kill switches from EDMC Repo."""
-from ast import parse
 from typing import Dict, List, NamedTuple, Optional, Union, cast
 
 import requests
@@ -73,7 +72,7 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KILL_SWITCH_J
     """
     logger.info("Attempting to fetch kill switches")
     try:
-        data = requests.get(target).json()
+        data = requests.get(target, timeout=10).json()
 
     except ValueError as e:
         logger.warning(f"Failed to get kill switches, data was invalid: {e}")
