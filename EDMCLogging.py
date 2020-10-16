@@ -43,7 +43,7 @@ import pathlib
 import tempfile
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple, cast
 
 from config import appcmdname, appname, config
 
@@ -82,6 +82,15 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     args,
     **kwargs
 )
+
+if TYPE_CHECKING:
+    # Fake type that we can use here to tell type checkers that trace exists
+    class LoggerMixin(logging.Logger):
+        """LoggerMixin is a fake class that tells type checkers that trace exists on a given type."""
+
+        def trace(self, message, *args, **kwargs) -> None:
+            """Fake trace method."""
+            return self._log(LEVEL_TRACE, message, args, **kwargs)
 
 
 class Logger:
@@ -147,13 +156,13 @@ class Logger:
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
-    def get_logger(self) -> logging.Logger:
+    def get_logger(self) -> 'LoggerMixin':
         """
         Obtain the self.logger of the class instance.
 
         Not to be confused with logging.getLogger().
         """
-        return self.logger
+        return cast('LoggerMixin', self.logger)
 
     def get_streamhandler(self) -> logging.Handler:
         """
@@ -186,7 +195,7 @@ class Logger:
             logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
-def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> logging.Logger:
+def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> 'LoggerMixin':
     """
     Return a logger suitable for a plugin.
 
@@ -222,7 +231,7 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> lo
 
     plugin_logger.addFilter(EDMCContextFilter())
 
-    return plugin_logger
+    return cast('LoggerMixin', plugin_logger)
 
 
 class EDMCContextFilter(logging.Filter):
@@ -449,14 +458,14 @@ class EDMCContextFilter(logging.Filter):
         return module_name
 
 
-def get_main_logger() -> logging.Logger:
+def get_main_logger() -> 'LoggerMixin':
     """Return the correct logger for how the program is being run."""
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
-        return logging.getLogger(appname)
+        return cast('LoggerMixin', logging.getLogger(appname))
     else:
         # Must be the CLI
-        return logging.getLogger(appcmdname)
+        return cast(LoggerMixin, logging.getLogger(appcmdname))
 
 
 # Singleton
@@ -470,4 +479,4 @@ else:
     base_logger_name = appcmdname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
-logger = edmclogger.get_logger()
+logger: 'LoggerMixin' = edmclogger.get_logger()
