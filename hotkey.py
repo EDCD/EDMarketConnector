@@ -291,8 +291,10 @@ elif platform == 'win32':
         def __init__(self):
             self.root = None
             self.thread = None
-            self.snd_good = open(join(config.respath_path, 'snd_good.wav'), 'rb').read()
-            self.snd_bad  = open(join(config.respath_path, 'snd_bad.wav'),  'rb').read()
+            with open(join(config.respath, 'snd_good.wav'), 'rb') as sg:
+                self.snd_good = sg.read()
+            with open(join(config.respath, 'snd_bad.wav'),  'rb') as sb:
+                self.snd_bad = sb.read()
             atexit.register(self.unregister)
 
         def register(self, root, keycode, modifiers):
