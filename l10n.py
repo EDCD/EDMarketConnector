@@ -131,6 +131,7 @@ class _Translations:
         """Load all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
+
         h = self.file(lang, plugin_path)
         if not h:
             return {}
@@ -144,6 +145,7 @@ class _Translations:
 
                 elif not _Translations.COMMENT_RE.match(line):
                     logger.debug(f'Bad translation: {line.strip()}')
+        h.close()
 
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
