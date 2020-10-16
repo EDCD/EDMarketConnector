@@ -137,7 +137,9 @@ class CAPIData(UserDict):
 
         self.original_data = self.data.copy()  # Just in case
 
-        self.check_modules_ships()
+        # Only the /profile end point has star port, and thus ships/modules.
+        if self.data.get('lastStarport'):
+            self.check_modules_ships()
 
     def check_modules_ships(self) -> None:
         modules: Dict[str, Any] = self.data['lastStarport'].get('modules')
