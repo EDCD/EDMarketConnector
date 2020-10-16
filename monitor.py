@@ -121,10 +121,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         }
 
     def start(self, root: 'tkinter.Tk'):
+        """Start journal monitoring."""
+        logger.debug('Begin...')
         self.root = root
         journal_dir = config.get('journaldir') or config.default_journal_dir
 
         if journal_dir is None:
+            logger.debug('journal_dir was None, setting ""')
             journal_dir = ''
 
         # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
@@ -163,31 +166,39 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # any non-standard logdir might be on a network drive and poll instead.
         polling = bool(config.get('journaldir')) and platform != 'win32'
         if not polling and not self.observer:
+            logger.debug('Not polling, no observer, starting an observer...')
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
+            logger.debug('Done')
 
         elif polling and self.observer:
+            logger.debug('Polling, but observer, so stopping observer...')
             self.observer.stop()
             self.observer = None
+            logger.debug('Done')
 
         if not self.observed and not polling:
+            logger.debug('Not observed and not polling, setting observed...')
             self.observed = self.observer.schedule(self, self.currentdir)
+            logger.debug('Done')
 
         logger.info(f'{"Polling" if polling else "Monitoring"} Journal Folder: "{self.currentdir}"')
         logger.info(f'Start Journal File: "{self.logfile}"')
 
         if not self.running():
-            logger.debug('Starting Journal worker')
+            logger.debug('Starting Journal worker thread...')
             self.thread = threading.Thread(target=self.worker, name='Journal worker')
             self.thread.daemon = True
             self.thread.start()
+            logger.debug('Done')
 
+        logger.debug('Done.')
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Journal')
+        """Stop journal monitoring."""
+        logger.debug('Stopping monitoring Journal')
 
         self.currentdir = None
         self.version = None
@@ -203,20 +214,35 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates = None
         self.systemaddress = None
         self.is_beta = False
+
         if self.observed:
+            logger.debug('self.observed: Calling unschedule_all()')
             self.observed = None
             self.observer.unschedule_all()
+            logger.debug('Done')
 
         self.thread = None  # Orphan the worker thread - will terminate at next poll
 
+        logger.debug('Done.')
+
     def close(self):
+        """Close journal monitoring."""
+        logger.debug('Calling self.stop()...')
         self.stop()
-        if self.observer:
-            self.observer.stop()
+        logger.debug('Done')
 
         if self.observer:
+            logger.debug('Calling self.observer.stop()...')
+            self.observer.stop()
+            logger.debug('Done')
+
+        if self.observer:
+            logger.debug('Joining self.observer thread...')
             self.observer.join()
             self.observer = None
+            logger.debug('Done')
+
+        logger.debug('Done.')
 
     def running(self):
         return self.thread and self.thread.is_alive()
@@ -255,6 +281,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         else:
             loghandle = None
 
+        logger.debug('Now at end of latest file.')
+
         self.game_was_running = self.game_running()
 
         if self.live:
@@ -290,6 +318,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # watch, but that may have unforseen differences in behaviour.
         emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
 
+        logger.debug('Entering loop...')
         while True:
 
             # Check whether new log file started, e.g. client (re)started.
@@ -346,8 +375,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             if self.game_was_running:
                 if not self.game_running():
                     logger.info('Detected exit from game, synthesising ShutDown event')
+                    timestamp = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
                     self.event_queue.append(
-                        '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                        f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
                     )
 
                     self.root.event_generate('<<JournalEvent>>', when="tail")
@@ -355,6 +385,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             else:
                 self.game_was_running = self.game_running()
+
+        logger.debug('Done.')
 
     def parse_entry(self, line: str):
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
