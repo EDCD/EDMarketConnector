@@ -300,11 +300,15 @@ class EDMCContextFilter(logging.Filter):
             frame_info = inspect.getframeinfo(frame)
             args, _, _, value_dict = inspect.getargvalues(frame)
             if len(args) and args[0] in ('self', 'cls'):
-                frame_class = value_dict[args[0]]
+                frame_class: 'object' = value_dict[args[0]]
 
                 if frame_class:
+                    # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
+                    if (name := frame_info.function).startswith("__") and not name.endswith("__"):
+                        name = f'_{frame_class.__class__.__name__}{frame_info.function}'
+
                     # Find __qualname__ of the caller
-                    fn = getattr(frame_class, frame_info.function)
+                    fn = getattr(frame_class, name, None)
                     if fn and fn.__qualname__:
                         caller_qualname = fn.__qualname__
 
