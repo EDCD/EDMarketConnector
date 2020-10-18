@@ -11,12 +11,13 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, TextIO
+from typing import Sequence, TextIO, Tuple
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 from companion import CAPIData, category_map
 from config import applongname, appversion, config
@@ -26,7 +27,7 @@ from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if sys.platform != 'win32':
-    from fcntl import lockf, LOCK_EX, LOCK_NB
+    from fcntl import LOCK_EX, LOCK_NB, lockf
 
 
 if TYPE_CHECKING:
@@ -127,6 +128,10 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID
         :param msg: the payload to send
         """
+        if killswitch.is_disabled('plugins.eddn_send'):
+            logger.warning("eddn.send has been disabled via killswitch. Returning")
+            return
+
         uploader_id = cmdr
 
         to_send: OrderedDictT[str, str] = OrderedDict([
