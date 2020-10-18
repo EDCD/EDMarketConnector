@@ -1,6 +1,5 @@
 """Inara Sync."""
 
-from companion import CAPIData
 import dataclasses
 import json
 import sys
@@ -17,9 +16,11 @@ from typing import Sequence, Union, cast
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
+from companion import CAPIData
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -1202,6 +1203,9 @@ def new_worker():
     logger.debug('Starting...')
     while True:
         events = get_events()
+        if killswitch.is_disabled("plugins.inara.worker"):
+            logger.warning("Inara worker disabled via killswitch")
+            return
 
         for creds, event_list in events.items():
             if not event_list:
