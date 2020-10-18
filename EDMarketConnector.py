@@ -12,6 +12,7 @@ import webbrowser
 from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, isdir, join
+import killswitch
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple, cast
@@ -1564,6 +1565,9 @@ sys.path: {sys.path}'''
     print(f'{applongname} {appversion}')
 
     Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
+
+    logger.debug('fetching killswitches...')
+    killswitch.setup_main_list()
 
     root = tk.Tk(className=appname.lower())
 
