@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, 
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appversion, config
@@ -507,6 +508,10 @@ def worker() -> None:
         else:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
+
+        if killswitch.is_disabled("plugins.eddn.worker"):
+            logger.warning('EDSM worker has been disabled via kill switch. Not uploading data.')
+            continue
 
         retrying = 0
         while retrying < 3:
