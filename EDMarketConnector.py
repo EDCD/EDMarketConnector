@@ -1334,6 +1334,10 @@ sys.path: {sys.path}'''
 
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
+                self.__test()
+
+            def __test(self):
+                logger.debug("A call from A.B.__test")
 
     # abinit = A.B()
 
