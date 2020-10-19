@@ -509,7 +509,7 @@ def worker() -> None:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
 
-        if killswitch.is_disabled("plugins.eddn.worker"):
+        if killswitch.is_disabled("plugins.edsm.worker"):
             logger.warning('EDSM worker has been disabled via kill switch. Not uploading data.')
             continue
 

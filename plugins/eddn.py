@@ -127,7 +127,7 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID
         :param msg: the payload to send
         """
-        if killswitch.is_disabled('plugins.eddn_send'):
+        if killswitch.is_disabled('plugins.eddn.send'):
             logger.warning("eddn.send has been disabled via killswitch. Returning")
             return
 
