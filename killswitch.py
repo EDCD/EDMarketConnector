@@ -78,8 +78,8 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KILL_SWITCH_J
         logger.warning(f"Failed to get kill switches, data was invalid: {e}")
         return None
 
-    except requests.exceptions.BaseHTTPError as e:
-        logger.warning(f"unable to connect to {target:r}: {e}")
+    except (requests.exceptions.BaseHTTPError, requests.exceptions.ConnectionError) as e:
+        logger.warning(f"unable to connect to {target!r}: {e}")
         return None
 
     return data
