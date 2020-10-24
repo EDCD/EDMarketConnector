@@ -1205,7 +1205,7 @@ def new_worker():
         events = get_events()
         if killswitch.is_disabled("plugins.inara.worker"):
             logger.warning("Inara worker disabled via killswitch")
-            return
+            continue
 
         for creds, event_list in events.items():
             if not event_list:
