@@ -1,5 +1,5 @@
 """Fetch kill switches from EDMC Repo."""
-from typing import Dict, List, NamedTuple, Optional, Union, cast
+from typing import Dict, List, NamedTuple, Optional, Tuple, Union, cast
 
 import requests
 import semantic_version
@@ -19,7 +19,14 @@ class KillSwitch(NamedTuple):
     """One version's set of kill switches."""
 
     version: semantic_version.Version
-    kills: List[str]
+    kills: Dict[str, str]
+
+
+class DisabledResult(NamedTuple):
+    """DisabledResult is the result returned from various is_disabled calls."""
+
+    disbled: bool
+    reason: str
 
 
 class KillSwitchSet:
@@ -28,7 +35,7 @@ class KillSwitchSet:
     def __init__(self, kill_switches: List[KillSwitch]) -> None:
         self.kill_switches = kill_switches
 
-    def is_disabled(self, id: str, *, version=_current_version) -> bool:
+    def is_disabled(self, id: str, *, version=_current_version) -> DisabledResult:
         """
         Return whether or not the given feature ID is disabled by a killswitch for the given version.
 
@@ -40,9 +47,9 @@ class KillSwitchSet:
             if version != ks.version:
                 continue
 
-            return id in ks.kills
+            return DisabledResult(id in ks.kills, ks.kills.get(id, ""))
 
-        return False
+        return DisabledResult(False, "")
 
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
@@ -111,7 +118,7 @@ def parse_kill_switches(data: KILL_SWITCH_JSON_DICT) -> List[KillSwitch]:
             logger.warning(f'could not parse killswitch idx {idx}: {e}')
             continue
 
-        ks = KillSwitch(version=ver, kills=cast(List[str], ks_data['kills']))
+        ks = KillSwitch(version=ver, kills=cast(Dict[str, str], ks_data['kills']))
         out.append(ks)
 
     return out
@@ -148,7 +155,7 @@ def setup_main_list():
     active = KillSwitchSet(parse_kill_switches(data))
 
 
-def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> bool:
+def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> DisabledResult:
     """
     Query the global KillSwitchSet for whether or not a given ID is disabled.
 
