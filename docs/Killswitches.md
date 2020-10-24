@@ -6,18 +6,18 @@ EDMarketConnector implements a Kill Switch system that allows us to disable feat
 
 Killswitches are stored in a JSON file that is queried by EDMC on startup. The format is as follows:
 
-|             Key |  Type   | Description                                                   |
-| --------------: | :-----: | :------------------------------------------------------------ |
-|       `version` | integer | the version of the Kill Switch JSON file, always 1            |
-|  `last_updated` | string  | When last the kill switches were updated (for human use only) |
-| `kill_switches` |  array  | The kill switches this file contains (expanded below)         |
+|             Key |   Type   | Description                                                   |
+| --------------: | :------: | :------------------------------------------------------------ |
+|       `version` |  `int`   | the version of the Kill Switch JSON file, always 1            |
+|  `last_updated` | `string` | When last the kill switches were updated (for human use only) |
+| `kill_switches` | `array`  | The kill switches this file contains (expanded below)         |
 
 The `kill_switches` array contains kill switch objects. Each contains two fields:
 
 |       Key |        Type        | Description                                                             |
 | --------: | :----------------: | :---------------------------------------------------------------------- |
 | `version` | `semantic version` | The version of EDMC these kill switches apply to (Must be valid semver) |
-|   `kills` |  array of strings  | The different keys to disable                                           |
+|   `kills` |  `Dict[str, str]`  | The different keys to disable, and the reason for the disable           |
 An example follows:
 
 ```json
@@ -27,7 +27,9 @@ An example follows:
     "kill_switches": [
         {
             "version": "1.0.0",
-            "kills": ["plugins.eddn.send"]
+            "kills": {
+                "plugins.eddn.send": "some reason"
+            }
         }
     ]
 }
