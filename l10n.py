@@ -140,12 +140,12 @@ class Translations(object):
     def available(self):
         path = self.respath()
         if getattr(sys, 'frozen', False) and platform == 'darwin':
-            available = set([
+            available = {
                 x[:-len('.lproj')] for x in os.listdir(path)
                 if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
-            ])
+            }
         else:
-            available = set([x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')])
+            available = {x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')}
         return available
 
     # Available language names by code
@@ -279,10 +279,11 @@ if __name__ == "__main__":
     import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen = {}
-    for f in (sorted([x for x in os.listdir('.') if x.endswith('.py')]) +
-              sorted([join('plugins', x) for x in isdir('plugins')
-                      and os.listdir('plugins') or [] if x.endswith('.py')])
-              ):
+    for f in (  # TODO: need to be sorted and then concatted like this?
+        sorted(x for x in os.listdir('.') if x.endswith('.py')) +
+        sorted(join('plugins', x) for x in isdir('plugins')
+               and os.listdir('plugins') or [] if x.endswith('.py'))
+    ):
         with codecs.open(f, 'r', 'utf-8') as h:
             lineno = 0
             for line in h:
