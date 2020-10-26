@@ -33,29 +33,16 @@ You will need several pieces of software installed, or the files from their
  [v3.7.9](https://www.python.org/downloads/release/python-379/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
-1. [py2exe](https://github.com/albertosottile/py2exe):
-	1. Install the python module.  There are two options here.
-		1. You can use the latest release version [0.9.3.2](https://github.com/albertosottile/py2exe/releases/tag/v0.9.3.2)
-	 	 and the current Marginal 'python3' branch as-is.  This contains a
-	 	 small hack in `setup.py` to ensure `sqlite3.dll` is packaged.
-
-				pip install py2exe-0.9.3.2-cp37-none-win32.whl
-		1.  Or you can use a pre-release version, [0.9.4.0](https://bintray.com/alby128/py2exe/download_file?file_path=py2exe-0.9.4.0-cp37-none-win32.whl), see [this py2exe issue](https://github.com/albertosottile/py2exe/issues/23#issuecomment-541359225),
-		 which packages that DLL file correctly.
-
-				pip install py2exe-0.9.4.0-cp37-none-win32.whl
-		 You can then edit out the following line from `setup.py`, but it
-		 does no harm:
-
-				%s/DLLs/sqlite3.dll' % (sys.base_prefix),
+1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
+ so will be picked up with the `pip install` below.  Latest tested as per
+ `requirements-dev.txt`.
 
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
 	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
 	1. The easiest way is to utilise the `requirements-dev.txt` file:
-	 `python -m pip install -r requirements-dev.txt`. This will install all
-	 dependencies plus anything required for development *other than py2exe, see
-	 above*.
+	 `python -m pip install --user -r requirements-dev.txt`. This will install
+	 all dependencies plus anything required for development.
 	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
 	 and ensure the modules listed there are installed as per the version
 	 requirements.
