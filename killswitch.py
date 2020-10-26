@@ -18,7 +18,7 @@ _current_version: semantic_version.Version = semantic_version.Version(config.app
 class KillSwitch(NamedTuple):
     """One version's set of kill switches."""
 
-    version: semantic_version.Version
+    version: semantic_version.SimpleSpec
     kills: Dict[str, str]
 
 
@@ -44,7 +44,7 @@ class KillSwitchSet:
         :return: a namedtuple indicating status and reason, if any
         """
         for ks in self.kill_switches:
-            if version != ks.version:
+            if version not in ks.version:
                 continue
 
             return DisabledResult(id in ks.kills, ks.kills.get(id, ""))
@@ -120,7 +120,7 @@ def parse_kill_switches(data: KILL_SWITCH_JSON_DICT) -> List[KillSwitch]:
 
     for idx, ks_data in enumerate(kill_switches):
         try:
-            ver = semantic_version.Version(ks_data['version'])
+            ver = semantic_version.SimpleSpec(ks_data['version'])
 
         except ValueError as e:
             logger.warning(f'could not parse killswitch idx {idx}: {e}')
