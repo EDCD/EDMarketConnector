@@ -22,12 +22,8 @@ autopep8==1.5.4
 grip>=4.5.2
 
 # Packaging
-# This isn't available via 'pip install', but is via git@tag
-# Refs:
-#	<https://pip.pypa.io/en/stable/user_guide/#requirements-files>
-#	<https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support>
-#py2exe==0.10.0.2
-git+https://github.com/albertosottile/py2exe.git@v0.10.0.2#egg=py2exe; sys_platform == 'win32'
+# We only need py2exe on windows.
+py2exe==0.10.0.2; sys_platform == 'win32'
 
 # All of the normal requirements
 -r requirements.txt
