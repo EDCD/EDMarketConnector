@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 try:
     locale.setlocale(locale.LC_ALL, '')
-except:
+except Exception:
     # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
     print("Can't set locale!")
 
@@ -100,7 +100,7 @@ class Translations(object):
                         self.translations[plugin] = self.contents(lang, plugin_path)
                     except UnicodeDecodeError as e:
                         print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
-                    except:
+                    except Exception:
                         print_exc()
             builtins.__dict__['_'] = self.translate
 
@@ -175,7 +175,7 @@ class Translations(object):
             if exists(f):
                 try:
                     return codecs.open(f, 'r', 'utf-8')
-                except:
+                except Exception:
                     print_exc()
             return None
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
@@ -220,12 +220,12 @@ class Locale(object):
         if platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
         else:
-            try:
+            try:  # TODO: This is awful.
                 return locale.atoi(string)
-            except:
+            except Exception:
                 try:
                     return locale.atof(string)
-                except:
+                except Exception:
                     return None
 
     # Returns list of preferred language codes in RFC4646 format i.e. "lang[-script][-region]"
