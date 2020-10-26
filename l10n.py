@@ -3,18 +3,18 @@
 # Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead.
 #
 
+import builtins
 import codecs
-from collections import OrderedDict
+import locale
 import numbers
 import os
-from os.path import basename, dirname, exists, isfile, isdir, join, normpath
 import re
 import sys
+from collections import OrderedDict
+from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
 from traceback import print_exc
-import builtins
 
-import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
 except:
@@ -39,7 +39,7 @@ elif platform == 'win32':
     MUI_LANGUAGE_ID = 4
     MUI_LANGUAGE_NAME = 8
     GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
-    GetUserPreferredUILanguages.argtypes = [ DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong) ]
+    GetUserPreferredUILanguages.argtypes = [DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)]
     GetUserPreferredUILanguages.restype = BOOL
 
     LOCALE_NAME_USER_DEFAULT = None
@@ -50,20 +50,20 @@ elif platform == 'win32':
 
 class Translations(object):
 
-    FALLBACK = 'en'	# strings in this code are in English
+    FALLBACK = 'en'  # strings in this code are in English
     FALLBACK_NAME = 'English'
 
-    TRANS_RE   = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
+    TRANS_RE = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
     COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
 
-
     def __init__(self):
-        self.translations = { None: {} }
+        self.translations = {None: {}}
 
     def install_dummy(self):
         # For when translation is not desired or not available
-        self.translations = { None: {} }
-        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')	# Promote strings to Unicode for consistency
+        self.translations = {None: {}}
+        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(
+            u'{CR}', u'\n')  # Promote strings to Unicode for consistency
 
     def install(self, lang=None):
         available = self.available()
@@ -76,16 +76,16 @@ class Translations(object):
                 if preferred in available:
                     lang = preferred
                 elif '-'.join(components[0:2]) in available:
-                    lang = '-'.join(components[0:2])	# language-script
+                    lang = '-'.join(components[0:2])  # language-script
                 elif components[0] in available:
-                    lang = components[0]	# just base language
+                    lang = components[0]  # just base language
                 if lang:
                     break
 
         if lang not in self.available():
             self.install_dummy()
         else:
-            self.translations = { None: self.contents(lang) }
+            self.translations = {None: self.contents(lang)}
             for plugin in os.listdir(config.plugin_dir):
                 plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
                 if isdir(plugin_path):
@@ -112,7 +112,7 @@ class Translations(object):
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
                         print('Bad translation: %s' % line.strip())
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
-            translations[LANGUAGE_ID] = str(lang)	# Replace language name with code if missing
+            translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
         return translations
 
     def translate(self, x, context=None):
@@ -131,7 +131,7 @@ class Translations(object):
     # Returns list of available language codes
     def available(self):
         path = self.respath()
-        if getattr(sys, 'frozen', False) and platform=='darwin':
+        if getattr(sys, 'frozen', False) and platform == 'darwin':
             available = set([x[:-len('.lproj')] for x in os.listdir(path) if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))])
         else:
             available = set([x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')])
@@ -140,16 +140,16 @@ class Translations(object):
     # Available language names by code
     def available_names(self):
         names = OrderedDict([
-            (None, _('Default')),	# Appearance theme and language setting
+            (None, _('Default')),  # Appearance theme and language setting
         ])
         names.update(sorted([(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
                             [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
-                            key=lambda x: x[1]))	# Sort by name
+                            key=lambda x: x[1]))  # Sort by name
         return names
 
     def respath(self):
         if getattr(sys, 'frozen', False):
-            if platform=='darwin':
+            if platform == 'darwin':
                 return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
             else:
                 return join(dirname(sys.executable), LOCALISATION_DIR)
@@ -167,7 +167,7 @@ class Translations(object):
                 except:
                     print_exc()
             return None
-        elif getattr(sys, 'frozen', False) and platform=='darwin':
+        elif getattr(sys, 'frozen', False) and platform == 'darwin':
             return codecs.open(join(self.respath(), '%s.lproj' % lang, 'Localizable.strings'), 'r', 'utf-16')
         else:
             return codecs.open(join(self.respath(), '%s.strings' % lang), 'r', 'utf-8')
@@ -176,7 +176,7 @@ class Translations(object):
 class Locale(object):
 
     def __init__(self):
-        if platform=='darwin':
+        if platform == 'darwin':
             self.int_formatter = NSNumberFormatter.alloc().init()
             self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
             self.float_formatter = NSNumberFormatter.alloc().init()
@@ -206,7 +206,7 @@ class Locale(object):
     def numberFromString(self, string):
         # Uses the current system locale, irrespective of language choice.
         # Returns None if the string is not parsable, otherwise an integer or float.
-        if platform=='darwin':
+        if platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
         else:
             try:
@@ -222,10 +222,10 @@ class Locale(object):
     # script is a capitalized 4 alpha ISO 15924 code and region is an uppercase 2 alpha ISO 3166 code
     def preferredLanguages(self):
 
-        if platform=='darwin':
+        if platform == 'darwin':
             return NSLocale.preferredLanguages()
 
-        elif platform=='win32':
+        elif platform == 'win32':
 
             def wszarray_to_list(array):
                 offset = 0
@@ -245,9 +245,10 @@ class Locale(object):
                     return wszarray_to_list(buf)
             return []
 
-        else:	# POSIX
+        else:  # POSIX
             lang = locale.getlocale()[0]
-            return lang and [lang.replace('_','-')] or []
+            return lang and [lang.replace('_', '-')] or []
+
 
 # singletons
 Locale = Locale()
@@ -258,7 +259,7 @@ Translations = Translations()
 # parsing is limited - only single ' or " delimited strings, and only one string per line
 if __name__ == "__main__":
     import re
-    regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')	# match a single line python literal
+    regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen = {}
     for f in (sorted([x for x in os.listdir('.') if x.endswith('.py')]) +
               sorted([join('plugins', x) for x in isdir('plugins') and os.listdir('plugins') or [] if x.endswith('.py')])):
@@ -267,7 +268,7 @@ if __name__ == "__main__":
             for line in h:
                 lineno += 1
                 match = regexp.search(line)
-                if match and not seen.get(match.group(2)):	# only record first commented instance of a string
+                if match and not seen.get(match.group(2)):  # only record first commented instance of a string
                     seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
     if seen:
         if not isdir(LOCALISATION_DIR):
@@ -279,4 +280,3 @@ if __name__ == "__main__":
                 template.write('/* %s */\n' % (seen[thing]))
             template.write('"%s" = "%s";\n\n' % (thing, thing))
         template.close()
-
