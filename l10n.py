@@ -37,7 +37,9 @@ if platform == 'darwin':
 
 elif platform == 'win32':
     import ctypes
-    from ctypes.wintypes import *
+    from ctypes.wintypes import BOOL, DWORD, LPCVOID, LPCWSTR, LPWSTR
+    if TYPE_CHECKING:
+        import ctypes.windll  # type: ignore # Magic to make linters not complain that windll is special
 
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd318124%28v=vs.85%29.aspx
     MUI_LANGUAGE_ID = 4
