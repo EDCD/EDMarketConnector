@@ -99,7 +99,7 @@ class Translations(object):
                     try:
                         self.translations[plugin] = self.contents(lang, plugin_path)
                     except UnicodeDecodeError as e:
-                        print('Malformed file %s.strings in plugin %s: %s' % (lang, plugin, e))
+                        print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
                     except:
                         print_exc()
             builtins.__dict__['_'] = self.translate
@@ -118,7 +118,7 @@ class Translations(object):
                         to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
                         translations[match.group(1).replace(r'\"', u'"')] = to_set
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
-                        print('Bad translation: %s' % line.strip())
+                        print(f'Bad translation: {line.strip()}')
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
         return translations
@@ -128,12 +128,12 @@ class Translations(object):
             context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
             if __debug__:
                 if self.translations[None] and context not in self.translations:
-                    print('No translations for "%s"' % context)
+                    print(f'No translations for {context!r}')
             return self.translations.get(context, {}).get(x) or self.translate(x)
         else:
             if __debug__:
                 if self.translations[None] and x not in self.translations[None]:
-                    print('Missing translation: "%s"' % x)
+                    print(f'Missing translation: {x!r}')
             return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
     # Returns list of available language codes
@@ -171,7 +171,7 @@ class Translations(object):
 
     def file(self, lang, plugin_path=None):
         if plugin_path:
-            f = join(plugin_path, '%s.strings' % lang)
+            f = join(plugin_path, f'{lang}.strings')
             if exists(f):
                 try:
                     return codecs.open(f, 'r', 'utf-8')
@@ -179,9 +179,9 @@ class Translations(object):
                     print_exc()
             return None
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
-            return codecs.open(join(self.respath(), '%s.lproj' % lang, 'Localizable.strings'), 'r', 'utf-16')
+            return codecs.open(join(self.respath(), f'{lang}.lproj', 'Localizable.strings'), 'r', 'utf-16')
         else:
-            return codecs.open(join(self.respath(), '%s.strings' % lang), 'r', 'utf-8')
+            return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
 
 
 class Locale(object):
@@ -290,15 +290,15 @@ if __name__ == "__main__":
                 match = regexp.search(line)
                 if match and not seen.get(match.group(2)):  # only record first commented instance of a string
                     seen[match.group(2)] = (
-                        (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
+                        (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{basename(f)}]'
                     )
     if seen:
         if not isdir(LOCALISATION_DIR):
             os.mkdir(LOCALISATION_DIR)
         template = codecs.open(join(LOCALISATION_DIR, 'en.template'), 'w', 'utf-8')
-        template.write('/* Language name */\n"%s" = "%s";\n\n' % (LANGUAGE_ID, 'English'))
+        template.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
         for thing in sorted(seen, key=str.lower):
             if seen[thing]:
-                template.write('/* %s */\n' % (seen[thing]))
-            template.write('"%s" = "%s";\n\n' % (thing, thing))
+                template.write(f'/* {seen[thing]} */\n')
+            template.write(f'"{thing}" = "{thing}";\n\n')
         template.close()
