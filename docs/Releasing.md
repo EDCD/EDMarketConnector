@@ -33,17 +33,16 @@ You will need several pieces of software installed, or the files from their
  [v3.8.6](https://www.python.org/downloads/release/python-386/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
-1. [py2exe](https://github.com/albertosottile/py2exe) - Install the python
- module.  You will need at least [version 0.10.0.1](https://github.com/albertosottile/py2exe/releases/tag/v0.10.0.1),
-specifically [py2exe-0.10.0.1-cp38-none-win32.whl](https://github.com/albertosottile/py2exe/releases/download/v0.10.0.1/py2exe-0.10.0.1-cp38-none-win32.whl).
+1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
+ so will be picked up with the `pip install` below.  Latest tested as per
+ `requirements-dev.txt`.
 
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
 	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
 	1. The easiest way is to utilise the `requirements-dev.txt` file:
 	 `python -m pip install --user -r requirements-dev.txt`. This will install
-	 all dependencies plus anything required for development *other than
-	 py2exe, see above*.
+	 all dependencies plus anything required for development.
 	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
 	 and ensure the modules listed there are installed as per the version
 	 requirements.
