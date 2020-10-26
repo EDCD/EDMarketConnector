@@ -1203,7 +1203,7 @@ def new_worker():
     logger.debug('Starting...')
     while True:
         events = get_events()
-        if (res := killswitch.is_disabled("plugins.inara.worker")).disbled:
+        if (res := killswitch.get_disabled("plugins.inara.worker")).disabled:
             logger.warning(f"Inara worker disabled via killswitch. ({res.reason})")
             continue
 

@@ -511,7 +511,7 @@ def worker() -> None:
 
         retrying = 0
         while retrying < 3:
-            if (res := killswitch.is_disabled("plugins.edsm.worker")).disbled:
+            if (res := killswitch.get_disabled("plugins.edsm.worker")).disabled:
                 logger.warning(
                     f'EDSM worker has been disabled via kill switch. Not uploading data. ({res.reason})'
                 )

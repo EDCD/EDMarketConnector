@@ -1,5 +1,5 @@
 """Fetch kill switches from EDMC Repo."""
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union, cast
+from typing import Dict, List, NamedTuple, Optional, Union, cast
 
 import requests
 import semantic_version
@@ -25,7 +25,7 @@ class KillSwitch(NamedTuple):
 class DisabledResult(NamedTuple):
     """DisabledResult is the result returned from various is_disabled calls."""
 
-    disbled: bool
+    disabled: bool
     reason: str
 
 
@@ -35,13 +35,13 @@ class KillSwitchSet:
     def __init__(self, kill_switches: List[KillSwitch]) -> None:
         self.kill_switches = kill_switches
 
-    def is_disabled(self, id: str, *, version=_current_version) -> DisabledResult:
+    def get_disabled(self, id: str, *, version=_current_version) -> DisabledResult:
         """
         Return whether or not the given feature ID is disabled by a killswitch for the given version.
 
         :param id: The feature ID to check
         :param version: The version to check killswitches for, defaults to the current EDMC version
-        :return: a bool indicating status
+        :return: a namedtuple indicating status and reason, if any
         """
         for ks in self.kill_switches:
             if version != ks.version:
@@ -50,6 +50,14 @@ class KillSwitchSet:
             return DisabledResult(id in ks.kills, ks.kills.get(id, ""))
 
         return DisabledResult(False, "")
+
+    def is_disabled(self, id: str, *, version=_current_version) -> bool:
+        """Return whether or not a given feature ID is disabled for the given version."""
+        return self.get_disabled(id, version=version).disabled
+
+    def get_reason(self, id: str, version=_current_version) -> str:
+        """Return a reason for why the given id is disabled for the given version, if any."""
+        return self.get_disabled(id, version=version).reason
 
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
@@ -155,17 +163,27 @@ def setup_main_list():
     active = KillSwitchSet(parse_kill_switches(data))
 
 
-def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> DisabledResult:
+def get_disabled(id: str, *, version: semantic_version.Version = _current_version) -> DisabledResult:
     """
     Query the global KillSwitchSet for whether or not a given ID is disabled.
 
     See KillSwitchSet#is_disabled for more information
     """
+    return active.get_disabled(id, version=version)
+
+
+def is_disabled(id: str, *, version=_current_version) -> bool:
+    """Query the global KillSwitchSet#is_disabled method."""
     return active.is_disabled(id, version=version)
+
+
+def get_reason(id: str, *, version=_current_version) -> str:
+    """Query the global KillSwitchSet#get_reason method."""
+    return active.get_reason(id, version=version)
 
 
 if __name__ == "__main__":
     setup_main_list()
     print(f'{_current_version=}')
-    print(f"{is_disabled('test')=}")
+    print(f"{get_disabled('test')=}")
     print(f"{active=}")
