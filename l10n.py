@@ -14,6 +14,10 @@ from collections import OrderedDict
 from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
 from traceback import print_exc
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    def _(x: str) -> str: ...
 
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -39,7 +43,10 @@ elif platform == 'win32':
     MUI_LANGUAGE_ID = 4
     MUI_LANGUAGE_NAME = 8
     GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
-    GetUserPreferredUILanguages.argtypes = [DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)]
+    GetUserPreferredUILanguages.argtypes = [
+        DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)
+    ]
+
     GetUserPreferredUILanguages.restype = BOOL
 
     LOCALE_NAME_USER_DEFAULT = None
@@ -108,7 +115,8 @@ class Translations(object):
                 if line.strip():
                     match = Translations.TRANS_RE.match(line)
                     if match:
-                        translations[match.group(1).replace(r'\"', u'"')] = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+                        to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+                        translations[match.group(1).replace(r'\"', u'"')] = to_set
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
                         print('Bad translation: %s' % line.strip())
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
@@ -132,7 +140,10 @@ class Translations(object):
     def available(self):
         path = self.respath()
         if getattr(sys, 'frozen', False) and platform == 'darwin':
-            available = set([x[:-len('.lproj')] for x in os.listdir(path) if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))])
+            available = set([
+                x[:-len('.lproj')] for x in os.listdir(path)
+                if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
+            ])
         else:
             available = set([x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')])
         return available
@@ -239,9 +250,16 @@ class Locale(object):
 
             num = ctypes.c_ulong()
             size = ctypes.c_ulong(0)
-            if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value):
+            if (
+                GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size))
+                and size.value
+            ):
                 buf = ctypes.create_unicode_buffer(size.value)
-                if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
+                if (
+                    GetUserPreferredUILanguages(
+                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
+                    )
+                ):
                     return wszarray_to_list(buf)
             return []
 
@@ -262,14 +280,18 @@ if __name__ == "__main__":
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen = {}
     for f in (sorted([x for x in os.listdir('.') if x.endswith('.py')]) +
-              sorted([join('plugins', x) for x in isdir('plugins') and os.listdir('plugins') or [] if x.endswith('.py')])):
+              sorted([join('plugins', x) for x in isdir('plugins')
+                      and os.listdir('plugins') or [] if x.endswith('.py')])
+              ):
         with codecs.open(f, 'r', 'utf-8') as h:
             lineno = 0
             for line in h:
                 lineno += 1
                 match = regexp.search(line)
                 if match and not seen.get(match.group(2)):  # only record first commented instance of a string
-                    seen[match.group(2)] = (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
+                    seen[match.group(2)] = (
+                        (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + '[%s]' % basename(f)
+                    )
     if seen:
         if not isdir(LOCALISATION_DIR):
             os.mkdir(LOCALISATION_DIR)
