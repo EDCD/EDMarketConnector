@@ -155,9 +155,11 @@ class Translations(object):
         names = OrderedDict([
             (None, _('Default')),  # Appearance theme and language setting
         ])
-        names.update(sorted([(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
-                            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
-                            key=lambda x: x[1]))  # Sort by name
+        names.update(sorted(
+            [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +  # type: ignore
+            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
+            key=lambda x: x[1]
+        ))  # Sort by name
         return names
 
     def respath(self):
