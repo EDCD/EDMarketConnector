@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 try:
     locale.setlocale(locale.LC_ALL, '')
+
 except Exception:
     # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
     print("Can't set locale!")
@@ -33,7 +34,9 @@ LOCALISATION_DIR = 'L10n'
 
 
 if platform == 'darwin':
-    from Foundation import NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
+    from Foundation import (  # type: ignore # exists on Darwin
+        NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
+    )
 
 elif platform == 'win32':
     import ctypes
@@ -71,28 +74,31 @@ class Translations(object):
     def install_dummy(self):
         # For when translation is not desired or not available
         self.translations = {None: {}}
-        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(
-            u'{CR}', u'\n')  # Promote strings to Unicode for consistency
+        # Promote strings to Unicode for consistency
+        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n') 
 
     def install(self, lang=None):
         available = self.available()
         available.add(Translations.FALLBACK)
-
         if not lang:
             # Choose the default language
             for preferred in Locale.preferredLanguages():
                 components = preferred.split('-')
                 if preferred in available:
                     lang = preferred
+
                 elif '-'.join(components[0:2]) in available:
                     lang = '-'.join(components[0:2])  # language-script
+
                 elif components[0] in available:
                     lang = components[0]  # just base language
+
                 if lang:
                     break
 
         if lang not in self.available():
             self.install_dummy()
+
         else:
             self.translations = {None: self.contents(lang)}
             for plugin in os.listdir(config.plugin_dir):
@@ -100,10 +106,13 @@ class Translations(object):
                 if isdir(plugin_path):
                     try:
                         self.translations[plugin] = self.contents(lang, plugin_path)
+
                     except UnicodeDecodeError as e:
                         print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
+
                     except Exception:
                         print_exc()
+
             builtins.__dict__['_'] = self.translate
 
     def contents(self, lang, plugin_path=None):
@@ -112,6 +121,7 @@ class Translations(object):
         h = self.file(lang, plugin_path)
         if not h:
             return {}
+
         else:
             for line in h:
                 if line.strip():
@@ -119,10 +129,13 @@ class Translations(object):
                     if match:
                         to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
                         translations[match.group(1).replace(r'\"', u'"')] = to_set
+
                     elif __debug__ and not Translations.COMMENT_RE.match(line):
                         print(f'Bad translation: {line.strip()}')
+
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
+
         return translations
 
     def translate(self, x, context=None):
@@ -131,11 +144,14 @@ class Translations(object):
             if __debug__:
                 if self.translations[None] and context not in self.translations:
                     print(f'No translations for {context!r}')
+
             return self.translations.get(context, {}).get(x) or self.translate(x)
+
         else:
             if __debug__:
                 if self.translations[None] and x not in self.translations[None]:
                     print(f'Missing translation: {x!r}')
+
             return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
     # Returns list of available language codes
@@ -146,8 +162,10 @@ class Translations(object):
                 x[:-len('.lproj')] for x in os.listdir(path)
                 if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
             }
+
         else:
             available = {x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')}
+
         return available
 
     # Available language names by code
@@ -160,16 +178,20 @@ class Translations(object):
             [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
             key=lambda x: x[1]
         ))  # Sort by name
+
         return names
 
     def respath(self):
         if getattr(sys, 'frozen', False):
             if platform == 'darwin':
                 return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
+
             else:
                 return join(dirname(sys.executable), LOCALISATION_DIR)
+
         elif __file__:
             return join(dirname(__file__), LOCALISATION_DIR)
+
         else:
             return LOCALISATION_DIR
 
@@ -179,11 +201,15 @@ class Translations(object):
             if exists(f):
                 try:
                     return codecs.open(f, 'r', 'utf-8')
+
                 except Exception:
                     print_exc()
+
             return None
+
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
             return codecs.open(join(self.respath(), f'{lang}.lproj', 'Localizable.strings'), 'r', 'utf-16')
+
         else:
             return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
 
@@ -205,16 +231,20 @@ class Locale(object):
         # places if the input is a float, or none if the input is an int.
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
+
         if platform == 'darwin':
             if not decimals and isinstance(number, numbers.Integral):
                 return self.int_formatter.stringFromNumber_(number)
+
             else:
                 self.float_formatter.setMinimumFractionDigits_(decimals or 5)
                 self.float_formatter.setMaximumFractionDigits_(decimals or 5)
                 return self.float_formatter.stringFromNumber_(number)
+
         else:
             if not decimals and isinstance(number, numbers.Integral):
                 return locale.format('%d', number, True)
+
             else:
                 return locale.format('%.*f', (decimals or 5, number), True)
 
@@ -223,12 +253,15 @@ class Locale(object):
         # Returns None if the string is not parsable, otherwise an integer or float.
         if platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
+
         else:
             try:  # TODO: This is awful.
                 return locale.atoi(string)
+
             except Exception:
                 try:
                     return locale.atof(string)
+
                 except Exception:
                     return None
 
@@ -249,6 +282,7 @@ class Locale(object):
                     if sz:
                         yield sz
                         offset += len(sz)+1
+
                     else:
                         break
 
@@ -265,6 +299,7 @@ class Locale(object):
                     )
                 ):
                     return wszarray_to_list(buf)
+
             return []
 
         else:  # POSIX
@@ -300,10 +335,13 @@ if __name__ == "__main__":
     if seen:
         if not isdir(LOCALISATION_DIR):
             os.mkdir(LOCALISATION_DIR)
+
         template = codecs.open(join(LOCALISATION_DIR, 'en.template'), 'w', 'utf-8')
         template.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
         for thing in sorted(seen, key=str.lower):
             if seen[thing]:
                 template.write(f'/* {seen[thing]} */\n')
+
             template.write(f'"{thing}" = "{thing}";\n\n')
+
         template.close()
