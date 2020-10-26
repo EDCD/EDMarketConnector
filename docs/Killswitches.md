@@ -14,10 +14,10 @@ Killswitches are stored in a JSON file that is queried by EDMC on startup. The f
 
 The `kill_switches` array contains kill switch objects. Each contains two fields:
 
-|       Key |        Type        | Description                                                             |
-| --------: | :----------------: | :---------------------------------------------------------------------- |
-| `version` | `semantic version` | The version of EDMC these kill switches apply to (Must be valid semver) |
-|   `kills` |  `Dict[str, str]`  | The different keys to disable, and the reason for the disable           |
+|       Key |       Type       | Description                                                                  |
+| --------: | :--------------: | :--------------------------------------------------------------------------- |
+| `version` |  `version spec`  | The version of EDMC these kill switches apply to (Must be valid semver spec) |
+|   `kills` | `Dict[str, str]` | The different keys to disable, and the reason for the disable                |
 An example follows:
 
 ```json
@@ -37,7 +37,7 @@ An example follows:
 
 ### Versions
 
-Versions are checked using equality checks on `semantic_version.Version` instances. Meaning that **all** fields are checked (ie, Major, Minor, Patch, Prerelease, and Build).
+Versions are checked using contains checks on `semantic_version.SimpleSpec` instances.
 
 ## Plugin support
 
