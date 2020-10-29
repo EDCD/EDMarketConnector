@@ -322,6 +322,11 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
 ) -> None:
     """Journal entry hook."""
+    if (ks := killswitch.get_disabled("plugins.inara.journal")).disabled:
+        logger.warning(f"INARA support has been disabled via killswitch: {ks.reason}")
+        plug.show_error("INARA disabled. See Log.")
+        return
+
     event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']

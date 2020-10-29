@@ -23,15 +23,22 @@
 #
 
 
-from companion import CAPIData
 import sys
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
 import requests
 
+import EDMCLogging
+import killswitch
+import plug
+from companion import CAPIData
 from config import config
 
 if TYPE_CHECKING:
     from tkinter import Tk
+
+
+logger = EDMCLogging.get_main_logger()
 
 
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
@@ -64,6 +71,7 @@ def station_url(system_name: str, station_name: str) -> str:
 
     return system_url(system_name)
 
+
 def plugin_start3(plugin_dir):
     return 'eddb'
 
@@ -83,7 +91,13 @@ def prefs_changed(cmdr, is_beta):
     # through correctly.  We don't want a static string.
     pass
 
+
 def journal_entry(cmdr, is_beta, system, station, entry, state):
+    if (ks := killswitch.get_disabled('plugins.eddb.journal')).disabled:
+        logger.warning(f'Journal processing for EDDB has been disabled: {ks.reason}')
+        plug.show_error('EDDB Journal processing disabled. See Log')
+        return
+
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
