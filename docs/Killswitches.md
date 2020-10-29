@@ -48,12 +48,9 @@ be used to query the kill switch set, see the docstrings for more information on
 ## Currently supported killswitch strings
 
 The current recognised (to EDMC and its internal plugins) killswitch strings are as follows:
-| Kill Switch             | Description                                                                               |
-| :---------------------- | :---------------------------------------------------------------------------------------- |
-| `plugins.eddn.send`     | Disables all use of the send method on EDDN (effectively disables EDDN updates)           |
-| `plugins.eddn.journal`  | Disables all journal processing for EDDN                                                  |
-| `plugins.edsm.worker`   | Disables the send portion of the EDSM worker thread (effectively disables EDSM updates)   |
-| `plugins.edsm.journal`  | Disables all journal processing for EDSM                                                  |
-| `plugins.inara.worker`  | Disables the send portion of the INARA worker thread (effectively disables INARA updates) |
-| `plugins.inara.journal` | Disables all journal processing for INARA                                                 |
-| `plugins.eddn.journal`  | Disables all journal processing for EDDN                                                   |
+| Kill Switch                                          | Description                                                                                  |
+| :--------------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `plugins.eddn.send`                                  | Disables all use of the send method on EDDN (effectively disables EDDN updates)              |
+| `plugins.(eddn|inara|edsm|eddb).journal`             | Disables all journal processing for EDDN/EDSM/INARA                                          |
+| `plugins.(edsm|inara).worker`                        | Disables the EDSM/INARA worker thread (effectively disables updates) (does not close thread) |
+| `plugins.(eddn|inara|edsm).journal.event.$eventname` | Specific events to disable processing for                                                    |
