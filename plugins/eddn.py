@@ -614,6 +614,9 @@ def journal_entry(  # noqa: C901
         logger.warning(f"EDDN journal handler has been disabled via killswitch: {ks.reason}")
         plug.show_error("EDDN journal handler disabled. See Log.")
         return
+    elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event{entry["name"]}')).disabled:
+        logger.warning(f'Handling of event {entry["name"]} disabled via killswitch: {ks.reason}')
+        return
 
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
