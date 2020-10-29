@@ -18,6 +18,7 @@ import requests
 
 import killswitch
 import myNotebook as nb  # noqa: N813
+import plug
 from companion import CAPIData, category_map
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
@@ -609,6 +610,11 @@ def plugin_stop() -> None:
 def journal_entry(  # noqa: C901
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> Optional[str]:
+    if (ks := killswitch.get_disabled("plugins.eddn.journal")).disabled:
+        logger.warning(f"EDDN journal handler has been disabled via killswitch: {ks.reason}")
+        plug.show_error("EDDN journal handler disabled. See Log.")
+        return
+
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
         filtered: OrderedDictT[str, Any] = OrderedDict()
