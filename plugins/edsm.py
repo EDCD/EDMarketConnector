@@ -339,9 +339,12 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> None:
     """Journal Entry hook."""
-    if (ks := killswitch.get_disabled("plugins.edsm.journal")).disabled:
-        logger.warning(f"EDSM Journal handler disabled via killswitch: {ks.reason}")
-        plug.show_error("EDSM Handler disabled. See Log.")
+    if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
+        logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+        plug.show_error('EDSM Handler disabled. See Log.')
+        return
+    elif (ks := killswitch.get_disabled(f'plugins.edsm.journal.event.{entry["name"]}')).disabled:
+        logger.warning(f'Handling of event {entry["name"]} has been disabled via killswitch: {ks.reason}')
         return
 
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
