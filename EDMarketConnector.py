@@ -1435,6 +1435,50 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
 
+def setup_killswitches():
+    """Download and setup the main killswitch list."""
+    logger.debug('fetching killswitches...')
+    killswitch.setup_main_list()
+
+
+def show_killswitch_poppup(root=None):
+    """Show a warning popup if there are any killswitches that match the current version."""
+    if len(kills := killswitch.kills_for_version()) == 0:
+        return
+
+    text = (
+        "Some EDMC Features have been disabled for known issues.\n"
+        "Please update EDMC as soon as possible to resolve any issues.\n"
+    )
+
+    tl = tk.Toplevel(root)
+    tl.wm_attributes('-topmost', True)
+    tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
+
+    tl.columnconfigure(1, weight=1)
+    tl.title("EDMC Features have been disabled")
+
+    frame = tk.Frame(tl)
+    frame.grid()
+    t = tk.Label(frame, text=text)
+    t.grid(columnspan=2)
+    idx = 1
+
+    for version in kills:
+        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        idx += 1
+        for id, reason in version.kills.items():
+            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
+            tk.Label(frame, text=reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            idx += 1
+        idx += 1
+
+    ok_button = tk.Button(frame, text="ok", command=tl.destroy)
+    ok_button.grid(columnspan=2, sticky=tk.EW)
+
+    theme.apply(tl)
+
+
 # Run the app
 if __name__ == "__main__":
     # Command-line arguments
@@ -1531,7 +1575,8 @@ sys.path: {sys.path}'''
 
             except Exception:
                 logger.exception(
-                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')"
+                )
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
@@ -1566,9 +1611,7 @@ sys.path: {sys.path}'''
 
     Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
-    logger.debug('fetching killswitches...')
-    killswitch.setup_main_list()
-
+    setup_killswitches()
     root = tk.Tk(className=appname.lower())
 
     # UI Scaling
@@ -1622,6 +1665,7 @@ sys.path: {sys.path}'''
     root.wm_attributes('-alpha', ui_transparency / 100)
 
     root.after(0, messagebox_not_py3)
+    root.after(1, show_killswitch_poppup, root)
     root.mainloop()
 
     logger.info('Exiting')
