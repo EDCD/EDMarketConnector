@@ -51,13 +51,22 @@ class KillSwitchSet:
 
         return DisabledResult(False, "")
 
-    def is_disabled(self, id: str, *, version=_current_version) -> bool:
+    def is_disabled(self, id: str, *, version: semantic_version.Version = _current_version) -> bool:
         """Return whether or not a given feature ID is disabled for the given version."""
         return self.get_disabled(id, version=version).disabled
 
-    def get_reason(self, id: str, version=_current_version) -> str:
+    def get_reason(self, id: str, version: semantic_version.Version = _current_version) -> str:
         """Return a reason for why the given id is disabled for the given version, if any."""
         return self.get_disabled(id, version=version).reason
+
+    def kills_for_version(self, version: semantic_version.Version = _current_version) -> List[KillSwitch]:
+        """
+        Get all killswitch entries that apply to the given version.
+
+        :param version: the version to check against, defaults to the current EDMC version
+        :return: the matching kill switches
+        """
+        return [k for k in self.kill_switches if version in k.version]
 
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
@@ -172,14 +181,19 @@ def get_disabled(id: str, *, version: semantic_version.Version = _current_versio
     return active.get_disabled(id, version=version)
 
 
-def is_disabled(id: str, *, version=_current_version) -> bool:
+def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> bool:
     """Query the global KillSwitchSet#is_disabled method."""
     return active.is_disabled(id, version=version)
 
 
-def get_reason(id: str, *, version=_current_version) -> str:
+def get_reason(id: str, *, version: semantic_version.Version = _current_version) -> str:
     """Query the global KillSwitchSet#get_reason method."""
     return active.get_reason(id, version=version)
+
+
+def kills_for_version(version: semantic_version.Version = _current_version) -> List[KillSwitch]:
+    """Query the global KillSwitchSet for kills matching a particular version."""
+    return active.kills_for_version(version)
 
 
 if __name__ == "__main__":
