@@ -326,7 +326,8 @@ def journal_entry(
         logger.warning(f'INARA support has been disabled via killswitch: {ks.reason}')
         plug.show_error('INARA disabled. See Log.')
         return
-    elif (ks := killswitch.get_disabled(f''))
+    elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
 
     event_name: str = entry['event']
     this.cmdr = cmdr
