@@ -346,7 +346,7 @@ import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
 import tkinter.messagebox
-from tkinter import ttk
+from tkinter import Toplevel, ttk
 
 import commodity
 import companion
@@ -1447,7 +1447,7 @@ def show_killswitch_poppup(root=None):
         return
 
     text = (
-        "Some EDMC Features have been disabled for known issues.\n"
+        "Some EDMC Features have been disabled due to known issues.\n"
         "Please update EDMC as soon as possible to resolve any issues.\n"
     )
 
