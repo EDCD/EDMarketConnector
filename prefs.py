@@ -739,9 +739,42 @@ class PreferencesDialog(tk.Toplevel):
                 text=_('100 means Default{CR}Restart Required for{CR}changes to take effect!')
             ).grid(column=3, padx=self.PADX, pady=2*self.PADY, sticky=tk.E, row=cur_row)
 
+        # Transparency slider
+        ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
+            columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
+        )
+
+        with row as cur_row:
+            nb.Label(appearance_frame, text="Main window transparency").grid(
+                padx=self.PADX, pady=self.PADY*2, sticky=tk.W, row=cur_row
+            )
+            self.transparency = tk.IntVar()
+            self.transparency.set(config.getint('ui_transparency') or 100)  # Default to 100 for users
+            self.transparency_bar = tk.Scale(
+                appearance_frame,
+                variable=self.transparency,
+                orient=tk.HORIZONTAL,
+                length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
+                from_=100,
+                to=5,
+                tickinterval=10,
+                resolution=5,
+                command=lambda _: self.parent.wm_attributes("-alpha", self.transparency.get() / 100)
+            )
+
+            nb.Label(appearance_frame, text="100 means fully opaque.\nWindow is updated in real time").grid(
+                column=3,
+                padx=self.PADX,
+                pady=self.PADY*2,
+                sticky=tk.E,
+                row=cur_row
+            )
+
+            self.transparency_bar.grid(column=1, sticky=tk.W, row=cur_row)
+
         # Always on top
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=3, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
         )
 
         self.ontop_button = nb.Checkbutton(
@@ -1122,6 +1155,7 @@ class PreferencesDialog(tk.Toplevel):
         Translations.install(config.get_str('language', default=None))  # type: ignore # This sets self in weird ways.
 
         config.set('ui_scale', self.ui_scale.get())
+        config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
