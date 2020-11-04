@@ -762,7 +762,14 @@ class PreferencesDialog(tk.Toplevel):
                 command=lambda _: self.parent.wm_attributes("-alpha", self.transparency.get() / 100)
             )
 
-            nb.Label(appearance_frame, text="100 means fully opaque.\nWindow is updated in real time").grid(
+            nb.Label(
+                appearance_frame,
+                text=(
+                    "100 means fully opaque.\n"
+                    "Window is updated in real time\n"
+                    "do NOT use this with the transparent theme on windows"
+                )
+            ).grid(
                 column=3,
                 padx=self.PADX,
                 pady=self.PADY*2,
