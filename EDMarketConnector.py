@@ -1598,6 +1598,13 @@ sys.path: {sys.path}'''
             )
             config.set('plugins_not_py3_last', int(time()))
 
+    # UI Transparency
+    ui_transparency = config.getint('ui_transparency')
+    if ui_transparency == 0:
+        ui_transparency = 100
+
+    root.wm_attributes('-alpha', ui_transparency / 100)
+
     root.after(0, messagebox_not_py3)
     root.mainloop()
 
