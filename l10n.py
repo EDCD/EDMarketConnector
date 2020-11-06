@@ -58,7 +58,7 @@ elif platform == 'win32':
     GetNumberFormatEx.restype = ctypes.c_int
 
 
-class Translations(object):
+class _Translations:
 
     FALLBACK = 'en'  # strings in this code are in English
     FALLBACK_NAME = 'English'
@@ -86,7 +86,7 @@ class Translations(object):
         :param lang: The language to translate to, defaults to the preferred language
         """
         available = self.available()
-        available.add(Translations.FALLBACK)
+        available.add(_Translations.FALLBACK)
         if not lang:
             # Choose the default language
             for preferred in Locale.preferredLanguages():
@@ -133,12 +133,12 @@ class Translations(object):
         else:
             for line in h:
                 if line.strip():
-                    match = Translations.TRANS_RE.match(line)
+                    match = _Translations.TRANS_RE.match(line)
                     if match:
                         to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
                         translations[match.group(1).replace(r'\"', u'"')] = to_set
 
-                    elif __debug__ and not Translations.COMMENT_RE.match(line):
+                    elif __debug__ and not _Translations.COMMENT_RE.match(line):
                         print(f'Bad translation: {line.strip()}')
 
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
@@ -190,7 +190,7 @@ class Translations(object):
         ])
         names.update(sorted(
             [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +  # type: ignore
-            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
+            [(_Translations.FALLBACK, _Translations.FALLBACK_NAME)],
             key=lambda x: x[1]
         ))  # Sort by name
 
@@ -238,7 +238,7 @@ class Translations(object):
             return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
 
 
-class Locale(object):
+class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
     def __init__(self):
@@ -350,8 +350,8 @@ class Locale(object):
 
 
 # singletons
-Locale = Locale()
-Translations = Translations()
+Locale = _Locale()
+Translations = _Translations()
 
 
 # generate template strings file - like xgettext
