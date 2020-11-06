@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-#
-# Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead.
-#
+"""Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
 
 import builtins
 import codecs
@@ -72,12 +70,21 @@ class Translations(object):
         self.translations = {None: {}}
 
     def install_dummy(self):
-        # For when translation is not desired or not available
+        """
+        Install a dummy translation function.
+
+        Use when translation is not desired or not available
+        """
         self.translations = {None: {}}
         # Promote strings to Unicode for consistency
-        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n') 
+        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
     def install(self, lang=None):
+        """
+        Install the translation function to the _ builtin.
+
+        :param lang: The language to translate to, defaults to the preferred language
+        """
         available = self.available()
         available.add(Translations.FALLBACK)
         if not lang:
@@ -116,6 +123,7 @@ class Translations(object):
             builtins.__dict__['_'] = self.translate
 
     def contents(self, lang, plugin_path=None):
+        """Get all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
         h = self.file(lang, plugin_path)
@@ -139,6 +147,13 @@ class Translations(object):
         return translations
 
     def translate(self, x, context=None):
+        """
+        Translate the given string to the current lang.
+
+        :param x: The string to translate
+        :param context: ????, defaults to None
+        :return: The translated string
+        """
         if context:
             context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
             if __debug__:
@@ -154,8 +169,8 @@ class Translations(object):
 
             return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
-    # Returns list of available language codes
     def available(self):
+        """Return a list of available language codes."""
         path = self.respath()
         if getattr(sys, 'frozen', False) and platform == 'darwin':
             available = {
@@ -168,8 +183,8 @@ class Translations(object):
 
         return available
 
-    # Available language names by code
     def available_names(self):
+        """Available language names by code."""
         names = OrderedDict([
             (None, _('Default')),  # Appearance theme and language setting
         ])
@@ -182,6 +197,7 @@ class Translations(object):
         return names
 
     def respath(self):
+        """Path to localisation files."""
         if getattr(sys, 'frozen', False):
             if platform == 'darwin':
                 return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
@@ -196,6 +212,13 @@ class Translations(object):
             return LOCALISATION_DIR
 
     def file(self, lang, plugin_path=None):
+        """
+        Open the given lang file for reading.
+
+        :param lang: The lang file to open
+        :param plugin_path: path to plugins dir, to check for plugin based lang files, defaults to None
+        :return: the opened file (Note: This should be closed when done)
+        """
         if plugin_path:
             f = join(plugin_path, f'{lang}.strings')
             if exists(f):
@@ -207,6 +230,7 @@ class Translations(object):
 
             return None
 
+        # TODO: python open() supports encoding
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
             return codecs.open(join(self.respath(), f'{lang}.lproj', 'Localizable.strings'), 'r', 'utf-16')
 
@@ -215,6 +239,7 @@ class Translations(object):
 
 
 class Locale(object):
+    """Locale holds a few utility methods to convert data to and from localized versions."""
 
     def __init__(self):
         if platform == 'darwin':
@@ -226,9 +251,15 @@ class Locale(object):
             self.float_formatter.setMaximumFractionDigits_(5)
 
     def stringFromNumber(self, number, decimals=None):
-        # Uses the current system locale, irrespective of language choice.
-        # Unless `decimals` is specified, the number will be formatted with 5 decimal
-        # places if the input is a float, or none if the input is an int.
+        """
+        Convert a number to a string.
+
+        Uses the current system locale, irrespective of language choice.
+
+        :param number: The number to stringify
+        :param decimals: The number of decimals to return, defaults to 5 if the given number is a float, otherwise None
+        :return: the stringified number
+        """
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
@@ -249,8 +280,13 @@ class Locale(object):
                 return locale.format('%.*f', (decimals or 5, number), True)
 
     def numberFromString(self, string):
-        # Uses the current system locale, irrespective of language choice.
-        # Returns None if the string is not parsable, otherwise an integer or float.
+        """
+        Convert a string to a number using the system locale.
+
+        Note that this uses the current SYSTEM locale regardless of set language.
+        :param string: The string to convert
+        :return: None if the string cannot be parsed, otherwise an int or float dependant on input data.
+        """
         if platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
 
@@ -265,11 +301,17 @@ class Locale(object):
                 except Exception:
                     return None
 
-    # Returns list of preferred language codes in RFC4646 format i.e. "lang[-script][-region]"
-    # Where lang is a lowercase 2 alpha ISO 639-1 or 3 alpha ISO 639-2 code,
-    # script is a capitalized 4 alpha ISO 15924 code and region is an uppercase 2 alpha ISO 3166 code
     def preferredLanguages(self):
+        """
+        Return a list of preferred language codes.
 
+        Returned data is in RFC4646 format (i.e. "lang[-script][-region]")
+        Where lang is a lowercase 2 alpha ISO 693-1 or 3 alpha ISO 693-2 code
+        Where script is a capitalized 4 alpha ISO 15924 code
+        Where region is an uppercase 2 alpha ISO 3166 code
+
+        :return: The preferred language list
+        """
         if platform == 'darwin':
             return NSLocale.preferredLanguages()
 
