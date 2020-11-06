@@ -13,7 +13,7 @@ from collections import OrderedDict
 from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
 from traceback import print_exc
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Set, Union, cast
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -68,7 +68,7 @@ class _Translations:
     COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
 
     def __init__(self) -> None:
-        self.translations: Dict[Optional[str], Dict[Any, Any]] = {None: {}}
+        self.translations: Dict[Optional[str], Dict[str, str]] = {None: {}}
 
     def install_dummy(self) -> None:
         """
@@ -80,7 +80,7 @@ class _Translations:
         # Promote strings to Unicode for consistency
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
-    def install(self, lang: Optional[str] = None) -> None:
+    def install(self, lang: str = None) -> None:
         """
         Install the translation function to the _ builtin.
 
@@ -108,13 +108,12 @@ class _Translations:
             self.install_dummy()
 
         else:
-            # TODO: replace this Any, Any when contents() is annotated
-            self.translations = {None: self.contents(lang)}
+            self.translations = {None: self.contents(cast(str, lang))}
             for plugin in os.listdir(config.plugin_dir):
                 plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
                 if isdir(plugin_path):
                     try:
-                        self.translations[plugin] = self.contents(lang, plugin_path)
+                        self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
 
                     except UnicodeDecodeError as e:
                         print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
@@ -262,8 +261,8 @@ class _Locale:
         :param decimals: The number of decimals to return, defaults to 5 if the given number is a float, otherwise None
         :return: the stringified number
         """
+        decimals = decimals if decimals is not None else 5
 
-        # TODO: decimals = decimals if decimals is not None else 5
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
@@ -272,8 +271,8 @@ class _Locale:
                 return self.int_formatter.stringFromNumber_(number)
 
             else:
-                self.float_formatter.setMinimumFractionDigits_(decimals or 5)
-                self.float_formatter.setMaximumFractionDigits_(decimals or 5)
+                self.float_formatter.setMinimumFractionDigits_(decimals)
+                self.float_formatter.setMaximumFractionDigits_(decimals)
                 return self.float_formatter.stringFromNumber_(number)
 
         else:
@@ -281,7 +280,7 @@ class _Locale:
                 return locale.format('%d', number, True)
 
             else:
-                return locale.format('%.*f', (decimals or 5, number), True)
+                return locale.format('%.*f', (decimals, number), True)  # type: ignore  # It ends up working out
 
     def numberFromString(self, string: str) -> Union[int, float, None]:
         """
