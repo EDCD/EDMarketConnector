@@ -766,8 +766,7 @@ class PreferencesDialog(tk.Toplevel):
                 appearance_frame,
                 text=_(
                     "100 means fully opaque.{CR}"
-                    "Window is updated in real time{CR}"
-                    "do NOT use this with the transparent theme on windows"
+                    "Window is updated in real time"
                 ).format(CR='\n')
             ).grid(
                 column=3,
