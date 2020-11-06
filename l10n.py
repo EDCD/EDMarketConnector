@@ -8,11 +8,12 @@ import numbers
 import os
 import re
 import sys
+from codecs import StreamReaderWriter
 from collections import OrderedDict
 from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
 from traceback import print_exc
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Set, Union
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -66,10 +67,10 @@ class _Translations:
     TRANS_RE = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
     COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
 
-    def __init__(self):
-        self.translations = {None: {}}
+    def __init__(self) -> None:
+        self.translations: Dict[Optional[str], Dict[Any, Any]] = {None: {}}
 
-    def install_dummy(self):
+    def install_dummy(self) -> None:
         """
         Install a dummy translation function.
 
@@ -79,7 +80,7 @@ class _Translations:
         # Promote strings to Unicode for consistency
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
-    def install(self, lang=None):
+    def install(self, lang: Optional[str] = None) -> None:
         """
         Install the translation function to the _ builtin.
 
@@ -107,6 +108,7 @@ class _Translations:
             self.install_dummy()
 
         else:
+            # TODO: replace this Any, Any when contents() is annotated
             self.translations = {None: self.contents(lang)}
             for plugin in os.listdir(config.plugin_dir):
                 plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
@@ -122,7 +124,7 @@ class _Translations:
 
             builtins.__dict__['_'] = self.translate
 
-    def contents(self, lang, plugin_path=None):
+    def contents(self, lang: str, plugin_path: Optional[str] = None) -> Dict[str, str]:
         """Get all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
@@ -146,12 +148,12 @@ class _Translations:
 
         return translations
 
-    def translate(self, x, context=None):
+    def translate(self, x: str, context: Optional[str] = None) -> str:
         """
         Translate the given string to the current lang.
 
         :param x: The string to translate
-        :param context: ????, defaults to None
+        :param context: Whether or not to search the given directory for translation files, defaults to None
         :return: The translated string
         """
         if context:
@@ -169,7 +171,7 @@ class _Translations:
 
             return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
-    def available(self):
+    def available(self) -> Set[str]:
         """Return a list of available language codes."""
         path = self.respath()
         if getattr(sys, 'frozen', False) and platform == 'darwin':
@@ -183,7 +185,7 @@ class _Translations:
 
         return available
 
-    def available_names(self):
+    def available_names(self) -> Dict[Optional[str], str]:
         """Available language names by code."""
         names = OrderedDict([
             (None, _('Default')),  # Appearance theme and language setting
@@ -196,7 +198,7 @@ class _Translations:
 
         return names
 
-    def respath(self):
+    def respath(self) -> str:  # TODO: PathLike
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
             if platform == 'darwin':
@@ -211,11 +213,11 @@ class _Translations:
         else:
             return LOCALISATION_DIR
 
-    def file(self, lang, plugin_path=None):
+    def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[StreamReaderWriter]:
         """
         Open the given lang file for reading.
 
-        :param lang: The lang file to open
+        :param lang: The lang file to open (just the name of the lang)
         :param plugin_path: path to plugins dir, to check for plugin based lang files, defaults to None
         :return: the opened file (Note: This should be closed when done)
         """
@@ -241,7 +243,7 @@ class _Translations:
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         if platform == 'darwin':
             self.int_formatter = NSNumberFormatter.alloc().init()
             self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
@@ -250,7 +252,7 @@ class _Locale:
             self.float_formatter.setMinimumFractionDigits_(5)
             self.float_formatter.setMaximumFractionDigits_(5)
 
-    def stringFromNumber(self, number, decimals=None):
+    def stringFromNumber(self, number: Union[float, int], decimals: int = None) -> str:
         """
         Convert a number to a string.
 
@@ -260,6 +262,8 @@ class _Locale:
         :param decimals: The number of decimals to return, defaults to 5 if the given number is a float, otherwise None
         :return: the stringified number
         """
+
+        # TODO: decimals = decimals if decimals is not None else 5
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
@@ -279,7 +283,7 @@ class _Locale:
             else:
                 return locale.format('%.*f', (decimals or 5, number), True)
 
-    def numberFromString(self, string):
+    def numberFromString(self, string: str) -> Union[int, float, None]:
         """
         Convert a string to a number using the system locale.
 
@@ -301,7 +305,7 @@ class _Locale:
                 except Exception:
                     return None
 
-    def preferredLanguages(self):
+    def preferredLanguages(self) -> Iterable[str]:
         """
         Return a list of preferred language codes.
 
@@ -359,7 +363,7 @@ Translations = _Translations()
 if __name__ == "__main__":
     import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
-    seen = {}
+    seen: Dict[str, str] = {}
     for f in (  # TODO: need to be sorted and then concatted like this?
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
         sorted(join('plugins', x) for x in isdir('plugins')
