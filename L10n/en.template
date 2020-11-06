@@ -1,3 +1,9 @@
+/* Label for 'UI Transparency' option in [prefs.py]*/
+"Main window transparency" = "Main window transparency";
+
+/* Warning next to 'UI Transparency' slider */
+"100 means fully opaque.{CR}Window is updated in real time{CR}do NOT use this with the transparent theme on windows" = "100 means fully opaque.{CR}Window is updated in real time{CR}do NOT use this with the transparent theme on windows";
+
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "UI Scale Percentage";
 

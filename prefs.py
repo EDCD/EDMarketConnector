@@ -745,14 +745,14 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         with row as cur_row:
-            nb.Label(appearance_frame, text="Main window transparency").grid(
+            nb.Label(appearance_frame, text=_("Main window transparency")).grid(
                 padx=self.PADX, pady=self.PADY*2, sticky=tk.W, row=cur_row
             )
             self.transparency = tk.IntVar()
             self.transparency.set(config.getint('ui_transparency') or 100)  # Default to 100 for users
             self.transparency_bar = tk.Scale(
                 appearance_frame,
-                variable=self.transparency,
+                variable=self.transparency,  # type: ignore # Its accepted as an intvar
                 orient=tk.HORIZONTAL,
                 length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
                 from_=100,
@@ -764,11 +764,11 @@ class PreferencesDialog(tk.Toplevel):
 
             nb.Label(
                 appearance_frame,
-                text=(
-                    "100 means fully opaque.\n"
-                    "Window is updated in real time\n"
+                text=_(
+                    "100 means fully opaque.{CR}"
+                    "Window is updated in real time{CR}"
                     "do NOT use this with the transparent theme on windows"
-                )
+                ).format(CR='\n')
             ).grid(
                 column=3,
                 padx=self.PADX,
