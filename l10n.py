@@ -2,20 +2,17 @@
 """Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
 
 import builtins
-import codecs
 import locale
 import numbers
 import os
-from os import PathLike
 import pathlib
 import re
 import sys
-from codecs import StreamReaderWriter
 from collections import OrderedDict
 from contextlib import suppress
-from os.path import basename, dirname, exists, isdir, isfile, join, normpath
+from os.path import basename, dirname, exists, isdir, isfile, join
 from sys import platform
-from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -199,7 +196,7 @@ class _Translations:
 
         return names
 
-    def respath(self) -> PathLike:
+    def respath(self) -> pathlib.Path:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
             if platform == 'darwin':
@@ -212,7 +209,7 @@ class _Translations:
 
         return pathlib.Path(LOCALISATION_DIR)
 
-    def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[StreamReaderWriter]:
+    def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[TextIO]:
         """
         Open the given lang file for reading.
 
@@ -224,18 +221,17 @@ class _Translations:
             f = join(plugin_path, f'{lang}.strings')
             if exists(f):
                 try:
-                    return codecs.open(f, 'r', 'utf-8')
+                    return open(f, 'r', encoding='utf-8')
 
                 except Exception:
                     logger.exception(f'could not open {f}')
 
             return None
 
-        # TODO: python open() supports encoding
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
-            return codecs.open(join(self.respath(), f'{lang}.lproj', 'Localizable.strings'), 'r', 'utf-16')
+            return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open('r', encoding='utf-16')
 
-        return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
+        return (self.respath() / f'{lang}.strings').open('r', encoding='utf-8')
 
 
 class _Locale:
@@ -352,10 +348,11 @@ if __name__ == "__main__":
     seen: Dict[str, str] = {}
     for f in (  # TODO: need to be sorted and then concatted like this?
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
-        sorted(join('plugins', x) for x in isdir('plugins')
-               and os.listdir('plugins') or [] if x.endswith('.py'))
+        sorted(
+            join('plugins', x) for x in isdir('plugins') and os.listdir('plugins') or [] if x.endswith('.py')
+        )
     ):
-        with codecs.open(f, 'r', 'utf-8') as h:
+        with open(f, 'r', encoding='utf-8') as h:
             lineno = 0
             for line in h:
                 lineno += 1
@@ -368,7 +365,7 @@ if __name__ == "__main__":
         if not isdir(LOCALISATION_DIR):
             os.mkdir(LOCALISATION_DIR)
 
-        template = codecs.open(join(LOCALISATION_DIR, 'en.template'), 'w', 'utf-8')
+        template = open(join(LOCALISATION_DIR, 'en.template'), 'w', encoding='utf-8')
         template.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
         for thing in sorted(seen, key=str.lower):
             if seen[thing]:
