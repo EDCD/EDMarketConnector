@@ -10,10 +10,11 @@ import re
 import sys
 from codecs import StreamReaderWriter
 from collections import OrderedDict
+from contextlib import suppress
 from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
 from traceback import print_exc
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, Union, cast
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -106,22 +107,22 @@ class _Translations:
 
         if lang not in self.available():
             self.install_dummy()
+            return
 
-        else:
-            self.translations = {None: self.contents(cast(str, lang))}
-            for plugin in os.listdir(config.plugin_dir):
-                plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
-                if isdir(plugin_path):
-                    try:
-                        self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
+        self.translations = {None: self.contents(cast(str, lang))}
+        for plugin in os.listdir(config.plugin_dir):
+            plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
+            if isdir(plugin_path):
+                try:
+                    self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
 
-                    except UnicodeDecodeError as e:
-                        print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
+                except UnicodeDecodeError as e:
+                    print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
 
-                    except Exception:
-                        print_exc()
+                except Exception:
+                    print_exc()
 
-            builtins.__dict__['_'] = self.translate
+        builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: Optional[str] = None) -> Dict[str, str]:
         """Get all the translations from a translation file."""
@@ -131,16 +132,15 @@ class _Translations:
         if not h:
             return {}
 
-        else:
-            for line in h:
-                if line.strip():
-                    match = _Translations.TRANS_RE.match(line)
-                    if match:
-                        to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
-                        translations[match.group(1).replace(r'\"', u'"')] = to_set
+        for line in h:
+            if line.strip():
+                match = _Translations.TRANS_RE.match(line)
+                if match:
+                    to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+                    translations[match.group(1).replace(r'\"', u'"')] = to_set
 
-                    elif __debug__ and not _Translations.COMMENT_RE.match(line):
-                        print(f'Bad translation: {line.strip()}')
+                elif __debug__ and not _Translations.COMMENT_RE.match(line):
+                    print(f'Bad translation: {line.strip()}')
 
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
@@ -163,12 +163,11 @@ class _Translations:
 
             return self.translations.get(context, {}).get(x) or self.translate(x)
 
-        else:
-            if __debug__:
-                if self.translations[None] and x not in self.translations[None]:
-                    print(f'Missing translation: {x!r}')
+        if __debug__:
+            if self.translations[None] and x not in self.translations[None]:
+                print(f'Missing translation: {x!r}')
 
-            return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+        return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
     def available(self) -> Set[str]:
         """Return a list of available language codes."""
@@ -186,11 +185,11 @@ class _Translations:
 
     def available_names(self) -> Dict[Optional[str], str]:
         """Available language names by code."""
-        names = OrderedDict([
+        names: Dict[Optional[str], str] = OrderedDict([
             (None, _('Default')),  # Appearance theme and language setting
         ])
         names.update(sorted(
-            [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +  # type: ignore
+            [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
             [(_Translations.FALLBACK, _Translations.FALLBACK_NAME)],
             key=lambda x: x[1]
         ))  # Sort by name
@@ -203,14 +202,12 @@ class _Translations:
             if platform == 'darwin':
                 return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
 
-            else:
-                return join(dirname(sys.executable), LOCALISATION_DIR)
+            return join(dirname(sys.executable), LOCALISATION_DIR)
 
         elif __file__:
             return join(dirname(__file__), LOCALISATION_DIR)
 
-        else:
-            return LOCALISATION_DIR
+        return LOCALISATION_DIR
 
     def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[StreamReaderWriter]:
         """
@@ -235,8 +232,7 @@ class _Translations:
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
             return codecs.open(join(self.respath(), f'{lang}.lproj', 'Localizable.strings'), 'r', 'utf-16')
 
-        else:
-            return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
+        return codecs.open(join(self.respath(), f'{lang}.strings'), 'r', 'utf-8')
 
 
 class _Locale:
@@ -270,17 +266,15 @@ class _Locale:
             if not decimals and isinstance(number, numbers.Integral):
                 return self.int_formatter.stringFromNumber_(number)
 
-            else:
-                self.float_formatter.setMinimumFractionDigits_(decimals)
-                self.float_formatter.setMaximumFractionDigits_(decimals)
-                return self.float_formatter.stringFromNumber_(number)
+            self.float_formatter.setMinimumFractionDigits_(decimals)
+            self.float_formatter.setMaximumFractionDigits_(decimals)
+            return self.float_formatter.stringFromNumber_(number)
+
+        if not decimals and isinstance(number, numbers.Integral):
+            return locale.format('%d', number, True)
 
         else:
-            if not decimals and isinstance(number, numbers.Integral):
-                return locale.format('%d', number, True)
-
-            else:
-                return locale.format('%.*f', (decimals, number), True)  # type: ignore  # It ends up working out
+            return locale.format('%.*f', (decimals, number), True)  # type: ignore  # It ends up working out
 
     def numberFromString(self, string: str) -> Union[int, float, None]:
         """
@@ -293,16 +287,13 @@ class _Locale:
         if platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
 
-        else:
-            try:  # TODO: This is awful.
-                return locale.atoi(string)
+        with suppress(ValueError):
+            return locale.atoi(string)
 
-            except Exception:
-                try:
-                    return locale.atof(string)
+        with suppress(ValueError):
+            return locale.atof(string)
 
-                except Exception:
-                    return None
+        return None
 
     def preferredLanguages(self) -> Iterable[str]:
         """
@@ -318,38 +309,31 @@ class _Locale:
         if platform == 'darwin':
             return NSLocale.preferredLanguages()
 
-        elif platform == 'win32':
-
-            def wszarray_to_list(array):
-                offset = 0
-                while offset < len(array):
-                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                    if sz:
-                        yield sz
-                        offset += len(sz)+1
-
-                    else:
-                        break
-
-            num = ctypes.c_ulong()
-            size = ctypes.c_ulong(0)
-            if (
-                GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size))
-                and size.value
-            ):
-                buf = ctypes.create_unicode_buffer(size.value)
-                if (
-                    GetUserPreferredUILanguages(
-                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
-                    )
-                ):
-                    return wszarray_to_list(buf)
-
-            return []
-
-        else:  # POSIX
+        elif platform != 'win32':
+            # POSIX
             lang = locale.getlocale()[0]
             return lang and [lang.replace('_', '-')] or []
+
+        def wszarray_to_list(array):
+            offset = 0
+            while offset < len(array):
+                sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
+                if sz:
+                    yield sz
+                    offset += len(sz)+1
+
+                else:
+                    break
+
+        num = ctypes.c_ulong()
+        size = ctypes.c_ulong(0)
+        if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value:
+            buf = ctypes.create_unicode_buffer(size.value)
+
+            if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
+                return wszarray_to_list(buf)
+
+        return []
 
 
 # singletons
