@@ -6,6 +6,8 @@ import codecs
 import locale
 import numbers
 import os
+from os import PathLike
+import pathlib
 import re
 import sys
 from codecs import StreamReaderWriter
@@ -197,18 +199,18 @@ class _Translations:
 
         return names
 
-    def respath(self) -> str:  # TODO: PathLike
+    def respath(self) -> PathLike:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
             if platform == 'darwin':
-                return normpath(join(dirname(sys.executable), os.pardir, 'Resources'))
+                return (pathlib.Path(sys.executable).parents[0] / os.pardir / 'Resources').resolve()
 
-            return join(dirname(sys.executable), LOCALISATION_DIR)
+            return pathlib.Path(dirname(sys.executable)) / LOCALISATION_DIR
 
         elif __file__:
-            return join(dirname(__file__), LOCALISATION_DIR)
+            return pathlib.Path(__file__).parents[0] / LOCALISATION_DIR
 
-        return LOCALISATION_DIR
+        return pathlib.Path(LOCALISATION_DIR)
 
     def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[StreamReaderWriter]:
         """
