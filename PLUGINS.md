@@ -225,7 +225,7 @@ to retrieve your plugin's settings in a platform-independent way.
 **Be sure to use a unique prefix for any settings you save so as not to clash
 with core EDMC or other plugins.**
 
-Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input
+Use `number_from_string()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.
 
 ```python
@@ -281,7 +281,7 @@ For a more complicated item create a tk.Frame widget and populate it with other
 ttk widgets. Return `None` if you just want to use this as a callback after the
 main window and all other plugins are initialised.
 
-You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format
+You can use `string_from_number()` from EDMC's `l10n.Locale` object to format
 numbers in your widgets in a locale-independent way.
 
 ```python
