@@ -13,7 +13,6 @@ from collections import OrderedDict
 from contextlib import suppress
 from os.path import basename, dirname, exists, isdir, isfile, join, normpath
 from sys import platform
-from traceback import print_exc
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, Union, cast
 
 if TYPE_CHECKING:
@@ -27,6 +26,10 @@ except Exception:
     print("Can't set locale!")
 
 from config import config
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
+
 
 # Language name
 LANGUAGE_ID = '!Language'
@@ -117,10 +120,10 @@ class _Translations:
                     self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
 
                 except UnicodeDecodeError as e:
-                    print(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
+                    logger.warning(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
 
                 except Exception:
-                    print_exc()
+                    logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
 
         builtins.__dict__['_'] = self.translate
 
@@ -139,8 +142,8 @@ class _Translations:
                     to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
                     translations[match.group(1).replace(r'\"', u'"')] = to_set
 
-                elif __debug__ and not _Translations.COMMENT_RE.match(line):
-                    print(f'Bad translation: {line.strip()}')
+                elif not _Translations.COMMENT_RE.match(line):
+                    logger.debug(f'Bad translation: {line.strip()}')
 
         if translations.get(LANGUAGE_ID, LANGUAGE_ID) == LANGUAGE_ID:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
@@ -157,15 +160,13 @@ class _Translations:
         """
         if context:
             context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
-            if __debug__:
-                if self.translations[None] and context not in self.translations:
-                    print(f'No translations for {context!r}')
+            if self.translations[None] and context not in self.translations:
+                logger.debug(f'No translations for {context!r}')
 
             return self.translations.get(context, {}).get(x) or self.translate(x)
 
-        if __debug__:
-            if self.translations[None] and x not in self.translations[None]:
-                print(f'Missing translation: {x!r}')
+        if self.translations[None] and x not in self.translations[None]:
+            logger.debug(f'Missing translation: {x!r}')
 
         return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
 
@@ -224,7 +225,7 @@ class _Translations:
                     return codecs.open(f, 'r', 'utf-8')
 
                 except Exception:
-                    print_exc()
+                    logger.exception(f'could not open {f}')
 
             return None
 
