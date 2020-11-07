@@ -448,4 +448,4 @@ class StatsResults(tk.Toplevel):
     def credits(self, value: int) -> str:
         """Localised string of given int, including a trailing ` Cr`."""
         # TODO: Locale is a class, this calls an instance method on it with an int as its `self`
-        return Locale.stringFromNumber(value, 0) + ' Cr'  # type: ignore
+        return Locale.string_from_number(value, 0) + ' Cr'  # type: ignore
