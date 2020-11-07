@@ -8,12 +8,12 @@ import os
 import pathlib
 import re
 import sys
+import warnings
 from collections import OrderedDict
 from contextlib import suppress
 from os.path import basename, dirname, exists, isdir, isfile, join
 from sys import platform
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
-import warnings
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -361,9 +361,7 @@ if __name__ == "__main__":
     seen: Dict[str, str] = {}
     for f in (  # TODO: need to be sorted and then concatted like this?
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
-        sorted(
-            join('plugins', x) for x in isdir('plugins') and os.listdir('plugins') or [] if x.endswith('.py')
-        )
+        sorted(join('plugins', x) for x in (os.listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
     ):
         with open(f, 'r', encoding='utf-8') as h:
             lineno = 0
