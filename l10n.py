@@ -13,6 +13,7 @@ from contextlib import suppress
 from os.path import basename, dirname, exists, isdir, isfile, join
 from sys import platform
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
+import warnings
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -93,7 +94,7 @@ class _Translations:
         available.add(_Translations.FALLBACK)
         if not lang:
             # Choose the default language
-            for preferred in Locale.preferredLanguages():
+            for preferred in Locale.preferred_languages():
                 components = preferred.split('-')
                 if preferred in available:
                     lang = preferred
@@ -246,7 +247,19 @@ class _Locale:
             self.float_formatter.setMinimumFractionDigits_(5)
             self.float_formatter.setMaximumFractionDigits_(5)
 
-    def stringFromNumber(self, number: Union[float, int], decimals: int = None) -> str:
+    def stringFromNumber(self, number: Union[float, int], decimals: int = None) -> str:  # noqa: N802
+        warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
+        return self.stringFromNumber(number, decimals)
+
+    def numberFromString(self, string: str) -> Union[int, float, None]:  # noqa: N802
+        warnings.warn(DeprecationWarning('use _Locale.number_from_string instead.'))
+        return self.numberFromString(string)
+
+    def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
+        warnings.warn(DeprecationWarning('use _Locale.preferred_languages instead.'))
+        return self.preferred_languages()
+
+    def string_from_number(self, number: Union[float, int], decimals: int = None) -> str:
         """
         Convert a number to a string.
 
@@ -275,7 +288,7 @@ class _Locale:
         else:
             return locale.format('%.*f', (decimals, number), True)  # type: ignore  # It ends up working out
 
-    def numberFromString(self, string: str) -> Union[int, float, None]:
+    def number_from_string(self, string: str) -> Union[int, float, None]:
         """
         Convert a string to a number using the system locale.
 
@@ -294,7 +307,7 @@ class _Locale:
 
         return None
 
-    def preferredLanguages(self) -> Iterable[str]:
+    def preferred_languages(self) -> Iterable[str]:
         """
         Return a list of preferred language codes.
 
