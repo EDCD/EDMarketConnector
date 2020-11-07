@@ -82,7 +82,7 @@ class _Translations:
         """
         self.translations = {None: {}}
         # Promote strings to Unicode for consistency
-        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str = None) -> None:
         """
@@ -139,8 +139,8 @@ class _Translations:
             if line.strip():
                 match = _Translations.TRANS_RE.match(line)
                 if match:
-                    to_set = match.group(2).replace(r'\"', u'"').replace(u'{CR}', u'\n')
-                    translations[match.group(1).replace(r'\"', u'"')] = to_set
+                    to_set = match.group(2).replace(r'\"', '"').replace('{CR}', '\n')
+                    translations[match.group(1).replace(r'\"', '"')] = to_set
 
                 elif not _Translations.COMMENT_RE.match(line):
                     logger.debug(f'Bad translation: {line.strip()}')
@@ -168,7 +168,7 @@ class _Translations:
         if self.translations[None] and x not in self.translations[None]:
             logger.debug(f'Missing translation: {x!r}')
 
-        return self.translations[None].get(x) or str(x).replace(r'\"', u'"').replace(u'{CR}', u'\n')
+        return self.translations[None].get(x) or str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def available(self) -> Set[str]:
         """Return a list of available language codes."""
