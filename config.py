@@ -5,6 +5,7 @@ On Windows this uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 """
 
+from configparser import NoOptionError
 import logging
 import numbers
 import sys
@@ -174,11 +175,11 @@ class Config():
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-        def get(self, key: str) -> Union[None, list, str]:
+        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
             """Look up a string configuration value."""
             val = self.settings.get(key)
             if val is None:
-                return None
+                return default
 
             elif isinstance(val, str):
                 return str(val)
@@ -187,20 +188,20 @@ class Config():
                 return list(val)  # make writeable
 
             else:
-                return None
+                return default
 
-        def getint(self, key: str) -> int:
+        def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
             try:
-                return int(self.settings.get(key, 0))  # should already be int, but check by casting
+                return int(self.settings.get(key, default))  # should already be int, but check by casting
 
             except ValueError as e:
                 logger.error(f"Failed to int({key=})", exc_info=e)
-                return 0
+                return default
 
             except Exception as e:
                 logger.debug('The exception type is ...', exc_info=e)
-                return 0
+                return default
 
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
@@ -303,7 +304,7 @@ class Config():
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
-        def get(self, key: str) -> Union[None, list, str]:
+        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
             """Look up a string configuration value."""
             key_type = DWORD()
             key_size = DWORD()
@@ -319,11 +320,11 @@ class Config():
                     )
                     or key_type.value not in [REG_SZ, REG_MULTI_SZ]
             ):
-                return None
+                return default
 
             buf = ctypes.create_unicode_buffer(int(key_size.value / 2))
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(key_type), buf, ctypes.byref(key_size)):
-                return None
+                return default
 
             elif key_type.value == REG_MULTI_SZ:
                 return list(ctypes.wstring_at(buf, len(buf)-2).split('\x00'))
@@ -331,7 +332,7 @@ class Config():
             else:
                 return str(buf.value)
 
-        def getint(self, key: str) -> int:
+        def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
             key_type = DWORD()
             key_size = DWORD(4)
@@ -347,7 +348,7 @@ class Config():
                     )
                     or key_type.value != REG_DWORD
             ):
-                return 0
+                return default
 
             else:
                 return key_val.value
@@ -421,7 +422,7 @@ class Config():
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', expanduser('~'))
 
-        def get(self, key: str) -> Union[None, list, str]:
+        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
             """Look up a string configuration value."""
             try:
                 val = self.config.get(self.SECTION, key)
@@ -433,22 +434,29 @@ class Config():
                 else:
                     return self._unescape(val)
 
+            except NoOptionError:
+                logger.debug(f'attempted to get key {key} that does not exist')
+                return default
+
             except Exception as e:
                 logger.debug('And the exception type is...', exc_info=e)
-                return None
+                return default
 
-        def getint(self, key: str) -> int:
+        def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
             try:
                 return self.config.getint(self.SECTION, key)
 
             except ValueError as e:
                 logger.error(f"Failed to int({key=})", exc_info=e)
-                return 0
 
-            except Exception as e:
-                logger.debug('And the exception type is...', exc_info=e)
-                return 0
+            except NoOptionError:
+                logger.debug(f'attempted to get key {key} that does not exist')
+
+            except Exception:
+                logger.exception(f'unexpected exception while attempting to access {key}')
+
+            return default
 
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
