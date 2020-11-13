@@ -5,15 +5,17 @@ On Windows this uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 """
 
-from configparser import NoOptionError
+# spell-checker: words HKEY FOLDERID wchar wstring edcdhkey
+
 import logging
 import numbers
 import sys
 import warnings
+from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import semantic_version
 
@@ -48,6 +50,8 @@ elif platform == 'win32':
     import ctypes
     import uuid
     from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
+    if TYPE_CHECKING:
+        import ctypes.windll  # type: ignore
 
     FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
