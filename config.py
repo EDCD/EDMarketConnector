@@ -7,15 +7,19 @@ Linux uses a file, but for commonality it's still a flat data structure.
 
 # spell-checker: words HKEY FOLDERID wchar wstring edcdhkey
 
+import abc
+import functools
 import logging
 import numbers
+import pathlib
 import sys
 import warnings
+from abc import abstractmethod
 from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import semantic_version
 
@@ -119,6 +123,256 @@ elif platform == 'win32':
 elif platform == 'linux':
     import codecs
     from configparser import RawConfigParser
+
+
+class AbstractConfig(abc.ABC):
+    """Abstract root class of all platform specific Config implementations."""
+
+    OUT_MKT_EDDN = 1
+    # OUT_MKT_BPC = 2	# No longer supported
+    OUT_MKT_TD = 4
+    OUT_MKT_CSV = 8
+    OUT_SHIP = 16
+    # OUT_SHIP_EDS = 16	# Replaced by OUT_SHIP
+    # OUT_SYS_FILE = 32	# No longer supported
+    # OUT_STAT = 64	# No longer available
+    # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
+    OUT_STATION_ANY = OUT_MKT_EDDN | OUT_MKT_TD | OUT_MKT_CSV
+    # OUT_SYS_EDSM = 256  # Now a plugin
+    # OUT_SYS_AUTO = 512  # Now always automatic
+    OUT_MKT_MANUAL = 1024
+    OUT_SYS_EDDN = 2048
+    OUT_SYS_DELAY = 4096
+
+    app_dir: pathlib.Path
+    plugin_dir: pathlib.Path
+    internal_plugin_dir: pathlib.Path
+    respath: pathlib.Path
+    home: pathlib.Path
+    default_journal_dir: Optional[pathlib.Path]
+
+    def __init__(self) -> None:
+        self.home = pathlib.Path.home()
+
+    def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
+        """
+        Get the requested key, or a default.
+
+        :param key: the key to get
+        :param default: the default to return if the key does not exist, defaults to None
+        :return: the data or the default
+        """
+        warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
+        if (l := self.get_list(key, None)) is not None:
+            return l
+
+        elif (s := self.get_str(key, None)) is not None:
+            return s
+
+        return default
+
+    @abstractmethod
+    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+        """See get."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """See get."""
+        raise NotImplementedError
+
+    def getint(self, key: str, default: int = 0) -> int:
+        """See get."""
+        warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
+        return self.get_int(key, default)
+
+    @abstractmethod
+    def get_int(self, key: str, default: int = 0) -> int:
+        """See get."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """Set the given key to the given data."""
+        ...
+
+    @abstractmethod
+    def save(self) -> None:
+        """Save the current configuration."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def close(self):
+        """Close this config and release any associated resources."""
+        raise NotImplementedError
+
+
+class WinConfig(AbstractConfig):
+    """Implementation of AbstractConfig for windows."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        # if sys.platform != 'win32':
+        #     raise ValueError(f'Do not use WinConfig on {sys.platform}')
+        self.app_dir = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
+        self.app_dir.mkdir(exist_ok=True)
+
+        self.plugin_dir = self.app_dir / 'plugins'
+        self.plugin_dir.mkdir(exist_ok=True)
+
+        if getattr(sys, 'frozen', False):
+            self.respath = pathlib.Path(dirname(sys.executable))
+            self.internal_plugin_dir = self.respath / 'plugins'
+
+        else:
+            self.respath = pathlib.Path(dirname(__file__))
+            self.internal_plugin_dir = self.respath / 'plugins'
+
+        self.home = pathlib.Path.home()
+
+        journal_dir_str = known_folder_path(FOLDERID_SavedGames)
+        journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
+        self.default_journal_dir = None
+        if journaldir is not None:
+            self.default_journal_dir = journaldir / 'Frontier Developments' / 'Elite Dangerous'
+
+        create_key_defaults = functools.partial(
+            winreg.CreateKeyEx,
+            key=winreg.HKEY_CURRENT_USER,
+            access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
+        )
+
+        try:
+            self.__reg_handle: winreg.HKEYType = create_key_defaults(
+                subkey=r'Software\Marginal\EDMarketConnector'
+            )
+            edcd_handle: winreg.HKEYType = create_key_defaults(subkey=r'Software\EDCD\EDMarketConnector')
+            winsparkle_reg: winreg.HKEYType = winreg.CreateKeyEx(
+                edcd_handle, 'WinSparkle', access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY
+            )
+
+        except OSError:
+            logger.exception('could not create required registry keys')
+            raise
+
+        # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
+        winreg.SetValueEx(
+            winsparkle_reg, 'UpdateInterval', REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, str(update_interval)
+        )
+
+        try:
+            winreg.QueryValueEx(winsparkle_reg, 'CheckForUpdates')
+        except FileNotFoundError:
+            # Key doesnt exist, set it to a default
+            winreg.SetValueEx(winsparkle_reg, 'CheckForUpdates', REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, '1')
+
+        winsparkle_reg.Close()
+        edcd_handle.Close()
+
+        self.identifier = applongname
+        if (outdir_str := self.get_str('outdir')) is None or not isdir(outdir_str):
+            docs = known_folder_path(FOLDERID_Documents)
+            self.set('outdir',  docs if docs is not None else str(self.home))
+
+    def __get_regentry(self, key: str) -> Union[None, list, str, int]:
+        """Access the registry for the raw entry."""
+        try:
+            value, _type = winreg.QueryValueEx(self.__reg_handle, key)
+        except FileNotFoundError:
+            # Key doesn't exist
+            return None
+
+        if _type not in (winreg.REG_SZ, winreg.REG_MULTI_SZ, winreg.REG_DWORD):
+            logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
+            return None
+
+        # The type returned is actually as we'd expect for each of these. The casts are here for type checkers and
+        # For programmers who want to actually know what is going on
+        if _type == winreg.REG_SZ:
+            return str(value)
+        elif _type == winreg.REG_DWORD:
+            return int(value)
+
+        return list(value)
+
+    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """
+        Return the string represented by the key, or the default if it does not exist.
+
+        :param key: the key to access
+        :param default: the default to return when the key does not exist, defaults to None
+        :raises ValueError: when the key is not a string type
+        :return: the requested data, or the default
+        """
+        res = self.__get_regentry(key)
+        if res is None:
+            return default
+        elif not isinstance(res, str):
+            raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
+
+        return res
+
+    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+        """
+        Return the list found at the given key, or the default if none exists.
+
+        :param key: The key to access
+        :param default: Default to return when the key does not exist, defaults to None
+        :raises ValueError: When the data at the given key is not a list
+        :return: the requested data or the default
+        """
+        res = self.__get_regentry(key)
+        if res is None:
+            return default
+        elif not isinstance(res, list):
+            raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
+
+        return res
+
+    def get_int(self, key: str, default: int = 0) -> int:
+        """
+        Return the int found at the given key, or the default if none exists.
+
+        :param key: The key to access
+        :param default: Default to return when the key does not exist, defaults to 0
+        :raises ValueError: If the data returned is of an unexpected type
+        :return: the data requested or the default
+        """
+        res = self.__get_regentry(key)
+        if res is None:
+            return default
+
+        if not isinstance(res, int):
+            raise ValueError(f'Data from registry is not an int: {type(res)=} {res}')
+
+        return res
+
+    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        reg_type = None
+        if isinstance(val, str):
+            reg_type = winreg.REG_SZ
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
+
+        elif isinstance(val, int):  # The original code checked for numbers.Integral, I dont think that is needed.
+            reg_type = winreg.REG_DWORD
+
+        elif isinstance(val, list):
+            reg_type = winreg.REG_MULTI_SZ
+
+        else:
+            raise ValueError(f'Unexpected type for value {type(val)=}')
+
+        # Its complaining about the list, it works, tested on windows, ignored.
+        winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
+
+    def save(self) -> None:
+        """Save the configuration."""
+        # Not required as reg keys are flushed on write
+        pass
+
+    def close(self):
+        """Close the config file."""
+        self.__reg_handle.Close()
 
 
 class Config():
