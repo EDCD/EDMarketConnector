@@ -282,18 +282,17 @@ class WinConfig(AbstractConfig):
             # Key doesn't exist
             return None
 
-        if _type not in (winreg.REG_SZ, winreg.REG_MULTI_SZ, winreg.REG_DWORD):
-            logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
-            return None
-
         # The type returned is actually as we'd expect for each of these. The casts are here for type checkers and
         # For programmers who want to actually know what is going on
         if _type == winreg.REG_SZ:
             return str(value)
         elif _type == winreg.REG_DWORD:
             return int(value)
-
-        return list(value)
+        elif _type == winreg.REG_MULTI_SZ:
+            return list(value)
+        else:
+            logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
+            return None
 
     def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """
@@ -348,6 +347,14 @@ class WinConfig(AbstractConfig):
         return res
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """
+        Set sets the given key to the given value.
+
+        :param key: The key to set the value to
+        :param val: The value to set the key
+        :raises ValueError: On an invalid type
+        :raises OSError: On any internal failure to the registry
+        """
         reg_type = None
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
