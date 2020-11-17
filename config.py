@@ -19,7 +19,7 @@ from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import semantic_version
 
@@ -45,7 +45,7 @@ else:
     logger = logging.getLogger(appname)
 
 if platform == 'darwin':
-    from Foundation import (
+    from Foundation import (  # type: ignore
         NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains,
         NSUserDefaults, NSUserDomainMask
     )
@@ -53,6 +53,7 @@ if platform == 'darwin':
 elif platform == 'win32':
     import ctypes
     import uuid
+    import winreg
     from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
     if TYPE_CHECKING:
         import ctypes.windll  # type: ignore
@@ -76,6 +77,8 @@ elif platform == 'win32':
     REG_SZ = 1
     REG_DWORD = 4
     REG_MULTI_SZ = 7
+
+    REG_RESERVED_ALWAYS_ZERO = 0
 
     RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
     RegCreateKeyEx.restype = LONG
@@ -194,7 +197,16 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
         """Set the given key to the given data."""
-        ...
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete(self, key: str) -> None:
+        """
+        Delete the given key from the config.
+
+        :param key: The key to delete
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def save(self) -> None:
@@ -202,7 +214,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def close(self):
+    def close(self) -> None:
         """Close this config and release any associated resources."""
         raise NotImplementedError
 
@@ -211,9 +223,6 @@ class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for windows."""
 
     def __init__(self) -> None:
-        super().__init__()
-        # if sys.platform != 'win32':
-        #     raise ValueError(f'Do not use WinConfig on {sys.platform}')
         self.app_dir = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
         self.app_dir.mkdir(exist_ok=True)
 
@@ -262,8 +271,9 @@ class WinConfig(AbstractConfig):
 
         try:
             winreg.QueryValueEx(winsparkle_reg, 'CheckForUpdates')
+
         except FileNotFoundError:
-            # Key doesnt exist, set it to a default
+            # Key doesn't exist, set it to a default
             winreg.SetValueEx(winsparkle_reg, 'CheckForUpdates', REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, '1')
 
         winsparkle_reg.Close()
@@ -286,10 +296,13 @@ class WinConfig(AbstractConfig):
         # For programmers who want to actually know what is going on
         if _type == winreg.REG_SZ:
             return str(value)
+
         elif _type == winreg.REG_DWORD:
             return int(value)
+
         elif _type == winreg.REG_MULTI_SZ:
             return list(value)
+
         else:
             logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
             return None
@@ -306,6 +319,7 @@ class WinConfig(AbstractConfig):
         res = self.__get_regentry(key)
         if res is None:
             return default
+
         elif not isinstance(res, str):
             raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
 
@@ -323,6 +337,7 @@ class WinConfig(AbstractConfig):
         res = self.__get_regentry(key)
         if res is None:
             return default
+
         elif not isinstance(res, list):
             raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
 
@@ -382,6 +397,142 @@ class WinConfig(AbstractConfig):
         self.__reg_handle.Close()
 
 
+class MacConfig(AbstractConfig):
+    """MacConfig is the implementation of AbstractConfig for Darwin based OSes."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        support_path = pathlib.Path(
+            NSSearchPathForDirectoriesInDomains(
+                NSApplicationSupportDirectory, NSUserDomainMask, True
+            )[0]
+        )
+
+        self.app_dir = support_path / appname
+        self.app_dir.mkdir(exist_ok=True)
+
+        self.plugin_dir = self.app_dir / 'plugins'
+        self.plugin_dir.mkdir(exist_ok=True)
+
+        # Bundle IDs identify a singled app though out a system
+
+        if getattr(sys, 'frozen', False):
+            exe_dir = pathlib.Path(sys.executable).parent
+            self.internal_plugin_dir = exe_dir.parent / 'Library' / 'plugins'
+            self.respath = exe_dir.parent / 'Resources'
+            self.identifier = NSBundle.mainBundle().bundleIdentifier()
+
+        else:
+            file_dir = pathlib.Path(__file__).parent
+            self.internal_plugin_dir = file_dir / 'plugins'
+            self.respath = file_dir
+
+            self.identifier = f'uk.org.marginal.{appname.lower()}'
+            NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
+
+        self.default_journal_dir = support_path / 'Frontier Developments' / 'Elite Dangerous'
+        self._defaults = NSUserDefaults.standardUserDefaults()
+        self._settings: Dict[str, Union[int, str, list]] = dict(
+            self._defaults.persistentDomainForName_(self.identifier) or {}
+        )  # make writeable
+
+        if (out_dir := self.get_str('out_dir')) is None or not pathlib.Path(out_dir).exists():
+            self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
+
+    def __raw_get(self, key: str) -> Union[None, list, str, int]:
+        res = self._settings.get(key)
+        if isinstance(res, list):
+            return list(res)
+
+        return res
+
+    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """
+        Return the string represented by the key, or the default if it does not exist.
+
+        :param key: the key to access
+        :param default: the default to return when the key does not exist, defaults to None
+        :raises ValueError: when the key is not a string type
+        :return: the requested data, or the default
+        """
+        res = self.__raw_get(key)
+        if res is None:
+            return default
+
+        if not isinstance(res, str):
+            raise ValueError(f'unexpected data returned from __raw_get: {type(res)=} {res}')
+
+        return res
+
+    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+        """
+        Return the list found at the given key, or the default if none exists.
+
+        :param key: The key to access
+        :param default: Default to return when the key does not exist, defaults to None
+        :raises ValueError: When the data at the given key is not a list
+        :return: the requested data or the default
+        """
+        res = self.__raw_get(key)
+        if res is None:
+            return default
+
+        elif not isinstance(res, list):
+            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+
+        return res
+
+    def get_int(self, key: str, default: int = 0) -> int:
+        """
+        Return the int found at the given key, or the default if none exists.
+
+        :param key: The key to access
+        :param default: Default to return when the key does not exist, defaults to 0
+        :raises ValueError: If the data returned is of an unexpected type
+        :return: the data requested or the default
+        """
+        res = self.__raw_get(key)
+        if res is None:
+            return default
+
+        elif not isinstance(res, (str, int)):
+            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+
+        try:
+            return int(res)
+
+        except ValueError as e:
+            logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
+            return default
+
+    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """
+        Set sets the given key to the given value.
+
+        :param key: The key to set the value to
+        :param val: The value to set the key
+        """
+        self._settings[key] = val
+
+    def delete(self, key: str) -> None:
+        """
+        Delete the given key from the config.
+
+        :param key: the key to delete
+        """
+        del self._settings[key]
+
+    def save(self) -> None:
+        """Save the configuration."""
+        self._defaults.setPersistentDomain_forName_(self._settings, self.identifier)
+        self._defaults.synchronize()
+
+    def close(self) -> None:
+        """Close the configuration."""
+        self.save()
+        self._defaults = None
+
+
 class Config():
     """Object that holds all configuration data."""
 
@@ -437,7 +588,7 @@ class Config():
             self.settings = dict(self.defaults.persistentDomainForName_(self.identifier) or {})  # make writeable
 
             # Check out_dir exists
-            if not self.get('outdir') or not isdir(self.get('outdir')):
+            if not self.get('outdir') or not isdir(str(self.get('outdir'))):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
