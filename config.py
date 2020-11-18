@@ -15,12 +15,13 @@ import os
 import pathlib
 import sys
 import warnings
+import contextlib
 from abc import abstractmethod
 from configparser import ConfigParser, NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Any, Callable, TYPE_CHECKING, Dict, List, Optional, Type, TypeVar, Union
 
 import semantic_version
 
@@ -129,6 +130,9 @@ elif platform == 'linux':
     from configparser import RawConfigParser
 
 
+_T = TypeVar('_T')
+
+
 class AbstractConfig(abc.ABC):
     """Abstract root class of all platform specific Config implementations."""
 
@@ -160,6 +164,22 @@ class AbstractConfig(abc.ABC):
     def __init__(self) -> None:
         self.home = pathlib.Path.home()
 
+    @staticmethod
+    def _suppress_call(
+        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
+        *args: Any, **kwargs: Any
+    ) -> Optional[_T]:
+        if exceptions is None:
+            exceptions = [Exception]
+
+        if not isinstance(exceptions, list):
+            exceptions = [exceptions]
+
+        with contextlib.suppress(*exceptions):  # type: ignore # it works fine, mypy
+            return func(*args, **kwargs)
+
+        return None
+
     def get(self, key: str, default: Union[None, list, str, bool, int] = None) -> Union[None, list, str, bool, int]:
         """
         Get the requested key, or a default.
@@ -170,16 +190,16 @@ class AbstractConfig(abc.ABC):
         :return: the data or the default
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
-        if (l := self.get_list(key, None)) is not None:
+        if (l := self._suppress_call(self.get_list, ValueError, key, None)) is not None:
             return l
 
-        elif (s := self.get_str(key, None)) is not None:
+        elif (s := self._suppress_call(self.get_str, ValueError, key, None)) is not None:
             return s
 
-        elif (b := self.get_bool(key, None)) is not None:
+        elif (b := self._suppress_call(self.get_bool, ValueError, key, None)) is not None:
             return b
 
-        elif (i := self.get_int(key, None)) is not None:
+        elif (i := self._suppress_call(self.get_int, ValueError, key, None)) is not None:
             return i
 
         return default
