@@ -11,11 +11,12 @@ import abc
 import functools
 import logging
 import numbers
+import os
 import pathlib
 import sys
 import warnings
 from abc import abstractmethod
-from configparser import NoOptionError
+from configparser import ConfigParser, NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
@@ -531,6 +532,126 @@ class MacConfig(AbstractConfig):
         """Close the configuration."""
         self.save()
         self._defaults = None
+
+
+class LinuxConfig(AbstractConfig):
+    """Linux implementation of AbstractConfig."""
+
+    SECTION = 'config'
+
+    def __init__(self) -> None:
+        # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
+        xdg_data_home = pathlib.Path(os.getenv('XDG_DATA_HOME', default='~/.local/share')).expanduser()
+        self.app_dir = xdg_data_home / appname
+        self.app_dir.mkdir(exist_ok=True, parents=True)
+
+        self.plugin_dir = self.app_dir / 'plugins'
+        self.plugin_dir.mkdir(exist_ok=True)
+
+        self.respath = pathlib.Path(__file__).parent
+
+        self.internal_plugin_dir = self.respath / 'plugins'
+        self.default_journal_dir = None
+        self.identifier = f'uk.org.marginal.{appname.lower()}'  # TODO: Unused?
+
+        config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
+
+        self.filename = config_home / appname / f'{appname}.ini'
+        self.filename.mkdir(exist_ok=True, parents=True)
+
+        self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
+
+        try:
+            self.config.read(self.filename)
+        except Exception as e:
+            logger.debug(f'Error occurred while reading in file. Assuming that we are creating a new one: {e}')
+            self.config.add_section(self.SECTION)
+
+        if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
+            self.set('outdir', str(self.home))
+
+        # TODO: I dislike this, would rather use a sane config file format. But here we are.
+        self.__unescape_table = str.maketrans({'\\n': '\n', '\\\\': '\\', '\\;': ';'})
+        self.__escape_table = str.maketrans({'\n': '\\n', '\\': '\\\\', ';': '\\;'})
+
+    def __raw_get(self, key: str) -> Optional[str]:
+        if self.config is None:
+            raise ValueError('Attempt to use a closed config')
+
+        return self.config[self.SECTION].get(key)
+
+    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        data = self.__raw_get(key)
+        if data is None:
+            return default
+
+        if '\n' in data:
+            raise ValueError('asked for string, got list')
+
+        return data.translate(self.__unescape_table)
+
+    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+        data = self.__raw_get(key)
+
+        if data is None:
+            return default
+
+        split = data.split('\n')
+        if split[-1] != ';':
+            raise ValueError('Encoded list does not have trailer sentinel')
+
+        return [s.translate(self.__unescape_table) for s in split[:-1]]
+
+    def get_int(self, key: str, default: int = 0) -> int:
+        data = self.__raw_get(key)
+
+        if data is None:
+            return default
+
+        try:
+            return int(data)
+
+        except ValueError as e:
+            raise ValueError(f'requested {key=} as int cannot be converted to int') from e
+
+    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        if self.config is None:
+            raise ValueError('attempt to use a closed config')
+
+        to_set: Optional[str] = None
+        if isinstance(val, bool):
+            to_set = str(int(val))
+
+        elif isinstance(val, str):
+            to_set = val.translate(self.__escape_table)
+
+        elif isinstance(val, int):
+            to_set = str(val)
+
+        elif isinstance(val, list):
+            to_set = '\n'.join(s.translate(self.__escape_table) for s in val + [';'])
+
+        else:
+            raise NotImplementedError(f'value of type {type(val)} is not supported')
+
+        self.config.set(self.SECTION, key, to_set)
+
+    def delete(self, key: str) -> None:
+        if self.config is None:
+            raise ValueError('attempt to use a closed config')
+
+        self.config.remove_option(self.SECTION, key)
+
+    def save(self) -> None:
+        if self.config is None:
+            raise ValueError('attempt to use a closed config')
+
+        with open(self.filename, 'w', encoding='utf-8') as f:
+            self.config.write(f)
+
+    def close(self) -> None:
+        self.save()
+        self.config = None
 
 
 class Config():
