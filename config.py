@@ -155,15 +155,18 @@ class AbstractConfig(abc.ABC):
     home: pathlib.Path
     default_journal_dir: Optional[pathlib.Path]
 
+    identifier: str
+
     def __init__(self) -> None:
         self.home = pathlib.Path.home()
 
-    def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
+    def get(self, key: str, default: Union[None, list, str, bool, int] = None) -> Union[None, list, str, bool, int]:
         """
         Get the requested key, or a default.
 
         :param key: the key to get
         :param default: the default to return if the key does not exist, defaults to None
+        :raises OSError: on windows, if a registry error occurs.
         :return: the data or the default
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
@@ -173,26 +176,76 @@ class AbstractConfig(abc.ABC):
         elif (s := self.get_str(key, None)) is not None:
             return s
 
+        elif (b := self.get_bool(key, None)) is not None:
+            return b
+
+        elif (i := self.get_int(key, None)) is not None:
+            return i
+
         return default
 
     @abstractmethod
     def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
-        """See get."""
+        """
+        Get the list referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :raises OSError: on windows, if a registry error occurs.
+        :return: The requested data or the default
+        """
         raise NotImplementedError
 
     @abstractmethod
     def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
-        """See get."""
+        """
+        Get the string referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :raises OSError: on windows, if a registry error occurs.
+        :return: The requested data or the default
+        """
         raise NotImplementedError
 
-    def getint(self, key: str, default: int = 0) -> int:
-        """See get."""
+    @abstractmethod
+    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        """
+        Get the bool referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :raises OSError: on windows, if a registry error occurs.
+        :return: The requested data or the default
+        """
+        raise NotImplementedError
+
+    def getint(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+        """
+        Getint is a Deprecated getter method.
+
+        See get_int for its replacement.
+        :raises OSError: on windows, if a registry error occurs.
+        """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
         return self.get_int(key, default)
 
     @abstractmethod
-    def get_int(self, key: str, default: int = 0) -> int:
-        """See get."""
+    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+        """
+        Get the int referred to by key if it exists in the config.
+
+        For legacy reasons, the default is 0 and not None.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to 0
+        :raises ValueError: if the internal representation of this key cannot be converted to an int
+        :raises OSError: on windows, if a registry error occurs.
+        :return: The requested data or the default
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -206,12 +259,17 @@ class AbstractConfig(abc.ABC):
         Delete the given key from the config.
 
         :param key: The key to delete
+        :raises OSError: on windows, if a registry error occurs.
         """
         raise NotImplementedError
 
     @abstractmethod
     def save(self) -> None:
-        """Save the current configuration."""
+        """
+        Save the current configuration.
+
+        :raises OSError: on windows, if a registry error occurs.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -356,7 +414,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -495,7 +553,7 @@ class MacConfig(AbstractConfig):
 
         return res
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -614,7 +672,7 @@ class LinuxConfig(AbstractConfig):
 
         return [s.translate(self.__unescape_table) for s in split[:-1]]
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
         data = self.__raw_get(key)
 
         if data is None:
