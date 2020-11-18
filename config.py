@@ -219,6 +219,18 @@ class AbstractConfig(abc.ABC):
         """Close this config and release any associated resources."""
         raise NotImplementedError
 
+    def get_password(self, account: str) -> None:
+        """Legacy password retrieval."""
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+
+    def set_password(self, account: str, password: str) -> None:
+        """Legacy password setting."""
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+
+    def delete_password(self, account: str) -> None:
+        """Legacy password deletion."""
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+
 
 class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for windows."""
