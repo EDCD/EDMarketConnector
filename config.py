@@ -681,9 +681,44 @@ class LinuxConfig(AbstractConfig):
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
             self.set('outdir', str(self.home))
 
-        # TODO: I dislike this, would rather use a sane config file format. But here we are.
-        self.__unescape_table = str.maketrans({'\\n': '\n', '\\\\': '\\', '\\;': ';'})
-        self.__escape_table = str.maketrans({'\n': '\\n', '\\': '\\\\', ';': '\\;'})
+    def __escape(self, s: str) -> str:
+        """
+        Escape the string using self.__escape_lut.
+
+        This does NOT support multi-character escapes
+        """
+        out = ""
+        for c in s:
+            if c not in self.__escape_lut:
+                out += c
+                continue
+
+            out += '\\' + self.__escape_lut[c]
+
+        return out
+
+    def __unescape(self, s: str) -> str:
+        out: List[str] = []
+        i = 0
+        while i < len(s):
+            c = s[i]
+            if c != '\\':
+                out.append(c)
+                i += 1
+                continue
+
+            # We have a backslash, check what its escaping
+            if i == len(s)-1:
+                raise ValueError('Escaped string has unescaped trailer')
+
+            unescaped = self.__unescape_lut.get(s[i+1])
+            if unescaped is None:
+                raise ValueError(f'Unknown escape: \\ {s[i+1]}')
+
+            out.append(unescaped)
+            i += 2
+
+        return "".join(out)
 
     def __raw_get(self, key: str) -> Optional[str]:
         if self.config is None:
@@ -699,7 +734,7 @@ class LinuxConfig(AbstractConfig):
         if '\n' in data:
             raise ValueError('asked for string, got list')
 
-        return data.translate(self.__unescape_table)
+        return self.__unescape(data)
 
     def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
         data = self.__raw_get(key)
@@ -711,7 +746,7 @@ class LinuxConfig(AbstractConfig):
         if split[-1] != ';':
             raise ValueError('Encoded list does not have trailer sentinel')
 
-        return [s.translate(self.__unescape_table) for s in split[:-1]]
+        return list(map(self.__unescape, split[:-1]))
 
     def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
         data = self.__raw_get(key)
@@ -744,13 +779,13 @@ class LinuxConfig(AbstractConfig):
             to_set = str(int(val))
 
         elif isinstance(val, str):
-            to_set = val.translate(self.__escape_table)
+            to_set = self.__escape(val)
 
         elif isinstance(val, int):
             to_set = str(val)
 
         elif isinstance(val, list):
-            to_set = '\n'.join(s.translate(self.__escape_table) for s in val + [';'])
+            to_set = '\n'.join([self.__escape(s) for s in val] + [';'])
 
         else:
             raise NotImplementedError(f'value of type {type(val)} is not supported')
