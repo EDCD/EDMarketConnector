@@ -8,20 +8,16 @@ Linux uses a file, but for commonality it's still a flat data structure.
 # spell-checker: words HKEY FOLDERID wchar wstring edcdhkey
 
 import abc
+import contextlib
 import functools
 import logging
-import numbers
 import os
 import pathlib
 import sys
 import warnings
-import contextlib
 from abc import abstractmethod
-from configparser import ConfigParser, NoOptionError
-from os import getenv, makedirs, mkdir, pardir
-from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import Any, Callable, TYPE_CHECKING, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import semantic_version
 
@@ -126,8 +122,7 @@ elif platform == 'win32':
         return retval
 
 elif platform == 'linux':
-    import codecs
-    from configparser import RawConfigParser
+    from configparser import ConfigParser
 
 
 _T = TypeVar('_T')
