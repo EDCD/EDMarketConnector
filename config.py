@@ -642,8 +642,12 @@ class LinuxConfig(AbstractConfig):
     """Linux implementation of AbstractConfig."""
 
     SECTION = 'config'
+    # TODO: I dislike this, would rather use a sane config file format. But here we are.
+    __unescape_lut = {'\\': '\\', 'n': '\n', ';': ';', 'r': '\r', '#': '#'}
+    __escape_lut = {'\\': '\\', '\n': 'n', ';': ';', '\r': 'r'}
 
-    def __init__(self) -> None:
+    def __init__(self, filename: Optional[str] = None) -> None:
+        super().__init__()
         # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
         xdg_data_home = pathlib.Path(os.getenv('XDG_DATA_HOME', default='~/.local/share')).expanduser()
         self.app_dir = xdg_data_home / appname
@@ -661,7 +665,10 @@ class LinuxConfig(AbstractConfig):
         config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
 
         self.filename = config_home / appname / f'{appname}.ini'
-        self.filename.mkdir(exist_ok=True, parents=True)
+        if filename is not None:
+            self.filename = pathlib.Path(filename)
+
+        self.filename.parent.mkdir(exist_ok=True, parents=True)
 
         self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
 
@@ -717,6 +724,16 @@ class LinuxConfig(AbstractConfig):
 
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
+
+    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        if self.config is None:
+            raise ValueError('attempt to use a closed config')
+
+        data = self.__raw_get(key)
+        if data is None:
+            return default
+
+        return bool(int(data))
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
         if self.config is None:
