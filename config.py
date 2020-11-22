@@ -36,7 +36,7 @@ copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 
-if getenv("EDMC_NO_UI"):
+if os.getenv("EDMC_NO_UI"):
     logger = logging.getLogger(appcmdname)
 
 else:
