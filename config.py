@@ -341,13 +341,32 @@ class WinConfig(AbstractConfig):
             self.__reg_handle: winreg.HKEYType = create_key_defaults(
                 subkey=r'Software\Marginal\EDMarketConnector'
             )
+            if do_winsparkle:
+                self.__setup_winsparkle()
+
+        except OSError:
+            logger.exception('could not create required registry keys')
+            raise
+
+        self.identifier = applongname
+        if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
+            docs = known_folder_path(FOLDERID_Documents)
+            self.set('outdir',  docs if docs is not None else str(self.home))
+
+    def __setup_winsparkle(self):
+        create_key_defaults = functools.partial(
+            winreg.CreateKeyEx,
+            key=winreg.HKEY_CURRENT_USER,
+            access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
+        )
+        try:
             edcd_handle: winreg.HKEYType = create_key_defaults(subkey=r'Software\EDCD\EDMarketConnector')
             winsparkle_reg: winreg.HKEYType = winreg.CreateKeyEx(
                 edcd_handle, 'WinSparkle', access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY
             )
 
         except OSError:
-            logger.exception('could not create required registry keys')
+            logger.exception('could not open winsparkle handle')
             raise
 
         # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
