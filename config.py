@@ -308,7 +308,7 @@ class AbstractConfig(abc.ABC):
 class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for windows."""
 
-    def __init__(self) -> None:
+    def __init__(self, do_winsparkle=True) -> None:
         self.app_dir = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
         self.app_dir.mkdir(exist_ok=True)
 
@@ -316,11 +316,11 @@ class WinConfig(AbstractConfig):
         self.plugin_dir.mkdir(exist_ok=True)
 
         if getattr(sys, 'frozen', False):
-            self.respath = pathlib.Path(dirname(sys.executable))
+            self.respath = pathlib.Path(sys.executable).parent
             self.internal_plugin_dir = self.respath / 'plugins'
 
         else:
-            self.respath = pathlib.Path(dirname(__file__))
+            self.respath = pathlib.Path(__file__).parent
             self.internal_plugin_dir = self.respath / 'plugins'
 
         self.home = pathlib.Path.home()
@@ -383,11 +383,6 @@ class WinConfig(AbstractConfig):
 
         winsparkle_reg.Close()
         edcd_handle.Close()
-
-        self.identifier = applongname
-        if (outdir_str := self.get_str('outdir')) is None or not isdir(outdir_str):
-            docs = known_folder_path(FOLDERID_Documents)
-            self.set('outdir',  docs if docs is not None else str(self.home))
 
     def __get_regentry(self, key: str) -> Union[None, list, str, int]:
         """Access the registry for the raw entry."""
