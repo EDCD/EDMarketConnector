@@ -52,10 +52,13 @@ elif platform == 'win32':
     import ctypes
     import uuid
     import winreg
-    from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
+    from ctypes.wintypes import DWORD, HANDLE
     if TYPE_CHECKING:
         import ctypes.windll  # type: ignore
 
+    REG_RESERVED_ALWAYS_ZERO = 0
+
+    # This is the only way to do this from python without external deps (which do this anyway).
     FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
     FOLDERID_Profile = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
@@ -66,51 +69,6 @@ elif platform == 'win32':
 
     CoTaskMemFree = ctypes.windll.ole32.CoTaskMemFree
     CoTaskMemFree.argtypes = [ctypes.c_void_p]
-
-    # winreg in Python <= 3.7.4 handles REG_MULTI_SZ incorrectly, so do this instead. https://bugs.python.org/issue32587
-    HKEY_CURRENT_USER = 0x80000001
-    KEY_ALL_ACCESS = 0x000F003F
-    REG_CREATED_NEW_KEY = 0x00000001
-    REG_OPENED_EXISTING_KEY = 0x00000002
-    REG_SZ = 1
-    REG_DWORD = 4
-    REG_MULTI_SZ = 7
-
-    REG_RESERVED_ALWAYS_ZERO = 0
-
-    RegCreateKeyEx = ctypes.windll.advapi32.RegCreateKeyExW
-    RegCreateKeyEx.restype = LONG
-    RegCreateKeyEx.argtypes = [
-        HKEY, LPCWSTR, DWORD, LPCVOID, DWORD, DWORD, LPCVOID, ctypes.POINTER(HKEY), ctypes.POINTER(DWORD)
-    ]
-
-    RegOpenKeyEx = ctypes.windll.advapi32.RegOpenKeyExW
-    RegOpenKeyEx.restype = LONG
-    RegOpenKeyEx.argtypes = [HKEY, LPCWSTR, DWORD, DWORD, ctypes.POINTER(HKEY)]
-
-    RegCloseKey = ctypes.windll.advapi32.RegCloseKey
-    RegCloseKey.restype = LONG
-    RegCloseKey.argtypes = [HKEY]
-
-    RegQueryValueEx = ctypes.windll.advapi32.RegQueryValueExW
-    RegQueryValueEx.restype = LONG
-    RegQueryValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, ctypes.POINTER(DWORD), LPCVOID, ctypes.POINTER(DWORD)]
-
-    RegSetValueEx = ctypes.windll.advapi32.RegSetValueExW
-    RegSetValueEx.restype = LONG
-    RegSetValueEx.argtypes = [HKEY, LPCWSTR, LPCVOID, DWORD, LPCVOID, DWORD]
-
-    RegCopyTree = ctypes.windll.advapi32.RegCopyTreeW
-    RegCopyTree.restype = LONG
-    RegCopyTree.argtypes = [HKEY, LPCWSTR, HKEY]
-
-    RegDeleteKey = ctypes.windll.advapi32.RegDeleteTreeW
-    RegDeleteKey.restype = LONG
-    RegDeleteKey.argtypes = [HKEY, LPCWSTR]
-
-    RegDeleteValue = ctypes.windll.advapi32.RegDeleteValueW
-    RegDeleteValue.restype = LONG
-    RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
     def known_folder_path(guid: uuid.UUID) -> Optional[str]:
         """Look up a Windows GUID to actual folder path name."""
