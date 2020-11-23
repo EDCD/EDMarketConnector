@@ -582,7 +582,17 @@ class MacConfig(AbstractConfig):
             logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
             return default
 
-    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        res = self.__raw_get(key)
+        if res is None:
+            return default
+
+        elif not isinstance(res, bool):
+            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+
+        return res
+
+    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
         Set sets the given key to the given value.
 
