@@ -2,7 +2,7 @@ import numbers
 import sys
 import warnings
 from configparser import NoOptionError
-from os import getenv, mkdir, pardir, makedirs
+from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
 from typing import TYPE_CHECKING, Optional, Union
@@ -202,7 +202,7 @@ class OldConfig():
     elif platform == 'win32':
 
         def __init__(self):
-            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)
+            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore # Not going to change
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -279,7 +279,7 @@ class OldConfig():
                 RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf) * 2)
                 RegCloseKey(sparklekey)
 
-            if not self.get('outdir') or not isdir(self.get('outdir')):
+            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore # Not going to change
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
@@ -395,7 +395,7 @@ class OldConfig():
                 logger.debug('Reading config failed, assuming we\'re making a new one...', exc_info=e)
                 self.config.add_section(self.SECTION)
 
-            if not self.get('outdir') or not isdir(self.get('outdir')):
+            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore # Not going to change
                 self.set('outdir', expanduser('~'))
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
@@ -437,10 +437,10 @@ class OldConfig():
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, bool):
-                self.config.set(self.SECTION, key, val and '1' or '0')
+                self.config.set(self.SECTION, key, val and '1' or '0')  # type: ignore # Not going to change
 
             elif isinstance(val, str) or isinstance(val, numbers.Integral):
-                self.config.set(self.SECTION, key, self._escape(val))
+                self.config.set(self.SECTION, key, self._escape(val))  # type: ignore # Not going to change
 
             elif isinstance(val, list):
                 self.config.set(self.SECTION, key, '\n'.join([self._escape(x) for x in val] + [';']))
