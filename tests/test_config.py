@@ -7,7 +7,7 @@ import pathlib
 import random
 import string
 import sys
-from typing import Any, List, cast
+from typing import Any, Iterable, List, cast
 
 import pytest
 from pytest import mark
@@ -64,11 +64,11 @@ bool_tests = [True, False]
 big_int = int(0xFFFFFFFF)  # 32 bit int
 
 
-def _make_params(args: List[Any], id_name: str = 'random_test_{i}'):
+def _make_params(args: List[Any], id_name: str = 'random_test_{i}') -> list:
     return [pytest.param(x, id=id_name.format(i=i)) for i, x in enumerate(args)]
 
 
-def _build_test_list(static_data, random_data, random_id_name='random_test_{i}'):
+def _build_test_list(static_data, random_data, random_id_name='random_test_{i}') -> Iterable:
     return itertools.chain(static_data, _make_params(random_data, id_name=random_id_name))
 
 
@@ -76,7 +76,7 @@ class TestNewConfig:
     """Test the new config with an array of hand picked and random data."""
 
     @mark.parametrize("i", _build_test_list(int_tests, _get_fuzz(int, value_length=(-big_int, big_int))))
-    def test_ints(self, i):
+    def test_ints(self, i: int) -> None:
         """Save int and then unpack it again."""
         if sys.platform == 'win32':
             i = abs(i)
@@ -87,7 +87,7 @@ class TestNewConfig:
         config.delete(name)
 
     @mark.parametrize("string", _build_test_list(string_tests, _get_fuzz(str, value_length=(0, 512))))
-    def test_string(self, string: str):
+    def test_string(self, string: str) -> None:
         """Save a string and then ask for it back."""
         name = f'str_test_{hash(string)}'
         config.set(name, string)
@@ -95,7 +95,7 @@ class TestNewConfig:
         config.delete(name)
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
-    def test_list(self, lst: List[str]):
+    def test_list(self, lst: List[str]) -> None:
         """Save a list and then ask for it back."""
         name = f'list_test_{ hash("".join(lst)) }'
         config.set(name, lst)
@@ -104,7 +104,7 @@ class TestNewConfig:
         config.delete(name)
 
     @mark.parametrize('b', bool_tests)
-    def test_bool(self, b):
+    def test_bool(self, b: bool) -> None:
         """Save a bool and ask for it back."""
         name = str(b)
         config.set(name, b)
@@ -117,7 +117,7 @@ class TestOldNewConfig:
 
     KEY_PREFIX = 'oldnew_'
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """
         Teardown for all config tests to save out configs.
 
@@ -127,12 +127,13 @@ class TestOldNewConfig:
         old_config.save()
         config.save()
 
-    def cleanup_entry(self, entry: str):
+    def cleanup_entry(self, entry: str) -> None:
+        """Remove the given key, on both sides if on linux."""
         config.delete(entry)
         if sys.platform == 'linux':
             old_config.delete(entry)
 
-    def __update_linuxconfig(self):
+    def __update_linuxconfig(self) -> None:
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
@@ -156,6 +157,7 @@ class TestOldNewConfig:
 
     @mark.parametrize("string", _build_test_list(string_tests, _get_fuzz(str, value_length=(0, 512))))
     def test_string(self, string: str) -> None:
+        """Save a string though the old config, recall it using the new config."""
         string = string.replace("\r", "")  # The old config does _not_ support \r in its entries. We do.
         name = self.KEY_PREFIX + f'string_{hash(string)}'
         old_config.set(name, string)
@@ -169,7 +171,8 @@ class TestOldNewConfig:
             assert res == string
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
-    def test_list(self, lst):
+    def test_list(self, lst: List[str]) -> None:
+        """Save a list though the old config, recall it using the new config."""
         lst = [x.replace("\r", "") for x in lst]  # OldConfig on linux fails to store these correctly
         if sys.platform == 'win32':
             # old conf on windows replaces empty entries with spaces as a workaround for a bug. New conf does not
@@ -189,7 +192,8 @@ class TestOldNewConfig:
 
     @mark.skipif(sys.platform == 'win32', reason="Old Windows config does not support bool types")
     @mark.parametrize("b", bool_tests)
-    def test_bool(self, b):
+    def test_bool(self, b: bool) -> None:
+        """Save a bool though the old config, recall it using the new config."""
         name = str(b)
         old_config.set(name, b)
         old_config.save()
