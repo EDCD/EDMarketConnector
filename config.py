@@ -419,7 +419,22 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        """
+        Return the bool found at the given key, or the default if none exists.
+
+        :param key: The key to access
+        :param default: Default to return when key does not exist, defaults to None
+        :raises ValueError: If the data returned is of an unexpected type
+        :return: The data requested or the default
+        """
+        res = self.get_int(key)
+        if res is None:
+            return default
+
+        return bool(res)
+
+    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
         Set sets the given key to the given value.
 
@@ -438,6 +453,10 @@ class WinConfig(AbstractConfig):
 
         elif isinstance(val, list):
             reg_type = winreg.REG_MULTI_SZ
+
+        elif isinstance(val, bool):
+            reg_type = winreg.REG_DWORD
+            val = int(val)
 
         else:
             raise ValueError(f'Unexpected type for value {type(val)=}')
