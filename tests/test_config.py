@@ -61,7 +61,7 @@ list_tests = [
 ]
 bool_tests = [True, False]
 
-big_int = 1 << 64
+big_int = int(0xFFFFFFFF)  # 32 bit int
 
 
 def _make_params(args: List[Any], id_name: str = 'random_test_{i}'):
@@ -78,6 +78,9 @@ class TestNewConfig:
     @mark.parametrize("i", _build_test_list(int_tests, _get_fuzz(int, value_length=(-big_int, big_int))))
     def test_ints(self, i):
         """Save int and then unpack it again."""
+        if sys.platform == 'win32':
+            i = abs(i)
+
         name = f"int_test_{i}"
         config.set(name, i)
         assert i == config.get_int(name)
@@ -134,9 +137,12 @@ class TestOldNewConfig:
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
 
-    @mark.parametrize("i", _build_test_list(int_tests, _get_fuzz(int, 50, (-(1 << 32), 1 << 32))))
+    @mark.parametrize("i", _build_test_list(int_tests, _get_fuzz(int, 50, (-big_int, big_int))))
     def test_int(self, i: int) -> None:
         """Save an int though the old config, recall it using the new config."""
+        if sys.platform == 'win32':
+            i = abs(i)
+
         name = self.KEY_PREFIX + f'int_{i}'
         old_config.set(name, i)
         old_config.save()
