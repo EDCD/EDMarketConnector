@@ -449,6 +449,8 @@ class WinConfig(AbstractConfig):
             winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
 
         elif isinstance(val, int):  # The original code checked for numbers.Integral, I dont think that is needed.
+            if val > 0xFFFFFFFF or val < 0:
+                warnings.warn(f'Value of {val} is either too large or negative. This will cause issues.')
             reg_type = winreg.REG_DWORD
 
         elif isinstance(val, list):
