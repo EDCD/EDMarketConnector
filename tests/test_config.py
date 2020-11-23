@@ -170,7 +170,12 @@ class TestOldNewConfig:
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
     def test_list(self, lst):
-        lst = [x.replace("\r", "") for x in lst]
+        lst = [x.replace("\r", "") for x in lst]  # OldConfig on linux fails to store these correctly
+        if sys.platform == 'win32':
+            # old conf on windows replaces empty entries with spaces as a workaround for a bug. New conf does not
+            # So insert those spaces here, to ensure that it works otherwise.
+            lst = [e if len(e) > 0 else ' ' for e in lst]
+
         name = self.KEY_PREFIX + f'list_test_{ hash("".join(lst)) }'
         old_config.set(name, lst)
         old_config.save()
