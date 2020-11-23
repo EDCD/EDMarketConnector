@@ -25,5 +25,11 @@ grip>=4.5.2
 # We only need py2exe on windows.
 py2exe==0.10.1.0; sys_platform == 'win32'
 
+# Testing
+pytest==6.1.2
+pytest-cov==2.10.1  # Pytest code coverage support
+coverage[toml]==5.3 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+
+
 # All of the normal requirements
 -r requirements.txt
