@@ -58,7 +58,7 @@ elif platform == 'win32':
 
     REG_RESERVED_ALWAYS_ZERO = 0
 
-    # This is the only way to do this from python without external deps (which do this anyway).
+    # This is the only way to do this from python without external dependencies (which do this anyway).
     FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
     FOLDERID_Profile = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
@@ -467,6 +467,12 @@ class WinConfig(AbstractConfig):
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str) -> None:
+        """
+        Delete the given key from the config.
+
+        :param key: The key to delete
+        :raises OSError: if a registry error occurs.
+        """
         winreg.DeleteValue(self.__reg_handle, key)
 
     def save(self) -> None:
@@ -588,6 +594,14 @@ class MacConfig(AbstractConfig):
             return default
 
     def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        """
+        Get the bool referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :return: The requested data or the default
+        """
         res = self.__raw_get(key)
         if res is None:
             return default
@@ -714,6 +728,14 @@ class LinuxConfig(AbstractConfig):
         return self.config[self.SECTION].get(key)
 
     def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """
+        Get the string referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :return: The requested data or the default
+        """
         data = self.__raw_get(key)
         if data is None:
             return default
@@ -724,6 +746,14 @@ class LinuxConfig(AbstractConfig):
         return self.__unescape(data)
 
     def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+        """
+        Get the list referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :return: The requested data or the default
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -736,6 +766,16 @@ class LinuxConfig(AbstractConfig):
         return list(map(self.__unescape, split[:-1]))
 
     def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+        """
+        Get the int referred to by key if it exists in the config.
+
+        For legacy reasons, the default is 0 and not None.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to 0
+        :raises ValueError: if the internal representation of this key cannot be converted to an int
+        :return: The requested data or the default
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -748,6 +788,14 @@ class LinuxConfig(AbstractConfig):
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
     def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+        """
+        Get the bool referred to by the given key if it exists, or the default.
+
+        :param key: The key to search for
+        :param default: Default to return if the key does not exist, defaults to None
+        :raises ValueError: If an internal error occurs getting or converting a value
+        :return: The requested data or the default
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -758,6 +806,7 @@ class LinuxConfig(AbstractConfig):
         return bool(int(data))
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """Set the given key to the given data."""
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -780,12 +829,18 @@ class LinuxConfig(AbstractConfig):
         self.config.set(self.SECTION, key, to_set)
 
     def delete(self, key: str) -> None:
+        """
+        Delete the given key from the config.
+
+        :param key: The key to delete
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
 
     def save(self) -> None:
+        """Save the current configuration."""
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -793,11 +848,12 @@ class LinuxConfig(AbstractConfig):
             self.config.write(f)
 
     def close(self) -> None:
+        """Close this config and release any associated resources."""
         self.save()
         self.config = None
 
 
-def get_config(*args, **kwargs) -> AbstractConfig:
+def _get_config(*args, **kwargs) -> AbstractConfig:
     if sys.platform == "darwin":
         return MacConfig(*args, **kwargs)
     elif sys.platform == "win32":
@@ -808,4 +864,4 @@ def get_config(*args, **kwargs) -> AbstractConfig:
         raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
-config = get_config()
+config = _get_config()
