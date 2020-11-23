@@ -75,6 +75,11 @@ def _build_test_list(static_data, random_data, random_id_name='random_test_{i}')
 class TestNewConfig:
     """Test the new config with an array of hand picked and random data."""
 
+    def __update_linuxconfig(self) -> None:
+        """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
+        if isinstance(config, LinuxConfig) and config.config is not None:
+            config.config.read(config.filename)
+
     @mark.parametrize("i", _build_test_list(int_tests, _get_fuzz(int, value_length=(-big_int, big_int))))
     def test_ints(self, i: int) -> None:
         """Save int and then unpack it again."""
@@ -83,6 +88,8 @@ class TestNewConfig:
 
         name = f"int_test_{i}"
         config.set(name, i)
+        config.save()
+        self.__update_linuxconfig()
         assert i == config.get_int(name)
         config.delete(name)
 
@@ -91,6 +98,8 @@ class TestNewConfig:
         """Save a string and then ask for it back."""
         name = f'str_test_{hash(string)}'
         config.set(name, string)
+        config.save()
+        self.__update_linuxconfig()
         assert string == config.get_str(name)
         config.delete(name)
 
@@ -99,6 +108,10 @@ class TestNewConfig:
         """Save a list and then ask for it back."""
         name = f'list_test_{ hash("".join(lst)) }'
         config.set(name, lst)
+        
+        config.save()
+        self.__update_linuxconfig()
+        
         assert lst == config.get_list(name)
 
         config.delete(name)
@@ -108,6 +121,8 @@ class TestNewConfig:
         """Save a bool and ask for it back."""
         name = str(b)
         config.set(name, b)
+        config.save()
+        self.__update_linuxconfig()
         assert b == config.get_bool(name)
         config.delete(name)
 
