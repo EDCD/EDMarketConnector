@@ -297,7 +297,7 @@ class WinConfig(AbstractConfig):
 
         try:
             self.__reg_handle: winreg.HKEYType = create_key_defaults(
-                subkey=r'Software\Marginal\EDMarketConnector'
+                sub_key=r'Software\Marginal\EDMarketConnector'
             )
             if do_winsparkle:
                 self.__setup_winsparkle()
@@ -318,9 +318,9 @@ class WinConfig(AbstractConfig):
             access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
         )
         try:
-            edcd_handle: winreg.HKEYType = create_key_defaults(subkey=r'Software\EDCD\EDMarketConnector')
+            edcd_handle: winreg.HKEYType = create_key_defaults(sub_key=r'Software\EDCD\EDMarketConnector')
             winsparkle_reg: winreg.HKEYType = winreg.CreateKeyEx(
-                edcd_handle, 'WinSparkle', access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY
+                edcd_handle, sub_key='WinSparkle', access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY
             )
 
         except OSError:
@@ -463,6 +463,9 @@ class WinConfig(AbstractConfig):
 
         # Its complaining about the list, it works, tested on windows, ignored.
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
+
+    def delete(self, key: str) -> None:
+        winreg.DeleteValue(self.__reg_handle, key)
 
     def save(self) -> None:
         """Save the configuration."""
