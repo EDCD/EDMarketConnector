@@ -124,6 +124,11 @@ class TestOldNewConfig:
         old_config.save()
         config.save()
 
+    def cleanup_entry(self, entry: str):
+        config.delete(entry)
+        if sys.platform == 'linux':
+            old_config.delete(entry)
+
     def __update_linuxconfig(self):
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
         if isinstance(config, LinuxConfig) and config.config is not None:
@@ -140,8 +145,7 @@ class TestOldNewConfig:
 
         res = config.get_int(name)
         with contextlib.ExitStack() as stack:
-            stack.callback(config.delete, name)
-            stack.callback(old_config.delete, name)
+            stack.callback(self.cleanup_entry, name)
             assert res == i
 
     @mark.parametrize("string", _build_test_list(string_tests, _get_fuzz(str, value_length=(0, 512))))
@@ -155,8 +159,7 @@ class TestOldNewConfig:
 
         res = config.get_str(name)
         with contextlib.ExitStack() as stack:
-            stack.callback(config.delete, name)
-            stack.callback(old_config.delete, name)
+            stack.callback(self.cleanup_entry, name)
             assert res == string
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
@@ -170,8 +173,7 @@ class TestOldNewConfig:
 
         res = config.get_list(name)
         with contextlib.ExitStack() as stack:
-            stack.callback(config.delete, name)
-            stack.callback(old_config.delete, name)
+            stack.callback(self.cleanup_entry, name)
             assert res == lst
 
     @mark.skipif(sys.platform == 'win32', reason="Old Windows config does not support bool types")
@@ -182,6 +184,5 @@ class TestOldNewConfig:
         old_config.save()
         self.__update_linuxconfig()
         with contextlib.ExitStack() as stack:
-            stack.callback(config.delete, name)
-            stack.callback(old_config.delete, name)
+            stack.callback(self.cleanup_entry, name)
             assert config.get_bool(name) == b
