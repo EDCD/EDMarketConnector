@@ -222,7 +222,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """Set the given key to the given data."""
         raise NotImplementedError
 
