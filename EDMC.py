@@ -173,6 +173,11 @@ sys.path: {sys.path}'''
         if args.j:
             logger.debug('Import and collate from JSON dump')
             # Import and collate from JSON dump
+            #
+            # Try twice, once with the system locale and once enforcing utf-8. If the file was made on the current
+            # system, chances are its the current locale, and not utf-8. Otherwise if it was copied, its probably
+            # utf8. Either way, try the system FIRST because reading something like cp1251 in UTF-8 results in garbage
+            # but the reverse results in an exception.
             try:
                 data = json.load(open(args.j))
             except UnicodeDecodeError:
