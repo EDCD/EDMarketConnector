@@ -14,10 +14,10 @@ from typing import TYPE_CHECKING, Any, Optional
 
 # isort: off
 
-# See EDMCLogging.py docs.
-# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
 
+# See EDMCLogging.py docs.
+# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 from EDMCLogging import edmclogger, logger, logging
 
 if TYPE_CHECKING:
