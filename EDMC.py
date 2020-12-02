@@ -173,7 +173,11 @@ sys.path: {sys.path}'''
         if args.j:
             logger.debug('Import and collate from JSON dump')
             # Import and collate from JSON dump
-            data = json.load(open(args.j))
+            try:
+                data = json.load(open(args.j))
+            except UnicodeDecodeError:
+                data = json.load(open(args.j, encoding='utf-8'))
+
             config.set('querytime', int(getmtime(args.j)))
 
         else:
@@ -188,7 +192,7 @@ sys.path: {sys.path}'''
                 logfile = join(logdir, logfiles[-1])
 
                 logger.debug(f'Using logfile "{logfile}"')
-                with open(logfile, 'r') as loghandle:
+                with open(logfile, 'r', encoding='utf-8') as loghandle:
                     for line in loghandle:
                         try:
                             monitor.parse_entry(line)
