@@ -12,16 +12,20 @@ from os.path import getmtime, join
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, Optional
 
-# See EDMCLogging.py docs.
 # isort: off
-from EDMCLogging import edmclogger, logger, logging
-if TYPE_CHECKING:
-    from logging import trace, TRACE  # type: ignore # noqa: F401
-# isort: on
-edmclogger.set_channels_loglevel(logging.INFO)
 
+# See EDMCLogging.py docs.
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 os.environ["EDMC_NO_UI"] = "1"
+
+from EDMCLogging import edmclogger, logger, logging
+
+if TYPE_CHECKING:
+    from logging import trace, TRACE  # type: ignore # noqa: F401
+
+edmclogger.set_channels_loglevel(logging.INFO)
+
+# isort: on
 
 import collate
 import commodity
