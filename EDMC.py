@@ -12,16 +12,20 @@ from os.path import getmtime, join
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, Optional
 
-# See EDMCLogging.py docs.
 # isort: off
+
+os.environ["EDMC_NO_UI"] = "1"
+
+# See EDMCLogging.py docs.
+# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 from EDMCLogging import edmclogger, logger, logging
+
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
-# isort: on
+
 edmclogger.set_channels_loglevel(logging.INFO)
 
-# workaround for https://github.com/EDCD/EDMarketConnector/issues/568
-os.environ["EDMC_NO_UI"] = "1"
+# isort: on
 
 import collate
 import commodity
@@ -169,7 +173,16 @@ sys.path: {sys.path}'''
         if args.j:
             logger.debug('Import and collate from JSON dump')
             # Import and collate from JSON dump
-            data = json.load(open(args.j))
+            #
+            # Try twice, once with the system locale and once enforcing utf-8. If the file was made on the current
+            # system, chances are its the current locale, and not utf-8. Otherwise if it was copied, its probably
+            # utf8. Either way, try the system FIRST because reading something like cp1251 in UTF-8 results in garbage
+            # but the reverse results in an exception.
+            try:
+                data = json.load(open(args.j))
+            except UnicodeDecodeError:
+                data = json.load(open(args.j, encoding='utf-8'))
+
             config.set('querytime', int(getmtime(args.j)))
 
         else:
@@ -184,7 +197,7 @@ sys.path: {sys.path}'''
                 logfile = join(logdir, logfiles[-1])
 
                 logger.debug(f'Using logfile "{logfile}"')
-                with open(logfile, 'r') as loghandle:
+                with open(logfile, 'r', encoding='utf-8') as loghandle:
                     for line in loghandle:
                         try:
                             monitor.parse_entry(line)

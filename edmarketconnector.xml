@@ -168,10 +168,18 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.3</title>
+			<title>Release 4.1.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.4</h2>
+<p>The only change from 4.1.3 is to insert some Windows version checks before
+even attempting to set a UTF-8 encoding.  We'll now only attempt this if the
+user is <em>not</em> on Windows, or is on at least Windows 10 1903.</p>
+<p>For unknown reasons no exception was being thrown under some circumstances (in
+this case running under an earlier Windows 10, but with EDMarketConnector.exe
+set to run in Windows 7 compatibility mode for some unknown reason).</p>
 
 <h2>Release 4.1.3</h2>
 <ul>
@@ -816,11 +824,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.3/EDMarketConnector_win_4.1.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.4/EDMarketConnector_win_4.1.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.3"
-				length="11354112"
+				sparkle:version="4.1.4"
+				length="11341824"
 				type="application/octet-stream"
 			/>
 		</item>
