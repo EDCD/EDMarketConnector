@@ -24,8 +24,6 @@ jobs:
         run: |
           pip install wheel
           pip install -r requirements-dev.txt
-          pip install py2exe
-          ls
 
       - name: Download winsparkle
         run: |
