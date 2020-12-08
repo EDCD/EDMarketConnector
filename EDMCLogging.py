@@ -291,7 +291,8 @@ class EDMCContextFilter(logging.Filter):
 
                 if frame_class:
                     # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
-                    if (name := frame_info.function).startswith("__") and not name.endswith("__"):
+                    name = frame_info.function
+                    if name.startswith("__") and not name.endswith("__"):
                         name = f'_{frame_class.__class__.__name__}{frame_info.function}'
 
                     # Find __qualname__ of the caller
