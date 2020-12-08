@@ -39,7 +39,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Built files
-          path: |
-            EDMarketConnector_win*.msi
-            dist.win32\EDMarketConnector.exe
-            appcast_win_*.xml
+          path: EDMarketConnector_win*.msi
