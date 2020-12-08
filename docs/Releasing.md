@@ -10,6 +10,8 @@ This document aims to enable anyone to quickly get up to speed on how to:
 Note that for Windows only a 32-bit application is supported at this time.
 This is principally due to the Windows Registry handling in config.py.
 
+Builds can be run automatically from GitHub Actions. For more information on that process, see [Automatic Builds](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Automatic%20Builds.md).
+
 # Environment
 
 You will need several pieces of software installed, or the files from their
