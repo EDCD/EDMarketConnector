@@ -354,7 +354,7 @@ threads - doing so may cause the app to crash intermittently. You can signal
 back to the main thread using Tkinter's `event_generate()` widget method,
 generating a user-defined event that you have previously registered with the
 [`bind_all()`](http://effbot.org/tkinterbook/tkinter-events-and-bindings.htm)
-widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/master/plugins/edsm.py)
+widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/main/plugins/edsm.py)
 for an example of these techniques.
 
 #### Journal Entry
