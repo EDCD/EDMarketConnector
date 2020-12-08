@@ -1,3 +1,5 @@
+name: Build EDMC for Windows
+
 on:
   push:
     tags:
