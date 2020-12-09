@@ -10,7 +10,7 @@ name: Push-Checks
 on:
   push:
     branches: [ develop ]
-  
+
 jobs:
   build:
 
