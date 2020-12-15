@@ -21,6 +21,13 @@ Plugins are python files. The plugin folder must have a file named `load.py`
 that must provide one module level function and optionally provide a few
 others.
 
+If you're running from source (which allows for debugging with e.g. [PyCharm](https://www.jetbrains.com/pycharm/features/))
+then you'll need to be using an appropriate version of Python.  The current
+version is listed in the [Environment section of Releasing.md](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#environment).
+If you're developing your plugin simply against an install of EDMarketConnector
+then you'll be relying on the bundled version of Python (it's baked 
+into the .exe via the py2exe build process).
+
 ---
 
 ### Examples
@@ -351,7 +358,7 @@ threads - doing so may cause the app to crash intermittently. You can signal
 back to the main thread using Tkinter's `event_generate()` widget method,
 generating a user-defined event that you have previously registered with the
 [`bind_all()`](http://effbot.org/tkinterbook/tkinter-events-and-bindings.htm)
-widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/master/plugins/edsm.py)
+widget method. See the [EDSM plugin](https://github.com/Marginal/EDMarketConnector/blob/main/plugins/edsm.py)
 for an example of these techniques.
 
 #### Journal Entry

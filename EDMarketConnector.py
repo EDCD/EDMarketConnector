@@ -17,8 +17,117 @@ from typing import TYPE_CHECKING
 
 from config import applongname, appname, appversion, appversion_nobuild, config, copyright
 
-# TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 if __name__ == "__main__":
+    def no_other_instance_running() -> bool:  # noqa: CCR001
+        """
+        Ensure only one copy of the app is running under this user account.
+
+        OSX does this automatically.
+
+        :returns: True if we are the single instance, else False.
+        """
+        # TODO: Linux implementation
+        if platform == 'win32':
+            import ctypes
+            from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
+
+            EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
+            GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
+            GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
+            GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
+            GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+            GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
+            GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
+
+            SW_RESTORE = 9  # noqa: N806
+            SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
+            ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
+            ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
+
+            COINIT_MULTITHREADED = 0  # noqa: N806,F841
+            COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
+            COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
+            CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
+
+            ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
+            ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
+
+            def window_title(h):
+                if h:
+                    text_length = GetWindowTextLength(h) + 1
+                    buf = ctypes.create_unicode_buffer(text_length)
+                    if GetWindowText(h, buf, text_length):
+                        return buf.value
+
+                return None
+
+            @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+            def enumwindowsproc(window_handle, l_param):
+                # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
+                cls = ctypes.create_unicode_buffer(257)
+                if GetClassName(window_handle, cls, 257) \
+                        and cls.value == 'TkTopLevel' \
+                        and window_title(window_handle) == applongname \
+                        and GetProcessHandleFromHwnd(window_handle):
+                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
+                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                        # Wait for it to be responsive to avoid ShellExecute recursing
+                        ShowWindow(window_handle, SW_RESTORE)
+                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+
+                    else:
+                        ShowWindowAsync(window_handle, SW_RESTORE)
+                        SetForegroundWindow(window_handle)
+
+                    return False
+
+                return True
+
+            return EnumWindows(enumwindowsproc, 0)
+
+        return True
+
+    def already_running_popup():
+        """Create the "already running" popup."""
+        import tkinter as tk
+        from tkinter import ttk
+
+        root = tk.Tk(className=appname.lower())
+
+        frame = tk.Frame(root)
+        frame.grid(row=1, column=0, sticky=tk.NSEW)
+
+        label = tk.Label(frame)
+        label['text'] = 'An EDMarketConnector.exe process was already running, exiting.'
+        label.grid(row=1, column=0, sticky=tk.NSEW)
+
+        button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
+        button.grid(row=2, column=0, sticky=tk.S)
+
+        root.mainloop()
+
+    if not no_other_instance_running():
+        # There's a copy already running.  We want to inform the user by
+        # **appending** to the log file, not truncating it.
+        if getattr(sys, 'frozen', False):
+            # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+            import tempfile
+
+            # unbuffered not allowed for text in python3, so use `1 for line buffering
+            sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='a', buffering=1)
+
+        # Logging isn't set up yet.
+        # We'll keep this print, but it will be over-written by any subsequent
+        # write by the already-running process.
+        print("An EDMarketConnector.exe process was already running, exiting.")
+
+        # To be sure the user knows, we need a popup
+        already_running_popup()
+        # If the user closes the popup with the 'X', not the 'OK' button we'll
+        # reach here.
+        sys.exit(0)
+
     # Keep this as the very first code run to be as sure as possible of no
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
@@ -36,6 +145,9 @@ if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
 # isort: on
 
+    def _(x: str) -> str:
+        """Fake the l10n translation functions for typing."""
+        return x
 
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
@@ -947,18 +1059,43 @@ class AppWindow(object):
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
             config.set('geometry', f'+{x}+{y}')
-        self.w.withdraw()  # Following items can take a few seconds, so hide the main window while they happen
+
+        # Let the user know we're shutting down.
+        self.status['text'] = _('Shutting down...')
+        self.w.update_idletasks()
+        logger.info('Starting shutdown procedures...')
+
+        logger.info('Closing protocol handler...')
         protocolhandler.close()
+
+        logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
+
+        logger.info('Closing dashboard...')
         dashboard.close()
+
+        logger.info('Closing journal monitor...')
         monitor.close()
+
+        logger.info('Notifying plugins to stop...')
         plug.notify_stop()
+
+        logger.info('Closing update checker...')
         self.updater.close()
+
+        logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
+
+        logger.info('Closing config...')
         config.close()
+
+        logger.info('Destroying app window...')
         self.w.destroy()
 
-    def drag_start(self, event):
+        logger.info('Done.')
+
+    def drag_start(self, event) -> None:
+        """Initiate dragging the window."""
         self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
 
     def drag_continue(self, event):

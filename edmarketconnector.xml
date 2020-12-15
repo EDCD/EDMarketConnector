@@ -168,10 +168,72 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.4</title>
+			<title>Release 4.1.5</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.5</h2>
+<p>This is a minor maintenance release, mostly addressing behaviour around
+process shutdown and startup, along with a couple of small enhancements that
+most users won't notice.</p>
+<ul>
+<li>
+<p>If there is already an EDMarketConnector.exe process running when trying
+to run another instance then that new process will no longer exit silently.
+Instead you'll get a pop-up telling you it's detected another process, and
+you need to close that pop-up in order for this additional process to then
+exit.</p>
+<p>This hopefully makes it obvious when you've got a hung EDMarketConnect.exe
+process that you need to kill in order to re-run the program.</p>
+</li>
+<li>
+<p>In order to gather more information about how and why EDMarketConnector.exe
+sometimes doesn't shutdown properly we've added some extra debug logging to
+the sequence of clean-up calls performed during shutdown.</p>
+<p>Also, to make it more obvious if the process has hung during shutdown the
+UI window is no longer hidden at the start of this shutdown sequence.  It
+will instead linger, with "Shutting down..." showing in the status line
+(translation for this small phrase will be added in a later release).</p>
+<p>If you encounter this shutdown hang then please add a comment to
+<a href="https://github.com/EDCD/EDMarketConnector/issues/678">Application can leave a zombie process on shutdown #678</a>
+to help us track down the cause and fix it.</p>
+</li>
+<li>
+<p>Cater for 'mangled name' class functions in our logging code.  e.g. where
+you name a class member with a <code>__</code> prefix in order to 'hide' it from
+out-of-class code.</p>
+</li>
+<li>
+<p>To help track down the cause of <a href="https://github.com/EDCD/EDMarketConnector/issues/798">Crashing On Startup #798</a>
+we've added some exception catching in our logging code.  If this is
+triggered you will see <code>??:??</code> in logging output, instead of class and/or
+function names.</p>
+<p>If you encounter this then please comment on that bug report to aid us in
+tracking down the root cause!</p>
+</li>
+<li>
+<p>Fixed logging from EDMC.exe so that the -debug log goes into <code>EDMC-debug.log</code>
+not <code>EDMarketConnector-debug.log</code>.</p>
+</li>
+<li>
+<p>Fix <code>EDMC.exe -j</code> handling of file encodings.  NB: This command-line
+argument isn't listed on <code>EDMC.exe -h</code> as it's intended for developer use
+only.</p>
+</li>
+<li>
+<p>Fix the name of 'Void Opal(s)' so that output of market data to files is
+correct.</p>
+</li>
+<li>
+<p>Fix URL in PLUGINS.md to refer to <code>main</code>, not <code>master</code> branch.</p>
+</li>
+<li>
+<p>We're able to pull <code>py2exe</code> from PyPi now, so docs/Releasing.md has been
+update to reflect this.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.1.4</h2>
 <p>The only change from 4.1.3 is to insert some Windows version checks before
@@ -824,11 +886,11 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.4/EDMarketConnector_win_4.1.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.5/EDMarketConnector_win_4.1.5.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.4"
-				length="11341824"
+				sparkle:version="4.1.5"
+				length="11362304"
 				type="application/octet-stream"
 			/>
 		</item>

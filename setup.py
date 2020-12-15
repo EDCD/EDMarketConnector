@@ -222,36 +222,3 @@ elif sys.platform == 'win32':
         os.system(r'cscript /nologo "%s\WiSubStg.vbs" %s %s\%d.mst %d' % (SDKPATH, PKG, gettempdir(), lcid, lcid))
 else:
     raise AssertionError('Unsupported platform')
-
-if not exists(PKG):
-    raise AssertionError('No %s found prior to appcast' % (PKG))
-# Make appcast entry
-appcast = open('appcast_%s_%s.xml' % (sys.platform=='darwin' and 'mac' or 'win', VERSION), 'w')
-appcast.write('''
-\t\t<item>
-\t\t\t<title>Release {VERSION}</title>
-\t\t\t<description>
-\t\t\t\t<![CDATA[
-<style>{STYLE}</style>
-<h2>Release {VERSION}</h2>
-<ul>
-
-</ul>
-\t\t\t\t]]>
-\t\t\t</description>
-\t\t\t<enclosure
-\t\t\t\turl="https://github.com/EDCD/EDMarketConnector/releases/download/rel-{VERSION}/{PKG}"
-\t\t\t\tsparkle:os="{OS}"
-\t\t\t\tsparkle:version="{VERSION}"
-\t\t\t\tlength="{LENGTH}"
-\t\t\t\ttype="application/octet-stream"
-\t\t\t/>
-\t\t</item>
-'''.format(VERSION=VERSION,
-           STYLE='{}'.format(
-                sys.platform=='win32' and 'body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }' 
-                or 'h2 { font-size: 105%; }'),
-           PKG=PKG,
-           OS=''.format(sys.platform=='win32' and 'windows"\n\t\t\t\tsparkle:installerArguments="/passive LAUNCH=yes' or 'macos'),
-           LENGTH=os.stat(PKG).st_size)
-)
