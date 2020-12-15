@@ -4,6 +4,10 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 Release 4.1.5
 ===
 
+This is a minor maintenance release, mostly addressing behaviour around
+process shutdown and startup, along with a couple of small enhancements that
+most users won't notice.
+
 * If there is already an EDMarketConnector.exe process running when trying
   to run another instance then that new process will no longer exit silently.
   Instead you'll get a pop-up telling you it's detected another process, and
@@ -22,9 +26,21 @@ Release 4.1.5
   will instead linger, with "Shutting down..." showing in the status line
   (translation for this small phrase will be added in a later release).
   
+  If you encounter this shutdown hang then please add a comment to
+  [Application can leave a zombie process on shutdown #678](https://github.com/EDCD/EDMarketConnector/issues/678)
+  to help us track down the cause and fix it.
+
 * Cater for 'mangled name' class functions in our logging code.  e.g. where
   you name a class member with a `__` prefix in order to 'hide' it from
   out-of-class code.
+  
+* To help track down the cause of [Crashing On Startup #798](https://github.com/EDCD/EDMarketConnector/issues/798)
+  we've added some exception catching in our logging code.  If this is
+  triggered you will see `??:??` in logging output, instead of class and/or
+  function names.
+  
+  If you encounter this then please comment on that bug report to aid us in
+  tracking down the root cause!
   
 * Fixed logging from EDMC.exe so that the -debug log goes into `EDMC-debug.log`
   not `EDMarketConnector-debug.log`.
