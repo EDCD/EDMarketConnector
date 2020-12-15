@@ -1061,7 +1061,7 @@ class AppWindow(object):
             config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
-        self.status['text'] = 'Shutting down...'
+        self.status['text'] = _('Shutting down...')
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
