@@ -418,8 +418,16 @@ running. In this case you won't receive initial events such as "LoadGame",
 "Rank", "Location", etc. However the `state` dictionary will reflect the
 cumulative effect of these missed events.
 
-Similarly, a special "ShutDown" entry is sent when the game is quitted while
-EDMC is running. This event is not sent when EDMC is running on a different
+Similarly, a special "ShutDown" entry is sent when the game stops writing
+to the Journal without writing a "Shutdown" event.
+This might happen, for example, when the game client crashes.
+Note that this is distinct in (letter) case from the "Shutdown" event that
+the game itself writes to the Journal when you exit normally.  If you want to
+react to either in your plugin code then either compare in a case insensitive
+manner or check for both.  The difference in case allows you to differentiate
+between the two scenarios.
+
+This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
 
 #### Player Dashboard
