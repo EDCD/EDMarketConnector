@@ -225,6 +225,11 @@ with core EDMC or other plugins.**
 Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.
 
+Note that in the following example the function signature defines that it
+returns `Optional[tk.Frame]` only because we need to allow for `None` if
+something goes wrong with the creation of the frame (the calling code checks
+this).  You absolutely need to return the `nb.Frame()` instance that you get
+as in the code below.
 ```python
 import tkinter as tk
 from tkinter import ttk
