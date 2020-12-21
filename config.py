@@ -58,7 +58,7 @@ elif platform == 'win32':
 
     REG_RESERVED_ALWAYS_ZERO = 0
 
-    # This is the only way to do this from python without external dependencies (which do this anyway).
+    # This is the only way to do this from python without external deps (which do this anyway).
     FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
     FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
     FOLDERID_Profile = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
@@ -133,7 +133,7 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    def get(self, key: str, default: Union[None, list, str, bool, int] = None) -> Union[None, list, str, bool, int]:
+    def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
         """
         Get the requested key, or a default.
 
@@ -155,10 +155,10 @@ class AbstractConfig(abc.ABC):
         elif (i := self._suppress_call(self.get_int, ValueError, key, None)) is not None:
             return i
 
-        return default
+        return default  # type: ignore
 
     @abstractmethod
-    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+    def get_list(self, key: str, default: list = None) -> list:
         """
         Get the list referred to by the given key if it exists, or the default.
 
@@ -171,7 +171,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get_str(self, key: str, default: str = None) -> str:
         """
         Get the string referred to by the given key if it exists, or the default.
 
@@ -184,7 +184,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+    def get_bool(self, key: str, default: bool = None) -> bool:
         """
         Get the bool referred to by the given key if it exists, or the default.
 
@@ -196,7 +196,7 @@ class AbstractConfig(abc.ABC):
         """
         raise NotImplementedError
 
-    def getint(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+    def getint(self, key: str, default: int = 0) -> int:
         """
         Getint is a Deprecated getter method.
 
@@ -207,7 +207,7 @@ class AbstractConfig(abc.ABC):
         return self.get_int(key, default)
 
     @abstractmethod
-    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+    def get_int(self, key: str, default: int = 0) -> int:
         """
         Get the int referred to by key if it exists in the config.
 
@@ -365,7 +365,7 @@ class WinConfig(AbstractConfig):
             logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
             return None
 
-    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get_str(self, key: str, default: str = None) -> str:
         """
         Return the string represented by the key, or the default if it does not exist.
 
@@ -376,14 +376,14 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, str):
             raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
 
         return res
 
-    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+    def get_list(self, key: str, default: list = None) -> list:
         """
         Return the list found at the given key, or the default if none exists.
 
@@ -394,14 +394,14 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, list):
             raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
 
         return res
 
-    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+    def get_int(self, key: str, default: int = 0) -> int:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -419,7 +419,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+    def get_bool(self, key: str, default: bool = None) -> bool:
         """
         Return the bool found at the given key, or the default if none exists.
 
@@ -430,7 +430,7 @@ class WinConfig(AbstractConfig):
         """
         res = self.get_int(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         return bool(res)
 
@@ -449,8 +449,6 @@ class WinConfig(AbstractConfig):
             winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
 
         elif isinstance(val, int):  # The original code checked for numbers.Integral, I dont think that is needed.
-            if val > 0xFFFFFFFF or val < 0:
-                warnings.warn(f'Value of {val} is either too large or negative. This will cause issues.')
             reg_type = winreg.REG_DWORD
 
         elif isinstance(val, list):
@@ -467,12 +465,6 @@ class WinConfig(AbstractConfig):
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str) -> None:
-        """
-        Delete the given key from the config.
-
-        :param key: The key to delete
-        :raises OSError: if a registry error occurs.
-        """
         winreg.DeleteValue(self.__reg_handle, key)
 
     def save(self) -> None:
@@ -534,7 +526,7 @@ class MacConfig(AbstractConfig):
 
         return res
 
-    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get_str(self, key: str, default: str = None) -> str:
         """
         Return the string represented by the key, or the default if it does not exist.
 
@@ -545,14 +537,14 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
             raise ValueError(f'unexpected data returned from __raw_get: {type(res)=} {res}')
 
         return res
 
-    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
+    def get_list(self, key: str, default: list = None) -> list:
         """
         Return the list found at the given key, or the default if none exists.
 
@@ -563,14 +555,14 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, list):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         return res
 
-    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
+    def get_int(self, key: str, default: int = 0) -> int:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -591,20 +583,12 @@ class MacConfig(AbstractConfig):
 
         except ValueError as e:
             logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
-        """
-        Get the bool referred to by the given key if it exists, or the default.
-
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :return: The requested data or the default
-        """
+    def get_bool(self, key: str, default: bool = None) -> bool:
         res = self.__raw_get(key)
         if res is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, bool):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
@@ -727,37 +711,21 @@ class LinuxConfig(AbstractConfig):
 
         return self.config[self.SECTION].get(key)
 
-    def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
-        """
-        Get the string referred to by the given key if it exists, or the default.
-
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :return: The requested data or the default
-        """
+    def get_str(self, key: str, default: str = None) -> str:
         data = self.__raw_get(key)
         if data is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if '\n' in data:
             raise ValueError('asked for string, got list')
 
         return self.__unescape(data)
 
-    def get_list(self, key: str, default: Optional[list] = None) -> Optional[list]:
-        """
-        Get the list referred to by the given key if it exists, or the default.
-
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :return: The requested data or the default
-        """
+    def get_list(self, key: str, default: list = None) -> list:
         data = self.__raw_get(key)
 
         if data is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         split = data.split('\n')
         if split[-1] != ';':
@@ -765,17 +733,7 @@ class LinuxConfig(AbstractConfig):
 
         return list(map(self.__unescape, split[:-1]))
 
-    def get_int(self, key: str, default: Optional[int] = 0) -> Optional[int]:
-        """
-        Get the int referred to by key if it exists in the config.
-
-        For legacy reasons, the default is 0 and not None.
-
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to 0
-        :raises ValueError: if the internal representation of this key cannot be converted to an int
-        :return: The requested data or the default
-        """
+    def get_int(self, key: str, default: int = 0) -> int:
         data = self.__raw_get(key)
 
         if data is None:
@@ -787,26 +745,17 @@ class LinuxConfig(AbstractConfig):
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
-    def get_bool(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
-        """
-        Get the bool referred to by the given key if it exists, or the default.
-
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :return: The requested data or the default
-        """
+    def get_bool(self, key: str, default: bool = None) -> bool:
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
         data = self.__raw_get(key)
         if data is None:
-            return default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         return bool(int(data))
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
-        """Set the given key to the given data."""
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -829,18 +778,12 @@ class LinuxConfig(AbstractConfig):
         self.config.set(self.SECTION, key, to_set)
 
     def delete(self, key: str) -> None:
-        """
-        Delete the given key from the config.
-
-        :param key: The key to delete
-        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
 
     def save(self) -> None:
-        """Save the current configuration."""
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -848,12 +791,11 @@ class LinuxConfig(AbstractConfig):
             self.config.write(f)
 
     def close(self) -> None:
-        """Close this config and release any associated resources."""
         self.save()
         self.config = None
 
 
-def _get_config(*args, **kwargs) -> AbstractConfig:
+def get_config(*args, **kwargs) -> AbstractConfig:
     if sys.platform == "darwin":
         return MacConfig(*args, **kwargs)
     elif sys.platform == "win32":
@@ -864,4 +806,4 @@ def _get_config(*args, **kwargs) -> AbstractConfig:
         raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
-config = _get_config()
+config = get_config()
