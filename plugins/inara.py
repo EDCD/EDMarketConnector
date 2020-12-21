@@ -209,7 +209,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
     ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
 
-    this.log = tk.IntVar(value=config.getint('inara_out') and 1)
+    this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged
     )
@@ -271,14 +271,14 @@ def prefsvarchanged():
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
     """Preferences window closed hook."""
-    changed = config.getint('inara_out') != this.log.get()
+    changed = config.get_int('inara_out') != this.log.get()
     config.set('inara_out', this.log.get())
 
     if cmdr and not is_beta:
         this.cmdr = cmdr
         this.FID = None
-        cmdrs = config.get('inara_cmdrs') or []
-        apikeys = config.get('inara_apikeys') or []
+        cmdrs = config.get_list('inara_cmdrs', [])
+        apikeys = config.get_list('inara_apikeys', [])
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             apikeys.extend([''] * (1 + idx - len(apikeys)))
@@ -309,9 +309,9 @@ def credentials(cmdr: str) -> Optional[str]:
     if not cmdr:
         return None
 
-    cmdrs = config.get('inara_cmdrs') or []
-    if cmdr in cmdrs and config.get('inara_apikeys'):
-        return config.get('inara_apikeys')[cmdrs.index(cmdr)]
+    cmdrs = config.get_list('inara_cmdrs', [])
+    if cmdr in cmdrs and config.get_list('inara_apikeys'):
+        return config.get_list('inara_apikeys')[cmdrs.index(cmdr)]
 
     else:
         return None
@@ -377,7 +377,7 @@ def journal_entry(
         this.station = None
         this.station_marketid = None
 
-    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
+    if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
             # Dump starting state to Inara
@@ -1018,13 +1018,13 @@ def journal_entry(
         this.newuser = False
 
     # Only actually change URLs if we are current provider.
-    if config.get('system_provider') == 'Inara':
+    if config.get_str('system_provider') == 'Inara':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'Inara':
+    if config.get_str('station_provider') == 'Inara':
         to_set: str = cast(str, this.station)
         if not to_set:
             if this.system_population is not None and this.system_population > 0:
@@ -1053,13 +1053,13 @@ def cmdr_data(data: CAPIData, is_beta):
         this.station = data['lastStarport']['name']
 
     # Override standard URL functions
-    if config.get('system_provider') == 'Inara':
+    if config.get_str('system_provider') == 'Inara':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'Inara':
+    if config.get_str('station_provider') == 'Inara':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
 
@@ -1073,7 +1073,7 @@ def cmdr_data(data: CAPIData, is_beta):
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
-    if config.getint('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
+    if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
             new_this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),

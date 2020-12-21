@@ -189,7 +189,7 @@ sys.path: {sys.path}'''
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                logdir = config.get('journaldir') or config.default_journal_dir
+                logdir = config.get_str('journaldir', str(config.default_journal_dir))
                 logger.debug(f'logdir = "{logdir}"')
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
                                   key=lambda x: x.split('.')[1:])
@@ -215,7 +215,7 @@ sys.path: {sys.path}'''
             # Get data from Companion API
             if args.p:
                 logger.debug(f'Attempting to use commander "{args.p}"')
-                cmdrs = config.get('cmdrs') or []
+                cmdrs = config.get_list('cmdrs', [])
                 if args.p in cmdrs:
                     idx = cmdrs.index(args.p)
 
@@ -231,7 +231,7 @@ sys.path: {sys.path}'''
 
             else:
                 logger.debug(f'Attempting to use commander "{monitor.cmdr}" from Journal File')
-                cmdrs = config.get('cmdrs') or []
+                cmdrs = config.get_list('cmdrs', [])
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
 
