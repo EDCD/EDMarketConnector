@@ -228,10 +228,15 @@ a single set and two get methods, the new methods provide better type safety.
 with core EDMC or other plugins.**
 
 Use `number_from_string()` from EDMC's `l10n.Locale` object to parse input
-numbers in a locale-independent way.
+numbers in a locale-independent way.  NB: the old CamelCase versions of
+`number_from_string` and `string_from_number` do still exist, but arexi
+deprecated. They will continue to work, but will throw warnings.
 
-Note that the old CamelCase versions of `number_from_string` and `string_from_number` do still exist,
-but are deprecated. They will continue to work, but will throw warnings.
+Note that in the following example the function signature defines that it
+returns `Optional[tk.Frame]` only because we need to allow for `None` if
+something goes wrong with the creation of the frame (the calling code checks
+this).  You absolutely need to return the `nb.Frame()` instance that you get
+as in the code below.
 
 ```python
 import tkinter as tk
