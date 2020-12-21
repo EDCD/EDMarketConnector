@@ -1344,9 +1344,15 @@ sys.path: {sys.path}'''
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
                 self.__test()
+                _ = self.test_prop
 
             def __test(self):
                 logger.debug("A call from A.B.__test")
+
+            @property
+            def test_prop(self):
+                logger.debug("test log from property")
+                return "Test property is testy"
 
     # abinit = A.B()
 
