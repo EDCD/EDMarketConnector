@@ -207,21 +207,21 @@ class _Theme(object):
             style.theme_use('clam')
 
         # Default dark theme colors
-        if not config.get('dark_text'):
+        if not config.get_str('dark_text'):
             config.set('dark_text', '#ff8000')	# "Tangerine" in OSX color picker
-        if not config.get('dark_highlight'):
+        if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
         if theme:
             # Dark
-            (r, g, b) = root.winfo_rgb(config.get('dark_text'))
+            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
             self.current = {
                 'background'         : 'grey4',	# OSX inactive dark titlebar color
-                'foreground'         : config.get('dark_text'),
-                'activebackground'   : config.get('dark_text'),
+                'foreground'         : config.get_str('dark_text'),
+                'activebackground'   : config.get_str('dark_text'),
                 'activeforeground'   : 'grey4',
                 'disabledforeground' : '#%02x%02x%02x' % (int(r/384), int(g/384), int(b/384)),
-                'highlight'          : config.get('dark_highlight'),
+                'highlight'          : config.get_str('dark_highlight'),
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
                 'font'               : (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
                                         tkFont.Font(family='Euro Caps', size=10, weight=tkFont.NORMAL) or
@@ -309,7 +309,7 @@ class _Theme(object):
     # Apply configured theme
     def apply(self, root):
 
-        theme = config.getint('theme')
+        theme = config.get_int('theme')
         self._colors(root, theme)
 
         # Apply colors
