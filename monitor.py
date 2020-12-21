@@ -124,7 +124,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """Start journal monitoring."""
         logger.debug('Begin...')
         self.root = root
-        journal_dir = config.get('journaldir') or config.default_journal_dir
+        journal_dir = config.get_str('journaldir', str(config.default_journal_dir))
 
         if journal_dir is None:
             logger.debug('journal_dir was None, setting ""')
@@ -164,7 +164,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = bool(config.get('journaldir')) and platform != 'win32'
+        polling = bool(config.get_str('journaldir')) and platform != 'win32'
         if not polling and not self.observer:
             logger.debug('Not polling, no observer, starting an observer...')
             self.observer = Observer()
@@ -984,15 +984,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))  # type: ignore
+        oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
-            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
+            with open(join(config.get_str('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
                 if h.read() == string:
                     return  # same as last time - don't write
 
         # Write
         filename = join(  # type: ignore
-            config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
+            config.get_str('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
         )
 
         with open(filename, 'wt') as h:

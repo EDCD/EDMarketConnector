@@ -22,9 +22,9 @@ stockbracketmap =  { 0: '-',
 
 def export(data):
 
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime', int(time.time()))
 
-    filename = join(config.get('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get_str('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
 
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 

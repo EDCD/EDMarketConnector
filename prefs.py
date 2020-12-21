@@ -85,7 +85,7 @@ class PrefsVersion:
         """
 
         # config.get('PrefsVersion') is the version preferences we last saved for
-        pv = config.getint('PrefsVersion')
+        pv = config.get_int('PrefsVersion')
         # If no PrefsVersion yet exists then return oldTest
         if not pv:
             return oldTest
@@ -326,11 +326,11 @@ class PreferencesDialog(tk.Toplevel):
         output_frame = nb.Frame(root_notebook)
         output_frame.columnconfigure(0, weight=1)
 
-        if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
+        if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
             output = config.OUT_SHIP  # default settings
 
         else:
-            output = config.getint('output')
+            output = config.get_int('output')
 
         row = AutoInc(start=1)
 
@@ -376,7 +376,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_auto_button.grid(columnspan=2, padx=self.BUTTONX, pady=(5, 0), sticky=tk.W, row=row.get())
 
         self.outdir = tk.StringVar()
-        self.outdir.set(str(config.get('outdir')))
+        self.outdir.set(str(config.get_str('outdir')))
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
@@ -407,7 +407,7 @@ class PreferencesDialog(tk.Toplevel):
         row = AutoInc(start=1)
 
         self.logdir = tk.StringVar()
-        self.logdir.set(str(config.get('journaldir') or config.default_journal_dir or ''))
+        self.logdir.set(str(config.get_str('journaldir') or config.default_journal_dir or ''))
         self.logdir_entry = nb.Entry(config_frame, takefocus=False)
 
         # Location of the new Journal file in E:D 2.2
@@ -431,7 +431,7 @@ class PreferencesDialog(tk.Toplevel):
                 config_frame,
                 text=_('Default'),
                 command=self.logdir_reset,
-                state=tk.NORMAL if config.get('journaldir') else tk.DISABLED
+                state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
             ).grid(column=2, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         if platform in ('darwin', 'win32'):
@@ -439,10 +439,10 @@ class PreferencesDialog(tk.Toplevel):
                 columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
             )
 
-            self.hotkey_code = config.getint('hotkey_code')
-            self.hotkey_mods = config.getint('hotkey_mods')
-            self.hotkey_only = tk.IntVar(value=not config.getint('hotkey_always'))
-            self.hotkey_play = tk.IntVar(value=not config.getint('hotkey_mute'))
+            self.hotkey_code = config.get_int('hotkey_code')
+            self.hotkey_mods = config.get_int('hotkey_mods')
+            self.hotkey_only = tk.IntVar(value=not config.get_int('hotkey_always'))
+            self.hotkey_play = tk.IntVar(value=not config.get_int('hotkey_mute'))
             nb.Label(
                 config_frame,
                 text=_('Keyboard shortcut') if  # Hotkey/Shortcut settings prompt on OSX
@@ -509,7 +509,7 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
             columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
         )
-        self.disable_autoappupdatecheckingame = tk.IntVar(value=config.getint('disable_autoappupdatecheckingame'))
+        self.disable_autoappupdatecheckingame = tk.IntVar(value=config.get_int('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
             config_frame,
             text=_('Disable Automatic Application Updates Check when in-game'),
@@ -531,8 +531,8 @@ class PreferencesDialog(tk.Toplevel):
         with row as cur_row:
             self.shipyard_provider = tk.StringVar(
                 value=str(
-                    config.get('shipyard_provider') in plug.provides('shipyard_url')
-                    and config.get('shipyard_provider') or 'EDSY')
+                    config.get_str('shipyard_provider') in plug.provides('shipyard_url')
+                    and config.get_str('shipyard_provider', 'EDSY'))
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
             nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
@@ -543,7 +543,7 @@ class PreferencesDialog(tk.Toplevel):
             self.shipyard_button.configure(width=15)
             self.shipyard_button.grid(column=1, sticky=tk.W, row=cur_row)
             # Option for alternate URL opening
-            self.alt_shipyard_open = tk.IntVar(value=config.getint('use_alt_shipyard_open'))
+            self.alt_shipyard_open = tk.IntVar(value=config.get_int('use_alt_shipyard_open'))
             self.alt_shipyard_open_btn = nb.Checkbutton(
                 config_frame,
                 text=_('Use alternate URL method'),
@@ -554,7 +554,7 @@ class PreferencesDialog(tk.Toplevel):
             self.alt_shipyard_open_btn.grid(column=2, sticky=tk.W, row=cur_row)
 
         with row as cur_row:
-            system_provider = config.get('system_provider')
+            system_provider = config.get_str('system_provider')
             self.system_provider = tk.StringVar(
                 value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
             )
@@ -571,7 +571,7 @@ class PreferencesDialog(tk.Toplevel):
             self.system_button.grid(column=1, sticky=tk.W, row=cur_row)
 
         with row as cur_row:
-            station_provider = config.get('station_provider')
+            station_provider = config.get_str('station_provider')
             self.station_provider = tk.StringVar(
                 value=str(station_provider if station_provider in plug.provides('station_url') else 'eddb')
             )
@@ -599,7 +599,7 @@ class PreferencesDialog(tk.Toplevel):
                 text=_('Log Level')
             ).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
 
-            current_loglevel = config.get('loglevel')
+            current_loglevel = config.get_str('loglevel')
             if not current_loglevel:
                 current_loglevel = logging.getLevelName(logging.INFO)
 
@@ -628,10 +628,10 @@ class PreferencesDialog(tk.Toplevel):
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
         # Appearance theme and language setting
-        self.lang = tk.StringVar(value=self.languages.get(config.get('language'), _('Default')))
-        self.always_ontop = tk.BooleanVar(value=bool(config.getint('always_ontop')))
-        self.theme = tk.IntVar(value=config.getint('theme'))
-        self.theme_colors = [config.get('dark_text'), config.get('dark_highlight')]
+        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
+        self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
+        self.theme = tk.IntVar(value=config.get_int('theme'))
+        self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
             _('Normal text'),		# Dark theme color setting
             _('Highlighted text'),  # Dark theme color setting
@@ -715,7 +715,7 @@ class PreferencesDialog(tk.Toplevel):
             )
 
             self.ui_scale = tk.IntVar()
-            self.ui_scale.set(config.getint('ui_scale'))
+            self.ui_scale.set(config.get_int('ui_scale'))
             self.uiscale_bar = tk.Scale(
                 appearance_frame,
                 variable=self.ui_scale,  # TODO: intvar, but annotated as DoubleVar
@@ -897,7 +897,7 @@ class PreferencesDialog(tk.Toplevel):
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
                 if uMsg == BFFM_INITIALIZED and lpData:
-                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData);
+                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData)
                 return 0
 
             browseInfo = BROWSEINFO()
@@ -1084,7 +1084,7 @@ class PreferencesDialog(tk.Toplevel):
             (self.out_csv.get() and config.OUT_MKT_CSV) +
             (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
             (self.out_ship.get() and config.OUT_SHIP) +
-            (config.getint('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY))
+            (config.get_int('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY))
         )
 
         config.set(
@@ -1113,7 +1113,7 @@ class PreferencesDialog(tk.Toplevel):
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above
-        Translations.install(config.get('language') or None)  # type: ignore # This sets self in weird ways.
+        Translations.install(config.get_str('language') or None)  # type: ignore # This sets self in weird ways.
 
         config.set('ui_scale', self.ui_scale.get())
         config.set('always_ontop', self.always_ontop.get())
@@ -1136,7 +1136,7 @@ class PreferencesDialog(tk.Toplevel):
             self.after_cancel(self.cmdrchanged_alarm)
             self.cmdrchanged_alarm = None
 
-        self.parent.wm_attributes('-topmost', 1 if config.getint('always_ontop') else 0)
+        self.parent.wm_attributes('-topmost', 1 if config.get_int('always_ontop') else 0)
         self.destroy()
 
     if platform == 'darwin':
