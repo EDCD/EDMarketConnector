@@ -296,9 +296,32 @@ class EDMCContextFilter(logging.Filter):
                         name = f'_{frame_class.__class__.__name__}{frame_info.function}'
 
                     # Find __qualname__ of the caller
-                    fn = getattr(frame_class, name, None)
-                    if fn and fn.__qualname__:
-                        caller_qualname = fn.__qualname__
+                    fn = inspect.getattr_static(frame_class, name, None)
+                    if fn is None:
+                        # For some reason getattr_static cant grab this. Try and grab it with getattr, bail out
+                        # if we get a RecursionError indicating a property
+                        try:
+                            fn = getattr(frame_class, name, None)
+                        except RecursionError:
+                            print(
+                                "EDMCLogging:EDMCContextFilter:caller_attributes():"
+                                "Failed to get attribute for function info. Bailing out"
+                            )
+                            return "??", "??", "??"
+
+                    if fn is not None:
+                        if isinstance(fn, property):
+                            class_name = str(frame_class)
+                            # If somehow you make your __class__ or __class__.__qualname__ recursive, I'll be impressed.
+                            if hasattr(frame_class, '__class__') and hasattr(frame_class.__class__, "__qualname__"):
+                                class_name = frame_class.__class__.__qualname__
+                                caller_qualname = f"{class_name}.{name}(property)"
+
+                            else:
+                                caller_qualname = f"<property {name} on {class_name}>"
+
+                        elif fn.__qualname__:
+                            caller_qualname = fn.__qualname__
 
                     # Find containing class name(s) of caller, if any
                     if frame_class.__class__ and frame_class.__class__.__qualname__:
