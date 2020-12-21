@@ -473,7 +473,7 @@ def get_main_logger() -> 'LoggerMixin':
 
 
 # Singleton
-loglevel = config.get('loglevel')
+loglevel = config.get_str('loglevel')
 if not loglevel:
     loglevel = logging.INFO
 

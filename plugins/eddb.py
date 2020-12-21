@@ -104,14 +104,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.station_marketid = None
 
     # Only actually change URLs if we are current provider.
-    if config.get('system_provider') == 'eddb':
+    if config.get_str('system_provider') == 'eddb':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     # But only actually change the URL if we are current station provider.
-    if config.get('station_provider') == 'eddb':
+    if config.get_str('station_provider') == 'eddb':
         text = this.station
         if not text:
             if this.system_population is not None and this.system_population > 0:
@@ -139,13 +139,13 @@ def cmdr_data(data: CAPIData, is_beta):
         this.station = data['lastStarport']['name']
 
     # Override standard URL functions
-    if config.get('system_provider') == 'eddb':
+    if config.get_str('system_provider') == 'eddb':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'eddb':
+    if config.get_str('station_provider') == 'eddb':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
 
