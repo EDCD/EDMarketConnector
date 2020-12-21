@@ -220,8 +220,8 @@ title will be the value that you returned from `plugin_start3`. Use widgets
 from EDMC's myNotebook.py for the correct look-and-feel. You can be notified
 when the settings dialog is closed so you can save your settings.
 
-You can use `set()`, `get()` and `getint()` from EDMC's `config.config` object
-to retrieve your plugin's settings in a platform-independent way.
+You can use `set()` and `get_$type()` (where type is one of: `int`, `bool`, `str`, `list`) from EDMC's 
+`config.config` object to retrieve your plugin's settings in a platform-independent way.
 
 **Be sure to use a unique prefix for any settings you save so as not to clash
 with core EDMC or other plugins.**
@@ -248,7 +248,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.F
    Return a TK Frame for adding to the EDMC settings dialog.
    """
    global my_setting
-   my_setting = tk.IntVar(value=config.getint("MyPluginSetting"))  # Retrieve saved value from config
+   my_setting = tk.IntVar(value=config.get_int("MyPluginSetting"))  # Retrieve saved value from config
    frame = nb.Frame(parent)
    nb.Label(frame, text="Hello").grid()
    nb.Label(frame, text="Commander").grid()
