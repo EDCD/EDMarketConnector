@@ -285,13 +285,13 @@ class Auth(object):
         logger.debug(f'Trying for "{self.cmdr}"')
 
         self.verifier = None
-        cmdrs = cast(List[str], config.get_list('cmdrs', []))
+        cmdrs = config.get_list('cmdrs', [])
         logger.debug(f'Cmdrs: {cmdrs}')
 
         idx = cmdrs.index(self.cmdr)
         logger.debug(f'idx = {idx}')
 
-        tokens = cast('List[str]', config.get_list('fdev_apikeys', []))
+        tokens = config.get_list('fdev_apikeys', [])
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
             logger.debug('We have a refresh token for that idx')
@@ -374,9 +374,9 @@ class Auth(object):
             data = r.json()
             if r.status_code == requests.codes.ok:
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
-                cmdrs = cast(List[str], config.get_list('cmdrs', []))
+                cmdrs = config.get_list('cmdrs', [])
                 idx = cmdrs.index(self.cmdr)
-                tokens = cast(List[str], config.get_list('fdev_apikeys', []))
+                tokens = config.get_list('fdev_apikeys', [])
                 tokens = tokens + [''] * (len(cmdrs) - len(tokens))
                 tokens[idx] = data.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
@@ -403,9 +403,9 @@ class Auth(object):
     def invalidate(cmdr: str) -> None:
         """Invalidate Refresh Token for specified Commander."""
         logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
-        cmdrs = cast(List[str], config.get_list('cmdrs', []))
+        cmdrs = config.get_list('cmdrs', [])
         idx = cmdrs.index(cmdr)
-        tokens = cast(List[str], config.get_list('fdev_apikeys', []))
+        tokens = config.get_list('fdev_apikeys', [])
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         tokens[idx] = ''
         config.set('fdev_apikeys', tokens)
