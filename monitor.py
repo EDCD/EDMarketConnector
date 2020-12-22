@@ -129,7 +129,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """Start journal monitoring."""
         logger.debug('Begin...')
         self.root = root
-        journal_dir = config.get_str('journaldir', str(config.default_journal_dir))
+        journal_dir = config.get_str('journaldir', default=str(config.default_journal_dir))
 
         if journal_dir is None:
             logger.debug('journal_dir was None, setting ""')

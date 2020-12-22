@@ -20,7 +20,7 @@ bracketmap = {
 
 
 def export(data, kind=COMMODITY_DEFAULT, filename=None):
-    querytime = config.get_int('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     if not filename:
         filename = '{system}.{starport}.{time}.{kind}'.format(

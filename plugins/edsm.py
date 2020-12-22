@@ -131,8 +131,8 @@ def plugin_start3(plugin_dir: str) -> str:
 
         elif config.get_list('edsm_cmdrname'):
             # Migrate <= 2.25 settings. edsm_cmdrs is unknown at this time
-            config.set('edsm_usernames', [config.get_str('edsm_cmdrname') or ''])
-            config.set('edsm_apikeys',   [config.get_str('edsm_apikey') or ''])
+            config.set('edsm_usernames', [config.get_str('edsm_cmdrname', default='')])
+            config.set('edsm_apikeys',   [config.get_str('edsm_apikey', default='')])
 
         config.delete('edsm_cmdrname')
         config.delete('edsm_apikey')
@@ -289,9 +289,9 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
     if cmdr and not is_beta:
         # TODO: remove this when config is rewritten.
-        cmdrs: List[str] = config.get_list('edsm_cmdrs', [])
-        usernames: List[str] = config.get_list('edsm_usernames', [])
-        apikeys: List[str] = config.get_list('edsm_apikeys', [])
+        cmdrs: List[str] = config.get_list('edsm_cmdrs', default=[])
+        usernames: List[str] = config.get_list('edsm_usernames', default=[])
+        apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
 
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)

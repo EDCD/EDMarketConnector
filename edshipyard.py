@@ -74,7 +74,7 @@ def export(data, filename=None):
 
         return ret + ' '
 
-    querytime = config.get_int('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     loadout = defaultdict(list)
     mass = 0.0
