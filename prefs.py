@@ -195,14 +195,15 @@ elif platform == 'win32':
         pass
 
     # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
-    BIF_RETURNONLYFSDIRS   = 0x00000001
-    BIF_USENEWUI           = 0x00000050
-    BFFM_INITIALIZED       = 1
-    BFFM_SETSELECTION      = 0x00000467
+    BIF_RETURNONLYFSDIRS = 0x00000001
+    BIF_USENEWUI = 0x00000050
+    BFFM_INITIALIZED = 1
+    BFFM_SETSELECTION = 0x00000467
     BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
 
     class BROWSEINFO(ctypes.Structure):
-        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR), ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
+        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR),
+                    ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
     CalculatePopupWindowPosition = None
     if not is_wine:
@@ -407,7 +408,8 @@ class PreferencesDialog(tk.Toplevel):
         row = AutoInc(start=1)
 
         self.logdir = tk.StringVar()
-        self.logdir.set(str(config.get_str('journaldir') or config.default_journal_dir or ''))
+        default = str(config.default_journal_dir) if config.default_journal_dir is not None else ''
+        self.logdir.set(str(config.get_str('journaldir', default=default)))
         self.logdir_entry = nb.Entry(config_frame, takefocus=False)
 
         # Location of the new Journal file in E:D 2.2
@@ -532,7 +534,7 @@ class PreferencesDialog(tk.Toplevel):
             self.shipyard_provider = tk.StringVar(
                 value=str(
                     config.get_str('shipyard_provider') in plug.provides('shipyard_url')
-                    and config.get_str('shipyard_provider', 'EDSY'))
+                    and config.get_str('shipyard_provider', default='EDSY'))
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
             nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
@@ -628,7 +630,7 @@ class PreferencesDialog(tk.Toplevel):
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
         # Appearance theme and language setting
-        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
+        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), default=_('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
@@ -1113,7 +1115,7 @@ class PreferencesDialog(tk.Toplevel):
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above
-        Translations.install(config.get_str('language') or None)  # type: ignore # This sets self in weird ways.
+        Translations.install(config.get_str('language', default=None))  # type: ignore # This sets self in weird ways.
 
         config.set('ui_scale', self.ui_scale.get())
         config.set('always_ontop', self.always_ontop.get())
