@@ -277,8 +277,8 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     if cmdr and not is_beta:
         this.cmdr = cmdr
         this.FID = None
-        cmdrs = config.get_list('inara_cmdrs', [])
-        apikeys = config.get_list('inara_apikeys', [])
+        cmdrs = config.get_list('inara_cmdrs', default=[])
+        apikeys = config.get_list('inara_apikeys', default=[])
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             apikeys.extend([''] * (1 + idx - len(apikeys)))
@@ -309,7 +309,7 @@ def credentials(cmdr: str) -> Optional[str]:
     if not cmdr:
         return None
 
-    cmdrs = config.get_list('inara_cmdrs', [])
+    cmdrs = config.get_list('inara_cmdrs', default=[])
     if cmdr in cmdrs and config.get_list('inara_apikeys'):
         return config.get_list('inara_apikeys')[cmdrs.index(cmdr)]
 

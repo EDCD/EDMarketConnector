@@ -28,7 +28,7 @@ def export(data, filename=None):
             if h.read() == string:
                 return	# same as last time - don't write
 
-    querytime = config.get_int('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     # Write
     filename = join(config.get_str('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))

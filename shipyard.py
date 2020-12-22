@@ -8,7 +8,7 @@ from config import config
 
 def export(data, filename):
 
-    querytime = config.get_int('querytime', int(time.time()))
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')
