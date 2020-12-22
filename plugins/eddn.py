@@ -714,7 +714,7 @@ def journal_entry(  # noqa: C901
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = entry['MarketID']
 
-            path = pathlib.Path(str(config.get_str('journaldir') or config.default_journal_dir)) / f'{entry["event"]}.json'
+            path = pathlib.Path(config.get_str('journaldir', str(config.default_journal_dir))) / f'{entry["event"]}.json'
             with path.open('rb') as f:
                 entry = json.load(f)
                 if entry['event'] == 'Market':

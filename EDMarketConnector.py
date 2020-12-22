@@ -209,7 +209,7 @@ class AppWindow(object):
 
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
-        self.holdofftime = config.get_int('querytime', 0) + companion.holdoff
+        self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
 
         self.w = master
         self.w.title(applongname)
@@ -464,7 +464,7 @@ class AppWindow(object):
             self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         # Migration from <= 3.30
-        for username in config.get_list('fdev_usernames', []):
+        for username in config.get_list('fdev_usernames', default=[]):
             config.delete_password(username)
         config.delete('fdev_usernames')
         config.delete('username')
@@ -831,7 +831,7 @@ class AppWindow(object):
             # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
                 if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
-                    config.set('cmdrs', config.get_list('cmdrs', []) + [monitor.cmdr])
+                    config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
             if not entry['event'] or not monitor.mode:
@@ -1370,7 +1370,7 @@ sys.path: {sys.path}'''
 
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
-        plugins_not_py3_last = config.get_int('plugins_not_py3_last') or 0
+        plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
             # Yes, this is horribly hacky so as to be sure we match the key
             # that we told Translators to use.
