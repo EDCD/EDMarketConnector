@@ -42,6 +42,9 @@ class Dashboard(FileSystemEventHandler):
         self.session_start = started
 
         logdir = config.get_str('journaldir', default=str(config.default_journal_dir))
+        if logdir == '':
+            logdir = str(config.default_journal_dir)
+        
         if not logdir or not isdir(logdir):
             logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()

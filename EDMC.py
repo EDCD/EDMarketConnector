@@ -190,6 +190,9 @@ sys.path: {sys.path}'''
             logger.debug('Getting state from latest journal file')
             try:
                 logdir = config.get_str('journaldir', default=str(config.default_journal_dir))
+                if not logdir:
+                    logdir = str(config.default_journal_dir)
+
                 logger.debug(f'logdir = "{logdir}"')
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
                                   key=lambda x: x.split('.')[1:])
