@@ -648,10 +648,10 @@ class AppWindow(object):
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
             config.delete_password(username)
-        config.delete('fdev_usernames')
-        config.delete('username')
-        config.delete('password')
-        config.delete('logdir')
+        config.delete('fdev_usernames', suppress=True)
+        config.delete('username', suppress=True)
+        config.delete('password', suppress=True)
+        config.delete('logdir', suppress=True)
 
         self.postprefs(False)  # Companion login happens in callback from monitor
 
