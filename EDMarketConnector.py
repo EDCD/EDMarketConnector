@@ -351,7 +351,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value=config.get_bool('always_ontop'))
+                self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'),
