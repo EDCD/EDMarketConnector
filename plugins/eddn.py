@@ -297,7 +297,7 @@ Msg:\n{msg}'''
             data['lastStarport'].get('economies', {}),
             data['lastStarport']['modules'],
             data['lastStarport']['ships']
-            )
+        )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
@@ -340,7 +340,7 @@ Msg:\n{msg}'''
             data['lastStarport'].get('economies', {}),
             data['lastStarport']['modules'],
             ships
-            )
+        )
 
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
@@ -487,7 +487,7 @@ Msg:\n{msg}'''
 
             if (
                 entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
-                (config.getint('output') & config.OUT_SYS_DELAY)
+                (config.get_int('output') & config.OUT_SYS_DELAY)
             ):
                 self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
 
@@ -523,11 +523,11 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
-    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
+    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
 
     else:
-        output: int = config.getint('output')
+        output = config.get_int('output')
 
     eddnframe = nb.Frame(parent)
 
@@ -579,7 +579,7 @@ def prefsvarchanged(event=None) -> None:
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
     config.set(
         'output',
-        (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
+        (config.get_int('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
         (this.eddn_station.get() and config.OUT_MKT_EDDN) +
         (this.eddn_system.get() and config.OUT_SYS_EDDN) +
         (this.eddn_delay.get() and config.OUT_SYS_DELAY)
@@ -637,7 +637,7 @@ def journal_entry(  # noqa: C901
         this.planet = None
 
     # Send interesting events to EDDN, but not when on a crew
-    if (config.getint('output') & config.OUT_SYS_EDDN and not state['Captain'] and
+    if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
             ('StarPos' in entry or this.coordinates)):
 
@@ -705,7 +705,7 @@ def journal_entry(  # noqa: C901
             logger.debug('Failed in export_journal_entry', exc_info=e)
             return str(e)
 
-    elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
+    elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
             entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
         # Market.json, Outfitting.json or Shipyard.json to process
 
@@ -714,7 +714,12 @@ def journal_entry(  # noqa: C901
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = entry['MarketID']
 
-            path = pathlib.Path(str(config.get('journaldir') or config.default_journal_dir)) / f'{entry["event"]}.json'
+            journaldir = config.get_str('journaldir')
+            if journaldir is None or journaldir == '':
+                journaldir = str(config.default_journal_dir)
+
+            path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
+
             with path.open('rb') as f:
                 entry = json.load(f)
                 if entry['event'] == 'Market':
@@ -736,7 +741,7 @@ def journal_entry(  # noqa: C901
 
 
 def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
-    if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
+    if data['commander'].get('docked') and config.get_int('output') & config.OUT_MKT_EDDN:
         try:
             if this.marketId != data['lastStarport']['id']:
                 this.commodities = this.outfitting = this.shipyard = None

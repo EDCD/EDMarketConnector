@@ -15,7 +15,7 @@ import sys
 import tkinter as tk
 from queue import Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple, cast
 
 import requests
 
@@ -124,25 +124,25 @@ def plugin_start3(plugin_dir: str) -> str:
     this._IMG_ERROR = tk.PhotoImage(data=IMG_ERR_B64)  # BBC Mode 5 '?'
 
     # Migrate old settings
-    if not config.get('edsm_cmdrs'):
-        if isinstance(config.get('cmdrs'), list) and config.get('edsm_usernames') and config.get('edsm_apikeys'):
+    if not config.get_list('edsm_cmdrs'):
+        if isinstance(config.get_list('cmdrs'), list) and config.get_list('edsm_usernames') and config.get_list('edsm_apikeys'):
             # Migrate <= 2.34 settings
-            config.set('edsm_cmdrs', config.get('cmdrs'))
+            config.set('edsm_cmdrs', config.get_list('cmdrs'))
 
-        elif config.get('edsm_cmdrname'):
+        elif config.get_list('edsm_cmdrname'):
             # Migrate <= 2.25 settings. edsm_cmdrs is unknown at this time
-            config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
-            config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
+            config.set('edsm_usernames', [config.get_str('edsm_cmdrname', default='')])
+            config.set('edsm_apikeys',   [config.get_str('edsm_apikey', default='')])
 
-        config.delete('edsm_cmdrname')
-        config.delete('edsm_apikey')
+        config.delete('edsm_cmdrname', suppress=True)
+        config.delete('edsm_apikey', suppress=True)
 
-    if config.getint('output') & 256:
+    if config.get_int('output') & 256:
         # Migrate <= 2.34 setting
         config.set('edsm_out', 1)
 
-    config.delete('edsm_autoopen')
-    config.delete('edsm_historical')
+    config.delete('edsm_autoopen', suppress=True)
+    config.delete('edsm_historical', suppress=True)
 
     logger.debug('Starting worker thread...')
     this.thread = Thread(target=worker, name='EDSM worker')
@@ -189,7 +189,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
 
-    this.log = tk.IntVar(value=config.getint('edsm_out') and 1)
+    this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
         frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
     )
@@ -289,9 +289,10 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
     if cmdr and not is_beta:
         # TODO: remove this when config is rewritten.
-        cmdrs: List[str] = list(config.get('edsm_cmdrs') or [])
-        usernames: List[str] = list(config.get('edsm_usernames') or [])
-        apikeys: List[str] = list(config.get('edsm_apikeys') or [])
+        cmdrs: List[str] = config.get_list('edsm_cmdrs', default=[])
+        usernames: List[str] = config.get_list('edsm_usernames', default=[])
+        apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
+
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             usernames.extend([''] * (1 + idx - len(usernames)))
@@ -319,15 +320,15 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     if not cmdr:
         return None
 
-    cmdrs = config.get('edsm_cmdrs')
+    cmdrs = config.get_list('edsm_cmdrs')
     if not cmdrs:
         # Migrate from <= 2.25
         cmdrs = [cmdr]
         config.set('edsm_cmdrs', cmdrs)
 
-    if cmdr in cmdrs and config.get('edsm_usernames') and config.get('edsm_apikeys'):
+    if cmdr in cmdrs and config.get_list('edsm_usernames') and config.get_list('edsm_apikeys'):
         idx = cmdrs.index(cmdr)
-        return (config.get('edsm_usernames')[idx], config.get('edsm_apikeys')[idx])
+        return (config.get_list('edsm_usernames')[idx], config.get_list('edsm_apikeys')[idx])
 
     else:
         return None
@@ -364,7 +365,7 @@ entry: {entry!r}'''
         this.station = None
         this.station_marketid = None
 
-    if config.get('station_provider') == 'EDSM':
+    if config.get_str('station_provider') == 'EDSM':
         to_set = this.station
         if not this.station:
             if this.system_population and this.system_population > 0:
@@ -410,7 +411,7 @@ entry: {entry!r}'''
 
     # Send interesting events to EDSM
     if (
-        config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
+        config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
         entry['event'] not in this.discardedEvents
     ):
         # Introduce transient states into the event
@@ -460,13 +461,13 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> None:
 
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
-    if config.get('system_provider') == 'EDSM':
+    if config.get_str('system_provider') == 'EDSM':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'EDSM':
+    if config.get_str('station_provider') == 'EDSM':
         if data['commander']['docked']:
             this.station_link['text'] = this.station
 

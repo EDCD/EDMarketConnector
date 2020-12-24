@@ -40,7 +40,6 @@ else:
     UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
 
 
-
 # Define custom type for the dicts that hold CAPI data
 # CAPIData = NewType('CAPIData', Dict)
 
@@ -286,13 +285,13 @@ class Auth(object):
         logger.debug(f'Trying for "{self.cmdr}"')
 
         self.verifier = None
-        cmdrs = cast(List[str], config.get('cmdrs'))
+        cmdrs = config.get_list('cmdrs', default=[])
         logger.debug(f'Cmdrs: {cmdrs}')
 
         idx = cmdrs.index(self.cmdr)
         logger.debug(f'idx = {idx}')
 
-        tokens = config.get('fdev_apikeys') or []
+        tokens = config.get_list('fdev_apikeys', default=[])
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
             logger.debug('We have a refresh token for that idx')
@@ -375,9 +374,9 @@ class Auth(object):
             data = r.json()
             if r.status_code == requests.codes.ok:
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
-                cmdrs = cast(List[str], config.get('cmdrs'))
+                cmdrs = config.get_list('cmdrs', default=[])
                 idx = cmdrs.index(self.cmdr)
-                tokens = config.get('fdev_apikeys') or []
+                tokens = config.get_list('fdev_apikeys', default=[])
                 tokens = tokens + [''] * (len(cmdrs) - len(tokens))
                 tokens[idx] = data.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
@@ -404,9 +403,9 @@ class Auth(object):
     def invalidate(cmdr: str) -> None:
         """Invalidate Refresh Token for specified Commander."""
         logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
-        cmdrs = cast(List[str], config.get('cmdrs'))
+        cmdrs = config.get_list('cmdrs', default=[])
         idx = cmdrs.index(cmdr)
-        tokens = cast(List[str], config.get('fdev_apikeys') or [])
+        tokens = config.get_list('fdev_apikeys', default=[])
         tokens = tokens + [''] * (len(cmdrs) - len(tokens))
         tokens[idx] = ''
         config.set('fdev_apikeys', tokens)

@@ -20,7 +20,7 @@ bracketmap = {
 
 
 def export(data, kind=COMMODITY_DEFAULT, filename=None):
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     if not filename:
         filename = '{system}.{starport}.{time}.{kind}'.format(
@@ -29,7 +29,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None):
             time=time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)),
             kind='csv'
         )
-        filename = join(config.get('outdir'), filename)
+        filename = join(config.get_str('outdir'), filename)
 
     if kind == COMMODITY_CSV:
         sep = ';'  # BUG: for fixing later after cleanup

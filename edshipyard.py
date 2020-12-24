@@ -74,7 +74,7 @@ def export(data, filename=None):
 
         return ret + ' '
 
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     loadout = defaultdict(list)
     mass = 0.0
@@ -199,14 +199,14 @@ def export(data, filename=None):
     # Look for last ship of this type
     ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-    oldfiles = sorted([x for x in os.listdir(config.get('outdir')) if regexp.match(x)])
+    oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:
+        with open(join(config.get_str('outdir'), oldfiles[-1]), 'rU') as h:
             if h.read() == string:
                 return  # same as last time - don't write
 
     # Write
-    filename = join(config.get('outdir'), '{}.{}.txt'.format(
+    filename = join(config.get_str('outdir'), '{}.{}.txt'.format(
         ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)))
     )
 
