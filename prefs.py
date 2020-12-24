@@ -409,7 +409,11 @@ class PreferencesDialog(tk.Toplevel):
 
         self.logdir = tk.StringVar()
         default = str(config.default_journal_dir) if config.default_journal_dir is not None else ''
-        self.logdir.set(str(config.get_str('journaldir', default=default)))
+        logdir = config.get_str('journaldir')
+        if logdir is None or logdir == '':
+            logdir = default
+
+        self.logdir.set(logdir)
         self.logdir_entry = nb.Entry(config_frame, takefocus=False)
 
         # Location of the new Journal file in E:D 2.2
