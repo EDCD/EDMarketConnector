@@ -229,7 +229,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, key: str) -> None:
+    def delete(self, key: str, *, suppress=False) -> None:
         """
         Delete the given key from the config.
 
@@ -466,8 +466,14 @@ class WinConfig(AbstractConfig):
         # Its complaining about the list, it works, tested on windows, ignored.
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
-    def delete(self, key: str) -> None:
-        winreg.DeleteValue(self.__reg_handle, key)
+    def delete(self, key: str, *, suppress=False) -> None:
+        try:
+            winreg.DeleteValue(self.__reg_handle, key)
+        except OSError:
+            if suppress:
+                return
+
+            raise
 
     def save(self) -> None:
         """Save the configuration."""
@@ -606,7 +612,7 @@ class MacConfig(AbstractConfig):
         """
         self._settings[key] = val
 
-    def delete(self, key: str) -> None:
+    def delete(self, key: str, *, suppress=False) -> None:
         """
         Delete the given key from the config.
 
@@ -779,7 +785,7 @@ class LinuxConfig(AbstractConfig):
 
         self.config.set(self.SECTION, key, to_set)
 
-    def delete(self, key: str) -> None:
+    def delete(self, key: str, *, suppress=False) -> None:
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
