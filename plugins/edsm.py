@@ -134,15 +134,15 @@ def plugin_start3(plugin_dir: str) -> str:
             config.set('edsm_usernames', [config.get_str('edsm_cmdrname', default='')])
             config.set('edsm_apikeys',   [config.get_str('edsm_apikey', default='')])
 
-        config.delete('edsm_cmdrname')
-        config.delete('edsm_apikey')
+        config.delete('edsm_cmdrname', suppress=True)
+        config.delete('edsm_apikey', suppress=True)
 
     if config.get_int('output') & 256:
         # Migrate <= 2.34 setting
         config.set('edsm_out', 1)
 
-    config.delete('edsm_autoopen')
-    config.delete('edsm_historical')
+    config.delete('edsm_autoopen', suppress=True)
+    config.delete('edsm_historical', suppress=True)
 
     logger.debug('Starting worker thread...')
     this.thread = Thread(target=worker, name='EDSM worker')
