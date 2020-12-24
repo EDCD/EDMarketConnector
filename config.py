@@ -36,6 +36,8 @@ copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 
+# This must be done here in order to avoid an import cycle with EDMCLogging.
+# Other code should use EDMCLogging.get_main_logger
 if os.getenv("EDMC_NO_UI"):
     logger = logging.getLogger(appcmdname)
 
