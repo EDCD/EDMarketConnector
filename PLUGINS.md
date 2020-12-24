@@ -220,8 +220,9 @@ title will be the value that you returned from `plugin_start3`. Use widgets
 from EDMC's myNotebook.py for the correct look-and-feel. You can be notified
 when the settings dialog is closed so you can save your settings.
 
-You can use `set()` and `get_$type()` (where type is one of: `int`, `bool`, `str`, `list`) from EDMC's 
-`config.config` object to retrieve your plugin's settings in a platform-independent way.
+You can use `set()` and `get_$type()` (where type is one of: `int`, `bool`, `str`, `list`) from EDMC's
+`config.config` object to retrieve your plugin's settings in a platform-independent way. Previously this was done with
+a single set and two get methods, the new methods provide better type safety.
 
 **Be sure to use a unique prefix for any settings you save so as not to clash
 with core EDMC or other plugins.**
