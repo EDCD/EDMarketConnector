@@ -112,7 +112,7 @@ class AbstractConfig(abc.ABC):
     internal_plugin_dir: pathlib.Path
     respath: pathlib.Path
     home: pathlib.Path
-    default_journal_dir: Optional[pathlib.Path]
+    default_journal_dir: pathlib.Path
 
     identifier: str
 
