@@ -158,7 +158,7 @@ class AbstractConfig(abc.ABC):
         return default  # type: ignore
 
     @abstractmethod
-    def get_list(self, key: str, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list = None) -> list:
         """
         Get the list referred to by the given key if it exists, or the default.
 
@@ -171,7 +171,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str = None) -> str:
         """
         Get the string referred to by the given key if it exists, or the default.
 
@@ -184,7 +184,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
         Get the bool referred to by the given key if it exists, or the default.
 
@@ -196,7 +196,7 @@ class AbstractConfig(abc.ABC):
         """
         raise NotImplementedError
 
-    def getint(self, key: str, default: int = 0) -> int:
+    def getint(self, key: str, *, default: int = 0) -> int:
         """
         Getint is a Deprecated getter method.
 
@@ -207,7 +207,7 @@ class AbstractConfig(abc.ABC):
         return self.get_int(key, default)
 
     @abstractmethod
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, *, default: int = 0) -> int:
         """
         Get the int referred to by key if it exists in the config.
 
@@ -365,7 +365,7 @@ class WinConfig(AbstractConfig):
             logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
             return None
 
-    def get_str(self, key: str, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str = None) -> str:
         """
         Return the string represented by the key, or the default if it does not exist.
 
@@ -383,7 +383,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_list(self, key: str, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list = None) -> list:
         """
         Return the list found at the given key, or the default if none exists.
 
@@ -401,7 +401,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, *, default: int = 0) -> int:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -419,7 +419,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_bool(self, key: str, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
         Return the bool found at the given key, or the default if none exists.
 
@@ -526,7 +526,7 @@ class MacConfig(AbstractConfig):
 
         return res
 
-    def get_str(self, key: str, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str = None) -> str:
         """
         Return the string represented by the key, or the default if it does not exist.
 
@@ -544,7 +544,7 @@ class MacConfig(AbstractConfig):
 
         return res
 
-    def get_list(self, key: str, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list = None) -> list:
         """
         Return the list found at the given key, or the default if none exists.
 
@@ -562,7 +562,7 @@ class MacConfig(AbstractConfig):
 
         return res
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, *, default: int = 0) -> int:
         """
         Return the int found at the given key, or the default if none exists.
 
@@ -585,7 +585,7 @@ class MacConfig(AbstractConfig):
             logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-    def get_bool(self, key: str, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool = None) -> bool:
         res = self.__raw_get(key)
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -711,7 +711,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.config[self.SECTION].get(key)
 
-    def get_str(self, key: str, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str = None) -> str:
         data = self.__raw_get(key)
         if data is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -721,7 +721,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.__unescape(data)
 
-    def get_list(self, key: str, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list = None) -> list:
         data = self.__raw_get(key)
 
         if data is None:
@@ -733,7 +733,7 @@ class LinuxConfig(AbstractConfig):
 
         return list(map(self.__unescape, split[:-1]))
 
-    def get_int(self, key: str, default: int = 0) -> int:
+    def get_int(self, key: str, *, default: int = 0) -> int:
         data = self.__raw_get(key)
 
         if data is None:
@@ -745,7 +745,7 @@ class LinuxConfig(AbstractConfig):
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
-    def get_bool(self, key: str, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool = None) -> bool:
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
