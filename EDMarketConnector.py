@@ -943,7 +943,7 @@ class AppWindow(object):
             return plug.invoke(config.get_str('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
 
         # Avoid file length limits if possible
-        provider = config.get_str('shipyard_provider', 'EDSY')
+        provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
         file_name = join(config.app_dir, "last_shipyard.html")
 
