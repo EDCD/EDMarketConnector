@@ -532,13 +532,13 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value=config.get_int('always_ontop')))
-                self.system_menu=tk.Menu(self.menubar, name = 'system', tearoff = tk.FALSE)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
+                self.always_ontop = tk.BooleanVar(value=config.get_bool('always_ontop'))
+                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
                 self.system_menu.add_separator()
-                self.system_menu.add_checkbutton(label = _('Always on top'),
-                                                 variable = self.always_ontop,
-                                                 command = self.ontop_changed)  # Appearance setting
-                self.menubar.add_cascade(menu = self.system_menu)
+                self.system_menu.add_checkbutton(label=_('Always on top'),
+                                                 variable=self.always_ontop,
+                                                 command=self.ontop_changed)  # Appearance setting
+                self.menubar.add_cascade(menu=self.system_menu)
             self.w.bind('<Control-c>', self.copy)
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
             theme.register(self.menubar)  # menus and children aren't automatically registered
@@ -547,9 +547,9 @@ class AppWindow(object):
             theme.register(self.help_menu)
 
             # Alternate title bar and menu for dark theme
-            self.theme_menubar=tk.Frame(frame)
-            self.theme_menubar.columnconfigure(2, weight = 1)
-            theme_titlebar=tk.Label(self.theme_menubar, text = applongname,
+            self.theme_menubar = tk.Frame(frame)
+            self.theme_menubar.columnconfigure(2, weight=1)
+            theme_titlebar = tk.Label(self.theme_menubar, text=applongname,
                                       image=self.theme_icon, cursor='fleur',
                                       anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
@@ -612,6 +612,7 @@ class AppWindow(object):
                         self.w.geometry(config.get_str('geometry'))
                 else:
                     self.w.geometry(config.get_str('geometry'))
+
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
         theme.register(frame)
