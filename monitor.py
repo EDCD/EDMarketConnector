@@ -124,11 +124,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """Start journal monitoring."""
         logger.debug('Begin...')
         self.root = root
-        journal_dir = config.get_str('journaldir', default=str(config.default_journal_dir))
+        journal_dir = config.get_str('journaldir')
 
-        if journal_dir is None:
-            logger.debug('journal_dir was None, setting ""')
-            journal_dir = ''
+        if journal_dir == '' or journal_dir is None:
+            journal_dir = str(config.default_journal_dir)
 
         # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
         # When that is refactored, remove the magic comment
