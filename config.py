@@ -206,7 +206,7 @@ class AbstractConfig(abc.ABC):
         :raises OSError: on windows, if a registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
-        return self.get_int(key, default)
+        return self.get_int(key, default=default)
 
     @abstractmethod
     def get_int(self, key: str, *, default: int = 0) -> int:
