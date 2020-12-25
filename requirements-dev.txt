@@ -26,7 +26,7 @@ grip==4.5.2
 py2exe==0.10.1.0; sys_platform == 'win32'
 
 # Testing
-pytest==6.1.2
+pytest==6.2.1
 pytest-cov==2.10.1  # Pytest code coverage support
 coverage[toml]==5.3 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 
