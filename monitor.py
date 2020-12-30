@@ -978,6 +978,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         side, this is represented as multiple entries in the `Inventory` List with the same names etc. Just a differing
         MissionID. We (as in EDMC Core) dont want to support the multiple mission IDs, but DO want to have correct cargo
         counts. Thus, we reduce all existing cargo down to one total.
+        >>> test = [
+        ...     { "Name":"basicmedicines", "Name_Localised":"BM", "MissionID":684359162, "Count":147, "Stolen":0 },
+        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684358939, "Count":147, "Stolen":0 },
+        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684359344, "Count":36, "Stolen":0 }
+        ... ]
+        >>> EDLogs().coalesce_cargo(test) # doctest: +NORMALIZE_WHITESPACE
+        [{'Name': 'basicmedicines', 'Name_Localised': 'BM', 'MissionID': 684359162, 'Count': 147, 'Stolen': 0},
+        {'Name': 'survivalequipment', 'Name_Localised': 'SE', 'MissionID': 684358939, 'Count': 183, 'Stolen': 0}]
 
         :param raw_cargo: Raw cargo data (usually from Cargo.json)
         :return: Coalesced data
