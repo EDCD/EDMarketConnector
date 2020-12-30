@@ -443,6 +443,11 @@ typically about once a second when in orbital flight.
 
  For more info on `status.json`, See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available  constants.
 
+New in version 4.1.6:
+
+`CargoJSON` contains the raw data from the last read of `cargo.json` passed through json.load.
+It contains more information about the cargo contents, such as the mission ID for mission specific cargo
+
 #### Getting Commander Data
 
 ```python
