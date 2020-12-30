@@ -392,7 +392,8 @@ Content of `state` (updated to the current journal entry):
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
 | `Captian`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
-| `Cargo`        |           `dict`            | Current cargo                                                                                                   |
+| `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
+| `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`      |            `int`            | Current credits balance                                                                                         |
 | `FID`          |            `str`            | Frontier commander ID                                                                                           |
 | `Loan`         |       `Optional[int]`       | Current loan amount, if any                                                                                     |
@@ -412,7 +413,6 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
-| `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
