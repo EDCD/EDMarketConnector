@@ -469,7 +469,7 @@ def get_main_logger() -> 'LoggerMixin':
         return cast('LoggerMixin', logging.getLogger(appname))
     else:
         # Must be the CLI
-        return cast(LoggerMixin, logging.getLogger(appcmdname))
+        return cast('LoggerMixin', logging.getLogger(appcmdname))
 
 
 # Singleton
