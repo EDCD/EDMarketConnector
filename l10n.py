@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
 
+# Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
 try:
     locale.setlocale(locale.LC_ALL, '')
 
@@ -81,7 +82,6 @@ class _Translations:
         Use when translation is not desired or not available
         """
         self.translations = {None: {}}
-        # Promote strings to Unicode for consistency
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str = None) -> None:
@@ -128,7 +128,7 @@ class _Translations:
         builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: Optional[str] = None) -> Dict[str, str]:
-        """Get all the translations from a translation file."""
+        """Load all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
         h = self.file(lang, plugin_path)
@@ -249,17 +249,17 @@ class _Locale:
 
     def stringFromNumber(self, number: Union[float, int], decimals: int = None) -> str:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
-        return self.stringFromNumber(number, decimals)
+        return self.string_from_number(number, decimals)  # type: ignore
 
     def numberFromString(self, string: str) -> Union[int, float, None]:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.number_from_string instead.'))
-        return self.numberFromString(string)
+        return self.number_from_string(string)
 
     def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.preferred_languages instead.'))
         return self.preferred_languages()
 
-    def string_from_number(self, number: Union[float, int], decimals: int = None) -> str:
+    def string_from_number(self, number: Union[float, int], decimals: int = 5) -> str:
         """
         Convert a number to a string.
 
@@ -269,8 +269,6 @@ class _Locale:
         :param decimals: The number of decimals to return, defaults to 5 if the given number is a float, otherwise None
         :return: the stringified number
         """
-        decimals = decimals if decimals is not None else 5
-
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
