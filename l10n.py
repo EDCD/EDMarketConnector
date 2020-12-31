@@ -219,15 +219,15 @@ class _Translations:
         :return: the opened file (Note: This should be closed when done)
         """
         if plugin_path:
-            f = join(plugin_path, f'{lang}.strings')
-            if exists(f):
-                try:
-                    return open(f, 'r', encoding='utf-8')
+            f = pathlib.Path(plugin_path) / f'{lang}.strings'
+            if not f.exists():
+                return None
 
-                except Exception:
-                    logger.exception(f'could not open {f}')
+            try:
+                return f.open('r', encoding='utf-8')
 
-            return None
+            except OSError:
+                logger.exception(f'could not open {f}')
 
         elif getattr(sys, 'frozen', False) and platform == 'darwin':
             return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open('r', encoding='utf-16')
