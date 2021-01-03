@@ -1276,6 +1276,9 @@ sys.path: {sys.path}'''
     # Trying to set a UTF-8 encoding on those older versions will fail with
     #   locale.Error: unsupported locale setting
     # but we do need to make the attempt for when we're running from source.
+    #
+    # Note that this locale magic is partially done in l10n.py as well. So
+    # removing or modifying this may or may not have the desired effect.
     log_locale('Initial Locale')
 
     try:
@@ -1317,7 +1320,8 @@ sys.path: {sys.path}'''
                 logger.exception(f"Could not set LC_ALL to ('{locale_startup[0]}', 'UTF_8')")
 
             except Exception:
-                logger.exception(f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+                logger.exception(
+                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
