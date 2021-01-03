@@ -11,7 +11,7 @@ import sys
 import warnings
 from collections import OrderedDict
 from contextlib import suppress
-from os.path import basename, dirname, exists, isdir, isfile, join
+from os.path import basename, dirname, isdir, isfile, join
 from sys import platform
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
 
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen: Dict[str, str] = {}
-    for f in (  # TODO: need to be sorted and then concatted like this?
+    for f in (
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
         sorted(join('plugins', x) for x in (os.listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
     ):
@@ -371,15 +371,12 @@ if __name__ == "__main__":
                         (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{basename(f)}]'
                     )
     if seen:
-        if not isdir(LOCALISATION_DIR):
-            os.mkdir(LOCALISATION_DIR)
+        target_path = pathlib.Path(LOCALISATION_DIR) / 'en.template.new'
+        target_path.mkdir(exist_ok=True)
+        with target_path.open('w', encoding='utf-8') as target_file:
+            target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
+            for thing in sorted(seen, key=str.lower):
+                if seen[thing]:
+                    target_file.write(f'/* {seen[thing]} */\n')
 
-        template = open(join(LOCALISATION_DIR, 'en.template'), 'w', encoding='utf-8')
-        template.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
-        for thing in sorted(seen, key=str.lower):
-            if seen[thing]:
-                template.write(f'/* {seen[thing]} */\n')
-
-            template.write(f'"{thing}" = "{thing}";\n\n')
-
-        template.close()
+                target_file.write(f'"{thing}" = "{thing}";\n\n')
