@@ -1473,6 +1473,9 @@ sys.path: {sys.path}'''
     # Trying to set a UTF-8 encoding on those older versions will fail with
     #   locale.Error: unsupported locale setting
     # but we do need to make the attempt for when we're running from source.
+    #
+    # Note that this locale magic is partially done in l10n.py as well. So
+    # removing or modifying this may or may not have the desired effect.
     log_locale('Initial Locale')
 
     try:
