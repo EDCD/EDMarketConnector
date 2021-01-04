@@ -372,7 +372,7 @@ if __name__ == "__main__":
                     )
     if seen:
         target_path = pathlib.Path(LOCALISATION_DIR) / 'en.template.new'
-        target_path.mkdir(exist_ok=True)
+        target_path.parent.mkdir(exist_ok=True)
         with target_path.open('w', encoding='utf-8') as target_file:
             target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
             for thing in sorted(seen, key=str.lower):
