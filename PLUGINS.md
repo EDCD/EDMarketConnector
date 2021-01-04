@@ -228,6 +228,9 @@ with core EDMC or other plugins.**
 Use `number_from_string()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.
 
+Note that the old CamelCase versions of `number_from_string` and `string_from_number` do still exist,
+but are deprecated. They will continue to work, but will throw warnings.
+
 ```python
 import tkinter as tk
 from tkinter import ttk
