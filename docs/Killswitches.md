@@ -54,3 +54,9 @@ The current recognised (to EDMC and its internal plugins) killswitch strings are
 | `plugins.(eddn|inara|edsm|eddb).journal`             | Disables all journal processing for EDDN/EDSM/INARA                                          |
 | `plugins.(edsm|inara).worker`                        | Disables the EDSM/INARA worker thread (effectively disables updates) (does not close thread) |
 | `plugins.(eddn|inara|edsm).journal.event.$eventname` | Specific events to disable processing for                                                    |
+
+## File location
+
+The main killswitch file is kept in the `releases` branch on the EDMC github repo. The file should NEVER be committed to
+any other repos. In the case that the killswitch file is found in other repos, the one in releases should always
+be taken as correct regardless of others.
