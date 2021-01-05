@@ -1,6 +1,5 @@
 """Inara Sync."""
 
-from companion import CAPIData
 import dataclasses
 import json
 import sys
@@ -17,9 +16,11 @@ from typing import Sequence, Union, cast
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
+from companion import CAPIData
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -321,6 +322,14 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
 ) -> None:
     """Journal entry hook."""
+    if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
+        logger.warning(f'INARA support has been disabled via killswitch: {ks.reason}')
+        plug.show_error('INARA disabled. See Log.')
+        return
+
+    elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
+
     event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']
@@ -1202,6 +1211,9 @@ def new_worker():
     logger.debug('Starting...')
     while True:
         events = get_events()
+        if (res := killswitch.get_disabled("plugins.inara.worker")).disabled:
+            logger.warning(f"Inara worker disabled via killswitch. ({res.reason})")
+            continue
 
         for creds, event_list in events.items():
             if not event_list:

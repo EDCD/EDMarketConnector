@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, 
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appversion, config
@@ -338,6 +339,15 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> None:
     """Journal Entry hook."""
+    if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
+        logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+        plug.show_error('EDSM Handler disabled. See Log.')
+        return
+
+    elif (ks := killswitch.get_disabled(f'plugins.edsm.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'Handling of event {entry["event"]} has been disabled via killswitch: {ks.reason}')
+        return
+
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.trace(f'''{entry["event"]}
 Commander: {cmdr}
@@ -510,6 +520,11 @@ def worker() -> None:
 
         retrying = 0
         while retrying < 3:
+            if (res := killswitch.get_disabled("plugins.edsm.worker")).disabled:
+                logger.warning(
+                    f'EDSM worker has been disabled via kill switch. Not uploading data. ({res.reason})'
+                )
+                break
             try:
                 if TYPE_CHECKING:
                     # Tell the type checker that these two are bound.
