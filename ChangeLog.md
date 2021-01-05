@@ -1,6 +1,62 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.5
+===
+
+This is a minor maintenance release, mostly addressing behaviour around
+process shutdown and startup, along with a couple of small enhancements that
+most users won't notice.
+
+* If there is already an EDMarketConnector.exe process running when trying
+  to run another instance then that new process will no longer exit silently.
+  Instead you'll get a pop-up telling you it's detected another process, and
+  you need to close that pop-up in order for this additional process to then
+  exit.
+  
+  This hopefully makes it obvious when you've got a hung EDMarketConnect.exe
+  process that you need to kill in order to re-run the program.
+
+* In order to gather more information about how and why EDMarketConnector.exe
+  sometimes doesn't shutdown properly we've added some extra debug logging to
+  the sequence of clean-up calls performed during shutdown.
+  
+  Also, to make it more obvious if the process has hung during shutdown the
+  UI window is no longer hidden at the start of this shutdown sequence.  It
+  will instead linger, with "Shutting down..." showing in the status line
+  (translation for this small phrase will be added in a later release).
+  
+  If you encounter this shutdown hang then please add a comment to
+  [Application can leave a zombie process on shutdown #678](https://github.com/EDCD/EDMarketConnector/issues/678)
+  to help us track down the cause and fix it.
+
+* Cater for 'mangled name' class functions in our logging code.  e.g. where
+  you name a class member with a `__` prefix in order to 'hide' it from
+  out-of-class code.
+  
+* To help track down the cause of [Crashing On Startup #798](https://github.com/EDCD/EDMarketConnector/issues/798)
+  we've added some exception catching in our logging code.  If this is
+  triggered you will see `??:??` in logging output, instead of class and/or
+  function names.
+  
+  If you encounter this then please comment on that bug report to aid us in
+  tracking down the root cause!
+  
+* Fixed logging from EDMC.exe so that the -debug log goes into `EDMC-debug.log`
+  not `EDMarketConnector-debug.log`.
+  
+* Fix `EDMC.exe -j` handling of file encodings.  NB: This command-line
+  argument isn't listed on `EDMC.exe -h` as it's intended for developer use
+  only.
+  
+* Fix the name of 'Void Opal(s)' so that output of market data to files is
+  correct.
+
+* Fix URL in PLUGINS.md to refer to `main`, not `master` branch.
+
+* We're able to pull `py2exe` from PyPi now, so docs/Releasing.md has been 
+  update to reflect this.
+
 Release 4.1.4
 ===
 
