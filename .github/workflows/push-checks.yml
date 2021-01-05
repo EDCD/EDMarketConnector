@@ -9,7 +9,7 @@ name: Push-Checks
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -27,27 +27,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
+        pip install flake8 pytest wheel
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
     - name: Lint with flake8
       env:
         ROOT_SHA: ${{github.base_ref}}
         
       run: |
-        DATA=$(python3 <<EOF
-        import json
-        import os
-        with open(os.getenv('GITHUB_EVENT_PATH')) as f:
-            data = json.load(f)
-        
-        typ = os.getenv('GITHUB_EVENT_NAME')
-        
-        if 'pull_request' in typ:
-            print(data['base']['ref'])
-        elif 'push' in typ:
-            print(data['before'])
-        EOF
-        )
+        DATA=$(jq --raw-output .before $GITHUB_EVENT_PATH)
+
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
         git diff "$DATA" | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
