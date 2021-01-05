@@ -193,10 +193,3 @@ def get_reason(id: str, *, version: semantic_version.Version = _current_version)
 def kills_for_version(version: semantic_version.Version = _current_version) -> List[KillSwitch]:
     """Query the global KillSwitchSet for kills matching a particular version."""
     return active.kills_for_version(version)
-
-
-if __name__ == "__main__":
-    setup_main_list()
-    print(f'{_current_version=}')
-    print(f"{get_disabled('test')=}")
-    print(f"{active=}")
