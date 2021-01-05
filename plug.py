@@ -184,7 +184,7 @@ def load_plugins(master):
     PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
-    sys.path.append(config.plugin_dir)
+    sys.path.append(config.plugin_dir_str)
 
     found = []
     # Load any plugins that are also packages first

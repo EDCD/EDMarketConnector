@@ -408,7 +408,7 @@ class PreferencesDialog(tk.Toplevel):
         row = AutoInc(start=1)
 
         self.logdir = tk.StringVar()
-        default = str(config.default_journal_dir) if config.default_journal_dir is not None else ''
+        default = config.default_journal_dir_str if config.default_journal_dir is not None else ''
         logdir = config.get_str('journaldir')
         if logdir is None or logdir == '':
             logdir = default
@@ -634,7 +634,7 @@ class PreferencesDialog(tk.Toplevel):
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
         # Appearance theme and language setting
-        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), default=_('Default')))
+        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
@@ -985,7 +985,7 @@ class PreferencesDialog(tk.Toplevel):
         entryfield['state'] = tk.NORMAL  # must be writable to update
         entryfield.delete(0, tk.END)
         if platform == 'win32':
-            start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
+            start = len(config.home_str.split('\\')) if pathvar.get().lower().startswith(config.home_str.lower()) else 0
             display = []
             components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
@@ -1006,7 +1006,7 @@ class PreferencesDialog(tk.Toplevel):
 
         #                                                   None if path doesn't exist
         elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
-            if pathvar.get().startswith(config.home):
+            if pathvar.get().startswith(config.home_str):
                 display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[
                     len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):
                 ]
@@ -1016,8 +1016,8 @@ class PreferencesDialog(tk.Toplevel):
 
             entryfield.insert(0, '/'.join(display))
         else:
-            if pathvar.get().startswith(config.home):
-                entryfield.insert(0, '~' + pathvar.get()[len(config.home):])
+            if pathvar.get().startswith(config.home_str):
+                entryfield.insert(0, '~' + pathvar.get()[len(config.home_str):])
 
             else:
                 entryfield.insert(0, pathvar.get())
@@ -1027,7 +1027,7 @@ class PreferencesDialog(tk.Toplevel):
     def logdir_reset(self) -> None:
         """Reset the log dir to the default."""
         if config.default_journal_dir:
-            self.logdir.set(config.default_journal_dir)
+            self.logdir.set(config.default_journal_dir_str)
 
         self.outvarchanged()
 
@@ -1138,7 +1138,7 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         logdir = self.logdir.get()
-        if config.default_journal_dir and logdir.lower() == config.default_journal_dir.lower():
+        if config.default_journal_dir and logdir.lower() == config.default_journal_dir_str.lower():
             config.set('journaldir', '')  # default location
 
         else:

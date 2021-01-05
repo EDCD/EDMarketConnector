@@ -132,7 +132,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         journal_dir = config.get_str('journaldir')
 
         if journal_dir == '' or journal_dir is None:
-            journal_dir = str(config.default_journal_dir)
+            journal_dir = config.default_journal_dir_str
 
         # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
         # When that is refactored, remove the magic comment
