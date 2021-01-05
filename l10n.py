@@ -84,7 +84,7 @@ class _Translations:
         self.translations = {None: {}}
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
-    def install(self, lang: str = None) -> None:
+    def install(self, lang: str = None) -> None:  # noqa: CCR001
         """
         Install the translation function to the _ builtin.
 
