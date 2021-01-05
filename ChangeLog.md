@@ -1,6 +1,21 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.6-rc1
+===
+
+* Cargo tracking will now correctly count all instances of the same type of
+  cargo for different missions.  Previously it only counted the cargo for
+  the last mission requiring that cargo type, as found in Cargo.json.
+
+* The loaded contents of Cargo.json can now be found in `monitor.state['CargoJSON']`.
+  `monitor.state` is what is passed to plugins as `state` in the 
+  `journal_entry()` call.
+
+* Our logging code should now cope with logging from a property.
+
+* Miscellaneous updates to PLUGINS.md - mostly to clarify some things.
+
 Release 4.1.5
 ===
 
