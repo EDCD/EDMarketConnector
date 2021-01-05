@@ -119,6 +119,36 @@ class AbstractConfig(abc.ABC):
     def __init__(self) -> None:
         self.home = pathlib.Path.home()
 
+    @property
+    def app_dir_str(self) -> str:
+        """Return a string version of app_dir."""
+        return str(self.app_dir)
+
+    @property
+    def plugin_dir_str(self) -> str:
+        """Return a string version of plugin_dir."""
+        return str(self.plugin_dir)
+
+    @property
+    def internal_plugin_dir_str(self) -> str:
+        """Return a string version of internal_plugin_dir."""
+        return str(self.internal_plugin_dir)
+
+    @property
+    def respath_str(self) -> str:
+        """Return a string version of respath."""
+        return str(self.respath)
+
+    @property
+    def home_str(self) -> str:
+        """Return a string version of home."""
+        return str(self.home)
+
+    @property
+    def default_journal_dir_str(self) -> str:
+        """Return a string version of default_journal_dir."""
+        return str(self.default_journal_dir)
+
     @staticmethod
     def _suppress_call(
         func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,

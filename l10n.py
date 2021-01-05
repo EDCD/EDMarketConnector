@@ -117,7 +117,7 @@ class _Translations:
             plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
             if isdir(plugin_path):
                 try:
-                    self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
+                    self.translations[plugin] = self.contents(cast(str, lang), str(plugin_path))
 
                 except UnicodeDecodeError as e:
                     logger.warning(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
@@ -160,7 +160,7 @@ class _Translations:
         """
         if context:
             # TODO: There is probably a better way to go about this now.
-            context = context[len(str(config.plugin_dir))+1:].split(os.sep)[0]
+            context = context[len(config.plugin_dir_str)+1:].split(os.sep)[0]
             if self.translations[None] and context not in self.translations:
                 logger.debug(f'No translations for {context!r}')
 
