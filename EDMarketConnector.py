@@ -1238,7 +1238,6 @@ executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
 
-
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
     # manifest ActiveCodePage to set this, but that is silently ignored on
@@ -1287,7 +1286,8 @@ sys.path: {sys.path}'''
                 logger.exception(f"Could not set LC_ALL to ('{locale_startup[0]}', 'UTF_8')")
 
             except Exception:
-                logger.exception(f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+                logger.exception(
+                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
@@ -1303,9 +1303,15 @@ sys.path: {sys.path}'''
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
                 self.__test()
+                _ = self.test_prop
 
             def __test(self):
                 logger.debug("A call from A.B.__test")
+
+            @property
+            def test_prop(self):
+                logger.debug("test log from property")
+                return "Test property is testy"
 
     # abinit = A.B()
 
