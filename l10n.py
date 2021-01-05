@@ -159,7 +159,8 @@ class _Translations:
         :return: The translated string
         """
         if context:
-            context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
+            # TODO: There is probably a better way to go about this now.
+            context = context[len(str(config.plugin_dir))+1:].split(os.sep)[0]
             if self.translations[None] and context not in self.translations:
                 logger.debug(f'No translations for {context!r}')
 
