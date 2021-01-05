@@ -800,7 +800,7 @@ class PreferencesDialog(tk.Toplevel):
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
         plugdir = tk.StringVar()
-        plugdir.set(config.plugin_dir)
+        plugdir.set(config.plugin_dir_str)
         row = AutoInc(1)
 
         # Section heading in settings
@@ -1008,7 +1008,7 @@ class PreferencesDialog(tk.Toplevel):
         elif platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
             if pathvar.get().startswith(config.home_str):
                 display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[
-                    len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):
+                    len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home_str)):
                 ]
 
             else:
