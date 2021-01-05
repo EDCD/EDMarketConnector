@@ -9,8 +9,7 @@ import EDMCLogging
 
 logger = EDMCLogging.get_main_logger()
 
-# DEFAULT_KILLSWITCH_URL = 'https://github.com/EDCD/EDMarketConnector'
-DEFAULT_KILLSWITCH_URL = 'http://127.0.0.1:8080/killswitches.json'
+DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
 
 _current_version: semantic_version.Version = semantic_version.Version(config.appversion)
 
