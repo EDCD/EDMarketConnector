@@ -1253,10 +1253,17 @@ if __name__ == "__main__":
                     "such as EDSM, Inara.cz and EDDB."
     )
 
-    parser.add_argument('--trace',
-                        help='Set the Debug logging loglevel to TRACE',
-                        action='store_true',
-                        )
+    parser.add_argument(
+        '--trace',
+        help='Set the Debug logging loglevel to TRACE',
+        action='store_true',
+    )
+
+    parser.add_argument(
+        '--reset-ui',
+        help='reset UI theme and transparency to defaults',
+        action='store_true'
+    )
 
     args = parser.parse_args()
 
@@ -1273,6 +1280,11 @@ exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
+
+    if args.reset_ui:
+        config.set('theme', 0)  # 'Default' theme uses ID 0
+        config.set('ui_transparency', 100)  # 100 is completely opaque
+        logger.info('reset theme and transparency to default.')
 
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
@@ -1405,6 +1417,13 @@ sys.path: {sys.path}'''
                 popup_text
             )
             config.set('plugins_not_py3_last', int(time()))
+
+    # UI Transparency
+    ui_transparency = config.getint('ui_transparency')
+    if ui_transparency == 0:
+        ui_transparency = 100
+
+    root.wm_attributes('-alpha', ui_transparency / 100)
 
     root.after(0, messagebox_not_py3)
     root.mainloop()
