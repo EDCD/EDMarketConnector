@@ -614,6 +614,7 @@ def journal_entry(  # noqa: C901
         logger.warning(f"EDDN journal handler has been disabled via killswitch: {ks.reason}")
         plug.show_error("EDDN journal handler disabled. See Log.")
         return None
+
     elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'Handling of event {entry["event"]} disabled via killswitch: {ks.reason}')
         return None
