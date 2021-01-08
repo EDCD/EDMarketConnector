@@ -828,6 +828,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         :return: dict representing the event
         """
+        if self.thread is None:
+            logger.debug('Called whilst self.thread is None, returning')
+            return None
+
         if not self.event_queue:
             logger.debug('Called with no event_queue')
             return None
