@@ -187,8 +187,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Journal')
+        logger.debug('Stopping monitoring Journal')
 
         self.currentdir = None
         self.version = None
