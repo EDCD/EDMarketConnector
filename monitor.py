@@ -187,8 +187,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Journal')
+        logger.debug('Stopping monitoring Journal')
 
         self.currentdir = None
         self.version = None
@@ -327,6 +326,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
+                    # Paranoia check to see if we're shutting down
+                    if threading.current_thread() != self.thread:
+                        logger.info("We're not meant to be running, exiting...")
+                        return  # Terminate
+
                     if b'"event":"Location"' in line:
                         logger.trace('Found "Location" event, appending to event_queue')
 
@@ -823,6 +827,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         :return: dict representing the event
         """
+        if self.thread is None:
+            logger.debug('Called whilst self.thread is None, returning')
+            return None
+
         if not self.event_queue:
             logger.debug('Called with no event_queue')
             return None
