@@ -415,7 +415,7 @@ class AppWindow(object):
 
             else:
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                               tk.PhotoImage(file=join(config.respath, 'EDMarketConnector.png')))
+                               tk.PhotoImage(file=join(config.respath_path, 'EDMarketConnector.png')))
 
             # TODO: Export to files and merge from them in future ?
             self.theme_icon = tk.PhotoImage(
@@ -1145,7 +1145,7 @@ class AppWindow(object):
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
-        file_name = join(config.app_dir, "last_shipyard.html")
+        file_name = join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
             print(SHIPYARD_HTML_TEMPLATE.format(

@@ -42,8 +42,8 @@ if platform == 'darwin':
 
             self.tkProcessKeyEvent_old = None
 
-            self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath, 'snd_good.wav'), False)
-            self.snd_bad  = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath, 'snd_bad.wav'), False)
+            self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath_path, 'snd_good.wav'), False)
+            self.snd_bad  = NSSound.alloc().initWithContentsOfFile_byReference_(join(config.respath_path, 'snd_bad.wav'), False)
 
         def register(self, root, keycode, modifiers):
             self.root = root
@@ -291,8 +291,8 @@ elif platform == 'win32':
         def __init__(self):
             self.root = None
             self.thread = None
-            self.snd_good = open(join(config.respath, 'snd_good.wav'), 'rb').read()
-            self.snd_bad  = open(join(config.respath, 'snd_bad.wav'),  'rb').read()
+            self.snd_good = open(join(config.respath_path, 'snd_good.wav'), 'rb').read()
+            self.snd_bad  = open(join(config.respath_path, 'snd_bad.wav'),  'rb').read()
             atexit.register(self.unregister)
 
         def register(self, root, keycode, modifiers):

@@ -41,7 +41,7 @@ from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater
 
-sys.path.append(config.internal_plugin_dir_str)
+sys.path.append(config.internal_plugin_dir)
 # This import must be after the sys.path.append.
 # The sys.path.append has to be after `import sys` and `from config import config`
 # isort: off
@@ -189,9 +189,9 @@ sys.path: {sys.path}'''
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                logdir = config.get_str('journaldir', default=config.default_journal_dir_str)
+                logdir = config.get_str('journaldir', default=config.default_journal_dir)
                 if not logdir:
-                    logdir = config.default_journal_dir_str
+                    logdir = config.default_journal_dir
 
                 logger.debug(f'logdir = "{logdir}"')
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),

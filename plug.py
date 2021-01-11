@@ -173,10 +173,10 @@ def load_plugins(master):
     last_error['root'] = master
 
     internal = []
-    for name in sorted(os.listdir(config.internal_plugin_dir)):
+    for name in sorted(os.listdir(config.internal_plugin_dir_path)):
         if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name), logger)
+                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except Exception as e:
@@ -184,13 +184,13 @@ def load_plugins(master):
     PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
-    sys.path.append(config.plugin_dir_str)
+    sys.path.append(config.plugin_dir)
 
     found = []
     # Load any plugins that are also packages first
-    for name in sorted(os.listdir(config.plugin_dir),
-                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir, n, '__init__.py')), n.lower())):
-        if not os.path.isdir(os.path.join(config.plugin_dir, name)) or name[0] in ['.', '_']:
+    for name in sorted(os.listdir(config.plugin_dir_path),
+                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
+        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
@@ -198,14 +198,14 @@ def load_plugins(master):
         else:
             try:
                 # Add plugin's folder to load path in case plugin has internal package dependencies
-                sys.path.append(os.path.join(config.plugin_dir, name))
+                sys.path.append(os.path.join(config.plugin_dir_path, name))
 
                 # Create a logger for this 'found' plugin.  Must be before the
                 # load.py is loaded.
                 import EDMCLogging
 
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
-                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
+                found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass

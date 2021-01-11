@@ -350,7 +350,7 @@ def lookup(module, ship_map, entitled=False):
 
     # Lazily populate
     if not moduledata:
-        moduledata.update(pickle.load(open(join(config.respath, 'modules.p'),  'rb')))
+        moduledata.update(pickle.load(open(join(config.respath_path, 'modules.p'),  'rb')))
 
     # if not module.get('category'): raise AssertionError('%s: Missing category' % module['id'])	# only present post 1.3, and not present in ship loadout
     if not module.get('name'): raise AssertionError('%s: Missing name' % module['id'])

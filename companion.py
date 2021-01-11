@@ -660,7 +660,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
-            with open(join(config.respath, f), 'r') as csvfile:
+            with open(join(config.respath_path, f), 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
 
                 for row in reader:

@@ -745,7 +745,7 @@ def journal_entry(  # noqa: C901
 
             journaldir = config.get_str('journaldir')
             if journaldir is None or journaldir == '':
-                journaldir = config.default_journal_dir_str
+                journaldir = config.default_journal_dir
 
             path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
 

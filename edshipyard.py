@@ -48,7 +48,7 @@ slot_map = {
 
 # Ship masses
 # TODO: prefer something other than pickle for this storage (dev readability, security)
-ships = pickle.load(open(join(config.respath, 'ships.p'), 'rb'))
+ships = pickle.load(open(join(config.respath_path, 'ships.p'), 'rb'))
 
 
 # Export ship loadout in E:D Shipyard plain text format
