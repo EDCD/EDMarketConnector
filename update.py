@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import tkinter as tk
 
 # ensure registry is set up on Windows before we start
-from config import appname, appversion, appversion_nobuild, update_feed
+from config import appname, appversion, appversion_nobuild, config, update_feed
 
 class EDMCVersion(object):
     """
