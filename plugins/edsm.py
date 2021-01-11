@@ -598,8 +598,10 @@ def worker() -> None:
                             if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
                                 # Update main window's system status
                                 this.lastlookup = r
-                                # calls update_status in main thread
-                                this.system_link.event_generate('<<EDSMStatus>>', when="tail")
+
+                                if not config.shutting_down():
+                                    # calls update_status in main thread
+                                    this.system_link.event_generate('<<EDSMStatus>>', when="tail")
 
                             if r['msgnum'] // 100 != 1:
                                 logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n{r["msg"]}\n'
