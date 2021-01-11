@@ -1,6 +1,22 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.6-rc2
+===
+
+* We've applied extra paranoia to some of the application shutdown code to 
+  ensure we're not still trying to handle journal events during this sequence.
+  
+  We also re-ordered the shutdown sequence, which might help avoid the shutdown
+  hang.
+  
+  If you encounter a shutdown hang then please add a comment and log files to
+  [Application can leave a zombie process on shutdown #678](https://github.com/EDCD/EDMarketConnector/issues/678)
+  to help us track down the cause and fix it.
+
+
+* Logging from any name-mangled method should now work properly.
+
 Release 4.1.6-rc1
 ===
 
