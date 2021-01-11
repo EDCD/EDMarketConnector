@@ -5,7 +5,7 @@ import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
 
-from config import appname
+from config import appname, config
 
 
 if sys.platform == 'win32':
