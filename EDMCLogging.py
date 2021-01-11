@@ -422,8 +422,8 @@ class EDMCContextFilter(logging.Filter):
         :return: The munged module_name.
         """
         file_name = pathlib.Path(frame_info.filename).expanduser()
-        plugin_dir = pathlib.Path(config.plugin_dir).expanduser()
-        internal_plugin_dir = pathlib.Path(config.internal_plugin_dir).expanduser()
+        plugin_dir = pathlib.Path(config.plugin_dir_path).expanduser()
+        internal_plugin_dir = pathlib.Path(config.internal_plugin_dir_path).expanduser()
         # Find the first parent called 'plugins'
         plugin_top = file_name
         while plugin_top and plugin_top.name != '':
