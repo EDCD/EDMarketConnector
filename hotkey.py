@@ -92,7 +92,7 @@ if platform == 'darwin':
             self.observer = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(NSKeyDownMask, self._handler)
 
         def _poll(self):
-            if config.shutting_down():
+            if config.shutting_down:
                 return
 
             # No way of signalling to Tkinter from within the callback handler block that doesn't
@@ -127,7 +127,7 @@ if platform == 'darwin':
             self.acquire_state = HotkeyMgr.ACQUIRE_INACTIVE
 
         def _acquire_poll(self):
-            if config.shutting_down():
+            if config.shutting_down:
                 return
 
             # No way of signalling to Tkinter from within the monkey-patched event handler that doesn't
@@ -323,7 +323,7 @@ elif platform == 'win32':
             while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
                 if msg.message == WM_HOTKEY:
                     if config.getint('hotkey_always') or WindowTitle(GetForegroundWindow()).startswith('Elite - Dangerous'):
-                        if not config.shutting_down():
+                        if not config.shutting_down:
                             self.root.event_generate('<<Invoke>>', when="tail")
                     else:
                         # Pass the key on

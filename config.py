@@ -182,6 +182,7 @@ class Config(object):
         def set_shutdown(self):
             self.__in_shutdown = True
 
+        @property
         def shutting_down(self) -> bool:
             return self.__in_shutdown
 

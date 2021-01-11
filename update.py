@@ -40,7 +40,7 @@ class Updater(object):
         Receive (Win)Sparkle shutdown request and send it to parent.
         :rtype: None
         """
-        if not config.shutting_down():
+        if not config.shutting_down:
             self.root.event_generate('<<Quit>>', when="tail")
 
     def use_internal(self) -> bool:

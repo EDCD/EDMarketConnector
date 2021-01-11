@@ -1157,5 +1157,5 @@ class PreferencesDialog(tk.Toplevel):
             except Exception:
                 AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
 
-            if not config.shutting_down():
+            if not config.shutting_down:
                 self.parent.event_generate('<<Quit>>', when="tail")

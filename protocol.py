@@ -33,7 +33,7 @@ class GenericProtocolHandler(object):
     def event(self, url):
         self.lastpayload = url
 
-        if not config.shutting_down():
+        if not config.shutting_down:
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
