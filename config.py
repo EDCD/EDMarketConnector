@@ -107,19 +107,19 @@ class AbstractConfig(abc.ABC):
     OUT_SYS_EDDN = 2048
     OUT_SYS_DELAY = 4096
 
-    app_dir: pathlib.Path
-    plugin_dir: pathlib.Path
-    internal_plugin_dir: pathlib.Path
-    respath: pathlib.Path
-    home: pathlib.Path
-    default_journal_dir: pathlib.Path
+    app_dir_path: pathlib.Path
+    plugin_dir_path: pathlib.Path
+    internal_plugin_dir_path: pathlib.Path
+    respath_path: pathlib.Path
+    home_path: pathlib.Path
+    default_journal_dir_path: pathlib.Path
 
     identifier: str
 
     __in_shutdown = False  # Is the application currently shutting down ?
 
     def __init__(self) -> None:
-        self.home = pathlib.Path.home()
+        self.home_path = pathlib.Path.home()
 
     def set_shutdown(self):
         self.__in_shutdown = True
@@ -129,34 +129,34 @@ class AbstractConfig(abc.ABC):
         return self.__in_shutdown
 
     @property
-    def app_dir_str(self) -> str:
+    def app_dir(self) -> str:
         """Return a string version of app_dir."""
-        return str(self.app_dir)
+        return str(self.app_dir_path)
 
     @property
-    def plugin_dir_str(self) -> str:
+    def plugin_dir(self) -> str:
         """Return a string version of plugin_dir."""
-        return str(self.plugin_dir)
+        return str(self.plugin_dir_path)
 
     @property
-    def internal_plugin_dir_str(self) -> str:
+    def internal_plugin_dir(self) -> str:
         """Return a string version of internal_plugin_dir."""
-        return str(self.internal_plugin_dir)
+        return str(self.internal_plugin_dir_path)
 
     @property
-    def respath_str(self) -> str:
+    def respath(self) -> str:
         """Return a string version of respath."""
-        return str(self.respath)
+        return str(self.respath_path)
 
     @property
-    def home_str(self) -> str:
+    def home(self) -> str:
         """Return a string version of home."""
-        return str(self.home)
+        return str(self.home_path)
 
     @property
-    def default_journal_dir_str(self) -> str:
+    def default_journal_dir(self) -> str:
         """Return a string version of default_journal_dir."""
-        return str(self.default_journal_dir)
+        return str(self.default_journal_dir_path)
 
     @staticmethod
     def _suppress_call(
@@ -308,27 +308,27 @@ class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for windows."""
 
     def __init__(self, do_winsparkle=True) -> None:
-        self.app_dir = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
-        self.app_dir.mkdir(exist_ok=True)
+        self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
+        self.app_dir_path.mkdir(exist_ok=True)
 
-        self.plugin_dir = self.app_dir / 'plugins'
-        self.plugin_dir.mkdir(exist_ok=True)
+        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.plugin_dir_path.mkdir(exist_ok=True)
 
         if getattr(sys, 'frozen', False):
-            self.respath = pathlib.Path(sys.executable).parent
-            self.internal_plugin_dir = self.respath / 'plugins'
+            self.respath_path = pathlib.Path(sys.executable).parent
+            self.internal_plugin_dir_path = self.respath_path / 'plugins'
 
         else:
-            self.respath = pathlib.Path(__file__).parent
-            self.internal_plugin_dir = self.respath / 'plugins'
+            self.respath_path = pathlib.Path(__file__).parent
+            self.internal_plugin_dir_path = self.respath_path / 'plugins'
 
-        self.home = pathlib.Path.home()
+        self.home_path = pathlib.Path.home()
 
         journal_dir_str = known_folder_path(FOLDERID_SavedGames)
         journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
-        self.default_journal_dir = None
+        self.default_journal_dir_path = None
         if journaldir is not None:
-            self.default_journal_dir = journaldir / 'Frontier Developments' / 'Elite Dangerous'
+            self.default_journal_dir_path = journaldir / 'Frontier Developments' / 'Elite Dangerous'
 
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
@@ -350,7 +350,7 @@ class WinConfig(AbstractConfig):
         self.identifier = applongname
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
             docs = known_folder_path(FOLDERID_Documents)
-            self.set('outdir',  docs if docs is not None else str(self.home))
+            self.set('outdir',  docs if docs is not None else str(self.home_path))
 
     def __setup_winsparkle(self):
         create_key_defaults = functools.partial(
@@ -535,29 +535,29 @@ class MacConfig(AbstractConfig):
             )[0]
         )
 
-        self.app_dir = support_path / appname
-        self.app_dir.mkdir(exist_ok=True)
+        self.app_dir_path = support_path / appname
+        self.app_dir_path.mkdir(exist_ok=True)
 
-        self.plugin_dir = self.app_dir / 'plugins'
-        self.plugin_dir.mkdir(exist_ok=True)
+        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.plugin_dir_path.mkdir(exist_ok=True)
 
         # Bundle IDs identify a singled app though out a system
 
         if getattr(sys, 'frozen', False):
             exe_dir = pathlib.Path(sys.executable).parent
-            self.internal_plugin_dir = exe_dir.parent / 'Library' / 'plugins'
-            self.respath = exe_dir.parent / 'Resources'
+            self.internal_plugin_dir_path = exe_dir.parent / 'Library' / 'plugins'
+            self.respath_path = exe_dir.parent / 'Resources'
             self.identifier = NSBundle.mainBundle().bundleIdentifier()
 
         else:
             file_dir = pathlib.Path(__file__).parent
-            self.internal_plugin_dir = file_dir / 'plugins'
-            self.respath = file_dir
+            self.internal_plugin_dir_path = file_dir / 'plugins'
+            self.respath_path = file_dir
 
             self.identifier = f'uk.org.marginal.{appname.lower()}'
             NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
-        self.default_journal_dir = support_path / 'Frontier Developments' / 'Elite Dangerous'
+        self.default_journal_dir_path = support_path / 'Frontier Developments' / 'Elite Dangerous'
         self._defaults = NSUserDefaults.standardUserDefaults()
         self._settings: Dict[str, Union[int, str, list]] = dict(
             self._defaults.persistentDomainForName_(self.identifier) or {}
@@ -682,16 +682,16 @@ class LinuxConfig(AbstractConfig):
         super().__init__()
         # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
         xdg_data_home = pathlib.Path(os.getenv('XDG_DATA_HOME', default='~/.local/share')).expanduser()
-        self.app_dir = xdg_data_home / appname
-        self.app_dir.mkdir(exist_ok=True, parents=True)
+        self.app_dir_path = xdg_data_home / appname
+        self.app_dir_path.mkdir(exist_ok=True, parents=True)
 
-        self.plugin_dir = self.app_dir / 'plugins'
-        self.plugin_dir.mkdir(exist_ok=True)
+        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.plugin_dir_path.mkdir(exist_ok=True)
 
-        self.respath = pathlib.Path(__file__).parent
+        self.respath_path = pathlib.Path(__file__).parent
 
-        self.internal_plugin_dir = self.respath / 'plugins'
-        self.default_journal_dir = None
+        self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        self.default_journal_dir_path = None
         self.identifier = f'uk.org.marginal.{appname.lower()}'  # TODO: Unused?
 
         config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
@@ -711,7 +711,7 @@ class LinuxConfig(AbstractConfig):
             self.config.add_section(self.SECTION)
 
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
-            self.set('outdir', str(self.home))
+            self.set('outdir', str(self.home_path))
 
     def __escape(self, s: str) -> str:
         """
