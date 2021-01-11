@@ -117,7 +117,7 @@ class Config(object):
     if platform=='darwin':
 
         def __init__(self):
-            self.in_shutdown = False  # Is the application currently shutting down ?
+            self.__in_shutdown = False  # Is the application currently shutting down ?
 
             self.app_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname)
             if not isdir(self.app_dir):
@@ -180,15 +180,15 @@ class Config(object):
             self.defaults = None
 
         def set_shutdown(self):
-            self.in_shutdown = True
+            self.__in_shutdown = True
 
         def shutting_down(self) -> bool:
-            return self.in_shutdown
+            return self.__in_shutdown
 
     elif platform=='win32':
 
         def __init__(self):
-            self.in_shutdown = False  # Is the application currently shutting down ?
+            self.__in_shutdown = False  # Is the application currently shutting down ?
 
             self.app_dir = join(KnownFolderPath(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
@@ -278,17 +278,17 @@ class Config(object):
             self.hkey = None
 
         def set_shutdown(self):
-            self.in_shutdown = True
+            self.__in_shutdown = True
 
         def shutting_down(self) -> bool:
-            return self.in_shutdown
+            return self.__in_shutdown
 
     elif platform=='linux':
 
         SECTION = 'config'
 
         def __init__(self):
-            self.in_shutdown = False  # Is the application currently shutting down ?
+            self.__in_shutdown = False  # Is the application currently shutting down ?
 
             # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
             self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
@@ -363,10 +363,10 @@ class Config(object):
             self.config = None
 
         def set_shutdown(self):
-            self.in_shutdown = True
+            self.__in_shutdown = True
 
         def shutting_down(self) -> bool:
-            return self.in_shutdown
+            return self.__in_shutdown
 
         def _escape(self, val):
             return str(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
