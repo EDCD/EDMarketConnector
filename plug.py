@@ -366,9 +366,16 @@ def notify_newdata(data, is_beta):
 def show_error(err):
     """
     Display an error message in the status line of the main window.
+
+    Will be NOP during shutdown to avoid Tk hang.
     :param err:
     .. versionadded:: 2.3.7
     """
+
+    if config.shutting_down():
+        logger.info(f'Called during shutdown: "{str(err)}"')
+        return
+
     if err and last_error['root']:
         last_error['msg'] = str(err)
         last_error['root'].event_generate('<<PluginError>>', when="tail")
