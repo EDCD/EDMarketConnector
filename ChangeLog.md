@@ -1,6 +1,29 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.6-rc3
+===
+
+We might have finally found the cause of the application hangs during shutdown.
+Note that this became easier to track down due to the current (2021-01-11)
+downtime for migration of www.edsm.net.  EDMarketConnector will hang during
+shutdown prior to this version whilst EDSM isn't available.
+
+* Avoid making Tk event_generate() calls whilst the appliction is shutting 
+  down.
+  
+* Plugins should actively avoid making any sort of Tk event_generate() call
+  during application shutdown.
+  
+  This means using `if not config.shutting_down:` to gate any code in worker
+  threads that might attempt this.  Also, be sure you're not attempting such
+  in your `plugin_stop()` function.
+  
+  See plugins/edsm.py and plugins/inara.py for example of the usage.
+  
+* Any use of plug.show_error() won't actually change the UI status line during
+  shutdown, but the text you tried to show will be logged instead.
+
 Release 4.1.6-rc2
 ===
 
