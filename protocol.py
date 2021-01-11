@@ -32,7 +32,9 @@ class GenericProtocolHandler(object):
 
     def event(self, url):
         self.lastpayload = url
-        self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+
+        if not config.shutting_down():
+            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
