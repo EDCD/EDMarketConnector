@@ -115,6 +115,9 @@ class Dashboard(FileSystemEventHandler):
 
     # Can be called either in watchdog thread or, if polling, in main thread.
     def process(self, logfile=None):
+        if config.shutting_down:
+            return
+
         try:
             with open(join(self.currentdir, 'Status.json'), 'rb') as h:
                 data = h.read().strip()
@@ -126,6 +129,7 @@ class Dashboard(FileSystemEventHandler):
                         self.status != entry):
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
+
         except Exception:
             logger.exception('Reading Status.json')
 
