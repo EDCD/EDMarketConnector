@@ -117,15 +117,15 @@ class AbstractConfig(abc.ABC):
     identifier: str
 
     def __init__(self) -> None:
-        self.in_shutdown = False  # Is the application currently shutting down ?
+        self.__in_shutdown = False  # Is the application currently shutting down ?
         self.home = pathlib.Path.home()
 
     def set_shutdown(self):
-        self.in_shutdown = True
+        self.__in_shutdown = True
 
     @property
     def shutting_down(self) -> bool:
-        return self.in_shutdown
+        return self.__in_shutdown
 
     @property
     def app_dir_str(self) -> str:
