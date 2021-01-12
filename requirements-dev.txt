@@ -19,7 +19,7 @@ safety==1.10.2
 autopep8==1.5.4
 
 # HTML changelogs
-grip>=4.5.2
+grip==4.5.2
 
 # Packaging
 # We only need py2exe on windows.
