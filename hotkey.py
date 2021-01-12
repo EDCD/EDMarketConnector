@@ -128,7 +128,7 @@ if platform == 'darwin':
             self.acquire_state = HotkeyMgr.ACQUIRE_INACTIVE
 
         def _acquire_poll(self):
-            if config.shutting_down():
+            if config.shutting_down:
                 return
 
             # No way of signalling to Tkinter from within the monkey-patched event handler that doesn't
