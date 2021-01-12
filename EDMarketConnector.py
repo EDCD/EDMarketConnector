@@ -1332,6 +1332,8 @@ class AppWindow(object):
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
+        config.set_shutdown()  # Signal we're in shutdown now.
+
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
