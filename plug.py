@@ -371,7 +371,7 @@ def show_error(err):
     :param err:
     .. versionadded:: 2.3.7
     """
-    if config.shutting_down():
+    if config.shutting_down:
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
 
