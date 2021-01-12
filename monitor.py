@@ -366,7 +366,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.event_queue.append(line)
 
                 if self.event_queue:
-                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    if not config.shutting_down:
+                        self.root.event_generate('<<JournalEvent>>', when="tail")
 
                 log_pos = loghandle.tell()
 
@@ -385,7 +386,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
                     )
 
-                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    if not config.shutting_down:
+                        self.root.event_generate('<<JournalEvent>>', when="tail")
+
                     self.game_was_running = False
 
             else:
