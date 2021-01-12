@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import tkinter as tk
 
 # ensure registry is set up on Windows before we start
-from config import appname, appversion, appversion_nobuild, update_feed
+from config import appname, appversion, appversion_nobuild, config, update_feed
 
 class EDMCVersion(object):
     """
@@ -40,7 +40,8 @@ class Updater(object):
         Receive (Win)Sparkle shutdown request and send it to parent.
         :rtype: None
         """
-        self.root.event_generate('<<Quit>>', when="tail")
+        if not config.shutting_down:
+            self.root.event_generate('<<Quit>>', when="tail")
 
     def use_internal(self) -> bool:
         """

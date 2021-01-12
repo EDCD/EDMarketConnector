@@ -6,6 +6,7 @@ import urllib.request, urllib.error, urllib.parse
 import sys
 
 from EDMCLogging import get_main_logger
+from config import config
 
 logger = get_main_logger()
 
@@ -33,7 +34,9 @@ class GenericProtocolHandler(object):
 
     def event(self, url):
         self.lastpayload = url
-        self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+
+        if not config.shutting_down:
+            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):

@@ -771,6 +771,10 @@ class AppWindow(object):
                 'FlightCon':  _('Helm'),  # Multicrew role
             }.get(role, role)
 
+        if monitor.thread is None:
+            logger.debug('monitor.thread is None, assuming shutdown and returning')
+            return
+
         while True:
             entry = monitor.get_entry()
             if not entry:
@@ -1140,6 +1144,8 @@ class AppWindow(object):
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
+        config.set_shutdown()  # Signal we're in shutdown now.
+
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
@@ -1150,27 +1156,36 @@ class AppWindow(object):
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
-        logger.info('Closing protocol handler...')
-        protocolhandler.close()
+        # First so it doesn't interrupt us
+        logger.info('Closing update checker...')
+        self.updater.close()
 
+        # Earlier than anything else so plugin code can't interfere *and* it
+        # won't still be running in a manner that might rely on something
+        # we'd otherwise have already stopped.
+        logger.info('Notifying plugins to stop...')
+        plug.notify_stop()
+
+        # Handling of application hotkeys now so the user can't possible cause
+        # an issue via triggering one.
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
 
         logger.info('Closing journal monitor...')
         monitor.close()
 
-        logger.info('Notifying plugins to stop...')
-        plug.notify_stop()
-
-        logger.info('Closing update checker...')
-        self.updater.close()
+        # Frontier auth/CAPI handling
+        logger.info('Closing protocol handler...')
+        protocolhandler.close()
 
         logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
 
+        # Now anything else.
         logger.info('Closing config...')
         config.close()
 
