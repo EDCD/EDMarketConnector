@@ -168,10 +168,62 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.5</title>
+			<title>Release 4.1.6</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.1.6</h2>
+<p>We might have finally found the cause of the application hangs during shutdown.
+Note that this became easier to track down due to the downtime
+for migration of <a href="http://www.edsm.net" rel="nofollow">www.edsm.net</a> around 2021-01-11.  Before these fixes EDSM's
+API not being available would cause an EDMC hang on shutdown.</p>
+<ul>
+<li>
+<p>We've applied extra paranoia to some of the application shutdown code to
+ensure we're not still trying to handle journal events during this sequence.</p>
+<p>We also re-ordered the shutdown sequence, which might help avoid the shutdown
+hang.</p>
+<p>If you encounter a shutdown hang then please add a comment and log files to
+<a href="https://github.com/EDCD/EDMarketConnector/issues/678">Application can leave a zombie process on shutdown #678</a>
+to help us track down the cause and fix it.</p>
+</li>
+<li>
+<p>We now avoid making Tk event_generate() calls whilst the appliction is
+shutting down.</p>
+</li>
+<li>
+<p>Plugins should actively avoid making any sort of Tk event_generate() call
+during application shutdown.</p>
+<p>This means using <code>if not config.shutting_down:</code> to gate any code in worker
+threads that might attempt this.  Also, be sure you're not attempting such
+in your <code>plugin_stop()</code> function.</p>
+<p>See plugins/edsm.py and plugins/inara.py for example of the usage.</p>
+</li>
+<li>
+<p>Any use of <code>plug.show_error()</code> won't actually change the UI status line
+during shutdown, but the text you tried to show will be logged instead.</p>
+</li>
+<li>
+<p>Cargo tracking will now correctly count all instances of the same type of
+cargo for different missions.  Previously it only counted the cargo for
+the last mission requiring that cargo type, as found in Cargo.json.</p>
+</li>
+<li>
+<p>The loaded contents of Cargo.json can now be found in <code>monitor.state['CargoJSON']</code>.
+<code>monitor.state</code> is what is passed to plugins as <code>state</code> in the
+<code>journal_entry()</code> call.</p>
+</li>
+<li>
+<p>Our logging code should now cope with logging from a property.</p>
+</li>
+<li>
+<p>Logging from any name-mangled method should now work properly.</p>
+</li>
+<li>
+<p>Miscellaneous updates to PLUGINS.md - mostly to clarify some things.</p>
+</li>
+</ul>
 
 <h2>Release 4.1.5</h2>
 <p>This is a minor maintenance release, mostly addressing behaviour around
@@ -886,10 +938,10 @@ If any of your plugins are listed in that section then they will need updating, 
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.5/EDMarketConnector_win_4.1.5.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.6/EDMarketConnector_win_4.1.6.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.5"
+				sparkle:version="4.1.6"
 				length="11362304"
 				type="application/octet-stream"
 			/>
