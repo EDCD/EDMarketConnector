@@ -1,9 +1,11 @@
 # edmc: protocol handler for cAPI authorisation
 
 
-import threading
-import urllib.request, urllib.error, urllib.parse
 import sys
+import threading
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from EDMCLogging import get_main_logger
 from config import appname, config
@@ -11,13 +13,14 @@ from constants import protocolhandler_redirect
 
 logger = get_main_logger()
 
+is_wine = False
+
 if sys.platform == 'win32':
-    from ctypes import *
-    from ctypes.wintypes import *
+    from ctypes import windll  # type: ignore
     try:
         is_wine = windll.ntdll.wine_get_version
-    except:
-        is_wine = False
+    except Exception:
+        pass
 
 
 class GenericProtocolHandler(object):
@@ -43,6 +46,7 @@ class GenericProtocolHandler(object):
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
 
     import struct
+
     import objc
     from AppKit import NSAppleEventManager, NSObject
 
@@ -83,6 +87,13 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
 
 
 elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
+    # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS
+    from ctypes import windll  # type: ignore
+    from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    from ctypes.wintypes import (
+        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPVOID, LPWSTR, MSG,
+        UINT, WPARAM
+    )
 
     class WNDCLASS(Structure):
         _fields_ = [
@@ -225,7 +236,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
 
 else:  # Linux / Run from source
 
-    from http.server import HTTPServer, BaseHTTPRequestHandler
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class ProtocolHandler(GenericProtocolHandler):
 
