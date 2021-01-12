@@ -7,7 +7,7 @@ from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
-from typing import Any, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
+from typing import Any, List, MutableMapping, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import tkinter
@@ -118,6 +118,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'ModulesValue': None,
             'Rebuy':        None,
             'Modules':      None,
+            'CargoJSON':   None,  # The raw data from the last time cargo.json was read
         }
 
     def start(self, root: 'tkinter.Tk'):
@@ -186,8 +187,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Journal')
+        logger.debug('Stopping monitoring Journal')
 
         self.currentdir = None
         self.version = None
@@ -326,13 +326,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
+                    # Paranoia check to see if we're shutting down
+                    if threading.current_thread() != self.thread:
+                        logger.info("We're not meant to be running, exiting...")
+                        return  # Terminate
+
                     if b'"event":"Location"' in line:
                         logger.trace('Found "Location" event, appending to event_queue')
 
                     self.event_queue.append(line)
 
                 if self.event_queue:
-                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    if not config.shutting_down:
+                        self.root.event_generate('<<JournalEvent>>', when="tail")
 
                 log_pos = loghandle.tell()
 
@@ -350,7 +356,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
                     )
 
-                    self.root.event_generate('<<JournalEvent>>', when="tail")
+                    if not config.shutting_down:
+                        self.root.event_generate('<<JournalEvent>>', when="tail")
+
                     self.game_was_running = False
 
             else:
@@ -363,7 +371,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         try:
             # Preserve property order because why not?
-            entry: OrderedDictT[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
+            entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
             entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
 
             event_type = entry['event']
@@ -608,8 +616,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
                         entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+                        self.state['CargoJSON'] = entry
 
-                self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
+                clean = self.coalesce_cargo(entry['Inventory'])
+
+                self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])
@@ -819,6 +830,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         :return: dict representing the event
         """
+        if self.thread is None:
+            logger.debug('Called whilst self.thread is None, returning')
+            return None
+
         if not self.event_queue:
             logger.debug('Called with no event_queue')
             return None
@@ -965,6 +980,43 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         with open(filename, 'wt') as h:
             h.write(string)
+
+    def coalesce_cargo(self, raw_cargo: List[MutableMapping[str, Any]]) -> List[MutableMapping[str, Any]]:
+        """
+        Coalesce multiple entries of the same cargo into one.
+
+        This exists due to the fact that a user can accept multiple missions that all require the same cargo. On the ED
+        side, this is represented as multiple entries in the `Inventory` List with the same names etc. Just a differing
+        MissionID. We (as in EDMC Core) dont want to support the multiple mission IDs, but DO want to have correct cargo
+        counts. Thus, we reduce all existing cargo down to one total.
+        >>> test = [
+        ...     { "Name":"basicmedicines", "Name_Localised":"BM", "MissionID":684359162, "Count":147, "Stolen":0 },
+        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684358939, "Count":147, "Stolen":0 },
+        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684359344, "Count":36, "Stolen":0 }
+        ... ]
+        >>> EDLogs().coalesce_cargo(test) # doctest: +NORMALIZE_WHITESPACE
+        [{'Name': 'basicmedicines', 'Name_Localised': 'BM', 'MissionID': 684359162, 'Count': 147, 'Stolen': 0},
+        {'Name': 'survivalequipment', 'Name_Localised': 'SE', 'MissionID': 684358939, 'Count': 183, 'Stolen': 0}]
+
+        :param raw_cargo: Raw cargo data (usually from Cargo.json)
+        :return: Coalesced data
+        """
+        # self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
+        out: List[MutableMapping[str, Any]] = []
+        for inventory_item in raw_cargo:
+            if not any(self.canonicalise(x['Name']) == self.canonicalise(inventory_item['Name']) for x in out):
+                out.append(dict(inventory_item))
+                continue
+
+            # We've seen this before, update that count
+            x = list(filter(lambda x: self.canonicalise(x['Name']) == self.canonicalise(inventory_item['Name']), out))
+
+            if len(x) != 1:
+                logger.debug(f'Unexpected number of items: {len(x)} where 1 was expected. {x}')
+
+            x[0]['Count'] += inventory_item['Count']
+
+        return out
 
 
 # singleton

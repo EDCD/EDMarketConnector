@@ -5,7 +5,7 @@ import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
 
-from config import appname
+from config import appname, config
 
 
 if sys.platform == 'win32':
@@ -32,7 +32,9 @@ class GenericProtocolHandler(object):
 
     def event(self, url):
         self.lastpayload = url
-        self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+
+        if not config.shutting_down:
+            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):

@@ -17,7 +17,7 @@ pep8-naming==0.11.1
 autopep8==1.5.4
 
 # HTML changelogs
-grip>=4.5.2
+grip==4.5.2
 
 # Packaging
 # We only need py2exe on windows.

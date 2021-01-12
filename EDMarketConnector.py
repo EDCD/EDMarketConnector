@@ -743,6 +743,10 @@ class AppWindow(object):
                 'FlightCon':  _('Helm'),  # Multicrew role
             }.get(role, role)
 
+        if monitor.thread is None:
+            logger.debug('monitor.thread is None, assuming shutdown and returning')
+            return
+
         while True:
             entry = monitor.get_entry()
             if not entry:
@@ -1055,6 +1059,8 @@ class AppWindow(object):
             self.status['text'] = str(e)
 
     def onexit(self, event=None):
+        config.set_shutdown()  # Signal we're in shutdown now.
+
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
         if platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
@@ -1065,27 +1071,36 @@ class AppWindow(object):
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
-        logger.info('Closing protocol handler...')
-        protocolhandler.close()
+        # First so it doesn't interrupt us
+        logger.info('Closing update checker...')
+        self.updater.close()
 
+        # Earlier than anything else so plugin code can't interfere *and* it
+        # won't still be running in a manner that might rely on something
+        # we'd otherwise have already stopped.
+        logger.info('Notifying plugins to stop...')
+        plug.notify_stop()
+
+        # Handling of application hotkeys now so the user can't possible cause
+        # an issue via triggering one.
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
 
         logger.info('Closing journal monitor...')
         monitor.close()
 
-        logger.info('Notifying plugins to stop...')
-        plug.notify_stop()
-
-        logger.info('Closing update checker...')
-        self.updater.close()
+        # Frontier auth/CAPI handling
+        logger.info('Closing protocol handler...')
+        protocolhandler.close()
 
         logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
 
+        # Now anything else.
         logger.info('Closing config...')
         config.close()
 
@@ -1238,7 +1253,6 @@ executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
 
-
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
     # manifest ActiveCodePage to set this, but that is silently ignored on
@@ -1287,7 +1301,8 @@ sys.path: {sys.path}'''
                 logger.exception(f"Could not set LC_ALL to ('{locale_startup[0]}', 'UTF_8')")
 
             except Exception:
-                logger.exception(f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+                logger.exception(
+                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
@@ -1303,9 +1318,15 @@ sys.path: {sys.path}'''
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
                 self.__test()
+                _ = self.test_prop
 
             def __test(self):
                 logger.debug("A call from A.B.__test")
+
+            @property
+            def test_prop(self):
+                logger.debug("test log from property")
+                return "Test property is testy"
 
     # abinit = A.B()
 

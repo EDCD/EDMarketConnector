@@ -1,16 +1,13 @@
 import json
 from calendar import timegm
-from operator import itemgetter
-from os import listdir
 from os.path import isdir, isfile, join, getsize
 from sys import platform
 import time
 
-if __debug__:
-    from traceback import print_exc
-
 from config import config
+from EDMCLogging import get_main_logger
 
+logger = get_main_logger()
 
 if platform=='darwin':
     from watchdog.observers import Observer
@@ -67,8 +64,10 @@ class Dashboard(FileSystemEventHandler):
         if not self.observed and not polling:
             self.observed = self.observer.schedule(self, self.currentdir)
 
-        if __debug__:
-            print('%s Dashboard "%s"' % (polling and 'Polling' or 'Monitoring', self.currentdir))
+        if polling:
+            logger.debug(f'Polling Dashboard "{self.currentdir}"')
+        else:
+            logger.debug(f'Monitoring Dashboard "{self.currentdir}"')
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not
@@ -78,8 +77,8 @@ class Dashboard(FileSystemEventHandler):
         return True
 
     def stop(self):
-        if __debug__:
-            print('Stopping monitoring Dashboard')
+        logger.debug('Stopping monitoring Dashboard')
+
         self.currentdir = None
         if self.observed:
             self.observed = None
@@ -116,6 +115,9 @@ class Dashboard(FileSystemEventHandler):
 
     # Can be called either in watchdog thread or, if polling, in main thread.
     def process(self, logfile=None):
+        if config.shutting_down:
+            return
+
         try:
             with open(join(self.currentdir, 'Status.json'), 'rb') as h:
                 data = h.read().strip()
@@ -127,8 +129,9 @@ class Dashboard(FileSystemEventHandler):
                         self.status != entry):
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
-        except:
-            if __debug__: print_exc()
+
+        except Exception:
+            logger.exception('Reading Status.json')
 
 # singleton
 dashboard = Dashboard()

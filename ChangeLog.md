@@ -1,6 +1,54 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.1.6
+===
+
+We might have finally found the cause of the application hangs during shutdown.
+Note that this became easier to track down due to the downtime
+for migration of www.edsm.net around 2021-01-11.  Before these fixes EDSM's
+API not being available would cause an EDMC hang on shutdown.
+
+* We've applied extra paranoia to some of the application shutdown code to
+  ensure we're not still trying to handle journal events during this sequence.
+
+  We also re-ordered the shutdown sequence, which might help avoid the shutdown
+  hang.
+
+  If you encounter a shutdown hang then please add a comment and log files to
+  [Application can leave a zombie process on shutdown #678](https://github.com/EDCD/EDMarketConnector/issues/678)
+  to help us track down the cause and fix it.
+
+* We now avoid making Tk event_generate() calls whilst the appliction is 
+  shutting down.
+
+* Plugins should actively avoid making any sort of Tk event_generate() call
+  during application shutdown.
+
+  This means using `if not config.shutting_down:` to gate any code in worker
+  threads that might attempt this.  Also, be sure you're not attempting such
+  in your `plugin_stop()` function.
+
+  See plugins/edsm.py and plugins/inara.py for example of the usage.
+
+* Any use of `plug.show_error()` won't actually change the UI status line
+  during shutdown, but the text you tried to show will be logged instead.
+
+* Cargo tracking will now correctly count all instances of the same type of
+  cargo for different missions.  Previously it only counted the cargo for
+  the last mission requiring that cargo type, as found in Cargo.json.
+
+* The loaded contents of Cargo.json can now be found in `monitor.state['CargoJSON']`.
+  `monitor.state` is what is passed to plugins as `state` in the
+  `journal_entry()` call.
+
+* Our logging code should now cope with logging from a property.
+
+* Logging from any name-mangled method should now work properly.
+
+* Miscellaneous updates to PLUGINS.md - mostly to clarify some things.
+
+
 Release 4.1.5
 ===
 

@@ -225,6 +225,11 @@ with core EDMC or other plugins.**
 Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.
 
+Note that in the following example the function signature defines that it
+returns `Optional[tk.Frame]` only because we need to allow for `None` if
+something goes wrong with the creation of the frame (the calling code checks
+this).  You absolutely need to return the `nb.Frame()` instance that you get
+as in the code below.
 ```python
 import tkinter as tk
 from tkinter import ttk
@@ -392,7 +397,8 @@ Content of `state` (updated to the current journal entry):
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
 | `Captian`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
-| `Cargo`        |           `dict`            | Current cargo                                                                                                   |
+| `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
+| `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`      |            `int`            | Current credits balance                                                                                         |
 | `FID`          |            `str`            | Frontier commander ID                                                                                           |
 | `Loan`         |       `Optional[int]`       | Current loan amount, if any                                                                                     |
@@ -418,8 +424,16 @@ running. In this case you won't receive initial events such as "LoadGame",
 "Rank", "Location", etc. However the `state` dictionary will reflect the
 cumulative effect of these missed events.
 
-Similarly, a special "ShutDown" entry is sent when the game is quitted while
-EDMC is running. This event is not sent when EDMC is running on a different
+Similarly, a special "ShutDown" entry is sent when the game stops writing
+to the Journal without writing a "Shutdown" event.
+This might happen, for example, when the game client crashes.
+Note that this is distinct in (letter) case from the "Shutdown" event that
+the game itself writes to the Journal when you exit normally.  If you want to
+react to either in your plugin code then either compare in a case insensitive
+manner or check for both.  The difference in case allows you to differentiate
+between the two scenarios.
+
+This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
 
 #### Player Dashboard
@@ -442,6 +456,11 @@ typically about once a second when in orbital flight.
 | `entry`   | `dict` | Data from status.json (see below) |
 
  For more info on `status.json`, See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available  constants.
+
+New in version 4.1.6:
+
+`CargoJSON` contains the raw data from the last read of `cargo.json` passed through json.load.
+It contains more information about the cargo contents, such as the mission ID for mission specific cargo
 
 #### Getting Commander Data
 
