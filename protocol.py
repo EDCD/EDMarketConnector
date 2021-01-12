@@ -6,6 +6,7 @@ import urllib.request, urllib.error, urllib.parse
 import sys
 
 from EDMCLogging import get_main_logger
+from config import config
 
 logger = get_main_logger()
 
