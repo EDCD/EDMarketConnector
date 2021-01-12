@@ -145,7 +145,7 @@ class Dashboard(FileSystemEventHandler):
 
     # Can be called either in watchdog thread or, if polling, in main thread.
     def process(self, logfile=None):
-        if config.shutting_down():
+        if config.shutting_down:
             return
 
         try:
