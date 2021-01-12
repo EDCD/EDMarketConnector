@@ -1154,27 +1154,36 @@ class AppWindow(object):
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
-        logger.info('Closing protocol handler...')
-        protocolhandler.close()
+        # First so it doesn't interrupt us
+        logger.info('Closing update checker...')
+        self.updater.close()
 
+        # Earlier than anything else so plugin code can't interfere *and* it
+        # won't still be running in a manner that might rely on something
+        # we'd otherwise have already stopped.
+        logger.info('Notifying plugins to stop...')
+        plug.notify_stop()
+
+        # Handling of application hotkeys now so the user can't possible cause
+        # an issue via triggering one.
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
 
         logger.info('Closing journal monitor...')
         monitor.close()
 
-        logger.info('Notifying plugins to stop...')
-        plug.notify_stop()
-
-        logger.info('Closing update checker...')
-        self.updater.close()
+        # Frontier auth/CAPI handling
+        logger.info('Closing protocol handler...')
+        protocolhandler.close()
 
         logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
 
+        # Now anything else.
         logger.info('Closing config...')
         config.close()
 
