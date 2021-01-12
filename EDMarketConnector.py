@@ -771,6 +771,10 @@ class AppWindow(object):
                 'FlightCon':  _('Helm'),  # Multicrew role
             }.get(role, role)
 
+        if monitor.thread is None:
+            logger.debug('monitor.thread is None, assuming shutdown and returning')
+            return
+
         while True:
             entry = monitor.get_entry()
             if not entry:
