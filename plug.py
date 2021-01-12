@@ -251,10 +251,14 @@ def notify_stop():
         plugin_stop = plugin._get_func('plugin_stop')
         if plugin_stop:
             try:
+                logger.info(f'Asking plugin "{plugin.name}" to stop...')
                 newerror = plugin_stop()
                 error = error or newerror
             except Exception as e:
                 logger.exception(f'Plugin "{plugin.name}" failed')
+
+    logger.info('Done')
+
     return error
 
 
