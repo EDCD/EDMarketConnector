@@ -7,6 +7,7 @@ import sys
 
 from EDMCLogging import get_main_logger
 from config import config
+from constants import protocolhandler_redirect
 
 logger = get_main_logger()
 
