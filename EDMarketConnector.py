@@ -19,23 +19,9 @@ from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple, cast
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
 appname = 'EDMarketConnector'  # TODO: Must match config.appname, add test
+applongname = 'E:D Market Connector'  # TODO: Must match config.applongname, add test
+protocolhandler_redirect = 'edmc://auth'  # TODO: Must match protocolhandler.redirect, add test
 if __name__ == '__main__':
-    # Keep this as the very first code run to be as sure as possible of no
-    # output until after this redirect is done, if needed.
-    if True or getattr(sys, 'frozen', False):
-        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
-
-        # unbuffered not allowed for text in python3, so use `1 for line buffering
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
-    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
-
-# isort: off
-import killswitch  # noqa: E402 # Will cause a logging import/startup so needs to be after the redirect
-from config import applongname, appname, appversion, appversion_nobuild, config, copyright  # noqa: E402
-# isort: on
-
-if __name__ == "__main__":
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
         Ensure only one copy of the app is running under this user account.
@@ -88,7 +74,7 @@ if __name__ == "__main__":
                         and window_title(window_handle) == applongname \
                         and GetProcessHandleFromHwnd(window_handle):
                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
+                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                         # Wait for it to be responsive to avoid ShellExecute recursing
                         ShowWindow(window_handle, SW_RESTORE)
@@ -145,6 +131,21 @@ if __name__ == "__main__":
         # If the user closes the popup with the 'X', not the 'OK' button we'll
         # reach here.
         sys.exit(0)
+
+    # Keep this as the very first code run to be as sure as possible of no
+    # output until after this redirect is done, if needed.
+    if True or getattr(sys, 'frozen', False):
+        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+        import tempfile
+
+        # unbuffered not allowed for text in python3, so use `1 for line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
+
+# isort: off
+import killswitch  # noqa: E402 # Will cause a logging import/startup so needs to be after the redirect
+from config import applongname, appname, appversion, appversion_nobuild, config, copyright  # noqa: E402
+# isort: on
 
 
 # After the redirect in case config does logging setup
