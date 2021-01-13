@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     # Keep this as the very first code run to be as sure as possible of no
     # output until after this redirect is done, if needed.
-    if True or getattr(sys, 'frozen', False):
+    if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         import tempfile
 
