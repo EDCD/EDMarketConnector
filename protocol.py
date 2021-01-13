@@ -87,7 +87,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
 
 
 elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
-    # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS
+    # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
     from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
     from ctypes.wintypes import (
@@ -156,12 +156,18 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         service = create_unicode_buffer(256)
         topic = create_unicode_buffer(256)
         if message == WM_DDE_INITIATE:
-            if (
-                (lParam & 0xffff == 0 or (GlobalGetAtomName(lParam & 0xffff, service, 256) and service.value == appname)) and
-                (lParam >> 16 == 0 or (GlobalGetAtomName(lParam >> 16, topic, 256) and topic.value.lower() == 'system'))
-            ):
-                SendMessage(wParam, WM_DDE_ACK, hwnd, PackDDElParam(
-                    WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System')))
+            # I have no idea what these do or how they work.
+            flag1 = (lParam & 0xffff == 0 or (
+                GlobalGetAtomName(lParam & 0xffff, service, 256) and service.value == appname)
+            )
+            flag2 = (
+                lParam >> 16 == 0 or (GlobalGetAtomName(lParam >> 16, topic, 256) and topic.value.lower() == 'system')
+            )
+
+            if flag1 and flag2:
+                SendMessage(
+                    wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System'))
+                )
                 return 0
         return DefWindowProc(hwnd, message, wParam, lParam)
 
