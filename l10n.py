@@ -113,8 +113,8 @@ class _Translations:
             return
 
         self.translations = {None: self.contents(cast(str, lang))}
-        for plugin in os.listdir(config.plugin_dir):
-            plugin_path = join(config.plugin_dir, plugin, LOCALISATION_DIR)
+        for plugin in os.listdir(config.plugin_dir_path):
+            plugin_path = join(config.plugin_dir_path, plugin, LOCALISATION_DIR)
             if isdir(plugin_path):
                 try:
                     self.translations[plugin] = self.contents(cast(str, lang), str(plugin_path))
@@ -160,7 +160,7 @@ class _Translations:
         """
         if context:
             # TODO: There is probably a better way to go about this now.
-            context = context[len(config.plugin_dir_str)+1:].split(os.sep)[0]
+            context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
             if self.translations[None] and context not in self.translations:
                 logger.debug(f'No translations for {context!r}')
 
