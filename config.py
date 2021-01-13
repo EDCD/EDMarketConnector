@@ -350,7 +350,7 @@ class WinConfig(AbstractConfig):
         self.identifier = applongname
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
             docs = known_folder_path(FOLDERID_Documents)
-            self.set('outdir',  docs if docs is not None else str(self.home_path))
+            self.set('outdir',  docs if docs is not None else self.home)
 
     def __setup_winsparkle(self):
         create_key_defaults = functools.partial(
@@ -711,7 +711,7 @@ class LinuxConfig(AbstractConfig):
             self.config.add_section(self.SECTION)
 
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
-            self.set('outdir', str(self.home_path))
+            self.set('outdir', self.home)
 
     def __escape(self, s: str) -> str:
         """
