@@ -7,6 +7,7 @@ import sys
 
 from EDMCLogging import get_main_logger
 from config import config
+from constants import protocolhandler_redirect
 
 logger = get_main_logger()
 
@@ -22,7 +23,7 @@ if sys.platform == 'win32':
 class GenericProtocolHandler(object):
 
     def __init__(self):
-        self.redirect = 'edmc://auth'	# Base redirection URL
+        self.redirect = protocolhandler_redirect  # Base redirection URL
         self.master = None
         self.lastpayload = None
 
