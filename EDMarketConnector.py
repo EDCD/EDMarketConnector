@@ -16,11 +16,10 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple, cast
 
+from constants import applongname, appname, protocolhandler_redirect
+
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
-appname = 'EDMarketConnector'  # TODO: Must match config.appname, add test
-applongname = 'E:D Market Connector'  # TODO: Must match config.applongname, add test
-protocolhandler_redirect = 'edmc://auth'  # TODO: Must match protocolhandler.redirect, add test
 if __name__ == '__main__':
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
@@ -143,8 +142,8 @@ if __name__ == '__main__':
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 # isort: off
-import killswitch  # noqa: E402 # Will cause a logging import/startup so needs to be after the redirect
-from config import applongname, appname, appversion, appversion_nobuild, config, copyright  # noqa: E402
+import killswitch  # Will cause a logging import/startup so needs to be after the redirect
+from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
 
