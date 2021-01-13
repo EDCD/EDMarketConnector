@@ -15,9 +15,11 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING
 
-from config import applongname, appname, appversion, appversion_nobuild, config, copyright
+from constants import applongname, appname, protocolhandler_redirect
 
-if __name__ == "__main__":
+# config will now cause an appname logger to be set up, so we need the
+# console redirect before this
+if __name__ == '__main__':
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
         Ensure only one copy of the app is running under this user account.
@@ -70,7 +72,7 @@ if __name__ == "__main__":
                         and window_title(window_handle) == applongname \
                         and GetProcessHandleFromHwnd(window_handle):
                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
+                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                         # Wait for it to be responsive to avoid ShellExecute recursing
                         ShowWindow(window_handle, SW_RESTORE)
@@ -140,6 +142,11 @@ if __name__ == "__main__":
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
+    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
+
+# isort: off
+from config import appversion, appversion_nobuild, config, copyright
+# isort: on
 
 from EDMCLogging import edmclogger, logger, logging
 

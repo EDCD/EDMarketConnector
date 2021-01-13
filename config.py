@@ -6,9 +6,9 @@ from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
 import semantic_version
 
+from constants import applongname, appname
+
 # Any of these may be imported by plugins
-appname = 'EDMarketConnector'
-applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
