@@ -375,7 +375,7 @@ def journal_entry(
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
-            logger.info(f'Arrived at {entry["StarSystem"]} {entry["StarPos"')
+            logger.info(f'Arrived at {entry["StarSystem"]} {entry["StarPos"]}')
 
         else:
             logger.info(f'Arrived at {entry["StarSystem"]}')
@@ -396,7 +396,7 @@ Content of `state` (updated to the current journal entry):
 
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
-| `Captian`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Captain`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
 | `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
 | `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`      |            `int`            | Current credits balance                                                                                         |
