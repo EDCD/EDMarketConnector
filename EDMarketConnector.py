@@ -9,7 +9,7 @@ import re
 import sys
 import webbrowser
 from builtins import object, str
-from os import chdir, environ
+from os import chdir, environ, getpid as os_getpid
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
@@ -42,7 +42,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 if __name__ == "__main__":
-    journal_dir_lockfile = None
+    journal_dir = config.get('journaldir') or config.default_journal_dir
+    journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='w+', encoding='utf-8')
 
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
@@ -50,11 +51,32 @@ if __name__ == "__main__":
 
         :returns: True if we are the single instance, else False.
         """
-        journal_dir = config.get('journaldir') or config.default_journal_dir
+        print('no_other_instance_running(): Begin...')
 
-        if sys.platform == 'win32':
-            journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='a+', encoding='utf-8')
+        if platform == 'win32':
+            print('no_other_instance_running(): win32')
+            import msvcrt
 
+            print(f'no_other_instance_running(): journal_dir_lockfile = {journal_dir_lockfile!r}')
+
+            try:
+                msvcrt.locking(journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
+
+            except PermissionError as e:
+                print(f"PermissionError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            except OSError as e:
+                print(f"OSError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            except Exception as e:
+                print(f"other Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
+
+        print('no_other_instance_running(): Done')
         return True
 
     def already_running_popup():
