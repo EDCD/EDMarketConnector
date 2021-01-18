@@ -120,16 +120,16 @@ if __name__ == '__main__':
                 def enumwindowsproc(window_handle, l_param):
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = ctypes.create_unicode_buffer(257)
-                    if GetClassName(window_handle, cls, 257) \
-                            and cls.value == 'TkTopLevel' \
-                            and window_title(window_handle) == applongname \
-                            and GetProcessHandleFromHwnd(window_handle):
-                        # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                            CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                            # Wait for it to be responsive to avoid ShellExecute recursing
-                            ShowWindow(window_handle, SW_RESTORE)
-                            ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                    if GetClassName(window_handle, cls, 257):
+                        if cls.value == 'TkTopLevel':
+                            if window_title(window_handle) == applongname:
+                                if GetProcessHandleFromHwnd(window_handle):
+                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                        # Wait for it to be responsive to avoid ShellExecute recursing
+                                        ShowWindow(window_handle, SW_RESTORE)
+                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
 
                 # This performs the edmc://auth check and forward
                 EnumWindows(enumwindowsproc, 0)
