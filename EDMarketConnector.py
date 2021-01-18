@@ -15,6 +15,7 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING
 
+from config import appversion, appversion_nobuild, config, copyright
 from constants import applongname, appname, protocolhandler_redirect
 
 # config will now cause an appname logger to be set up, so we need the
@@ -41,7 +42,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-if __name__ == "__main__":
     journal_dir: str = config.get('journaldir') or config.default_journal_dir
     # This must be at top level to guarantee the file handle doesn't go out
     # of scope and get cleaned up, removing the lock with it.
@@ -69,8 +69,6 @@ if __name__ == "__main__":
                 print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
                 return False
 
-            journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
-
         else:
             print('no_other_instance_running(): NOT win32, using fcntl')
             try:
@@ -86,7 +84,7 @@ if __name__ == "__main__":
                 print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
                 return False
 
-            journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
+        journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
 
         print('no_other_instance_running(): Done')
         return True
@@ -145,9 +143,6 @@ if __name__ == "__main__":
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
-# isort: off
-from config import appversion, appversion_nobuild, config, copyright
-# isort: on
 
 from EDMCLogging import edmclogger, logger, logging
 
