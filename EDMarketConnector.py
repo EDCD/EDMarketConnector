@@ -34,7 +34,7 @@ if __name__ == '__main__':
 from config import appversion, appversion_nobuild, config, copyright
 from EDMCLogging import edmclogger, logger, logging
 
-if __name__ == '__main__':  # noqa C901
+if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
     parser = argparse.ArgumentParser(
         prog=appname,
@@ -158,7 +158,8 @@ if __name__ == '__main__':  # noqa C901
                 fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except Exception as e:
-                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
+                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\","
+                      f"assuming another process running\n{e!r}")
                 return False
 
         journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
@@ -234,13 +235,6 @@ from tkinter import ttk
 
 from ttkHyperlinkLabel import HyperlinkLabel
 
-if __debug__:
-    if platform != 'win32':
-        import pdb
-        import signal
-
-        signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
-
 import commodity
 import companion
 import plug
@@ -279,7 +273,7 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master):
+    def __init__(self, master):  # noqa: C901
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
@@ -635,7 +629,7 @@ class AppWindow(object):
             self.status['text'] = str(e)
         self.cooldown()
 
-    def getandsend(self, event=None, retrying=False):
+    def getandsend(self, event=None, retrying=False):  # noqa: C901
 
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
@@ -794,7 +788,7 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event: str):
+    def journal_event(self, event: str):  # noqa: C901
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -1230,7 +1224,7 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 
 
 # Run the app
-if __name__ == "__main__":
+if __name__ == "__main__":  # noqa C901
     if args.trace:
         logger.setLevel(logging.TRACE)
         edmclogger.set_channels_loglevel(logging.TRACE)
