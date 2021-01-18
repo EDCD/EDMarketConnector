@@ -43,71 +43,11 @@ if __name__ == '__main__':
 
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
-        Ensure only one copy of the app is running under this user account.
-
-        OSX does this automatically.
+        Ensure only one copy of the app is running for the configured journal directory.
 
         :returns: True if we are the single instance, else False.
         """
-        # TODO: Linux implementation
-        if platform == 'win32':
-            import ctypes
-            from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
-
-            EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
-            GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
-            GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
-            GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
-            GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-            GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
-            GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-            SW_RESTORE = 9  # noqa: N806
-            SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
-            ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
-            ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
-
-            COINIT_MULTITHREADED = 0  # noqa: N806,F841
-            COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-            COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-            CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
-
-            ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
-            ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
-
-            def window_title(h):
-                if h:
-                    text_length = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(text_length)
-                    if GetWindowText(h, buf, text_length):
-                        return buf.value
-
-                return None
-
-            @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-            def enumwindowsproc(window_handle, l_param):
-                # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                cls = ctypes.create_unicode_buffer(257)
-                if GetClassName(window_handle, cls, 257) \
-                        and cls.value == 'TkTopLevel' \
-                        and window_title(window_handle) == applongname \
-                        and GetProcessHandleFromHwnd(window_handle):
-                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                        # Wait for it to be responsive to avoid ShellExecute recursing
-                        ShowWindow(window_handle, SW_RESTORE)
-                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
-
-                    else:
-                        ShowWindowAsync(window_handle, SW_RESTORE)
-                        SetForegroundWindow(window_handle)
-
-                    return False
-
-                return True
-
-            return EnumWindows(enumwindowsproc, 0)
+        journal_dir = config.get('journaldir') or config.default_journal_dir
 
         return True
 
