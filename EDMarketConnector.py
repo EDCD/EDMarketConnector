@@ -41,6 +41,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+if __name__ == "__main__":
+    journal_dir_lockfile = None
+
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
         Ensure only one copy of the app is running for the configured journal directory.
@@ -48,6 +51,9 @@ if __name__ == '__main__':
         :returns: True if we are the single instance, else False.
         """
         journal_dir = config.get('journaldir') or config.default_journal_dir
+
+        if sys.platform == 'win32':
+            journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='a+', encoding='utf-8')
 
         return True
 
