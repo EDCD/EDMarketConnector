@@ -136,6 +136,10 @@ if __name__ == '__main__':  # noqa C901
                                         ShowWindow(window_handle, SW_RESTORE)
                                         ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
 
+                                    else:
+                                        ShowWindowAsync(window_handle, SW_RESTORE)
+                                        SetForegroundWindow(window_handle)
+
                     return True  # Do not remove, else this function as a callback breaks
 
                 # This performs the edmc://auth check and forward
