@@ -56,6 +56,7 @@ if __name__ == "__main__":
         print('no_other_instance_running(): Begin...')
 
         if platform == 'win32':
+            # win32 doesn't have fcntl, so we have to use msvcrt
             print('no_other_instance_running(): win32')
             import msvcrt
 
@@ -66,6 +67,30 @@ if __name__ == "__main__":
 
             except PermissionError as e:
                 print(f"PermissionError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            except OSError as e:
+                print(f"OSError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            except Exception as e:
+                print(f"other Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                return False
+
+            journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
+
+        else:
+            try:
+                import fcntl
+
+            except Exception:
+                print("Not on win32 and we have no fcntl, can't use a file lock!  Allowing multiple instances!")
+
+            try:
+                fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+            except BlockingIOError as e:
+                print(f"BlockingIOError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
                 return False
 
             except OSError as e:
