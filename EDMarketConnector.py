@@ -43,6 +43,8 @@ if __name__ == '__main__':
 
 if __name__ == "__main__":
     journal_dir = config.get('journaldir') or config.default_journal_dir
+    # This must be at top level to guarantee the file handle doesn't go out
+    # of scope and get cleaned up, removing the lock with it.
     journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='w+', encoding='utf-8')
 
     def no_other_instance_running() -> bool:  # noqa: CCR001
