@@ -42,7 +42,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 if __name__ == "__main__":
-    journal_dir = config.get('journaldir') or config.default_journal_dir
+    journal_dir: str = config.get('journaldir') or config.default_journal_dir
     # This must be at top level to guarantee the file handle doesn't go out
     # of scope and get cleaned up, removing the lock with it.
     journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='w+', encoding='utf-8')
@@ -56,8 +56,8 @@ if __name__ == "__main__":
         print('no_other_instance_running(): Begin...')
 
         if platform == 'win32':
+            print('no_other_instance_running(): win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
-            print('no_other_instance_running(): win32')
             import msvcrt
 
             print(f'no_other_instance_running(): journal_dir_lockfile = {journal_dir_lockfile!r}')
@@ -80,6 +80,7 @@ if __name__ == "__main__":
             journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
 
         else:
+            print('no_other_instance_running(): NOT win32, using fcntl')
             try:
                 import fcntl
 
@@ -87,7 +88,7 @@ if __name__ == "__main__":
                 print("Not on win32 and we have no fcntl, can't use a file lock!  Allowing multiple instances!")
 
             try:
-                fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except BlockingIOError as e:
                 print(f"BlockingIOError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
