@@ -34,7 +34,7 @@ if __name__ == '__main__':
 from config import appversion, appversion_nobuild, config, copyright
 from EDMCLogging import edmclogger, logger, logging
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # noqa C901
     # Command-line arguments
     parser = argparse.ArgumentParser(
         prog=appname,
@@ -76,12 +76,16 @@ if __name__ == '__main__':
 
             print(f'no_other_instance_running(): journal_dir_lockfile = {journal_dir_lockfile!r}')
 
+            locked = False
             try:
                 msvcrt.locking(journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
 
             except Exception as e:
-                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
+                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\""
+                      f", assuming another process running\n{e!r}")
+                locked = True
 
+            if locked:
                 # Need to do the check for this being an edmc:// auth callback
                 import ctypes
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
@@ -120,6 +124,7 @@ if __name__ == '__main__':
                 def enumwindowsproc(window_handle, l_param):
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = ctypes.create_unicode_buffer(257)
+                    # This conditional is exploded to make debugging slightly easier
                     if GetClassName(window_handle, cls, 257):
                         if cls.value == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
@@ -130,6 +135,8 @@ if __name__ == '__main__':
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         ShowWindow(window_handle, SW_RESTORE)
                                         ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+
+                    return True  # Do not remove, else this function as a callback breaks
 
                 # This performs the edmc://auth check and forward
                 EnumWindows(enumwindowsproc, 0)
