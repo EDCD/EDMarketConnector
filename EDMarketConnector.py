@@ -65,16 +65,8 @@ if __name__ == "__main__":
             try:
                 msvcrt.locking(journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
 
-            except PermissionError as e:
-                print(f"PermissionError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
-                return False
-
-            except OSError as e:
-                print(f"OSError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
-                return False
-
             except Exception as e:
-                print(f"other Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
                 return False
 
             journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
