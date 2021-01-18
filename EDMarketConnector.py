@@ -93,6 +93,10 @@ if __name__ == "__main__":
         import tkinter as tk
         from tkinter import ttk
 
+        # Check for CL arg that suppresses this popup.
+        if args.suppress_dupe_process_popup:
+            sys.exit(0)
+
         root = tk.Tk(className=appname.lower())
 
         frame = tk.Frame(root)
@@ -1221,8 +1225,6 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 
 # Run the app
 if __name__ == "__main__":
-    enforce_single_instance()
-
     # Command-line arguments
     parser = argparse.ArgumentParser(
         prog=appname,
@@ -1237,7 +1239,14 @@ if __name__ == "__main__":
                         action='store_true',
                         )
 
+    parser.add_argument('--suppress-dupe-process-popup',
+                        help='Suppress the popup from when the application detects another instance already running',
+                        action='store_true'
+                        )
+
     args = parser.parse_args()
+
+    enforce_single_instance()
 
     if args.trace:
         logger.setLevel(logging.TRACE)
