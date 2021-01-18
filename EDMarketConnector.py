@@ -76,22 +76,14 @@ if __name__ == "__main__":
             try:
                 import fcntl
 
-            except Exception:
+            except ImportError:
                 print("Not on win32 and we have no fcntl, can't use a file lock!  Allowing multiple instances!")
 
             try:
                 fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-            except BlockingIOError as e:
-                print(f"BlockingIOError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
-                return False
-
-            except OSError as e:
-                print(f"OSError: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
-                return False
-
             except Exception as e:
-                print(f"other Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e}")
+                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
                 return False
 
             journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
