@@ -67,7 +67,59 @@ if __name__ == '__main__':
 
             except Exception as e:
                 print(f"Exception: Couldn't lock journal directory \"{journal_dir}\", assuming another process running\n{e!r}")
-                return False
+
+                # Need to do the check for this being an edmc:// auth callback
+                import ctypes
+                from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
+
+                EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
+                GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
+                GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
+                GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
+                GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+                GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
+                GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
+
+                SW_RESTORE = 9  # noqa: N806
+                SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
+                ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
+                ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
+
+                COINIT_MULTITHREADED = 0  # noqa: N806,F841
+                COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
+                COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
+                CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
+
+                ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
+                ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
+
+                def window_title(h):
+                    if h:
+                        text_length = GetWindowTextLength(h) + 1
+                        buf = ctypes.create_unicode_buffer(text_length)
+                        if GetWindowText(h, buf, text_length):
+                            return buf.value
+
+                    return None
+
+                @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+                def enumwindowsproc(window_handle, l_param):
+                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
+                    cls = ctypes.create_unicode_buffer(257)
+                    if GetClassName(window_handle, cls, 257) \
+                            and cls.value == 'TkTopLevel' \
+                            and window_title(window_handle) == applongname \
+                            and GetProcessHandleFromHwnd(window_handle):
+                        # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                        if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                            CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                            # Wait for it to be responsive to avoid ShellExecute recursing
+                            ShowWindow(window_handle, SW_RESTORE)
+                            ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+
+                # This performs the edmc://auth check and forward
+                EnumWindows(enumwindowsproc, 0)
+                return False  # Another instance is running
 
         else:
             print('no_other_instance_running(): NOT win32, using fcntl')
