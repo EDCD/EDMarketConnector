@@ -9,7 +9,8 @@ import re
 import sys
 import webbrowser
 from builtins import object, str
-from os import chdir, environ, getpid as os_getpid
+from os import chdir, environ
+from os import getpid as os_getpid
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
@@ -233,8 +234,6 @@ import tkinter.font
 import tkinter.messagebox
 from tkinter import ttk
 
-from ttkHyperlinkLabel import HyperlinkLabel
-
 import commodity
 import companion
 import plug
@@ -248,6 +247,7 @@ from l10n import Translations
 from monitor import monitor
 from protocol import protocolhandler
 from theme import theme
+from ttkHyperlinkLabel import HyperlinkLabel
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
