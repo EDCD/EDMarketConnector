@@ -5,7 +5,7 @@ import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
 
-from config import config
+from config import appname, config
 from constants import protocolhandler_redirect
 
 
