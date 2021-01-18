@@ -5,7 +5,8 @@ import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
 
-from config import appname, config
+from config import config
+from constants import protocolhandler_redirect
 
 
 if sys.platform == 'win32':
@@ -20,7 +21,7 @@ if sys.platform == 'win32':
 class GenericProtocolHandler(object):
 
     def __init__(self):
-        self.redirect = 'edmc://auth'	# Base redirection URL
+        self.redirect = protocolhandler_redirect  # Base redirection URL
         self.master = None
         self.lastpayload = None
 
