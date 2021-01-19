@@ -84,7 +84,7 @@ if __name__ == '__main__':  # noqa: C901
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\""
-                            f", assuming another process running\n{e!r}")
+                            f", assuming another process running: {e!r}")
                 locked = True
 
             if locked:
@@ -183,7 +183,7 @@ if __name__ == '__main__':  # noqa: C901
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\","
-                            f"assuming another process running\n{e!r}")
+                            f"assuming another process running: {e!r}")
                 return False
 
         journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
@@ -221,9 +221,11 @@ if __name__ == '__main__':  # noqa: C901
     try:
         journal_dir_lockfile = open(journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
+    # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
+    # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
     except Exception as e:  # For remote FS this could be any of a wide range of exceptions
         logger.warning(f"Couldn't open \"{journal_dir_lockfile_name}\" for \"w+\""
-                       f"Aborting checks: {e!r}")
+                       f" Aborting duplicate process checks: {e!r}")
 
     else:
         if not no_other_instance_running():
@@ -237,9 +239,9 @@ if __name__ == '__main__':  # noqa: C901
             # reach here.
             sys.exit(0)
 
-        if getattr(sys, 'frozen', False):
-            # Now that we're sure we're the only instance running we can truncate the logfile
-            sys.stdout.truncate()
+    if getattr(sys, 'frozen', False):
+        # Now that we're sure we're the only instance running we can truncate the logfile
+        sys.stdout.truncate()
 
 
 # See EDMCLogging.py docs.
