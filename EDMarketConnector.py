@@ -123,6 +123,19 @@ if __name__ == '__main__':  # noqa: C901
 
                 @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
                 def enumwindowsproc(window_handle, l_param):
+                    """
+                    Determine if any window for the Application exists.
+
+                    Called for each found window by EnumWindows().
+
+                    When a match is found we check if we're being invoked as the
+                    edmc://auth handler.  If so we send the message to the existing
+                    process/window.  If not we'll raise that existing window to the
+                    foreground.
+                    :param window_handle: Window to check.
+                    :param l_param: ???
+                    :return: False if we found a match, else True to continue iteration
+                    """
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = ctypes.create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
@@ -141,10 +154,18 @@ if __name__ == '__main__':  # noqa: C901
                                         ShowWindowAsync(window_handle, SW_RESTORE)
                                         SetForegroundWindow(window_handle)
 
+                            return False  # Indicate window found, so stop iterating
+
+                    # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
 
                 # This performs the edmc://auth check and forward
+                # EnumWindows() will iterate through all open windows, calling
+                # enumwindwsproc() on each.  When an invocation returns False it
+                # stops iterating.
+                # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 EnumWindows(enumwindowsproc, 0)
+
                 return False  # Another instance is running
 
         else:
