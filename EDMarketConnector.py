@@ -63,11 +63,6 @@ if __name__ == '__main__':  # noqa: C901
     else:
         edmclogger.set_channels_loglevel(logging.DEBUG)
 
-    journal_dir: str = config.get('journaldir') or config.default_journal_dir
-    # This must be at top level to guarantee the file handle doesn't go out
-    # of scope and get cleaned up, removing the lock with it.
-    journal_dir_lockfile = open(join(journal_dir, 'edmc-journal-lock.txt'), mode='w+', encoding='utf-8')
-
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
         Ensure only one copy of the app is running for the configured journal directory.
@@ -219,20 +214,32 @@ if __name__ == '__main__':  # noqa: C901
 
         root.mainloop()
 
-    if not no_other_instance_running():
-        # There's a copy already running.
+    journal_dir: str = config.get('journaldir') or config.default_journal_dir
+    # This must be at top level to guarantee the file handle doesn't go out
+    # of scope and get cleaned up, removing the lock with it.
+    journal_dir_lockfile_name = join(journal_dir, 'edmc-journal-lock.txt')
+    try:
+        journal_dir_lockfile = open(journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
-        logger.info("An EDMarketConnector.exe process was already running, exiting.")
+    except Exception as e:  # For remote FS this could be any of a wide range of exceptions
+        logger.warning(f"Couldn't open \"{journal_dir_lockfile_name}\" for \"w+\""
+                       f"Aborting checks: {e!r}")
 
-        # To be sure the user knows, we need a popup
-        already_running_popup()
-        # If the user closes the popup with the 'X', not the 'OK' button we'll
-        # reach here.
-        sys.exit(0)
+    else:
+        if not no_other_instance_running():
+            # There's a copy already running.
 
-    if getattr(sys, 'frozen', False):
-        # Now that we're sure we're the only instance running we can truncate the logfile
-        sys.stdout.truncate()
+            logger.info("An EDMarketConnector.exe process was already running, exiting.")
+
+            # To be sure the user knows, we need a popup
+            already_running_popup()
+            # If the user closes the popup with the 'X', not the 'OK' button we'll
+            # reach here.
+            sys.exit(0)
+
+        if getattr(sys, 'frozen', False):
+            # Now that we're sure we're the only instance running we can truncate the logfile
+            sys.stdout.truncate()
 
 
 # See EDMCLogging.py docs.
