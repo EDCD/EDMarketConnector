@@ -134,7 +134,7 @@ if __name__ == '__main__':  # noqa: C901
                     process/window.  If not we'll raise that existing window to the
                     foreground.
                     :param window_handle: Window to check.
-                    :param l_param: ???
+                    :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
