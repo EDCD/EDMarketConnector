@@ -57,6 +57,12 @@ if __name__ == '__main__':  # noqa: C901
 
     args = parser.parse_args()
 
+    if args.trace:
+        logger.setLevel(logging.TRACE)
+        edmclogger.set_channels_loglevel(logging.TRACE)
+    else:
+        edmclogger.set_channels_loglevel(logging.DEBUG)
+
     journal_dir: str = config.get('journaldir') or config.default_journal_dir
     # This must be at top level to guarantee the file handle doesn't go out
     # of scope and get cleaned up, removing the lock with it.
@@ -68,22 +74,22 @@ if __name__ == '__main__':  # noqa: C901
 
         :returns: True if we are the single instance, else False.
         """
-        print('no_other_instance_running(): Begin...')
+        logger.trace('Begin...')
 
         if platform == 'win32':
-            print('no_other_instance_running(): win32, using msvcrt')
+            logger.trace('win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
 
-            print(f'no_other_instance_running(): journal_dir_lockfile = {journal_dir_lockfile!r}')
+            logger.trace(f'journal_dir_lockfile = {journal_dir_lockfile!r}')
 
             locked = False
             try:
                 msvcrt.locking(journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
 
             except Exception as e:
-                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\""
-                      f", assuming another process running\n{e!r}")
+                logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\""
+                            f", assuming another process running\n{e!r}")
                 locked = True
 
             if locked:
@@ -169,24 +175,25 @@ if __name__ == '__main__':  # noqa: C901
                 return False  # Another instance is running
 
         else:
-            print('no_other_instance_running(): NOT win32, using fcntl')
+            logger.trace('NOT win32, using fcntl')
             try:
                 import fcntl
 
             except ImportError:
-                print("Not on win32 and we have no fcntl, can't use a file lock!  Allowing multiple instances!")
+                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
+                               "Allowing multiple instances!")
 
             try:
                 fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except Exception as e:
-                print(f"Exception: Couldn't lock journal directory \"{journal_dir}\","
-                      f"assuming another process running\n{e!r}")
+                logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\","
+                            f"assuming another process running\n{e!r}")
                 return False
 
         journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
 
-        print('no_other_instance_running(): Done')
+        logger.trace('Done')
         return True
 
     def already_running_popup():
@@ -215,10 +222,7 @@ if __name__ == '__main__':  # noqa: C901
     if not no_other_instance_running():
         # There's a copy already running.
 
-        # Logging isn't set up yet. # TODO: Actually it will be by now in `develop`
-        # We'll keep this print, but it will be over-written by any subsequent
-        # write by the already-running process.
-        print("An EDMarketConnector.exe process was already running, exiting.")
+        logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
         already_running_popup()
@@ -1246,12 +1250,6 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 
 # Run the app
 if __name__ == "__main__":  # noqa C901
-    if args.trace:
-        logger.setLevel(logging.TRACE)
-        edmclogger.set_channels_loglevel(logging.TRACE)
-    else:
-        edmclogger.set_channels_loglevel(logging.DEBUG)
-
     logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
