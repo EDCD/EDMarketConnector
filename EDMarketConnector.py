@@ -187,6 +187,7 @@ if __name__ == '__main__':  # noqa: C901
                 return False
 
         journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
+        journal_dir_lockfile.flush()
 
         logger.trace('Done')
         return True
