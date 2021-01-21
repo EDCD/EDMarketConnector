@@ -3,6 +3,7 @@
 
 import sys
 import threading
+from typing import Optional
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -54,16 +55,16 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
     keyDirectObject = struct.unpack('>l', b'----')[0]
 
     class ProtocolHandler(GenericProtocolHandler):
-
         POLL = 100  # ms
 
         def start(self, master):
             GenericProtocolHandler.start(self, master)
-            self.lasturl = None
+            self.lasturl: Optional[str] = None
             self.eventhandler = EventHandler.alloc().init()
 
         def poll(self):
-            # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash, so poll.
+            # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash,
+            # so poll. TODO: Resolved?
             if self.lasturl and self.lasturl.startswith(self.redirect):
                 self.event(self.lasturl)
                 self.lasturl = None
@@ -130,6 +131,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
     PostMessage.argtypes = [HWND, UINT, WPARAM, LPARAM]
 
     WM_QUIT = 0x0012
+    # https://docs.microsoft.com/en-us/windows/win32/dataxchg/wm-dde-initiate
     WM_DDE_INITIATE = 0x03E0
     WM_DDE_TERMINATE = 0x03E1
     WM_DDE_ACK = 0x03E4
@@ -152,24 +154,45 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
     GlobalUnlock.restype = BOOL
 
     @WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
-    def WndProc(hwnd, message, wParam, lParam):
+    def WndProc(hwnd: HWND, message: UINT, wParam, lParam):  # noqa: N803 N802
+        """
+        Deal with DDE requests.
+
+        :param hwnd: Window handle
+        :param message: The message being sent
+        :param wParam: Additional Message Information (depends on message type)
+        :param lParam: Also additional message information
+        :return: ???
+        """
+        if message != WM_DDE_INITIATE:
+            # Not a DDE init message, bail and tell windows to do the default
+            return DefWindowProc(hwnd, message, wParam, lParam)
+
         service = create_unicode_buffer(256)
         topic = create_unicode_buffer(256)
-        if message == WM_DDE_INITIATE:
-            # I have no idea what these do or how they work.
-            flag1 = (lParam & 0xffff == 0 or (
-                GlobalGetAtomName(lParam & 0xffff, service, 256) and service.value == appname)
-            )
-            flag2 = (
-                lParam >> 16 == 0 or (GlobalGetAtomName(lParam >> 16, topic, 256) and topic.value.lower() == 'system')
-            )
+        # Note that lParam is 32 bits, and broken into two 16 bit words. This will break on 64bit as the math is
+        # wrong
+        lparam_low = lParam & 0xFFFF  # if nonzero, the target application for which a conversation is requested
+        lparam_high = lParam >> 16  # if nonzero, the topic of said conversation
 
-            if flag1 and flag2:
-                SendMessage(
-                    wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System'))
-                )
-                return 0
-        return DefWindowProc(hwnd, message, wParam, lParam)
+        # if either of the words are nonzero, they contain
+        # atoms https://docs.microsoft.com/en-us/windows/win32/dataxchg/about-atom-tables
+        # which we can read out as shown below, and then compare.
+
+        target_is_valid = lparam_low == 0 or (
+            GlobalGetAtomName(lparam_low, service, 256) and service.value == appname
+        )
+
+        topic_is_valid = lparam_high == 0 or (
+            GlobalGetAtomName(lparam_high, topic, 256) and topic.value.lower() == 'system'
+        )
+
+        if target_is_valid and topic_is_valid:
+            # if everything is happy, send an acknowledgement of the DDE request
+            SendMessage(
+                wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System'))
+            )
+            return 0
 
     class ProtocolHandler(GenericProtocolHandler):
 
@@ -215,6 +238,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
                     wndclass.hInstance,
                     None
                 )
+
                 msg = MSG()
                 while GetMessage(byref(msg), None, 0, 0) != 0:
                     logger.trace(f'DDE message of type: {msg.message}')
@@ -228,15 +252,20 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
                             if url.startswith(self.redirect):
                                 logger.debug(f'Message starts with {self.redirect}')
                                 self.event(url)
+
                             SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
+
                         else:
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
+
                     elif msg.message == WM_DDE_TERMINATE:
                         PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+
                     else:
                         TranslateMessage(byref(msg))
                         DispatchMessage(byref(msg))
+
             else:
                 print('Failed to register DDE for cAPI')
 
