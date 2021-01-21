@@ -54,7 +54,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
     kInternetEventClass = kAEGetURL = struct.unpack('>l', b'GURL')[0]
     keyDirectObject = struct.unpack('>l', b'----')[0]
 
-    class ProtocolHandler(GenericProtocolHandler):
+    class DarwinProtocolHandler(GenericProtocolHandler):
         POLL = 100  # ms
 
         def start(self, master):
@@ -194,7 +194,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             )
             return 0
 
-    class ProtocolHandler(GenericProtocolHandler):
+    class WindowsProtocolHandler(GenericProtocolHandler):
 
         def __init__(self):
             GenericProtocolHandler.__init__(self)
@@ -273,7 +273,7 @@ else:  # Linux / Run from source
 
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
-    class ProtocolHandler(GenericProtocolHandler):
+    class LinuxProtocolHandler(GenericProtocolHandler):
 
         def __init__(self):
             GenericProtocolHandler.__init__(self)
@@ -342,4 +342,12 @@ else:  # Linux / Run from source
 
 
 # singleton
-protocolhandler = ProtocolHandler()
+protocolhandler: GenericProtocolHandler
+
+if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
+    protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
+
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
+    protocolhandler = WindowsProtocolHandler()
+else:
+    protocolhandler = LinuxProtocolHandler()
