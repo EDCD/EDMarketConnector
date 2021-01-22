@@ -242,6 +242,8 @@ if __name__ == '__main__':  # noqa: C901
 
     if getattr(sys, 'frozen', False):
         # Now that we're sure we're the only instance running we can truncate the logfile
+        logger.trace('Truncating plain logfile')
+        sys.stdout.seek(0)
         sys.stdout.truncate()
 
 
