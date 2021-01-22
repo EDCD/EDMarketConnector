@@ -177,6 +177,7 @@ if __name__ == '__main__':  # noqa: C901
             except ImportError:
                 logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
                                "Allowing multiple instances!")
+                return True  # Lie about there being no other instances
 
             try:
                 fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
