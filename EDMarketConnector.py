@@ -225,6 +225,8 @@ if __name__ == '__main__':  # noqa: C901
         root.mainloop()
 
     journal_dir: str = config.get('journaldir') or config.default_journal_dir
+    # TODO: This needs to be stored in config.py so that we can change it
+    #       if the user changes the location.
     # This must be at top level to guarantee the file handle doesn't go out
     # of scope and get cleaned up, removing the lock with it.
     journal_dir_lockfile_name = join(journal_dir, 'edmc-journal-lock.txt')
