@@ -68,6 +68,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('--force-localserver-for-auth',
+                        help='Force EDMC to use a localhost webserver for Frontier Auth callback',
+                        action='store_true'
+                        )
+
     args = parser.parse_args()
 
     if args.trace:
@@ -75,6 +80,9 @@ if __name__ == '__main__':  # noqa: C901
         edmclogger.set_channels_loglevel(logging.TRACE)
     else:
         edmclogger.set_channels_loglevel(logging.DEBUG)
+
+    if args.force_localserver_for_auth:
+        config.set_auth_force_localserver()
 
     def no_other_instance_running() -> bool:  # noqa: CCR001
         """
