@@ -117,6 +117,7 @@ class AbstractConfig(abc.ABC):
     identifier: str
 
     __in_shutdown = False  # Is the application currently shutting down ?
+    __auth_force_localserver = False  # Should we use localhost for auth callback ?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -127,6 +128,13 @@ class AbstractConfig(abc.ABC):
     @property
     def shutting_down(self) -> bool:
         return self.__in_shutdown
+
+    def set_auth_force_localserver(self):
+        self.__auth_force_localserver = True
+
+    @property
+    def auth_force_localserver(self) -> bool:
+        return self.__auth_force_localserver
 
     @property
     def app_dir(self) -> str:
