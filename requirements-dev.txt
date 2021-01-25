@@ -11,7 +11,7 @@ flake8-noqa==1.0.5
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.1
 
-mypy==0.790
+mypy==0.800
 pep8-naming==0.11.1
 safety==1.10.3
 
