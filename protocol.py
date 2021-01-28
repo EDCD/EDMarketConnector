@@ -6,11 +6,14 @@ import threading
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from EDMCLogging import get_main_logger
 from config import appname, config
 from constants import protocolhandler_redirect
+
+if TYPE_CHECKING:
+    import tkinter
 
 logger = get_main_logger()
 
@@ -31,38 +34,48 @@ class GenericProtocolHandler(object):
         self.master = None
         self.lastpayload = None
 
-    def start(self, master):
+    def start(self, master: 'tkinter.Tk'):
+        """Start Protocol Handler."""
         self.master = master
 
     def close(self):
+        """Stop / Close Protocol Handler."""
         pass
 
     def event(self, url):
+        """Generate an auth event."""
         self.lastpayload = url
 
         if not config.shutting_down:
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
-if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
-
+if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # its guarding ALL macos stuff.
     import struct
 
-    import objc
-    from AppKit import NSAppleEventManager, NSObject
+    import objc  # type: ignore
+    from AppKit import NSAppleEventManager, NSObject  # type: ignore
 
-    kInternetEventClass = kAEGetURL = struct.unpack('>l', b'GURL')[0]
-    keyDirectObject = struct.unpack('>l', b'----')[0]
+    kInternetEventClass = kAEGetURL = struct.unpack('>l', b'GURL')[0]  # noqa: N816 # API names
+    keyDirectObject = struct.unpack('>l', b'----')[0]  # noqa: N816 # API names
 
     class DarwinProtocolHandler(GenericProtocolHandler):
+        """
+        MacOS protocol handler implementation.
+
+        Uses macOS event stuff.
+        """
+
         POLL = 100  # ms
 
         def start(self, master):
+            """Start Protocol Handler."""
             GenericProtocolHandler.start(self, master)
             self.lasturl: Optional[str] = None
             self.eventhandler = EventHandler.alloc().init()
 
         def poll(self):
+            """Poll event until URL is updated."""
             # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash,
             # so poll. TODO: Resolved?
             if self.lasturl and self.lasturl.startswith(self.redirect):
@@ -70,8 +83,14 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
                 self.lasturl = None
 
     class EventHandler(NSObject):
+        """Handle NSAppleEventManager IPC stuff."""
 
         def init(self):
+            """
+            Init method for handler.
+
+            (I'd assume this is related to the subclassing of NSObject for why its not __init__)
+            """
             self = objc.super(EventHandler, self).init()
             NSAppleEventManager.sharedAppleEventManager().setEventHandler_andSelector_forEventClass_andEventID_(
                 self,
@@ -81,7 +100,8 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
             )
             return self
 
-        def handleEvent_withReplyEvent_(self, event, replyEvent):  # noqa: N802 # Required to override
+        def handleEvent_withReplyEvent_(self, event, replyEvent):  # noqa: N802 N803 # Required to override
+            """Actual event handling from NSAppleEventManager."""
             protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
@@ -98,7 +118,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         UINT, WPARAM
     )
 
-    class WNDCLASS(Structure):
+    class WNDCLASS(Structure):  # noqa: D101 # I dont want to chance messing with a Structure with a docstring
         _fields_ = [
             ('style', UINT),
             ('lpfnWndProc', WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)),
@@ -220,7 +240,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             self.thread.start()
 
         def close(self):
-            """Stop the DDE thread"""
+            """Stop the DDE thread."""
             thread = self.thread
             if thread:
                 self.thread = None
