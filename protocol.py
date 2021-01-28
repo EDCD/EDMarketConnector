@@ -203,12 +203,12 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         """
 
         def __init__(self):
-            GenericProtocolHandler.__init__(self)
-            self.thread = None
+            super().__init__()
+            self.thread: Optional[threading.Thread] = None
 
         def start(self, master):
             """Start the DDE thread."""
-            GenericProtocolHandler.start(self, master)
+            super().start(master)
             self.thread = threading.Thread(target=self.worker, name='DDE worker')
             self.thread.daemon = True
             self.thread.start()
