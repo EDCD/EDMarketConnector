@@ -292,7 +292,7 @@ else:  # Linux / Run from source
         def __init__(self):
             GenericProtocolHandler.__init__(self)
             self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
-            self.redirect = 'http://localhost:%d/auth' % self.httpd.server_port
+            self.redirect = f'http://localhost:{self.httpd.server_port}/auth'
             logger.trace(f'Web server listening on {self.redirect}')
             self.thread = None
 
