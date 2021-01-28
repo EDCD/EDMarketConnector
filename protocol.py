@@ -352,9 +352,8 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write(
-                    '<html><head><title>{}</title></head>'.format('Authentication successful').encode('utf-8'))
-                self.wfile.write('<body><p>{}</p></body>'.format('Authentication successful').encode('utf-8'))
+                self.wfile.write('<html><head><title>Authentication successful</title></head>'.encode('utf-8'))
+                self.wfile.write('<body><p>Authentication successful</p></body>'.encode('utf-8'))
             else:
                 self.end_headers()
 
