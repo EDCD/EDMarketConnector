@@ -114,23 +114,23 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
 
     CW_USEDEFAULT = 0x80000000
 
-    CreateWindowEx = windll.user32.CreateWindowExW
-    CreateWindowEx.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
-    CreateWindowEx.restype = HWND
-    RegisterClass = windll.user32.RegisterClassW
-    RegisterClass.argtypes = [POINTER(WNDCLASS)]
-    DefWindowProc = windll.user32.DefWindowProcW
+    CreateWindowExW = windll.user32.CreateWindowExW
+    CreateWindowExW.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
+    CreateWindowExW.restype = HWND
+    RegisterClassW = windll.user32.RegisterClassW
+    RegisterClassW.argtypes = [POINTER(WNDCLASS)]
+    DefWindowProcW = windll.user32.DefWindowProcW
     GetParent = windll.user32.GetParent
     SetForegroundWindow = windll.user32.SetForegroundWindow
 
-    GetMessage = windll.user32.GetMessageW
+    GetMessageW = windll.user32.GetMessageW
     TranslateMessage = windll.user32.TranslateMessage
-    DispatchMessage = windll.user32.DispatchMessageW
-    PostThreadMessage = windll.user32.PostThreadMessageW
-    SendMessage = windll.user32.SendMessageW
-    SendMessage.argtypes = [HWND, UINT, WPARAM, LPARAM]
-    PostMessage = windll.user32.PostMessageW
-    PostMessage.argtypes = [HWND, UINT, WPARAM, LPARAM]
+    DispatchMessageW = windll.user32.DispatchMessageW
+    PostThreadMessageW = windll.user32.PostThreadMessageW
+    SendMessageW = windll.user32.SendMessageW
+    SendMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
+    PostMessageW = windll.user32.PostMessageW
+    PostMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
 
     WM_QUIT = 0x0012
     # https://docs.microsoft.com/en-us/windows/win32/dataxchg/wm-dde-initiate
@@ -142,12 +142,12 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
     PackDDElParam = windll.user32.PackDDElParam
     PackDDElParam.argtypes = [UINT, LPARAM, LPARAM]
 
-    GlobalAddAtom = windll.kernel32.GlobalAddAtomW
-    GlobalAddAtom.argtypes = [LPWSTR]
-    GlobalAddAtom.restype = ATOM
-    GlobalGetAtomName = windll.kernel32.GlobalGetAtomNameW
-    GlobalGetAtomName.argtypes = [ATOM, LPWSTR, INT]
-    GlobalGetAtomName.restype = UINT
+    GlobalAddAtomW = windll.kernel32.GlobalAddAtomW
+    GlobalAddAtomW.argtypes = [LPWSTR]
+    GlobalAddAtomW.restype = ATOM
+    GlobalGetAtomNameW = windll.kernel32.GlobalGetAtomNameW
+    GlobalGetAtomNameW.argtypes = [ATOM, LPWSTR, INT]
+    GlobalGetAtomNameW.restype = UINT
     GlobalLock = windll.kernel32.GlobalLock
     GlobalLock.argtypes = [HGLOBAL]
     GlobalLock.restype = LPVOID
@@ -171,7 +171,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         if message != WM_DDE_INITIATE:
             # Not a DDE init message, bail and tell windows to do the default
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowproca?redirectedfrom=MSDN
-            return DefWindowProc(hwnd, message, wParam, lParam)
+            return DefWindowProcW(hwnd, message, wParam, lParam)
 
         service = create_unicode_buffer(256)
         topic = create_unicode_buffer(256)
@@ -185,17 +185,17 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         # which we can read out as shown below, and then compare.
 
         target_is_valid = lparam_low == 0 or (
-            GlobalGetAtomName(lparam_low, service, 256) and service.value == appname
+            GlobalGetAtomNameW(lparam_low, service, 256) and service.value == appname
         )
 
         topic_is_valid = lparam_high == 0 or (
-            GlobalGetAtomName(lparam_high, topic, 256) and topic.value.lower() == 'system'
+            GlobalGetAtomNameW(lparam_high, topic, 256) and topic.value.lower() == 'system'
         )
 
         if target_is_valid and topic_is_valid:
             # if everything is happy, send an acknowledgement of the DDE request
-            SendMessage(
-                wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System'))
+            SendMessageW(
+                wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtomW(appname), GlobalAddAtomW('System'))
             )
 
             return 0
@@ -224,7 +224,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             thread = self.thread
             if thread:
                 self.thread = None
-                PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
+                PostThreadMessageW(thread.ident, WM_QUIT, 0, 0)
                 thread.join()  # Wait for it to quit
 
         def worker(self):
@@ -241,12 +241,12 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             wndclass.lpszMenuName = None
             wndclass.lpszClassName = 'DDEServer'
 
-            if not RegisterClass(byref(wndclass)):
+            if not RegisterClassW(byref(wndclass)):
                 print('Failed to register Dynamic Data Exchange for cAPI')
                 return
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
-            hwnd = CreateWindowEx(
+            hwnd = CreateWindowExW(
                 0,                       # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
                 "DDE Server",            # lpWindowName
@@ -260,7 +260,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
 
             msg = MSG()
             # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
-            while GetMessage(byref(msg), None, 0, 0) != 0:
+            while GetMessageW(byref(msg), None, 0, 0) != 0:
                 if msg.message == WM_DDE_EXECUTE:
                     # GlobalLock does some sort of "please dont move this?"
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
@@ -274,18 +274,18 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
 
                         SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
+                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
 
                     else:
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
+                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
 
                 elif msg.message == WM_DDE_TERMINATE:
-                    PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+                    PostMessageW(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
 
                 else:
                     TranslateMessage(byref(msg))  # "Translates virtual key messages into character messages" ???
-                    DispatchMessage(byref(msg))
+                    DispatchMessageW(byref(msg))
 
 
 else:  # Linux / Run from source
