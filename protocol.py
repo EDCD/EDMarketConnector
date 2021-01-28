@@ -27,7 +27,8 @@ if sys.platform == 'win32':
         pass
 
 
-class GenericProtocolHandler(object):
+class GenericProtocolHandler:
+    """Base Protocol Handler."""
 
     def __init__(self):
         self.redirect = protocolhandler_redirect  # Base redirection URL
