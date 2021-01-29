@@ -76,7 +76,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
             protocolhandler.master.after(ProtocolHandler.POLL, protocolhandler.poll)
 
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
 
     class WNDCLASS(Structure):
         _fields_ = [('style', UINT),
@@ -219,6 +219,7 @@ else:	# Linux / Run from source
             GenericProtocolHandler.__init__(self)
             self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
             self.redirect = 'http://localhost:%d/auth' % self.httpd.server_port
+            logger.trace(f'Web server listening on {self.redirect}')
             self.thread = None
 
         def start(self, master):
