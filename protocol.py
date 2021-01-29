@@ -8,9 +8,9 @@ import urllib.parse
 import urllib.request
 from typing import TYPE_CHECKING, Optional
 
+from config import config
+from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
-from config import appname, config
-from constants import protocolhandler_redirect
 
 if TYPE_CHECKING:
     import tkinter
