@@ -16,7 +16,7 @@ pep8-naming==0.11.1
 safety==1.10.3
 
 # Code formatting tools
-autopep8==1.5.4
+autopep8==1.5.5
 
 # HTML changelogs
 grip==4.5.2
