@@ -6,7 +6,7 @@ multi_line_output = 5
 line_length = 119
 
 [tool.pytest.ini_options]
-testpaths = ["tests"] # Search for tests in tests/
+testpaths = ["tests", "plugin/tests"] # Search for tests in tests/
 
 [tool.coverage.run]
 omit = ["venv/*"]  # when running pytest --cov, dont report coverage in venv directories
