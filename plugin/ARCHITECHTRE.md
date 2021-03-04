@@ -13,6 +13,10 @@ Plugins are defined as any class that is a subclass of `plugin.Plugin` and is de
 or a set of functions decorated as callbacks. While the second method of defining a plugin will work, it is discoraged.
 TODO: second method does not work
 
+During loading, the only file that is explicitly loaded is `plugin.py` in the directory of the plugin. Anything
+that file imports will _also_ be loaded however (as normal with python modules). This means that plugins can be
+defined outside of `plugin.py`, but `plugin.py` must exist for loading to occur correctly.
+
 ### Decorators
 
 There are two decorators that currently defined by plugin:
