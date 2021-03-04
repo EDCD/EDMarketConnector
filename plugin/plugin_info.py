@@ -14,3 +14,6 @@ class PluginInfo:
     version: semantic_version.Version
     authors: Optional[List[str]] = None
     comment: Optional[str] = None
+
+    # TODO: implement update checking and optional downloading
+    update_url: Optional[str] = None

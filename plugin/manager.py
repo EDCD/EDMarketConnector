@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type
 if TYPE_CHECKING:
     from types import ModuleType
 
-from EDMCLogging import get_main_logger
+from EDMCLogging import get_main_logger, get_plugin_logger
 from plugin import decorators
 from plugin.plugin import Plugin
 from plugin.plugin_info import PluginInfo
@@ -56,8 +56,12 @@ class PluginManager:
 
         str_plugin_reference = f"{class_name} -> {cls!r} from path {path}"
         self.log.trace(f"Loading plugin class {str_plugin_reference}")
+
+        plugin_logger = get_plugin_logger(path.parts[-1])
+
         try:
-            instantiated = cls()
+            instantiated = cls(plugin_logger)
+
         except Exception:
             self.log.exception(f"Could not instantiate plugin class for plugin {str_plugin_reference}")
             return None
