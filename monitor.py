@@ -22,6 +22,10 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
+if TYPE_CHECKING:
+    def _(x: str) -> str:
+        return x
+
 if platform == 'darwin':
     from AppKit import NSWorkspace
     from watchdog.observers import Observer
@@ -1181,7 +1185,7 @@ class JournalLock:
 
             self.parent = parent
             self.callback = callback
-            self.title('Journal directory already locked')
+            self.title(_('Journal directory already locked'))
 
             # remove decoration
             if platform == 'win32':
@@ -1197,14 +1201,14 @@ class JournalLock:
             frame.grid(sticky=tk.NSEW)
 
             self.blurb = tk.Label(frame)
-            self.blurb['text'] = '''The new Journal Directory location is already locked.
-You can either attempt to resolve this and then Retry, or choose to Ignore this.'''
+            self.blurb['text'] = _("The new Journal Directory location is already locked.{CR}"
+                                   "You can either attempt to resolve this and then Retry, or choose to Ignore this.")
             self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
 
-            self.retry_button = ttk.Button(frame, text='Retry', command=self.retry)
+            self.retry_button = ttk.Button(frame, text=_('Retry'), command=self.retry)
             self.retry_button.grid(row=2, column=0, sticky=tk.EW)
 
-            self.ignore_button = ttk.Button(frame, text='Ignore', command=self.ignore)
+            self.ignore_button = ttk.Button(frame, text=_('Ignore'), command=self.ignore)
             self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
@@ -1239,6 +1243,9 @@ You can either attempt to resolve this and then Retry, or choose to Ignore this.
 
     def retry_lock(self, retry: bool, parent: tk.Tk):
         logger.trace(f'We should retry: {retry}')
+
+        if not retry:
+            return
 
         current_journaldir = config.get('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
