@@ -551,7 +551,7 @@ class AppWindow(object):
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
         # Update Journal lock if needs be.
-        journal_lock.update_lock()
+        journal_lock.update_lock(self.w)
 
         # (Re-)install log monitoring
         if not monitor.start(self.w):
