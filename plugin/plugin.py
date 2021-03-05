@@ -35,8 +35,8 @@ class Plugin(abc.ABC):
 class MigratedPlugin(Plugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, logger: LoggerMixin) -> None:
+        super().__init__(logger)
 
     def load(self, plugin_path: pathlib.Path) -> PluginInfo:
         return super().load(plugin_path)
