@@ -79,8 +79,6 @@ if __name__ == '__main__':  # noqa: C901
         """
         logger.trace('Begin...')
 
-        locked = journal_lock.journaldir_obtain_lock()
-
         if platform == 'win32':
 
             if not locked:
@@ -191,6 +189,7 @@ if __name__ == '__main__':  # noqa: C901
         root.mainloop()
 
     journal_lock = JournalLock()
+    locked = journal_lock.obtain_lock()
 
     if journal_lock.journal_dir_lockfile:
         if not no_other_instance_running():
@@ -550,6 +549,9 @@ class AppWindow(object):
 
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+
+        # Update Journal lock if needs be.
+        journal_lock.update_lock()
 
         # (Re-)install log monitoring
         if not monitor.start(self.w):
