@@ -532,6 +532,10 @@ class Session(object):
     def station(self) -> CAPIData:
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
+        if 'commander' not in data:
+            logger.error('No commander in returned data')
+            return data
+
         if not data['commander'].get('docked'):
             return data
 

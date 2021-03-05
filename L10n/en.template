@@ -46,6 +46,9 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Browse...";
 
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: No commander data returned";
+
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
 
