@@ -94,8 +94,9 @@ if __name__ == '__main__':  # noqa: C901
 
         if platform == 'win32':
 
+            # If *this* instance hasn't locked, then another already has and we
+            # now need to do the edmc:// checks for auth callback
             if not locked:
-                # Need to do the check for this being an edmc:// auth callback
                 import ctypes
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
