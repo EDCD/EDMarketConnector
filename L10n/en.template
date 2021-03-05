@@ -226,8 +226,14 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Ignore";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara credentials";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = Journal directory already locked";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
@@ -409,6 +415,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Release Notes";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Retry";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Role";
 
@@ -477,6 +486,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "System";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this WIBBLE.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Theme";
