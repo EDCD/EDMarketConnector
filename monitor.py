@@ -1118,7 +1118,7 @@ class JournalLock:
                 fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except Exception as e:
-                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\","
+                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\", "
                             f"assuming another process running: {e!r}")
                 return False
 
