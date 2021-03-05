@@ -38,6 +38,19 @@ Once a plugin class is found, it is instantiated and the below takes place.
 If the load fails, an exception indicating the failure (likely subclass of PluginLoadingException) will be raised by the
 loading machinery, this exception will be caught and logged at the top level of loading.
 
+### Old style plugins
+
+!!UNIMPLEMENTED -- Planning
+
+During the above loading steps to find the packages for new-style plugins, old style plugins are assumed to be
+any python files in the root plugin directory, or any directory under the root that has no `__init__.py`. These will
+be wrapped in a compatibility class and should continue to work as normal:
+
+1. Load file as a module
+2. Map any existing functions in the file to their new counterparts, start3 -> load, journal hooks -> event handlers
+3. These will explicitly NOT support reloading. And any attempt to reload them will result in a very large and scary
+   exception being thrown.
+
 ### Post instantiation of class
 
 After a plugin class is instantiated, two things happen:
@@ -47,8 +60,10 @@ After a plugin class is instantiated, two things happen:
 
 Event callbacks are scanned for and stored as described in the decorator section.
 
-The choice to load callbacks _before_ on_load is called is intentional -- To prevent on_load from modifying callbacks.
+The choice to load callbacks _before_ on_load is called is intentional -- To prevent `on_load` from modifying callbacks.
 If a user wants dynamically generated callbacks, they must do so in `__init__`. This is a design choice that may be
 changed, but was made to allow for assumptions that may or may not be made in implementation.
 
 ## Event Engine
+
+!! TODO
