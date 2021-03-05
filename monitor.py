@@ -1042,9 +1042,9 @@ class JournalLock:
 
         :return: bool - True if we successfully obtained the lock
         """
-        logger.trace(f'journal_dir_lockfile = {self.journal_dir_lockfile!r}')
 
-        self.journal_dir_lockfile_name: str = self.journal_dir_path / 'edmc-journal-lock.txt'
+        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
+        logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
             self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
@@ -1103,6 +1103,9 @@ class JournalLock:
             import msvcrt
 
             try:
+                # Need to seek to the start first, as lock range is relative to
+                # current position
+                self.journal_dir_lockfile.seek(0)
                 msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096)
 
             except Exception as e:
@@ -1149,5 +1152,8 @@ class JournalLock:
         if current_journaldir == self.journal_dir:
             return True  # Still the same
 
-        self.journaldir_release_lock()
-        return self.journaldir_obtain_lock()
+        self.release_lock()
+
+        self.journal_dir = current_journaldir
+        self.journal_dir_path = pathlib.Path(self.journal_dir)
+        return self.obtain_lock()
