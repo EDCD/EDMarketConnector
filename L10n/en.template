@@ -233,7 +233,7 @@
 "Inara credentials" = "Inara credentials";
 
 /* Changed journal update_lock failed [monitor.py] */
-"Journal directory already locked" = Journal directory already locked";
+"Journal directory already locked" = "Journal directory already locked";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Keyboard shortcut";
