@@ -1,11 +1,11 @@
 """Main plugin engine."""
 from __future__ import annotations
 
-import sys
+import dataclasses
 import importlib
 import pathlib
-import dataclasses
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type
+import sys
+from typing import TYPE_CHECKING, Callable, Dict, List, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -24,6 +24,22 @@ class LoadedPlugin:
     plugin: Plugin
     module: ModuleType
     callbacks: Dict[str, List[Callable]]
+
+
+class PluginLoadingException(Exception):
+    """Plugin load failed."""
+
+
+class PluginAlreadyLoadedException(PluginLoadingException):
+    """Plugin is already loaded."""
+
+
+class PluginHasNoPluginClassException(PluginLoadingException):
+    """Plugin has no decorated plugin class."""
+
+
+class PluginDoesNotExistException(PluginLoadingException):
+    """Requested module does not exist, or requested plugin name does not exist."""
 
 
 class PluginManager:
@@ -52,7 +68,7 @@ class PluginManager:
 
     def __load_plugin_from_class(
         self, path: pathlib.Path, module: ModuleType, class_name: str, cls: Type[Plugin]
-    ) -> Optional[LoadedPlugin]:
+    ) -> LoadedPlugin:
 
         str_plugin_reference = f"{class_name} -> {cls!r} from path {path}"
         self.log.trace(f"Loading plugin class {str_plugin_reference}")
@@ -64,7 +80,7 @@ class PluginManager:
 
         except Exception:
             self.log.exception(f"Could not instantiate plugin class for plugin {str_plugin_reference}")
-            return None
+            raise
 
         callbacks: Dict[str, List[Callable]] = {}
 
@@ -84,7 +100,7 @@ class PluginManager:
             info = instantiated.load(path)
         except Exception:
             self.log.exception(f"Could not call load on plugin {str_plugin_reference}")
-            return None
+            raise
 
         return LoadedPlugin(info, instantiated, module, callbacks)
 
@@ -101,9 +117,9 @@ class PluginManager:
             relative_to = pathlib.Path.cwd()
 
         relative = path.relative_to(relative_to)
-        return ".".join(relative.parts) + ".plugin"
+        return ".".join(relative.parts)
 
-    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> bool:
+    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True):
         """
         Load a plugin at the given path.
 
@@ -126,9 +142,13 @@ class PluginManager:
             self.log.trace(f"Resolved plugin path to import path {resolved}")
             module = importlib.import_module(resolved)
 
-        except Exception:
-            self.log.exception(f"Unable to load module {path}")
-            return False
+        except ImportError as e:
+            self.log.warning("Attempted to load nonexistent module path {path}")
+            raise PluginDoesNotExistException from e
+
+        except Exception as e:
+            self.log.error(f"Unable to load module {path}")
+            raise PluginLoadingException(f"Exception occurred while loading: {e}") from e
 
         loaded = None
 
@@ -136,24 +156,23 @@ class PluginManager:
         for class_name, cls in module.__dict__.items():
             if not hasattr(cls, decorators.PLUGIN_MARKER):
                 continue
-
-            loaded = self.__load_plugin_from_class(path, module, class_name, cls)
-            if loaded is None:
+            try:
+                loaded = self.__load_plugin_from_class(path, module, class_name, cls)
+            except Exception as e:
                 self.log.info(f"Failed to load plugin {class_name} -> {cls!r}")
-                return False
+                raise PluginLoadingException(f"Cannot load plugin {cls!r}: {e}") from e
 
             if self.is_plugin_loaded(loaded.info.name):
                 self.log.error("Plugins with the same names attempted to load")
-                return False
+                raise PluginAlreadyLoadedException(f"Plugin with name {loaded.info.name} cannot be loaded twice")
 
             break
 
-        if loaded is not None:
-            self.plugins.append(loaded)
-            return True
+        if loaded is None:
+            self.log.error(f"No plugin class found in {path}")
+            raise PluginHasNoPluginClassException(f"No plugin class found in {path}")
 
-        self.log.error(f"No plugin class found in {path}")
-        return False
+        self.plugins.append(loaded)
 
     def is_plugin_loaded(self, name: str) -> bool:
         """
