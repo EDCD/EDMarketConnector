@@ -21,14 +21,16 @@ def _idfn(test_data) -> str:
 
 
 current_path = pathlib.Path.cwd() / "plugin/test/test_plugins"
+good_path = current_path / "good"
+bad_path = current_path / "bad"
 
 TESTS = [
-    (current_path / "good", nullcontext()),
-    (current_path / "bad/no_plugin", pytest.raises(PluginHasNoPluginClassException)),
-    (current_path / "bad/error", pytest.raises(PluginLoadingException, match="This doesn't load")),
-    (current_path / "bad/class_init_error", pytest.raises(PluginLoadingException, match="Exception in init")),
-    (current_path / "bad/class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
-    (current_path / "bad/no_exist", pytest.raises(PluginDoesNotExistException)),
+    (good_path / "simple", nullcontext()),
+    (bad_path / "no_plugin", pytest.raises(PluginHasNoPluginClassException)),
+    (bad_path / "error", pytest.raises(PluginLoadingException, match="This doesn't load")),
+    (bad_path / "class_init_error", pytest.raises(PluginLoadingException, match="Exception in init")),
+    (bad_path / "class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
+    (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
 ]
 
 
@@ -38,7 +40,7 @@ def plugin_manager():
     yield PluginManager()
 
 
-@pytest.mark.parametrize('path,context',    TESTS,    ids=_idfn)
+@pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
 def test_load(plugin_manager: PluginManager, context: ContextManager, path: pathlib.Path) -> None:
     """
     Test that plugins load as expected.
