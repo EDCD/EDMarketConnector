@@ -84,11 +84,9 @@ if __name__ == '__main__':  # noqa: C901
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
 
-    def no_other_instance_running() -> bool:  # noqa: CCR001
+    def handle_edmc_callback_or_foregrounding():  # noqa: CCR001
         """
-        Ensure only one copy of the app is running for the configured journal directory.
-
-        :returns: True if we are the single instance, else False.
+        Handle any edmc:// auth callback, else foreground existing window.
         """
         logger.trace('Begin...')
 
@@ -175,9 +173,7 @@ if __name__ == '__main__':  # noqa: C901
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 EnumWindows(enumwindowsproc, 0)
 
-                return False  # Another instance is running
-
-        return True
+        return
 
     def already_running_popup():
         """Create the "already running" popup."""
@@ -205,17 +201,18 @@ if __name__ == '__main__':  # noqa: C901
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
 
-    if journal_lock.journal_dir_lockfile:
-        if not no_other_instance_running():
-            # There's a copy already running.
+    handle_edmc_callback_or_foregrounding()
 
-            logger.info("An EDMarketConnector.exe process was already running, exiting.")
+    if not locked:
+        # There's a copy already running.
 
-            # To be sure the user knows, we need a popup
-            already_running_popup()
-            # If the user closes the popup with the 'X', not the 'OK' button we'll
-            # reach here.
-            sys.exit(0)
+        logger.info("An EDMarketConnector.exe process was already running, exiting.")
+
+        # To be sure the user knows, we need a popup
+        already_running_popup()
+        # If the user closes the popup with the 'X', not the 'OK' button we'll
+        # reach here.
+        sys.exit(0)
 
     if getattr(sys, 'frozen', False):
         # Now that we're sure we're the only instance running we can truncate the logfile
