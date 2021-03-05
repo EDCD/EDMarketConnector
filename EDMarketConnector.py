@@ -11,7 +11,6 @@ import sys
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
-from os import getpid as os_getpid
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
@@ -40,6 +39,7 @@ from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
 from EDMCLogging import edmclogger, logger, logging
+from monitor import JournalLock
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -92,23 +92,11 @@ if __name__ == '__main__':  # noqa: C901
         """
         logger.trace('Begin...')
 
+        locked = journal_lock.journaldir_obtain_lock()
+
         if platform == 'win32':
-            logger.trace('win32, using msvcrt')
-            # win32 doesn't have fcntl, so we have to use msvcrt
-            import msvcrt
 
-            logger.trace(f'journal_dir_lockfile = {journal_dir_lockfile!r}')
-
-            locked = False
-            try:
-                msvcrt.locking(journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
-
-            except Exception as e:
-                logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\""
-                            f", assuming another process running: {e!r}")
-                locked = True
-
-            if locked:
+            if not locked:
                 # Need to do the check for this being an edmc:// auth callback
                 import ctypes
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
@@ -190,28 +178,6 @@ if __name__ == '__main__':  # noqa: C901
 
                 return False  # Another instance is running
 
-        else:
-            logger.trace('NOT win32, using fcntl')
-            try:
-                import fcntl
-
-            except ImportError:
-                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
-                               "Allowing multiple instances!")
-                return True  # Lie that no other instances are running.
-
-            try:
-                fcntl.flock(journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
-            except Exception as e:
-                logger.info(f"Exception: Couldn't lock journal directory \"{journal_dir}\","
-                            f"assuming another process running: {e!r}")
-                return False
-
-        journal_dir_lockfile.write(f"Path: {journal_dir}\nPID: {os_getpid()}\n")
-        journal_dir_lockfile.flush()
-
-        logger.trace('Done')
         return True
 
     def already_running_popup():
@@ -237,20 +203,9 @@ if __name__ == '__main__':  # noqa: C901
 
         root.mainloop()
 
-    journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
-    # This must be at top level to guarantee the file handle doesn't go out
-    # of scope and get cleaned up, removing the lock with it.
-    journal_dir_lockfile_name = join(journal_dir, 'edmc-journal-lock.txt')
-    try:
-        journal_dir_lockfile = open(journal_dir_lockfile_name, mode='w+', encoding='utf-8')
+    journal_lock = JournalLock()
 
-    # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
-    # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
-    except Exception as e:  # For remote FS this could be any of a wide range of exceptions
-        logger.warning(f"Couldn't open \"{journal_dir_lockfile_name}\" for \"w+\""
-                       f" Aborting duplicate process checks: {e!r}")
-
-    else:
+    if journal_lock.journal_dir_lockfile:
         if not no_other_instance_running():
             # There's a copy already running.
 
