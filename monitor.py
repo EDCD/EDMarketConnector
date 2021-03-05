@@ -1032,7 +1032,6 @@ class JournalLock:
         """Initialise where the journal directory and lock file are."""
         self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
-        self.journal_dir_lock = None
         self.journal_dir_lockfile_name = None
         self.journal_dir_lockfile = None
 
@@ -1135,7 +1134,6 @@ class JournalLock:
         # Close the file whether or not the unlocking succeeded.
         self.journal_dir_lockfile.close()
 
-        self.journal_dir_lock = None
         self.journal_dir_lockfile_name = None
         self.journal_dir_lockfile = None
 
