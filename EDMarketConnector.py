@@ -753,7 +753,11 @@ class AppWindow(object):
             config.set('querytime', querytime)
 
             # Validation
-            if not data.get('commander', {}).get('name'):
+            if 'commander' not in data:
+                # This can happen with EGS Auth if no commander created yet
+                self.status['text'] = _('CAPI: No commander data returned')
+
+            elif not data.get('commander', {}).get('name'):
                 self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
