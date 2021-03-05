@@ -13,9 +13,10 @@ Plugins are defined as any class that is a subclass of `plugin.Plugin` and is de
 or a set of functions decorated as callbacks. While the second method of defining a plugin will work, it is discoraged.
 TODO: second method does not work
 
-During loading, the only file that is explicitly loaded is `plugin.py` in the directory of the plugin. Anything
-that file imports will _also_ be loaded however (as normal with python modules). This means that plugins can be
-defined outside of `plugin.py`, but `plugin.py` must exist for loading to occur correctly.
+Plugins are loaded as standard python packages. Meaning that the _only_ file that is directly executed (as in,
+not executed via import from another file) is `__init__.py`. This file is required to make the plugin a package anyway.
+If a developer does not want to store their plugin classes in `__init__.py`, all that is required within that file is
+an import of their main plugin file.
 
 ### Decorators
 
@@ -33,6 +34,9 @@ There are two decorators that currently defined by plugin:
 On a load call (as in `plugin.manager.PluginManager#load_plugin`), the plugin's module is loaded into the running
 interpreter. Once the load is complete, the module is scanned for a decorated class that satisfies the above requirements.
 Once a plugin class is found, it is instantiated and the below takes place.
+
+If the load fails, an exception indicating the failure (likely subclass of PluginLoadingException) will be raised by the
+loading machinery, this exception will be caught and logged at the top level of loading.
 
 ### Post instantiation of class
 
