@@ -2,6 +2,7 @@ from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
+from os import getpid as os_getpid
 from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, expanduser, isdir, join
 from sys import platform
@@ -1089,3 +1090,71 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
 # singleton
 monitor = EDLogs()
+
+
+class JournalLock:
+    """Handle locking of journal directory."""
+
+    def __init__(self):
+        """Initialise where the journal directory and lock file are."""
+        self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
+        self.journal_dir_lock = None
+
+        self.journal_dir_lockfile_name: str = join(self.journal_dir, 'edmc-journal-lock.txt')
+        try:
+            self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
+
+        # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
+        # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
+        except Exception as e:  # For remote FS this could be any of a wide range of exceptions
+            logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
+                           f" Aborting duplicate process checks: {e!r}")
+
+    def journaldir_obtain_lock(self) -> bool:
+        """
+        Attempt to obtain a lock on the journal directory.
+
+        :return: bool - True if we successfully obtained the lock
+        """
+        logger.trace(f'journal_dir_lockfile = {self.journal_dir_lockfile!r}')
+
+        if platform == 'win32':
+            logger.trace('win32, using msvcrt')
+            # win32 doesn't have fcntl, so we have to use msvcrt
+            import msvcrt
+
+            try:
+                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
+
+            except Exception as e:
+                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\""
+                            f", assuming another process running: {e!r}")
+                return False
+
+        else:
+            logger.trace('NOT win32, using fcntl')
+            try:
+                import fcntl
+
+            except ImportError:
+                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
+                               "Allowing multiple instances!")
+                return True  # Lie about being locked
+
+            try:
+                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+            except Exception as e:
+                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\","
+                            f"assuming another process running: {e!r}")
+                return False
+
+        self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
+        self.journal_dir_lockfile.flush()
+
+        logger.trace('Done')
+        return True
+
+    def journaldir_release_lock(self) -> bool:
+        """Release lock on journal directory."""
+        pass
