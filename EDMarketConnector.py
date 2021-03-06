@@ -662,17 +662,25 @@ class AppWindow(object):
             config.set('querytime', querytime)
 
             # Validation
-            if not data.get('commander', {}).get('name'):
+            if 'commander' not in data:
+                # This can happen with EGS Auth if no commander created yet
+                self.status['text'] = _('CAPI: No commander data returned')
+
+            elif not data.get('commander', {}).get('name'):
                 self.status['text'] = _("Who are you?!")  # Shouldn't happen
+
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
                       and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
                 self.status['text'] = _("Where are you?!")  # Shouldn't happen
+
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
                 self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 # Companion API return doesn't match Journal
                 raise companion.CmdrError()
+
             elif ((auto_update and not data['commander'].get('docked'))
                   or (data['lastSystem']['name'] != monitor.system)
                   or ((data['commander']['docked']
