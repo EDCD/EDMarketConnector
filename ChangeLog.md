@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.2.0-beta2
+===
+
+This release actually includes the commits to enable Steam and Epic
+authentication.
+
 Pre-Release 4.2.0-beta1
 ===
 
