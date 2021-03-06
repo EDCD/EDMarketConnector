@@ -356,3 +356,18 @@ If you are making a pre-release then:
 1. **DO NOT** merge into `stable`.
 1. *Do* merge the code into `beta` after you have made a 'pre-release' on
  GitHub.
+
+# Changing Python version
+
+When changing the Python version (Major.Minor.Patch) used:
+
+1. Any version change:
+
+   1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
+   based build use the correct version.
+   
+1. Major or Minor level changes:
+
+    1. `setup.py` will need its version check updating.
+    1. `EDMarketConnector.wxs` will need updating to reference the correct
+       pythonXX.dll file.
