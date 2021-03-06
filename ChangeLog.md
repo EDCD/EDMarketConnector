@@ -1,6 +1,72 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.2.0-beta1
+===
+
+*NB: This contains further work on top of 4.1.7-rc1.  Due to the major change
+in how multiple-instance checking is done we felt the need to bump the minor
+version.*
+
+There is a major change in this release with respect to how the main
+application checks if there is already another instance running.
+
+For most users things will operate no differently, although note that the
+multiple instance check does now apply to platforms other than Windows.
+
+For anyone wanting to run multiple instances of the program this is now
+possible via:
+
+`runas /user:OTHERUSER <path to>EDMarketConnector.exe --force-localserver-for-auth`
+
+The old check was based solely on there being a window present with the title
+we expect.  This prevented using `runas /user:SOMEUSER ...` to run a second
+copy of the application, as the resulting window would still be within the
+same desktop environment and thus be found in the check.
+
+The new method does assume that the Journals directory is writable by the
+user we're running as.  This might not be true in the case of sharing the
+file system to another host in a read-only manner.  If we fail to open the
+lock file read-write then the application aborts the checks and will simply
+continue running as normal.
+
+Note that any single instance of EDMarketConnector.exe will still only monitor
+and act upon the *latest* Journal file in the configured location.  If you run
+Elite Dangerous for another Commander then the application will want to start
+monitoring that separate Commander.  See [wiki:Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc>)
+which will be updated when this change is in a full release.
+
+* Changes the "is there another process already running?" check to be based on
+  a lockfile in the configured Journals directory.  The name of this file is
+  `edmc-journal-lock.txt` and upon successful locking it will contain text
+  like:
+
+    ```
+  Path: <configured path to your Journals>
+  PID: <process ID of the application>
+  ```
+  The lock will be released and applied to the new directory if you change it
+  via Settings > Configuration.  If the new location is already locked you'll
+  get a 'Retry/Ignore?' pop-up.
+  
+* Adds the command-line argument `--force-localserver-for-auth`. This forces 
+  using a local webserver for the Frontier Auth callback.  This should be used
+  when running multiple instances of the application **for all instances** 
+  else there's no guarantee of the `edmc://` protocol callback reaching the
+  correct process and Frontier Auth will fail.
+  
+* Adds Steam and Epic to the list of "audiences" in the Frontier Auth callout
+  so that you can authorise using those accounts, rather than their associated
+  Frontier Account details.
+  
+* Adds the command-line argument `--suppress-dupe-process-popup` to exit
+  without showing the warning popup in the case that EDMarketConnector found
+  another process already running.
+
+  This can be useful if wanting to blindly run both EDMC and the game from a
+  batch file or similar.
+
+
 Release 4.1.6
 ===
 
