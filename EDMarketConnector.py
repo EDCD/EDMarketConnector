@@ -60,6 +60,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('edmc',
+                        help='Callback from Frontier Auth',
+                        nargs='*'
+                        )
+
     args = parser.parse_args()
 
     if args.trace:
