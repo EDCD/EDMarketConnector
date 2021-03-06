@@ -198,7 +198,7 @@
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
 					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\python38.dll" />
+						<File KeyPath="yes" Source="SourceDir\python39.dll" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />
@@ -602,7 +602,7 @@
 			<ComponentRef Id="pt_BR.strings" />
 			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
-			<ComponentRef Id="python38.dll" />
+			<ComponentRef Id="python39.dll" />
 			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />

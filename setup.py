@@ -22,7 +22,7 @@ import semantic_version
 
 from config import appcmdname, applongname, appname, appversion, copyright, update_feed, update_interval
 
-if sys.version_info[0:2] != (3, 8):
+if sys.version_info[0:2] != (3, 9):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
 if sys.platform == 'win32':
