@@ -17,7 +17,7 @@ need to have " (double-quote) around the entire command (path to program .exe
 any double-quote characters in the command (such as around the space-including
 path to the program).
 
-I've verified it renders correctly (on GitHub)[https://github.com/EDCD/EDMarketConnector/blob/Release/4.2.0-beta2/ChangeLog.md].
+I've verified it renders correctly [on GitHub](https://github.com/EDCD/EDMarketConnector/blob/Release/4.2.0-beta2/ChangeLog.md).
 
 Pre-Release 4.2.0-beta1
 ===
