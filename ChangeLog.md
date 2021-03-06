@@ -9,7 +9,7 @@ authentication.
 
 **NB: The correct form for the runas command is as follows:**
 
-`runas /user:<USER> "\\"c:\\Program Files (x86)\\EDMarketConnector\\EDMarketConnector.exe\\" --force-localserver-for-auth"`
+`runas /user:<USER> "\"c:\Program Files (x86)\EDMarketConnector\EDMarketConnector.exe\" --force-localserver-for-auth"`
 
 If anything has messed with the backslash characters there then know that you
 need to have " (double-quote) around the entire command (path to program .exe
