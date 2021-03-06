@@ -7,6 +7,17 @@ Pre-Release 4.2.0-beta2
 This release actually includes the commits to enable Steam and Epic
 authentication.
 
+**NB: The correct form for the runas command is as follows:**
+
+`runas /user:<USER> "\\"c:\\Program Files (x86)\\EDMarketConnector\\EDMarketConnector.exe\\" --force-localserver-for-auth"`
+
+If anything has messed with the backslash characters there then know that you
+need to have " (double-quote) around the entire command (path to program .exe
+*and* any extra arguments), and as a result need to place a backslash before
+any double-quote characters in the command (such as around the space-including
+path to the program).
+
+
 Pre-Release 4.2.0-beta1
 ===
 
