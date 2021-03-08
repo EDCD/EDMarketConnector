@@ -199,7 +199,8 @@ if __name__ == '__main__':  # noqa: C901
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
-        already_running_popup()
+        if not args.edmc:
+            already_running_popup()
         # If the user closes the popup with the 'X', not the 'OK' button we'll
         # reach here.
         sys.exit(0)
