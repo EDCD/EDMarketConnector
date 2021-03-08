@@ -120,7 +120,12 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
     )
 
     class WNDCLASS(Structure):
-        """A WNDCLASS structure."""
+        """
+        A WNDCLASS structure.
+
+        Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassa>
+             <https://docs.microsoft.com/en-us/windows/win32/intl/registering-window-classes>
+        """
 
         _fields_ = [
             ('style', UINT),
