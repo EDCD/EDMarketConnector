@@ -5,7 +5,7 @@ import tkinter as tk
 from os import getpid as os_getpid
 from sys import platform
 from tkinter import ttk
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Optional
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -20,12 +20,13 @@ if TYPE_CHECKING:
 class JournalLock:
     """Handle locking of journal directory."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
         self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
-        self.journal_dir_lockfile_name = None
-        self.journal_dir_lockfile = None
+        self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
+        # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
+        # self.journal_dir_lockfile: Optional[IO] = None
 
     def obtain_lock(self) -> bool:
         """
@@ -43,6 +44,7 @@ class JournalLock:
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
+            return False
 
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -127,14 +129,15 @@ class JournalLock:
         self.journal_dir_lockfile.close()
 
         self.journal_dir_lockfile_name = None
-        self.journal_dir_lockfile = None
+        # Avoids type hint issues, see 'declaration' in JournalLock.__init__()
+        # self.journal_dir_lockfile = None
 
         return unlocked
 
     class JournalAlreadyLocked(tk.Toplevel):
         """Pop-up for when Journal directory already locked."""
 
-        def __init__(self, parent: tk.Tk, callback: Callable):
+        def __init__(self, parent: tk.Tk, callback: Callable) -> None:
             """
             Init the user choice popup.
 
@@ -172,24 +175,24 @@ class JournalLock:
             self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
-        def retry(self):
+        def retry(self) -> None:
             """Handle user electing to Retry obtaining the lock."""
             logger.trace('User selected: Retry')
             self.destroy()
             self.callback(True, self.parent)
 
-        def ignore(self):
+        def ignore(self) -> None:
             """Handle user electing to Ignore failure to obtain the lock."""
             logger.trace('User selected: Ignore')
             self.destroy()
             self.callback(False, self.parent)
 
-        def _destroy(self):
+        def _destroy(self) -> None:
             """Destroy the Retry/Ignore popup."""
             logger.trace('User force-closed popup, treating as Ignore')
             self.ignore()
 
-    def update_lock(self, parent: tk.Tk):
+    def update_lock(self, parent: tk.Tk) -> None:
         """
         Update journal directory lock to new location if possible.
 
@@ -208,7 +211,7 @@ class JournalLock:
             # Pop-up message asking for Retry or Ignore
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
 
-    def retry_lock(self, retry: bool, parent: tk.Tk):
+    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:
         """
         Try again to obtain a lock on the Journal Directory.
 
