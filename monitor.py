@@ -1,19 +1,21 @@
-from collections import defaultdict, OrderedDict
 import json
 import re
 import threading
-from os import listdir, SEEK_SET, SEEK_END
+from calendar import timegm
+from collections import OrderedDict, defaultdict
+from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from calendar import timegm
-from typing import Any, List, MutableMapping, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional
+from typing import OrderedDict as OrderedDictT
+from typing import Tuple, Union
 
 if TYPE_CHECKING:
     import tkinter
 
-from config import config
 from companion import ship_file_name
+from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -23,17 +25,19 @@ if TYPE_CHECKING:
         return x
 
 if platform == 'darwin':
-    from AppKit import NSWorkspace
-    from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler
     from fcntl import fcntl
+
+    from AppKit import NSWorkspace
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
     F_GLOBAL_NOCACHE = 55
 
 elif platform == 'win32':
-    from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
+
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
 
     EnumWindows = ctypes.windll.user32.EnumWindows
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
