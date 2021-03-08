@@ -1,9 +1,11 @@
+"""Implements locking of Journal directory."""
+
 import pathlib
 import tkinter as tk
 from os import getpid as os_getpid
 from sys import platform
 from tkinter import ttk
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -31,7 +33,6 @@ class JournalLock:
 
         :return: bool - True if we successfully obtained the lock
         """
-
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
         logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
@@ -84,7 +85,8 @@ class JournalLock:
         """
         Release lock on journal directory.
 
-        :return: bool - Success of unlocking operation."""
+        :return: bool - Success of unlocking operation.
+        """
         unlocked = False
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -133,6 +135,12 @@ class JournalLock:
         """Pop-up for when Journal directory already locked."""
 
         def __init__(self, parent: tk.Tk, callback: Callable):
+            """
+            Init the user choice popup.
+
+            :param parent: - The tkinter parent window.
+            :param callback: - The function to be called when the user makes their choice.
+            """
             tk.Toplevel.__init__(self, parent)
 
             self.parent = parent
@@ -165,21 +173,28 @@ class JournalLock:
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         def retry(self):
+            """Handle user electing to Retry obtaining the lock."""
             logger.trace('User selected: Retry')
             self.destroy()
             self.callback(True, self.parent)
 
         def ignore(self):
+            """Handle user electing to Ignore failure to obtain the lock."""
             logger.trace('User selected: Ignore')
             self.destroy()
             self.callback(False, self.parent)
 
         def _destroy(self):
+            """Destroy the Retry/Ignore popup."""
             logger.trace('User force-closed popup, treating as Ignore')
             self.ignore()
 
     def update_lock(self, parent: tk.Tk):
-        """Update journal directory lock to new location if possible."""
+        """
+        Update journal directory lock to new location if possible.
+
+        :param parent: - The parent tkinter window.
+        """
         current_journaldir = config.get_str('journaldir') or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
@@ -194,6 +209,12 @@ class JournalLock:
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
 
     def retry_lock(self, retry: bool, parent: tk.Tk):
+        """
+        Try again to obtain a lock on the Journal Directory.
+
+        :param retry: - does the user want to retry?  Comes from the dialogue choice.
+        :param parent: - The parent tkinter window.
+        """
         logger.trace(f'We should retry: {retry}')
 
         if not retry:
