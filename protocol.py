@@ -119,7 +119,9 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         UINT, WPARAM
     )
 
-    class WNDCLASS(Structure):  # noqa: D101 # I dont want to chance messing with a Structure with a docstring
+    class WNDCLASS(Structure):
+        """A WNDCLASS structure."""
+
         _fields_ = [
             ('style', UINT),
             ('lpfnWndProc', WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)),
