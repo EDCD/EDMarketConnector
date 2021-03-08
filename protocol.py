@@ -21,7 +21,8 @@ is_wine = False
 if sys.platform == 'win32':
     from ctypes import windll  # type: ignore
     try:
-        is_wine = windll.ntdll.wine_get_version
+        if windll.ntdll.wine_get_version:
+            is_wine = True
     except Exception:
         pass
 
@@ -398,7 +399,7 @@ protocolhandler: GenericProtocolHandler
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
     protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
     protocolhandler = WindowsProtocolHandler()
 else:
     protocolhandler = LinuxProtocolHandler()
