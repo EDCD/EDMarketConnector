@@ -6,7 +6,7 @@ import urllib.request, urllib.error, urllib.parse
 import sys
 
 from EDMCLogging import get_main_logger
-from config import config
+from config import appname, config
 from constants import protocolhandler_redirect
 
 logger = get_main_logger()
