@@ -6,26 +6,25 @@
 #
 
 import os
-from sys import platform
-from os.path import join
-
 import tkinter as tk
-from tkinter import ttk
+from os.path import join
+from sys import platform
 from tkinter import font as tkFont
-from ttkHyperlinkLabel import HyperlinkLabel
+from tkinter import ttk
 
-from config import appname, applongname, config
+from config import applongname, appname, config
+from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
     from traceback import print_exc
 
 if platform == "linux":
-    from ctypes import *
+    from ctypes import POINTER, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll, Structure, byref
 
 
 if platform == 'win32':
     import ctypes
-    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+    from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
     FR_PRIVATE  = 0x10
@@ -33,10 +32,11 @@ if platform == 'win32':
     AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif platform == 'linux':
+    # pyright: reportUnboundVariable=false
     XID = c_ulong 	# from X.h: typedef unsigned long XID
     Window = XID
     Atom = c_ulong
-    Display = c_void_p	# Opaque
+    Display = c_void_p  # Opaque
 
     PropModeReplace = 0
     PropModePrepend = 1
@@ -338,7 +338,7 @@ class _Theme(object):
             self.active = theme
 
         if platform == 'darwin':
-            from AppKit import NSApplication, NSAppearance, NSMiniaturizableWindowMask, NSResizableWindowMask
+            from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask
             root.update_idletasks()	# need main window to be created
             appearance = NSAppearance.appearanceNamed_(theme and
                                                        'NSAppearanceNameDarkAqua' or
