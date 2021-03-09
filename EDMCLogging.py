@@ -316,8 +316,8 @@ class EDMCContextFilter(logging.Filter):
                 except Exception:
                     pass
 
-                # We've given up, so just return all '??' to signal we couldn't get the info
-                return '??', '??', '??'
+                # We've given up, so just return '??' to signal we couldn't get the info
+                return '??', '??', module_name
 
             args, _, _, value_dict = inspect.getargvalues(frame)
             if len(args) and args[0] in ('self', 'cls'):
@@ -340,7 +340,8 @@ class EDMCContextFilter(logging.Filter):
                                 "EDMCLogging:EDMCContextFilter:caller_attributes():"
                                 "Failed to get attribute for function info. Bailing out"
                             )
-                            return "??", "??", "??"
+                            # class_name is better than nothing for __qualname__
+                            return class_name, class_name, module_name
 
                     if fn is not None:
                         if isinstance(fn, property):
