@@ -634,8 +634,6 @@ def worker() -> None:
 
                         pending = []
 
-                    r.close()
-
                 break  # No exception, so assume success
 
             except Exception as e:
