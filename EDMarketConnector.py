@@ -33,7 +33,7 @@ if __name__ == '__main__':
 # After the redirect in case config does logging setup
 from config import appversion, appversion_nobuild, config, copyright
 from EDMCLogging import edmclogger, logger, logging
-from monitor import JournalLock
+from journal_lock import JournalLock
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
