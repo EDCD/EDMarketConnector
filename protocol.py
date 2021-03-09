@@ -21,7 +21,8 @@ is_wine = False
 if sys.platform == 'win32':
     from ctypes import windll  # type: ignore
     try:
-        is_wine = windll.ntdll.wine_get_version
+        if windll.ntdll.wine_get_version:
+            is_wine = True
     except Exception:
         pass
 
@@ -118,7 +119,14 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         UINT, WPARAM
     )
 
-    class WNDCLASS(Structure):  # noqa: D101 # I dont want to chance messing with a Structure with a docstring
+    class WNDCLASS(Structure):
+        """
+        A WNDCLASS structure.
+
+        Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassa>
+             <https://docs.microsoft.com/en-us/windows/win32/intl/registering-window-classes>
+        """
+
         _fields_ = [
             ('style', UINT),
             ('lpfnWndProc', WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)),
@@ -397,7 +405,7 @@ protocolhandler: GenericProtocolHandler
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
     protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine:
+elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
     protocolhandler = WindowsProtocolHandler()
 else:
     protocolhandler = LinuxProtocolHandler()
