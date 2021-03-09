@@ -219,9 +219,6 @@
 						<File KeyPath="yes" Source="SourceDir\sqlite3.dll" />
 					</Component>
 					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\stations.p" />
-					</Component>
-					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\systems.p" />
 					</Component>
 					<Component Guid="{30EEAD30-A43B-4A31-A209-450A8AD17AC2}">
@@ -613,7 +610,6 @@
 			<ComponentRef Id="snd_good.wav" />
 			<ComponentRef Id="snd_bad.wav" />
 			<ComponentRef Id="sqlite3.dll" />
-			<ComponentRef Id="stations.p" />
 			<ComponentRef Id="sv_SE.strings" />
 			<ComponentRef Id="systems.p" />
 			<ComponentRef Id="tcl86t.dll" />
