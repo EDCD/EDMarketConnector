@@ -291,6 +291,9 @@ class EDMCContextFilter(logging.Filter):
          class if relevant.
         3. module is munged if we detect the caller is an EDMC plugin,
          whether internal or found.
+
+        :param module_name: The name of the calling module.
+        :return: Tuple[str, str, str] - class_name, qualname, module_name
         """
         frame = cls.find_caller_frame()
 
