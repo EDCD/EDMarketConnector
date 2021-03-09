@@ -274,6 +274,10 @@ class Auth(object):
         self.verifier: Union[bytes, None] = None
         self.state: Union[str, None] = None
 
+    def __del__(self):
+        if self.session:
+            self.session.close()
+
     def refresh(self) -> Union[str, None]:
         """
         Attempt use of Refresh Token to get a valid Access Token.
@@ -309,6 +313,7 @@ class Auth(object):
                     tokens[idx] = data.get('refresh_token', '')
                     config.set('fdev_apikeys', tokens)
                     config.save()  # Save settings now for use by command-line app
+
                     return data.get('access_token')
 
                 else:

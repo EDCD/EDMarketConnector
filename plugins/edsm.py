@@ -168,6 +168,7 @@ def plugin_stop() -> None:
     this.queue.put(None)
     this.thread.join()
     this.thread = None
+    this.session.close()
     # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
     this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
     logger.debug('Done.')
@@ -541,6 +542,7 @@ def worker() -> None:
                     r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
                     r.raise_for_status()
                     this.discardedEvents = set(r.json())
+
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
                     if not this.discardedEvents:
                         logger.error(
@@ -633,6 +635,7 @@ def worker() -> None:
                         pending = []
 
                 break  # No exception, so assume success
+
             except Exception as e:
                 logger.debug(f'Attempt to send API events: retrying == {retrying}', exc_info=e)
                 retrying += 1
