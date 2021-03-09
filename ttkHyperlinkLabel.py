@@ -1,15 +1,14 @@
-from sys import platform
-import webbrowser
-
 import tkinter as tk
-from tkinter import ttk
+import webbrowser
+from sys import platform
 from tkinter import font as tkFont
+from tkinter import ttk
 
 if platform == 'win32':
     import subprocess
-    import ctypes
-    from ctypes.wintypes import *
-    from winreg import CloseKey, OpenKeyEx, QueryValueEx, HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, KEY_READ, REG_SZ, REG_MULTI_SZ
+    from winreg import (
+        HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, CloseKey, OpenKeyEx, QueryValueEx
+    )
 
 # A clickable ttk Label
 #
