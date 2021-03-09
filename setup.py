@@ -133,8 +133,6 @@ if sys.platform == 'darwin':
                 'snd_bad.wav',
                 'modules.p',
                 'ships.p',
-                'stations.p',
-                'systems.p'
             ],
             'site_packages': False,
             'plist': {
@@ -204,8 +202,6 @@ elif sys.platform == 'win32':
             'snd_bad.wav',
             'modules.p',
             'ships.p',
-            'stations.p',
-            'systems.p',
             f'{appname}.VisualElementsManifest.xml',
             f'{appname}.ico',
             'EDMarketConnector - TRACE.bat',
