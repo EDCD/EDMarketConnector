@@ -113,13 +113,16 @@ class EDDN:
         self.replayfile.flush()
 
     def close(self):
-        """Close the replay file."""
+        """Close down the EDDN class instance."""
         logger.debug('Closing replayfile...')
         if self.replayfile:
             self.replayfile.close()
 
         self.replayfile = None
         logger.debug('Done.')
+
+        logger.debug('Closing EDDN requests.Session.')
+        self.session.close()
 
     def send(self, cmdr: str, msg: Mapping[str, Any]) -> None:
         """
