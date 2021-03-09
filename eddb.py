@@ -114,14 +114,3 @@ if __name__ == "__main__":
     with open('systems.p',  'wb') as h:
         pickle.dump(system_ids, h, protocol = pickle.HIGHEST_PROTOCOL)
     print('\n%d saved systems' % len(system_ids))
-
-    # station_id by (system_id, station_name)
-    stations = json.loads(download('stations.json').content)	# let json do the utf-8 decode
-    station_ids = {
-        (x['system_id'], x['name']) : x['id']	# Pilgrim's Ruin in HR 3005 id 70972 has U+2019 quote
-        for x in stations if x['max_landing_pad_size']
-    }
-
-    with open('stations.p', 'wb') as h:
-        pickle.dump(station_ids, h, protocol = pickle.HIGHEST_PROTOCOL)
-    print('\n%d saved stations' % len(station_ids))
