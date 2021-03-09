@@ -1,6 +1,13 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 4.2.0-beta3
+===
+
+* Allow `--force-localserver-for-auth` to actually work. See [#891
+  `--force-localserver-for-auth` fails due to JounalLock being imported from
+  monitor.py](https://github.com/EDCD/EDMarketConnector/issues/891)
+
 Pre-Release 4.2.0-beta2
 ===
 
