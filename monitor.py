@@ -680,6 +680,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     else:
                         self.state['NavRoute'] = entry
 
+            elif event_type == 'ModuleInfo':
+                with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
+                    entry = json.load(mf)
+                    self.state['ModuleInfo'] = entry
+
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
