@@ -9,7 +9,7 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
 
@@ -39,6 +39,8 @@ elif platform == 'win32':
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
     from watchdog.events import FileSystemEventHandler
+    if TYPE_CHECKING:
+        from watchdog.events import FileCreatedEvent
     from watchdog.observers import Observer
 
     EnumWindows = ctypes.windll.user32.EnumWindows
@@ -68,16 +70,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
-    def __init__(self):
+    def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
-        self.root = None
-        self.currentdir: Optional[str] = None		# The actual logdir that we're monitoring
+        self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
+        self.currentdir: Optional[str] = None  # The actual logdir that we're monitoring
         self.logfile: Optional[str] = None
-        self.observer = None
-        self.observed = None		# a watchdog ObservedWatch, or None if polling
+        self.observer: Optional['Observer'] = None
+        self.observed = None  # a watchdog ObservedWatch, or None if polling
         self.thread: Optional[threading.Thread] = None
-        self.event_queue = []		# For communicating journal entries back to main thread
+        self.event_queue: List = []  # For communicating journal entries back to main thread
 
         # On startup we might be:
         # 1) Looking at an old journal file because the game isn't running or the user has exited to the main menu.
@@ -106,7 +108,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
-        self.state = {
+        self.state: Dict = {
             'Captain':      None,  # On a crew
             'Cargo':        defaultdict(int),
             'Credits':      None,
@@ -134,10 +136,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Route':        None,  # Last plotted route from Route.json file
         }
 
-    def start(self, root: 'tkinter.Tk'):  # noqa: CCR001
-        """Start journal monitoring."""
+    def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
+        """
+        Start journal monitoring.
+
+        :param root: The parent Tk window.
+        :return: bool - False if we couldn't access/find latest Journal file.
+        """
         logger.debug('Begin...')
-        self.root = root
+        self.root = root  # type: ignore
         journal_dir = config.get_str('journaldir')
 
         if journal_dir == '' or journal_dir is None:
@@ -193,7 +200,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         if not self.observed and not polling:
             logger.debug('Not observed and not polling, setting observed...')
-            self.observed = self.observer.schedule(self, self.currentdir)
+            self.observed = self.observer.schedule(self, self.currentdir)  # type: ignore
             logger.debug('Done')
 
         logger.info(f'{"Polling" if polling else "Monitoring"} Journal Folder: "{self.currentdir}"')
@@ -209,7 +216,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         logger.debug('Done.')
         return True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop journal monitoring."""
         logger.debug('Stopping monitoring Journal')
 
@@ -238,7 +245,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
-    def close(self):
+    def close(self) -> None:
         """Close journal monitoring."""
         logger.debug('Calling self.stop()...')
         self.stop()
@@ -257,21 +264,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
-    def running(self):
+    def running(self) -> bool:
         """
         Determine if Journal watching is active.
 
         :return: bool
         """
-        return self.thread and self.thread.is_alive()
+        return bool(self.thread and self.thread.is_alive())
 
-    def on_created(self, event):
+    def on_created(self, event: FileCreatedEvent) -> None:
         """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
             self.logfile = event.src_path
 
-    def worker(self):  # noqa: C901, CCR001
+    def worker(self) -> None:  # noqa: C901, CCR001
         """
         Watch latest Journal file.
 
@@ -300,12 +307,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.parse_entry(line)  # Some events are of interest even in the past
 
                 except Exception as ex:
-                    logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
+                    logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
 
             log_pos = loghandle.tell()
 
         else:
-            loghandle = None
+            loghandle = None  # type: ignore
 
         logger.debug('Now at end of latest file.')
 
@@ -425,7 +432,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
-    def parse_entry(self, line: str) -> MutableMapping[str, Any]:  # noqa: C901, CCR001
+    def parse_entry(self, line: bytes) -> MutableMapping[str, Any]:  # noqa: C901, CCR001
         """
         Parse a Journal JSON line.
 
@@ -892,10 +899,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             return entry
 
         except Exception as ex:
-            logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
+            logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
 
-    def canonicalise(self, item: Optional[str]):
+    def canonicalise(self, item: Optional[str]) -> str:
         """
         Produce canonical name for a ship module.
 
@@ -918,7 +925,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return item
 
-    def category(self, item: str):
+    def category(self, item: str) -> str:
         """
         Determine the category of an item.
 
@@ -1005,7 +1012,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     return True
 
         elif platform == 'win32':
-            def WindowTitle(h):  # noqa: N802
+            def WindowTitle(h):  # noqa: N802 # type: ignore
                 if h:
                     length = GetWindowTextLength(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
