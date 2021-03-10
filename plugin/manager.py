@@ -5,7 +5,7 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Callable, Dict, List, Type
+from typing import Optional, Set, TYPE_CHECKING, Callable, Dict, List, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -48,7 +48,8 @@ class PluginManager:
     def __init__(self) -> None:
         self.log = get_main_logger()
         self.log.info("starting new plugin management engine")
-        self.plugins: List[LoadedPlugin] = []
+        self.plugins: Dict[str, LoadedPlugin] = {}
+        self._plugins_previously_loaded: Set[str] = set()
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
         """
@@ -172,7 +173,7 @@ class PluginManager:
             self.log.error(f"No plugin class found in {path}")
             raise PluginHasNoPluginClassException(f"No plugin class found in {path}")
 
-        self.plugins.append(loaded)
+        self.plugins[loaded.info.name] = loaded
 
     def is_plugin_loaded(self, name: str) -> bool:
         """
@@ -181,11 +182,16 @@ class PluginManager:
         :param name: The name to search for
         :return: Whether or not the name is loaded
         """
-        for plugin in self.plugins:
-            if plugin.info.name == name:
-                return True
+        return name in self.plugins
 
-        return False
+    def get_plugin(self, name: str) -> Optional[LoadedPlugin]:
+        """
+        Get the plugin identified by name, if it exists.
+
+        :param name: The plugin name to search for.
+        :return: The plugin if it exists, otherwise None
+        """
+        return self.plugins.get(name)
 
     def unload_plugin(self, name: str) -> bool:
         ...
