@@ -25,7 +25,7 @@ class Plugin(abc.ABC):
 
         :param plugin_path: the path at which this module was found.
         """
-        ...
+        raise NotImplementedError
 
     def unload(self) -> None:
         """Unload this plugin."""
