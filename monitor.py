@@ -671,8 +671,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
-                    entry = json.load(rf)
-                    self.state['NavRoute'] = entry
+                    try:
+                        entry = json.load(rf)
+
+                    except json.JSONDecodeError:
+                        logger.exception('Failed decoding NavRoute.json')
+
+                    else:
+                        self.state['NavRoute'] = entry
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])
