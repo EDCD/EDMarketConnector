@@ -668,9 +668,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
-            elif event_type == 'Route':
+            elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in Route.json
-                with open(join(self.currentdir, 'Route.json'), 'rb') as rf:  # type: ignore
+                with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
                     entry = json.load(rf)
                     self.state['Route'] = entry
 
