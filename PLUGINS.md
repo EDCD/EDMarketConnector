@@ -462,6 +462,22 @@ Examples of this are:
     *NB: There is no indication available when a player cancels a route.*  The
     game itself does not provide any such, not in a Journal event, not in a
    `Status.json` flag.
+   
+    The Journal documentation v28 is incorrect about the event
+    and file being `Route(.json)` the word is `NavRoute`.  Also the format of
+    the data is, e.g.
+   
+    ```json
+   { "timestamp":"2021-03-10T11:31:37Z",
+      "event":"NavRoute",
+      "Route": [
+         { "StarSystem": "Esuvit", "SystemAddress": 2869709317505, "StarPos": [-13.18750,-1.15625,-92.68750], "StarClass": "M" },
+         { "StarSystem": "Ndozins", "SystemAddress": 3446451210595, "StarPos": [-14.31250,-10.68750,-60.56250], "StarClass": "M" },
+         { "StarSystem": "Tascheter Sector MN-T b3-6", "SystemAddress": 13864825529753, "StarPos": [-11.87500,-21.96875,-29.03125], "StarClass": "M" },
+         { "StarSystem": "LP 823-4", "SystemAddress": 9466778953129, "StarPos": [-8.62500,-27.84375,3.93750], "StarClass": "M" }
+      ]
+   }
+    ```
 
 #### Player Dashboard
 
