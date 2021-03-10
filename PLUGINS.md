@@ -426,6 +426,7 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
+| `Route`        |           `dict`            | Last plotted multi-hop route                                                                                    |
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
@@ -474,6 +475,11 @@ as the mission ID for mission specific cargo
 **NB: Because this is only the data loaded from the `Cargo.json` file, and that
 is not written at Commander login (instead the in-Journal `Cargo` event
 contains all the data), this will not be populated at login.**
+
+New in version 5.0.0:
+
+`Route` contains the `json.load()` of `Route.json` as indicated by a journal
+`Route` event.
 
 #### Getting Commander Data
 
