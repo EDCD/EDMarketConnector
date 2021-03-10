@@ -9,9 +9,9 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Tuple, Union
+from typing import Tuple
 
 if TYPE_CHECKING:
     import tkinter
@@ -100,7 +100,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.station: Optional[str] = None
         self.station_marketid: Optional[int] = None
         self.stationtype: Optional[str] = None
-        self.coordinates: Optional[Tuple[int, int, int]] = None
+        self.coordinates: Optional[Tuple[float, float, float]] = None
         self.systemaddress: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
@@ -425,7 +425,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
-    def parse_entry(self, line: str) -> Dict:  # noqa: C901, CCR001
+    def parse_entry(self, line: str) -> MutableMapping[str, Any]:  # noqa: C901, CCR001
         """
         Parse a Journal JSON line.
 
@@ -623,7 +623,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.planet = None
 
                 if 'StarPos' in entry:
-                    self.coordinates = tuple(entry['StarPos'])
+                    self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
                 elif self.system != entry['StarSystem']:
                     self.coordinates = None  # Docked event doesn't include coordinates
@@ -890,6 +890,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Friends'].discard(entry['Name'])
 
             return entry
+
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
             return {'event': None}
@@ -931,7 +932,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return item.capitalize()
 
-    def get_entry(self) -> Union[OrderedDictT[str, Any], None]:
+    def get_entry(self) -> Optional[MutableMapping[str, Any]]:
         """
         Pull the next Journal event from the event_queue.
 
@@ -1026,7 +1027,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return False
 
-    def ship(self, timestamped=True) -> OrderedDictT:
+    def ship(self, timestamped=True) -> Optional[MutableMapping[str, Any]]:
         """
         Produce a subset of data for the current ship.
 
@@ -1043,7 +1044,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'PowerDistributor', 'Radar', 'FuelTank'
         )
 
-        d = OrderedDict()
+        d: MutableMapping[str, Any] = OrderedDict()
         if timestamped:
             d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
 
