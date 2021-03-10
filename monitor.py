@@ -682,8 +682,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'ModuleInfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
-                    entry = json.load(mf)
-                    self.state['ModuleInfo'] = entry
+                    try:
+                        entry = json.load(mf)
+
+                    except json.JSONDecodeError:
+                        logger.exception('Failed decoding ModulesInfo.json', exc_info=True)
+
+                    else:
+                        self.state['ModuleInfo'] = entry
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])
