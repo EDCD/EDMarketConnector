@@ -38,9 +38,7 @@ elif platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
-    from watchdog.events import FileSystemEventHandler
-    if TYPE_CHECKING:
-        from watchdog.events import FileCreatedEvent
+    from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
 
     EnumWindows = ctypes.windll.user32.EnumWindows
