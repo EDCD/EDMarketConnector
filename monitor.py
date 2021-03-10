@@ -439,6 +439,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         This augments some events, sets internal state in reaction to many and
         loads some extra files, e.g. Cargo.json, as necessary.
 
+        :param line: bytes - The entry being parsed.  Yes, this is bytes, not str.
+                             We rely on json.loads() dealing with this properly.
         :return: Dict of the processed event.
         """
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
