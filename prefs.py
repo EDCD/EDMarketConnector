@@ -749,7 +749,7 @@ class PreferencesDialog(tk.Toplevel):
                 padx=self.PADX, pady=self.PADY*2, sticky=tk.W, row=cur_row
             )
             self.transparency = tk.IntVar()
-            self.transparency.set(config.getint('ui_transparency') or 100)  # Default to 100 for users
+            self.transparency.set(config.get_int('ui_transparency') or 100)  # Default to 100 for users
             self.transparency_bar = tk.Scale(
                 appearance_frame,
                 variable=self.transparency,  # type: ignore # Its accepted as an intvar
