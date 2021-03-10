@@ -5,7 +5,7 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import Optional, Set, TYPE_CHECKING, Callable, Dict, List, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -103,6 +103,9 @@ class PluginManager:
             self.log.exception(f"Could not call load on plugin {str_plugin_reference}")
             raise
 
+        if info is None:
+            raise PluginLoadingException(f"Plugin {str_plugin_reference} did not return a valid PluginInfo")
+
         return LoadedPlugin(info, instantiated, module, callbacks)
 
     @staticmethod
@@ -164,7 +167,7 @@ class PluginManager:
                 raise PluginLoadingException(f"Cannot load plugin {cls!r}: {e}") from e
 
             if self.is_plugin_loaded(loaded.info.name):
-                self.log.error("Plugins with the same names attempted to load")
+                self.log.error("Plugins with the same names attempted to load (double load?)")
                 raise PluginAlreadyLoadedException(f"Plugin with name {loaded.info.name} cannot be loaded twice")
 
             break
