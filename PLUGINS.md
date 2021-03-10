@@ -427,6 +427,7 @@ Content of `state` (updated to the current journal entry):
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
 | `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
+| `ModuleInfo`   |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
 
 ##### Synthetic Events
 
@@ -479,6 +480,11 @@ Examples of this are:
    }
     ```
 
+1. Every `ModuleInfo` event contains the full data as loaded from the
+  `ModulesInfo.json` file.  It's also available as `monitor.stat['ModuleInfo']`
+   (noting that we used the singular form there to stay consistent with the
+   Journal event name).
+
 #### Player Dashboard
 
 ```python
@@ -514,6 +520,9 @@ New in version 5.0.0:
 
 `NavRoute` contains the `json.load()` of `NavRoute.json` as indicated by a journal
 `NavRoute` event.
+
+`ModuleInfo` contains the `json.load()` of `ModulesInfo.json` as indicated by a
+Journal `ModuleInfo` event.
 
 #### Getting Commander Data
 
