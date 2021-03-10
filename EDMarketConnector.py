@@ -1536,7 +1536,7 @@ sys.path: {sys.path}'''
             config.set('plugins_not_py3_last', int(time()))
 
     # UI Transparency
-    ui_transparency = config.getint('ui_transparency')
+    ui_transparency = config.get_int('ui_transparency')
     if ui_transparency == 0:
         ui_transparency = 100
 
