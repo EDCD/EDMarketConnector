@@ -1,3 +1,5 @@
+"""Monitor for new Journal files and contents of latest."""
+
 import json
 import re
 import threading
@@ -7,7 +9,7 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union
 
@@ -57,6 +59,8 @@ else:
 
 # Journal handler
 class EDLogs(FileSystemEventHandler):  # type: ignore # See below
+    """Monitoring of Journal files."""
+
     # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
 
     _POLL = 1		# Polling is cheap, so do it often
@@ -130,7 +134,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Route':        None,  # Last plotted route from Route.json file
         }
 
-    def start(self, root: 'tkinter.Tk'):
+    def start(self, root: 'tkinter.Tk'):  # noqa: CCR001
         """Start journal monitoring."""
         logger.debug('Begin...')
         self.root = root
@@ -254,15 +258,28 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         logger.debug('Done.')
 
     def running(self):
+        """
+        Determine if Journal watching is active.
+
+        :return: bool
+        """
         return self.thread and self.thread.is_alive()
 
     def on_created(self, event):
-        # watchdog callback, e.g. client (re)started.
+        """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
             self.logfile = event.src_path
 
-    def worker(self):
+    def worker(self):  # noqa: C901, CCR001
+        """
+        Watch latest Journal file.
+
+        1. Keep track of the latest Journal file, switching to a new one if
+          needs be.
+        2. Read in lines from the latest Journal file and queue them up for
+          get_entry() to process in the main thread.
+        """
         # Tk isn't thread-safe in general.
         # event_generate() is the only safe way to poke the main thread from this thread:
         # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
@@ -408,7 +425,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
-    def parse_entry(self, line: str):
+    def parse_entry(self, line: str) -> Dict:  # noqa: C901, CCR001
+        """
+        Parse a Journal JSON line.
+
+        This augments some events, sets internal state in reaction to many and
+        loads some extra files, e.g. Cargo.json, as necessary.
+
+        :return: Dict of the processed event.
+        """
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
         if line is None:
             return {'event': None}  # Fake startup event
@@ -869,11 +894,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug(f'Invalid journal entry:\n{line}\n', exc_info=ex)
             return {'event': None}
 
-    # Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount",
-    # and "hnshockmount", "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1",
-    # "python" and "Python", etc.
-    # This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
     def canonicalise(self, item: Optional[str]):
+        """
+        Produce canonical name for a ship module.
+
+        Commodities, Modules and Ships can appear in different forms e.g. "$HNShockMount_Name;", "HNShockMount",
+        and "hnshockmount", "$int_cargorack_size6_class1_name;" and "Int_CargoRack_Size6_Class1",
+        "python" and "Python", etc.
+        This returns a simple lowercased name e.g. 'hnshockmount', 'int_cargorack_size6_class1', 'python', etc
+
+        :param item: str - 'Found' name of the item.
+        :return: str - The canonical name.
+        """
         if not item:
             return ''
 
@@ -886,6 +918,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return item
 
     def category(self, item: str):
+        """
+        Determine the category of an item.
+
+        :param item: str - The item in question.
+        :return: str - The category for this item.
+        """
         match = self._RE_CATEGORY.match(item)
 
         if match:
@@ -945,20 +983,28 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
 
             elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
+                ts = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
                 self.event_queue.append(
-                    '{{ "timestamp":"{}", "event":"ShutDown" }}'.format(strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()))
+                    f'{{ "timestamp":"{ts}", "event":"ShutDown" }}'
                 )
 
             return entry
 
-    def game_running(self):
+    def game_running(self) -> bool:  # noqa: CCR001
+        """
+        Determine if the game is currently running.
+
+        TODO: Implement on Linux
+
+        :return: bool - True if the game is running.
+        """
         if platform == 'darwin':
             for app in NSWorkspace.sharedWorkspace().runningApplications():
                 if app.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
                     return True
 
         elif platform == 'win32':
-            def WindowTitle(h):
+            def WindowTitle(h):  # noqa: N802
                 if h:
                     length = GetWindowTextLength(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
@@ -966,7 +1012,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         return buf.value
                 return None
 
-            def callback(hWnd, lParam):
+            def callback(hWnd, lParam):  # noqa: N803
                 name = WindowTitle(hWnd)
                 if name and name.startswith('Elite - Dangerous'):
                     handle = GetProcessHandleFromHwnd(hWnd)
@@ -980,8 +1026,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return False
 
-    # Return a subset of the received data describing the current ship as a Loadout event
-    def ship(self, timestamped=True):
+    def ship(self, timestamped=True) -> OrderedDictT:
+        """
+        Produce a subset of data for the current ship.
+
+        Return a subset of the received data describing the current ship as a Loadout event.
+
+        :param timestamped: bool - Whether to add a 'timestamp' member.
+        :return: dict
+        """
         if not self.state['Modules']:
             return None
 
@@ -1024,8 +1077,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return d
 
-    # Export ship loadout as a Loadout event
-    def export_ship(self, filename=None):
+    def export_ship(self, filename=None) -> None:
+        """
+        Export ship loadout as a Loadout event.
+
+        Writes either to the specified filename or to a formatted filename based on
+        the ship name and a date+timestamp.
+
+        :param filename: Name of file to write to, if not default.
+        """
         # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
         string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
         if filename:
@@ -1061,8 +1121,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     return  # same as last time - don't write
 
         # Write
+        ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
         filename = join(  # type: ignore
-            config.get_str('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
+            config.get_str('outdir'), f'{ship}.{ts}.txt'
         )
 
         try:
