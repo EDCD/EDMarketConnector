@@ -9,7 +9,8 @@ import pytest
 sys.path.append(str(pathlib.Path(__file__).parent.parent.parent))
 
 from plugin.manager import (  # noqa: E402 # Cant be at the top
-    PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException, PluginManager
+    PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException,
+    PluginManager
 )
 
 
@@ -31,6 +32,7 @@ TESTS = [
     (bad_path / "class_init_error", pytest.raises(PluginLoadingException, match="Exception in init")),
     (bad_path / "class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
     (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
+    (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo"))
 ]
 
 
@@ -47,7 +49,14 @@ def test_load(plugin_manager: PluginManager, context: ContextManager, path: path
 
     :param plugin_manager: a plugin.PluginManager instance to run tests against
     :param context: Context manager to run the test in, pytest.raises is used to assert that an exception is raised
-    :param path: [description]
+    :param path: path to the plugin
     """
     with context:
         plugin_manager.load_plugin(path)
+
+
+def test_double_load(plugin_manager: PluginManager) -> None:
+    """Attempt to load a plugin twice."""
+    plugin_manager.load_plugin(bad_path / "double_load")
+    with pytest.raises(PluginAlreadyLoadedException):
+        plugin_manager.load_plugin(bad_path / "double_load")
