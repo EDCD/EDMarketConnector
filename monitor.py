@@ -126,7 +126,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'ModulesValue': None,
             'Rebuy':        None,
             'Modules':      None,
-            'CargoJSON':   None,  # The raw data from the last time cargo.json was read
+            'CargoJSON':    None,  # The raw data from the last time cargo.json was read
+            'Route':        None,  # Last plotted route from Route.json file
         }
 
     def start(self, root: 'tkinter.Tk'):
@@ -458,6 +459,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'ModulesValue': None,
                     'Rebuy':        None,
                     'Modules':      None,
+                    'Route':        None,
                 }
 
             elif event_type == 'Commander':
@@ -664,6 +666,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 clean = self.coalesce_cargo(entry['Inventory'])
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
+
+            elif event_type == 'NavRoute':
+                # Added in ED 3.7 - multi-hop route details in NavRoute.json
+                with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
+                    try:
+                        entry = json.load(rf)
+
+                    except json.JSONDecodeError:
+                        logger.exception('Failed decoding NavRoute.json', exc_info=True)
+
+                    else:
+                        self.state['NavRoute'] = entry
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])

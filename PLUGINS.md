@@ -426,6 +426,9 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
+| `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
+
+##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
@@ -443,6 +446,38 @@ between the two scenarios.
 
 This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
+
+##### Augmented Events
+
+In some cases we augment the events, as seen in the Journal, with extra data.
+Examples of this are:
+
+1. Every `Cargo` event passed to plugins contains the data from
+   `Cargo.json` (but see above for caveats).
+
+1. Every `NavRoute` event contains the full `Route` array as loaded from
+    `NavRoute.json`.  You do not need to access this via
+   `monitor.state['NavRoute']`, although it is available there.
+   
+    *NB: There is no indication available when a player cancels a route.*  The
+    game itself does not provide any such, not in a Journal event, not in a
+   `Status.json` flag.
+   
+    The Journal documentation v28 is incorrect about the event
+    and file being `Route(.json)` the word is `NavRoute`.  Also the format of
+    the data is, e.g.
+   
+    ```json
+   { "timestamp":"2021-03-10T11:31:37Z",
+      "event":"NavRoute",
+      "Route": [
+         { "StarSystem": "Esuvit", "SystemAddress": 2869709317505, "StarPos": [-13.18750,-1.15625,-92.68750], "StarClass": "M" },
+         { "StarSystem": "Ndozins", "SystemAddress": 3446451210595, "StarPos": [-14.31250,-10.68750,-60.56250], "StarClass": "M" },
+         { "StarSystem": "Tascheter Sector MN-T b3-6", "SystemAddress": 13864825529753, "StarPos": [-11.87500,-21.96875,-29.03125], "StarClass": "M" },
+         { "StarSystem": "LP 823-4", "SystemAddress": 9466778953129, "StarPos": [-8.62500,-27.84375,3.93750], "StarClass": "M" }
+      ]
+   }
+    ```
 
 #### Player Dashboard
 
@@ -469,6 +504,11 @@ New in version 4.1.6:
 
 `CargoJSON` contains the raw data from the last read of `cargo.json` passed through json.load.
 It contains more information about the cargo contents, such as the mission ID for mission specific cargo
+
+New in version 5.0.0:
+
+`NavRoute` contains the `json.load()` of `NavRoute.json` as indicated by a journal
+`NavRoute` event.
 
 #### Getting Commander Data
 
