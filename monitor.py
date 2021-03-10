@@ -675,7 +675,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         entry = json.load(rf)
 
                     except json.JSONDecodeError:
-                        logger.exception('Failed decoding NavRoute.json')
+                        logger.exception('Failed decoding NavRoute.json', exc_info=True)
 
                     else:
                         self.state['NavRoute'] = entry
