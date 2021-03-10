@@ -426,7 +426,9 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
-| `Route`        |           `dict`            | Last plotted multi-hop route                                                                                    |
+| `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
+
+##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
@@ -444,6 +446,22 @@ between the two scenarios.
 
 This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
+
+##### Augmented Events
+
+In some cases we augment the events, as seen in the Journal, with extra data.
+Examples of this are:
+
+1. Every `Cargo` event passed to plugins contains the data from
+   `Cargo.json` (but see above for caveats).
+
+1. Every `NavRoute` event contains the full `Route` array as loaded from
+    `NavRoute.json`.  You do not need to access this via
+   `monitor.state['NavRoute']`, although it is available there.
+   
+    *NB: There is no indication available when a player cancels a route.*  The
+    game itself does not provide any such, not in a Journal event, not in a
+   `Status.json` flag.
 
 #### Player Dashboard
 
@@ -478,8 +496,8 @@ contains all the data), this will not be populated at login.**
 
 New in version 5.0.0:
 
-`Route` contains the `json.load()` of `Route.json` as indicated by a journal
-`Route` event.
+`NavRoute` contains the `json.load()` of `NavRoute.json` as indicated by a journal
+`NavRoute` event.
 
 #### Getting Commander Data
 
