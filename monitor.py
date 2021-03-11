@@ -270,7 +270,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """
         return bool(self.thread and self.thread.is_alive())
 
-    def on_created(self, event: FileCreatedEvent) -> None:
+    def on_created(self, event: 'FileCreatedEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
