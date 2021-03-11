@@ -196,8 +196,27 @@ class PluginManager:
         """
         return self.plugins.get(name)
 
-    def unload_plugin(self, name: str) -> bool:
-        ...
+    def unload_plugin(self, name: str):
+        """
+        Unload the plugin identified by the given name.
+
+        :param name: The name to unload
+        """
+        to_unload = self.get_plugin(name)
+        if to_unload is None:
+            self.log.warn(f"Attempt to unload nonexistent plugin {name}")
+            return
+
+        try:
+            to_unload.plugin.unload()
+
+        except Exception as e:
+            self.log.exception(f"Exception occurred while attempting to fire unload callback on {name}: {e}")
+
+        except SystemExit:
+            self.log.critical(f"Unload of {name} attempted to stop the running interpreter! Catching!")
+
+        del self.plugins[name]
 
     def fire_event(self, name: str, data):
         ...
