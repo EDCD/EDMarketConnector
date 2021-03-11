@@ -195,16 +195,16 @@ class AbstractConfig(abc.ABC):
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
         logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
 
-        if (l := self._suppress_call(self.get_list, ValueError, key, None)) is not None:
+        if (l := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return l
 
-        elif (s := self._suppress_call(self.get_str, ValueError, key, None)) is not None:
+        elif (s := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
             return s
 
-        elif (b := self._suppress_call(self.get_bool, ValueError, key, None)) is not None:
+        elif (b := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
             return b
 
-        elif (i := self._suppress_call(self.get_int, ValueError, key, None)) is not None:
+        elif (i := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return i
 
         return default  # type: ignore
