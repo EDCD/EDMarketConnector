@@ -15,6 +15,7 @@ import os
 import pathlib
 import sys
 import warnings
+import traceback
 from abc import abstractmethod
 from sys import platform
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
@@ -192,6 +193,8 @@ class AbstractConfig(abc.ABC):
         :return: the data or the default
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
+        logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
+
         if (l := self._suppress_call(self.get_list, ValueError, key, None)) is not None:
             return l
 
@@ -253,6 +256,8 @@ class AbstractConfig(abc.ABC):
         :raises OSError: on windows, if a registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
+        logger.debug('Attempt to use Deprecated get_int() method\n' + ''.join(traceback.format_stack()))
+
         return self.get_int(key, default=default)
 
     @abstractmethod
