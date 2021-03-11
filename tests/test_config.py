@@ -108,10 +108,10 @@ class TestNewConfig:
         """Save a list and then ask for it back."""
         name = f'list_test_{ hash("".join(lst)) }'
         config.set(name, lst)
-        
+
         config.save()
         self.__update_linuxconfig()
-        
+
         assert lst == config.get_list(name)
 
         config.delete(name)
@@ -124,6 +124,18 @@ class TestNewConfig:
         config.save()
         self.__update_linuxconfig()
         assert b == config.get_bool(name)
+        config.delete(name)
+
+    def test_get_no_error(self) -> None:
+        """Regression test to ensure that get() doesn't throw a TypeError."""
+        name = 'test-get'
+        config.set(name, '1337')
+        config.save()
+        self.__update_linuxconfig()
+        with pytest.deprecated_call():
+            res = config.get(name)
+
+        assert res == '1337'
         config.delete(name)
 
 
