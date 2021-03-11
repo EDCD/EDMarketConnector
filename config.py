@@ -14,8 +14,8 @@ import logging
 import os
 import pathlib
 import sys
-import warnings
 import traceback
+import warnings
 from abc import abstractmethod
 from sys import platform
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
@@ -339,7 +339,7 @@ class WinConfig(AbstractConfig):
 
         journal_dir_str = known_folder_path(FOLDERID_SavedGames)
         journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
-        self.default_journal_dir_path = None
+        self.default_journal_dir_path = None  # type: ignore
         if journaldir is not None:
             self.default_journal_dir_path = journaldir / 'Frontier Developments' / 'Elite Dangerous'
 
@@ -704,7 +704,7 @@ class LinuxConfig(AbstractConfig):
         self.respath_path = pathlib.Path(__file__).parent
 
         self.internal_plugin_dir_path = self.respath_path / 'plugins'
-        self.default_journal_dir_path = None
+        self.default_journal_dir_path = None  # type: ignore
         self.identifier = f'uk.org.marginal.{appname.lower()}'  # TODO: Unused?
 
         config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
