@@ -256,7 +256,7 @@ class AbstractConfig(abc.ABC):
         :raises OSError: on windows, if a registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
-        logger.debug('Attempt to use Deprecated get_int() method\n' + ''.join(traceback.format_stack()))
+        logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
 
         return self.get_int(key, default=default)
 
