@@ -1,6 +1,82 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.0
+===
+
+*This release increases the Minor version due to the major change in how
+multiple-instance checking is done.*
+
+* Adds Steam and Epic to the list of "audiences" in the Frontier Auth callout
+  so that you can authorise using those accounts, rather than their associated
+  Frontier Account details.
+
+* New status message "CAPI: No commander data returned" if a `/profile`
+  request has no commander in the returned data.  This can happen if you
+  literally haven't yet created a Commander on the account.  Previously you'd
+  get a confusing `'commander'` message shown.
+  
+* Changes the "is there another process already running?" check to be based on
+  a lockfile in the configured Journals directory.  The name of this file is
+  `edmc-journal-lock.txt` and upon successful locking it will contain text
+  like:
+
+    ```
+  Path: <configured path to your Journals>
+  PID: <process ID of the application>
+  ```
+  The lock will be released and applied to the new directory if you change it
+  via Settings > Configuration.  If the new location is already locked you'll
+  get a 'Retry/Ignore?' pop-up.
+
+  For most users things will operate no differently, although note that the
+  multiple instance check does now apply to platforms other than Windows.
+    
+  For anyone wanting to run multiple instances of the program this is now
+  possible via:
+    
+  `runas /user:<USER> "\"c:\Program Files (x86)\EDMarketConnector\EDMarketConnector.exe\" --force-localserver-for-auth"`
+    
+  If anything has messed with the backslash characters there then know that you
+  need to have " (double-quote) around the entire command (path to program .exe
+  *and* any extra arguments), and as a result need to place a backslash before
+  any double-quote characters in the command (such as around the space-including
+  path to the program).
+    
+  I've verified it renders correctly [on GitHub](https://github.com/EDCD/EDMarketConnector/blob/Release/4.2.0/ChangeLog.md).
+    
+  The old check was based solely on there being a window present with the title
+  we expect.  This prevented using `runas /user:SOMEUSER ...` to run a second
+  copy of the application, as the resulting window would still be within the
+  same desktop environment and thus be found in the check.
+    
+  The new method does assume that the Journals directory is writable by the
+  user we're running as.  This might not be true in the case of sharing the
+  file system to another host in a read-only manner.  If we fail to open the
+  lock file read-write then the application aborts the checks and will simply
+  continue running as normal.
+    
+  Note that any single instance of EDMarketConnector.exe will still only monitor
+  and act upon the *latest* Journal file in the configured location.  If you run
+  Elite Dangerous for another Commander then the application will want to start
+  monitoring that separate Commander.  See [wiki:Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc>)
+  which will be updated when this change is in a full release.
+
+* Adds the command-line argument `--force-localserver-for-auth`. This forces 
+  using a local webserver for the Frontier Auth callback.  This should be used
+  when running multiple instances of the application **for all instances** 
+  else there's no guarantee of the `edmc://` protocol callback reaching the
+  correct process and Frontier Auth will fail.
+  
+* Adds the command-line argument `--suppress-dupe-process-popup` to exit
+  without showing the warning popup in the case that EDMarketConnector found
+  another process already running.
+
+  This can be useful if wanting to blindly run both EDMC and the game from a
+  batch file or similar.
+
+
+
 Release 4.1.6
 ===
 

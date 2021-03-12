@@ -6,14 +6,14 @@ from os.path import expanduser, dirname, exists, isdir, join, normpath
 from sys import platform
 import semantic_version
 
+from constants import applongname, appname
+
 # Any of these may be imported by plugins
-appname = 'EDMarketConnector'
-applongname = 'E:D Market Connector'
 appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.1.6'  #-rc1+a872b5f'
+appversion = '4.2.0'  #-rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = u'© 2015-2019 Jonathan Harris, 2020 EDCD'
@@ -118,6 +118,7 @@ class Config(object):
 
         def __init__(self):
             self.__in_shutdown = False  # Is the application currently shutting down ?
+            self.__auth_force_localserver = False  # Should we use localhost for auth callback ?
 
             self.app_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname)
             if not isdir(self.app_dir):
@@ -186,10 +187,18 @@ class Config(object):
         def shutting_down(self) -> bool:
             return self.__in_shutdown
 
+        def set_auth_force_localserver(self):
+            self.__auth_force_localserver = True
+
+        @property
+        def auth_force_localserver(self) -> bool:
+            return self.__auth_force_localserver
+
     elif platform=='win32':
 
         def __init__(self):
             self.__in_shutdown = False  # Is the application currently shutting down ?
+            self.__auth_force_localserver = False  # Should we use localhost for auth callback ?
 
             self.app_dir = join(KnownFolderPath(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
@@ -285,12 +294,20 @@ class Config(object):
         def shutting_down(self) -> bool:
             return self.__in_shutdown
 
+        def set_auth_force_localserver(self):
+            self.__auth_force_localserver = True
+
+        @property
+        def auth_force_localserver(self) -> bool:
+            return self.__auth_force_localserver
+
     elif platform=='linux':
 
         SECTION = 'config'
 
         def __init__(self):
             self.__in_shutdown = False  # Is the application currently shutting down ?
+            self.__auth_force_localserver = False  # Should we use localhost for auth callback ?
 
             # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
             self.app_dir = join(getenv('XDG_DATA_HOME', expanduser('~/.local/share')), appname)
@@ -370,6 +387,13 @@ class Config(object):
         @property
         def shutting_down(self) -> bool:
             return self.__in_shutdown
+
+        def set_auth_force_localserver(self):
+            self.__auth_force_localserver = True
+
+        @property
+        def auth_force_localserver(self) -> bool:
+            return self.__auth_force_localserver
 
         def _escape(self, val):
             return str(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')

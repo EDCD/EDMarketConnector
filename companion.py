@@ -277,7 +277,7 @@ class Auth(object):
         logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
-            f'{SERVER_AUTH}{URL_AUTH}?response_type=code&audience=frontier&scope=capi&client_id={CLIENT_ID}&code_challenge={challenge}&code_challenge_method=S256&state={self.state}&redirect_uri={protocolhandler.redirect}'  # noqa: E501 # I cant make this any shorter
+            f'{SERVER_AUTH}{URL_AUTH}?response_type=code&audience=frontier,steam,epic&scope=capi&client_id={CLIENT_ID}&code_challenge={challenge}&code_challenge_method=S256&state={self.state}&redirect_uri={protocolhandler.redirect}'  # noqa: E501 # I cant make this any shorter
         )
 
         return None
@@ -527,11 +527,19 @@ class Session(object):
 
     def profile(self) -> CAPIData:
         """Perform general CAPI /profile endpoint query."""
-        return self.query(URL_QUERY)
+        data = self.query(URL_QUERY)
+        if 'commander' not in data:
+            logger.error('No commander in returned data')
+
+        return data
 
     def station(self) -> CAPIData:
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
+        if 'commander' not in data:
+            logger.error('No commander in returned data')
+            return data
+
         if not data['commander'].get('docked'):
             return data
 

@@ -18,6 +18,10 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
+if TYPE_CHECKING:
+    def _(x: str) -> str:
+        return x
+
 if platform == 'darwin':
     from AppKit import NSWorkspace
     from watchdog.observers import Observer

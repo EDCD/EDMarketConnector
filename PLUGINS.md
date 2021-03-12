@@ -59,8 +59,9 @@ contained therein.   NB: There's a plan to move such to a `data` module.
 for `dashboard_entry()` to be useful (see example below).  Relying on anything
 else isn't supported.
 
-`from monitor import gamerunning` - in case a plugin needs to know if we
- think the game is running.
+`from monitor import game_running` - in case a plugin needs to know if we
+ think the game is running.  *NB: This is a function, and should be called as
+ such.  Using the bare word `game_running` will always be `True`.*
 
 `import timeout_session` - provides a method called `new_session` that creates a requests.session with a default timeout
 on all requests. Recommended to reduce noise in HTTP requests
@@ -375,7 +376,7 @@ def journal_entry(
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
-            logger.info(f'Arrived at {entry["StarSystem"]} {entry["StarPos"')
+            logger.info(f'Arrived at {entry["StarSystem"]} {entry["StarPos"]}')
 
         else:
             logger.info(f'Arrived at {entry["StarSystem"]}')
@@ -396,7 +397,7 @@ Content of `state` (updated to the current journal entry):
 
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
-| `Captian`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Captain`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
 | `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
 | `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`      |            `int`            | Current credits balance                                                                                         |

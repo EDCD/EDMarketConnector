@@ -15,83 +15,161 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING
 
-from config import applongname, appname, appversion, appversion_nobuild, config, copyright
+from constants import applongname, appname, protocolhandler_redirect
 
-if __name__ == "__main__":
-    def no_other_instance_running() -> bool:  # noqa: CCR001
+# config will now cause an appname logger to be set up, so we need the
+# console redirect before this
+if __name__ == '__main__':
+    # Keep this as the very first code run to be as sure as possible of no
+    # output until after this redirect is done, if needed.
+    if getattr(sys, 'frozen', False):
+        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
+        import tempfile
+
+        # unbuffered not allowed for text in python3, so use `1 for line buffering
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='a', buffering=1)
+    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
+
+# After the redirect in case config does logging setup
+from config import appversion, appversion_nobuild, config, copyright
+from EDMCLogging import edmclogger, logger, logging
+from journal_lock import JournalLock
+
+if __name__ == '__main__':  # noqa: C901
+    # Command-line arguments
+    parser = argparse.ArgumentParser(
+        prog=appname,
+        description="Utilises Elite Dangerous Journal files and the Frontier "
+                    "Companion API (CAPI) service to gather data about a "
+                    "player's state and actions to upload to third-party sites "
+                    "such as EDSM, Inara.cz and EDDB."
+    )
+
+    parser.add_argument('--trace',
+                        help='Set the Debug logging loglevel to TRACE',
+                        action='store_true',
+                        )
+
+    parser.add_argument('--suppress-dupe-process-popup',
+                        help='Suppress the popup from when the application detects another instance already running',
+                        action='store_true'
+                        )
+
+    parser.add_argument('--force-localserver-for-auth',
+                        help='Force EDMC to use a localhost webserver for Frontier Auth callback',
+                        action='store_true'
+                        )
+
+    args = parser.parse_args()
+
+    if args.trace:
+        logger.setLevel(logging.TRACE)
+        edmclogger.set_channels_loglevel(logging.TRACE)
+    else:
+        edmclogger.set_channels_loglevel(logging.DEBUG)
+
+    if args.force_localserver_for_auth:
+        config.set_auth_force_localserver()
+
+    def handle_edmc_callback_or_foregrounding():  # noqa: CCR001
         """
-        Ensure only one copy of the app is running under this user account.
-
-        OSX does this automatically.
-
-        :returns: True if we are the single instance, else False.
+        Handle any edmc:// auth callback, else foreground existing window.
         """
-        # TODO: Linux implementation
+        logger.trace('Begin...')
+
         if platform == 'win32':
-            import ctypes
-            from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
-            EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
-            GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
-            GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
-            GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
-            GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-            GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
-            GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
+            # If *this* instance hasn't locked, then another already has and we
+            # now need to do the edmc:// checks for auth callback
+            if not locked:
+                import ctypes
+                from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
-            SW_RESTORE = 9  # noqa: N806
-            SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
-            ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
-            ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
+                EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
+                GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
+                GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
+                GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
+                GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
+                GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
+                GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
 
-            COINIT_MULTITHREADED = 0  # noqa: N806,F841
-            COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-            COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-            CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
+                SW_RESTORE = 9  # noqa: N806
+                SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
+                ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
+                ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
 
-            ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
-            ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
+                COINIT_MULTITHREADED = 0  # noqa: N806,F841
+                COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
+                COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
+                CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
 
-            def window_title(h):
-                if h:
-                    text_length = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(text_length)
-                    if GetWindowText(h, buf, text_length):
-                        return buf.value
+                ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
+                ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
 
-                return None
+                def window_title(h):
+                    if h:
+                        text_length = GetWindowTextLength(h) + 1
+                        buf = ctypes.create_unicode_buffer(text_length)
+                        if GetWindowText(h, buf, text_length):
+                            return buf.value
 
-            @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-            def enumwindowsproc(window_handle, l_param):
-                # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                cls = ctypes.create_unicode_buffer(257)
-                if GetClassName(window_handle, cls, 257) \
-                        and cls.value == 'TkTopLevel' \
-                        and window_title(window_handle) == applongname \
-                        and GetProcessHandleFromHwnd(window_handle):
-                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
-                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                        # Wait for it to be responsive to avoid ShellExecute recursing
-                        ShowWindow(window_handle, SW_RESTORE)
-                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                    return None
 
-                    else:
-                        ShowWindowAsync(window_handle, SW_RESTORE)
-                        SetForegroundWindow(window_handle)
+                @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+                def enumwindowsproc(window_handle, l_param):
+                    """
+                    Determine if any window for the Application exists.
 
-                    return False
+                    Called for each found window by EnumWindows().
 
-                return True
+                    When a match is found we check if we're being invoked as the
+                    edmc://auth handler.  If so we send the message to the existing
+                    process/window.  If not we'll raise that existing window to the
+                    foreground.
+                    :param window_handle: Window to check.
+                    :param l_param: The second parameter to the EnumWindows() call.
+                    :return: False if we found a match, else True to continue iteration
+                    """
+                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
+                    cls = ctypes.create_unicode_buffer(257)
+                    # This conditional is exploded to make debugging slightly easier
+                    if GetClassName(window_handle, cls, 257):
+                        if cls.value == 'TkTopLevel':
+                            if window_title(window_handle) == applongname:
+                                if GetProcessHandleFromHwnd(window_handle):
+                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                        # Wait for it to be responsive to avoid ShellExecute recursing
+                                        ShowWindow(window_handle, SW_RESTORE)
+                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
 
-            return EnumWindows(enumwindowsproc, 0)
+                                    else:
+                                        ShowWindowAsync(window_handle, SW_RESTORE)
+                                        SetForegroundWindow(window_handle)
 
-        return True
+                            return False  # Indicate window found, so stop iterating
+
+                    # Indicate that EnumWindows() needs to continue iterating
+                    return True  # Do not remove, else this function as a callback breaks
+
+                # This performs the edmc://auth check and forward
+                # EnumWindows() will iterate through all open windows, calling
+                # enumwindwsproc() on each.  When an invocation returns False it
+                # stops iterating.
+                # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
+                EnumWindows(enumwindowsproc, 0)
+
+        return
 
     def already_running_popup():
         """Create the "already running" popup."""
         import tkinter as tk
         from tkinter import ttk
+
+        # Check for CL arg that suppresses this popup.
+        if args.suppress_dupe_process_popup:
+            sys.exit(0)
 
         root = tk.Tk(className=appname.lower())
 
@@ -107,20 +185,15 @@ if __name__ == "__main__":
 
         root.mainloop()
 
-    if not no_other_instance_running():
-        # There's a copy already running.  We want to inform the user by
-        # **appending** to the log file, not truncating it.
-        if getattr(sys, 'frozen', False):
-            # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-            import tempfile
+    journal_lock = JournalLock()
+    locked = journal_lock.obtain_lock()
 
-            # unbuffered not allowed for text in python3, so use `1 for line buffering
-            sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='a', buffering=1)
+    handle_edmc_callback_or_foregrounding()
 
-        # Logging isn't set up yet.
-        # We'll keep this print, but it will be over-written by any subsequent
-        # write by the already-running process.
-        print("An EDMarketConnector.exe process was already running, exiting.")
+    if not locked:
+        # There's a copy already running.
+
+        logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
         already_running_popup()
@@ -128,16 +201,12 @@ if __name__ == "__main__":
         # reach here.
         sys.exit(0)
 
-    # Keep this as the very first code run to be as sure as possible of no
-    # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
-        # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
+        # Now that we're sure we're the only instance running we can truncate the logfile
+        logger.trace('Truncating plain logfile')
+        sys.stdout.seek(0)
+        sys.stdout.truncate()
 
-        # unbuffered not allowed for text in python3, so use `1 for line buffering
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
-
-from EDMCLogging import edmclogger, logger, logging
 
 # See EDMCLogging.py docs.
 # isort: off
@@ -163,15 +232,6 @@ import tkinter.font
 import tkinter.messagebox
 from tkinter import ttk
 
-from ttkHyperlinkLabel import HyperlinkLabel
-
-if __debug__:
-    if platform != 'win32':
-        import pdb
-        import signal
-
-        signal.signal(signal.SIGTERM, lambda sig, frame: pdb.Pdb().set_trace(frame))
-
 import commodity
 import companion
 import plug
@@ -185,6 +245,7 @@ from l10n import Translations
 from monitor import monitor
 from protocol import protocolhandler
 from theme import theme
+from ttkHyperlinkLabel import HyperlinkLabel
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -210,7 +271,7 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master):
+    def __init__(self, master):  # noqa: C901
 
         self.holdofftime = config.getint('querytime') + companion.holdoff
 
@@ -487,6 +548,9 @@ class AppWindow(object):
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
 
+        # Update Journal lock if needs be.
+        journal_lock.update_lock(self.w)
+
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             self.status['text'] = f'Error: Check {_("E:D journal file location")}'
@@ -566,7 +630,7 @@ class AppWindow(object):
             self.status['text'] = str(e)
         self.cooldown()
 
-    def getandsend(self, event=None, retrying=False):
+    def getandsend(self, event=None, retrying=False):  # noqa: C901
 
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
@@ -598,17 +662,25 @@ class AppWindow(object):
             config.set('querytime', querytime)
 
             # Validation
-            if not data.get('commander', {}).get('name'):
+            if 'commander' not in data:
+                # This can happen with EGS Auth if no commander created yet
+                self.status['text'] = _('CAPI: No commander data returned')
+
+            elif not data.get('commander', {}).get('name'):
                 self.status['text'] = _("Who are you?!")  # Shouldn't happen
+
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
                       and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
                 self.status['text'] = _("Where are you?!")  # Shouldn't happen
+
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
                 self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 # Companion API return doesn't match Journal
                 raise companion.CmdrError()
+
             elif ((auto_update and not data['commander'].get('docked'))
                   or (data['lastSystem']['name'] != monitor.system)
                   or ((data['commander']['docked']
@@ -725,7 +797,7 @@ class AppWindow(object):
             pass
 
     # Handle event(s) from the journal
-    def journal_event(self, event: str):
+    def journal_event(self, event: str):  # noqa: C901
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -1146,65 +1218,6 @@ class AppWindow(object):
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
-def enforce_single_instance() -> None:
-    # Ensure only one copy of the app is running under this user account. OSX does this automatically. Linux TODO.
-    if platform == 'win32':
-        import ctypes
-        from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
-
-        EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
-        GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
-        GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
-        GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
-        GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-        GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
-        GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-        SW_RESTORE = 9  # noqa: N806
-        SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
-        ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
-        ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
-
-        COINIT_MULTITHREADED = 0  # noqa: N806,F841
-        COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-        COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-        CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
-
-        ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
-        ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
-
-        def window_title(h):
-            if h:
-                text_length = GetWindowTextLength(h) + 1
-                buf = ctypes.create_unicode_buffer(text_length)
-                if GetWindowText(h, buf, text_length):
-                    return buf.value
-            return None
-
-        @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-        def enumwindowsproc(window_handle, l_param):
-            # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-            cls = ctypes.create_unicode_buffer(257)
-            if GetClassName(window_handle, cls, 257) \
-                    and cls.value == 'TkTopLevel' \
-                    and window_title(window_handle) == applongname \
-                    and GetProcessHandleFromHwnd(window_handle):
-                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler.redirect):
-                    # Browser invoked us directly with auth response. Forward the response to the other app instance.
-                    CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                    # Wait for it to be responsive to avoid ShellExecute recursing
-                    ShowWindow(window_handle, SW_RESTORE)
-                    ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
-                else:
-                    ShowWindowAsync(window_handle, SW_RESTORE)
-                    SetForegroundWindow(window_handle)
-                sys.exit(0)
-            return True
-
-        EnumWindows(enumwindowsproc, 0)
-
-
 def test_logging():
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
@@ -1220,31 +1233,7 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 
 
 # Run the app
-if __name__ == "__main__":
-    enforce_single_instance()
-
-    # Command-line arguments
-    parser = argparse.ArgumentParser(
-        prog=appname,
-        description="Utilises Elite Dangerous Journal files and the Frontier "
-                    "Companion API (CAPI) service to gather data about a "
-                    "player's state and actions to upload to third-party sites "
-                    "such as EDSM, Inara.cz and EDDB."
-    )
-
-    parser.add_argument('--trace',
-                        help='Set the Debug logging loglevel to TRACE',
-                        action='store_true',
-                        )
-
-    args = parser.parse_args()
-
-    if args.trace:
-        logger.setLevel(logging.TRACE)
-        edmclogger.set_channels_loglevel(logging.TRACE)
-    else:
-        edmclogger.set_channels_loglevel(logging.DEBUG)
-
+if __name__ == "__main__":  # noqa C901
     logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
