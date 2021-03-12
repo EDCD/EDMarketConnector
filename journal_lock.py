@@ -22,7 +22,7 @@ class JournalLock:
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
-        self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
+        self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
         # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
@@ -198,7 +198,7 @@ class JournalLock:
 
         :param parent: - The parent tkinter window.
         """
-        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
+        current_journaldir = config.get('journaldir') or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
             return  # Still the same
@@ -223,7 +223,7 @@ class JournalLock:
         if not retry:
             return
 
-        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
+        current_journaldir = config.get('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
         if not self.obtain_lock():
