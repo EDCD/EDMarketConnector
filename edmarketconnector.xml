@@ -36,10 +36,80 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.1.6</title>
+			<title>Release 4.2.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.0</h2>
+<p><em>This release increases the Minor version due to the major change in how
+multiple-instance checking is done.</em></p>
+<ul>
+<li>
+<p>Adds Steam and Epic to the list of "audiences" in the Frontier Auth callout
+so that you can authorise using those accounts, rather than their associated
+Frontier Account details.</p>
+</li>
+<li>
+<p>New status message "CAPI: No commander data returned" if a <code>/profile</code>
+request has no commander in the returned data.  This can happen if you
+literally haven't yet created a Commander on the account.  Previously you'd
+get a confusing <code>'commander'</code> message shown.</p>
+</li>
+<li>
+<p>Changes the "is there another process already running?" check to be based on
+a lockfile in the configured Journals directory.  The name of this file is
+<code>edmc-journal-lock.txt</code> and upon successful locking it will contain text
+like:</p>
+<pre><code>Path: &lt;configured path to your Journals&gt;
+PID: &lt;process ID of the application&gt;
+</code></pre>
+<p>The lock will be released and applied to the new directory if you change it
+via Settings &gt; Configuration.  If the new location is already locked you'll
+get a 'Retry/Ignore?' pop-up.</p>
+<p>For most users things will operate no differently, although note that the
+multiple instance check does now apply to platforms other than Windows.</p>
+<p>For anyone wanting to run multiple instances of the program this is now
+possible via:</p>
+<p><code>runas /user:&lt;USER&gt; "\"c:\Program Files (x86)\EDMarketConnector\EDMarketConnector.exe\" --force-localserver-for-auth"</code></p>
+<p>If anything has messed with the backslash characters there then know that you
+need to have " (double-quote) around the entire command (path to program .exe
+<em>and</em> any extra arguments), and as a result need to place a backslash before
+any double-quote characters in the command (such as around the space-including
+path to the program).</p>
+<p>I've verified it renders correctly <a href="https://github.com/EDCD/EDMarketConnector/blob/Release/4.2.0/ChangeLog.md">on GitHub</a>.</p>
+<p>The old check was based solely on there being a window present with the title
+we expect.  This prevented using <code>runas /user:SOMEUSER ...</code> to run a second
+copy of the application, as the resulting window would still be within the
+same desktop environment and thus be found in the check.</p>
+<p>The new method does assume that the Journals directory is writable by the
+user we're running as.  This might not be true in the case of sharing the
+file system to another host in a read-only manner.  If we fail to open the
+lock file read-write then the application aborts the checks and will simply
+continue running as normal.</p>
+<p>Note that any single instance of EDMarketConnector.exe will still only monitor
+and act upon the <em>latest</em> Journal file in the configured location.  If you run
+Elite Dangerous for another Commander then the application will want to start
+monitoring that separate Commander.  See <a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc%3E">wiki:Troubleshooting#i-run-two-instances-of-ed-simultaneously-but-i-cant-run-two-instances-of-edmc</a>
+which will be updated when this change is in a full release.</p>
+</li>
+<li>
+<p>Adds the command-line argument <code>--force-localserver-for-auth</code>. This forces
+using a local webserver for the Frontier Auth callback.  This should be used
+when running multiple instances of the application <strong>for all instances</strong>
+else there's no guarantee of the <code>edmc://</code> protocol callback reaching the
+correct process and Frontier Auth will fail.</p>
+</li>
+<li>
+<p>Adds the command-line argument <code>--suppress-dupe-process-popup</code> to exit
+without showing the warning popup in the case that EDMarketConnector found
+another process already running.</p>
+<p>This can be useful if wanting to blindly run both EDMC and the game from a
+batch file or similar.</p>
+</li>
+</ul>
+
+
 
 <h2>Release 4.1.6</h2>
 <p>We might have finally found the cause of the application hangs during shutdown.
@@ -96,11 +166,11 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.1.6/EDMarketConnector_win_4.1.6.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.0/EDMarketConnector_win_4.2.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.1.6"
-				length="11362304"
+				sparkle:version="4.2.0"
+				length="11378688"
 				type="application/octet-stream"
 			/>
 		</item>
