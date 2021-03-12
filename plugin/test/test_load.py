@@ -1,17 +1,16 @@
 """Testing suite for plugin loading system."""
 import pathlib
-import sys
 from contextlib import nullcontext
 from typing import ContextManager
 
 import pytest
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent.parent))
-
-from plugin.manager import (  # noqa: E402 # Cant be at the top
+from plugin.manager import (
     PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException,
     PluginManager
 )
+
+from .conftest import bad_path, good_path
 
 
 def _idfn(test_data) -> str:
@@ -20,10 +19,6 @@ def _idfn(test_data) -> str:
 
     return ""
 
-
-current_path = pathlib.Path.cwd() / "plugin/test/test_plugins"
-good_path = current_path / "good"
-bad_path = current_path / "bad"
 
 TESTS = [
     (good_path / "simple", nullcontext()),
@@ -34,12 +29,6 @@ TESTS = [
     (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
     (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo"))
 ]
-
-
-@pytest.fixture
-def plugin_manager():
-    """Provide a PluginManager as a fixture."""
-    yield PluginManager()
 
 
 @pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
@@ -60,3 +49,26 @@ def test_double_load(plugin_manager: PluginManager) -> None:
     plugin_manager.load_plugin(bad_path / "double_load")
     with pytest.raises(PluginAlreadyLoadedException):
         plugin_manager.load_plugin(bad_path / "double_load")
+
+
+def test_unload_call(plugin_manager: PluginManager):
+    """Load and unload a single plugin."""
+    target = good_path / "simple"
+    plug = plugin_manager.load_plugin(target)
+    assert plugin_manager.is_plugin_loaded("good")
+    assert plug is not None
+
+    unload_called = False
+    real_unload = plug.plugin.unload
+
+    def mock_unload():
+        nonlocal unload_called
+        unload_called = True
+        real_unload()
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(plug.plugin, 'unload', mock_unload)  # patch the unload method
+        plugin_manager.unload_plugin("good")
+
+    assert not plugin_manager.is_plugin_loaded("good")
+    assert unload_called

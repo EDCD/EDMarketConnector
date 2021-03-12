@@ -123,7 +123,7 @@ class PluginManager:
         relative = path.relative_to(relative_to)
         return ".".join(relative.parts)
 
-    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True):
+    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
         """
         Load a plugin at the given path.
 
@@ -132,7 +132,7 @@ class PluginManager:
 
         :param path: The path to load a plugin from
         :param autoresolve_sys_path: Whether or not to add the parent of the given directory to sys.path if needed
-        :return: A bool indicating success.
+        :return: The LoadedPlugin, or None / an exception.
         """
         self.log.info(f"attempting to load plugin(s) at path {path} ({path.absolute()})")
 
@@ -177,6 +177,7 @@ class PluginManager:
             raise PluginHasNoPluginClassException(f"No plugin class found in {path}")
 
         self.plugins[loaded.info.name] = loaded
+        return loaded
 
     def is_plugin_loaded(self, name: str) -> bool:
         """
