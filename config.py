@@ -14,6 +14,7 @@ import logging
 import os
 import pathlib
 import sys
+import traceback
 import warnings
 from abc import abstractmethod
 from sys import platform
@@ -192,16 +193,18 @@ class AbstractConfig(abc.ABC):
         :return: the data or the default
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
-        if (l := self._suppress_call(self.get_list, ValueError, key, None)) is not None:
+        logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
+
+        if (l := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return l
 
-        elif (s := self._suppress_call(self.get_str, ValueError, key, None)) is not None:
+        elif (s := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
             return s
 
-        elif (b := self._suppress_call(self.get_bool, ValueError, key, None)) is not None:
+        elif (b := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
             return b
 
-        elif (i := self._suppress_call(self.get_int, ValueError, key, None)) is not None:
+        elif (i := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return i
 
         return default  # type: ignore
@@ -253,6 +256,8 @@ class AbstractConfig(abc.ABC):
         :raises OSError: on windows, if a registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
+        logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
+
         return self.get_int(key, default=default)
 
     @abstractmethod
@@ -334,7 +339,7 @@ class WinConfig(AbstractConfig):
 
         journal_dir_str = known_folder_path(FOLDERID_SavedGames)
         journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
-        self.default_journal_dir_path = None
+        self.default_journal_dir_path = None  # type: ignore
         if journaldir is not None:
             self.default_journal_dir_path = journaldir / 'Frontier Developments' / 'Elite Dangerous'
 
@@ -699,7 +704,7 @@ class LinuxConfig(AbstractConfig):
         self.respath_path = pathlib.Path(__file__).parent
 
         self.internal_plugin_dir_path = self.respath_path / 'plugins'
-        self.default_journal_dir_path = None
+        self.default_journal_dir_path = None  # type: ignore
         self.identifier = f'uk.org.marginal.{appname.lower()}'  # TODO: Unused?
 
         config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
