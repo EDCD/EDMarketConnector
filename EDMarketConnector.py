@@ -39,7 +39,7 @@ from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
 from EDMCLogging import edmclogger, logger, logging
-from journal_lock import JournalLock
+from journal_lock import JournalLock, JournalLockResult
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -90,16 +90,14 @@ if __name__ == '__main__':  # noqa: C901
         config.set_auth_force_localserver()
 
     def handle_edmc_callback_or_foregrounding():  # noqa: CCR001
-        """
-        Handle any edmc:// auth callback, else foreground existing window.
-        """
+        """Handle any edmc:// auth callback, else foreground existing window."""
         logger.trace('Begin...')
 
         if platform == 'win32':
 
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
-            if not locked:
+            if locked != JournalLockResult.LOCKED:
                 import ctypes
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
@@ -208,7 +206,7 @@ if __name__ == '__main__':  # noqa: C901
 
     handle_edmc_callback_or_foregrounding()
 
-    if not locked:
+    if locked == JournalLockResult.ALREADY_LOCKED:
         # There's a copy already running.
 
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
