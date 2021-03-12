@@ -11,6 +11,11 @@ multiple-instance checking is done.*
   so that you can authorise using those accounts, rather than their associated
   Frontier Account details.
 
+* New status message "CAPI: No commander data returned" if a `/profile`
+  request has no commander in the returned data.  This can happen if you
+  literally haven't yet created a Commander on the account.  Previously you'd
+  get a confusing `'commander'` message shown.
+  
 * Changes the "is there another process already running?" check to be based on
   a lockfile in the configured Journals directory.  The name of this file is
   `edmc-journal-lock.txt` and upon successful locking it will contain text
