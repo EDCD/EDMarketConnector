@@ -670,7 +670,12 @@ class MacConfig(AbstractConfig):
 
         :param key: the key to delete
         """
-        del self._settings[key]
+        try:
+            del self._settings[key]
+
+        except Exception:
+            if suppress:
+                pass
 
     def save(self) -> None:
         """Save the configuration."""
