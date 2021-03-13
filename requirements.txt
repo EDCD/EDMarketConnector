@@ -4,3 +4,6 @@ watchdog==2.0.2
 # argh==0.26.2 watchdog dep
 # pyyaml==5.3.1 watchdog dep
 semantic-version==2.8.5
+
+# Base requirement for MacOS
+pyobjc; sys_platform == 'darwin'
