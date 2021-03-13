@@ -587,7 +587,7 @@ class MacConfig(AbstractConfig):
         #
         # If we can find where to import the definition of NSCFArray
         # then we could possibly test against that.
-        if res and not isinstance(res, str) and not isinstance(res, int):
+        if res is not None and not isinstance(res, str) and not isinstance(res, int):
             return list(res)
 
         return res
