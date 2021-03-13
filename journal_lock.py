@@ -37,6 +37,7 @@ class JournalLock:
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
         # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
         # self.journal_dir_lockfile: Optional[IO] = None
+        self.locked = False
 
     def obtain_lock(self) -> JournalLockResult:
         """
@@ -91,6 +92,8 @@ class JournalLock:
         self.journal_dir_lockfile.flush()
 
         logger.trace('Done')
+        self.locked = True
+
         return JournalLockResult.LOCKED
 
     def release_lock(self) -> bool:
@@ -99,6 +102,9 @@ class JournalLock:
 
         :return: bool - Success of unlocking operation.
         """
+        if not self.locked:
+            return True  # We weren't locked, and still aren't
+
         unlocked = False
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
