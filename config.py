@@ -581,7 +581,13 @@ class MacConfig(AbstractConfig):
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
         res = self._settings.get(key)
-        if isinstance(res, list):
+        # On MacOS Catalina, with python.org python 3.9.2 any 'list'
+        # has type __NSCFArray so a simple `isinstance(res, list)` is
+        # False.  So, check it's not-None, and not the other types.
+        #
+        # If we can find where to import the definition of NSCFArray
+        # then we could possibly test against that.
+        if res is not None and not isinstance(res, str) and not isinstance(res, int):
             return list(res)
 
         return res
@@ -670,7 +676,12 @@ class MacConfig(AbstractConfig):
 
         :param key: the key to delete
         """
-        del self._settings[key]
+        try:
+            del self._settings[key]
+
+        except Exception:
+            if suppress:
+                pass
 
     def save(self) -> None:
         """Save the configuration."""
