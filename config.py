@@ -581,6 +581,12 @@ class MacConfig(AbstractConfig):
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
         res = self._settings.get(key)
+        # On MacOS Catalina, with python.org python 3.9.2 any 'list'
+        # has type __NSCFArray so a simple `isinstance(res, list)` is
+        # False.  So, check it's not-None, and not the other types.
+        #
+        # If we can find where to import the definition of NSCFArray
+        # then we could possibly test against that.
         if res and not isinstance(res, str) and not isinstance(res, int):
             return list(res)
 
