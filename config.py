@@ -581,7 +581,7 @@ class MacConfig(AbstractConfig):
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
         res = self._settings.get(key)
-        if isinstance(res, list):
+        if res and not isinstance(res, str) and not isinstance(res, int):
             return list(res)
 
         return res
