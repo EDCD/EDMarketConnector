@@ -798,12 +798,24 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     if isinstance(dict, economies):
         economies_colony = any(economy['name'] == 'Colony' for economy in economies.values())
 
+    else:
+        logger.error(f'economies type is {type(economies)}')
+
     if isinstance(dict, modules):
         modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
+
+    else:
+        logger.error(f'modules type is {type(modules)}')
 
     if isinstance(dict, ships):
         if ships.get('shipyard_list') is not None:
             ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+
+        else:
+            logger.debug('No ships["shipyard_list"] - Damaged station or FC ?')
+
+    else:
+        logger.error(f'ships type is {type(ships)}')
 
     return economies_colony or modules_horizons or ship_horizons
 
