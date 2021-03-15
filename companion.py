@@ -496,8 +496,8 @@ class Session(object):
 
     # Callback from protocol handler
     def auth_callback(self) -> None:
-        """Handle callback from edmc:// handler."""
-        logger.debug('Handling callback from edmc:// handler')
+        """Handle callback from edmc:// or localhost:/auth handler."""
+        logger.debug('Handling auth callback')
         if self.state != Session.STATE_AUTH:
             # Shouldn't be getting a callback
             logger.debug('Got an auth callback while not doing auth')
