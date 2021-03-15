@@ -454,6 +454,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Telakka";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Sulkeutuu...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
