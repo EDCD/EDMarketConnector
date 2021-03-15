@@ -263,6 +263,7 @@ class Auth(object):
 
             except (ValueError, requests.RequestException, ):
                 logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
+                self.dump(r)
 
         else:
             logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"")
@@ -360,7 +361,11 @@ class Auth(object):
     # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
         """Dump details of HTTP failure from oAuth attempt."""
-        logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
+        if r:
+            logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
+
+        else:
+            logger.debug(f'Frontier CAPI Auth: failed with `r` False: {r!r}')
 
     # noinspection PyMethodMayBeStatic
     def base64_url_encode(self, text: bytes) -> str:

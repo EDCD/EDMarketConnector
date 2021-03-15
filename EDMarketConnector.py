@@ -918,6 +918,7 @@ class AppWindow(object):
 
     # cAPI auth
     def auth(self, event=None):
+        logger.debug('Received "<<CompanionAuthEvent>>')
         try:
             companion.session.auth_callback()
             # Successfully authenticated with the Frontier website
@@ -925,14 +926,18 @@ class AppWindow(object):
             if platform == 'darwin':
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
+
             else:
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+
         except companion.ServerError as e:
             self.status['text'] = str(e)
+
         except Exception as e:
             logger.debug('Frontier CAPI Auth:', exc_info=e)
             self.status['text'] = str(e)
+
         self.cooldown()
 
     # Handle Status event
