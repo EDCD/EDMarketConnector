@@ -5,14 +5,14 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
 
 from EDMCLogging import get_main_logger, get_plugin_logger
 from plugin import decorators
-from plugin.plugin import Plugin
+from plugin.plugin import MigratedPlugin, Plugin
 from plugin.plugin_info import PluginInfo
 
 
@@ -55,17 +55,29 @@ class PluginManager:
         """
         Search for plugins at the given path.
 
-        :param path: The path to search for
+        :param path: The path to search at
         :return: All plugins found
         """
-        out = []
+        return list(filter(lambda f: f.is_dir(), path.iterdir()))
 
-        for dir in path.iterdir():
-            if not dir.is_dir():
-                continue
-            out.append(dir)
+    # def clean_potential_plugins(self, paths: List[pathlib.Path]) -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
+    #     """
+    #     Split potential plugins into normal and legacy plugins.
 
-        return out
+    #     Silently drops any potential plugin paths that dont match requirements.
+
+    #     :param paths: The potential plugin paths
+    #     :return: A tuple containing plugin and legacy plugin path lists
+    #     """
+    #     legacy = []
+    #     plugins = []
+
+    #     for path in paths:
+    #         for file in list(filter(lambda f: f.is_file(), path.iterdir())):
+    #             if file.match("__init__.py"):
+    #                 # Assume a normal plugin
+
+    #     ...
 
     def __load_plugin_from_class(
         self, path: pathlib.Path, module: ModuleType, class_name: str, cls: Type[Plugin]
@@ -179,6 +191,29 @@ class PluginManager:
         self.plugins[loaded.info.name] = loaded
         return loaded
 
+    def load_legacy_or_normal_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
+        try:
+            return self.load_plugin(path, autoresolve_sys_path=autoresolve_sys_path)
+        except PluginDoesNotExistException:
+            # No __init__.py. Try load it as a legacy plugin directly from the path
+            ...
+        ...
+
+    def load_legacy_plugin_from_path(self, path: pathlib.Path) -> Optional[MigratedPlugin]:
+        target = path / "load.py"
+        if not target.exists():
+            raise PluginDoesNotExistException
+
+        resolved = self.resolve_path_to_plugin(target)[:-3]  # strip off .py
+
+        try:
+            module = importlib.import_module(resolved)
+        except Exception as e:
+            # Something went wrong _but_ the file _DOES_ exist.
+            raise PluginLoadingException from e
+
+        ...
+
     def is_plugin_loaded(self, name: str) -> bool:
         """
         Check if a plugin is loaded under a given name.
@@ -221,3 +256,5 @@ class PluginManager:
 
     def fire_event(self, name: str, data):
         ...
+
+    # TODO: Register(System|station)Provider method, to allow it to be dynamic to plugins

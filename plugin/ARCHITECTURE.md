@@ -40,6 +40,10 @@ loading machinery, this exception will be caught and logged at the top level of 
 
 ### Old style plugins
 
+Searching for old style plugins is done as part of locating normal plugins. We attempt to load any plugin with an
+`__init__.py` as normal, but if it does not contain a decorated plugin class, we then search for a `plugin_start3`.
+If we find said file, we load the plugin in the wrapped plugin loading system.
+
 !!UNIMPLEMENTED -- Planning
 
 During the above loading steps to find the packages for new-style plugins, old style plugins are assumed to be
@@ -66,4 +70,6 @@ changed, but was made to allow for assumptions that may or may not be made in im
 
 ## Event Engine
 
-!! TODO
+Events are identified by a namespace, and are hooked using the decorator `@hook("namespace.event_name")`.
+You can hook onto all events in a given namespace using `@hook("namespace")`, and all events fired with the special 
+event name `*`.
