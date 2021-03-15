@@ -1,6 +1,35 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.1
+===
+
+  This is a bug-fix release.
+
+* PLUGINS.md: Clarify when `CargoJSON` is populated.
+
+* macOS: `pip install -r requirements.txt` will now include `pyobjc` so that
+  running this application works at all.
+
+* JournalLock: Handle when the Journal directory isn't set at all, rather than
+  erroring.  Fixes [#910 - Not launching (Linux)](https://github.com/EDCD/EDMarketConnector/issues/910).
+
+* Extra logging added to track down cause of [#909 - Authentication not possible (PC)](https://github.com/EDCD/EDMarketConnector/issues/909)
+  . The debug log file might now indicate what's wrong, or we might need
+  you to run
+
+    ```
+    "c:\Program Files (x86)\EDMarketConnector/EDMarketConnector.exe" --trace
+    ```
+  in order to increase the log level and gather some extra information.
+  Caution is advised if sharing a `--trace` log file as it will now contain
+  some of the actual auth data returned from Frontier.
+
+* Ensure that 'Save Raw Data' will work.  Fixes [#908 - Raw export of CAPI data broken](https://github.com/EDCD/EDMarketConnector/issues/908).
+
+* Prevent EDDN plugin from erroring when we determine if the commander has
+  Horizons.  Fixes [#907 - Modules is a list not a dict on damaged stations](https://github.com/EDCD/EDMarketConnector/issues/907)
+
 Release 4.2.0
 ===
 
