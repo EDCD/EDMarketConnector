@@ -697,7 +697,7 @@ class AppWindow(object):
                                 system=data['lastSystem']['name'],
                                 station=data['commander'].get('docked') and '.' + data['lastStarport']['name'] or '',
                                 timestamp=strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wb') as h:
-                            h.write(json.dumps(data,
+                            h.write(json.dumps(dict(data),
                                                ensure_ascii=False,
                                                indent=2,
                                                sort_keys=True,
@@ -1119,7 +1119,7 @@ class AppWindow(object):
                                                      initialfile=f'{last_system}{last_starport}.{timestamp}')
             if f:
                 with open(f, 'wb') as h:
-                    h.write(json.dumps(data,
+                    h.write(json.dumps(dict(data),
                                        ensure_ascii=False,
                                        indent=2,
                                        sort_keys=True,
