@@ -1,5 +1,5 @@
 # Static analysis tools
-flake8==3.8.4
+flake8==3.9.0
 flake8-annotations-coverage==0.0.5
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.3.1
