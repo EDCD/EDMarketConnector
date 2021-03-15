@@ -1,3 +1,9 @@
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Skalowanie UI";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 oznacza wartość domyślną{CR}Zmiany zostaną wprowadzone po{CR}ponownym uruchomieniu programu!";
+
 /* Language name */
 "!Language" = "Polski";
 
@@ -39,6 +45,9 @@
 
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Przeglądaj...";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Nie zwrócono danych dowódcy";
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
@@ -101,7 +110,7 @@
 "Delay sending until docked" = "Czekaj z wysłaniem na zadokowanie";
 
 /* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "Wyłącz Sprawdzanie Aktualnej Wersji Aplikacji, gdy jesteś w grze";
+"Disable Automatic Application Updates Check when in-game" = "Wyłącz automatyczne wyszukiwanie aktualizacji, gdy jesteś w grze";
 
 /* List of plugins in settings. [prefs.py] */
 "Disabled Plugins" = "Pluginy wyłączone";
@@ -220,8 +229,14 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Skr. Klaw.";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Zignoruj";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara - uprawnienia";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "Katalog dziennika zablokowany";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Skrót klawiaturowy";
@@ -403,6 +418,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Informacje o wersji";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Ponów";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Rola";
 
@@ -448,6 +466,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Stocznia";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Wyłączanie...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
@@ -468,6 +489,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "System";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Nowa pozycja katalogu dziennika jest zablokowana. {CR}Możesz spróbować to rozwiązać na własną rękę lub zignorować.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Schemat kolorystyczny";
@@ -525,3 +549,6 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} wymaga uprawnień by{CR}móc korzystać ze skrótów klawiszowych.";
+
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Poziom logowania";

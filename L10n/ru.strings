@@ -46,6 +46,9 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Просмотреть...";
 
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Нет данных пилота";
+
 /* Federation rank. [stats.py] */
 "Cadet" = "Кадет";
 
@@ -226,8 +229,14 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Горячая клавиша";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Игнорировать";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Учётные данные Inara";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "Каталог журнала уже заблокирован";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сочетание клавиш";
@@ -409,6 +418,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Заметки о текущем релизе";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Повтор";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Роль";
 
@@ -454,6 +466,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Верфи";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Выключение...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Оруженосец";
 
@@ -474,6 +489,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Система";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Каталог журнала заблокирован..{CR}Вы можете устранить ошибку и нажать \"Повтор\", или игнорировать эту ошибку.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема оформления";
