@@ -25,6 +25,7 @@ class JournalLockResult(Enum):
     JOURNALDIR_NOTEXIST = 2
     JOURNALDIR_READONLY = 3
     ALREADY_LOCKED = 4
+    JOURNALDIR_IS_NONE = 5
 
 
 class JournalLock:
@@ -33,10 +34,23 @@ class JournalLock:
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
         self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
+        self.journal_dir_path: Optional[pathlib.Path] = None
+        self.set_path_from_journaldir()
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
         # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
         # self.journal_dir_lockfile: Optional[IO] = None
+
+    def set_path_from_journaldir(self):
+        """Set self.journal_dir_path from seld.journal_dir."""
+        if self.journal_dir is None:
+            self.journal_dir_path = None
+
+        else:
+            try:
+                self.journal_dir_path = pathlib.Path(self.journal_dir)
+
+            except Exception:
+                logger.exception("Couldn't make pathlib.Path from journal_dir", exc_info=True)
 
     def obtain_lock(self) -> JournalLockResult:
         """
@@ -44,6 +58,9 @@ class JournalLock:
 
         :return: LockResult - See the class Enum definition
         """
+        if self.journal_dir_path is None:
+            return JournalLockResult.JOURNALDIR_IS_NONE
+
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
         logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
@@ -97,7 +114,7 @@ class JournalLock:
         """
         Release lock on journal directory.
 
-        :return: bool - Success of unlocking operation.
+        :return: bool - Whether we're now unlocked.
         """
         unlocked = False
         if platform == 'win32':
@@ -216,8 +233,9 @@ class JournalLock:
         self.release_lock()
 
         self.journal_dir = current_journaldir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
-        if not self.obtain_lock():
+        self.set_path_from_journaldir()
+
+        if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
 
@@ -235,7 +253,7 @@ class JournalLock:
 
         current_journaldir = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
-        if not self.obtain_lock():
+        self.set_path_from_journaldir()
+        if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
