@@ -9,7 +9,9 @@ Release 4.2.1
 * PLUGINS.md: Clarify when `CargoJSON` is populated.
 
 * macOS: `pip install -r requirements.txt` will now include `pyobjc` so that
-  running this application works at all.
+  running this application works at all.  Check the updated [Running from 
+  source](https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source)
+  for some advice if attempting to run on macOS.
 
 * JournalLock: Handle when the Journal directory isn't set at all, rather than
   erroring.  Fixes [#910 - Not launching (Linux)](https://github.com/EDCD/EDMarketConnector/issues/910).
