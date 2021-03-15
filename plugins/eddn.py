@@ -795,19 +795,19 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     modules_horizons = False
     ship_horizons = False
 
-    if isinstance(dict, economies):
+    if isinstance(economies, dict):
         economies_colony = any(economy['name'] == 'Colony' for economy in economies.values())
 
     else:
         logger.error(f'economies type is {type(economies)}')
 
-    if isinstance(dict, modules):
+    if isinstance(modules, dict):
         modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
 
     else:
         logger.error(f'modules type is {type(modules)}')
 
-    if isinstance(dict, ships):
+    if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
             ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
 
