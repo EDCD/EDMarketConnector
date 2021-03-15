@@ -6,6 +6,9 @@ Release 4.2.1
 
   This is a bug-fix release.
 
+* Updated translations.  Thanks once again to all those contributing as per
+  [Translations](https://github.com/EDCD/EDMarketConnector/wiki/Translations).
+  
 * PLUGINS.md: Clarify when `CargoJSON` is populated.
 
 * macOS: `pip install -r requirements.txt` will now include `pyobjc` so that
