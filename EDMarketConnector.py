@@ -671,7 +671,7 @@ class AppWindow(object):
 
             timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
             with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
-                h.write(json.dumps(data,
+                h.write(json.dumps(dict(data),
                                    ensure_ascii=False,
                                    indent=2,
                                    sort_keys=True,
