@@ -46,6 +46,9 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Potraži...";
 
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Nema podataka o komandiru";
+
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
 
@@ -226,8 +229,14 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Skraćenica";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Ignoriši";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara kredencijali";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "Žurnal direktorijum je već zaključan";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Skraćenica";
@@ -409,6 +418,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Informacije o ovoj verziji";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Probaj ponovo";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Uloga";
 
@@ -454,6 +466,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Shipyard";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Gasim...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
@@ -474,6 +489,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Sistem";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Novi Žurnal direktorijum je već zaključan.{CR}Možete probati da rešite problem i probate ponovo ili da ga ignorišete.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";

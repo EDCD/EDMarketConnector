@@ -2,6 +2,7 @@
 
 import pathlib
 import tkinter as tk
+from enum import Enum
 from os import getpid as os_getpid
 from sys import platform
 from tkinter import ttk
@@ -17,23 +18,49 @@ if TYPE_CHECKING:
         return x
 
 
+class JournalLockResult(Enum):
+    """Enumeration of possible outcomes of trying to lock the Journal Directory."""
+
+    LOCKED = 1
+    JOURNALDIR_NOTEXIST = 2
+    JOURNALDIR_READONLY = 3
+    ALREADY_LOCKED = 4
+    JOURNALDIR_IS_NONE = 5
+
+
 class JournalLock:
     """Handle locking of journal directory."""
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
         self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
+        self.journal_dir_path: Optional[pathlib.Path] = None
+        self.set_path_from_journaldir()
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
         # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
         # self.journal_dir_lockfile: Optional[IO] = None
+        self.locked = False
 
-    def obtain_lock(self) -> bool:
+    def set_path_from_journaldir(self):
+        if self.journal_dir is None:
+            self.journal_dir_path = None
+
+        else:
+            try:
+                self.journal_dir_path = pathlib.Path(self.journal_dir)
+
+            except Exception:
+                logger.exception("Couldn't make pathlib.Path from journal_dir")
+
+    def obtain_lock(self) -> JournalLockResult:
         """
         Attempt to obtain a lock on the journal directory.
 
-        :return: bool - True if we successfully obtained the lock
+        :return: LockResult - See the class Enum definition
         """
+        if self.journal_dir_path is None:
+            return JournalLockResult.JOURNALDIR_IS_NONE
+
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
         logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
@@ -44,7 +71,7 @@ class JournalLock:
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
-            return False
+            return JournalLockResult.JOURNALDIR_READONLY
 
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -57,7 +84,7 @@ class JournalLock:
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\""
                             f", assuming another process running: {e!r}")
-                return False
+                return JournalLockResult.ALREADY_LOCKED
 
         else:
             logger.trace('NOT win32, using fcntl')
@@ -67,7 +94,7 @@ class JournalLock:
             except ImportError:
                 logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
                                "Allowing multiple instances!")
-                return True  # Lie about being locked
+                return JournalLockResult.LOCKED
 
             try:
                 fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -75,20 +102,25 @@ class JournalLock:
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\", "
                             f"assuming another process running: {e!r}")
-                return False
+                return JournalLockResult.ALREADY_LOCKED
 
         self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
         self.journal_dir_lockfile.flush()
 
         logger.trace('Done')
-        return True
+        self.locked = True
+
+        return JournalLockResult.LOCKED
 
     def release_lock(self) -> bool:
         """
         Release lock on journal directory.
 
-        :return: bool - Success of unlocking operation.
+        :return: bool - Whether we're now unlocked.
         """
+        if not self.locked:
+            return True  # We weren't locked, and still aren't
+
         unlocked = False
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -206,8 +238,9 @@ class JournalLock:
         self.release_lock()
 
         self.journal_dir = current_journaldir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
-        if not self.obtain_lock():
+        self.set_path_from_journaldir()
+
+        if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
 
@@ -225,7 +258,7 @@ class JournalLock:
 
         current_journaldir = config.get('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
-        self.journal_dir_path = pathlib.Path(self.journal_dir)
-        if not self.obtain_lock():
+        self.set_path_from_journaldir()
+        if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
             self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)

@@ -36,7 +36,9 @@ class GenericProtocolHandler(object):
     def event(self, url):
         self.lastpayload = url
 
+        logger.trace(f'Payload: {self.lastpayload}')
         if not config.shutting_down:
+            logger.debug('event_generate("<<CompanionAuthEvent>>"')
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
@@ -190,12 +192,16 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
                                       None)
                 msg = MSG()
                 while GetMessage(byref(msg), None, 0, 0) != 0:
+                    logger.trace(f'DDE message of type: {msg.message}')
                     if msg.message == WM_DDE_EXECUTE:
                         args = wstring_at(GlobalLock(msg.lParam)).strip()
                         GlobalUnlock(msg.lParam)
                         if args.lower().startswith('open("') and args.endswith('")'):
+                            logger.trace(f'args are: {args}')
                             url = urllib.parse.unquote(args[6:-2]).strip()
+                            logger.trace(f'Parsed url: {url}')
                             if url.startswith(self.redirect):
+                                logger.debug(f'Message starts with {self.redirect}')
                                 self.event(url)
                             SetForegroundWindow(GetParent(self.master.winfo_id()))	# raise app window
                             PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
@@ -242,8 +248,10 @@ else:	# Linux / Run from source
     class HTTPRequestHandler(BaseHTTPRequestHandler):
 
         def parse(self):
+            logger.trace(f'Got message on path: {self.path}')
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
+                logger.debug('Request starts with /auth, sending to protocolhandler.event()')
                 protocolhandler.event(url)
                 self.send_response(200)
                 return True

@@ -1,3 +1,9 @@
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Percentuale zoom della UI";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Default{CR}Riavvio Richiesto per{CR}applicare i cambiamenti!";
+
 /* Language name */
 "!Language" = "Italiano";
 
@@ -39,6 +45,9 @@
 
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Sfoglia...";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
@@ -220,8 +229,14 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Hotkey";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Ignora";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Credenziali per Inara";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "cartella Journal già bloccata";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Scorciatoia di tastiera";
@@ -403,6 +418,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Note di rilascio";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Riprova";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Ruolo";
 
@@ -448,6 +466,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Spazioporto";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Spegnimento...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Squire";
 
@@ -468,6 +489,9 @@
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Sistema";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "La nuova cartella dove risiede il Journal è già bloccata.{CR}Puoi provare a risolvere Riprovando, oppure scegliere di ignorare la cosa.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";

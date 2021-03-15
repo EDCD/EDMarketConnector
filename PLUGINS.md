@@ -460,8 +460,13 @@ typically about once a second when in orbital flight.
 
 New in version 4.1.6:
 
-`CargoJSON` contains the raw data from the last read of `cargo.json` passed through json.load.
-It contains more information about the cargo contents, such as the mission ID for mission specific cargo
+`CargoJSON` contains the raw data from the last read of `Cargo.json` passed
+through json.load. It contains more information about the cargo contents, such
+as the mission ID for mission specific cargo
+
+**NB: Because this is only the data loaded from the `Cargo.json` file, and that
+is not written at Commander login (instead the in-Journal `Cargo` event
+contains all the data), this will not be populated at login.**
 
 #### Getting Commander Data
 
