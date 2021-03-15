@@ -47,6 +47,7 @@ class GenericProtocolHandler:
         """Generate an auth event."""
         self.lastpayload = url
 
+        logger.trace(f'Payload: {self.lastpayload}')
         if not config.shutting_down:
             logger.debug('event_generate("<<CompanionAuthEvent>>"')
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
@@ -374,6 +375,7 @@ else:  # Linux / Run from source
 
         def parse(self) -> bool:
             """Parse a request."""
+            logger.trace(f'Got message on path: {self.path}')
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
