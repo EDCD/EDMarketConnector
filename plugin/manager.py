@@ -5,13 +5,16 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
 
 from EDMCLogging import get_main_logger, get_plugin_logger
 from plugin import decorators
+from plugin.exceptions import (
+    PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
+)
 from plugin.plugin import MigratedPlugin, Plugin
 from plugin.plugin_info import PluginInfo
 
@@ -24,22 +27,6 @@ class LoadedPlugin:
     plugin: Plugin
     module: ModuleType
     callbacks: Dict[str, List[Callable]]
-
-
-class PluginLoadingException(Exception):
-    """Plugin load failed."""
-
-
-class PluginAlreadyLoadedException(PluginLoadingException):
-    """Plugin is already loaded."""
-
-
-class PluginHasNoPluginClassException(PluginLoadingException):
-    """Plugin has no decorated plugin class."""
-
-
-class PluginDoesNotExistException(PluginLoadingException):
-    """Requested module does not exist, or requested plugin name does not exist."""
 
 
 class PluginManager:
@@ -58,6 +45,7 @@ class PluginManager:
         :param path: The path to search at
         :return: All plugins found
         """
+        # TODO: ignore ones ending in .disabled, either here or lower down
         return list(filter(lambda f: f.is_dir(), path.iterdir()))
 
     # def clean_potential_plugins(self, paths: List[pathlib.Path]) -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
@@ -89,7 +77,7 @@ class PluginManager:
         plugin_logger = get_plugin_logger(path.parts[-1])
 
         try:
-            instantiated = cls(plugin_logger)
+            instantiated = cls(plugin_logger, self)
 
         except Exception:
             self.log.exception(f"Could not instantiate plugin class for plugin {str_plugin_reference}")
@@ -200,6 +188,14 @@ class PluginManager:
         ...
 
     def load_legacy_plugin_from_path(self, path: pathlib.Path) -> Optional[MigratedPlugin]:
+        """
+        Load a legacy (load.py and plugin_start3()) plugin from the given path.
+
+        :param path: The path to the _directory_ in which the plugin is located
+        :raises PluginDoesNotExistException: When the plugin does not exist
+        :raises PluginLoadingException: When an exception occurs during loading
+        :return: A MigratedPlugin instance
+        """
         target = path / "load.py"
         if not target.exists():
             raise PluginDoesNotExistException

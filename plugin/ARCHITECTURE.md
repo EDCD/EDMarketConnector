@@ -51,7 +51,7 @@ any python files in the root plugin directory, or any directory under the root t
 be wrapped in a compatibility class and should continue to work as normal:
 
 1. Load file as a module
-2. Map any existing functions in the file to their new counterparts, start3 -> load, journal hooks -> event handlers
+2. Map any existing functions in the file to their new counterparts, start3 -> load, journal hooks -> event handlers. This is done via generated members on the MigratedPlugin instance
 3. These will explicitly NOT support reloading. And any attempt to reload them will result in a very large and scary
    exception being thrown.
 
@@ -71,5 +71,7 @@ changed, but was made to allow for assumptions that may or may not be made in im
 ## Event Engine
 
 Events are identified by a namespace, and are hooked using the decorator `@hook("namespace.event_name")`.
-You can hook onto all events in a given namespace using `@hook("namespace")`, and all events fired with the special 
-event name `*`.
+You can hook onto all events in a given namespace using `@hook("namespace")`, and all events fired with the special event name `*`.
+
+Some `core` events are special, and will work directly with your plugin rather than
+being global, eg $plugin_prefs_changed_here
