@@ -4,7 +4,9 @@ from __future__ import annotations
 import abc
 import inspect
 import pathlib
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, Optional
+
+import semantic_version
 
 from plugin.exceptions import LegacyPluginNeedsMigrating
 
@@ -25,6 +27,7 @@ class Plugin(abc.ABC):
     def __init__(self, logger: LoggerMixin, manager: PluginManager) -> None:
         self.log = logger
         self._manager = manager
+        self.can_reload = True  # Set to false to prevent reload support
 
     @abc.abstractmethod
     def load(self, plugin_path: pathlib.Path) -> PluginInfo:
@@ -62,13 +65,9 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 class MigratedPlugin(Plugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
 
-    OLD_CALLBACKS_AND_BEHAVIOUR = (
-        ('plugin_app', lambda x: decorators.hook("core.plugin_ui_setup")(x)),
-        ('plugin_prefs', lambda x: decorators.hook('core.plugin_preferences_setup')(x))
-    )
-
     def __init__(self, logger: LoggerMixin, module: ModuleType, manager: PluginManager) -> None:
         super().__init__(logger, manager)
+        self.can_reload = False
         self.module = module
         # Find start3
         plugin_start3: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start3')
@@ -89,19 +88,55 @@ class MigratedPlugin(Plugin):
             if callback is None:
                 continue
 
-            setattr(self, f"_SYNTHETIC_CALLBACK_{old_callback}", decorators.hook(new_hook)(old_callback))
+            target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
+            setattr(self, target_name, decorators.hook(new_hook)(old_callback))
+            self.log.trace(
+                f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
+            )
 
     def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+        """
+        Load the legacy plugin.
 
-        return super().load(plugin_path)
+        Do our best to get any comment or version information that may exist in old-style variables and docstrings
+
+        :param plugin_path: The path to this plugin
+        :return: PluginInfo telling the world about us
+        """
+        name = self.start3(str(plugin_path))
+
+        if (version_str := getattr(self.module, "__version__")) is not None:
+            version = semantic_version.Version.coerce(version_str)
+
+        else:
+            version = semantic_version.Version.coerce('0.0.0+UNKNOWN')
+
+        authors = getattr(self.module, '__author__')
+        if authors is None:
+            authors = getattr(self.module, "__credits__")
+
+        if authors is not None and not isinstance(authors, list):
+            authors = [authors]
+
+        comment = getattr(self.module, "__doc__")
+
+        return PluginInfo(name, version, authors=authors, comment=comment)
 
     @staticmethod
     def enforce_load3_signature(load3: Callable):
+        """
+        Ensure that plugin_load3 is the expected function.
+
+        :param load3: The callable to check
+        :raises ValueError: If the given callable is not actually a callable
+        :raises ValueError: If the given callable accepts the wrong number of args
+        """
         if not callable(load3):
             raise ValueError(f'Plugin3 provided by plugin is not callable: {load3!r}')
 
         sig = inspect.signature(load3)
         if not len(sig.parameters) == 1:
-            raise ValueError(f'Plugin3 provided by legacy plugin takes an unexpected arg count: {len(sig.parameters)}')
-
-    ...
+            raise ValueError(
+                f'Plugin3 provided by legacy plugin takes an unexpected arg count:'
+                f'{len(sig.parameters)}; {sig.parameters}'
+            )
