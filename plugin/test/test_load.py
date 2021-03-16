@@ -28,6 +28,7 @@ TESTS = [
     (bad_path / "class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
     (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
     (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo"))
+    # TODO: plugin that imports a nonexistent module
 ]
 
 
