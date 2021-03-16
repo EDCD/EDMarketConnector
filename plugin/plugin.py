@@ -44,6 +44,21 @@ class Plugin(abc.ABC):
         ...
 
 
+LEGACY_CALLBACK_LUT: Dict[str, str] = {
+    'core.setup_ui': 'plugin_app',
+    'core.setup_preferences_ui': 'plugin_prefs',
+    'core.preferences_closed': 'prefs_changed',
+    'core.journal_entry': 'journal_entry',
+    'core.dashboard_entry': 'dashboard_entry',
+    'core.commander_data': 'cmdr_data',
+
+
+    'inara.notify_ship': 'inara_notify_ship',
+    'inara.notify_location': 'inara_notify_location',
+    'edsm.notify_system': 'edsm_notify_system',
+}
+
+
 class MigratedPlugin(Plugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
 
@@ -55,22 +70,7 @@ class MigratedPlugin(Plugin):
     def __init__(self, logger: LoggerMixin, module: ModuleType, manager: PluginManager) -> None:
         super().__init__(logger, manager)
         self.module = module
-        # TODO: fill this dict and then generate hooks for everything that needs it
-        self.callbacks: Dict[str, List[Callable]] = {
-            'core.setup_ui': [],
-            'core.setup_preferences_ui': [],
-            'core.preferences_changed': [],
-            'core.journal_entry': [],
-            'core.dashboard_entry': [],
-            'core.commander_data': [],
-
-
-            'inara.notify_ship': [],
-            'inara.notify_location': [],
-            'edsm.notify_system': [],
-        }
-
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+        # Find start3
         plugin_start3: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start3')
         plugin_start: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start')
 
@@ -81,8 +81,17 @@ class MigratedPlugin(Plugin):
             raise ValueError('Plugin does not define a plugin_start3 method')
 
         self.enforce_load3_signature(plugin_start3)
+        self.start3 = plugin_start3
 
         # We have a start3, lets see what else we have and get ready to prepare hooks for them
+        for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
+            callback: Optional[Callable] = getattr(self.module, old_callback)
+            if callback is None:
+                continue
+
+            setattr(self, f"_SYNTHETIC_CALLBACK_{old_callback}", decorators.hook(new_hook)(old_callback))
+
+    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
 
         return super().load(plugin_path)
 
