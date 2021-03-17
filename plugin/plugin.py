@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional
 
 import semantic_version
 
-from plugin.exceptions import LegacyPluginNeedsMigrating
+from plugin.exceptions import LegacyPluginHasNoStart3, LegacyPluginNeedsMigrating
 
 if TYPE_CHECKING:
     from EDMCLogging import LoggerMixin
@@ -77,7 +77,7 @@ class MigratedPlugin(Plugin):
             if plugin_start is not None:
                 raise LegacyPluginNeedsMigrating
 
-            raise ValueError('Plugin does not define a plugin_start3 method')
+            raise LegacyPluginHasNoStart3
 
         self.enforce_load3_signature(plugin_start3)
         self.start3 = plugin_start3
@@ -132,11 +132,11 @@ class MigratedPlugin(Plugin):
         :raises ValueError: If the given callable accepts the wrong number of args
         """
         if not callable(load3):
-            raise ValueError(f'Plugin3 provided by plugin is not callable: {load3!r}')
+            raise ValueError(f'load3 provided by plugin is not callable: {load3!r}')
 
         sig = inspect.signature(load3)
         if not len(sig.parameters) == 1:
             raise ValueError(
-                f'Plugin3 provided by legacy plugin takes an unexpected arg count:'
+                'load3 provided by legacy plugin takes an unexpected arg count:'
                 f'{len(sig.parameters)}; {sig.parameters}'
             )
