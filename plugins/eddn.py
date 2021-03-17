@@ -288,7 +288,7 @@ Msg:\n{msg}'''
                 logger.debug('modules was None.  FC or Damaged Station?')
             elif isinstance(modules, list):
                 if len(modules) == 0:
-                    logger.debug('modules is empty list. Damaged Station?')
+                    logger.debug('modules is empty list. FC or Damaged Station?')
                 else:
                     logger.error(f'modules is non-empty list: {modules!r}')
             else:
@@ -807,10 +807,14 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
 
     if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
-            ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+            if isinstance(ships.get('shipyard_list'), dict):
+                ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+
+            else:
+                logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')
 
         else:
-            logger.debug('No ships["shipyard_list"] - Damaged station or FC ?')
+            logger.debug('ships["shipyard_list"] is None - FC or Damaged Station?')
 
     else:
         logger.error(f'ships type is {type(ships)}')
