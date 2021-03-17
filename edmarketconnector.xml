@@ -36,10 +36,18 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.1</title>
+			<title>Release 4.2.2</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.2</h2>
+<p>This release contains a minor bug-fix, actually properly checking a station's
+ships list before operating on it.</p>
+<ul>
+<li>Check that <code>ships['shipuard_list']</code> is a <code>dict</code> before trying to use
+<code>.values()</code> on it.  This fixes the issue with seeing <code>list object has no attribute values</code> in the application status line.</li>
+</ul>
 
 <h2>Release 4.2.1</h2>
 <p>This is a bug-fix release.</p>
@@ -206,11 +214,11 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.1/EDMarketConnector_win_4.2.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.2/EDMarketConnector_win_4.2.2.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.1"
-				length="11378688"
+				sparkle:version="4.2.2"
+				length="11366400"
 				type="application/octet-stream"
 			/>
 		</item>
