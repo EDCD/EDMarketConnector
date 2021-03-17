@@ -5,7 +5,7 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Type
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -18,6 +18,8 @@ from plugin.exceptions import (
 from plugin.plugin import MigratedPlugin, Plugin
 from plugin.plugin_info import PluginInfo
 
+PLUGIN_MODULE_PAIR = Tuple[Optional[Plugin], Optional[ModuleType]]
+
 
 @dataclasses.dataclass
 class LoadedPlugin:
@@ -27,6 +29,12 @@ class LoadedPlugin:
     plugin: Plugin
     module: ModuleType
     callbacks: Dict[str, List[Callable]]
+
+    def __str__(self) -> str:
+        return (
+            f'Plugin {self.info.name} from {self.module} on {self.plugin._manager}'
+            f' with {len(self.callbacks)} callbacks'
+        )
 
 
 class PluginManager:
@@ -123,7 +131,7 @@ class PluginManager:
         relative = path.relative_to(relative_to)
         return ".".join(relative.parts)
 
-    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
+    def load_normal_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> PLUGIN_MODULE_PAIR:
         """
         Load a plugin at the given path.
 
@@ -154,40 +162,117 @@ class PluginManager:
             self.log.error(f"Unable to load module {path}")
             raise PluginLoadingException(f"Exception occurred while loading: {e}") from e
 
-        loaded = None
+        uninstantiated: Optional[Type[Plugin]] = None
 
+        self.log.trace(f'Searching for decorated plugin class in module at {path}')
         # Okay, we have the module loaded, lets find any actual plugins
         for class_name, cls in module.__dict__.items():
             if not hasattr(cls, decorators.PLUGIN_MARKER):
                 continue
-            try:
-                loaded = self.__load_plugin_from_class(path, module, class_name, cls)
-            except Exception as e:
-                self.log.info(f"Failed to load plugin {class_name} -> {cls!r}")
-                raise PluginLoadingException(f"Cannot load plugin {cls!r}: {e}") from e
 
-            if self.is_plugin_loaded(loaded.info.name):
-                self.log.error("Plugins with the same names attempted to load (double load?)")
-                raise PluginAlreadyLoadedException(f"Plugin with name {loaded.info.name} cannot be loaded twice")
-
+            self.log.trace(f'Found decorated plugin class for {path}: {class_name} ({cls!r})')
+            uninstantiated = cls
             break
 
-        if loaded is None:
-            self.log.error(f"No plugin class found in {path}")
-            raise PluginHasNoPluginClassException(f"No plugin class found in {path}")
+        if uninstantiated is None:
+            self.log.trace(f'No plugin class found in module at {path}')
+            raise PluginHasNoPluginClassException
 
-        self.plugins[loaded.info.name] = loaded
+        plugin_logger = get_plugin_logger(path.parts[-1])
+        instance: Optional[Plugin] = None
+
+        try:
+            instance = uninstantiated(plugin_logger, self, path)
+
+        except Exception as e:
+            self.log.exception(f'Could not load plugin class for plugin at {path} ({uninstantiated!r}): {e}')
+            raise PluginLoadingException(f'Cannot load plugin {uninstantiated!r}: {e}') from e
+
+        return instance, module
+
+    def __get_plugin_at(self, path: pathlib.Path, autoresolve_sys_path=True) -> PLUGIN_MODULE_PAIR:  # noqa: CCR001
+        init = path / '__init__.py'
+        load = path / 'load.py'
+
+        plugin: Optional[Plugin] = None
+        module: Optional[ModuleType] = None
+
+        if init.exists():
+            # Could be either type, start by trying a normal plugin
+            try:
+                plugin, module = self.load_normal_plugin(path, autoresolve_sys_path=autoresolve_sys_path)
+            except PluginHasNoPluginClassException:
+                if not load.exists():
+                    raise
+            except PluginLoadingException as e:
+                self.log.exception(f'Unable to load plugin at {path}: {e}')
+                raise
+                return None
+
+            except Exception as e:
+                self.log.exception(f'Exception occurred during loading plugin at {path}: {e} THIS IS A BUG!')
+                raise
+
+        if load.exists() and plugin is None:
+            # We have a load.py, and loading the plugin as a new style plugin failed. Try migrate the plugin
+            self.log.trace(
+                f'Attempt to load {path} as a normal plugin failed. Attempting to load it as a legacy plugin'
+            )
+
+            try:
+                plugin, module = self.load_legacy_plugin(path)
+            except PluginLoadingException as e:
+                self.log.exception(f'Unable to load legacy plugin at {path}: {e}')
+                raise
+                return None
+
+            except Exception as e:
+                self.log.exception(f'Exception occurred during loading of legacy plugin at {path}: {e} THIS IS A BUG')
+                raise
+
+        return plugin, module
+
+    def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
+        """
+        Load either a normal or legacy plugin from the given path.
+
+        Normal plugins are tried first, then the two legacy plugin types in order
+
+        :param path: The path to the directory in which the plugin lies
+        :param autoresolve_sys_path: See load_normal_plugin, defaults to True
+        :return: The loaded plugin, if successful
+        """
+        # TODO: PLUGINS.md indicates that for legacy plugins, plugins _with_ an __init__.py should be loaded first
+        # TODO: Likely this will be done a step above in whatever is done for ordering the list for iteration
+
+        plugin, module = self.__get_plugin_at(path, autoresolve_sys_path=autoresolve_sys_path)
+
+        if plugin is None or module is None:
+            raise ValueError('All attempts to load both failed and did not raise any exceptions. THIS IS A BUG')
+
+        # At this point, we have _a_ plugin. Don't really care if its a legacy or otherwise, as far as we're concerned
+        # if it walks like a duck, talks like a duck, and quacks like a duck, its a plugin
+
+        self.log.trace(f'Calling load method on {plugin}')
+        try:
+            info = plugin.load()
+        except PluginLoadingException:
+            # TODO: store this to note that it was tried but failed
+            return None
+
+        except Exception as e:
+            raise PluginLoadingException from e
+
+        if info.name in self.plugins:
+            raise PluginAlreadyLoadedException(info.name)
+
+        loaded = LoadedPlugin(info, plugin, module, plugin._find_callbacks())
+        self.plugins[info.name] = loaded
+        self.log.trace(f'successfully loaded {loaded}')
+
         return loaded
 
-    def load_legacy_or_normal_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
-        try:
-            return self.load_plugin(path, autoresolve_sys_path=autoresolve_sys_path)
-        except PluginDoesNotExistException:
-            # No __init__.py. Try load it as a legacy plugin directly from the path
-            ...
-        ...
-
-    def load_legacy_plugin_from_path(self, path: pathlib.Path) -> Optional[MigratedPlugin]:
+    def load_legacy_plugin(self, path: pathlib.Path) -> PLUGIN_MODULE_PAIR:
         """
         Load a legacy (load.py and plugin_start3()) plugin from the given path.
 
@@ -200,6 +285,9 @@ class PluginManager:
         if not target.exists():
             raise PluginDoesNotExistException
 
+        # TODO: set up the plugin path in sys.path? Note that this probably has special behaviour if an __init__ is
+        # TODO: present
+
         resolved = self.resolve_path_to_plugin(target)[:-3]  # strip off .py
 
         try:
@@ -208,7 +296,15 @@ class PluginManager:
             # Something went wrong _but_ the file _DOES_ exist.
             raise PluginLoadingException from e
 
-        ...
+        logger = get_plugin_logger(path.parts[-1])
+
+        self.log.trace(f'Begin migration of legacy plugin at {path}')
+
+        # This can raise, but we want it to go through us to the upper loading machinery
+        plugin = MigratedPlugin(logger, module, self, path)
+        self.log.trace(f'Migration of {plugin} complete.')
+
+        return plugin, module
 
     def is_plugin_loaded(self, name: str) -> bool:
         """
