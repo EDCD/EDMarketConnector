@@ -1,6 +1,16 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.2
+===
+
+  This release contains a minor bug-fix, actually properly checking a station's
+ships list before operating on it.
+
+* Check that `ships['shipuard_list']` is a `dict` before trying to use
+  `.values()` on it.  This fixes the issue with seeing `list object has no
+  attribute values` in the application status line.
+
 Release 4.2.1
 ===
 
