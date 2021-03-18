@@ -142,6 +142,7 @@ if __name__ == '__main__':  # noqa: C901
                                 if GetProcessHandleFromHwnd(window_handle):
                                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                        logger.debug('Invoked with edmc:// protocol handler arg')
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         ShowWindow(window_handle, SW_RESTORE)
