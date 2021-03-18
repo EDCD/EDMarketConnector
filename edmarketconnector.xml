@@ -36,10 +36,35 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.2</title>
+			<title>Release 4.2.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.3</h2>
+<p>This release mostly addresses an issue when Frontier Authorisation gets stuck
+on 'Logging in...' despite completing the authorisation on the Frontier
+website.</p>
+<ul>
+<li>
+<p>Allow <code>edmc...</code> argument to EDMarketConnector.exe.  This should only be
+necessary when something has prevented your web browser from invoking the
+<code>edmc</code> protocol via DDE.</p>
+<p>If you were encountering the 'Logging in...' issue and still do with this
+release then please try running the application via the new
+<code>EDMarketConnector - localserver-auth.bat</code> file in the installation
+directory.</p>
+<p>This simply runs EDMarketConnector.exe with the
+<code>--force-localserver-for-auth</code> command-line argument.  This forces the code
+to setup and use a webserver on a random port on localhost for the
+Frontier Authorisation callback, the same way it already works on
+non-Windows platforms.</p>
+</li>
+<li>
+<p>Add Korean translation to both the application and the installer.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.2.2</h2>
 <p>This release contains a minor bug-fix, actually properly checking a station's
@@ -214,11 +239,11 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.2/EDMarketConnector_win_4.2.2.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.2"
-				length="11366400"
+				sparkle:version="4.2.3"
+				length="11382784"
 				type="application/octet-stream"
 			/>
 		</item>
