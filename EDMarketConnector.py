@@ -60,6 +60,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('edmc',
+                        help='Callback from Frontier Auth',
+                        nargs='*'
+                        )
+
     args = parser.parse_args()
 
     if args.trace:
@@ -137,6 +142,7 @@ if __name__ == '__main__':  # noqa: C901
                                 if GetProcessHandleFromHwnd(window_handle):
                                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                        logger.debug('Invoked with edmc:// protocol handler arg')
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         ShowWindow(window_handle, SW_RESTORE)
@@ -194,7 +200,8 @@ if __name__ == '__main__':  # noqa: C901
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
-        already_running_popup()
+        if not args.edmc:
+            already_running_popup()
         # If the user closes the popup with the 'X', not the 'OK' button we'll
         # reach here.
         sys.exit(0)

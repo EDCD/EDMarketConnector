@@ -82,7 +82,7 @@ To add a new language to the app:
 
     Remember that until there are translations all strings will default to the English version (actually the key, which is always specified in English).
 
-1. You need to get the new `.string` file added to the files the installer will install:
+1. You need to get the new `.strings` file added to the files the installer will install:
     1. Edit `EDMarketConnector.wxs` to add an appropriate section to the:
     
             `<Directory Id="L10n" Name="L10n">`
