@@ -18,8 +18,8 @@
 				 Description="$(var.PRODUCTLONGNAME) installer"
 				 InstallerVersion="300" Compressed="yes"
 				 Platform="x86"
-				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,0" />
-				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk  lv zh-CN pt-PT sr-Latn sr-Latn-BA sl sv-SE neutral -->
+				 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0" />
+				 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk  lv zh-CN pt-PT sr-Latn sr-Latn-BA sl sv-SE ko neutral -->
 				 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
 
 		<!-- Always reinstall since patching is problematic -->
@@ -248,6 +248,9 @@
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\ja.strings" />
+						</Component>
+						<Component Guid="*">
+							<File KeyPath="yes" Source="SourceDir\L10n\ko.strings" />
 						</Component>
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\lv.strings" />
@@ -565,6 +568,7 @@
 			<ComponentRef Id="libcrypto_1_1.dll" />
 			<ComponentRef Id="library.zip" />
 			<ComponentRef Id="libssl_1_1.dll" />
+			<ComponentRef Id="ko.strings" />
 			<ComponentRef Id="lv.strings" />
 			<ComponentRef Id="modules.p" />
 			<ComponentRef Id="nl.strings" />
