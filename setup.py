@@ -150,6 +150,7 @@ elif sys.platform=='win32':
             '%s.ico' % APPNAME,
             '%s/DLLs/sqlite3.dll' % (sys.base_prefix),
             'EDMarketConnector - TRACE.bat',
+            'EDMarketConnector - localserver-auth.bat',
         ]),
         ('L10n', [join('L10n',x) for x in os.listdir('L10n') if x.endswith('.strings')]),
         ('plugins', PLUGINS),

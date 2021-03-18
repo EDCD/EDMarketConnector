@@ -224,6 +224,9 @@
 					<Component Id="EDMarketConnector_TRACE.bat" Guid="*">
 					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - TRACE.bat" />
 					</Component>
+					<Component Id="EDMarketConnector_localserver_auth.bat" Guid="*">
+					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - localserver-auth.bat" />
+					</Component>
 					<Directory Id="L10n" Name="L10n">
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\cs.strings" />
@@ -597,6 +600,7 @@
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />
 			<ComponentRef Id="EDMarketConnector_TRACE.bat" />
+			<ComponentRef Id="EDMarketConnector_localserver_auth.bat" />
 			<ComponentRef Id="zh_CN.strings" />
 			<ComponentRef Id="auto.tcl" />
 			<ComponentRef Id="clock.tcl" />
