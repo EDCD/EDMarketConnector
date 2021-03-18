@@ -1,6 +1,31 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.3
+===
+
+This release mostly addresses an issue when Frontier Authorisation gets stuck
+on 'Logging in...' despite completing the authorisation on the Frontier
+website.
+
+* Allow `edmc...` argument to EDMarketConnector.exe.  This should only be
+  necessary when something has prevented your web browser from invoking the
+  `edmc` protocol via DDE.
+  
+  If you were encountering the 'Logging in...' issue and still do with this
+  release then please try running the application via the new
+  `EDMarketConnector - localserver-auth.bat` file in the installation 
+  directory.
+  
+  This simply runs EDMarketConnector.exe with the 
+  `--force-localserver-for-auth` command-line argument.  This forces the code
+  to setup and use a webserver on a random port on localhost for the 
+  Frontier Authorisation callback, the same way it already works on 
+  non-Windows platforms.
+  
+* Add Korean translation to both the application and the installer.
+
+
 Release 4.2.2
 ===
 
