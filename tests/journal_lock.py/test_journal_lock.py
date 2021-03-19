@@ -43,28 +43,30 @@ from config import config
 from journal_lock import JournalLock
 
 
-@pytest.fixture
-def mock_journaldir(monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
-    """Fixture for mocking config.get_str('journaldir')."""
-    def get_str(key: str, *, default: str = None) -> str:
-        """Mock config.*Config get_str to provide fake journaldir."""
-        if key == 'journaldir':
-            print(f'journaldir: using tmpdir: {tmpdir}')
-            return tmpdir
+class TestJournalLock:
+    """JournalLock test class."""
 
-        print('Other key, calling up ...')
-        return config.get_str(key)  # Call the non-mocked
+    @pytest.fixture
+    def mock_journaldir(self, monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
+        """Fixture for mocking config.get_str('journaldir')."""
+        def get_str(key: str, *, default: str = None) -> str:
+            """Mock config.*Config get_str to provide fake journaldir."""
+            if key == 'journaldir':
+                print(f'journaldir: using tmpdir: {tmpdir}')
+                return tmpdir
 
-    with monkeypatch.context() as m:
-        m.setattr(config, "get_str", get_str)
-        yield tmpdir
+            print('Other key, calling up ...')
+            return config.get_str(key)  # Call the non-mocked
 
+        with monkeypatch.context() as m:
+            m.setattr(config, "get_str", get_str)
+            yield tmpdir
 
-def test_journal_lock_init(mock_journaldir: py_path_local_LocalPath):
-    """Test JournalLock instantiation."""
-    tmpdir = mock_journaldir
+    def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock instantiation."""
+        tmpdir = mock_journaldir
 
-    jlock = JournalLock()
-    assert jlock.journal_dir == tmpdir
-    assert jlock.journal_dir_path is not None
-    assert jlock.journal_dir_lockfile_name is None
+        jlock = JournalLock()
+        assert jlock.journal_dir == tmpdir
+        assert jlock.journal_dir_path is not None
+        assert jlock.journal_dir_lockfile_name is None
