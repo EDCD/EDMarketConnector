@@ -42,7 +42,7 @@ class JournalLock:
         self.locked = False
 
     def set_path_from_journaldir(self):
-        """Set self.journal_dir_path from seld.journal_dir."""
+        """Set self.journal_dir_path from self.journal_dir."""
         if self.journal_dir is None:
             self.journal_dir_path = None
 
