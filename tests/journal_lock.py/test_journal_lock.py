@@ -75,7 +75,7 @@ class TestJournalLock:
         assert jlock.journal_dir_lockfile_name is None
 
     def test_path_from_journaldir_with_none(self):
-        """Test JournalLock.set_path_from_journaldir()."""
+        """Test JournalLock.set_path_from_journaldir() with None."""
         jlock = JournalLock()
 
         # Check that 'None' is handled correctly.
@@ -84,7 +84,7 @@ class TestJournalLock:
         assert jlock.journal_dir_path is None
 
     def test_path_from_journaldir_with_tmpdir(self, mock_journaldir: py_path_local_LocalPath):
-        """Test JournalLock.set_path_from_journaldir()."""
+        """Test JournalLock.set_path_from_journaldir() with tmpdir."""
         tmpdir = mock_journaldir
 
         jlock = JournalLock()
