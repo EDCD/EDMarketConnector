@@ -33,6 +33,8 @@ py2exe==0.10.3.0; sys_platform == 'win32'
 pytest==6.2.2
 pytest-cov==2.11.1  # Pytest code coverage support
 coverage[toml]==5.5 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+# For manipulating folder permissions and the like.
+pywin32==300; sys_platform == 'win32'
 
 
 # All of the normal requirements
