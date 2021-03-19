@@ -53,16 +53,9 @@ class JournalLock:
             except Exception:
                 logger.exception("Couldn't make pathlib.Path from journal_dir")
 
-    def obtain_lock(self) -> JournalLockResult:
-        """
-        Attempt to obtain a lock on the journal directory.
-
-        :return: LockResult - See the class Enum definition
-        """
-        if self.journal_dir_path is None:
-            return JournalLockResult.JOURNALDIR_IS_NONE
-
-        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
+    def open_journal_dir_lockfile(self) -> bool:
+        """Open journal_dir lockfile ready for locking."""
+        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
         logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
             self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
@@ -72,8 +65,35 @@ class JournalLock:
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
+            return False
+
+        return True
+
+    def obtain_lock(self) -> JournalLockResult:
+        """
+        Attempt to obtain a lock on the journal directory.
+
+        :return: LockResult - See the class Enum definition
+        """
+        if self.journal_dir_path is None:
+            return JournalLockResult.JOURNALDIR_IS_NONE
+
+        if not self.open_journal_dir_lockfile():
             return JournalLockResult.JOURNALDIR_READONLY
 
+        return self._obtain_lock()
+
+    def _obtain_lock(self) -> JournalLockResult:
+        """
+        Actual code for obtaining a lock.
+
+        This is split out so tests can call *just* it, without the attempt
+        at opening the file.  If we call open_journal_dir_lockfile() we
+        re-use self.journal_dir_lockfile and in the process close the
+        previous handle stored in it and thus release the lock.
+
+        :return: LockResult - See the class Enum definition
+        """
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
