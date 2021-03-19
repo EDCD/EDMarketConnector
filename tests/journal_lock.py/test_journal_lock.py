@@ -33,6 +33,8 @@
 #
 #  - Not sure about testing JournalAlreadyLocked class.
 
+import pathlib
+
 import pytest
 # Import as other names else they get picked up when used as fixtures
 from _pytest import monkeypatch as _pytest_monkeypatch
@@ -67,6 +69,27 @@ class TestJournalLock:
         tmpdir = mock_journaldir
 
         jlock = JournalLock()
+        # Check members are properly initialised.
         assert jlock.journal_dir == tmpdir
         assert jlock.journal_dir_path is not None
         assert jlock.journal_dir_lockfile_name is None
+
+    def test_path_from_journaldir_with_none(self):
+        """Test JournalLock.set_path_from_journaldir()."""
+        jlock = JournalLock()
+
+        # Check that 'None' is handled correctly.
+        jlock.journal_dir = None
+        jlock.set_path_from_journaldir()
+        assert jlock.journal_dir_path is None
+
+    def test_path_from_journaldir_with_tmpdir(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.set_path_from_journaldir()."""
+        tmpdir = mock_journaldir
+
+        jlock = JournalLock()
+
+        # Check that an actual journaldir is handled correctly.
+        jlock.journal_dir = tmpdir
+        jlock.set_path_from_journaldir()
+        assert isinstance(jlock.journal_dir_path, pathlib.Path)
