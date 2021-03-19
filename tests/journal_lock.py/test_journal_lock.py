@@ -33,19 +33,23 @@
 #
 #  - Not sure about testing JournalAlreadyLocked class.
 
-from pytest._pytest import monkeypatch, tmpdir
+import pytest
+# Import as other names else they get picked up when used as fixtures
+from _pytest import monkeypatch as _pytest_monkeypatch
+from _pytest import tmpdir as _pytest_tmpdir
+from py._path.local import LocalPath as py_path_local_LocalPath
 
 from config import config
 from journal_lock import JournalLock
 
 
-def test_journal_lock_init(monkeypatch: monkeypatch, tmpdir: tmpdir):  # type: ignore
-    """Test JournalLock instantiation."""
-
+@pytest.fixture
+def mock_get_str(monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
+    """Fixture for get_str() mock setup."""
     def get_str(key: str, *, default: str = None) -> str:
         """Mock config.*Config get_str to provide fake journaldir."""
         if key == 'journaldir':
-            print('journaldir: using tmpdir')
+            print(f'journaldir: using tmpdir: {tmpdir}')
             return tmpdir
 
         print('Other key, calling up ...')
@@ -53,5 +57,14 @@ def test_journal_lock_init(monkeypatch: monkeypatch, tmpdir: tmpdir):  # type: i
 
     with monkeypatch.context() as m:
         m.setattr(config, "get_str", get_str)
-        print(f'{tmpdir=}')
-        jlock = JournalLock()
+        yield tmpdir
+
+
+def test_journal_lock_init(mock_get_str: py_path_local_LocalPath):
+    """Test JournalLock instantiation."""
+    tmpdir = mock_get_str
+
+    jlock = JournalLock()
+    assert jlock.journal_dir == str(tmpdir)
+    assert jlock.journal_dir_path is not None
+    assert jlock.journal_dir_lockfile_name is None
