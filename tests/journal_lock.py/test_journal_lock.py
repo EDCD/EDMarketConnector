@@ -33,7 +33,9 @@
 #
 #  - Not sure about testing JournalAlreadyLocked class.
 
+import os
 import pathlib
+import sys
 
 import pytest
 # Import as other names else they get picked up when used as fixtures
@@ -42,7 +44,7 @@ from _pytest import tmpdir as _pytest_tmpdir
 from py._path.local import LocalPath as py_path_local_LocalPath
 
 from config import config
-from journal_lock import JournalLock
+from journal_lock import JournalLock, JournalLockResult
 
 
 class TestJournalLock:
@@ -51,6 +53,9 @@ class TestJournalLock:
     @pytest.fixture
     def mock_journaldir(self, monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
+        # Force the directory to pre-defined for testing making !Write
+        # tmpdir = pathlib.Path(r'C:\Users\Athan\AppData\Local\Temp\rotest')
+
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
@@ -93,3 +98,62 @@ class TestJournalLock:
         jlock.journal_dir = tmpdir
         jlock.set_path_from_journaldir()
         assert isinstance(jlock.journal_dir_path, pathlib.Path)
+
+    def test_obtain_lock_with_none(self):
+        """Test JournalLock.obtain_lock() with None."""
+        jlock = JournalLock()
+
+        # Check that 'None' is handled correctly.
+        jlock.journal_dir = None
+        jlock.set_path_from_journaldir()
+        assert jlock.journal_dir_path is None
+        locked = jlock.obtain_lock()
+        assert locked == JournalLockResult.JOURNALDIR_IS_NONE
+
+    def test_obtain_lock_with_tmpdir(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.obtain_lock() with tmpdir."""
+        jlock = JournalLock()
+
+        # Check that an actual journaldir is handled correctly.
+        locked = jlock.obtain_lock()
+        assert locked == JournalLockResult.LOCKED
+
+    def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.obtain_lock() with tmpdir."""
+        tmpdir = mock_journaldir
+
+        # Make tmpdir read-only ?
+        if sys.platform == 'win32':
+            # Ref: <https://stackoverflow.com/a/12168268>
+            # 1. Look up the current user
+            user = os.environ.get('USERNAME')
+
+            # From pywin32
+            import ntsecuritycon as con
+            import win32security
+
+            # 2. Fetch its details
+            winuser, domain, type = win32security.LookupAccountName("", user)
+
+            # 3. Fetch the current security of tmpdir for that user.
+            sd = win32security.GetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION)
+            dacl = sd.GetSecurityDescriptorDacl()  # instead of dacl = win32security.ACL()
+
+            # 4. Add Write to Denied list
+            dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, winuser)
+            # 5. Apply that change.
+            sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
+            win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+            #
+            # And, we might need to undo all of that to exit tests cleanly ?
+
+        else:
+            import stat
+            os.chmod(tmpdir, stat.S_IRUSR | stat.S_IUSR)
+
+        jlock = JournalLock()
+
+        # Check that an actual journaldir is handled correctly.
+        locked = jlock.obtain_lock()
+        print(f'{locked=}')
+        assert locked == JournalLockResult.JOURNALDIR_READONLY
