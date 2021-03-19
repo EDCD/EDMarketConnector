@@ -44,8 +44,8 @@ from journal_lock import JournalLock
 
 
 @pytest.fixture
-def mock_get_str(monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
-    """Fixture for get_str() mock setup."""
+def mock_journaldir(monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
+    """Fixture for mocking config.get_str('journaldir')."""
     def get_str(key: str, *, default: str = None) -> str:
         """Mock config.*Config get_str to provide fake journaldir."""
         if key == 'journaldir':
@@ -60,9 +60,9 @@ def mock_get_str(monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py
         yield tmpdir
 
 
-def test_journal_lock_init(mock_get_str: py_path_local_LocalPath):
+def test_journal_lock_init(mock_journaldir: py_path_local_LocalPath):
     """Test JournalLock instantiation."""
-    tmpdir = mock_get_str
+    tmpdir = mock_journaldir
 
     jlock = JournalLock()
     assert jlock.journal_dir == str(tmpdir)
