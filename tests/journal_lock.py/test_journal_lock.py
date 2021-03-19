@@ -65,6 +65,6 @@ def test_journal_lock_init(mock_journaldir: py_path_local_LocalPath):
     tmpdir = mock_journaldir
 
     jlock = JournalLock()
-    assert jlock.journal_dir == str(tmpdir)
+    assert jlock.journal_dir == tmpdir
     assert jlock.journal_dir_path is not None
     assert jlock.journal_dir_lockfile_name is None
