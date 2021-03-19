@@ -119,41 +119,66 @@ class TestJournalLock:
         assert locked == JournalLockResult.LOCKED
 
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
-        """Test JournalLock.obtain_lock() with tmpdir."""
+        """Test JournalLock.obtain_lock() with read-only tmpdir."""
         tmpdir = mock_journaldir
 
         # Make tmpdir read-only ?
         if sys.platform == 'win32':
             # Ref: <https://stackoverflow.com/a/12168268>
-            # 1. Look up the current user
-            user = os.environ.get('USERNAME')
-
-            # From pywin32
             import ntsecuritycon as con
             import win32security
 
-            # 2. Fetch its details
-            winuser, domain, type = win32security.LookupAccountName("", user)
-
-            # 3. Fetch the current security of tmpdir for that user.
+            # Fetch user details
+            winuser, domain, type = win32security.LookupAccountName("", os.environ.get('USERNAME'))
+            # Fetch the current security of tmpdir for that user.
             sd = win32security.GetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION)
             dacl = sd.GetSecurityDescriptorDacl()  # instead of dacl = win32security.ACL()
 
-            # 4. Add Write to Denied list
-            dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_GENERIC_WRITE, winuser)
-            # 5. Apply that change.
+            # Add Write to Denied list
+            dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_WRITE_DATA, winuser)
+            # Apply that change.
             sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
             win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
-            #
-            # And, we might need to undo all of that to exit tests cleanly ?
 
         else:
             import stat
-            os.chmod(tmpdir, stat.S_IRUSR | stat.S_IUSR)
+            os.chmod(tmpdir, stat.S_IRUSR | stat.S_IXUSR)
 
         jlock = JournalLock()
 
         # Check that an actual journaldir is handled correctly.
         locked = jlock.obtain_lock()
+
+        # Revert permissions for test cleanup
+        if sys.platform == 'win32':
+            # We can reuse winuser etc from before
+            import pywintypes
+
+            # We have to call GetAce() until we find one that looks like what
+            # we added.
+            i = 0
+            ace = dacl.GetAce(i)
+            while ace:
+                print(f'After {ace=}')
+                if ace[0] == (con.ACCESS_DENIED_ACE_TYPE, 0) and ace[1] == con.FILE_WRITE_DATA:
+                    # Delete the Ace that we added
+                    dacl.DeleteAce(i)
+                    # Apply that change.
+                    sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
+                    win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+                    print('Found the Ace we added, removing...')
+                    break
+
+                i += 1
+                try:
+                    ace = dacl.GetAce(i)
+
+                except pywintypes.error:
+                    print("Couldn't find the Ace we added, so can't remove")
+                    break
+
+        else:
+            os.chmod(tmpdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
         print(f'{locked=}')
         assert locked == JournalLockResult.JOURNALDIR_READONLY
