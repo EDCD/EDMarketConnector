@@ -59,7 +59,6 @@ class TestJournalLock:
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                print(f'journaldir: using tmpdir: {tmpdir}')
                 return tmpdir
 
             print('Other key, calling up ...')
@@ -135,6 +134,10 @@ class TestJournalLock:
             dacl = sd.GetSecurityDescriptorDacl()  # instead of dacl = win32security.ACL()
 
             # Add Write to Denied list
+            # con.FILE_WRITE_DATA results in a 'Special permissions' being
+            # listed on Properties > Security for the user in the 'Deny' column.
+            # Clicking through to 'Advanced' shows a 'Deny' for
+            # 'Create files / write data'.
             dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_WRITE_DATA, winuser)
             # Apply that change.
             sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
@@ -159,14 +162,12 @@ class TestJournalLock:
             i = 0
             ace = dacl.GetAce(i)
             while ace:
-                print(f'After {ace=}')
                 if ace[0] == (con.ACCESS_DENIED_ACE_TYPE, 0) and ace[1] == con.FILE_WRITE_DATA:
                     # Delete the Ace that we added
                     dacl.DeleteAce(i)
                     # Apply that change.
                     sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
                     win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
-                    print('Found the Ace we added, removing...')
                     break
 
                 i += 1
@@ -180,5 +181,4 @@ class TestJournalLock:
         else:
             os.chmod(tmpdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-        print(f'{locked=}')
         assert locked == JournalLockResult.JOURNALDIR_READONLY
