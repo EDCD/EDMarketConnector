@@ -182,3 +182,13 @@ class TestJournalLock:
             os.chmod(tmpdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
         assert locked == JournalLockResult.JOURNALDIR_READONLY
+
+    def test_obtain_lock_already_locked(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.obtain_lock() with tmpdir."""
+        jlock = JournalLock()
+
+        locked = jlock.obtain_lock()
+        assert locked == JournalLockResult.LOCKED
+        # Now attempt to lock again, but only that.
+        second_attempt = jlock._obtain_lock()
+        assert second_attempt == JournalLockResult.ALREADY_LOCKED
