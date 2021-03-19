@@ -116,6 +116,7 @@ class TestJournalLock:
         # Check that an actual journaldir is handled correctly.
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.LOCKED
+        assert jlock.locked is True
 
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.obtain_lock() with read-only tmpdir."""
@@ -189,6 +190,7 @@ class TestJournalLock:
 
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.LOCKED
+        assert jlock.locked is True
         # Now attempt to lock again, but only that.
         second_attempt = jlock._obtain_lock()
         assert second_attempt == JournalLockResult.ALREADY_LOCKED
