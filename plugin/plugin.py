@@ -4,7 +4,8 @@ from __future__ import annotations
 import abc
 import inspect
 import pathlib
-from typing import TYPE_CHECKING, Callable, Dict, Optional
+from collections import defaultdict
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 import semantic_version
 
@@ -24,13 +25,15 @@ class Plugin(abc.ABC):
 
     # TODO: a similar level of paranoia about defined methods where needed
 
-    def __init__(self, logger: LoggerMixin, manager: PluginManager) -> None:
+    def __init__(self, logger: LoggerMixin, manager: PluginManager, path: pathlib.Path) -> None:
         self.log = logger
         self._manager = manager
         self.can_reload = True  # Set to false to prevent reload support
+        self.path = path
+        # TODO: self.loaded?
 
     @abc.abstractmethod
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         """
         Load this plugin.
 
@@ -45,6 +48,22 @@ class Plugin(abc.ABC):
     def show_error(self):
         # TODO: replacement of plug.show_error
         ...
+
+    def _find_callbacks(self) -> Dict[str, List[Callable]]:
+        out: Dict[str, List[Callable]] = defaultdict(list)
+
+        for field in self.__dict__.values():
+            callbacks: Optional[List[str]] = getattr(field, decorators.CALLBACK_MARKER)
+            if callbacks is None:
+                continue
+
+            for name in callbacks:
+                out[name].append(field)
+
+        return dict(out)
+
+    def __str__(self) -> str:
+        return f'Plugin at {self.path} on {self._manager} '
 
 
 LEGACY_CALLBACK_LUT: Dict[str, str] = {
@@ -65,8 +84,8 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 class MigratedPlugin(Plugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
 
-    def __init__(self, logger: LoggerMixin, module: ModuleType, manager: PluginManager) -> None:
-        super().__init__(logger, manager)
+    def __init__(self, logger: LoggerMixin, module: ModuleType, manager: PluginManager, path: pathlib.Path) -> None:
+        super().__init__(logger, manager, path)
         self.can_reload = False
         self.module = module
         # Find start3
