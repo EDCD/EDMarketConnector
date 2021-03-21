@@ -605,7 +605,7 @@ in your plugin's folder. This extracts all the translatable strings from Python
 files in your plugin's folder and places them in a file named `en.template` in
 the `L10n` folder. Rename this file as `<language_code>.strings` and edit it.
 
-See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/master/L10n)
+See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/main/L10n)
 folder for the list of supported language codes and for example translation
 files.
 
