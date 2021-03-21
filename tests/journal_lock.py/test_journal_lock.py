@@ -1,12 +1,5 @@
 """Tests for journal_lock.py code."""
 # Tests:
-#  - Need logging set up, at TRACE level.
-#
-#  - Will need to mock config for the retrieval of journaldir.
-#  - Can ask pytest to create a unique tmp dir:
-#
-#       <https://docs.pytest.org/en/stable/getting-started.html#request-a-unique-temporary-directory-for-functional-tests>
-#
 #  - Is file actually locked after obtain_lock().  Problem: We opened the
 #     file in a manner which means nothing else can open it.  Also I assume
 #     that the same process will either be allowed to lock it 'again' or
@@ -23,10 +16,6 @@
 #      1. return True if not locked.
 #      2. return True if locked, but successful unlock.
 #      3. return False otherwise.
-#
-#  - JournalLock.set_path_from_journaldir
-#      1. When journaldir is None.
-#      2. Succeeds otherwise?
 #
 #  - Can any string to pathlib.Path result in an invalid path for other
 #    operations?
@@ -68,6 +57,8 @@ class TestJournalLock:
             m.setattr(config, "get_str", get_str)
             yield tmpdir
 
+    ###########################################################################
+    # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock instantiation."""
         tmpdir = mock_journaldir
@@ -78,6 +69,8 @@ class TestJournalLock:
         assert jlock.journal_dir_path is not None
         assert jlock.journal_dir_lockfile_name is None
 
+    ###########################################################################
+    # Tests against JournalLock.set_path_from_journaldir()
     def test_path_from_journaldir_with_none(self):
         """Test JournalLock.set_path_from_journaldir() with None."""
         jlock = JournalLock()
@@ -98,6 +91,8 @@ class TestJournalLock:
         jlock.set_path_from_journaldir()
         assert isinstance(jlock.journal_dir_path, pathlib.Path)
 
+    ###########################################################################
+    # Tests against JournalLock.obtain_lock()
     def test_obtain_lock_with_none(self):
         """Test JournalLock.obtain_lock() with None."""
         jlock = JournalLock()
@@ -193,4 +188,12 @@ class TestJournalLock:
         assert jlock.locked is True
         # Now attempt to lock again, but only that.
         second_attempt = jlock._obtain_lock()
+        # Fails on Linux, because flock(2) is per process, so we'd need to
+        # use multiprocessing to test this.
         assert second_attempt == JournalLockResult.ALREADY_LOCKED
+
+    ###########################################################################
+    # Tests against JournalLock.release_lock()
+
+    ###########################################################################
+    # Tests against JournalLock.update_lock()
