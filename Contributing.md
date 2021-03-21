@@ -157,10 +157,20 @@ Note that if your PR does not cleanly (or mostly cleanly) pass a linting scan, y
 
 ### Unit testing
 
-Where possible please write unit tests for your PRs, especially in the case of bug fixes, having regression tests help
-ensure that we don't accidentally re-introduce a bug down the line.
+Where possible please write unit tests for your PRs, especially in the case of
+bug fixes, having regression tests help ensure that we don't accidentally
+re-introduce a bug down the line.
 
-We use the python stdlib library `unittest` for unit testing.
+We use the `pytest` for unit testing.
+
+The files for a test should go in a sub-directory of `tests/` names after the
+(main) file that contains the code they are testing.  e.g. for journal_lock.py
+the tests are in `tests/journal_lock.py/test_journal_lock.py`.  The `test_`
+prefix on `test_journal_lock.py` is necessary in order for `pytest` to
+recognise the file as containing tests to be run.
+The sub-directory avoids having a mess of files in `tests`, particularly when
+there might be supporting files, e.g. `tests/config.py/_old_config.py` or files
+containing test data.
 
 ---
 
