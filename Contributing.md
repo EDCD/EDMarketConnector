@@ -1,3 +1,6 @@
+<!--
+vim: textwidth=79 wrapmargin=79
+-->
 # Guidelines for contributing to EDMC
 
 ## Work on Issues
@@ -163,14 +166,27 @@ re-introduce a bug down the line.
 
 We use the `pytest` for unit testing.
 
-The files for a test should go in a sub-directory of `tests/` names after the
-(main) file that contains the code they are testing.  e.g. for journal_lock.py
-the tests are in `tests/journal_lock.py/test_journal_lock.py`.  The `test_`
-prefix on `test_journal_lock.py` is necessary in order for `pytest` to
-recognise the file as containing tests to be run.
+The files for a test should go in a sub-directory of `tests/` named after the
+(principal) file that contains the code they are testing.  e.g. for
+journal_lock.py the tests are in `tests/journal_lock.py/test_journal_lock.py`.
+The `test_` prefix on `test_journal_lock.py` is necessary in order for `pytest`
+to recognise the file as containing tests to be run.
 The sub-directory avoids having a mess of files in `tests`, particularly when
 there might be supporting files, e.g. `tests/config.py/_old_config.py` or files
 containing test data.
+
+Invoking just a bare `pytest` command will run all tests.
+
+To run only a sub-set of tests you can use, e.g. `pytest -k journal_lock`. You
+might want to use `pytest -rA -k journal_lock` if you have any debug print()
+statements within the test code itself, so you can see the output even when the
+tests all succeed.
+
+Adding `--trace` to a `pytest` invocation causes it to drop into `pdb` prompt
+for each test, handy if you want to step through the testing code to be sure of
+anything.
+
+Otherwise see the [pytest documentation](https://docs.pytest.org/en/stable/contents.html).
 
 ---
 
