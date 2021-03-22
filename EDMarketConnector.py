@@ -715,11 +715,17 @@ class AppWindow(object):
             else:
                 if __debug__:  # Recording
                     if isdir('dump'):
-                        with open('dump/{system}{station}.{timestamp}.json'.format(
-                                system=data['lastSystem']['name'],
-                                station=data['commander'].get('docked') and '.' + data['lastStarport']['name'] or '',
-                                timestamp=strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wb') as h:
-                            h.write(json.dumps(dict(data),
+                        system = data['lastSystem']['name']
+
+                        if data['commander'].get('docked'):
+                            station = f'.{data["lastStarport"]["name"]}'
+
+                        else:
+                            station = ''
+
+                        timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+                        with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+                            h.write(json.dumps(data,
                                                ensure_ascii=False,
                                                indent=2,
                                                sort_keys=True,
@@ -1458,7 +1464,7 @@ sys.path: {sys.path}'''
         """Simple top-level class."""
 
         class B(object):
-        """Simple second-level class."""
+            """Simple second-level class."""
 
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
