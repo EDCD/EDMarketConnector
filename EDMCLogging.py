@@ -44,7 +44,7 @@ import tempfile
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple, cast
 
 from config import appcmdname, appname, config
 
@@ -282,7 +282,7 @@ class EDMCContextFilter(logging.Filter):
         return True
 
     @classmethod
-    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:  # noqa: CCR001, E501 # this is as refactored as is sensible
+    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
         """
         Determine extra or changed fields for the caller.
 
@@ -322,11 +322,8 @@ class EDMCContextFilter(logging.Filter):
 
                 if frame_class:
                     # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
-                    # For more detail, see _Py_Mangle in CPython's Python/compile.c.
-                    name = frame_info.function
-                    class_name = frame_class.__class__.__name__.lstrip("_")
-                    if name.startswith("__") and not name.endswith("__") and class_name:
-                        name = f'_{class_name}{frame_info.function}'
+                    if (name := frame_info.function).startswith("__") and not name.endswith("__"):
+                        name = f'_{frame_class.__class__.__name__}{frame_info.function}'
 
                     # Find __qualname__ of the caller
                     fn = inspect.getattr_static(frame_class, name, None)
