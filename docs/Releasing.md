@@ -361,6 +361,8 @@ If you are making a pre-release then:
 
 When changing the Python version (Major.Minor.Patch) used:
 
+1. Change the contents of `.python-version` so that pyenv notices.
+
 1. Any version change:
 
    1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
