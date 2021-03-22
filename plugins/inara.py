@@ -1315,16 +1315,14 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
                 'setCommanderTravelLocation'
             ):
                 this.lastlocation = reply_event.get('eventData', {})
-
+                # calls update_location in main thread
                 if not config.shutting_down:
-                    # calls update_location in main thread
                     this.system_link.event_generate('<<InaraLocation>>', when="tail")
 
             elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
                 this.lastship = reply_event.get('eventData', {})
-
+                # calls update_ship in main thread
                 if not config.shutting_down:
-                    # calls update_ship in main thread
                     this.system_link.event_generate('<<InaraShip>>', when="tail")
 
     return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
