@@ -177,7 +177,14 @@ elif sys.platform=='win32':
                       'timeout_session',
                       'zipfile',        # Included for plugins
                   ],
-                  'excludes': [ 'distutils', '_markerlib', 'optparse', 'PIL', 'pkg_resources', 'simplejson', 'unittest' ],
+                  'excludes': [
+                      'distutils',
+                      '_markerlib',
+                      'optparse',
+                      'PIL',
+                      'pkg_resources',
+                      'simplejson',
+                      'unittest' ],
               }
     }
 
