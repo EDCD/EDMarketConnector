@@ -18,7 +18,7 @@ from plugin.exceptions import (
 from plugin.plugin import MigratedPlugin, Plugin
 from plugin.plugin_info import PluginInfo
 
-PLUGIN_MODULE_PAIR = Tuple[Optional[Plugin], Optional[ModuleType]]
+PLUGIN_MODULE_PAIR = Tuple[Optional[Plugin], Optional['ModuleType']]
 
 
 @dataclasses.dataclass
@@ -55,66 +55,6 @@ class PluginManager:
         """
         # TODO: ignore ones ending in .disabled, either here or lower down
         return list(filter(lambda f: f.is_dir(), path.iterdir()))
-
-    # def clean_potential_plugins(self, paths: List[pathlib.Path]) -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
-    #     """
-    #     Split potential plugins into normal and legacy plugins.
-
-    #     Silently drops any potential plugin paths that dont match requirements.
-
-    #     :param paths: The potential plugin paths
-    #     :return: A tuple containing plugin and legacy plugin path lists
-    #     """
-    #     legacy = []
-    #     plugins = []
-
-    #     for path in paths:
-    #         for file in list(filter(lambda f: f.is_file(), path.iterdir())):
-    #             if file.match("__init__.py"):
-    #                 # Assume a normal plugin
-
-    #     ...
-
-    def __load_plugin_from_class(
-        self, path: pathlib.Path, module: ModuleType, class_name: str, cls: Type[Plugin]
-    ) -> LoadedPlugin:
-
-        str_plugin_reference = f"{class_name} -> {cls!r} from path {path}"
-        self.log.trace(f"Loading plugin class {str_plugin_reference}")
-
-        plugin_logger = get_plugin_logger(path.parts[-1])
-
-        try:
-            instantiated = cls(plugin_logger, self)
-
-        except Exception:
-            self.log.exception(f"Could not instantiate plugin class for plugin {str_plugin_reference}")
-            raise
-
-        callbacks: Dict[str, List[Callable]] = {}
-
-        for field_name, class_field in cls.__dict__.items():
-            if not hasattr(class_field, decorators.CALLBACK_MARKER):
-                continue
-
-            events = getattr(class_field, decorators.CALLBACK_MARKER)
-
-            self.log.trace(f"found callback method {field_name} -> {class_field} with callbacks {events}")
-            for name in events:
-                callbacks[name] = callbacks.get(name, []) + [class_field]
-
-        self.log.trace(f"finished finding callbacks on plugin class {str_plugin_reference}")
-
-        try:
-            info = instantiated.load(path)
-        except Exception:
-            self.log.exception(f"Could not call load on plugin {str_plugin_reference}")
-            raise
-
-        if info is None:
-            raise PluginLoadingException(f"Plugin {str_plugin_reference} did not return a valid PluginInfo")
-
-        return LoadedPlugin(info, instantiated, module, callbacks)
 
     @staticmethod
     def resolve_path_to_plugin(path: pathlib.Path, relative_to=None) -> str:
@@ -224,7 +164,6 @@ class PluginManager:
             except PluginLoadingException as e:
                 self.log.exception(f'Unable to load legacy plugin at {path}: {e}')
                 raise
-                return None
 
             except Exception as e:
                 self.log.exception(f'Exception occurred during loading of legacy plugin at {path}: {e} THIS IS A BUG')
