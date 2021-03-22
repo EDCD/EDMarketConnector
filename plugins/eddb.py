@@ -23,6 +23,7 @@
 #
 
 
+from companion import CAPIData
 import sys
 from typing import Any, Optional, TYPE_CHECKING
 import requests
@@ -125,7 +126,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data, is_beta):
+def cmdr_data(data: CAPIData, is_beta):
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid and data['commander']['docked']:
         this.station_marketid = data['lastStarport']['id']
