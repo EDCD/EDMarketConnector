@@ -809,15 +809,27 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     modules_horizons = False
     ship_horizons = False
 
-    if isinstance(dict, economies):
+    if isinstance(economies, dict):
         economies_colony = any(economy['name'] == 'Colony' for economy in economies.values())
 
-    if isinstance(dict, modules):
+    else:
+        logger.error(f'economies type is {type(economies)}')
+
+    if isinstance(modules, dict):
         modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
 
-    if isinstance(dict, ships):
+    else:
+        logger.error(f'modules type is {type(modules)}')
+
+    if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
             ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+
+        else:
+            logger.debug('No ships["shipyard_list"] - Damaged station or FC ?')
+
+    else:
+        logger.error(f'ships type is {type(ships)}')
 
     return economies_colony or modules_horizons or ship_horizons
 

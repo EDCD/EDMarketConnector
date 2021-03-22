@@ -73,6 +73,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('edmc',
+                        help='Callback from Frontier Auth',
+                        nargs='*'
+                        )
+
     args = parser.parse_args()
 
     if args.trace:
@@ -171,9 +176,7 @@ if __name__ == '__main__':  # noqa: C901
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 EnumWindows(enumwindowsproc, 0)
 
-                return False  # Another instance is running
-
-        return True
+        return
 
     def already_running_popup():
         """Create the "already running" popup."""
@@ -201,17 +204,19 @@ if __name__ == '__main__':  # noqa: C901
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
 
-    if journal_lock.journal_dir_lockfile:
-        if not no_other_instance_running():
-            # There's a copy already running.
+    handle_edmc_callback_or_foregrounding()
 
-            logger.info("An EDMarketConnector.exe process was already running, exiting.")
+    if locked == JournalLockResult.ALREADY_LOCKED:
+        # There's a copy already running.
 
-            # To be sure the user knows, we need a popup
+        logger.info("An EDMarketConnector.exe process was already running, exiting.")
+
+        # To be sure the user knows, we need a popup
+        if not args.edmc:
             already_running_popup()
-            # If the user closes the popup with the 'X', not the 'OK' button we'll
-            # reach here.
-            sys.exit(0)
+        # If the user closes the popup with the 'X', not the 'OK' button we'll
+        # reach here.
+        sys.exit(0)
 
     if getattr(sys, 'frozen', False):
         # Now that we're sure we're the only instance running we can truncate the logfile
@@ -1238,31 +1243,40 @@ class AppWindow(object):
             config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
-        self.status['text'] = 'Shutting down...'
+        self.status['text'] = _('Shutting down...')
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
-        logger.info('Closing protocol handler...')
-        protocolhandler.close()
+        # First so it doesn't interrupt us
+        logger.info('Closing update checker...')
+        self.updater.close()
 
+        # Earlier than anything else so plugin code can't interfere *and* it
+        # won't still be running in a manner that might rely on something
+        # we'd otherwise have already stopped.
+        logger.info('Notifying plugins to stop...')
+        plug.notify_stop()
+
+        # Handling of application hotkeys now so the user can't possible cause
+        # an issue via triggering one.
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
 
         logger.info('Closing journal monitor...')
         monitor.close()
 
-        logger.info('Notifying plugins to stop...')
-        plug.notify_stop()
-
-        logger.info('Closing update checker...')
-        self.updater.close()
+        # Frontier auth/CAPI handling
+        logger.info('Closing protocol handler...')
+        protocolhandler.close()
 
         logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
 
+        # Now anything else.
         logger.info('Closing config...')
         config.close()
 
