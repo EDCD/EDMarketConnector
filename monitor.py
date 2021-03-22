@@ -5,6 +5,7 @@ import threading
 from os import getpid as os_getpid
 from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, expanduser, isdir, join
+import pathlib
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
@@ -1098,9 +1099,20 @@ class JournalLock:
     def __init__(self):
         """Initialise where the journal directory and lock file are."""
         self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
+        self.journal_dir_path = pathlib.Path(self.journal_dir)
         self.journal_dir_lock = None
+        self.journal_dir_lockfile_name = None
+        self.journal_dir_lockfile = None
 
-        self.journal_dir_lockfile_name: str = join(self.journal_dir, 'edmc-journal-lock.txt')
+    def obtain_lock(self) -> bool:
+        """
+        Attempt to obtain a lock on the journal directory.
+
+        :return: bool - True if we successfully obtained the lock
+        """
+        logger.trace(f'journal_dir_lockfile = {self.journal_dir_lockfile!r}')
+
+        self.journal_dir_lockfile_name: str = self.journal_dir_path / 'edmc-journal-lock.txt'
         try:
             self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
@@ -1109,14 +1121,6 @@ class JournalLock:
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
-
-    def journaldir_obtain_lock(self) -> bool:
-        """
-        Attempt to obtain a lock on the journal directory.
-
-        :return: bool - True if we successfully obtained the lock
-        """
-        logger.trace(f'journal_dir_lockfile = {self.journal_dir_lockfile!r}')
 
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -1155,6 +1159,63 @@ class JournalLock:
         logger.trace('Done')
         return True
 
-    def journaldir_release_lock(self) -> bool:
-        """Release lock on journal directory."""
-        pass
+    def release_lock(self) -> bool:
+        """
+        Release lock on journal directory.
+
+        :return: bool - Success of unlocking operation."""
+        unlocked = False
+        if platform == 'win32':
+            logger.trace('win32, using msvcrt')
+            # win32 doesn't have fcntl, so we have to use msvcrt
+            import msvcrt
+
+            try:
+                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096)
+
+            except Exception as e:
+                logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")
+
+            else:
+                unlocked = True
+
+        else:
+            logger.trace('NOT win32, using fcntl')
+            try:
+                import fcntl
+
+            except ImportError:
+                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!")
+                return True  # Lie about being unlocked
+
+            try:
+                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_UN)
+
+            except Exception as e:
+                logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")
+
+            else:
+                unlocked = True
+
+        # Close the file whether or not the unlocking succeeded.
+        self.journal_dir_lockfile.close()
+
+        self.journal_dir_lock = None
+        self.journal_dir_lockfile_name = None
+        self.journal_dir_lockfile = None
+
+        return unlocked
+
+    def update_lock(self) -> bool:
+        """
+        Update journal directory lock to new location if possible.
+
+        :return: bool - Success of obtaining new lock
+        """
+        current_journaldir = config.get('journaldir') or config.default_journal_dir
+
+        if current_journaldir == self.journal_dir:
+            return True  # Still the same
+
+        self.journaldir_release_lock()
+        return self.journaldir_obtain_lock()
