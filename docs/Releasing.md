@@ -31,13 +31,14 @@ You will need several pieces of software installed, or the files from their
  auto-select some others).  NB: If you have need to uninstall this it's
  "Windows Software Development Kit - Windows 10.0.18362.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.
- [v3.7.9](https://www.python.org/downloads/release/python-379/) is the most
+1. [Python](https://python.org): 32-bit version of Python 3.8 for Windows.
+ [v3.8.6](https://www.python.org/downloads/release/python-386/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.
-1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
- so will be picked up with the `pip install` below.  Latest tested as per
- `requirements-dev.txt`.
+1. [py2exe](https://github.com/albertosottile/py2exe) - Install the python
+ module.  You will need at least the [pre-release of 0.10.0.1](https://bintray.com/alby128/py2exe/py2exe/0.10.0.1#files)
+ as we found 0.10.0.0 still had an issue with certifi and cacert.pem.
+	
 
 1. You'll now need to 'pip install' several python modules.
 	1. Ensure you have `pip` installed. If needs be see
@@ -270,6 +271,9 @@ without errors.
 Finally, uninstall your current version of ED Market Connector and re-install
 using the newly generated `EDMarketConnector_win_4.0.2.msi` file.  Check the
 resulting installation does work (the installer will run the program for you).
+If it doesn't then check if there are any files, particularly `.dll` or `.pyd`
+files in `dist.win32` that aren't yet specified in the `EDMarketConnector.wxs`
+file, i.e. they're not packaged into the installer.
 
 Update `edmarketconnector.xml` once more to set the `length=` attribute of the
 enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.
