@@ -53,7 +53,7 @@ class Plugin(abc.ABC):
         out: Dict[str, List[Callable]] = defaultdict(list)
 
         for field in self.__dict__.values():
-            callbacks: Optional[List[str]] = getattr(field, decorators.CALLBACK_MARKER)
+            callbacks: Optional[List[str]] = getattr(field, decorators.CALLBACK_MARKER, None)
             if callbacks is None:
                 continue
 
@@ -89,8 +89,8 @@ class MigratedPlugin(Plugin):
         self.can_reload = False
         self.module = module
         # Find start3
-        plugin_start3: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start3')
-        plugin_start: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start')
+        plugin_start3: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start3', None)
+        plugin_start: Optional[Callable[[str], str]] = getattr(self.module, 'plugin_start', None)
 
         if plugin_start3 is None:
             if plugin_start is not None:
@@ -103,7 +103,7 @@ class MigratedPlugin(Plugin):
 
         # We have a start3, lets see what else we have and get ready to prepare hooks for them
         for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
-            callback: Optional[Callable] = getattr(self.module, old_callback)
+            callback: Optional[Callable] = getattr(self.module, old_callback, None)
             if callback is None:
                 continue
 
@@ -113,7 +113,7 @@ class MigratedPlugin(Plugin):
                 f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
             )
 
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         """
         Load the legacy plugin.
 
@@ -122,22 +122,22 @@ class MigratedPlugin(Plugin):
         :param plugin_path: The path to this plugin
         :return: PluginInfo telling the world about us
         """
-        name = self.start3(str(plugin_path))
+        name = self.start3(str(self.path))
 
-        if (version_str := getattr(self.module, "__version__")) is not None:
+        if (version_str := getattr(self.module, "__version__", None)) is not None:
             version = semantic_version.Version.coerce(version_str)
 
         else:
             version = semantic_version.Version.coerce('0.0.0+UNKNOWN')
 
-        authors = getattr(self.module, '__author__')
+        authors = getattr(self.module, '__author__', None)
         if authors is None:
-            authors = getattr(self.module, "__credits__")
+            authors = getattr(self.module, "__credits__", None)
 
         if authors is not None and not isinstance(authors, list):
             authors = [authors]
 
-        comment = getattr(self.module, "__doc__")
+        comment = getattr(self.module, "__doc__", None)
 
         return PluginInfo(name, version, authors=authors, comment=comment)
 
