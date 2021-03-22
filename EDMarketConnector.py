@@ -14,7 +14,7 @@ from os import chdir, environ
 from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple, cast
 
 from constants import applongname, appname, protocolhandler_redirect
 
@@ -390,7 +390,7 @@ class AppWindow(object):
 
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
-        self.holdofftime = config.getint('querytime') + companion.holdoff
+        self.holdofftime = cast(int, config.get_int('querytime', 0)) + companion.holdoff
 
         self.w = master
         self.w.title(applongname)
@@ -532,7 +532,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
+                self.always_ontop = tk.BooleanVar(value=cast(int, config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)  # type: ignore # https://github.com/python/typeshed/issues/4658 # noqa: E501
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'),
@@ -593,13 +593,13 @@ class AppWindow(object):
             self.w.resizable(tk.TRUE, tk.FALSE)
 
         # update geometry
-        if config.get('geometry'):
-            match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))  # noqa: W605
+        if config.get_str('geometry'):
+            match = re.match(r'\+([\-\d]+)\+([\-\d]+)', config.get_str('geometry'))  # noqa: W605
             if match:
                 if platform == 'darwin':
                     # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
                     if int(match.group(2)) >= 0:
-                        self.w.geometry(config.get('geometry'))
+                        self.w.geometry(config.get_str('geometry'))
                 elif platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
                     import ctypes
@@ -609,10 +609,10 @@ class AppWindow(object):
                     MONITOR_DEFAULTTONULL = 0  # noqa: N806
                     if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
                                                              MONITOR_DEFAULTTONULL):
-                        self.w.geometry(config.get('geometry'))
+                        self.w.geometry(config.get_str('geometry'))
                 else:
-                    self.w.geometry(config.get('geometry'))
-        self.w.attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+                    self.w.geometry(config.get_str('geometry'))
+        self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
         theme.register(frame)
         theme.apply(self.w)
@@ -645,7 +645,7 @@ class AppWindow(object):
             self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         # Migration from <= 3.30
-        for username in config.get('fdev_usernames') or []:
+        for username in config.get_list('fdev_usernames', []):
             config.delete_password(username)
         config.delete('fdev_usernames')
         config.delete('username')
@@ -665,7 +665,7 @@ class AppWindow(object):
         self.station.configure(url=self.station_url)
 
         # (Re-)install hotkey monitoring
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+        hotkeymgr.register(self.w, config.get_int('hotkey_code'), config.get_int('hotkey_mods'))
 
         # Update Journal lock if needs be.
         journal_lock.update_lock(self.w)
@@ -784,7 +784,7 @@ class AppWindow(object):
 
         :return: True if all OK, else False to trigger play_bad in caller.
         """
-        if config.getint('output') & (config.OUT_STATION_ANY):
+        if config.get_int('output') & (config.OUT_STATION_ANY):
             if not data['commander'].get('docked'):
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
@@ -793,7 +793,7 @@ class AppWindow(object):
                     return False
 
             # Ignore possibly missing shipyard info
-            elif (config.getint('output') & config.OUT_MKT_EDDN) \
+            elif (config.get_int('output') & config.OUT_MKT_EDDN) \
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
                     self.status['text'] = _("Station doesn't have anything!")
@@ -802,13 +802,13 @@ class AppWindow(object):
                 if not self.status['text']:
                     self.status['text'] = _("Station doesn't have a market!")
 
-            elif config.getint('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
+            elif config.get_int('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
-                if config.getint('output') & config.OUT_MKT_CSV:
+                if config.get_int('output') & config.OUT_MKT_CSV:
                     commodity.export(fixed, COMMODITY_CSV)
 
-                if config.getint('output') & config.OUT_MKT_TD:
+                if config.get_int('output') & config.OUT_MKT_TD:
                     td.export(fixed)
 
         return True
@@ -821,7 +821,7 @@ class AppWindow(object):
         automatically on docking, or due to a retry.
         """
         auto_update = not event
-        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
+        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
         play_bad = False
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
@@ -1022,8 +1022,8 @@ class AppWindow(object):
 
             # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
-                if not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
-                    config.set('cmdrs', (config.get('cmdrs') or []) + [monitor.cmdr])
+                if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
+                    config.set('cmdrs', config.get_list('cmdrs', []) + [monitor.cmdr])
                 self.login()
 
             if not entry['event'] or not monitor.mode:
@@ -1034,7 +1034,7 @@ class AppWindow(object):
                 logger.info('Startup or LoadGame event')
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
-                if config.getint('disable_autoappupdatecheckingame') and 1:
+                if config.get_int('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
@@ -1044,7 +1044,7 @@ class AppWindow(object):
 
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
-                    and config.getint('output') & config.OUT_SHIP:
+                    and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
             err = plug.notify_journal_entry(monitor.cmdr,
@@ -1055,15 +1055,15 @@ class AppWindow(object):
                                             monitor.state)
             if err:
                 self.status['text'] = err
-                if not config.getint('hotkey_mute'):
+                if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
             # Auto-Update after docking, but not if auth callback is pending
             if (
                     entry['event'] in ('StartUp', 'Location', 'Docked')
                     and monitor.station
-                    and not config.getint('output') & config.OUT_MKT_MANUAL
-                    and config.getint('output') & config.OUT_STATION_ANY
+                    and not config.get_int('output') & config.OUT_MKT_MANUAL
+                    and config.get_int('output') & config.OUT_STATION_ANY
                     and companion.session.state != companion.Session.STATE_AUTH
             ):
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
@@ -1117,7 +1117,7 @@ class AppWindow(object):
         err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
         if err:
             self.status['text'] = err
-            if not config.getint('hotkey_mute'):
+            if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
     def plugin_error(self, event=None) -> None:
@@ -1125,17 +1125,17 @@ class AppWindow(object):
         if plug.last_error.get('msg'):
             self.status['text'] = plug.last_error['msg']
             self.w.update_idletasks()
-            if not config.getint('hotkey_mute'):
+            if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
     def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
-        if not bool(config.getint("use_alt_shipyard_open")):
-            return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        if not bool(config.get_int("use_alt_shipyard_open")):
+            return plug.invoke(config.get_str('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
 
         # Avoid file length limits if possible
-        provider = config.get('shipyard_provider') or 'EDSY'
-        target = plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        provider = config.get_str('shipyard_provider', 'EDSY')
+        target = plug.invoke(provider, 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
         file_name = join(config.app_dir, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
@@ -1149,11 +1149,11 @@ class AppWindow(object):
 
     def system_url(self, system: str) -> str:
         """Despatch a system URL to the configured handler."""
-        return plug.invoke(config.get('system_provider'), 'EDSM', 'system_url', monitor.system)
+        return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
 
     def station_url(self, station: str) -> str:
         """Despatch a station URL to the configured handler."""
-        return plug.invoke(config.get('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
+        return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
@@ -1280,7 +1280,7 @@ class AppWindow(object):
 
         def _destroy(self) -> None:
             """Set parent window's topmost appropriately as we close."""
-            self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+            self.parent.wm_attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
             self.destroy()
             self.__class__.showing = False
 
@@ -1304,18 +1304,22 @@ class AppWindow(object):
                 last_starport = '.' + data.get('lastStarport', {}).get('name', 'Unknown')
 
             timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            f = tkinter.filedialog.asksaveasfilename(parent=self.w,
-                                                     defaultextension=default_extension,
-                                                     filetypes=[('JSON', '.json'), ('All Files', '*')],
-                                                     initialdir=config.get('outdir'),
-                                                     initialfile=f'{last_system}{last_starport}.{timestamp}')
+            f = tkinter.filedialog.asksaveasfilename(
+                parent=self.w,
+                defaultextension=default_extension,
+                filetypes=[('JSON', '.json'), ('All Files', '*')],
+                initialdir=config.get_str('outdir'),
+                initialfile=f'{last_system}{last_starport}.{timestamp}'
+            )
             if f:
                 with open(f, 'wb') as h:
-                    h.write(json.dumps(dict(data),
-                                       ensure_ascii=False,
-                                       indent=2,
-                                       sort_keys=True,
-                                       separators=(',', ': ')).encode('utf-8'))
+                    h.write(json.dumps(
+                        data,
+                        ensure_ascii=False,
+                        indent=2,
+                        sort_keys=True,
+                        separators=(',', ': ')).encode('utf-8')
+                    )
 
         except companion.ServerError as e:
             self.status['text'] = str(e)
@@ -1398,7 +1402,7 @@ class AppWindow(object):
         """Handle when our window gains focus."""
         # TODO: This assumes that 1) transparent is at least 2, 2) there are
         #       no new themes added after that.
-        if config.getint('theme') > 1:
+        if config.get_int('theme') > 1:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
@@ -1407,7 +1411,7 @@ class AppWindow(object):
         """Handle when our window loses focus."""
         # TODO: This assumes that 1) transparent is at least 2, 2) there are
         #       no new themes added after that.
-        if config.getint('theme') > 1 and event.widget == self.w:
+        if config.get_int('theme') > 1 and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
@@ -1543,7 +1547,7 @@ sys.path: {sys.path}'''
     # Plain, not via `logger`
     print(f'{applongname} {appversion}')
 
-    Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
+    Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
     root = tk.Tk(className=appname.lower())
 
@@ -1551,7 +1555,7 @@ sys.path: {sys.path}'''
     """
     We scale the UI relative to what we find tk-scaling is on startup.
     """
-    ui_scale = config.getint('ui_scale')
+    ui_scale = config.get_int('ui_scale')
     # NB: This *also* catches a literal 0 value to re-set to the default 100
     if not ui_scale:
         ui_scale = 100
@@ -1564,7 +1568,7 @@ sys.path: {sys.path}'''
 
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
-        plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
+        plugins_not_py3_last = config.get_int('plugins_not_py3_last') or 0
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
             # Yes, this is horribly hacky so as to be sure we match the key
             # that we told Translators to use.
