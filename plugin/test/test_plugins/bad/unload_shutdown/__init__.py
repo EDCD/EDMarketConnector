@@ -15,7 +15,7 @@ class UnloadSystemExit(Plugin):
 
     def load(self) -> PluginInfo:
         """Load."""
-        return PluginInfo("unload_exception", semantic_version.Version.coerce("0.0.1"))
+        return PluginInfo("unload_exception", semantic_version.Version.coerce('0.0.1'))
 
     def unload(self) -> None:
         """Bang!."""

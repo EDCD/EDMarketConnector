@@ -1,5 +1,4 @@
-import pathlib
-
+"""Test Plugin."""
 import semantic_version
 
 from plugin.decorators import edmc_plugin
@@ -13,4 +12,4 @@ class Broken(Plugin):
 
     def load(self) -> PluginInfo:
         """Load."""
-        return PluginInfo("double_load", semantic_version.Version.coerce("0.0.1"))
+        return PluginInfo('double_load', semantic_version.Version.coerce('0.0.1'))

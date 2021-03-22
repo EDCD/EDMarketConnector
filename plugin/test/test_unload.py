@@ -9,9 +9,9 @@ from plugin.manager import PluginManager
 from .conftest import bad_path, good_path
 
 UNLOAD_TESTS = [
-    (good_path / "simple", None),
-    (bad_path / "unload_exception", "fire unload callback on unload_exception: Bang!"),
-    (bad_path / "unload_shutdown", "attempted to stop the running interpreter! Catching!"),
+    (good_path / 'simple', None),
+    (bad_path / 'unload_exception', 'fire unload callback on unload_exception: Bang!'),
+    (bad_path / 'unload_shutdown', 'attempted to stop the running interpreter! Catching!'),
 ]
 
 

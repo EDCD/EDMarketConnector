@@ -24,7 +24,7 @@ def _idfn(test_data) -> str:
 
 
 LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
-    (legacy_good_path / "simple", nullcontext()),
+    (legacy_good_path / 'simple', nullcontext()),
     (legacy_bad_path / "load_error", pytest.raises(PluginLoadingException, match=r'Exception in load method.*BANG!$')),
     (
         legacy_bad_path / 'import_error',
@@ -36,13 +36,13 @@ LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
 ]
 
 TESTS = [
-    (good_path / "simple", nullcontext()),
-    (bad_path / "no_plugin", pytest.raises(PluginHasNoPluginClassException)),
-    (bad_path / "error", pytest.raises(PluginLoadingException, match="This doesn't load")),
-    (bad_path / "class_init_error", pytest.raises(PluginLoadingException, match="Exception in init")),
-    (bad_path / "class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
-    (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
-    (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo")),
+    (good_path / 'simple', nullcontext()),
+    (bad_path / 'no_plugin', pytest.raises(PluginHasNoPluginClassException)),
+    (bad_path / 'error', pytest.raises(PluginLoadingException, match="This doesn't load")),
+    (bad_path / 'class_init_error', pytest.raises(PluginLoadingException, match='Exception in init')),
+    (bad_path / 'class_load_error', pytest.raises(PluginLoadingException, match='Exception in load')),
+    (bad_path / 'no_exist', pytest.raises(PluginDoesNotExistException)),
+    (bad_path / 'null_plugin_info', pytest.raises(PluginLoadingException, match='did not return a valid PluginInfo')),
     (
         bad_path / 'str_plugin_info',
         pytest.raises(
@@ -70,16 +70,16 @@ def test_load(plugin_manager: PluginManager, context: ContextManager, path: path
 
 def test_double_load(plugin_manager: PluginManager) -> None:
     """Attempt to load a plugin twice."""
-    plugin_manager.load_plugin(bad_path / "double_load")
+    plugin_manager.load_plugin(bad_path / 'double_load')
     with pytest.raises(PluginAlreadyLoadedException):
-        plugin_manager.load_plugin(bad_path / "double_load")
+        plugin_manager.load_plugin(bad_path / 'double_load')
 
 
 def test_unload_call(plugin_manager: PluginManager):
     """Load and unload a single plugin."""
     target = good_path / "simple"
     plug = plugin_manager.load_plugin(target)
-    assert plugin_manager.is_plugin_loaded("good")
+    assert plugin_manager.is_plugin_loaded('good')
     assert plug is not None
 
     unload_called = False
@@ -92,7 +92,7 @@ def test_unload_call(plugin_manager: PluginManager):
 
     with pytest.MonkeyPatch.context() as mp:
         mp.setattr(plug.plugin, 'unload', mock_unload)  # patch the unload method
-        plugin_manager.unload_plugin("good")
+        plugin_manager.unload_plugin('good')
 
-    assert not plugin_manager.is_plugin_loaded("good")
+    assert not plugin_manager.is_plugin_loaded('good')
     assert unload_called
