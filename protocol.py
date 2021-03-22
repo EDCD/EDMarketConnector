@@ -195,18 +195,26 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             return 0
 
     class WindowsProtocolHandler(GenericProtocolHandler):
+        """
+        Windows implementation of GenericProtocolHandler.
+
+        This works by using windows Dynamic Data Exchange to pass messages between processes
+        https://en.wikipedia.org/wiki/Dynamic_Data_Exchange
+        """
 
         def __init__(self):
             GenericProtocolHandler.__init__(self)
             self.thread = None
 
         def start(self, master):
+            """Start the DDE thread."""
             GenericProtocolHandler.start(self, master)
             self.thread = threading.Thread(target=self.worker, name='DDE worker')
             self.thread.daemon = True
             self.thread.start()
 
         def close(self):
+            """Stop the DDE thread"""
             thread = self.thread
             if thread:
                 self.thread = None
@@ -214,6 +222,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
                 thread.join()  # Wait for it to quit
 
         def worker(self):
+            """Start a DDE server."""
             wndclass = WNDCLASS()
             wndclass.style = 0
             wndclass.lpfnWndProc = WndProc
@@ -274,6 +283,11 @@ else:  # Linux / Run from source
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class LinuxProtocolHandler(GenericProtocolHandler):
+        """
+        Implementation of GenericProtocolHandler.
+
+        This implementation uses a localhost HTTP server
+        """
 
         def __init__(self):
             GenericProtocolHandler.__init__(self)
@@ -283,12 +297,14 @@ else:  # Linux / Run from source
             self.thread = None
 
         def start(self, master):
+            """Start the HTTP server thread."""
             GenericProtocolHandler.start(self, master)
             self.thread = threading.Thread(target=self.worker, name='OAuth worker')
             self.thread.daemon = True
             self.thread.start()
 
         def close(self):
+            """Shutdown the HTTP server thread."""
             thread = self.thread
             if thread:
                 logger.debug('Thread')
@@ -307,12 +323,15 @@ else:  # Linux / Run from source
             logger.debug('Done.')
 
         def worker(self):
+            """HTTP Worker."""
+            # TODO: This should probably be more ephemeral, and only handle one request, as its all we're expecting
             self.httpd.serve_forever()
 
     class HTTPRequestHandler(BaseHTTPRequestHandler):
+        """Simple HTTP server to handle IPC from protocol handler."""
 
         def parse(self):
-            logger.trace(f'Got message on path: {self.path}')
+            """Parse a request."""
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
@@ -323,11 +342,13 @@ else:  # Linux / Run from source
                 self.send_response(404)  # Not found
                 return False
 
-        def do_HEAD(self):
+        def do_HEAD(self):  # noqa: N802 # Required to override
+            """Handle HEAD Request."""
             self.parse()
             self.end_headers()
 
-        def do_GET(self):
+        def do_GET(self):  # noqa: N802 # Required to override
+            """Handle GET Request."""
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
@@ -338,6 +359,7 @@ else:  # Linux / Run from source
                 self.end_headers()
 
         def log_request(self, code, size=None):
+            """Override to prevent logging."""
             pass
 
 
