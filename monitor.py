@@ -1100,7 +1100,7 @@ class JournalLock:
 
     def __init__(self):
         """Initialise where the journal directory and lock file are."""
-        self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
+        self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
         self.journal_dir_lock = None
         self.journal_dir_lockfile_name = None
@@ -1259,7 +1259,7 @@ You can either attempt to resolve this and then Retry, or choose to Ignore this.
 
     def update_lock(self, parent: tk.Tk):
         """Update journal directory lock to new location if possible."""
-        current_journaldir = config.get('journaldir') or config.default_journal_dir
+        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
             return  # Still the same
@@ -1275,7 +1275,10 @@ You can either attempt to resolve this and then Retry, or choose to Ignore this.
     def retry_lock(self, retry: bool, parent: tk.Tk):
         logger.trace(f'We should retry: {retry}')
 
-        current_journaldir = config.get('journaldir') or config.default_journal_dir
+        if not retry:
+            return
+
+        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
         self.journal_dir_path = pathlib.Path(self.journal_dir)
         if not self.obtain_lock():
