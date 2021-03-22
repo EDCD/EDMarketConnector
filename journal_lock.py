@@ -2,6 +2,7 @@
 
 import pathlib
 import tkinter as tk
+from enum import Enum
 from os import getpid as os_getpid
 from sys import platform
 from tkinter import ttk
@@ -17,6 +18,15 @@ if TYPE_CHECKING:
         return x
 
 
+class JournalLockResult(Enum):
+    """Enumeration of possible outcomes of trying to lock the Journal Directory."""
+
+    LOCKED = 1
+    JOURNALDIR_NOTEXIST = 2
+    JOURNALDIR_READONLY = 3
+    ALREADY_LOCKED = 4
+
+
 class JournalLock:
     """Handle locking of journal directory."""
 
@@ -28,11 +38,11 @@ class JournalLock:
         # We never test truthiness of this, so let it be defined when first assigned.  Avoids type hint issues.
         # self.journal_dir_lockfile: Optional[IO] = None
 
-    def obtain_lock(self) -> bool:
+    def obtain_lock(self) -> JournalLockResult:
         """
         Attempt to obtain a lock on the journal directory.
 
-        :return: bool - True if we successfully obtained the lock
+        :return: LockResult - See the class Enum definition
         """
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
         logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
@@ -44,7 +54,7 @@ class JournalLock:
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
-            return False
+            return JournalLockResult.JOURNALDIR_READONLY
 
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
@@ -57,7 +67,7 @@ class JournalLock:
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\""
                             f", assuming another process running: {e!r}")
-                return False
+                return JournalLockResult.ALREADY_LOCKED
 
         else:
             logger.trace('NOT win32, using fcntl')
@@ -67,7 +77,7 @@ class JournalLock:
             except ImportError:
                 logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
                                "Allowing multiple instances!")
-                return True  # Lie about being locked
+                return JournalLockResult.LOCKED
 
             try:
                 fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -75,13 +85,13 @@ class JournalLock:
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\", "
                             f"assuming another process running: {e!r}")
-                return False
+                return JournalLockResult.ALREADY_LOCKED
 
         self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
         self.journal_dir_lockfile.flush()
 
         logger.trace('Done')
-        return True
+        return JournalLockResult.LOCKED
 
     def release_lock(self) -> bool:
         """
