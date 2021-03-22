@@ -134,6 +134,9 @@ class PluginManager:
         init = path / '__init__.py'
         load = path / 'load.py'
 
+        if not path.exists() or (not init.exists() and not load.exists()):
+            raise PluginDoesNotExistException
+
         plugin: Optional[Plugin] = None
         module: Optional[ModuleType] = None
 
@@ -200,7 +203,15 @@ class PluginManager:
             return None
 
         except Exception as e:
-            raise PluginLoadingException from e
+            raise PluginLoadingException(f'Exception in load method of {plugin}: {e}') from e
+
+        if info is None:
+            raise PluginLoadingException(f'{plugin} did not return a valid PluginInfo')
+
+        elif not isinstance(info, PluginInfo):
+            raise PluginLoadingException(
+                f'{plugin} returned an invalid type for its PluginInfo: {type(info)}({info!r})'
+            )
 
         if info.name in self.plugins:
             raise PluginAlreadyLoadedException(info.name)
