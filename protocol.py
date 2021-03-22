@@ -1,15 +1,19 @@
 # edmc: protocol handler for cAPI authorisation
 
 
+import logging
 import threading
 import urllib.request, urllib.error, urllib.parse
 import sys
+from os import getenv
 
-from config import appname, config
-from constants import protocolhandler_redirect
-from EDMCLogging import get_main_logger
+from config import appname, appcmdname
 
-logger = get_main_logger()
+if getenv("EDMC_NO_UI"):
+    logger = logging.getLogger(appcmdname)
+
+else:
+    logger = logging.getLogger(appname)
 
 if sys.platform == 'win32':
     from ctypes import *
@@ -237,10 +241,18 @@ else:	# Linux / Run from source
         def close(self):
             thread = self.thread
             if thread:
+                logger.debug('Thread')
                 self.thread = None
+
                 if self.httpd:
+                    logger.info('Shutting down httpd')
                     self.httpd.shutdown()
-                thread.join()	# Wait for it to quit
+
+                logger.info('Joining thread')
+                thread.join()  # Wait for it to quit
+
+            else:
+                logger.debug('No thread')
 
         def worker(self):
             self.httpd.serve_forever()
