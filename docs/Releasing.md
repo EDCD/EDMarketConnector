@@ -235,7 +235,7 @@ else you might need this, which assumes correct python.exe is in your PATH:
 	
 else you'll have to specify the path to python.exe, e.g.:
 
-		"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
+		"C:\Program Files (x86)\Python38-32\python.exe" setup.py py2exe
 
 Output will be something like (`...` denoting parts elided for brevity):
 
