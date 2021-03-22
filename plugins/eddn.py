@@ -187,8 +187,9 @@ Msg:\n{msg}'''
 
         # Paranoia check in case this function gets chain-called.
         if not self.replaylog:
-            logger.error('self.replaylog is False after update_idletasks().  Traceback:\n'
-                         f'{"".join(traceback.format_list(traceback.extract_stack()))}')
+            logger.error(
+                f'self.replaylog (type: {type(self.replaylog)}) is falsey after update_idletasks().  Traceback:\n'
+                f'{"".join(traceback.format_list(traceback.extract_stack()))}')
             return
 
         try:
