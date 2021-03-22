@@ -18,12 +18,6 @@ from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
 
 from constants import applongname, appname, protocolhandler_redirect
 
-# TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
-# TODO: Move enforce_single_instance() call here ?  But then how do we notify
-#       the user if they already have a process ?
-#       We could propagate what that found all the way up and then do the stderr/out redirect
-#       in a non-truncate manner.  Need to double-check the existing process won't then overwrite
-#       due to its seek position.
 def no_other_instance_running() -> bool:  # noqa: CCR001
     """
     Ensure only one copy of the app is running under this user account.
