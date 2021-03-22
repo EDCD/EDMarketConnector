@@ -11,6 +11,7 @@ import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
+from typing import Union
 
 import semantic_version
 
@@ -121,20 +122,19 @@ class Config(object):
     # OUT_SYS_FILE = 32	# No longer supported
     # OUT_STAT = 64	# No longer available
     # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY = OUT_MKT_EDDN|OUT_MKT_TD|OUT_MKT_CSV
-    # OUT_SYS_EDSM = 256	# Now a plugin
-    # OUT_SYS_AUTO = 512	# Now always automatic
+    OUT_STATION_ANY = OUT_MKT_EDDN | OUT_MKT_TD | OUT_MKT_CSV
+    # OUT_SYS_EDSM = 256  # Now a plugin
+    # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
     OUT_SYS_EDDN = 2048
     OUT_SYS_DELAY = 4096
 
-    if platform == 'darwin':
+    if platform == 'darwin':  # noqa: C901 # It's gating *all* the functions
 
         def __init__(self):
-            self.__in_shutdown = False  # Is the application currently shutting down ?
-            self.__auth_force_localserver = False  # Should we use localhost for auth callback ?
-
-            self.app_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname)
+            self.app_dir = join(
+                NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname
+            )
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -142,55 +142,66 @@ class Config(object):
             if not isdir(self.plugin_dir):
                 mkdir(self.plugin_dir)
 
-            self.internal_plugin_dir = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Library', 'plugins')) or join(dirname(__file__), 'plugins')
+            if getattr(sys, 'frozen', False):
+                self.internal_plugin_dir = normpath(join(dirname(sys.executable), pardir, 'Library', 'plugins'))
+                self.respath = normpath(join(dirname(sys.executable), pardir, 'Resources'))
+                self.identifier = NSBundle.mainBundle().bundleIdentifier()
 
-            self.default_journal_dir = join(NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], 'Frontier Developments', 'Elite Dangerous')
+            else:
+                self.internal_plugin_dir = join(dirname(__file__), 'plugins')
+                self.respath = dirname(__file__)
+                # Don't use Python's settings if interactive
+                self.identifier = f'uk.org.marginal.{appname.lower()}'
+                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
+            self.default_journal_dir = join(
+                NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
+                'Frontier Developments',
+                'Elite Dangerous'
+            )
             self.home = expanduser('~')
 
-            self.respath = getattr(sys, 'frozen', False) and normpath(join(dirname(sys.executable), pardir, 'Resources')) or dirname(__file__)
-
-            if not getattr(sys, 'frozen', False):
-                # Don't use Python's settings if interactive
-                self.identifier = 'uk.org.marginal.%s' % appname.lower()
-                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
-            else:
-                self.identifier = NSBundle.mainBundle().bundleIdentifier()
             self.defaults = NSUserDefaults.standardUserDefaults()
-            self.settings = dict(self.defaults.persistentDomainForName_(self.identifier) or {})	# make writeable
+            self.settings = dict(self.defaults.persistentDomainForName_(self.identifier) or {})  # make writeable
 
             # Check out_dir exists
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-        def get(self, key):
+        def get(self, key: str) -> Union[None, list, str]:
+            """Look up a non-int configuration value."""
             val = self.settings.get(key)
             if val is None:
                 return None
             elif isinstance(val, str):
                 return str(val)
             elif hasattr(val, '__iter__'):
-                return list(val)	# make writeable
+                return list(val)  # make writeable
             else:
                 return None
 
-        def getint(self, key):
+        def getint(self, key: str) -> int:
+            """Look up an integer configuraiton value."""
             try:
-                return int(self.settings.get(key, 0))	# should already be int, but check by casting
+                return int(self.settings.get(key, 0))  # should already be int, but check by casting
             except:
                 return 0
 
-        def set(self, key, val):
+        def set(self, key: str, val: Union[int, str]) -> None:
+            """Set value on the specified configuration key."""
             self.settings[key] = val
 
-        def delete(self, key):
+        def delete(self, key: str) -> None:
+            """Delete the specified configuration key."""
             self.settings.pop(key, None)
 
-        def save(self):
+        def save(self) -> None:
+            """Save current configuration to disk."""
             self.defaults.setPersistentDomain_forName_(self.settings, self.identifier)
             self.defaults.synchronize()
 
-        def close(self):
+        def close(self) -> None:
+            """Close the configuration."""
             self.save()
             self.defaults = None
 
