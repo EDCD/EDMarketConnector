@@ -191,6 +191,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return True
 
     def stop(self):
+        """Stop journal monitoring."""
         logger.debug('Stopping monitoring Journal')
 
         self.currentdir = None
@@ -207,11 +208,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates = None
         self.systemaddress = None
         self.is_beta = False
+
         if self.observed:
+            logger.debug('self.observed: Calling unschedule_all()')
             self.observed = None
             self.observer.unschedule_all()
+            logger.debug('Done')
 
         self.thread = None  # Orphan the worker thread - will terminate at next poll
+
+        logger.debug('Done.')
 
     def close(self):
         """Close journal monitoring."""
