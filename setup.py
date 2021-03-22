@@ -174,9 +174,9 @@ elif sys.platform == 'win32':
             ],
             'includes': [
                 'dataclasses',
-                'shutil',         # Included for plugins
+                'shutil',  # Included for plugins
                 'timeout_session',
-                'zipfile',        # Included for plugins
+                'zipfile',  # Included for plugins
             ],
             'excludes': [
                 'distutils',
