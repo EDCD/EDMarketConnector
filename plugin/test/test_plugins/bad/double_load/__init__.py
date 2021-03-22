@@ -11,6 +11,6 @@ from plugin.plugin_info import PluginInfo
 class Broken(Plugin):
     """Valid (but not loadable twice) plugin."""
 
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         """Load."""
         return PluginInfo("double_load", semantic_version.Version.coerce("0.0.1"))

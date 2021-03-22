@@ -13,7 +13,7 @@ from plugin.plugin import Plugin, PluginInfo
 class UnloadSystemExit(Plugin):
     """Throws an exception during unload."""
 
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         """Load."""
         return PluginInfo("unload_exception", semantic_version.Version.coerce("0.0.1"))
 

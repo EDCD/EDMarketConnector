@@ -9,5 +9,5 @@ from plugin.plugin_info import PluginInfo
 
 @edmc_plugin
 class Broken(Plugin):
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         raise Exception("Exception in load")

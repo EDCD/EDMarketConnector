@@ -8,9 +8,9 @@ from plugin.decorators import edmc_plugin
 
 @edmc_plugin
 class Broken(Plugin):
-    def __init__(self, logger) -> None:
-        super().__init__(logger)
+    def __init__(self, logger, manager, path) -> None:
+        super().__init__(logger, manager, path)
         raise Exception("Exception in init")
 
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
-        return super().load(plugin_path)
+    def load(self) -> PluginInfo:
+        return super().load()
