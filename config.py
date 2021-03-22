@@ -12,7 +12,7 @@ import warnings
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from sys import platform
-from typing import Union
+from typing import Iterable, Union
 
 import semantic_version
 
@@ -194,7 +194,7 @@ class Config(object):
                 logger.debug('The exception type is ...', exc_info=e)
                 return 0
 
-        def set(self, key: str, val: Union[int, str]) -> None:
+        def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
             self.settings[key] = val
 
@@ -295,7 +295,7 @@ class Config(object):
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
-        def get(self, key):
+        def get(self, key: str) -> Union[None, list, str]:
             """Look up a string configuration value."""
             key_type = DWORD()
             key_size = DWORD()
@@ -323,7 +323,7 @@ class Config(object):
             else:
                 return str(buf.value)
 
-        def getint(self, key):
+        def getint(self, key: str) -> int:
             """Look up an integer configuration value."""
             key_type = DWORD()
             key_size = DWORD(4)
@@ -344,7 +344,7 @@ class Config(object):
             else:
                 return key_val.value
 
-        def set(self, key, val):
+        def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, str):
                 buf = ctypes.create_unicode_buffer(val)
@@ -353,7 +353,7 @@ class Config(object):
             elif isinstance(val, numbers.Integral):
                 RegSetValueEx(self.hkey, key, 0, REG_DWORD, ctypes.byref(DWORD(val)), 4)
 
-            elif hasattr(val, '__iter__'):
+            elif isinstance(val, list):
                 # null terminated non-empty strings
                 string_val = u'\x00'.join([str(x) or u' ' for x in val] + [u''])
                 buf = ctypes.create_unicode_buffer(string_val)
@@ -362,35 +362,20 @@ class Config(object):
             else:
                 raise NotImplementedError()
 
-        def delete(self, key):
+        def delete(self, key: str) -> None:
             """Delete the specified configuration key."""
             RegDeleteValue(self.hkey, key)
 
-        def save(self):
+        def save(self) -> None:
             """Save current configuration to disk."""
             pass  # Redundant since registry keys are written immediately
 
-        def close(self):
+        def close(self) -> None:
             """Close the configuration."""
             RegCloseKey(self.hkey)
             self.hkey = None
 
-        def set_shutdown(self):
-            self.__in_shutdown = True
-
-        @property
-        def shutting_down(self) -> bool:
-            return self.__in_shutdown
-
-        def set_auth_force_localserver(self):
-            self.__auth_force_localserver = True
-
-        @property
-        def auth_force_localserver(self) -> bool:
-            return self.__auth_force_localserver
-
-    elif platform=='linux':
-
+    elif platform == 'linux':
         SECTION = 'config'
 
         def __init__(self):
@@ -407,65 +392,77 @@ class Config(object):
                 mkdir(self.plugin_dir)
 
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-
             self.default_journal_dir = None
-
             self.home = expanduser('~')
-
             self.respath = dirname(__file__)
+            self.identifier = f'uk.org.marginal.{appname.lower()}'
 
-            self.identifier = 'uk.org.marginal.%s' % appname.lower()
-
-            self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, '%s.ini' % appname)
+            self.filename = join(getenv('XDG_CONFIG_HOME', expanduser('~/.config')), appname, f'{appname}.ini')
             if not isdir(dirname(self.filename)):
                 makedirs(dirname(self.filename))
 
-            self.config = RawConfigParser(comment_prefixes = ('#',))
+            self.config = RawConfigParser(comment_prefixes=('#',))
             try:
                 with codecs.open(self.filename, 'r') as h:
                     self.config.read_file(h)
-            except:
+
+            except Exception as e:
+                logger.debug('config section not yet present', exc_info=e)
                 self.config.add_section(self.SECTION)
 
             if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', expanduser('~'))
 
-        def get(self, key):
+        def get(self, key: str) -> Union[None, list, str]:
+            """Look up a string configuration value."""
             try:
                 val = self.config.get(self.SECTION, key)
-                if u'\n' in val:	# list
-                    # ConfigParser drops the last entry if blank, so we add a spurious ';' entry in set() and remove it here
+                if u'\n' in val:  # list
+                    # ConfigParser drops the last entry if blank,
+                    # so we add a spurious ';' entry in set() and remove it here
                     assert val.split('\n')[-1] == ';', val.split('\n')
                     return [self._unescape(x) for x in val.split(u'\n')[:-1]]
                 else:
                     return self._unescape(val)
-            except:
+
+            except Exception as e:
+                logger.debug('And the exception type is...', exc_info=e)
                 return None
 
-        def getint(self, key):
+        def getint(self, key: str) -> int:
+            """Look up an integer configuration value."""
             try:
                 return self.config.getint(self.SECTION, key)
-            except:
+
+            except Exception as e:
+                logger.debug('And the exception type is...', exc_info=e)
                 return 0
 
-        def set(self, key, val):
+        def set(self, key: str, val: Union[int, str, list]) -> None:
+            """Set value on the specified configuration key."""
             if isinstance(val, bool):
                 self.config.set(self.SECTION, key, val and '1' or '0')
+
             elif isinstance(val, str) or isinstance(val, numbers.Integral):
                 self.config.set(self.SECTION, key, self._escape(val))
-            elif hasattr(val, '__iter__'):	# iterable
+
+            elif isinstance(val, list):
                 self.config.set(self.SECTION, key, u'\n'.join([self._escape(x) for x in val] + [u';']))
+
             else:
                 raise NotImplementedError()
 
-        def delete(self, key):
+        def delete(self, key: str) -> None:
+            """Delete the specified configuration key."""
             self.config.remove_option(self.SECTION, key)
 
-        def save(self):
+        def save(self) -> None:
+            """Save current configuration to disk."""
             with codecs.open(self.filename, 'w', 'utf-8') as h:
                 self.config.write(h)
 
-        def close(self):
+        def close(self) -> None:
+            """Close the configuration."""
             self.save()
             self.config = None
 
@@ -484,9 +481,11 @@ class Config(object):
             return self.__auth_force_localserver
 
         def _escape(self, val):
+            """Escape a string for storage."""
             return str(val).replace(u'\\', u'\\\\').replace(u'\n', u'\\n').replace(u';', u'\\;')
 
         def _unescape(self, val):
+            """Un-escape a string from storage."""
             chars = list(val)
             i = 0
             while i < len(chars):
@@ -497,21 +496,24 @@ class Config(object):
                 i += 1
             return u''.join(chars)
 
-    else:	# ???
-
+    else:
         def __init__(self):
             raise NotImplementedError('Implement me')
 
     # Common
 
     def get_password(self, account):
+        """Legacy password retrieval."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def set_password(self, account, password):
+        """Legacy password setting."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
     def delete_password(self, account):
+        """Legacy password deletion."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+
 
 # singleton
 config = Config()
