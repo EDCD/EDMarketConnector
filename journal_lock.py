@@ -51,7 +51,7 @@ class JournalLock:
                 self.journal_dir_path = pathlib.Path(self.journal_dir)
 
             except Exception:
-                logger.exception("Couldn't make pathlib.Path from journal_dir", exc_info=True)
+                logger.exception("Couldn't make pathlib.Path from journal_dir")
 
     def obtain_lock(self) -> JournalLockResult:
         """
