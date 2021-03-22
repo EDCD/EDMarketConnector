@@ -7,9 +7,11 @@ from os import listdir, SEEK_SET, SEEK_END
 from os.path import basename, expanduser, isdir, join
 import pathlib
 from sys import platform
+import tkinter as tk
+from tkinter import ttk
 from time import gmtime, localtime, sleep, strftime, strptime, time
 from calendar import timegm
-from typing import Any, List, MutableMapping, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, List, MutableMapping, Optional, OrderedDict as OrderedDictT, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import tkinter
@@ -1206,16 +1208,76 @@ class JournalLock:
 
         return unlocked
 
-    def update_lock(self) -> bool:
-        """
-        Update journal directory lock to new location if possible.
+    class JournalAlreadyLocked(tk.Toplevel):
+        """Pop-up for when Journal directory already locked."""
 
-        :return: bool - Success of obtaining new lock
-        """
+        def __init__(self, parent: tk.Tk, callback: Callable):
+            tk.Toplevel.__init__(self, parent)
+
+            self.parent = parent
+            self.callback = callback
+            self.title('Journal directory already locked')
+
+            # remove decoration
+            if platform == 'win32':
+                self.attributes('-toolwindow', tk.TRUE)
+
+            elif platform == 'darwin':
+                # http://wiki.tcl.tk/13428
+                parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
+
+            self.resizable(tk.FALSE, tk.FALSE)
+
+            frame = ttk.Frame(self)
+            frame.grid(sticky=tk.NSEW)
+
+            self.blurb = tk.Label(frame)
+            self.blurb['text'] = '''The new Journal Directory location is already locked.
+You can either attempt to resolve this and then Retry, or choose to Ignore this.'''
+            self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
+
+            self.retry_button = ttk.Button(frame, text='Retry', command=self.retry)
+            self.retry_button.grid(row=2, column=0, sticky=tk.EW)
+
+            self.ignore_button = ttk.Button(frame, text='Ignore', command=self.ignore)
+            self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
+            self.protocol("WM_DELETE_WINDOW", self._destroy)
+
+        def retry(self):
+            logger.trace('User selected: Retry')
+            self.destroy()
+            self.callback(True, self.parent)
+
+        def ignore(self):
+            logger.trace('User selected: Ignore')
+            self.destroy()
+            self.callback(False, self.parent)
+
+        def _destroy(self):
+            logger.trace('User force-closed popup, treating as Ignore')
+            self.ignore()
+
+    def update_lock(self, parent: tk.Tk):
+        """Update journal directory lock to new location if possible."""
         current_journaldir = config.get('journaldir') or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
-            return True  # Still the same
+            return  # Still the same
 
-        self.journaldir_release_lock()
-        return self.journaldir_obtain_lock()
+        self.release_lock()
+
+        self.journal_dir = current_journaldir
+        self.journal_dir_path = pathlib.Path(self.journal_dir)
+        if not self.obtain_lock():
+            # Pop-up message asking for Retry or Ignore
+            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
+
+    def retry_lock(self, retry: bool, parent: tk.Tk):
+        logger.trace(f'We should retry: {retry}')
+
+        current_journaldir = config.get('journaldir') or config.default_journal_dir
+        self.journal_dir = current_journaldir
+        self.journal_dir_path = pathlib.Path(self.journal_dir)
+        if not self.obtain_lock():
+            # Pop-up message asking for Retry or Ignore
+            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
