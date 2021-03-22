@@ -3,10 +3,10 @@
 
 import sys
 import threading
-from typing import Optional
 import urllib.error
 import urllib.parse
 import urllib.request
+from typing import Optional
 
 from EDMCLogging import get_main_logger
 from config import appname, config
@@ -81,10 +81,12 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
             )
             return self
 
-        def handleEvent_withReplyEvent_(self, event, replyEvent):
-            protocolhandler.lasturl = urllib.parse.unquote(
-                event.paramDescriptorForKeyword_(keyDirectObject).stringValue()).strip()
-            protocolhandler.master.after(ProtocolHandler.POLL, protocolhandler.poll)
+        def handleEvent_withReplyEvent_(self, event, replyEvent):  # noqa: N802 # Required to override
+            protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
+                event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
+            ).strip()
+
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
 
 
 elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
@@ -153,6 +155,8 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
     GlobalUnlock.argtypes = [HGLOBAL]
     GlobalUnlock.restype = BOOL
 
+    # Windows Message handler stuff (IPC)
+    # https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85)
     @WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
     def WndProc(hwnd: HWND, message: UINT, wParam, lParam):  # noqa: N803 N802
         """
@@ -166,6 +170,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
         """
         if message != WM_DDE_INITIATE:
             # Not a DDE init message, bail and tell windows to do the default
+            # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowproca?redirectedfrom=MSDN
             return DefWindowProc(hwnd, message, wParam, lParam)
 
         service = create_unicode_buffer(256)
@@ -192,6 +197,7 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             SendMessage(
                 wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtom(appname), GlobalAddAtom('System'))
             )
+
             return 0
 
     class WindowsProtocolHandler(GenericProtocolHandler):
@@ -235,48 +241,52 @@ elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine a
             wndclass.lpszMenuName = None
             wndclass.lpszClassName = 'DDEServer'
 
-            if RegisterClass(byref(wndclass)):
-                hwnd = CreateWindowEx(
-                    0,
-                    wndclass.lpszClassName,
-                    "DDE Server",
-                    0,
-                    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-                    self.master.winfo_id(),  # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
-                    None,
-                    wndclass.hInstance,
-                    None
-                )
+            if not RegisterClass(byref(wndclass)):
+                print('Failed to register Dynamic Data Exchange for cAPI')
+                return
 
-                msg = MSG()
-                while GetMessage(byref(msg), None, 0, 0) != 0:
-                    logger.trace(f'DDE message of type: {msg.message}')
-                    if msg.message == WM_DDE_EXECUTE:
-                        args = wstring_at(GlobalLock(msg.lParam)).strip()
-                        GlobalUnlock(msg.lParam)
-                        if args.lower().startswith('open("') and args.endswith('")'):
-                            logger.trace(f'args are: {args}')
-                            url = urllib.parse.unquote(args[6:-2]).strip()
-                            logger.trace(f'Parsed url: {url}')
-                            if url.startswith(self.redirect):
-                                logger.debug(f'Message starts with {self.redirect}')
-                                self.event(url)
+            # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
+            hwnd = CreateWindowEx(
+                0,                       # dwExStyle
+                wndclass.lpszClassName,  # lpClassName
+                "DDE Server",            # lpWindowName
+                0,                       # dwStyle
+                CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
+                self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
+                None,                    # hMenu
+                wndclass.hInstance,      # hInstance
+                None                     # lpParam
+            )
 
-                            SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
-                            PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
+            msg = MSG()
+            # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
+            while GetMessage(byref(msg), None, 0, 0) != 0:
+                if msg.message == WM_DDE_EXECUTE:
+                    # GlobalLock does some sort of "please dont move this?"
+                    # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
+                    args = wstring_at(GlobalLock(msg.lParam)).strip()
+                    GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
 
-                        else:
-                            PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
+                    if args.lower().startswith('open("') and args.endswith('")'):
+                        url = urllib.parse.unquote(args[6:-2]).strip()
+                        if url.startswith(self.redirect):
+                            self.event(url)
 
-                    elif msg.message == WM_DDE_TERMINATE:
-                        PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+                        SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
+                        # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
+                        PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
 
                     else:
-                        TranslateMessage(byref(msg))
-                        DispatchMessage(byref(msg))
+                        # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
+                        PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
 
-            else:
-                print('Failed to register DDE for cAPI')
+                elif msg.message == WM_DDE_TERMINATE:
+                    PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+
+                else:
+                    TranslateMessage(byref(msg))  # "Translates virtual key messages into character messages" ???
+                    DispatchMessage(byref(msg))
+
 
 else:  # Linux / Run from source
 
