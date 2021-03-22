@@ -17,7 +17,7 @@ from typing import Sequence, TextIO
 import requests
 
 import myNotebook as nb  # noqa: N813
-from companion import category_map
+from companion import CAPIData, category_map
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
 from myNotebook import Frame
@@ -238,6 +238,7 @@ Msg:\n{msg}'''
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
@@ -289,33 +290,7 @@ Msg:\n{msg}'''
 
         this.commodities = commodities
 
-    def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[Dict, Dict]:
-        modules: Dict[str, Any] = data['lastStarport'].get('modules')
-        if modules is None or not isinstance(modules, dict):
-            if modules is None:
-                logger.debug('modules was None.  FC or Damaged Station?')
-            elif isinstance(modules, list):
-                if len(modules) == 0:
-                    logger.debug('modules is empty list. FC or Damaged Station?')
-                else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
-            else:
-                logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
-            # Set a safe value
-            modules = {}
-
-        ships: Dict[str, Any] = data['lastStarport'].get('ships')
-        if ships is None or not isinstance(ships, dict):
-            if ships is None:
-                logger.debug('ships was None')
-            else:
-                logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
-            # Set a safe value
-            ships = {'shipyard_list': {}, 'unavailable_list': []}
-
-        return modules, ships
-
-    def export_outfitting(self, data: Mapping[str, Any], is_beta: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
         export_outfitting updates EDDN with the current (lastStarport) station's outfitting options, if any.
         Once the send is complete, this.outfitting is updated with the given data.
@@ -323,25 +298,25 @@ Msg:\n{msg}'''
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
-        modules, ships = self.safe_modules_and_ships(data)
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
         horizons: bool = is_horizons(
             data['lastStarport'].get('economies', {}),
-            modules,
-            ships
+            data['lastStarport']['modules'],
+            data['lastStarport']['ships']
             )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
             m['name'] != 'Int_PlanetApproachSuite',
-            modules.values()
+            data['lastStarport']['modules'].values()
         )
 
         outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
         )
+
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
@@ -358,7 +333,7 @@ Msg:\n{msg}'''
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: Dict[str, Any], is_beta: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
         export_shipyard updates EDDN with the current (lastStarport) station's outfitting options, if any.
         once the send is complete, this.shipyard is updated to the new data.
@@ -366,11 +341,12 @@ Msg:\n{msg}'''
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
-        modules, ships = self.safe_modules_and_ships(data)
+
+        ships = data['lastStarport']['ships']
 
         horizons: bool = is_horizons(
             data['lastStarport'].get('economies', {}),
-            modules,
+            data['lastStarport']['modules'],
             ships
             )
 
@@ -767,7 +743,7 @@ def journal_entry(  # noqa: C901
             return str(e)
 
 
-def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
     if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
         try:
             if this.marketId != data['lastStarport']['id']:
@@ -800,34 +776,8 @@ MAP_STR_ANY = Mapping[str, Any]
 
 
 def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
-    economies_colony = False
-    modules_horizons = False
-    ship_horizons = False
-
-    if isinstance(economies, dict):
-        economies_colony = any(economy['name'] == 'Colony' for economy in economies.values())
-
-    else:
-        logger.error(f'economies type is {type(economies)}')
-
-    if isinstance(modules, dict):
-        modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
-
-    else:
-        logger.error(f'modules type is {type(modules)}')
-
-    if isinstance(ships, dict):
-        if ships.get('shipyard_list') is not None:
-            if isinstance(ships.get('shipyard_list'), dict):
-                ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
-
-            else:
-                logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')
-
-        else:
-            logger.debug('ships["shipyard_list"] is None - FC or Damaged Station?')
-
-    else:
-        logger.error(f'ships type is {type(ships)}')
-
-    return economies_colony or modules_horizons or ship_horizons
+    return (
+        any(economy['name'] == 'Colony' for economy in economies.values()) or
+        any(module.get('sku') == HORIZ_SKU for module in modules.values()) or
+        any(ship.get('sku') == HORIZ_SKU for ship in ships.get('shipyard_list', {}).values())
+    )
