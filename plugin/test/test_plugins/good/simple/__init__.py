@@ -12,7 +12,7 @@ from plugin.plugin_info import PluginInfo
 class GoodPlugin(Plugin):
     """Plugin that loads correctly."""
 
-    def load(self, plugin_path: pathlib.Path) -> PluginInfo:
+    def load(self) -> PluginInfo:
         """Nothing Special."""
         return PluginInfo(
             name="good",

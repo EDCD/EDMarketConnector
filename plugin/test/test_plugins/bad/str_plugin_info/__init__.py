@@ -1,3 +1,4 @@
+"""Test Plugin."""
 from plugin.decorators import edmc_plugin
 from plugin.plugin import Plugin, PluginInfo
 
@@ -8,4 +9,4 @@ class BadPlugInfo(Plugin):
 
     def load(self) -> PluginInfo:
         """Intentionally broken load()."""
-        return None  # type: ignore # Its intentional
+        return "This is broken"  # type: ignore # Its intentional

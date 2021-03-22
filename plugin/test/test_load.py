@@ -10,7 +10,7 @@ from plugin.manager import (
     PluginManager
 )
 
-from .conftest import bad_path, good_path
+from .conftest import bad_path, good_path, legacy_path
 
 
 def _idfn(test_data) -> str:
@@ -27,8 +27,16 @@ TESTS = [
     (bad_path / "class_init_error", pytest.raises(PluginLoadingException, match="Exception in init")),
     (bad_path / "class_load_error", pytest.raises(PluginLoadingException, match="Exception in load")),
     (bad_path / "no_exist", pytest.raises(PluginDoesNotExistException)),
-    (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo"))
-    # TODO: plugin that imports a nonexistent module
+    (bad_path / "null_plugin_info", pytest.raises(PluginLoadingException, match="did not return a valid PluginInfo")),
+    (
+        bad_path / 'str_plugin_info',
+        pytest.raises(
+            PluginLoadingException, match='returned an invalid type for its PluginInfo'
+        )
+    ),
+
+    # Legacy plugins
+    (legacy_path / "good", nullcontext()),
 ]
 
 
