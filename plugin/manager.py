@@ -147,6 +147,7 @@ class PluginManager:
             except PluginHasNoPluginClassException:
                 if not load.exists():
                     raise
+
             except PluginLoadingException as e:
                 self.log.exception(f'Unable to load plugin at {path}: {e}')
                 raise
@@ -164,6 +165,7 @@ class PluginManager:
 
             try:
                 plugin, module = self.load_legacy_plugin(path)
+
             except PluginLoadingException as e:
                 self.log.exception(f'Unable to load legacy plugin at {path}: {e}')
                 raise
@@ -244,7 +246,7 @@ class PluginManager:
             module = importlib.import_module(resolved)
         except Exception as e:
             # Something went wrong _but_ the file _DOES_ exist.
-            raise PluginLoadingException from e
+            raise PluginLoadingException(f'Exception while loading {resolved}: {e}') from e
 
         logger = get_plugin_logger(path.parts[-1])
 

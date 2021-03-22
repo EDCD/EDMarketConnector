@@ -1,7 +1,7 @@
 """Testing suite for plugin loading system."""
 import pathlib
 from contextlib import nullcontext
-from typing import ContextManager
+from typing import Any, ContextManager, List, Tuple
 
 import pytest
 
@@ -10,15 +10,30 @@ from plugin.manager import (
     PluginManager
 )
 
-from .conftest import bad_path, good_path, legacy_path
+from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, legacy_path
 
 
 def _idfn(test_data) -> str:
-    if isinstance(test_data, pathlib.Path):
-        return test_data.parts[-1]
+    if not isinstance(test_data, pathlib.Path):
+        return ""
 
-    return ""
+    if legacy_path in test_data.parents:
+        return f'Legacy_{test_data.parts[-1]}'
 
+    return test_data.parts[-1]
+
+
+LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
+    (legacy_good_path / "simple", nullcontext()),
+    (legacy_bad_path / "load_error", pytest.raises(PluginLoadingException, match=r'Exception in load method.*BANG!$')),
+    (
+        legacy_bad_path / 'import_error',
+        pytest.raises(
+            PluginLoadingException,
+            match="No module named 'ThisDoesNotExistEDMCLibNeedsMoreTextToEnsureUnique'"
+        )
+    ),
+]
 
 TESTS = [
     (good_path / "simple", nullcontext()),
@@ -36,11 +51,11 @@ TESTS = [
     ),
 
     # Legacy plugins
-    (legacy_path / "good", nullcontext()),
-]
+
+] + LEGACY_TESTS
 
 
-@pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
+@ pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
 def test_load(plugin_manager: PluginManager, context: ContextManager, path: pathlib.Path) -> None:
     """
     Test that plugins load as expected.
