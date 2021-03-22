@@ -9,4 +9,4 @@ class BadPlugInfo(Plugin):
 
     def load(self) -> PluginInfo:
         """Intentionally broken load()."""
-        return "This is broken"  # type: ignore # Its intentional
+        return 'This is broken'  # type: ignore # Its intentional

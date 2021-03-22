@@ -1,3 +1,4 @@
+"""Test Plugin."""
 from plugin.decorators import edmc_plugin
 from plugin.plugin import Plugin, PluginInfo
 

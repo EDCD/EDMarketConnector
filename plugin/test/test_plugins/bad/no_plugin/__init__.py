@@ -1,2 +1,2 @@
 """Invalid plugin."""
-print("I have no plugins defined")
+print('I have no plugins defined')

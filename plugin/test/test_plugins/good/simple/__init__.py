@@ -1,6 +1,4 @@
 """Test plugin that loads correctly."""
-import pathlib
-
 import semantic_version
 
 from plugin.decorators import edmc_plugin
@@ -16,6 +14,6 @@ class GoodPlugin(Plugin):
         """Nothing Special."""
         return PluginInfo(
             name="good",
-            version=semantic_version.Version.coerce("0.0.1"),
-            authors=["A_D"]
+            version=semantic_version.Version.coerce('0.0.1'),
+            authors=['A_D']
         )
