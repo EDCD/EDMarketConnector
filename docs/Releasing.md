@@ -373,3 +373,5 @@ When changing the Python version (Major.Minor.Patch) used:
     1. `setup.py` will need its version check updating.
     1. `EDMarketConnector.wxs` will need updating to reference the correct
        pythonXX.dll file.
+    1. `.pre-commit-config.yaml` will need the `default_language_version`
+       section updated to the appropriate version.
