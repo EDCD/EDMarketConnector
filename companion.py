@@ -634,8 +634,6 @@ class Session(object):
             else:
                 data['lastStarport'].update(shipdata)
 
-        data.check_modules_ships()
-
         return data
 
     def close(self) -> None:
