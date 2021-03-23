@@ -126,7 +126,7 @@ ship_map = {
 class CAPIData(UserDict):
     """CAPI Response."""
 
-    def __init__(self, data: Union[str, Dict[str, Any], 'CAPIData', None] = None) -> None:
+    def __init__(self, data: Union[str, Dict[str, Any], 'CAPIData', None] = None, source_endpoint: str = None) -> None:
         if data is None:
             super().__init__()
         elif isinstance(data, str):
@@ -136,8 +136,14 @@ class CAPIData(UserDict):
 
         self.original_data = self.data.copy()  # Just in case
 
-        # Only the /profile end point has star port, and thus ships/modules.
-        if self.data.get('lastStarport'):
+        self.source_endpoint = source_endpoint
+
+        if source_endpoint is None:
+            return
+
+        if source_endpoint == URL_SHIPYARD and self.data.get('lastStarport'):
+            # All the other endpoints may or may not have a lastStarport, but definitely wont have valid data
+            # for this check, which means it'll just make noise for no reason while we're working on other things
             self.check_modules_ships()
 
     def check_modules_ships(self) -> None:
@@ -558,7 +564,7 @@ class Session(object):
 
         try:
             r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
-            data = CAPIData(r.json())  # May also fail here if token expired since response is empty
+            data = CAPIData(r.json(), endpoint)  # May also fail here if token expired since response is empty
 
         except (requests.HTTPError, ValueError) as e:
             logger.exception('Frontier CAPI Auth: GET ')
@@ -627,6 +633,8 @@ class Session(object):
 
             else:
                 data['lastStarport'].update(shipdata)
+
+        data.check_modules_ships()
 
         return data
 
