@@ -1,6 +1,18 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.4
+===
+
+  This release fixes one cosmetic bug and prepares for the Odyssey Alpha.
+
+* Avoid a spurious 'list index out of range' status text.  This was caused by
+  the EDDN plugin running out of data to send.
+* Add some paranoia in case Odyssey Alpha looks like a live version.  This 
+  should prevent sending any alpha data to EDDN, EDSM and Inara.
+* Reduce some log spam in normal operation below TRACE level.  
+* Updated Korean translation.
+
 Release 4.2.3
 ===
 

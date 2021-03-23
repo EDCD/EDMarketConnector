@@ -184,6 +184,14 @@ Msg:\n{msg}'''
 
         self.parent.update_idletasks()
 
+        # Paranoia check in case this function gets chain-called.
+        if not self.replaylog:
+            # import traceback
+            # logger.error(
+            #     f'self.replaylog (type: {type(self.replaylog)}) is falsey after update_idletasks().  Traceback:\n'
+            #     f'{"".join(traceback.format_list(traceback.extract_stack()))}')
+            return
+
         try:
             cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
 

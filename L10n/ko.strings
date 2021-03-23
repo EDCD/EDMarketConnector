@@ -5,7 +5,7 @@
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100은 '기본 설정'을 의미하며{CR}변경사항 적용을 위해{CR}재시작이 요구됩니다!";
 
 /* Language name */
-"!Language" = "영어";
+"!Language" = "한국어(Korean)";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "{APP} 정보";
@@ -488,7 +488,7 @@
 "Surveyor" = "Surveyor";
 
 /* Main window. [EDMarketConnector.py] */
-"System" = "시스템";
+"System" = "성계";
 
 /* Changed journal update_lock failed [monitor.py] */
 "The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "새 저널 디렉토리(Journal Directory)가 이미 잠겨있습니다.{CR}문제 해결을 시도하고 재시도하거나, 무시하는 방법이 있습니다.";
