@@ -11,6 +11,7 @@ Release 4.2.4
 * Add some paranoia in case Odyssey Alpha looks like a live version.  This 
   should prevent sending any alpha data to EDDN, EDSM and Inara.
 * Reduce some log spam in normal operation below TRACE level.  
+* Updated Korean translation.
 
 Release 4.2.3
 ===
