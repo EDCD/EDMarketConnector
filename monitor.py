@@ -845,7 +845,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             return None
 
         if not self.event_queue:
-            logger.debug('Called with no event_queue')
+            logger.trace('Called with no event_queue')
             return None
 
         else:
