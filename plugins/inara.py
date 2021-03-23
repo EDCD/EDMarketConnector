@@ -1275,8 +1275,11 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
         # Log individual errors and warnings
         for data_event, reply_event in zip(data['events'], reply['events']):
             if reply_event['eventStatus'] != 200:
-                logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
-                logger.debug(f'JSON data:\n{json.dumps(data_event)}')
+                if ("Everything was alright, the near-neutral status just wasn't stored."
+                        not in reply_event.get("eventStatusText")):
+                    logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
+                    logger.debug(f'JSON data:\n{json.dumps(data_event)}')
+
                 if reply_event['eventStatus'] // 100 != 2:
                     plug.show_error(_('Error: Inara {MSG}').format(
                         MSG=f'{data_event["eventName"]},'
