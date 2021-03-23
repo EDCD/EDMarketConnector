@@ -36,10 +36,22 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.3</title>
+			<title>Release 4.2.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.4</h2>
+<p>This release fixes one cosmetic bug and prepares for the Odyssey Alpha.</p>
+<ul>
+<li>Avoid a spurious 'list index out of range' status text.  This was caused by
+the EDDN plugin running out of data to send.</li>
+<li>Add some paranoia in case Odyssey Alpha looks like a live version.  This
+should prevent sending any alpha data to EDDN, EDSM and Inara.</li>
+<li>Reduce some log spam in normal operation below TRACE level.</li>
+<li>Updated Korean translation.</li>
+</ul>
+
 
 <h2>Release 4.2.3</h2>
 <p>This release mostly addresses an issue when Frontier Authorisation gets stuck
@@ -239,11 +251,11 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.4/EDMarketConnector_win_4.2.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.3"
-				length="11382784"
+				sparkle:version="4.2.4"
+				length="11386880"
 				type="application/octet-stream"
 			/>
 		</item>
