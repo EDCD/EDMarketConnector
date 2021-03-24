@@ -120,7 +120,7 @@ class TestJournalLock:
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmpdir_factory.mktemp()
+                return tmpdir_factory.mktemp("changing")
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
@@ -128,6 +128,17 @@ class TestJournalLock:
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
             yield tmpdir_factory
+
+    @pytest.fixture
+    def mock_journalalreadylocked(self, monkeypatch: _pytest_monkeypatch) -> JournalLock:
+        """Fixture to mock JournalAlreadyLocked in JournalLock instance."""
+        class MockJournalAlreadyLocked:
+            def __init__(self, parent, callback) -> None:
+                pass
+
+        with monkeypatch.context() as m:
+            m.setattr(JournalLock, "JournalAlreadyLocked", MockJournalAlreadyLocked)
+            yield
 
     ###########################################################################
     # Tests against JournalLock.__init__()
@@ -295,7 +306,10 @@ class TestJournalLock:
 
     ###########################################################################
     # Tests against JournalLock.update_lock()
-    def test_update_lock(self, mock_journaldir_changing: py_path_local_LocalPath):
+    def test_update_lock(
+            self,
+            mock_journaldir_changing: py_path_local_LocalPath,
+            mock_journalalreadylocked):
         """
         Test JournalLock.update_lock().
 
@@ -312,6 +326,6 @@ class TestJournalLock:
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
-        jlock.update_lock()
-        assert jlock.journaldir != old_journaldir
+        jlock.update_lock(None)
+        assert jlock.journal_dir != old_journaldir
         assert jlock.locked is True
