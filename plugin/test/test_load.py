@@ -1,6 +1,7 @@
 """Testing suite for plugin loading system."""
 import pathlib
 from contextlib import nullcontext
+from plugin.plugin import LEGACY_CALLBACK_LUT
 from typing import Any, ContextManager, List, Tuple
 
 import pytest
@@ -9,6 +10,8 @@ from plugin.manager import (
     PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException,
     PluginManager
 )
+
+from plugin.decorators import CALLBACK_MARKER
 
 from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, legacy_path
 
@@ -25,6 +28,7 @@ def _idfn(test_data) -> str:
 
 LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
     (legacy_good_path / 'simple', nullcontext()),
+    (legacy_good_path / 'all_callbacks', nullcontext()),
     (legacy_bad_path / "load_error", pytest.raises(PluginLoadingException, match=r'Exception in load method.*BANG!$')),
     (
         legacy_bad_path / 'import_error',
@@ -55,7 +59,7 @@ TESTS = [
 ] + LEGACY_TESTS
 
 
-@ pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
+@pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
 def test_load(plugin_manager: PluginManager, context: ContextManager, path: pathlib.Path) -> None:
     """
     Test that plugins load as expected.
@@ -66,6 +70,25 @@ def test_load(plugin_manager: PluginManager, context: ContextManager, path: path
     """
     with context:
         plugin_manager.load_plugin(path)
+
+
+def test_legacy_load(plugin_manager: PluginManager):
+    """Test that legacy loading system correctly loads a plugin, and creates synthetic hooks for it."""
+    target = legacy_good_path / 'all_callbacks'
+    loaded = plugin_manager.load_plugin(target)
+    assert loaded is not None
+
+    target_name = '_SYNTHETIC_CALLBACK_journal_entry'
+
+    # does the callback exist
+    assert hasattr(loaded.plugin, target_name)
+    # does the callback have the same function as the module, _explicitly_ an identity check over an equality check
+    # as a function equality is shaky at best
+    assert getattr(loaded.plugin, target_name) is getattr(loaded.module, 'journal_entry')
+    # has the callback been decorated with hook()?
+    assert hasattr(getattr(loaded.plugin, target_name), CALLBACK_MARKER)
+    # have all of the functions created automatically as part of callbacks been found by the callback search code?
+    assert len(loaded.callbacks) == len(LEGACY_CALLBACK_LUT)
 
 
 def test_double_load(plugin_manager: PluginManager) -> None:
