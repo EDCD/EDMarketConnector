@@ -31,10 +31,11 @@ You will need several pieces of software installed, or the files from their
  auto-select some others).  NB: If you have need to uninstall this it's
  "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.8 for Windows.
- [v3.8.6](https://www.python.org/downloads/release/python-386/) is the most
+1. [Python](https://python.org): 32-bit version of Python 3.9 for Windows.
+ [v3.9.2](https://www.python.org/downloads/release/python-392/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
- file, for the 32-bit version.
+ file, for the 32-bit version.  Double-check the version against the
+   `.python.version` file, as it should always contain the intended version.
 1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
  so will be picked up with the `pip install` below.  Latest tested as per
  `requirements-dev.txt`.
@@ -92,9 +93,6 @@ that.
  appears in the EXE properties, and is also used as the location of WinSparkle
  registry entries on Windows.
 
-1. Location of release files. To change this edit `setup.py`.  Look for the
-`appcast.write()` statement and change the `url="...` line.
-
 1. Application names, version and URL of the file with latest release
  information. These are all in the `config.py` file.  See the
  `from config import ...` lines in setup.py.
@@ -112,6 +110,21 @@ that.
 	 URL doesn't change over application versions) version of the
 	 appcast_win_<version>.xml file.  The original upstream value is
 	 `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
+       
+1. Location of release files.  This needs to be cited correctly in the
+   `edmarketconnector.xml` file, which is what the application queries to
+   see if there is a newer version.
+   Look for the `url="...` line in the `<enclosure ...` that is like:
+
+       <enclosure
+            url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
+            sparkle:os="windows"
+            sparkle:installerArguments="/passive LAUNCH=yes"
+            sparkle:version="4.2.3"
+            length="11382784"
+            type="application/octet-stream"
+       />
+
 
 ## Adding a new file
 
