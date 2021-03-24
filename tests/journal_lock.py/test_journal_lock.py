@@ -57,8 +57,18 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
                 msvcrt.locking(lf.fileno(), msvcrt.LK_NBLCK, 4096)
 
             except Exception as e:
-                print(f"sub-process: Unable to lock file: {e!r}")
+                print(f'sub-process: Unable to lock file: {e!r}')
                 return
+
+        else:
+            import fcntl
+
+            print('Not win32, using fcntl')
+            try:
+                fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+            except Exception as e:
+                print(f'sub-process: Unable to lock file: {e!r}')
 
         print('Telling main process to go...')
         continue_q.put('go', timeout=5)
