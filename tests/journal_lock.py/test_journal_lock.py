@@ -293,6 +293,11 @@ class TestJournalLock:
         with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
             assert _obtain_lock('release-lock', lf) is True
 
+    def test_release_lock_not_locked(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.release_lock() when not locked."""
+        jlock = JournalLock()
+        assert jlock.release_lock() is True
+
     ###########################################################################
     # Tests against JournalLock.update_lock()
     def test_update_lock(
