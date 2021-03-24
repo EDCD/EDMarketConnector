@@ -49,32 +49,48 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
     with open(lockfile / 'edmc-journal-lock.txt', mode='w+') as lf:
         print(f'sub-process: Opened {lockfile} for read...')
         # This needs to be kept in sync with journal_lock.py:_obtain_lock()
-        if sys.platform == 'win32':
-            print('sub-process: On win32')
-            import msvcrt
-            try:
-                print('sub-process: Trying msvcrt.locking() ...')
-                msvcrt.locking(lf.fileno(), msvcrt.LK_NBLCK, 4096)
-
-            except Exception as e:
-                print(f'sub-process: Unable to lock file: {e!r}')
-                return
-
-        else:
-            import fcntl
-
-            print('sub-process: Not win32, using fcntl')
-            try:
-                fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
-            except Exception as e:
-                print(f'sub-process: Unable to lock file: {e!r}')
+        if not _obtain_lock('sub-process', lf):
+            print('sub-process: Failed to get lock, so returning')
+            return
 
         print('sub-process: Got lock, telling main process to go...')
         continue_q.put('go', timeout=5)
         # Wait for signal to exit
         print('sub-process: Waiting for exit signal...')
         exit_q.get(block=True, timeout=None)
+
+
+def _obtain_lock(prefix: str, filehandle) -> bool:
+    """
+    Obtain the JournalLock.
+
+    :param prefix: str - what to prefix output with.
+    :param filehandle: File handle already open on the lockfile.
+    :return: bool - True if we obtained the lock.
+    """
+    if sys.platform == 'win32':
+        print(f'{prefix}: On win32')
+        import msvcrt
+        try:
+            print(f'{prefix}: Trying msvcrt.locking() ...')
+            msvcrt.locking(filehandle.fileno(), msvcrt.LK_NBLCK, 4096)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to lock file: {e!r}')
+            return False
+
+    else:
+        import fcntl
+
+        print(f'{prefix}: Not win32, using fcntl')
+        try:
+            fcntl.flock(filehandle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to lock file: {e!r}')
+            return False
+
+    return True
 
 
 class TestJournalLock:
@@ -248,5 +264,19 @@ class TestJournalLock:
 
     ###########################################################################
     # Tests against JournalLock.release_lock()
+    def test_release_lock(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.release_lock()."""
+        # First actually obtain the lock, and check it worked
+        jlock = JournalLock()
+        jlock.obtain_lock()
+        assert jlock.locked is True
+
+        # Now release the lock
+        assert jlock.release_lock() is True
+
+        # And finally check it actually IS unlocked.
+        with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
+            assert _obtain_lock('release-lock', lf) is True
+
     ###########################################################################
     # Tests against JournalLock.update_lock()
