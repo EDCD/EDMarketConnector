@@ -47,13 +47,13 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
     :param lockfile: Path where the lockfile should be.
     """
     with open(lockfile / 'edmc-journal-lock.txt', mode='w+') as lf:
-        print(f'Opened {lockfile} for read...')
+        print(f'sub-process: Opened {lockfile} for read...')
         # This needs to be kept in sync with journal_lock.py:_obtain_lock()
         if sys.platform == 'win32':
-            print('On win32')
+            print('sub-process: On win32')
             import msvcrt
             try:
-                print('Trying msvcrt.locking() ...')
+                print('sub-process: Trying msvcrt.locking() ...')
                 msvcrt.locking(lf.fileno(), msvcrt.LK_NBLCK, 4096)
 
             except Exception as e:
@@ -63,17 +63,17 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
         else:
             import fcntl
 
-            print('Not win32, using fcntl')
+            print('sub-process: Not win32, using fcntl')
             try:
                 fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except Exception as e:
                 print(f'sub-process: Unable to lock file: {e!r}')
 
-        print('Telling main process to go...')
+        print('sub-process: Got lock, telling main process to go...')
         continue_q.put('go', timeout=5)
         # Wait for signal to exit
-        print('Waiting for exit signal...')
+        print('sub-process: Waiting for exit signal...')
         exit_q.get(block=True, timeout=None)
 
 
