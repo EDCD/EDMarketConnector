@@ -107,8 +107,12 @@ class MigratedPlugin(Plugin):
             if callback is None:
                 continue
 
+            # TODO: This really will need a wrapper at some point, but those can be defined later
+            # Dynamically adding methods is done with types.MethodType(function ...) (see docs)
+            # this is required for access to self, which likely wont be needed here but it also may. Something
+            # to keep in mind
             target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
-            setattr(self, target_name, decorators.hook(new_hook)(old_callback))
+            setattr(self, target_name, decorators.hook(new_hook)(callback))
             self.log.trace(
                 f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
             )
