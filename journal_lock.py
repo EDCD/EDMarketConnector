@@ -13,7 +13,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     def _(x: str) -> str:
         return x
 
@@ -50,7 +50,7 @@ class JournalLock:
             try:
                 self.journal_dir_path = pathlib.Path(self.journal_dir)
 
-            except Exception:
+            except Exception:  # pragma: no cover
                 logger.exception("Couldn't make pathlib.Path from journal_dir")
 
     def open_journal_dir_lockfile(self) -> bool:
@@ -107,7 +107,7 @@ class JournalLock:
                             f", assuming another process running: {e!r}")
                 return JournalLockResult.ALREADY_LOCKED
 
-        else:
+        else:  # pytest coverage only sees this on !win32
             logger.trace('NOT win32, using fcntl')
             try:
                 import fcntl
@@ -133,7 +133,7 @@ class JournalLock:
 
         return JournalLockResult.LOCKED
 
-    def release_lock(self) -> bool:
+    def release_lock(self) -> bool:  # noqa: CCR001
         """
         Release lock on journal directory.
 
@@ -160,7 +160,7 @@ class JournalLock:
             else:
                 unlocked = True
 
-        else:
+        else:  # pytest coverage only sees this on !win32
             logger.trace('NOT win32, using fcntl')
             try:
                 import fcntl
@@ -179,7 +179,8 @@ class JournalLock:
                 unlocked = True
 
         # Close the file whether or not the unlocking succeeded.
-        self.journal_dir_lockfile.close()
+        if hasattr(self, 'journal_dir_lockfile'):
+            self.journal_dir_lockfile.close()
 
         self.journal_dir_lockfile_name = None
         # Avoids type hint issues, see 'declaration' in JournalLock.__init__()
@@ -187,7 +188,7 @@ class JournalLock:
 
         return unlocked
 
-    class JournalAlreadyLocked(tk.Toplevel):
+    class JournalAlreadyLocked(tk.Toplevel):  # pragma: no cover
         """Pop-up for when Journal directory already locked."""
 
         def __init__(self, parent: tk.Tk, callback: Callable) -> None:
@@ -263,9 +264,9 @@ class JournalLock:
 
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
-            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
+            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)  # pragma: no cover
 
-    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:
+    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:  # pragma: no cover
         """
         Try again to obtain a lock on the Journal Directory.
 

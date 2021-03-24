@@ -298,6 +298,12 @@ class TestJournalLock:
         jlock = JournalLock()
         assert jlock.release_lock() is True
 
+    def test_release_lock_lie_locked(self, mock_journaldir: py_path_local_LocalPath):
+        """Test JournalLock.release_lock() when not locked, but lie we are."""
+        jlock = JournalLock()
+        jlock.locked = True
+        assert jlock.release_lock() is False
+
     ###########################################################################
     # Tests against JournalLock.update_lock()
     def test_update_lock(
@@ -319,6 +325,25 @@ class TestJournalLock:
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
-        jlock.update_lock(None)
+        jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir != old_journaldir
+        assert jlock.locked is True
+
+    def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
+        """
+        Test JournalLock.update_lock().
+
+        Due to using 'static' mock_journaldir this should 'work', because the
+        directory is still the same.
+        """
+        # First actually obtain the lock, and check it worked
+        jlock = JournalLock()
+        jlock.obtain_lock()
+        assert jlock.locked is True
+
+        # Now store the 'current' journaldir for reference and attempt
+        # to update to a new one.
+        old_journaldir = jlock.journal_dir
+        jlock.update_lock(None)  # type: ignore
+        assert jlock.journal_dir == old_journaldir
         assert jlock.locked is True
