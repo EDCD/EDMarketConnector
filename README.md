@@ -42,16 +42,9 @@ Please see the [Troubleshooting](https://github.com/EDCD/EDMarketConnector/wiki/
 Reporting a problem
 ---
 Please report a problem as a new GitHub [issue](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=).
-Please wait for the error to occur and zip up and attach this app's log file to the new issue:
-
-Mac:
-
-* `$TMPDIR/EDMarketConnector.log`
-
-Windows:
-
-* `%TMP%\EDMarketConnector.log`
-
+See [Reporting a problem](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#reporting-a-problem)
+for further guidance, including how to find the necessary log files to 
+attach to the report.
 
 Packaging for distribution
 --------
@@ -74,6 +67,6 @@ Please see the [Acknowledgements](https://github.com/EDCD/EDMarketConnector/wiki
 
 License
 -------
-Copyright © 2015-2019 Jonathan Harris, 2020 EDCD
+Copyright © 2015-2019 Jonathan Harris, 2020-2021 EDCD
 
 Licensed under the [GNU Public License (GPL)](http://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
