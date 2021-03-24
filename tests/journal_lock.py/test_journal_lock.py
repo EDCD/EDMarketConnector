@@ -99,9 +99,6 @@ class TestJournalLock:
     @pytest.fixture
     def mock_journaldir(self, monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
-        # Force the directory to pre-defined for testing making !Write
-        # tmpdir = pathlib.Path(r'C:\Users\Athan\AppData\Local\Temp\rotest')
-
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
@@ -113,6 +110,24 @@ class TestJournalLock:
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
             yield tmpdir
+
+    @pytest.fixture
+    def mock_journaldir_changing(
+            self,
+            monkeypatch: _pytest_monkeypatch,
+            tmpdir_factory: _pytest_tmpdir.TempdirFactory) -> py_path_local_LocalPath:
+        """Fixture for mocking config.get_str('journaldir')."""
+        def get_str(key: str, *, default: str = None) -> str:
+            """Mock config.*Config get_str to provide fake journaldir."""
+            if key == 'journaldir':
+                return tmpdir_factory.mktemp()
+
+            print('Other key, calling up ...')
+            return config.get_str(key)  # Call the non-mocked
+
+        with monkeypatch.context() as m:
+            m.setattr(config, "get_str", get_str)
+            yield tmpdir_factory
 
     ###########################################################################
     # Tests against JournalLock.__init__()
@@ -280,3 +295,23 @@ class TestJournalLock:
 
     ###########################################################################
     # Tests against JournalLock.update_lock()
+    def test_update_lock(self, mock_journaldir_changing: py_path_local_LocalPath):
+        """
+        Test JournalLock.update_lock().
+
+        NB: This uses mock_journaldir_changing so that each subsequent call
+            to config.get_str('journaldir') gets a new, unique, path.
+            This should mean that the call to update_lock() switches to a new
+            journaldir.
+        """
+        # First actually obtain the lock, and check it worked
+        jlock = JournalLock()
+        jlock.obtain_lock()
+        assert jlock.locked is True
+
+        # Now store the 'current' journaldir for reference and attempt
+        # to update to a new one.
+        old_journaldir = jlock.journal_dir
+        jlock.update_lock()
+        assert jlock.journaldir != old_journaldir
+        assert jlock.locked is True
