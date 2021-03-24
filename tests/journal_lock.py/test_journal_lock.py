@@ -22,6 +22,7 @@
 #
 #  - Not sure about testing JournalAlreadyLocked class.
 
+import multiprocessing as mp
 import os
 import pathlib
 import sys
@@ -34,6 +35,36 @@ from py._path.local import LocalPath as py_path_local_LocalPath
 
 from config import config
 from journal_lock import JournalLock, JournalLockResult
+
+
+# We need another process to already hold the lock.
+def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib.Path):
+    """
+    Obtain the lock in a sub-process.
+
+    :param continue_q: Write to this when parent should continue.
+    :param exit_q: When there's an item in this, exit.
+    :param lockfile: Path where the lockfile should be.
+    """
+    with open(lockfile / 'edmc-journal-lock.txt', mode='w+') as lf:
+        print(f'Opened {lockfile} for read...')
+        # This needs to be kept in sync with journal_lock.py:_obtain_lock()
+        if sys.platform == 'win32':
+            print('On win32')
+            import msvcrt
+            try:
+                print('Trying msvcrt.locking() ...')
+                msvcrt.locking(lf.fileno(), msvcrt.LK_NBLCK, 4096)
+
+            except Exception as e:
+                print(f"sub-process: Unable to lock file: {e!r}")
+                return
+
+        print('Telling main process to go...')
+        continue_q.put('go', timeout=5)
+        # Wait for signal to exit
+        print('Waiting for exit signal...')
+        exit_q.get(block=True, timeout=None)
 
 
 class TestJournalLock:
@@ -181,19 +212,31 @@ class TestJournalLock:
 
     def test_obtain_lock_already_locked(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.obtain_lock() with tmpdir."""
-        jlock = JournalLock()
+        continue_q: mp.Queue = mp.Queue()
+        exit_q: mp.Queue = mp.Queue()
+        locker = mp.Process(target=other_process_lock,
+                            args=(continue_q, exit_q, mock_journaldir)
+                            )
+        print('Starting sub-process other_process_lock()...')
+        locker.start()
+        # Wait for the sub-process to have locked
+        print('Waiting for "go" signal from sub-process...')
+        continue_q.get(block=True, timeout=5)
 
-        locked = jlock.obtain_lock()
-        assert locked == JournalLockResult.LOCKED
-        assert jlock.locked is True
-        # Now attempt to lock again, but only that.
-        second_attempt = jlock._obtain_lock()
+        print('Attempt actual lock test...')
+        # Now attempt to lock with to-test code
+        jlock = JournalLock()
+        second_attempt = jlock.obtain_lock()
         # Fails on Linux, because flock(2) is per process, so we'd need to
         # use multiprocessing to test this.
         assert second_attempt == JournalLockResult.ALREADY_LOCKED
+        print('Telling sub-process to quit...')
+        exit_q.put('quit')
+        print('Waiting for sub-process...')
+        locker.join()
+        print('Done.')
 
     ###########################################################################
     # Tests against JournalLock.release_lock()
-
     ###########################################################################
     # Tests against JournalLock.update_lock()
