@@ -129,17 +129,6 @@ class TestJournalLock:
             m.setattr(config, "get_str", get_str)
             yield tmpdir_factory
 
-    @pytest.fixture
-    def mock_journalalreadylocked(self, monkeypatch: _pytest_monkeypatch) -> JournalLock:
-        """Fixture to mock JournalAlreadyLocked in JournalLock instance."""
-        class MockJournalAlreadyLocked:
-            def __init__(self, parent, callback) -> None:
-                pass
-
-        with monkeypatch.context() as m:
-            m.setattr(JournalLock, "JournalAlreadyLocked", MockJournalAlreadyLocked)
-            yield
-
     ###########################################################################
     # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
@@ -308,8 +297,7 @@ class TestJournalLock:
     # Tests against JournalLock.update_lock()
     def test_update_lock(
             self,
-            mock_journaldir_changing: py_path_local_LocalPath,
-            mock_journalalreadylocked):
+            mock_journaldir_changing: py_path_local_LocalPath):
         """
         Test JournalLock.update_lock().
 
