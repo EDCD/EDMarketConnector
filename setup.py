@@ -12,7 +12,6 @@ import os
 import platform
 import re
 import shutil
-import subprocess
 import sys
 from distutils.core import setup
 from os.path import exists, isdir, join
@@ -21,34 +20,25 @@ from typing import Any, Generator, Set
 
 import semantic_version
 
-from config import appcmdname, applongname, appname, appversion, copyright, update_feed, update_interval
+from config import (
+    appcmdname, applongname, appname, appversion, copyright, git_shorthash_from_head, update_feed, update_interval
+)
 from constants import GITVERSION_FILE
 
 if sys.version_info[0:2] != (3, 9):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
+###########################################################################
 # Retrieve current git short hash and store in file GITVERSION_FILE
-try:
-    git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT
-                               )
-    out, err = git_cmd.communicate()
-
-except Exception as e:
-    print(f"Couldn't run git command for short hash: {e!r}")
+git_shorthash = git_shorthash_from_head()
+if git_shorthash is None:
     exit(-1)
 
-else:
-    git_shorthash: str = out.decode().rstrip('\n')
-    if re.match(r'^[0-9a-f]{7,}$', git_shorthash) is None:
-        print(f"'{git_shorthash}' doesn't look like a valid git short hash!")
-        exit(-2)
-
-    with open(GITVERSION_FILE, 'w+', encoding='utf-8') as gvf:
-        gvf.write(git_shorthash)
+with open(GITVERSION_FILE, 'w+', encoding='utf-8') as gvf:
+    gvf.write(git_shorthash)
 
 print(f'Git short hash: {git_shorthash}')
+###########################################################################
 
 if sys.platform == 'win32':
     assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
