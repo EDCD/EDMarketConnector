@@ -195,7 +195,7 @@ class TestJournalLock:
         # Check that an actual journaldir is handled correctly.
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.LOCKED
-        assert jlock.locked is True
+        assert jlock.locked
 
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.obtain_lock() with read-only tmpdir."""
@@ -296,19 +296,19 @@ class TestJournalLock:
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
         jlock.obtain_lock()
-        assert jlock.locked is True
+        assert jlock.locked
 
         # Now release the lock
-        assert jlock.release_lock() is True
+        assert jlock.release_lock()
 
         # And finally check it actually IS unlocked.
         with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
-            assert _obtain_lock('release-lock', lf) is True
+            assert _obtain_lock('release-lock', lf)
 
     def test_release_lock_not_locked(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.release_lock() when not locked."""
         jlock = JournalLock()
-        assert jlock.release_lock() is True
+        assert jlock.release_lock()
 
     def test_release_lock_lie_locked(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.release_lock() when not locked, but lie we are."""
@@ -332,14 +332,14 @@ class TestJournalLock:
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
         jlock.obtain_lock()
-        assert jlock.locked is True
+        assert jlock.locked
 
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir != old_journaldir
-        assert jlock.locked is True
+        assert jlock.locked
 
     def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
         """
@@ -351,11 +351,11 @@ class TestJournalLock:
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
         jlock.obtain_lock()
-        assert jlock.locked is True
+        assert jlock.locked
 
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir == old_journaldir
-        assert jlock.locked is True
+        assert jlock.locked
