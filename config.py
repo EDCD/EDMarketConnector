@@ -29,7 +29,7 @@ appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.2.0-beta1'  # -rc1+a872b5f'
+appversion = '5.0.0-beta1'  # -rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
