@@ -307,7 +307,7 @@ Msg:\n{msg}'''
 
             elif isinstance(modules, list):
                 if len(modules) == 0:
-                    logger.debug('modules is empty list. Damaged Station?')
+                    logger.debug('modules is empty list. FC or Damaged Station?')
 
                 else:
                     logger.error(f'modules is non-empty list: {modules!r}')
@@ -327,7 +327,7 @@ Msg:\n{msg}'''
             # Set a safe value
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
-        return (modules, ships)
+        return modules, ships
 
     def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
