@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 
 import myNotebook as nb  # noqa: N813
 import plug
-from config import applongname, appversion, config
+from config import applongname, appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import Translations
@@ -1122,7 +1122,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def apply(self) -> None:
         """Update the config with the options set on the dialog."""
-        config.set('PrefsVersion', prefsVersion.stringToSerial(appversion))
+        config.set('PrefsVersion', prefsVersion.stringToSerial(appversion_nobuild()))
         config.set(
             'output',
             (self.out_td.get() and config.OUT_MKT_TD) +

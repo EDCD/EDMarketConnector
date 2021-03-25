@@ -1147,11 +1147,11 @@ class AppWindow(object):
             # version <link to changelog>
             ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.appversion_label = tk.Label(frame, text=appversion)
+            self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
-                                                 f'{appversion_nobuild}',
+                                                 f'{appversion_nobuild()}',
                                              underline=True)
             self.appversion.grid(row=row, column=2, sticky=tk.W)
             row += 1
@@ -1180,7 +1180,7 @@ class AppWindow(object):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
-            logger.info(f'Current version is {appversion}')
+            logger.info(f'Current version is {appversion()}')
 
         def apply(self) -> None:
             """Close the window."""
@@ -1395,7 +1395,7 @@ def show_killswitch_poppup(root=None):
 
 # Run the app
 if __name__ == "__main__":  # noqa: C901
-    logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
+    logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
@@ -1493,7 +1493,7 @@ sys.path: {sys.path}'''
     # abinit = A.B()
 
     # Plain, not via `logger`
-    print(f'{applongname} {appversion}')
+    print(f'{applongname} {appversion()}')
 
     Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 

@@ -20,7 +20,7 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appversion, config
+from config import applongname, appversion_nobuild, config
 from EDMCLogging import get_main_logger
 from myNotebook import Frame
 from prefs import prefsVersion
@@ -141,7 +141,7 @@ class EDDN:
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
-                ('softwareVersion', appversion),
+                ('softwareVersion', appversion_nobuild()),
                 ('uploaderID',      uploader_id),
             ])),
             ('message', msg['message']),

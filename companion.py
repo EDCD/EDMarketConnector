@@ -55,7 +55,7 @@ SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH = '/auth'
 URL_TOKEN = '/token'
 
-USER_AGENT = f'EDCD-{appname}-{appversion}'
+USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'

@@ -573,7 +573,7 @@ def worker() -> None:
                         'commanderName': username.encode('utf-8'),
                         'apiKey': apikey,
                         'fromSoftware': applongname,
-                        'fromSoftwareVersion': appversion,
+                        'fromSoftwareVersion': appversion(),
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
