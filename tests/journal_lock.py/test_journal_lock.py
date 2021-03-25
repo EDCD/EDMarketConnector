@@ -43,7 +43,11 @@ from config import config
 from journal_lock import JournalLock, JournalLockResult
 
 
-# We need another process to already hold the lock.
+###########################################################################
+# For some tests (at least on Linux) we need another process to already
+# hold the lock.
+# This is at top level due to multiprocessing.Process wanting to
+# pickle its arguments, other_process_lock() being one of them.
 def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib.Path):
     """
     Obtain the lock in a sub-process.
@@ -97,6 +101,7 @@ def _obtain_lock(prefix: str, filehandle) -> bool:
             return False
 
     return True
+###########################################################################
 
 
 class TestJournalLock:
