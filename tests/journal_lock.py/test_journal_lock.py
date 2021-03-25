@@ -1,27 +1,33 @@
-"""Tests for journal_lock.py code."""
-# Tests:
-#  - Is file actually locked after obtain_lock().  Problem: We opened the
-#     file in a manner which means nothing else can open it.  Also I assume
-#     that the same process will either be allowed to lock it 'again' or
-#     overwrite the lock.
-#
-#     Expected failures if:
-#
-#      1. Lock already held (elsewhere).
-#      2. Can't open lock file 'w+'.
-#      3. Path to lock file doesn't exist.
-#      4. journaldir is None (default on Linux).
-#
-#  - Does release_lock() work?  Easier to test, if it's worked....
-#      1. return True if not locked.
-#      2. return True if locked, but successful unlock.
-#      3. return False otherwise.
-#
-#  - Can any string to pathlib.Path result in an invalid path for other
-#    operations?
-#
-#  - Not sure about testing JournalAlreadyLocked class.
+"""
+Tests for journal_lock.py code.
 
+Tests:
+ - Is file actually locked after obtain_lock().  Problem: We opened the
+    file in a manner which means nothing else can open it.  Also I assume
+    that the same process will either be allowed to lock it 'again' or
+    overwrite the lock.
+
+    Expected failures if:
+
+     1. Lock already held (elsewhere).
+     2. Can't open lock file 'w+'.
+     3. Path to lock file doesn't exist.
+     4. journaldir is None (default on Linux).
+
+ - Does release_lock() work?  Easier to test, if it's worked....
+     1. return True if not locked.
+     2. return True if locked, but successful unlock.
+     3. return False otherwise.
+
+ - JournalLock.set_path_from_journaldir
+     1. When journaldir is None.
+     2. Succeeds otherwise?
+
+ - Can any string to pathlib.Path result in an invalid path for other
+   operations?
+
+ - Not sure about testing JournalAlreadyLocked class.
+"""
 import multiprocessing as mp
 import os
 import pathlib
@@ -115,7 +121,8 @@ class TestJournalLock:
     def mock_journaldir_changing(
             self,
             monkeypatch: _pytest_monkeypatch,
-            tmpdir_factory: _pytest_tmpdir.TempdirFactory) -> py_path_local_LocalPath:
+            tmpdir_factory: _pytest_tmpdir.TempdirFactory
+    ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
