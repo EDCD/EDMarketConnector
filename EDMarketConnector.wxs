@@ -585,6 +585,7 @@
 			<ComponentRef Id="hu.strings" />
 			<ComponentRef Id="it.strings" />
 			<ComponentRef Id="ja.strings" />
+			<ComponentRef Id="ko.strings" />
 			<ComponentRef Id="libcrypto_1_1.dll" />
 			<ComponentRef Id="libffi_7.dll" />
 			<ComponentRef Id="library.zip" />
