@@ -13,6 +13,8 @@ import functools
 import logging
 import os
 import pathlib
+import re
+import subprocess
 import sys
 import traceback
 import warnings
@@ -87,6 +89,34 @@ elif platform == 'linux':
 
 
 _T = TypeVar('_T')
+
+
+###########################################################################
+def git_shorthash_from_head() -> str:
+    """
+    Determine short hash for current git HEAD.
+
+    :return: str - None if we couldn't determine the short hash.
+    """
+    shorthash: str = None  # type: ignore
+    try:
+        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT
+                                   )
+        out, err = git_cmd.communicate()
+
+    except Exception as e:
+        logger.error(f"Couldn't run git command for short hash: {e!r}")
+
+    else:
+        shorthash = out.decode().rstrip('\n')
+        if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
+            logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
+            shorthash = None  # type: ignore
+
+    return shorthash
+###########################################################################
 
 
 class AbstractConfig(abc.ABC):
