@@ -145,9 +145,9 @@ def main():
             updater = Updater(provider='internal')
             newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
-                print(f'{appversion} ({newversion.title!r} is available)')
+                print(f'{appversion()} ({newversion.title!r} is available)')
             else:
-                print(appversion)
+                print(appversion())
 
             return
 
@@ -160,7 +160,7 @@ def main():
                 sys.exit(EXIT_ARGS)
             edmclogger.set_channels_loglevel(args.loglevel)
 
-        logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
+        logger.debug(f'Startup v{appversion()} : Running on Python v{sys.version}')
         logger.debug(f'''Platform: {sys.platform}
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}

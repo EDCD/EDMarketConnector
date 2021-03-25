@@ -34,7 +34,7 @@ def export(data):
             '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'
             '@ {system}/{starport}\n'.format(
                 appname=applongname,
-                appversion=appversion,
+                appversion=appversion(),
                 platform=platform == 'darwin' and "Mac OS" or system(),
                 cmdr=data['commander']['name'].strip(),
                 system=data['lastSystem']['name'].strip(),

@@ -9,7 +9,8 @@ if TYPE_CHECKING:
     import tkinter as tk
 
 # ensure registry is set up on Windows before we start
-from config import appname, appversion, appversion_nobuild, config, update_feed
+from config import appname, appversion_nobuild, config, update_feed
+
 
 class EDMCVersion(object):
     """
@@ -28,6 +29,7 @@ class EDMCVersion(object):
         self.version: str = version
         self.title: str = title
         self.sv: semantic_version.base.Version = sv
+
 
 class Updater(object):
     """
@@ -79,7 +81,7 @@ class Updater(object):
                 # NB: It 'accidentally' supports pre-release due to how it
                 # splits and compares strings:
                 # <https://github.com/vslavik/winsparkle/issues/214>
-                self.updater.win_sparkle_set_app_build_version(appversion_nobuild)
+                self.updater.win_sparkle_set_app_build_version(appversion_nobuild())
 
                 # set up shutdown callback
                 global root
@@ -175,7 +177,7 @@ class Updater(object):
             )
 
         # Look for any remaining version greater than appversion
-        simple_spec = semantic_version.SimpleSpec('>' + appversion)
+        simple_spec = semantic_version.SimpleSpec('>' + appversion_nobuild())
         newversion = simple_spec.select(items.keys())
 
         if newversion:
