@@ -239,6 +239,9 @@
 					<Component Id="EDMarketConnector_localserver_auth.bat" Guid="*">
 					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - localserver-auth.bat" />
 					</Component>
+					<Component Id="gitversion" Guid="*">
+					    <File KeyPath="yes" Source="SourceDir\.gitversion" />
+					</Component>
 					<Directory Id="L10n" Name="L10n">
 						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\L10n\cs.strings" />
@@ -555,6 +558,7 @@
 		<Feature Id='Complete' Level='1'>
 			<ComponentRef Id="RegistryEntries" />
 			<ComponentRef Id="MainExecutable" />
+			<ComponentRef Id="gitversion" />
 			<ComponentRef Id="_asyncio.pyd" />
 			<ComponentRef Id="_bz2.pyd" />
 			<ComponentRef Id="_ctypes.pyd" />

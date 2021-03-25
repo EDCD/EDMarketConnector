@@ -207,6 +207,7 @@ elif sys.platform == 'win32':
 
     DATA_FILES = [
         ('', [
+            '.gitversion',  # Contains git short hash
             'WinSparkle.dll',
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
