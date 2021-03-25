@@ -24,17 +24,25 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Typ
 
 import semantic_version
 
-from constants import applongname, appname
+from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
 appcmdname = 'EDMC'
+# Replacing appversion with a function:
+#
+# 1. In setup.py grab the current HEAD short hash and place in a file .gitversion
+# 2. config.py code then needs to check:
+#   a. If we're not frozen and .git/ exists (i.e. not from a tarball ?) use something to get the current HEAD
+#   b. If not frozen and no .gitversion (but there should be) ???
+#   c. If frozen, just read the .gitversion (that had better damned well be there, but catch if it's not).
+# 3. But I don't want to spam EDDN with different 5.0.0-beta1+shorthash when testing... so ???
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '5.0.0-beta1'  # -rc1+a872b5f'
+static_appversion = '5.0.0-beta1'
 # For some things we want appversion without (possible) +build metadata
-appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
-copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
+static_appversion_nobuild = str(semantic_version.Version(static_appversion).truncate('prerelease'))
+copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
@@ -116,6 +124,27 @@ def git_shorthash_from_head() -> str:
             shorthash = None  # type: ignore
 
     return shorthash
+
+
+def appversion() -> str:
+    if getattr(sys, 'frozen', False):
+        # Running frozen, so we should have a .gitversion file
+        with open(GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+            shorthash = gitv.read()
+
+        # TODO: Check if there was already a build meta data in static_appversion ?
+
+    else:
+        # Running from source
+        shorthash = git_shorthash_from_head()
+        if shorthash is None:
+            shorthash = 'UNKNOWN'
+
+    return f'{static_appversion}+{shorthash}'
+
+
+def appversion_nobuild() -> str:
+    return str(semantic_version.Version(appversion()).truncate('prerelease'))
 ###########################################################################
 
 
