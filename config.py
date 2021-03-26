@@ -1,8 +1,9 @@
 """
 Code dealing with the configuration of the program.
 
-On Windows this uses the Registry to store values in a flat manner.
+Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
+macOS uses a 'defaults' object.
 """
 
 # spell-checker: words HKEY FOLDERID wchar wstring edcdhkey
@@ -268,12 +269,12 @@ class AbstractConfig(abc.ABC):
 
     def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
         """
-        Return the requested key, or a default.
+        Return the data for the requested key, or a default.
 
-        :param key: the key to get
-        :param default: the default to return if the key does not exist, defaults to None
-        :raises OSError: on windows, if a registry error occurs.
-        :return: the data or the default
+        :param key: The key data is being requested for.
+        :param default: The default to return if the key does not exist, defaults to None.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The data or the default.
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
         logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
@@ -306,11 +307,11 @@ class AbstractConfig(abc.ABC):
         """
         Return the string referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        :param key: The key data is being requested for.
+        :param default: Default to return if the key does not exist, defaults to None.
+        :raises ValueError: If an internal error occurs getting or converting a value.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The requested data or the default.
         """
         raise NotImplementedError
 
@@ -319,10 +320,10 @@ class AbstractConfig(abc.ABC):
         """
         Return the bool referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
+        :param key: The key data is being requested for.
         :param default: Default to return if the key does not exist, defaults to None
         :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         :return: The requested data or the default
         """
         raise NotImplementedError
@@ -332,7 +333,7 @@ class AbstractConfig(abc.ABC):
         Getint is a Deprecated getter method.
 
         See get_int for its replacement.
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
         logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
@@ -346,11 +347,11 @@ class AbstractConfig(abc.ABC):
 
         For legacy reasons, the default is 0 and not None.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to 0
-        :raises ValueError: if the internal representation of this key cannot be converted to an int
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        :param key: The key data is being requested for.
+        :param default: Default to return if the key does not exist, defaults to 0.
+        :raises ValueError: If the internal representation of this key cannot be converted to an int.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The requested data or the default.
         """
         raise NotImplementedError
 
@@ -362,7 +363,7 @@ class AbstractConfig(abc.ABC):
         :param key: The key to set the value on.
         :param val: The value to set the key's data to.
         :raises ValueError: On an invalid type.
-        :raises OSError: On Windows for any Registry failure.
+        :raises OSError: On Windows, if a Registry error occurs.
         """
         raise NotImplementedError
 
@@ -371,7 +372,7 @@ class AbstractConfig(abc.ABC):
         """
         Delete the given key from the config.
 
-        :param key: The key to delete
+        :param key: The key to delete.
         :param suppress: bool - Whether to suppress any errors.  Useful in case
           code to migrate settings is blindly removing an old key.
         :raises OSError: On Windows, if a registry error occurs.
@@ -406,7 +407,7 @@ class AbstractConfig(abc.ABC):
 
 
 class WinConfig(AbstractConfig):
-    """Implementation of AbstractConfig for windows."""
+    """Implementation of AbstractConfig for Windows."""
 
     def __init__(self, do_winsparkle=True) -> None:
         self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
@@ -454,6 +455,7 @@ class WinConfig(AbstractConfig):
             self.set('outdir',  docs if docs is not None else self.home)
 
     def __setup_winsparkle(self):
+        """Ensure the necessary Registry keys for WinSparkle are present."""
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
             key=winreg.HKEY_CURRENT_USER,
@@ -466,7 +468,7 @@ class WinConfig(AbstractConfig):
             )
 
         except OSError:
-            logger.exception('could not open winsparkle handle')
+            logger.exception('could not open WinSparkle handle')
             raise
 
         # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
@@ -485,7 +487,7 @@ class WinConfig(AbstractConfig):
         edcd_handle.Close()
 
     def __get_regentry(self, key: str) -> Union[None, list, str, int]:
-        """Access the registry for the raw entry."""
+        """Access the Registry for the raw entry."""
         try:
             value, _type = winreg.QueryValueEx(self.__reg_handle, key)
         except FileNotFoundError:
@@ -667,6 +669,12 @@ class MacConfig(AbstractConfig):
             self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
+        """
+        Retrieve the raw data for the given key.
+
+        :param str: str - The key data is being requested for.
+        :return: The requested data.
+        """
         res = self._settings.get(key)
         # On MacOS Catalina, with python.org python 3.9.2 any 'list'
         # has type __NSCFArray so a simple `isinstance(res, list)` is
@@ -835,9 +843,12 @@ class LinuxConfig(AbstractConfig):
 
     def __escape(self, s: str) -> str:
         """
-        Escape the string using self.__escape_lut.
+        Escape a string using self.__escape_lut.
 
-        This does NOT support multi-character escapes
+        This does NOT support multi-character escapes.
+
+        :param s: str - String to be escaped.
+        :return: str - The escaped string.
         """
         out = ""
         for c in s:
@@ -850,6 +861,12 @@ class LinuxConfig(AbstractConfig):
         return out
 
     def __unescape(self, s: str) -> str:
+        """
+        Unescape a string.
+
+        :param s: str - The string to unescape.
+        :return: str - The unescaped string.
+        """
         out: List[str] = []
         i = 0
         while i < len(s):
@@ -873,6 +890,12 @@ class LinuxConfig(AbstractConfig):
         return "".join(out)
 
     def __raw_get(self, key: str) -> Optional[str]:
+        """
+        Get a raw data value from the config file.
+
+        :param key: str - The key data is being requested for.
+        :return: str - The raw data, if found.
+        """
         if self.config is None:
             raise ValueError('Attempt to use a closed config')
 
