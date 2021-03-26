@@ -195,17 +195,29 @@ class AbstractConfig(abc.ABC):
         self.home_path = pathlib.Path.home()
 
     def set_shutdown(self):
+        """Set flag denoting we're in the shutdown sequence."""
         self.__in_shutdown = True
 
     @property
     def shutting_down(self) -> bool:
+        """
+        Determine if we're in the shutdown sequence.
+
+        :return: bool - True if in shutdown sequence.
+        """
         return self.__in_shutdown
 
     def set_auth_force_localserver(self):
+        """Set flag to force use of localhost web server for Frontier Auth callback."""
         self.__auth_force_localserver = True
 
     @property
     def auth_force_localserver(self) -> bool:
+        """
+        Determine if use of localhost is forced for Frontier Auth callback.
+
+        :return: bool - True if we should use localhost web server.
+        """
         return self.__auth_force_localserver
 
     @property
@@ -256,7 +268,7 @@ class AbstractConfig(abc.ABC):
 
     def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
         """
-        Get the requested key, or a default.
+        Return the requested key, or a default.
 
         :param key: the key to get
         :param default: the default to return if the key does not exist, defaults to None
@@ -283,20 +295,16 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Get the list referred to by the given key if it exists, or the default.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        Implements :meth:`AbstractConfig.get_list()`.
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Get the string referred to by the given key if it exists, or the default.
+        Return the string referred to by the given key if it exists, or the default.
 
         :param key: The key to search for
         :param default: Default to return if the key does not exist, defaults to None
@@ -309,7 +317,7 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
-        Get the bool referred to by the given key if it exists, or the default.
+        Return the bool referred to by the given key if it exists, or the default.
 
         :param key: The key to search for
         :param default: Default to return if the key does not exist, defaults to None
@@ -334,7 +342,7 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Get the int referred to by key if it exists in the config.
+        Return the int referred to by key if it exists in the config.
 
         For legacy reasons, the default is 0 and not None.
 
@@ -348,7 +356,14 @@ class AbstractConfig(abc.ABC):
 
     @abstractmethod
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
-        """Set the given key to the given data."""
+        """
+        Set the given key's value to the given value.
+
+        :param key: The key to set the value on.
+        :param val: The value to set the key's data to.
+        :raises ValueError: On an invalid type.
+        :raises OSError: On any internal failure to the registry.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -492,12 +507,9 @@ class WinConfig(AbstractConfig):
 
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Return the string represented by the key, or the default if it does not exist.
+        Return the string referred to by the given key if it exists, or the default.
 
-        :param key: the key to access
-        :param default: the default to return when the key does not exist, defaults to None
-        :raises ValueError: when the key is not a string type
-        :return: the requested data, or the default
+        Implements :meth:`AbstractConfig.get_str()`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -510,12 +522,9 @@ class WinConfig(AbstractConfig):
 
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Return the list found at the given key, or the default if none exists.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to None
-        :raises ValueError: When the data at the given key is not a list
-        :return: the requested data or the default
+        Implements :meth:`AbstractConfig.get_list()`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -528,12 +537,9 @@ class WinConfig(AbstractConfig):
 
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Return the int found at the given key, or the default if none exists.
+        Return the int referred to by key if it exists in the config.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to 0
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: the data requested or the default
+        Implements :meth:`AbstractConfig.get_int()`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -546,12 +552,9 @@ class WinConfig(AbstractConfig):
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
-        Return the bool found at the given key, or the default if none exists.
+        Return the bool referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when key does not exist, defaults to None
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: The data requested or the default
+        Implements :meth:`AbstractConfig.get_bool()`.
         """
         res = self.get_int(key)
         if res is None:
@@ -590,6 +593,15 @@ class WinConfig(AbstractConfig):
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str, *, suppress=False) -> None:
+        """
+        Remove the given key from the Windows Registry.
+
+        'key' is relative to the base path we use.
+
+        :param key: str - The name of the sub-key to be removed.
+        :param suppress: bool - Whether to suppress any errors.  Useful in case
+          code to migrate settings is blindly removing an old key.
+        """
         try:
             winreg.DeleteValue(self.__reg_handle, key)
         except OSError:
@@ -599,12 +611,15 @@ class WinConfig(AbstractConfig):
             raise
 
     def save(self) -> None:
-        """Save the configuration."""
-        # Not required as reg keys are flushed on write
+        """
+        Save the configuration.
+
+        Not required for WinConfig as reg keys are flushed on write.
+        """
         pass
 
     def close(self):
-        """Close the config file."""
+        """Close the Registry handle."""
         self.__reg_handle.Close()
 
 
@@ -665,12 +680,9 @@ class MacConfig(AbstractConfig):
 
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Return the string represented by the key, or the default if it does not exist.
+        Return the string referred to by the given key if it exists, or the default.
 
-        :param key: the key to access
-        :param default: the default to return when the key does not exist, defaults to None
-        :raises ValueError: when the key is not a string type
-        :return: the requested data, or the default
+        Implements :meth:`AbstractConfig.get_str()`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -683,12 +695,9 @@ class MacConfig(AbstractConfig):
 
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Return the list found at the given key, or the default if none exists.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to None
-        :raises ValueError: When the data at the given key is not a list
-        :return: the requested data or the default
+        Implements :meth:`AbstractConfig.get_list()`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -701,12 +710,9 @@ class MacConfig(AbstractConfig):
 
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Return the int found at the given key, or the default if none exists.
+        Return the int referred to by key if it exists in the config.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to 0
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: the data requested or the default
+        Implements :meth:`AbstractConfig.get_int()`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -723,6 +729,11 @@ class MacConfig(AbstractConfig):
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
+        """
+        Return the bool referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_bool()`.
+        """
         res = self.__raw_get(key)
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -854,6 +865,11 @@ class LinuxConfig(AbstractConfig):
         return self.config[self.SECTION].get(key)
 
     def get_str(self, key: str, *, default: str = None) -> str:
+        """
+        Return the string referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_str()`.
+        """
         data = self.__raw_get(key)
         if data is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -864,6 +880,11 @@ class LinuxConfig(AbstractConfig):
         return self.__unescape(data)
 
     def get_list(self, key: str, *, default: list = None) -> list:
+        """
+        Return the list referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_list()`.
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -876,6 +897,11 @@ class LinuxConfig(AbstractConfig):
         return list(map(self.__unescape, split[:-1]))
 
     def get_int(self, key: str, *, default: int = 0) -> int:
+        """
+        Return the int referred to by key if it exists in the config.
+
+        Implements :meth:`AbstractConfig.get_int()`.
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -888,6 +914,11 @@ class LinuxConfig(AbstractConfig):
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
+        """
+        Return the bool referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_bool`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
