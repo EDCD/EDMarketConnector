@@ -10,9 +10,9 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, TextIO, Tuple
+from typing import TextIO, Tuple
 
 import requests
 
@@ -36,18 +36,41 @@ if TYPE_CHECKING:
 
 logger = get_main_logger()
 
-this: Any = sys.modules[__name__]  # For holding module globals
 
-# Track location to add to Journal events
-this.systemaddress = None
-this.coordinates = None
-this.planet = None
+class This:
+    """Holds module globals."""
 
-# Avoid duplicates
-this.marketId = None
-this.commodities = None
-this.outfitting: Optional[Tuple[bool, MutableMapping[str, Any]]] = None
-this.shipyard = None
+    def __init__(self):
+        # Track location to add to Journal events
+        self.systemaddress = None
+        self.coordinates = None
+        self.planet = None
+
+        # Avoid duplicates
+        self.marketId = None
+        self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
+        self.outfitting: Optional[Tuple[bool, List[str]]] = None
+        self.shipyard = None
+
+        # For the tkinter parent window, so we can call update_idletasks()
+        self.parent: tk.Tk
+
+        # To hold EDDN class instance
+        self.eddn: EDDN
+
+        # tkinter UI bits.
+        self.eddn_station: tk.IntVar
+        self.eddn_station_button: nb.Checkbutton
+
+        self.eddn_system: tk.IntVar
+        self.eddn_system_button: nb.Checkbutton
+
+        self.eddn_delay: tk.IntVar
+        self.eddn_delay_button: nb.Checkbutton
+
+
+this = This()
+
 
 HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
@@ -137,7 +160,7 @@ class EDDN:
 
         uploader_id = cmdr
 
-        to_send: OrderedDictT[str, str] = OrderedDict([
+        to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
@@ -176,7 +199,7 @@ Msg:\n{msg}'''
         if not self.replayfile:
             return  # Probably closing app
 
-        status: Dict[str, Any] = self.parent.children['status']
+        status: tk.Widget = self.parent.children['status']
 
         if not self.replaylog:
             status['text'] = ''
@@ -428,7 +451,7 @@ Msg:\n{msg}'''
         :param entry: the journal entry containing the commodities data
         """
         items: List[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: Sequence[OrderedDictT[AnyStr, Any]] = sorted((OrderedDict([
+        commodities: List[OrderedDictT[str, Any]] = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -457,7 +480,7 @@ Msg:\n{msg}'''
                 ]),
             })
 
-        this.commodities: OrderedDictT[str, Any] = commodities
+        this.commodities = commodities
 
     def export_journal_outfitting(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """Update EDDN with Journal oufitting data from the current station (lastStarport).
@@ -537,7 +560,7 @@ Msg:\n{msg}'''
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
-            self.replayfile.write(f'{self.replaylog[-1]}\n')
+            self.replayfile.write(f'{self.replaylog[-1]}\n')  # type: ignore
 
             if (
                 entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
@@ -547,11 +570,10 @@ Msg:\n{msg}'''
 
         else:
             # Can't access replay file! Send immediately.
-            status: MutableMapping[str, str] = self.parent.children['status']
-            status['text'] = _('Sending data to EDDN...')
+            self.parent.children['status']['text'] = _('Sending data to EDDN...')
             self.parent.update_idletasks()
             self.send(cmdr, msg)
-            status['text'] = ''
+            self.parent.children['status']['text'] = ''
 
     def canonicalise(self, item: str) -> str:
         """
@@ -593,7 +615,7 @@ def plugin_app(parent: tk.Tk) -> None:
     # Try to obtain exclusive lock on journal cache, even if we don't need it yet
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
-        this.status['text'] = 'Error: Is another copy of this app already running?'
+        this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
@@ -739,18 +761,18 @@ def journal_entry(  # noqa: C901, CCR001
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet: Optional[str] = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
         elif entry['event'] == 'FSDJump':
-            this.planet: Optional[str] = None
+            this.planet = None
 
         if 'StarPos' in entry:
-            this.coordinates: Optional[Tuple[int, int, int]] = tuple(entry['StarPos'])
+            this.coordinates = tuple(entry['StarPos'])
 
         elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates: Optional[Tuple[int, int, int]] = None  # Docked event doesn't include coordinates
+            this.coordinates = None  # Docked event doesn't include coordinates
 
-        this.systemaddress: Optional[str] = entry.get('SystemAddress')
+        this.systemaddress = entry.get('SystemAddress')  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
         this.planet = entry['Body']
@@ -867,6 +889,8 @@ def journal_entry(  # noqa: C901, CCR001
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
+    return None
+
 
 def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     """
@@ -902,6 +926,8 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
         except Exception as e:
             logger.debug('Failed exporting data', exc_info=e)
             return str(e)
+
+    return None
 
 
 MAP_STR_ANY = Mapping[str, Any]
