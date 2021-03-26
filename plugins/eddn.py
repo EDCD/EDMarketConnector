@@ -42,15 +42,15 @@ class This:
 
     def __init__(self):
         # Track location to add to Journal events
-        self.systemaddress = None
-        self.coordinates = None
-        self.planet = None
+        self.systemaddress: Optional[str] = None
+        self.coordinates: Optional[Tuple] = None
+        self.planet: Optional[str] = None
 
         # Avoid duplicates
-        self.marketId = None
+        self.marketId: Optional[str] = None
         self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
         self.outfitting: Optional[Tuple[bool, List[str]]] = None
-        self.shipyard = None
+        self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
