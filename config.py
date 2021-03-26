@@ -372,7 +372,9 @@ class AbstractConfig(abc.ABC):
         Delete the given key from the config.
 
         :param key: The key to delete
-        :raises OSError: on windows, if a registry error occurs.
+        :param suppress: bool - Whether to suppress any errors.  Useful in case
+          code to migrate settings is blindly removing an old key.
+        :raises OSError: On Windows, if a registry error occurs.
         """
         raise NotImplementedError
 
@@ -381,7 +383,7 @@ class AbstractConfig(abc.ABC):
         """
         Save the current configuration.
 
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         """
         raise NotImplementedError
 
@@ -591,13 +593,11 @@ class WinConfig(AbstractConfig):
 
     def delete(self, key: str, *, suppress=False) -> None:
         """
-        Remove the given key from the Windows Registry.
+        Delete the given key from the config.
 
-        'key' is relative to the base path we use.
+        'key' is relative to the base Registry path we use.
 
-        :param key: str - The name of the sub-key to be removed.
-        :param suppress: bool - Whether to suppress any errors.  Useful in case
-          code to migrate settings is blindly removing an old key.
+        Implements :meth:`AbstractConfig.delete`.
         """
         try:
             winreg.DeleteValue(self.__reg_handle, key)
@@ -611,12 +611,16 @@ class WinConfig(AbstractConfig):
         """
         Save the configuration.
 
-        Not required for WinConfig as reg keys are flushed on write.
+        Not required for WinConfig as Registry keys are flushed on write.
         """
         pass
 
     def close(self):
-        """Close the Registry handle."""
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.__reg_handle.Close()
 
 
@@ -758,7 +762,7 @@ class MacConfig(AbstractConfig):
         """
         Delete the given key from the config.
 
-        :param key: the key to delete
+        Implements :meth:`AbstractConfig.delete`.
         """
         try:
             del self._settings[key]
@@ -768,12 +772,20 @@ class MacConfig(AbstractConfig):
                 pass
 
     def save(self) -> None:
-        """Save the configuration."""
+        """
+        Save the current configuration.
+
+        Implements :meth:`AbstractConfig.save`.
+        """
         self._defaults.setPersistentDomain_forName_(self._settings, self.identifier)
         self._defaults.synchronize()
 
     def close(self) -> None:
-        """Close the configuration."""
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.save()
         self._defaults = None
 
@@ -958,12 +970,22 @@ class LinuxConfig(AbstractConfig):
         self.config.set(self.SECTION, key, to_set)
 
     def delete(self, key: str, *, suppress=False) -> None:
+        """
+        Delete the given key from the config.
+
+        Implements :meth:`AbstractConfig.delete`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
 
     def save(self) -> None:
+        """
+        Save the current configuration.
+
+        Implements :meth:`AbstractConfig.save`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -971,11 +993,23 @@ class LinuxConfig(AbstractConfig):
             self.config.write(f)
 
     def close(self) -> None:
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.save()
         self.config = None
 
 
 def get_config(*args, **kwargs) -> AbstractConfig:
+    """
+    Get the appropriate config class for the current platform.
+
+    :param args: Args to be passed through to implementation.
+    :param kwargs: Args to be passed through to implementation.
+    :return: Instance of the implementation.
+    """
     if sys.platform == "darwin":
         return MacConfig(*args, **kwargs)
     elif sys.platform == "win32":
