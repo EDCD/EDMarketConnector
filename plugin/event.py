@@ -1,6 +1,6 @@
 
 import time
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 
 class BaseEvent:
@@ -33,3 +33,16 @@ class BaseDataEvent(BaseEvent):
 
 class JournalEvent(BaseDataEvent):
     """Journal event."""
+
+    def __init__(
+        self, name: str, data: Dict[str, Any], event_time: float, cmdr: str, is_beta: bool,
+        system: Optional[str], station: Optional[str], state: Dict[str, Any]
+    ) -> None:
+
+        self.data: Dict[str, Any]  # Override the definition in BaseDataEvent to be more specific
+        super().__init__(name, data=data, event_time=event_time)
+        self.commander = cmdr
+        self.is_beta = is_beta
+        self.system = system
+        self.station = station
+        self.state = state

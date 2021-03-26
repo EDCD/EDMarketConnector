@@ -5,7 +5,7 @@ import abc
 import inspect
 import pathlib
 from collections import defaultdict
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import Any, TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import semantic_version
 
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 from plugin import decorators
 from plugin.plugin_info import PluginInfo
+from plugin import event
 
 
 class Plugin(abc.ABC):
@@ -81,8 +82,31 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 }
 
 
+def journal_entry_breakout(e: event.JournalEvent) -> Tuple[str, bool, Optional[str], Optional[str], Dict, Dict]:
+    return (e.commander, e.is_beta, e.system, e.station, e.data, e.state)
+
+
+LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
+    # All of these callables should accept an event.BaseEvent or a subclass thereof
+    # 'core.setup_ui': 'plugin_app',
+    # 'core.setup_preferences_ui': 'plugin_prefs',
+    # 'core.preferences_closed': 'prefs_changed',
+    'core.journal_entry': journal_entry_breakout,
+    # 'core.dashboard_entry': 'dashboard_entry',
+    # 'core.commander_data': 'cmdr_data',
+
+
+    # 'inara.notify_ship': 'inara_notify_ship',
+    # 'inara.notify_location': 'inara_notify_location',
+    # 'edsm.notify_system': 'edsm_notify_system',
+}
+
+
 class MigratedPlugin(Plugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
+
+    OSTR = Optional[str]
+    JOURNAL_EVENT_SIG = Callable[[str, bool, OSTR, OSTR, Dict[str, Any], Dict[str, Any]], None]
 
     def __init__(self, logger: LoggerMixin, module: ModuleType, manager: PluginManager, path: pathlib.Path) -> None:
         super().__init__(logger, manager, path)
@@ -102,20 +126,33 @@ class MigratedPlugin(Plugin):
         self.start3 = plugin_start3
 
         # We have a start3, lets see what else we have and get ready to prepare hooks for them
+        self.setup_callbacks()
+        # for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
+        #     callback: Optional[Callable] = getattr(self.module, old_callback, None)
+        #     if callback is None:
+        #         continue
+
+        #     # Dynamically adding methods is done with types.MethodType(function ...) (see docs)
+        #     # this is required for access to self, which likely wont be needed here but it also may. Something
+        #     # to keep in mind
+        #     target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
+        #     setattr(self, target_name, decorators.hook(new_hook)(callback))
+        #     self.log.trace(
+        #         f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
+        #     )
+
+    def setup_callbacks(self) -> None:
+        # TODO: Update arch with how this works
         for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
             callback: Optional[Callable] = getattr(self.module, old_callback, None)
             if callback is None:
                 continue
 
-            # TODO: This really will need a wrapper at some point, but those can be defined later
-            # Dynamically adding methods is done with types.MethodType(function ...) (see docs)
-            # this is required for access to self, which likely wont be needed here but it also may. Something
-            # to keep in mind
             target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
-            setattr(self, target_name, decorators.hook(new_hook)(callback))
-            self.log.trace(
-                f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
-            )
+            breakout = LEGACY_CALLBACK_BREAKOUT_LUT.get(new_hook, lambda e: ())
+
+            wrapped = self.generic_callback_handler(callback, breakout)
+            setattr(self, target_name, decorators.hook(new_hook)(wrapped))
 
     def load(self) -> PluginInfo:
         """
@@ -163,3 +200,24 @@ class MigratedPlugin(Plugin):
                 'load3 provided by legacy plugin takes an unexpected arg count:'
                 f'{len(sig.parameters)}; {sig.parameters}'
             )
+
+    @staticmethod
+    def generic_callback_handler(f: Callable, breakout: Callable[..., Tuple[Any, ...]]):
+        def wrapper(e: event.BaseEvent):
+            return f(*breakout(e))
+
+        setattr(wrapper, "original_func", f)
+        return wrapper
+
+    @staticmethod
+    def journal_callback(f: MigratedPlugin.JOURNAL_EVENT_SIG) -> Callable[[event.JournalEvent], None]:
+        """
+        Wrapper around legacy journal_event calls.
+
+        :param f: Legacy journal_event function
+        :return: Wrapped callback to the legacy journal_event
+        """
+        def wrapper(e: event.JournalEvent) -> None:
+            f(e.commander, e.is_beta, e.system, e.station, e.data, e.state)
+
+        return wrapper
