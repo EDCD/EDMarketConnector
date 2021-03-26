@@ -126,6 +126,11 @@ def git_shorthash_from_head() -> str:
 
 
 def appversion() -> str:
+    """
+    Determine app version including git short hash if possible.
+
+    :return: str - The augmented app version.
+    """
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
         with open(GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
@@ -143,6 +148,14 @@ def appversion() -> str:
 
 
 def appversion_nobuild() -> str:
+    """
+    Determine app version without *any* build meta data.
+
+    This will not only strip any added git short hash, but also any trailing
+    '+<string>' in _static_appversion.
+
+    :return: str - App version without any build meta data.
+    """
     return str(semantic_version.Version(appversion()).truncate('prerelease'))
 ###########################################################################
 
