@@ -28,6 +28,8 @@ def _idfn(test_data) -> str:
 
 LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
     (legacy_good_path / 'simple', nullcontext()),
+
+    # This is tested below, being here and there causes issues with double hooked methods
     (legacy_good_path / 'all_callbacks', nullcontext()),
     (legacy_bad_path / "load_error", pytest.raises(PluginLoadingException, match=r'Exception in load method.*BANG!$')),
     (
@@ -82,11 +84,13 @@ def test_legacy_load(plugin_manager: PluginManager):
 
     # does the callback exist
     assert hasattr(loaded.plugin, target_name)
-    # does the callback have the same function as the module, _explicitly_ an identity check over an equality check
-    # as a function equality is shaky at best
-    assert getattr(loaded.plugin, target_name) is getattr(loaded.module, 'journal_entry')
+    hook = getattr(loaded.plugin, target_name)
+    # does the hook function have the original function attached, and if so, is it the same function as the module
+    assert hasattr(hook, 'original_func')
+    assert getattr(hook, 'original_func') is getattr(loaded.module, 'journal_entry')
+
     # has the callback been decorated with hook()?
-    assert hasattr(getattr(loaded.plugin, target_name), CALLBACK_MARKER)
+    assert hasattr(hook, CALLBACK_MARKER)
     # have all of the functions created automatically as part of callbacks been found by the callback search code?
     assert len(loaded.callbacks) == len(LEGACY_CALLBACK_LUT)
 
