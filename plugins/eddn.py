@@ -261,7 +261,8 @@ Msg:\n{msg}'''
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
-        """Update EDDN with the commodities on the current (lastStarport) station.
+        """
+        Update EDDN with the commodities on the current (lastStarport) station.
 
         Once the send is complete, this.commodities is updated with the new data.
 
@@ -360,7 +361,8 @@ Msg:\n{msg}'''
         return modules, ships
 
     def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
-        """Update EDDN with the current (lastStarport) station's outfitting options, if any.
+        """
+        Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.outfitting is updated with the given data.
 
@@ -404,7 +406,8 @@ Msg:\n{msg}'''
         this.outfitting = (horizons, outfitting)
 
     def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
-        """Update EDDN with the current (lastStarport) station's outfitting options, if any.
+        """
+        Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.shipyard is updated to the new data.
 
@@ -442,7 +445,8 @@ Msg:\n{msg}'''
         this.shipyard = (horizons, shipyard)
 
     def export_journal_commodities(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
-        """Update EDDN with Journal commodities data from the current station (lastStarport).
+        """
+        Update EDDN with Journal commodities data from the current station (lastStarport).
 
         As a side effect, it also updates this.commodities with the data.
 
@@ -483,7 +487,8 @@ Msg:\n{msg}'''
         this.commodities = commodities
 
     def export_journal_outfitting(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
-        """Update EDDN with Journal oufitting data from the current station (lastStarport).
+        """
+        Update EDDN with Journal oufitting data from the current station (lastStarport).
 
         As a side effect, it also updates this.outfitting with the data.
 
@@ -516,7 +521,8 @@ Msg:\n{msg}'''
         this.outfitting = (horizons, outfitting)
 
     def export_journal_shipyard(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
-        """Update EDDN with Journal shipyard data from the current station (lastStarport).
+        """
+        Update EDDN with Journal shipyard data from the current station (lastStarport).
 
         As a side effect, this.shipyard is updated with the data.
 
@@ -544,7 +550,8 @@ Msg:\n{msg}'''
         this.shipyard = (horizons, shipyard)
 
     def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
-        """Update EDDN with an event from the journal.
+        """
+        Update EDDN with an event from the journal.
 
         Additionally if additional lines are cached, it may send those as well.
 
