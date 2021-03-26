@@ -1,8 +1,9 @@
 """
 Code dealing with the configuration of the program.
 
-On Windows this uses the Registry to store values in a flat manner.
+Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
+macOS uses a 'defaults' object.
 """
 
 # spell-checker: words HKEY FOLDERID wchar wstring edcdhkey
@@ -13,6 +14,8 @@ import functools
 import logging
 import os
 import pathlib
+import re
+import subprocess
 import sys
 import traceback
 import warnings
@@ -22,17 +25,24 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Typ
 
 import semantic_version
 
-from constants import applongname, appname
+from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
 appcmdname = 'EDMC'
+# Replacing appversion with a function:
+#
+# 1. In setup.py grab the current HEAD short hash and place in a file .gitversion
+# 2. config.py code then needs to check:
+#   a. If we're not frozen and .git/ exists (i.e. not from a tarball ?) use something to get the current HEAD
+#   b. If not frozen and no .gitversion (but there should be) ???
+#   c. If frozen, just read the .gitversion (that had better damned well be there, but catch if it's not).
+# 3. But I don't want to spam EDDN with different 5.0.0-beta1+shorthash when testing... so ???
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '5.0.0-beta1'  # -rc1+a872b5f'
-# For some things we want appversion without (possible) +build metadata
-appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
-copyright = '© 2015-2019 Jonathan Harris, 2020 EDCD'
+# NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
+_static_appversion = '5.0.0-beta1'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
@@ -89,6 +99,68 @@ elif platform == 'linux':
 _T = TypeVar('_T')
 
 
+###########################################################################
+def git_shorthash_from_head() -> str:
+    """
+    Determine short hash for current git HEAD.
+
+    :return: str - None if we couldn't determine the short hash.
+    """
+    shorthash: str = None  # type: ignore
+    try:
+        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT
+                                   )
+        out, err = git_cmd.communicate()
+
+    except Exception as e:
+        logger.error(f"Couldn't run git command for short hash: {e!r}")
+
+    else:
+        shorthash = out.decode().rstrip('\n')
+        if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
+            logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
+            shorthash = None  # type: ignore
+
+    return shorthash
+
+
+def appversion() -> str:
+    """
+    Determine app version including git short hash if possible.
+
+    :return: str - The augmented app version.
+    """
+    if getattr(sys, 'frozen', False):
+        # Running frozen, so we should have a .gitversion file
+        with open(GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+            shorthash = gitv.read()
+
+        # TODO: Check if there was already a build meta data in static_appversion ?
+
+    else:
+        # Running from source
+        shorthash = git_shorthash_from_head()
+        if shorthash is None:
+            shorthash = 'UNKNOWN'
+
+    return f'{_static_appversion}+{shorthash}'
+
+
+def appversion_nobuild() -> str:
+    """
+    Determine app version without *any* build meta data.
+
+    This will not only strip any added git short hash, but also any trailing
+    '+<string>' in _static_appversion.
+
+    :return: str - App version without any build meta data.
+    """
+    return str(semantic_version.Version(appversion()).truncate('prerelease'))
+###########################################################################
+
+
 class AbstractConfig(abc.ABC):
     """Abstract root class of all platform specific Config implementations."""
 
@@ -124,17 +196,29 @@ class AbstractConfig(abc.ABC):
         self.home_path = pathlib.Path.home()
 
     def set_shutdown(self):
+        """Set flag denoting we're in the shutdown sequence."""
         self.__in_shutdown = True
 
     @property
     def shutting_down(self) -> bool:
+        """
+        Determine if we're in the shutdown sequence.
+
+        :return: bool - True if in shutdown sequence.
+        """
         return self.__in_shutdown
 
     def set_auth_force_localserver(self):
+        """Set flag to force use of localhost web server for Frontier Auth callback."""
         self.__auth_force_localserver = True
 
     @property
     def auth_force_localserver(self) -> bool:
+        """
+        Determine if use of localhost is forced for Frontier Auth callback.
+
+        :return: bool - True if we should use localhost web server.
+        """
         return self.__auth_force_localserver
 
     @property
@@ -185,12 +269,12 @@ class AbstractConfig(abc.ABC):
 
     def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
         """
-        Get the requested key, or a default.
+        Return the data for the requested key, or a default.
 
-        :param key: the key to get
-        :param default: the default to return if the key does not exist, defaults to None
-        :raises OSError: on windows, if a registry error occurs.
-        :return: the data or the default
+        :param key: The key data is being requested for.
+        :param default: The default to return if the key does not exist, defaults to None.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The data or the default.
         """
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
         logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
@@ -212,38 +296,34 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Get the list referred to by the given key if it exists, or the default.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        Implements :meth:`AbstractConfig.get_list`.
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Get the string referred to by the given key if it exists, or the default.
+        Return the string referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        :param key: The key data is being requested for.
+        :param default: Default to return if the key does not exist, defaults to None.
+        :raises ValueError: If an internal error occurs getting or converting a value.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The requested data or the default.
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
-        Get the bool referred to by the given key if it exists, or the default.
+        Return the bool referred to by the given key if it exists, or the default.
 
-        :param key: The key to search for
+        :param key: The key data is being requested for.
         :param default: Default to return if the key does not exist, defaults to None
         :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         :return: The requested data or the default
         """
         raise NotImplementedError
@@ -253,7 +333,7 @@ class AbstractConfig(abc.ABC):
         Getint is a Deprecated getter method.
 
         See get_int for its replacement.
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         """
         warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
         logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
@@ -263,21 +343,28 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Get the int referred to by key if it exists in the config.
+        Return the int referred to by key if it exists in the config.
 
         For legacy reasons, the default is 0 and not None.
 
-        :param key: The key to search for
-        :param default: Default to return if the key does not exist, defaults to 0
-        :raises ValueError: if the internal representation of this key cannot be converted to an int
-        :raises OSError: on windows, if a registry error occurs.
-        :return: The requested data or the default
+        :param key: The key data is being requested for.
+        :param default: Default to return if the key does not exist, defaults to 0.
+        :raises ValueError: If the internal representation of this key cannot be converted to an int.
+        :raises OSError: On Windows, if a Registry error occurs.
+        :return: The requested data or the default.
         """
         raise NotImplementedError
 
     @abstractmethod
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
-        """Set the given key to the given data."""
+        """
+        Set the given key's data to the given value.
+
+        :param key: The key to set the value on.
+        :param val: The value to set the key's data to.
+        :raises ValueError: On an invalid type.
+        :raises OSError: On Windows, if a Registry error occurs.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -285,8 +372,10 @@ class AbstractConfig(abc.ABC):
         """
         Delete the given key from the config.
 
-        :param key: The key to delete
-        :raises OSError: on windows, if a registry error occurs.
+        :param key: The key to delete.
+        :param suppress: bool - Whether to suppress any errors.  Useful in case
+          code to migrate settings is blindly removing an old key.
+        :raises OSError: On Windows, if a registry error occurs.
         """
         raise NotImplementedError
 
@@ -295,7 +384,7 @@ class AbstractConfig(abc.ABC):
         """
         Save the current configuration.
 
-        :raises OSError: on windows, if a registry error occurs.
+        :raises OSError: On Windows, if a Registry error occurs.
         """
         raise NotImplementedError
 
@@ -318,7 +407,7 @@ class AbstractConfig(abc.ABC):
 
 
 class WinConfig(AbstractConfig):
-    """Implementation of AbstractConfig for windows."""
+    """Implementation of AbstractConfig for Windows."""
 
     def __init__(self, do_winsparkle=True) -> None:
         self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
@@ -366,6 +455,7 @@ class WinConfig(AbstractConfig):
             self.set('outdir',  docs if docs is not None else self.home)
 
     def __setup_winsparkle(self):
+        """Ensure the necessary Registry keys for WinSparkle are present."""
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
             key=winreg.HKEY_CURRENT_USER,
@@ -378,7 +468,7 @@ class WinConfig(AbstractConfig):
             )
 
         except OSError:
-            logger.exception('could not open winsparkle handle')
+            logger.exception('could not open WinSparkle handle')
             raise
 
         # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
@@ -397,7 +487,7 @@ class WinConfig(AbstractConfig):
         edcd_handle.Close()
 
     def __get_regentry(self, key: str) -> Union[None, list, str, int]:
-        """Access the registry for the raw entry."""
+        """Access the Registry for the raw entry."""
         try:
             value, _type = winreg.QueryValueEx(self.__reg_handle, key)
         except FileNotFoundError:
@@ -421,12 +511,9 @@ class WinConfig(AbstractConfig):
 
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Return the string represented by the key, or the default if it does not exist.
+        Return the string referred to by the given key if it exists, or the default.
 
-        :param key: the key to access
-        :param default: the default to return when the key does not exist, defaults to None
-        :raises ValueError: when the key is not a string type
-        :return: the requested data, or the default
+        Implements :meth:`AbstractConfig.get_str`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -439,12 +526,9 @@ class WinConfig(AbstractConfig):
 
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Return the list found at the given key, or the default if none exists.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to None
-        :raises ValueError: When the data at the given key is not a list
-        :return: the requested data or the default
+        Implements :meth:`AbstractConfig.get_list`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -457,12 +541,9 @@ class WinConfig(AbstractConfig):
 
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Return the int found at the given key, or the default if none exists.
+        Return the int referred to by key if it exists in the config.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to 0
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: the data requested or the default
+        Implements :meth:`AbstractConfig.get_int`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -475,12 +556,9 @@ class WinConfig(AbstractConfig):
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
-        Return the bool found at the given key, or the default if none exists.
+        Return the bool referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when key does not exist, defaults to None
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: The data requested or the default
+        Implements :meth:`AbstractConfig.get_bool`.
         """
         res = self.get_int(key)
         if res is None:
@@ -490,12 +568,9 @@ class WinConfig(AbstractConfig):
 
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
-        Set sets the given key to the given value.
+        Set the given key's data to the given value.
 
-        :param key: The key to set the value to
-        :param val: The value to set the key
-        :raises ValueError: On an invalid type
-        :raises OSError: On any internal failure to the registry
+        Implements :meth:`AbstractConfig.set`.
         """
         reg_type = None
         if isinstance(val, str):
@@ -519,6 +594,13 @@ class WinConfig(AbstractConfig):
         winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str, *, suppress=False) -> None:
+        """
+        Delete the given key from the config.
+
+        'key' is relative to the base Registry path we use.
+
+        Implements :meth:`AbstractConfig.delete`.
+        """
         try:
             winreg.DeleteValue(self.__reg_handle, key)
         except OSError:
@@ -528,12 +610,19 @@ class WinConfig(AbstractConfig):
             raise
 
     def save(self) -> None:
-        """Save the configuration."""
-        # Not required as reg keys are flushed on write
+        """
+        Save the configuration.
+
+        Not required for WinConfig as Registry keys are flushed on write.
+        """
         pass
 
     def close(self):
-        """Close the config file."""
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.__reg_handle.Close()
 
 
@@ -580,6 +669,12 @@ class MacConfig(AbstractConfig):
             self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
+        """
+        Retrieve the raw data for the given key.
+
+        :param str: str - The key data is being requested for.
+        :return: The requested data.
+        """
         res = self._settings.get(key)
         # On MacOS Catalina, with python.org python 3.9.2 any 'list'
         # has type __NSCFArray so a simple `isinstance(res, list)` is
@@ -594,12 +689,9 @@ class MacConfig(AbstractConfig):
 
     def get_str(self, key: str, *, default: str = None) -> str:
         """
-        Return the string represented by the key, or the default if it does not exist.
+        Return the string referred to by the given key if it exists, or the default.
 
-        :param key: the key to access
-        :param default: the default to return when the key does not exist, defaults to None
-        :raises ValueError: when the key is not a string type
-        :return: the requested data, or the default
+        Implements :meth:`AbstractConfig.get_str`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -612,12 +704,9 @@ class MacConfig(AbstractConfig):
 
     def get_list(self, key: str, *, default: list = None) -> list:
         """
-        Return the list found at the given key, or the default if none exists.
+        Return the list referred to by the given key if it exists, or the default.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to None
-        :raises ValueError: When the data at the given key is not a list
-        :return: the requested data or the default
+        Implements :meth:`AbstractConfig.get_list`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -630,12 +719,9 @@ class MacConfig(AbstractConfig):
 
     def get_int(self, key: str, *, default: int = 0) -> int:
         """
-        Return the int found at the given key, or the default if none exists.
+        Return the int referred to by key if it exists in the config.
 
-        :param key: The key to access
-        :param default: Default to return when the key does not exist, defaults to 0
-        :raises ValueError: If the data returned is of an unexpected type
-        :return: the data requested or the default
+        Implements :meth:`AbstractConfig.get_int`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -652,6 +738,11 @@ class MacConfig(AbstractConfig):
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
+        """
+        Return the bool referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_bool`.
+        """
         res = self.__raw_get(key)
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -663,18 +754,23 @@ class MacConfig(AbstractConfig):
 
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
-        Set sets the given key to the given value.
+        Set the given key's data to the given value.
 
-        :param key: The key to set the value to
-        :param val: The value to set the key
+        Implements :meth:`AbstractConfig.set`.
         """
+        if self._settings is None:
+            raise ValueError('attempt to use a closed _settings')
+
+        if not isinstance(val, (bool, str, int, list)):
+            raise ValueError(f'Unexpected type for value {type(val)=}')
+
         self._settings[key] = val
 
     def delete(self, key: str, *, suppress=False) -> None:
         """
         Delete the given key from the config.
 
-        :param key: the key to delete
+        Implements :meth:`AbstractConfig.delete`.
         """
         try:
             del self._settings[key]
@@ -684,12 +780,20 @@ class MacConfig(AbstractConfig):
                 pass
 
     def save(self) -> None:
-        """Save the configuration."""
+        """
+        Save the current configuration.
+
+        Implements :meth:`AbstractConfig.save`.
+        """
         self._defaults.setPersistentDomain_forName_(self._settings, self.identifier)
         self._defaults.synchronize()
 
     def close(self) -> None:
-        """Close the configuration."""
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.save()
         self._defaults = None
 
@@ -739,9 +843,12 @@ class LinuxConfig(AbstractConfig):
 
     def __escape(self, s: str) -> str:
         """
-        Escape the string using self.__escape_lut.
+        Escape a string using self.__escape_lut.
 
-        This does NOT support multi-character escapes
+        This does NOT support multi-character escapes.
+
+        :param s: str - String to be escaped.
+        :return: str - The escaped string.
         """
         out = ""
         for c in s:
@@ -754,6 +861,12 @@ class LinuxConfig(AbstractConfig):
         return out
 
     def __unescape(self, s: str) -> str:
+        """
+        Unescape a string.
+
+        :param s: str - The string to unescape.
+        :return: str - The unescaped string.
+        """
         out: List[str] = []
         i = 0
         while i < len(s):
@@ -777,12 +890,23 @@ class LinuxConfig(AbstractConfig):
         return "".join(out)
 
     def __raw_get(self, key: str) -> Optional[str]:
+        """
+        Get a raw data value from the config file.
+
+        :param key: str - The key data is being requested for.
+        :return: str - The raw data, if found.
+        """
         if self.config is None:
             raise ValueError('Attempt to use a closed config')
 
         return self.config[self.SECTION].get(key)
 
     def get_str(self, key: str, *, default: str = None) -> str:
+        """
+        Return the string referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_str`.
+        """
         data = self.__raw_get(key)
         if data is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
@@ -793,6 +917,11 @@ class LinuxConfig(AbstractConfig):
         return self.__unescape(data)
 
     def get_list(self, key: str, *, default: list = None) -> list:
+        """
+        Return the list referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_list`.
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -805,6 +934,11 @@ class LinuxConfig(AbstractConfig):
         return list(map(self.__unescape, split[:-1]))
 
     def get_int(self, key: str, *, default: int = 0) -> int:
+        """
+        Return the int referred to by key if it exists in the config.
+
+        Implements :meth:`AbstractConfig.get_int`.
+        """
         data = self.__raw_get(key)
 
         if data is None:
@@ -817,6 +951,11 @@ class LinuxConfig(AbstractConfig):
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
+        """
+        Return the bool referred to by the given key if it exists, or the default.
+
+        Implements :meth:`AbstractConfig.get_bool`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -827,6 +966,11 @@ class LinuxConfig(AbstractConfig):
         return bool(int(data))
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """
+        Set the given key's data to the given value.
+
+        Implements :meth:`AbstractConfig.set`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -844,17 +988,27 @@ class LinuxConfig(AbstractConfig):
             to_set = '\n'.join([self.__escape(s) for s in val] + [';'])
 
         else:
-            raise NotImplementedError(f'value of type {type(val)} is not supported')
+            raise ValueError(f'Unexpected type for value {type(val)=}')
 
         self.config.set(self.SECTION, key, to_set)
 
     def delete(self, key: str, *, suppress=False) -> None:
+        """
+        Delete the given key from the config.
+
+        Implements :meth:`AbstractConfig.delete`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
 
     def save(self) -> None:
+        """
+        Save the current configuration.
+
+        Implements :meth:`AbstractConfig.save`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -862,11 +1016,23 @@ class LinuxConfig(AbstractConfig):
             self.config.write(f)
 
     def close(self) -> None:
+        """
+        Close this config and release any associated resources.
+
+        Implements :meth:`AbstractConfig.close`.
+        """
         self.save()
         self.config = None
 
 
 def get_config(*args, **kwargs) -> AbstractConfig:
+    """
+    Get the appropriate config class for the current platform.
+
+    :param args: Args to be passed through to implementation.
+    :param kwargs: Args to be passed through to implementation.
+    :return: Instance of the implementation.
+    """
     if sys.platform == "darwin":
         return MacConfig(*args, **kwargs)
     elif sys.platform == "win32":

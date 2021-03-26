@@ -20,10 +20,26 @@ from typing import Any, Generator, Set
 
 import semantic_version
 
-from config import appcmdname, applongname, appname, appversion, copyright, update_feed, update_interval
+from config import (
+    appcmdname, applongname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head, update_feed,
+    update_interval
+)
+from constants import GITVERSION_FILE
 
 if sys.version_info[0:2] != (3, 9):
     raise AssertionError(f'Unexpected python version {sys.version}')
+
+###########################################################################
+# Retrieve current git short hash and store in file GITVERSION_FILE
+git_shorthash = git_shorthash_from_head()
+if git_shorthash is None:
+    exit(-1)
+
+with open(GITVERSION_FILE, 'w+', encoding='utf-8') as gvf:
+    gvf.write(git_shorthash)
+
+print(f'Git short hash: {git_shorthash}')
+###########################################################################
 
 if sys.platform == 'win32':
     assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
@@ -37,7 +53,7 @@ else:
     assert False, f'Unsupported platform {sys.platform}'
 
 # Split version, as py2exe wants the 'base' for version
-semver = semantic_version.Version.coerce(appversion)
+semver = semantic_version.Version.coerce(appversion())
 base_appversion = str(semver.truncate('patch'))
 
 if dist_dir and len(dist_dir) > 1 and isdir(dist_dir):
@@ -74,7 +90,6 @@ if sys.platform == 'darwin':
 
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
-SHORTappversion = ''.join(appversion.split('.')[:3])
 PLUGINS = [
     'plugins/coriolis.py',
     'plugins/eddb.py',
@@ -139,8 +154,8 @@ if sys.platform == 'darwin':
                 'CFBundleName': applongname,
                 'CFBundleIdentifier': f'uk.org.marginal.{appname.lower()}',
                 'CFBundleLocalizations': get_cfbundle_localizations(),
-                'CFBundleShortVersionString': appversion,
-                'CFBundleVersion':  appversion,
+                'CFBundleShortVersionString': appversion(),
+                'CFBundleVersion':  appversion(),
                 'CFBundleURLTypes': [
                     {
                         'CFBundleTypeRole': 'Viewer',
@@ -192,6 +207,7 @@ elif sys.platform == 'win32':
 
     DATA_FILES = [
         ('', [
+            '.gitversion',  # Contains git short hash
             'WinSparkle.dll',
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
@@ -213,7 +229,7 @@ elif sys.platform == 'win32':
 
 setup(
     name=applongname,
-    version=appversion,
+    version=appversion(),
     windows=[
         {
             'dest_base': appname,
@@ -222,7 +238,7 @@ setup(
             'company_name': 'EDCD',  # Used by WinSparkle
             'product_name': appname,  # Used by WinSparkle
             'version': base_appversion,
-            'product_version': appversion,
+            'product_version': appversion(),
             'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appname}.manifest').read())],
         }
@@ -234,7 +250,7 @@ setup(
             'company_name': 'EDCD',
             'product_name': appname,
             'version': base_appversion,
-            'product_version': appversion,
+            'product_version': appversion(),
             'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appcmdname}.manifest').read())],
         }
@@ -264,7 +280,7 @@ if sys.platform == 'darwin':
             os.system(f'codesign --deep -v -s "Developer ID Application: {macdeveloperid}" {dist_dir}/{appname}.app')
 
         # Make zip for distribution, preserving signature
-        package_filename = f'{appname}_mac_{appversion}.zip'
+        package_filename = f'{appname}_mac_{appversion_nobuild()}.zip'
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
@@ -273,7 +289,7 @@ elif sys.platform == 'win32':
     if not exists(f'{dist_dir}/{appname}.wixobj'):
         raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
 
-    package_filename = f'{appname}_win_{appversion}.msi'
+    package_filename = f'{appname}_win_{appversion_nobuild()}.msi'
     os.system(rf'"{WIXPATH}\light.exe" -sacl -spdb -sw1076 {dist_dir}\{appname}.wixobj -out {package_filename}')
 
     if not exists(package_filename):
