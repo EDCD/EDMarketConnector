@@ -297,7 +297,7 @@ class AbstractConfig(abc.ABC):
         """
         Return the list referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_list()`.
+        Implements :meth:`AbstractConfig.get_list`.
         """
         raise NotImplementedError
 
@@ -357,12 +357,12 @@ class AbstractConfig(abc.ABC):
     @abstractmethod
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
-        Set the given key's value to the given value.
+        Set the given key's data to the given value.
 
         :param key: The key to set the value on.
         :param val: The value to set the key's data to.
         :raises ValueError: On an invalid type.
-        :raises OSError: On any internal failure to the registry.
+        :raises OSError: On Windows for any Registry failure.
         """
         raise NotImplementedError
 
@@ -509,7 +509,7 @@ class WinConfig(AbstractConfig):
         """
         Return the string referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_str()`.
+        Implements :meth:`AbstractConfig.get_str`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -524,7 +524,7 @@ class WinConfig(AbstractConfig):
         """
         Return the list referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_list()`.
+        Implements :meth:`AbstractConfig.get_list`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -539,7 +539,7 @@ class WinConfig(AbstractConfig):
         """
         Return the int referred to by key if it exists in the config.
 
-        Implements :meth:`AbstractConfig.get_int()`.
+        Implements :meth:`AbstractConfig.get_int`.
         """
         res = self.__get_regentry(key)
         if res is None:
@@ -554,7 +554,7 @@ class WinConfig(AbstractConfig):
         """
         Return the bool referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_bool()`.
+        Implements :meth:`AbstractConfig.get_bool`.
         """
         res = self.get_int(key)
         if res is None:
@@ -564,12 +564,9 @@ class WinConfig(AbstractConfig):
 
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
-        Set sets the given key to the given value.
+        Set the given key's data to the given value.
 
-        :param key: The key to set the value to
-        :param val: The value to set the key
-        :raises ValueError: On an invalid type
-        :raises OSError: On any internal failure to the registry
+        Implements :meth:`AbstractConfig.set`.
         """
         reg_type = None
         if isinstance(val, str):
@@ -682,7 +679,7 @@ class MacConfig(AbstractConfig):
         """
         Return the string referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_str()`.
+        Implements :meth:`AbstractConfig.get_str`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -697,7 +694,7 @@ class MacConfig(AbstractConfig):
         """
         Return the list referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_list()`.
+        Implements :meth:`AbstractConfig.get_list`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -712,7 +709,7 @@ class MacConfig(AbstractConfig):
         """
         Return the int referred to by key if it exists in the config.
 
-        Implements :meth:`AbstractConfig.get_int()`.
+        Implements :meth:`AbstractConfig.get_int`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -732,7 +729,7 @@ class MacConfig(AbstractConfig):
         """
         Return the bool referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_bool()`.
+        Implements :meth:`AbstractConfig.get_bool`.
         """
         res = self.__raw_get(key)
         if res is None:
@@ -745,11 +742,16 @@ class MacConfig(AbstractConfig):
 
     def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
-        Set sets the given key to the given value.
+        Set the given key's data to the given value.
 
-        :param key: The key to set the value to
-        :param val: The value to set the key
+        Implements :meth:`AbstractConfig.set`.
         """
+        if self._settings is None:
+            raise ValueError('attempt to use a closed _settings')
+
+        if not isinstance(val, (bool, str, int, list)):
+            raise ValueError(f'Unexpected type for value {type(val)=}')
+
         self._settings[key] = val
 
     def delete(self, key: str, *, suppress=False) -> None:
@@ -868,7 +870,7 @@ class LinuxConfig(AbstractConfig):
         """
         Return the string referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_str()`.
+        Implements :meth:`AbstractConfig.get_str`.
         """
         data = self.__raw_get(key)
         if data is None:
@@ -883,7 +885,7 @@ class LinuxConfig(AbstractConfig):
         """
         Return the list referred to by the given key if it exists, or the default.
 
-        Implements :meth:`AbstractConfig.get_list()`.
+        Implements :meth:`AbstractConfig.get_list`.
         """
         data = self.__raw_get(key)
 
@@ -900,7 +902,7 @@ class LinuxConfig(AbstractConfig):
         """
         Return the int referred to by key if it exists in the config.
 
-        Implements :meth:`AbstractConfig.get_int()`.
+        Implements :meth:`AbstractConfig.get_int`.
         """
         data = self.__raw_get(key)
 
@@ -929,6 +931,11 @@ class LinuxConfig(AbstractConfig):
         return bool(int(data))
 
     def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+        """
+        Set the given key's data to the given value.
+
+        Implements :meth:`AbstractConfig.set`.
+        """
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
@@ -946,7 +953,7 @@ class LinuxConfig(AbstractConfig):
             to_set = '\n'.join([self.__escape(s) for s in val] + [';'])
 
         else:
-            raise NotImplementedError(f'value of type {type(val)} is not supported')
+            raise ValueError(f'Unexpected type for value {type(val)=}')
 
         self.config.set(self.SECTION, key, to_set)
 
