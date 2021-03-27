@@ -89,7 +89,7 @@ if __name__ == '__main__':  # noqa: C901
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
 
-    def handle_edmc_callback_or_foregrounding():  # noqa: CCR001
+    def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
         logger.trace('Begin...')
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':  # noqa: C901
                 ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
                 ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
 
-                def window_title(h):
+                def window_title(h: int) -> Optional[str]:
                     if h:
                         text_length = GetWindowTextLength(h) + 1
                         buf = ctypes.create_unicode_buffer(text_length)
