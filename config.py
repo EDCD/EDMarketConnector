@@ -130,7 +130,7 @@ def appversion() -> semantic_version.Version:
     """
     Determine app version including git short hash if possible.
 
-    :return: str - The augmented app version.
+    :return: The augmented app version.
     """
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
@@ -155,7 +155,7 @@ def appversion_nobuild() -> semantic_version.Version:
     This will not only strip any added git short hash, but also any trailing
     '+<string>' in _static_appversion.
 
-    :return: str - App version without any build meta data.
+    :return: App version without any build meta data.
     """
     return appversion().truncate('prerelease')
 ###########################################################################
