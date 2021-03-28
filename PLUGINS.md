@@ -170,6 +170,40 @@ functions, in the output.
 
 ---
 
+### Checking core EDMC version
+
+If you have code that needs to act differently under different versions of 
+this application then you can check the core version using:
+
+```python
+import semantic_version
+from config import appversion
+
+...
+    if isinstance(appversion, str):
+        core_version = appversion  # Up until 5.0.0-beta1 this is a string
+
+    elif callable(appversion):
+        core_version = appversion()  # From 5.0.0-beta1 it's a function
+
+    else:
+        core_version = '<UNKNOWN!>'  # Paranoia
+
+    # Either way you now have a string
+    logger.info(f'Core EDMC version: {core_version}')
+    # The easiest way to compare is using semantic_version, so convert
+    core_version_sv = semantic_version.Version(core_version)
+    # And then compare like this
+    if core_version_sv < semantic_version.Version('5.0.0-beta1'):
+        logger.info('EDMC core version is before 5.0.0-beta1')
+
+    else:
+        logger.info('EDMC core version is at least 5.0.0-beta1')
+
+```
+
+---
+
 ### Startup
 
 EDMC will import the `load.py` file as a module and then call the

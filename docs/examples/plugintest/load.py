@@ -94,16 +94,19 @@ def plugin_start3(plugin_dir: str) -> str:
     :return: 'Pretty' name of this plugin.
     """
     if isinstance(appversion, str):
-        core_version = appversion
+        core_version = appversion  # Up until 5.0.0-beta1 this is a string
 
     elif callable(appversion):
-        core_version = appversion()
+        core_version = appversion()  # From 5.0.0-beta1 it's a function
 
     else:
-        core_version = '<UNKNOWN!>'
+        core_version = '<UNKNOWN!>'  # Paranoia
 
+    # Either way you now have a string
     logger.info(f'Core EDMC version: {core_version}')
+    # The easiest way to compare is using semantic_version, so convert
     core_version_sv = semantic_version.Version(core_version)
+    # And then compare like this
     if core_version_sv < semantic_version.Version('5.0.0-beta1'):
         logger.info('EDMC core version is before 5.0.0-beta1')
 
