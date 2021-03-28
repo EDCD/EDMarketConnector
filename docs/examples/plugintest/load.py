@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 import sqlite3
-import sys
 import zipfile
 
 from SubA import SubA
@@ -32,9 +31,16 @@ if not logger.hasHandlers():
     logger.addHandler(logger_channel)
 
 
-this = sys.modules[__name__]  # For holding module globals
-this.DBFILE = 'plugintest.db'
-this.mt = None
+class This:
+    """Module global variables."""
+
+    def __init__(self):
+        self.DBFILE = 'plugintest.db'
+        self.plugin_test: PluginTest
+        self.suba: SubA
+
+
+this = This()
 
 
 class PluginTest(object):
@@ -87,7 +93,7 @@ def plugin_start3(plugin_dir: str) -> str:
     :return: 'Pretty' name of this plugin.
     """
     logger.info(f'Folder is {plugin_dir}')
-    this.mt = PluginTest(plugin_dir)
+    this.plugin_test = PluginTest(plugin_dir)
 
     this.suba = SubA(logger)
 
@@ -117,5 +123,9 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     :param state:
     :return: None
     """
-    logger.debug(f'cmdr = "{cmdrname}", is_beta = "{is_beta}", system = "{system}", station = "{station}"')
-    this.mt.store(entry['timestamp'], cmdrname, system, station, entry['event'])
+    logger.debug(
+            f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
+            f', system = "{system}", station = "{station}"'
+            f', event = "{entry["event"]}'
+    )
+    this.plugin_test.store(entry['timestamp'], cmdrname, system, station, entry['event'])
