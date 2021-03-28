@@ -126,6 +126,6 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     logger.debug(
             f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
             f', system = "{system}", station = "{station}"'
-            f', event = "{entry["event"]}'
+            f', event = "{entry["event"]}"'
     )
     this.plugin_test.store(entry['timestamp'], cmdrname, system, station, entry['event'])
