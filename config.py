@@ -126,7 +126,7 @@ def git_shorthash_from_head() -> str:
     return shorthash
 
 
-def appversion() -> str:
+def appversion() -> semantic_version.Version:
     """
     Determine app version including git short hash if possible.
 
@@ -145,10 +145,10 @@ def appversion() -> str:
         if shorthash is None:
             shorthash = 'UNKNOWN'
 
-    return f'{_static_appversion}+{shorthash}'
+    return semantic_version.Version(f'{_static_appversion}+{shorthash}')
 
 
-def appversion_nobuild() -> str:
+def appversion_nobuild() -> semantic_version.Version:
     """
     Determine app version without *any* build meta data.
 
@@ -157,7 +157,7 @@ def appversion_nobuild() -> str:
 
     :return: str - App version without any build meta data.
     """
-    return str(semantic_version.Version(appversion()).truncate('prerelease'))
+    return appversion().truncate('prerelease')
 ###########################################################################
 
 

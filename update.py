@@ -177,7 +177,7 @@ class Updater(object):
             )
 
         # Look for any remaining version greater than appversion
-        simple_spec = semantic_version.SimpleSpec('>' + appversion_nobuild())
+        simple_spec = semantic_version.SimpleSpec(f'>{appversion_nobuild()}')
         newversion = simple_spec.select(items.keys())
 
         if newversion:
