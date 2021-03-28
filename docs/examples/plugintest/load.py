@@ -8,9 +8,10 @@ import shutil
 import sqlite3
 import zipfile
 
+import semantic_version
 from SubA import SubA
 
-from config import appname
+from config import appname, appversion
 
 # This could also be returned from plugin_start3()
 plugin_name = os.path.basename(os.path.dirname(__file__))
@@ -92,6 +93,23 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir:
     :return: 'Pretty' name of this plugin.
     """
+    if isinstance(appversion, str):
+        core_version = appversion
+
+    elif callable(appversion):
+        core_version = appversion()
+
+    else:
+        core_version = '<UNKNOWN!>'
+
+    logger.info(f'Core EDMC version: {core_version}')
+    core_version_sv = semantic_version.Version(core_version)
+    if core_version_sv < semantic_version.Version('5.0.0-beta1'):
+        logger.info('EDMC core version is before 5.0.0-beta1')
+
+    else:
+        logger.info('EDMC core version is at least 5.0.0-beta1')
+
     logger.info(f'Folder is {plugin_dir}')
     this.plugin_test = PluginTest(plugin_dir)
 
