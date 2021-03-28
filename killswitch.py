@@ -11,7 +11,7 @@ logger = EDMCLogging.get_main_logger()
 
 DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
 
-_current_version: semantic_version.Version = semantic_version.Version(config.appversion_nobuild())
+_current_version: semantic_version.Version = config.appversion_nobuild()
 
 
 class KillSwitch(NamedTuple):
