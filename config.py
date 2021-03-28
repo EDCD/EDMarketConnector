@@ -160,11 +160,23 @@ class Config(object):
             else:
                 return None
 
+        def get_str(self, key):
+            return self.get(key)
+
+        def get_list(self, key):
+            return self.get(key)
+
+        def get_bool(self, key):
+            return self.get(key)
+
         def getint(self, key):
             try:
                 return int(self.settings.get(key, 0))	# should already be int, but check by casting
             except:
                 return 0
+
+        def get_int(self, key):
+            return self.getint(key)
 
         def set(self, key, val):
             self.settings[key] = val
