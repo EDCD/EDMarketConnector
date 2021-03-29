@@ -1222,7 +1222,7 @@ def new_worker():
             data = {
                 'header': {
                     'appName': applongname,
-                    'appVersion': appversion(),
+                    'appVersion': str(appversion()),
                     'APIkey': creds.api_key,
                     'commanderName': creds.cmdr,
                     'commanderFrontierID': creds.fid
