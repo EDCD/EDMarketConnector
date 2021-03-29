@@ -1010,12 +1010,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             return  # same as last time - don't write
 
                 except OSError:
-                    logger.exception("OSError reading old ship loadout default encoding, aborting.")
-                    return
+                    logger.exception("OSError reading old ship loadout default encoding.")
 
             except OSError:
-                logger.exception("OSError reading old ship loadout with default encoding, aborting.")
-                return
+                logger.exception("OSError reading old ship loadout with default encoding")
 
         # Write
         filename = join(  # type: ignore
