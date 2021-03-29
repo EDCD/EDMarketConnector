@@ -81,7 +81,7 @@ class Updater(object):
                 # NB: It 'accidentally' supports pre-release due to how it
                 # splits and compares strings:
                 # <https://github.com/vslavik/winsparkle/issues/214>
-                self.updater.win_sparkle_set_app_build_version(appversion_nobuild())
+                self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
 
                 # set up shutdown callback
                 global root
