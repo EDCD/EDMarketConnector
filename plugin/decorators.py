@@ -1,14 +1,14 @@
 """New plugin system."""
 
 
-from typing import Callable, List, Type
+from typing import Any, Callable, List, Type, TypeVar
 
 from EDMCLogging import get_main_logger
 from plugin.plugin import Plugin
 
 logger = get_main_logger()
 
-CALLBACK_MARKER = "__edmc_callback_marker"
+CALLBACK_MARKER = "__edmc_callback_marker__"
 PLUGIN_MARKER = "__edmc_plugin_marker__"
 
 
@@ -26,15 +26,20 @@ def edmc_plugin(cls: Type[Plugin]) -> Type[Plugin]:
     logger.trace(f"Successfully marked class {cls!r} as EDMC plugin")
     return cls
 
+# Varidic generics are _not_ currently supported, see https://github.com/python/typing/issues/193
 
-def hook(name: str) -> Callable:
+
+_F = TypeVar('_F', bound=Callable[..., Any])
+
+
+def hook(name: str) -> Callable[[_F], _F]:
     """
     Create event callback.
 
     :param name: The event to hook onto
     :return: (Internal python decoration implementation)
     """
-    def decorate(func: Callable) -> Callable:
+    def decorate(func: _F) -> _F:
         """
         Decorate a function.
 

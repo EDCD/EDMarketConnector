@@ -102,6 +102,11 @@ def test_double_load(plugin_manager: PluginManager) -> None:
         plugin_manager.load_plugin(bad_path / 'double_load')
 
 
+def test_hooks_created(plugin_manager: PluginManager) -> None:
+    plugin_manager.load_plugin(good_path / )
+    ...
+
+
 def test_unload_call(plugin_manager: PluginManager):
     """Load and unload a single plugin."""
     target = good_path / "simple"
