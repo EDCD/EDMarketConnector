@@ -456,11 +456,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.version = entry['gameversion']
                 self.is_beta = any(v in entry['gameversion'].lower() for v in ('alpha', 'beta'))
 
-                # TODO: This is an extra paranoia check, because we don't yet know what will (not) be in the Odyssey alpha string.
-                if 'Fleet Carriers Update' not in entry['gameversion']:
-                    logger.warning(f'Forcing is_beta to True due to gameversion: {entry["gameversion"]}')
-                    self.is_beta = True
-
                 self.cmdr = None
                 self.mode = None
                 self.group = None
