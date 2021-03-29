@@ -272,7 +272,7 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
 				sparkle:version="4.2.5"
-				length="11386880"
+				length="11382784"
 				type="application/octet-stream"
 			/>
 		</item>
