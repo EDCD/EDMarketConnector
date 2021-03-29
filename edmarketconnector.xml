@@ -36,10 +36,27 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.4</title>
+			<title>Release 4.2.5</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.5</h2>
+<ul>
+<li>
+<p>Support the 'JournalAlpha' files from the Odyssey Alpha.  We've confirmed
+any data from these is correctly tagged as 'beta' for the is_beta flag
+passed to plugins.</p>
+<p>Any data from Odyssey Alpha is sent to EDDN using the test schemas.</p>
+<p>No data from Odyssey Alpha is sent to the EDSM or Inara APIs.</p>
+</li>
+<li>
+<p>Fix ship loadout export to files to not trip up in the face of file
+encoding issues.  This relates to the 'Ship Loadout' option on the
+'Output' tab of Settings/Preferences.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.2.4</h2>
 <p>This release fixes one cosmetic bug and prepares for the Odyssey Alpha.</p>
@@ -251,10 +268,10 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.4/EDMarketConnector_win_4.2.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.5/EDMarketConnector_win_4.2.5.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.4"
+				sparkle:version="4.2.5"
 				length="11386880"
 				type="application/octet-stream"
 			/>
