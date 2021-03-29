@@ -970,8 +970,26 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
         string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
         if filename:
-            with open(filename, 'wt') as h:
-                h.write(string)
+            try:
+                with open(filename, 'wt', encoding='utf-8') as h:
+                    h.write(string)
+
+            except UnicodeError:
+                logger.exception("UnicodeError writing ship loadout to specified filename with utf-8 encoding"
+                                 ", trying without..."
+                                 )
+
+                try:
+                    with open(filename, 'wt') as h:
+                        h.write(string)
+
+                except OSError:
+                    logger.exception("OSError writing ship loadout to specified filename with default encoding"
+                                     ", aborting."
+                                     )
+
+            except OSError:
+                logger.exception("OSError writing ship loadout to specified filename with utf-8 encoding, aborting.")
 
             return
 
@@ -979,17 +997,44 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
-            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
-                if h.read() == string:
-                    return  # same as last time - don't write
+            try:
+                with open(join(config.get('outdir'), oldfiles[-1]), 'rU', encoding='utf-8') as h:  # type: ignore
+                    if h.read() == string:
+                        return  # same as last time - don't write
+
+            except UnicodeError:
+                logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
+                try:
+                    with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
+                        if h.read() == string:
+                            return  # same as last time - don't write
+
+                except OSError:
+                    logger.exception("OSError reading old ship loadout default encoding.")
+
+            except OSError:
+                logger.exception("OSError reading old ship loadout with default encoding")
 
         # Write
         filename = join(  # type: ignore
             config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
         )
 
-        with open(filename, 'wt') as h:
-            h.write(string)
+        try:
+            with open(filename, 'wt', encoding='utf-8') as h:
+                h.write(string)
+
+        except UnicodeError:
+            logger.exception("UnicodeError writing ship loadout to new filename with utf-8 encoding, trying without...")
+            try:
+                with open(filename, 'wt') as h:
+                    h.write(string)
+
+            except OSError:
+                logger.exception("OSError writing ship loadout to new filename with default encoding, aborting.")
+
+        except OSError:
+            logger.exception("OSError writing ship loadout to new filename with utf-8 encoding, aborting.")
 
     def coalesce_cargo(self, raw_cargo: List[MutableMapping[str, Any]]) -> List[MutableMapping[str, Any]]:
         """
