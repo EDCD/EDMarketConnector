@@ -1,6 +1,34 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta2
+===
+
+* Support the 'JournalAlpha' files from the Odyssey Alpha.  We've confirmed
+  any data from these is correctly tagged as 'beta' for the is_beta flag
+  passed to plugins.
+
+  Any data from Odyssey Alpha is sent to EDDN using the test schemas.
+
+  No data from Odyssey Alpha is sent to the EDSM or Inara APIs.
+
+* Fix ship loadout export to files to not trip up in the face of file encoding
+  issues. This relates to the 'Ship Loadout' option on the 'Output' tab of
+  Settings/Preferences.
+  
+Plugin Authors
+---
+
+* `config.appversion()` now returns a `semantic_version.Version`.  In contexts 
+  where you're expecting a string this should mostly just work.  If needs 
+  be wrap it in a `str()`.
+  
+* Example plugin
+  [plugintest](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/plugintest)
+  updated.  This includes an example of how to check core EDMC version if needs
+  be.  This example is also in
+  [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#checking-core-edmc-version).
+
 Pre-Release 5.0.0-beta1
 ===
 
