@@ -164,7 +164,7 @@ class EDDN:
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
-                ('softwareVersion', appversion_nobuild()),
+                ('softwareVersion', str(appversion_nobuild())),
                 ('uploaderID',      uploader_id),
             ])),
             ('message', msg['message']),
