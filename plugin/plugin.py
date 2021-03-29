@@ -46,6 +46,9 @@ class Plugin(abc.ABC):
         """Unload this plugin."""
         ...
 
+    def reload(self) -> None:
+        """Reload this plugin."""
+
     def show_error(self):
         # TODO: replacement of plug.show_error
         ...
@@ -127,19 +130,6 @@ class MigratedPlugin(Plugin):
 
         # We have a start3, lets see what else we have and get ready to prepare hooks for them
         self.setup_callbacks()
-        # for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
-        #     callback: Optional[Callable] = getattr(self.module, old_callback, None)
-        #     if callback is None:
-        #         continue
-
-        #     # Dynamically adding methods is done with types.MethodType(function ...) (see docs)
-        #     # this is required for access to self, which likely wont be needed here but it also may. Something
-        #     # to keep in mind
-        #     target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
-        #     setattr(self, target_name, decorators.hook(new_hook)(callback))
-        #     self.log.trace(
-        #         f"Successfully created fake callback wrapper {target_name} for old callback {old_callback} ({callback})"
-        #     )
 
     def setup_callbacks(self) -> None:
         # TODO: Update arch with how this works
@@ -203,6 +193,14 @@ class MigratedPlugin(Plugin):
 
     @staticmethod
     def generic_callback_handler(f: Callable, breakout: Callable[..., Tuple[Any, ...]]):
+        """
+        Wrap the given callback with the given event breakout.
+
+        It is expected that `breakout` is a callable that accepts any subclass of event.BaseEvent
+
+        :param f: The callback to wrap
+        :param breakout: The breakout method
+        """
         def wrapper(e: event.BaseEvent):
             return f(*breakout(e))
 
@@ -221,3 +219,7 @@ class MigratedPlugin(Plugin):
             f(e.commander, e.is_beta, e.system, e.station, e.data, e.state)
 
         return wrapper
+
+    def unload(self) -> None:
+        """Legacy plugins do not support unloading."""
+        raise NotImplementedError('Legacy plugins do not support unloading')
