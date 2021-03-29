@@ -1132,7 +1132,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
+                    with open(join(config.get('outdir'), oldfiles[-1]), 'r') as h:  # type: ignore
                         if h.read() == string:
                             return  # same as last time - don't write
 
