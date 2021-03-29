@@ -58,7 +58,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
-    _RE_LOGFILE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+    _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
     def __init__(self):
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
@@ -383,11 +383,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = False
                 self.version = entry['gameversion']
                 self.is_beta = any(v in entry['gameversion'].lower() for v in ('alpha', 'beta'))
-
-                # TODO: This is an extra paranoia check, because we don't yet know what will (not) be in the Odyssey alpha string.
-                if 'Fleet Carriers Update' not in entry['gameversion']:
-                    logger.warning(f'Forcing is_beta to True due to gameversion: {entry["gameversion"]}')
-                    self.is_beta = True
 
                 self.cmdr = None
                 self.mode = None
