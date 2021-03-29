@@ -1085,7 +1085,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return d
 
-    def export_ship(self, filename=None) -> None:
+    def export_ship(self, filename=None) -> None:  # noqa: C901, CCR001
         """
         Export ship loadout as a Loadout event.
 
@@ -1124,9 +1124,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
-            with open(join(config.get_str('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
-                if h.read() == string:
-                    return  # same as last time - don't write
+            try:
+                with open(join(config.get('outdir'), oldfiles[-1]), 'r', encoding='utf-8') as h:  # type: ignore
+                    if h.read() == string:
+                        return  # same as last time - don't write
+
+            except UnicodeError:
+                logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
+                try:
+                    with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
+                        if h.read() == string:
+                            return  # same as last time - don't write
+
+                except OSError:
+                    logger.exception("OSError reading old ship loadout default encoding.")
+
+            except OSError:
+                logger.exception("OSError reading old ship loadout with default encoding")
 
         # Write
         ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
