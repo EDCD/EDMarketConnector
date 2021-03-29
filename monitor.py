@@ -58,7 +58,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
-    _RE_LOGFILE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+    _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
     def __init__(self):
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
@@ -383,11 +383,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = False
                 self.version = entry['gameversion']
                 self.is_beta = any(v in entry['gameversion'].lower() for v in ('alpha', 'beta'))
-
-                # TODO: This is an extra paranoia check, because we don't yet know what will (not) be in the Odyssey alpha string.
-                if 'Fleet Carriers Update' not in entry['gameversion']:
-                    logger.warning(f'Forcing is_beta to True due to gameversion: {entry["gameversion"]}')
-                    self.is_beta = True
 
                 self.cmdr = None
                 self.mode = None
@@ -970,8 +965,26 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
         string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
         if filename:
-            with open(filename, 'wt') as h:
-                h.write(string)
+            try:
+                with open(filename, 'wt', encoding='utf-8') as h:
+                    h.write(string)
+
+            except UnicodeError:
+                logger.exception("UnicodeError writing ship loadout to specified filename with utf-8 encoding"
+                                 ", trying without..."
+                                 )
+
+                try:
+                    with open(filename, 'wt') as h:
+                        h.write(string)
+
+                except OSError:
+                    logger.exception("OSError writing ship loadout to specified filename with default encoding"
+                                     ", aborting."
+                                     )
+
+            except OSError:
+                logger.exception("OSError writing ship loadout to specified filename with utf-8 encoding, aborting.")
 
             return
 
@@ -979,17 +992,44 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted((x for x in listdir(config.get('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
-            with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
-                if h.read() == string:
-                    return  # same as last time - don't write
+            try:
+                with open(join(config.get('outdir'), oldfiles[-1]), 'rU', encoding='utf-8') as h:  # type: ignore
+                    if h.read() == string:
+                        return  # same as last time - don't write
+
+            except UnicodeError:
+                logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
+                try:
+                    with open(join(config.get('outdir'), oldfiles[-1]), 'rU') as h:  # type: ignore
+                        if h.read() == string:
+                            return  # same as last time - don't write
+
+                except OSError:
+                    logger.exception("OSError reading old ship loadout default encoding.")
+
+            except OSError:
+                logger.exception("OSError reading old ship loadout with default encoding")
 
         # Write
         filename = join(  # type: ignore
             config.get('outdir'), '{}.{}.txt'.format(ship, strftime('%Y-%m-%dT%H.%M.%S', localtime(time())))
         )
 
-        with open(filename, 'wt') as h:
-            h.write(string)
+        try:
+            with open(filename, 'wt', encoding='utf-8') as h:
+                h.write(string)
+
+        except UnicodeError:
+            logger.exception("UnicodeError writing ship loadout to new filename with utf-8 encoding, trying without...")
+            try:
+                with open(filename, 'wt') as h:
+                    h.write(string)
+
+            except OSError:
+                logger.exception("OSError writing ship loadout to new filename with default encoding, aborting.")
+
+        except OSError:
+            logger.exception("OSError writing ship loadout to new filename with utf-8 encoding, aborting.")
 
     def coalesce_cargo(self, raw_cargo: List[MutableMapping[str, Any]]) -> List[MutableMapping[str, Any]]:
         """

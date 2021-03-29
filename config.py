@@ -13,7 +13,7 @@ appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.2.4'  #-rc1+a872b5f'
+appversion = '4.2.5'  #-rc1+a872b5f'
 # For some things we want appversion without (possible) +build metadata
 appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
 copyright = u'© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
@@ -160,11 +160,23 @@ class Config(object):
             else:
                 return None
 
+        def get_str(self, key):
+            return self.get(key)
+
+        def get_list(self, key):
+            return self.get(key)
+
+        def get_bool(self, key):
+            return self.get(key)
+
         def getint(self, key):
             try:
                 return int(self.settings.get(key, 0))	# should already be int, but check by casting
             except:
                 return 0
+
+        def get_int(self, key):
+            return self.getint(key)
 
         def set(self, key, val):
             self.settings[key] = val
