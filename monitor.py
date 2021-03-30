@@ -234,6 +234,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates = None
         self.systemaddress = None
         self.is_beta = False
+        self.on_foot = False
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -496,6 +497,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Modules':      None,
                     'Route':        None,
                 }
+                self.on_foot = False
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
@@ -622,6 +624,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
+
+            elif event_type == 'Embark':
+                self.on_foot = False
+
+            elif event_type == 'Disembark':
+                self.on_foot = True
 
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 if event_type in ('Location', 'CarrierJump'):
@@ -884,6 +892,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+                self.on_foot = False
 
             elif event_type == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
@@ -899,6 +908,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+                # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'Friends':
                 if entry['Status'] in ('Online', 'Added'):
