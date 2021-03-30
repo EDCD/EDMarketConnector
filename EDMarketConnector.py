@@ -773,15 +773,30 @@ class AppWindow(object):
                 self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
-                # Companion API return doesn't match Journal
+                # Companion API Commander doesn't match Journal
                 raise companion.CmdrError()
 
-            elif ((auto_update and not data['commander'].get('docked'))
-                  or (data['lastSystem']['name'] != monitor.system)
-                  or ((data['commander']['docked']
-                       and data['lastStarport']['name'] or None) != monitor.station)
-                  or (data['ship']['id'] != monitor.state['ShipID'])
-                  or (data['ship']['name'].lower() != monitor.state['ShipType'])):
+            elif auto_update and not monitor.on_foot and not data['commander'].get('docked'):
+                # auto update is only when just docked
+                raise companion.ServerLagging()
+
+            elif data['lastSystem']['name'] != monitor.system:
+                # CAPI system must match last journal one
+                raise companion.ServerLagging()
+
+            elif (monitor.on_foot and monitor.station
+                  and data['lastStarport']['name'] != monitor.station  # On foot station must match if set
+                  or ((data['commander']['docked'] and data['lastStarport']['name'] or None)
+                      != monitor.station)  # CAPI lastStarport must match
+                  ):
+                raise companion.ServerLagging()
+
+            elif not monitor.on_foot and data['ship']['id'] != monitor.state['ShipID']:
+                # CAPI ship must match
+                raise companion.ServerLagging()
+
+            elif not monitor.on_foot and data['ship']['name'].lower() != monitor.state['ShipType']:
+                # CAPI ship type must match
                 raise companion.ServerLagging()
 
             else:
