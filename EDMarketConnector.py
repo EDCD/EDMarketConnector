@@ -784,12 +784,18 @@ class AppWindow(object):
                 # CAPI system must match last journal one
                 raise companion.ServerLagging()
 
-            elif (monitor.on_foot and monitor.station
-                  and data['lastStarport']['name'] != monitor.station  # On foot station must match if set
-                  or ((data['commander']['docked'] and data['lastStarport']['name'] or None)
-                      != monitor.station)  # CAPI lastStarport must match
-                  ):
-                raise companion.ServerLagging()
+            elif data['lastStarport']['name'] != monitor.station:
+                if monitor.on_foot and monitor.station:
+                    raise companion.ServerLagging()
+
+                else:
+                    last_station = None
+                    if data['commander']['docked']:
+                        last_station = data['lastStarport']['name']
+
+                    if last_station != monitor.station:
+                        # CAPI lastStarport must match
+                        raise companion.ServerLagging()
 
             elif not monitor.on_foot and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
