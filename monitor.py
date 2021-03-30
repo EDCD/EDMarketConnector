@@ -16,7 +16,7 @@ from typing import Tuple
 if TYPE_CHECKING:
     import tkinter
 
-from companion import ship_file_name
+import util_ships
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -1141,7 +1141,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             return
 
-        ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
+        ship = util_ships.ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:

@@ -2,8 +2,8 @@
 
 import time
 
-from companion import ship_map
 from config import config
+from util_ships import ship_map
 
 
 def export(data, filename):

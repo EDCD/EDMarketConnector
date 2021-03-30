@@ -256,6 +256,7 @@ import plug
 import prefs
 import stats
 import td
+import util_ships
 from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from hotkey import hotkeymgr
@@ -689,7 +690,7 @@ class AppWindow(object):
         :return: True if all OK, else False to trigger play_bad in caller.
         """
         if config.get_int('output') & (config.OUT_STATION_ANY):
-            if not data['commander'].get('docked'):
+            if not data['commander'].get('docked') and not monitor.on_foot:
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
@@ -810,7 +811,7 @@ class AppWindow(object):
                     self.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    self.ship['text'] = util_ships.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
@@ -912,7 +913,7 @@ class AppWindow(object):
                     ship_text = monitor.state['ShipName']
 
                 else:
-                    ship_text = companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    ship_text = util_ships.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
 
                 if not ship_text:
                     ship_text = ''
