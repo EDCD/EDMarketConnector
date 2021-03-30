@@ -337,6 +337,10 @@ class AppWindow(object):
 
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        # system and station text is set/updated by the 'provider' plugins
+        # eddb, edsm and inara.  Look for:
+        #
+        # parent.children['system'] / parent.children['station']
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
 
