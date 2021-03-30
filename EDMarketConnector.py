@@ -690,7 +690,7 @@ class AppWindow(object):
         :return: True if all OK, else False to trigger play_bad in caller.
         """
         if config.get_int('output') & (config.OUT_STATION_ANY):
-            if not data['commander'].get('docked') and not monitor.on_foot:
+            if not data['commander'].get('docked') and not monitor.state['on_foot']:
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
@@ -777,7 +777,7 @@ class AppWindow(object):
                 # Companion API Commander doesn't match Journal
                 raise companion.CmdrError()
 
-            elif auto_update and not monitor.on_foot and not data['commander'].get('docked'):
+            elif auto_update and not monitor.state['on_foot'] and not data['commander'].get('docked'):
                 # auto update is only when just docked
                 raise companion.ServerLagging()
 
@@ -786,7 +786,7 @@ class AppWindow(object):
                 raise companion.ServerLagging()
 
             elif data['lastStarport']['name'] != monitor.station:
-                if monitor.on_foot and monitor.station:
+                if monitor.state['on_foot'] and monitor.station:
                     raise companion.ServerLagging()
 
                 else:
@@ -798,11 +798,11 @@ class AppWindow(object):
                         # CAPI lastStarport must match
                         raise companion.ServerLagging()
 
-            elif not monitor.on_foot and data['ship']['id'] != monitor.state['ShipID']:
+            elif not monitor.state['on_foot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
                 raise companion.ServerLagging()
 
-            elif not monitor.on_foot and data['ship']['name'].lower() != monitor.state['ShipType']:
+            elif not monitor.state['on_foot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
                 # CAPI ship type must match
                 raise companion.ServerLagging()
 
@@ -909,6 +909,7 @@ class AppWindow(object):
 
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
 
+                # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
                     ship_text = monitor.state['ShipName']
 
