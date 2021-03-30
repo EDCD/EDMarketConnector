@@ -53,6 +53,7 @@ this.system_population: Optional[int] = None
 this.station_link: 'Optional[Tk]' = None
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None
+this.on_foot = False
 
 
 def system_url(system_name: str) -> str:
@@ -102,6 +103,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         logger.warning(f'Processing of event {entry["event"]} has been disabled: {ks.reason}')
         return
 
+    this.on_foot = state['on_foot']
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -115,9 +117,13 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system_population = pop
 
     this.station = entry.get('StationName') or this.station
+    # on_foot station detection
+    if not this.station and entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+        this.station = entry['Body']
+
     this.station_marketid = entry.get('MarketID') or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
+    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry', 'Embark'):
         this.station = None
         this.station_marketid = None
 
@@ -164,7 +170,7 @@ def cmdr_data(data: CAPIData, is_beta):
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'eddb':
-        if data['commander']['docked']:
+        if data['commander']['docked'] or this.on_foot and this.station:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":

@@ -104,7 +104,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates: Optional[Tuple[float, float, float]] = None
         self.systemaddress: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
-        self.on_foot: bool = False
 
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
@@ -134,6 +133,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Modules':      None,
             'CargoJSON':    None,  # The raw data from the last time cargo.json was read
             'Route':        None,  # Last plotted route from Route.json file
+            'on_foot':      False,  # Whether we think you're on-foot
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -234,7 +234,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates = None
         self.systemaddress = None
         self.is_beta = False
-        self.on_foot = False
+        self.state['on_foot'] = False
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -497,7 +497,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Modules':      None,
                     'Route':        None,
                 }
-                self.on_foot = False
+                self.state['on_foot'] = False
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
@@ -530,7 +530,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Role':       None,
                 })
                 if self._RE_SHIP_ONFOOT.search(entry['Ship']):
-                    self.on_foot = True
+                    self.state['on_foot'] = True
 
             elif event_type == 'NewCommander':
                 self.cmdr = entry['Name']
@@ -628,12 +628,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'Embark':
                 # If we've embarked then we're no longer on the station.
                 self.station = None
-                self.on_foot = False
+                self.state['on_foot'] = False
 
             elif event_type == 'Disembark':
                 # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
                 self.station = None
-                self.on_foot = True
+                self.state['on_foot'] = True
 
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 if event_type in ('Location', 'CarrierJump'):
@@ -896,7 +896,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
-                self.on_foot = False
+                self.state['on_foot'] = False
 
             elif event_type == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
