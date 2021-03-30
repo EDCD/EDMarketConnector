@@ -22,6 +22,7 @@ import plug
 from companion import CAPIData, category_map
 from config import applongname, appversion_nobuild, config
 from EDMCLogging import get_main_logger
+from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -907,7 +908,8 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     :param is_beta: bool - True if this is a beta version of the Game.
     :return: str - Error message, or `None` if no errors.
     """
-    if data['commander'].get('docked') and config.get_int('output') & config.OUT_MKT_EDDN:
+    if (data['commander'].get('docked') or (monitor.on_foot and monitor.station)
+            and config.get_int('output') & config.OUT_MKT_EDDN):
         try:
             if this.marketId != data['lastStarport']['id']:
                 this.commodities = this.outfitting = this.shipyard = None

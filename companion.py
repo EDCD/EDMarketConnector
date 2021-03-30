@@ -28,6 +28,7 @@ import requests
 
 from config import appname, appversion, config
 from EDMCLogging import get_main_logger
+from monitor import monitor
 from protocol import protocolhandler
 
 logger = get_main_logger()
@@ -563,7 +564,7 @@ class Session(object):
             logger.error('No commander in returned data')
             return data
 
-        if not data['commander'].get('docked'):
+        if not data['commander'].get('docked') and not monitor.on_foot:
             return data
 
         services = data['lastStarport'].get('services', {})

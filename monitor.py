@@ -626,9 +626,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
 
             elif event_type == 'Embark':
+                # If we've embarked then we're no longer on the station.
+                self.station = None
                 self.on_foot = False
 
             elif event_type == 'Disembark':
+                # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
+                self.station = None
                 self.on_foot = True
 
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
