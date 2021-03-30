@@ -67,6 +67,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.)$')
 
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
@@ -103,6 +104,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates: Optional[Tuple[float, float, float]] = None
         self.systemaddress: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
+        self.on_foot: bool = False
 
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
@@ -525,6 +527,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Statistics': {},
                     'Role':       None,
                 })
+                if self._RE_SHIP_ONFOOT.search(entry['Ship']):
+                    self.on_foot = True
 
             elif event_type == 'NewCommander':
                 self.cmdr = entry['Name']
@@ -641,7 +645,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.systempopulation = entry.get('Population')
 
                 self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
+
                 self.station = entry.get('StationName')  # May be None
+                # If on foot in-station 'Docked' is false, but we have a
+                # 'BodyType' of 'Station', and the 'Body' is the station name
+                # NB: No MarketID
+                if entry.get('BodyType') and entry['BodyType'] == 'Station':
+                    self.station = entry.get('Body')
+
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
