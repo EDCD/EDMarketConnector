@@ -8,6 +8,7 @@ import time
 
 from config import config
 import companion
+import util_ships
 
 
 def export(data, filename=None):
@@ -20,7 +21,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
-    ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
+    ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + '\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
