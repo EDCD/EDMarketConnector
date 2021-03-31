@@ -13,6 +13,7 @@ assignees: ''
 
 **Please complete the following information:**
  - Version [e.g. 4.0.6 - See 'Help > About E:D Market Connector'.  If running from source using git then please paste the output of `git log --decorate=full | head -1`]
+ - Game Version [e.g. 'Live' or 'Odyssey Alpha']
  - OS: [e.g. Windows 10, Linux Debian 10.6, etc.]
  - OS Locale: [e.g. English, French, Serbian...]
  - If applicable: Browser [e.g. chrome, safari]
