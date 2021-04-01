@@ -36,10 +36,26 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.5</title>
+			<title>Release 4.2.6</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.6</h2>
+<p>This release applies a workaround for a game bug to do with late Scan events.</p>
+<ul>
+<li>
+<p>EDDN requires that all Scan events are augmented with <code>StarPos</code> (system
+co-ordinates).  This is taken from the co-ordinates of the <em>current</em> system.</p>
+<p>A sequence of EDDN messages indicated that the game can log a delayed
+Scan event for the previous system after having already jumped (<code>FSDJump</code>
+event) to another system.</p>
+<p>This application would then erroneously apply the new system's <code>StarPos</code>
+to the <code>Scan</code> from the old system.</p>
+<p>This application will now not send such delayed <code>Scan</code> events to EDDN at all.</p>
+</li>
+</ul>
+
 
 <h2>Release 4.2.5</h2>
 <ul>
@@ -268,10 +284,10 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.5/EDMarketConnector_win_4.2.5.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.6/EDMarketConnector_win_4.2.6.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.5"
+				sparkle:version="4.2.6"
 				length="11382784"
 				type="application/octet-stream"
 			/>
