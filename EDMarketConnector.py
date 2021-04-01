@@ -1433,7 +1433,9 @@ sys.path: {sys.path}'''
     if args.reset_ui:
         config.set('theme', 0)  # 'Default' theme uses ID 0
         config.set('ui_transparency', 100)  # 100 is completely opaque
-        logger.info('reset theme and transparency to default.')
+        config.delete('font')
+        config.delete('font_size')
+        logger.info('reset theme, font, font size, and transparency to default.')
 
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
@@ -1526,6 +1528,13 @@ sys.path: {sys.path}'''
 
     setup_killswitches()
     root = tk.Tk(className=appname.lower())
+    if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
+        size = config.get_int('font_size', default=-1)
+        if size == -1:
+            size = 10
+
+        logger.info(f'Overriding tkinter default font to {f!r} at size {size}')
+        tk.font.nametofont('TkDefaultFont').configure(family=f, size=size)
 
     # UI Scaling
     """
