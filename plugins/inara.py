@@ -331,7 +331,7 @@ def journal_entry(
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
 
-    this.on_foot = state['on_foot']
+    this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']

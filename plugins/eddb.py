@@ -103,7 +103,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         logger.warning(f'Processing of event {entry["event"]} has been disabled: {ks.reason}')
         return
 
-    this.on_foot = state['on_foot']
+    this.on_foot = state['OnFoot']
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):

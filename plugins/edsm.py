@@ -350,7 +350,7 @@ def journal_entry(
         logger.warning(f'Handling of event {entry["event"]} has been disabled via killswitch: {ks.reason}')
         return
 
-    this.on_foot = state['on_foot']
+    this.on_foot = state['OnFoot']
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.trace(f'''{entry["event"]}
 Commander: {cmdr}

@@ -530,7 +530,7 @@ Content of `state` (updated to the current journal entry):
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
 | `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
 | `ModuleInfo`   |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
-| `on_foot`      |           `bool`            | Whether you're on_foot                                                                                          |
+| `OnFoot`       |           `bool`            | Whether the Cmdr is on foot                                                                                     |
 
 New in version 4.1.6:
 
@@ -550,7 +550,7 @@ journal `NavRoute` event.
 `ModuleInfo` contains the `json.load()` of `ModulesInfo.json` as indicated by a
 Journal `ModuleInfo` event.
 
-`on_foot` is an indication as to if the player is on-foot, rather than in a
+`OnFoot` is an indication as to if the player is on-foot, rather than in a
 vehicle.
 
 ##### Synthetic Events
