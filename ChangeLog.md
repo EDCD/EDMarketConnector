@@ -1,6 +1,12 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.7
+===
+
+  Developer error meant that 4.2.6 didn't actually contain the intended fix.
+This will, honest.  No, it wasn't intended as an April Stupids Day prank.
+
 Release 4.2.6
 ===
 

@@ -714,6 +714,12 @@ def journal_entry(  # noqa: C901
                 logger.warning("this.coordinates is None, can't add StarPos")
                 return "this.coordinates is None, can't add StarPos"
 
+            # Gazelle[TD] reported seeing a lagged Scan event with incorrect
+            # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
+            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+                logger.warning("event has no StarPos, but SystemAddress isn't current location")
+                return "Wrong System! Delayed Scan event?"
+
             entry['StarPos'] = list(this.coordinates)
 
         if 'SystemAddress' not in entry:
