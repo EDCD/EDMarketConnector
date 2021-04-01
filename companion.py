@@ -564,7 +564,7 @@ class Session(object):
             logger.error('No commander in returned data')
             return data
 
-        if not data['commander'].get('docked') and not monitor.state['on_foot']:
+        if not data['commander'].get('docked') and not monitor.state['OnFoot']:
             return data
 
         services = data['lastStarport'].get('services', {})
