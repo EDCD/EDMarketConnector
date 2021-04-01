@@ -36,10 +36,15 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 4.2.6</title>
+			<title>Release 4.2.7</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 4.2.7</h2>
+<p>Developer error meant that 4.2.6 didn't actually contain the intended fix.
+This will, honest.  No, it wasn't intended as an April Stupids Day prank.</p>
+
 
 <h2>Release 4.2.6</h2>
 <p>This release applies a workaround for a game bug to do with late Scan events.</p>
@@ -284,11 +289,11 @@ the last mission requiring that cargo type, as found in Cargo.json.</p>
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.6/EDMarketConnector_win_4.2.6.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.7/EDMarketConnector_win_4.2.7.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="4.2.6"
-				length="11382784"
+				sparkle:version="4.2.7"
+				length="11374592"
 				type="application/octet-stream"
 			/>
 		</item>
