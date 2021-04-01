@@ -509,7 +509,7 @@ def lookup(module, ship_map, entitled=False):
 
 def export(data, filename):
 
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime') or int(time.time())
 
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')

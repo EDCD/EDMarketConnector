@@ -113,7 +113,7 @@ if platform == 'darwin':
         def _handler(self, event):
             # use event.charactersIgnoringModifiers to handle composing characters like Alt-e
             if (event.modifierFlags() & HotkeyMgr.MODIFIERMASK) == self.modifiers and ord(event.charactersIgnoringModifiers()[0]) == self.keycode:
-                if config.getint('hotkey_always'):
+                if config.get_int('hotkey_always'):
                     self.activated = True
                 else:	# Only trigger if game client is front process
                     front = NSWorkspace.sharedWorkspace().frontmostApplication()
@@ -347,7 +347,7 @@ elif platform == 'win32':
                     logger.debug('WM_HOTKEY')
 
                     if (
-                            config.getint('hotkey_always')
+                            config.get_int('hotkey_always')
                             or WindowTitle(GetForegroundWindow()).startswith('Elite - Dangerous')
                     ):
                         logger.debug('Sending event <<Invoke>>')
