@@ -1,6 +1,23 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 4.2.6
+===
+
+  This release applies a workaround for a game bug to do with late Scan events.
+
+* EDDN requires that all Scan events are augmented with `StarPos` (system 
+  co-ordinates).  This is taken from the co-ordinates of the *current* system.
+
+  A sequence of EDDN messages indicated that the game can log a delayed 
+  Scan event for the previous system after having already jumped (`FSDJump` 
+  event) to another system.
+  
+  This application would then erroneously apply the new system's `StarPos` 
+  to the `Scan` from the old system.
+  
+  This application will now not send such delayed `Scan` events to EDDN at all.
+
 Release 4.2.5
 ===
 
