@@ -1,6 +1,110 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta1
+===
+
+This release comes after some substantial code cleanup and is our first based
+on Python 3.9 rather than 3.7.  Other than what is noted in this changelog 
+it should have the same functionality as 4.2.4.
+
+* We are now testing and building with Python 3.9 (3.9.2 specifically at 
+  this point).  This should have no impact on users or plugin developers, other
+  than the latter now being free to use features that were introduced since the
+  Python 3.7 series.
+  
+  For developers you can check the contents of the `.python-version` file 
+  in the source (it's not distributed with the Windows installer) for the 
+  currently used version in a given branch.
+  
+* We now also cite the git 'short hash' in the version string.  For a Windows 
+  install of the application this is sourced from the `.gitversion` file 
+  (written during the build process).
+  
+  When running from source we attempt to use the command `git rev-parse --short HEAD`
+  to obtain this.  If this doesn't work it will be set to 'UNKNOWN'.
+
+* New 'Main window transparency' slider on `Settings` > `Appearance`.
+  
+* New command-line argument for EDMarketConnector.exe `--reset-ui`.  This will:
+
+    1. Reset to the default Theme.
+    2. Reset the UI transparency to fully opaque.
+
+  The intention is this can be used if you've lost sight of the main window 
+  due to tweaking these options.
+  
+* We have added a 'killswitch' feature to turn off specific functionality if it
+  is found to have a bug.  An example use of this would be in an "oh 
+  shit! we're sending bad data to EDDN!" moment so as to protect EDDN 
+  listeners such as EDDB.
+  
+  If we ever have to use this we'll announce it clearly and endeavour to 
+  get a fixed version of the program released ASAP.  We will **NOT** be 
+  using this merely to try and get some laggards to upgrade.
+
+* Our logging code will make best efforts to still show class name and 
+  other such fields if it has trouble finding any of the required data for 
+  the calling frame.  This means no longer seeing `??:??:??` when there is 
+  an issue with this.
+
+* macOS: We've managed to test the latest code on macOS Catalina.  Other than
+  [keyboard shortcut support not working](https://github.com/EDCD/EDMarketConnector/issues/906)
+  it appears to be working.
+  
+* We've pulled the latest Coriolis data which might have caused changes to 
+  ship and module names as written out to some files.
+
+Plugin Developers
+-----------------
+
+* config.py has undergone a major rewrite.  You should no longer be using 
+  `config.get(...)` or `config.getint(...)`, which will both give a 
+  deprecation warning.  
+  Use instead the correct config.get_<type> function:
+  
+     * `config.get_list(<key>)`
+     * `config.get_str(<key>)`
+     * `config.get_bool(<key>)`
+     * `config.get_int(<key>)`
+    
+  Setting still uses `config.set(...)`.
+
+* The files `stations.p` and `systems.p` have been removed from the Windows 
+  Installer.  These were never intended for third-party use.  Their core 
+  code use was for generating EDDB-id links, but we long since changed the 
+  EDDB plugin's handlers for that to use alternate URL formats based on 
+  game IDs or names.
+  
+  If you were using either to lookup EDDB IDs for systems and/or stations 
+  then please see how `system_url()` and `station_url` now work in 
+  `plugins/eddb.py`.
+  
+  This change also removed the core (not plugin) `eddb.py` file which 
+  generated these files.  You can find it still in the git history if needs 
+  be.  It had gotten to the stage where generating `systems.p` took many 
+  hours and required 64-bit Python to have any hope of working due to 
+  memory usage.
+  
+* Support has been added for the `NavRoute` (not `Route` as v28 of the 
+  official Journal documentation erroneously labels it) Journal event and 
+  its associated file `NavRoute.json`.  See [PLUGINS.md:Events documentation](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#journal-entry)
+  
+* Similarly there is now support for the `ModuleInfo` event and its 
+  associated `ModulesInfo.json` file.
+
+Code Clean Up
+-------------
+
+* Some code to do with processing Journal events has been re-factored.
+
+* The code for `File` > `Status` has been cleaned up.
+
+* Localisation code has been cleaned up.
+
+* Code handling the Frontier Authorisation callback on Windows has been
+  cleaned up.
+
 Release 4.2.7
 ===
 
