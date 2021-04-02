@@ -117,6 +117,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Raw':          defaultdict(int),
             'Manufactured': defaultdict(int),
             'Encoded':      defaultdict(int),
+            'Component':    defaultdict(int),  # Odyssey materials
             'Engineers':    {},
             'Rank':         {},
             'Reputation':   {},

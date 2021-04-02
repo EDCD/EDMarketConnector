@@ -515,6 +515,7 @@ Content of `state` (updated to the current journal entry):
 | `Raw`          |           `dict`            | Current raw engineering materials                                                                               |
 | `Manufactured` |           `dict`            | Current manufactured engineering materials                                                                      |
 | `Encoded`      |           `dict`            | Current encoded engineering materials                                                                           |
+| `Component`    |           `dict`            | Current component materials                                                                                     |
 | `Engineers`    |           `dict`            | Current Raw engineering materials                                                                               |
 | `Rank`         | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
 | `Statistics`   |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
@@ -552,6 +553,9 @@ Journal `ModuleInfo` event.
 
 `OnFoot` is an indication as to if the player is on-foot, rather than in a
 vehicle.
+
+`Component` is a dict tracking your 'on-foot' materials for upgrading Suits 
+and on-foot weapons.
 
 ##### Synthetic Events
 
