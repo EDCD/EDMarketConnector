@@ -959,7 +959,7 @@ class AppWindow(object):
                 self.login()
 
             if not entry['event'] or not monitor.mode:
-                logger.trace('Startup or in CQC, returning')
+                # logger.trace('Startup or in CQC, returning')
                 return  # Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
