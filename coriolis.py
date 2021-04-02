@@ -15,6 +15,7 @@ from traceback import print_exc
 from config import config
 import outfitting
 import companion
+import util_ships
 
 
 if __name__ == "__main__":
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     }
 
     # Symbolic name from in-game name
-    reverse_ship_map = {v: k for k, v in list(companion.ship_map.items())}
+    reverse_ship_map = {v: k for k, v in list(util_ships.ship_map.items())}
 
     bulkheads = list(outfitting.armour_map.keys())
 
@@ -98,7 +99,7 @@ if __name__ == "__main__":
         reader = csv.DictReader(csvfile, restval='')
         for row in reader:
             try:
-                module = outfitting.lookup({ 'id': row['id'], 'name': row['symbol'] }, companion.ship_map)
+                module = outfitting.lookup({ 'id': row['id'], 'name': row['symbol'] }, util_ships.ship_map)
             except:
                 print(row['symbol'])
                 print_exc()

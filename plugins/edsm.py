@@ -55,6 +55,7 @@ this.system_population: Optional[int] = None
 this.station_link: tk.Tk = None
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None  # Frontier MarketID
+this.on_foot = False
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 __cleanup = str.maketrans({' ': None, '\n': None})
 IMG_KNOWN_B64 = """
@@ -349,6 +350,7 @@ def journal_entry(
         logger.warning(f'Handling of event {entry["event"]} has been disabled via killswitch: {ks.reason}')
         return
 
+    this.on_foot = state['OnFoot']
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
         logger.trace(f'''{entry["event"]}
 Commander: {cmdr}
@@ -370,6 +372,10 @@ entry: {entry!r}'''
         this.system_population = pop
 
     this.station = entry.get('StationName', this.station)
+    # on_foot station detection
+    if not this.station and entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+        this.station = entry['Body']
+
     this.station_marketid = entry.get('MarketID', this.station)
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
@@ -479,7 +485,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> None:
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'EDSM':
-        if data['commander']['docked']:
+        if data['commander']['docked'] or this.on_foot and this.station:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":

@@ -6,12 +6,13 @@
 import csv
 import json
 import os
-from os.path import isfile
 import sys
+from os.path import isfile
 from traceback import print_exc
 
 import companion
 import outfitting
+import util_ships
 
 
 def __make_backup(file_name: str, suffix: str = '.bak') -> None:
@@ -106,7 +107,7 @@ def addmodules(data):
             raise ValueError('id: {} != {}'.format(key, module['id']))
 
         try:
-            new = outfitting.lookup(module, companion.ship_map, True)
+            new = outfitting.lookup(module, util_ships.ship_map, True)
 
         except Exception:
             print('{}, {}:'.format(module['id'], module['name']))
@@ -164,7 +165,7 @@ def addships(data):
     for ship in tuple(data_ships.get('shipyard_list', {}).values()) + data_ships.get('unavailable_list'):
         # sanity check
         key = int(ship['id'])
-        new = {'id': key, 'symbol': ship['name'], 'name': companion.ship_map.get(ship['name'].lower())}
+        new = {'id': key, 'symbol': ship['name'], 'name': util_ships.ship_map.get(ship['name'].lower())}
         if new:
             old = ships.get(key)
             if old:

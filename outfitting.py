@@ -3,7 +3,7 @@ import pickle
 from os.path import join
 import time
 
-import companion
+import util_ships
 from config import config
 
 
@@ -521,7 +521,7 @@ def export(data, filename):
     h.write(header)
     for v in list(data['lastStarport'].get('modules', {}).values()):
         try:
-            m = lookup(v, companion.ship_map)
+            m = lookup(v, util_ships.ship_map)
             if m:
                 h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], data['timestamp']))
         except AssertionError as e:

@@ -59,6 +59,7 @@ this.storedmodules: Optional[OrderedDictT[str, Any]] = None
 this.loadout: Optional[OrderedDictT[str, Any]] = None
 this.fleet: Optional[List[OrderedDictT[str, Any]]] = None
 this.shipswap: bool = False  # just swapped ship
+this.on_foot = False
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
@@ -330,6 +331,7 @@ def journal_entry(
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
 
+    this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']
@@ -380,6 +382,10 @@ def journal_entry(
         this.system_population = pop
 
     this.station = entry.get('StationName', this.station)
+    # on_foot station detection
+    if not this.station and entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+        this.station = entry['Body']
+
     this.station_marketid = entry.get('MarketID', this.station_marketid) or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if event_name in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
@@ -1069,7 +1075,7 @@ def cmdr_data(data: CAPIData, is_beta):
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'Inara':
-        if data['commander']['docked']:
+        if data['commander']['docked'] or this.on_foot and this.station:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":

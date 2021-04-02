@@ -16,7 +16,7 @@ from typing import Tuple
 if TYPE_CHECKING:
     import tkinter
 
-from companion import ship_file_name
+import util_ships
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -67,6 +67,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.)$')
 
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
@@ -132,6 +133,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Modules':      None,
             'CargoJSON':    None,  # The raw data from the last time cargo.json was read
             'Route':        None,  # Last plotted route from Route.json file
+            'OnFoot':      False,  # Whether we think you're on-foot
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -232,6 +234,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.coordinates = None
         self.systemaddress = None
         self.is_beta = False
+        self.state['OnFoot'] = False
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -494,6 +497,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Modules':      None,
                     'Route':        None,
                 }
+                self.state['OnFoot'] = False
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
@@ -525,6 +529,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Statistics': {},
                     'Role':       None,
                 })
+                if self._RE_SHIP_ONFOOT.search(entry['Ship']):
+                    self.state['OnFoot'] = True
 
             elif event_type == 'NewCommander':
                 self.cmdr = entry['Name']
@@ -619,6 +625,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationtype = None
                 self.stationservices = None
 
+            elif event_type == 'Embark':
+                # If we've embarked then we're no longer on the station.
+                self.station = None
+                self.state['OnFoot'] = False
+
+            elif event_type == 'Disembark':
+                # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
+                self.station = None
+                self.state['OnFoot'] = True
+
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
@@ -641,7 +657,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.systempopulation = entry.get('Population')
 
                 self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
+
                 self.station = entry.get('StationName')  # May be None
+                # If on foot in-station 'Docked' is false, but we have a
+                # 'BodyType' of 'Station', and the 'Body' is the station name
+                # NB: No MarketID
+                if entry.get('BodyType') and entry['BodyType'] == 'Station':
+                    self.station = entry.get('Body')
+
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
@@ -873,6 +896,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+                self.state['OnFoot'] = False
 
             elif event_type == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
@@ -888,6 +912,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+                # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'Friends':
                 if entry['Status'] in ('Online', 'Added'):
@@ -1120,7 +1145,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             return
 
-        ship = ship_file_name(self.state['ShipName'], self.state['ShipType'])
+        ship = util_ships.ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:

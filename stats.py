@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, NamedTuple, Optional,
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
-from companion import ship_map
 from l10n import Locale
 from monitor import monitor
+from util_ships import ship_map
 
 logger = EDMCLogging.get_main_logger()
 
