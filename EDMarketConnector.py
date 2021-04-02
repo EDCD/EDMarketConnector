@@ -894,7 +894,8 @@ class AppWindow(object):
         while True:
             entry = monitor.get_entry()
             if not entry:
-                logger.trace('No entry from monitor.get_entry()')
+                # This is expected due to some monitor.py code that appends `None`
+                # logger.trace('No entry from monitor.get_entry()')
                 return
 
             # Update main window
