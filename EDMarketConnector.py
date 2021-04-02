@@ -891,7 +891,7 @@ class AppWindow(object):
             logger.debug('monitor.thread is None, assuming shutdown and returning')
             return
 
-        while True:
+        while not monitor.event_queue.empty():
             entry = monitor.get_entry()
             if not entry:
                 # This is expected due to some monitor.py code that appends `None`
