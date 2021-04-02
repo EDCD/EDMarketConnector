@@ -134,10 +134,8 @@ def appversion() -> semantic_version.Version:
     """
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
-        with open(GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
             shorthash = gitv.read()
-
-        # TODO: Check if there was already a build meta data in static_appversion ?
 
     else:
         # Running from source
