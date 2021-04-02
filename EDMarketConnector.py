@@ -6,6 +6,7 @@ import argparse
 import html
 import json
 import locale
+import pathlib
 import re
 import sys
 import webbrowser
@@ -26,6 +27,11 @@ if getattr(sys, 'frozen', False):
         # Allow executable to be invoked from any cwd
         environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
         environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
+
+else:
+    # We still want to *try* to have CWD be where the main script is, even if
+    # not frozen.
+    chdir(pathlib.Path(__file__).parent)
 
 from constants import applongname, appname, protocolhandler_redirect
 
