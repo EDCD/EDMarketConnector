@@ -8,14 +8,14 @@ import re
 import time
 
 from config import config
-import companion
 import outfitting
+import util_ships
 
 from typing import Dict, Union, List
 __Module = Dict[str, Union[str, List[str]]]
 
 # Map API ship names to E:D Shipyard ship names
-ship_map = companion.ship_map.copy()
+ship_map = util_ships.ship_map.copy()
 
 ship_map.update(
     {
@@ -172,11 +172,11 @@ def export(data, filename=None):
     string += '---\nCargo : {} T\nFuel  : {} T\n'.format(cargo, fuel)
 
     # Add mass and range
-    assert data['ship']['name'].lower() in companion.ship_map, data['ship']['name']
-    assert companion.ship_map[data['ship']['name'].lower()] in ships, companion.ship_map[data['ship']['name'].lower()]
+    assert data['ship']['name'].lower() in util_ships.ship_map, data['ship']['name']
+    assert util_ships.ship_map[data['ship']['name'].lower()] in ships, util_ships.ship_map[data['ship']['name'].lower()]
 
     try:
-        mass += ships[companion.ship_map[data['ship']['name'].lower()]]['hullMass']
+        mass += ships[util_ships.ship_map[data['ship']['name'].lower()]]['hullMass']
         string += 'Mass  : {:.2f} T empty\n        {:.2f} T full\n'.format(mass, mass + fuel + cargo)
 
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
@@ -197,7 +197,7 @@ def export(data, filename=None):
         return
 
     # Look for last ship of this type
-    ship = companion.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
+    ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:

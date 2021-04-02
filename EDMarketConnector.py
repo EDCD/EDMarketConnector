@@ -256,6 +256,7 @@ import plug
 import prefs
 import stats
 import td
+import util_ships
 from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from hotkey import hotkeymgr
@@ -336,6 +337,10 @@ class AppWindow(object):
 
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        # system and station text is set/updated by the 'provider' plugins
+        # eddb, edsm and inara.  Look for:
+        #
+        # parent.children['system'] / parent.children['station']
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
 
@@ -689,7 +694,7 @@ class AppWindow(object):
         :return: True if all OK, else False to trigger play_bad in caller.
         """
         if config.get_int('output') & (config.OUT_STATION_ANY):
-            if not data['commander'].get('docked'):
+            if not data['commander'].get('docked') and not monitor.state['OnFoot']:
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
@@ -773,15 +778,36 @@ class AppWindow(object):
                 self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
-                # Companion API return doesn't match Journal
+                # Companion API Commander doesn't match Journal
                 raise companion.CmdrError()
 
-            elif ((auto_update and not data['commander'].get('docked'))
-                  or (data['lastSystem']['name'] != monitor.system)
-                  or ((data['commander']['docked']
-                       and data['lastStarport']['name'] or None) != monitor.station)
-                  or (data['ship']['id'] != monitor.state['ShipID'])
-                  or (data['ship']['name'].lower() != monitor.state['ShipType'])):
+            elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
+                # auto update is only when just docked
+                raise companion.ServerLagging()
+
+            elif data['lastSystem']['name'] != monitor.system:
+                # CAPI system must match last journal one
+                raise companion.ServerLagging()
+
+            elif data['lastStarport']['name'] != monitor.station:
+                if monitor.state['OnFoot'] and monitor.station:
+                    raise companion.ServerLagging()
+
+                else:
+                    last_station = None
+                    if data['commander']['docked']:
+                        last_station = data['lastStarport']['name']
+
+                    if last_station != monitor.station:
+                        # CAPI lastStarport must match
+                        raise companion.ServerLagging()
+
+            elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
+                # CAPI ship must match
+                raise companion.ServerLagging()
+
+            elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
+                # CAPI ship type must match
                 raise companion.ServerLagging()
 
             else:
@@ -789,7 +815,7 @@ class AppWindow(object):
                     self.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    self.ship['text'] = util_ships.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
@@ -887,11 +913,12 @@ class AppWindow(object):
 
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
 
+                # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
                     ship_text = monitor.state['ShipName']
 
                 else:
-                    ship_text = companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    ship_text = util_ships.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
 
                 if not ship_text:
                     ship_text = ''
