@@ -16,6 +16,17 @@ from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
 
+# Have this as early as possible for people running EDMarketConnector.exe
+# from cmd.exe or a bat file or similar.  Else they might not be in the correct
+# place for things like config.py reading .gitversion
+if getattr(sys, 'frozen', False):
+    # Under py2exe sys.path[0] is the executable name
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
+        # Allow executable to be invoked from any cwd
+        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
+        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
+
 from constants import applongname, appname, protocolhandler_redirect
 
 # config will now cause an appname logger to be set up, so we need the
@@ -235,14 +246,6 @@ if TYPE_CHECKING:
     def _(x: str) -> str:
         """Fake the l10n translation functions for typing."""
         return x
-
-if getattr(sys, 'frozen', False):
-    # Under py2exe sys.path[0] is the executable name
-    if platform == 'win32':
-        chdir(dirname(sys.path[0]))
-        # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
 
 import tkinter as tk
 import tkinter.filedialog
