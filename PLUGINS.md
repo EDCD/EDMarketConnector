@@ -63,6 +63,9 @@ breaking with future code changes.**
 `from companion import category_map` - Or any of the other static data
 contained therein.   NB: There's a plan to move such to a `data` module.
 
+`from util_ships import ship_map` - A mapping of symbolic to English 
+readable names for ships.
+
 `import plug` - For using `plug.show_error()` and accessing the flags
 for `dashboard_entry()` to be useful (see example below).  Relying on anything
 else isn't supported.
