@@ -305,8 +305,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             for line in loghandle:
                 try:
-                    if b'"event":"Location"' in line:
-                        logger.trace('"Location" event in the past at startup')
+                    # if b'"event":"Location"' in line:
+                    #     logger.trace('"Location" event in the past at startup')
 
                     self.parse_entry(line)  # Some events are of interest even in the past
 
@@ -397,8 +397,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         logger.info("We're not meant to be running, exiting...")
                         return  # Terminate
 
-                    if b'"event":"Location"' in line:
-                        logger.trace('Found "Location" event, adding to event_queue')
+                    # if b'"event":"Location"' in line:
+                    #     logger.trace('Found "Location" event, adding to event_queue')
 
                     self.event_queue.put(line)
 
@@ -645,8 +645,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
-                    if event_type == 'Location':
-                        logger.trace('"Location" event')
+                    # if event_type == 'Location':
+                    #     logger.trace('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
@@ -988,8 +988,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # logger.trace('event_queue NOT empty')
         entry = self.parse_entry(self.event_queue.get_nowait())
 
-        if entry['event'] == 'Location':
-            logger.trace('"Location" event')
+        # if entry['event'] == 'Location':
+        #     logger.trace('"Location" event')
 
         if not self.live and entry['event'] not in (None, 'Fileheader'):
             # Game not running locally, but Journal has been updated
@@ -1017,8 +1017,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     ('SystemAddress', self.systemaddress),
                 ])
 
-            if entry['event'] == 'Location':
-                logger.trace('Appending "Location" event to event_queue')
+            # if entry['event'] == 'Location':
+            #     logger.trace('Appending "Location" event to event_queue')
 
             self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
