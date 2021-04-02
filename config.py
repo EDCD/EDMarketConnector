@@ -134,6 +134,7 @@ def appversion() -> semantic_version.Version:
     """
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
+        # Yes, .parent because if frozen we're inside library.zip
         with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
             shorthash = gitv.read()
 
