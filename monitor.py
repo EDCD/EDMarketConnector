@@ -1,6 +1,7 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
+import queue
 import re
 import threading
 from calendar import timegm
@@ -78,7 +79,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.observer: Optional['Observer'] = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
         self.thread: Optional[threading.Thread] = None
-        self.event_queue: List = []  # For communicating journal entries back to main thread
+        # For communicating journal entries back to main thread
+        self.event_queue: queue.Queue = queue.Queue(maxsize=0)
 
         # On startup we might be:
         # 1) Looking at an old journal file because the game isn't running or the user has exited to the main menu.
@@ -303,8 +305,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             for line in loghandle:
                 try:
-                    if b'"event":"Location"' in line:
-                        logger.trace('"Location" event in the past at startup')
+                    # if b'"event":"Location"' in line:
+                    #     logger.trace('"Location" event in the past at startup')
 
                     self.parse_entry(line)  # Some events are of interest even in the past
 
@@ -342,11 +344,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     entry['StationType'] = self.stationtype
                     entry['MarketID'] = self.station_marketid
 
-                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
+                self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
             else:
                 # Generate null event to update the display (with possibly out-of-date info)
-                self.event_queue.append(None)
+                self.event_queue.put(None)
                 self.live = False
 
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
@@ -395,13 +397,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         logger.info("We're not meant to be running, exiting...")
                         return  # Terminate
 
-                    if b'"event":"Location"' in line:
-                        logger.trace('Found "Location" event, appending to event_queue')
+                    # if b'"event":"Location"' in line:
+                    #     logger.trace('Found "Location" event, adding to event_queue')
 
-                    self.event_queue.append(line)
+                    self.event_queue.put(line)
 
-                if self.event_queue:
+                if not self.event_queue.empty():
                     if not config.shutting_down:
+                        # logger.trace('Sending <<JournalEvent>>')
                         self.root.event_generate('<<JournalEvent>>', when="tail")
 
                 log_pos = loghandle.tell()
@@ -420,11 +423,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if not self.game_running():
                     logger.info('Detected exit from game, synthesising ShutDown event')
                     timestamp = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
-                    self.event_queue.append(
+                    self.event_queue.put(
                         f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
                     )
 
                     if not config.shutting_down:
+                        # logger.trace('Sending <<JournalEvent>>')
                         self.root.event_generate('<<JournalEvent>>', when="tail")
 
                     self.game_was_running = False
@@ -482,6 +486,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Raw':          defaultdict(int),
                     'Manufactured': defaultdict(int),
                     'Encoded':      defaultdict(int),
+                    'Component':    defaultdict(int),
                     'Engineers':    {},
                     'Rank':         {},
                     'Reputation':   {},
@@ -640,8 +645,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
-                    if event_type == 'Location':
-                        logger.trace('"Location" event')
+                    # if event_type == 'Location':
+                    #     logger.trace('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
@@ -975,54 +980,55 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug('Called whilst self.thread is None, returning')
             return None
 
-        if not self.event_queue:
-            logger.trace('Called with no event_queue')
+        # logger.trace('Begin')
+        if self.event_queue.empty() and self.game_running():
+            logger.error('event_queue is empty whilst game_running, this should not happen, returning')
             return None
 
-        else:
-            entry = self.parse_entry(self.event_queue.pop(0))
+        # logger.trace('event_queue NOT empty')
+        entry = self.parse_entry(self.event_queue.get_nowait())
 
-            if entry['event'] == 'Location':
-                logger.trace('"Location" event')
+        # if entry['event'] == 'Location':
+        #     logger.trace('"Location" event')
 
-            if not self.live and entry['event'] not in (None, 'Fileheader'):
-                # Game not running locally, but Journal has been updated
-                self.live = True
-                if self.station:
-                    entry = OrderedDict([
-                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                        ('event', 'StartUp'),
-                        ('Docked', True),
-                        ('MarketID', self.station_marketid),
-                        ('StationName', self.station),
-                        ('StationType', self.stationtype),
-                        ('StarSystem', self.system),
-                        ('StarPos', self.coordinates),
-                        ('SystemAddress', self.systemaddress),
-                    ])
+        if not self.live and entry['event'] not in (None, 'Fileheader'):
+            # Game not running locally, but Journal has been updated
+            self.live = True
+            if self.station:
+                entry = OrderedDict([
+                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                    ('event', 'StartUp'),
+                    ('Docked', True),
+                    ('MarketID', self.station_marketid),
+                    ('StationName', self.station),
+                    ('StationType', self.stationtype),
+                    ('StarSystem', self.system),
+                    ('StarPos', self.coordinates),
+                    ('SystemAddress', self.systemaddress),
+                ])
 
-                else:
-                    entry = OrderedDict([
-                        ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                        ('event', 'StartUp'),
-                        ('Docked', False),
-                        ('StarSystem', self.system),
-                        ('StarPos', self.coordinates),
-                        ('SystemAddress', self.systemaddress),
-                    ])
+            else:
+                entry = OrderedDict([
+                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
+                    ('event', 'StartUp'),
+                    ('Docked', False),
+                    ('StarSystem', self.system),
+                    ('StarPos', self.coordinates),
+                    ('SystemAddress', self.systemaddress),
+                ])
 
-                if entry['event'] == 'Location':
-                    logger.trace('Appending "Location" event to event_queue')
+            # if entry['event'] == 'Location':
+            #     logger.trace('Appending "Location" event to event_queue')
 
-                self.event_queue.append(json.dumps(entry, separators=(', ', ':')))
+            self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
-            elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
-                ts = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
-                self.event_queue.append(
-                    f'{{ "timestamp":"{ts}", "event":"ShutDown" }}'
-                )
+        elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
+            ts = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+            self.event_queue.put(
+                f'{{ "timestamp":"{ts}", "event":"ShutDown" }}'
+            )
 
-            return entry
+        return entry
 
     def game_running(self) -> bool:  # noqa: CCR001
         """
