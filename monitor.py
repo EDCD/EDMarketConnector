@@ -1157,14 +1157,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
             try:
-                with open(join(config.get('outdir'), oldfiles[-1]), 'r', encoding='utf-8') as h:  # type: ignore
+                with open(join(config.get_str('outdir'), oldfiles[-1]), 'r', encoding='utf-8') as h:  # type: ignore
                     if h.read() == string:
                         return  # same as last time - don't write
 
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(join(config.get('outdir'), oldfiles[-1]), 'r') as h:  # type: ignore
+                    with open(join(config.get_str('outdir'), oldfiles[-1]), 'r') as h:  # type: ignore
                         if h.read() == string:
                             return  # same as last time - don't write
 
