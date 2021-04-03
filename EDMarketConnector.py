@@ -779,8 +779,9 @@ class AppWindow(object):
                 self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
-                  or (data['commander'].get('docked')
-                      and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
+                  or (data['commander'].get('docked') or monitor.state['OnFoot']
+                      and not data.get('lastStarport', {}).get('name'))
+                  or (monitor.state['OnFoot'] and data['lastStarport']['name'] != monitor.station)):
                 self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
