@@ -60,15 +60,11 @@ breaking with future code changes.**
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
-`from companion import category_map` - Or any of the other static data
-contained therein.   NB: There's a plan to move such to a `data` module.
+`import edmc_data` (or specific 'from' imports) - This contains various static
+data that used to be in other files.  You should **not** now import anything
+from the original files unless specified as allowed in this section.
 
-`from util_ships import ship_map` - A mapping of symbolic to English 
-readable names for ships.
-
-`import plug` - For using `plug.show_error()` and accessing the flags
-for `dashboard_entry()` to be useful (see example below).  Relying on anything
-else isn't supported.
+`import plug` - For using `plug.show_error()` only.
 
 `from monitor import game_running` - in case a plugin needs to know if we
  think the game is running.  *NB: This is a function, and should be called as

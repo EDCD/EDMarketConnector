@@ -1,348 +1,35 @@
-from collections import OrderedDict
 import pickle
-from os.path import join
 import time
+from collections import OrderedDict
+from os.path import join
 
-import util_ships
 from config import config
-
-
-# Map API module names to in-game names
-
-armour_map = OrderedDict([
-    ('grade1',   'Lightweight Alloy'),
-    ('grade2',   'Reinforced Alloy'),
-    ('grade3',   'Military Grade Composite'),
-    ('mirrored', 'Mirrored Surface Composite'),
-    ('reactive', 'Reactive Surface Composite'),
-])
-
-weapon_map = {
-    'advancedtorppylon'              : 'Torpedo Pylon',
-    'atdumbfiremissile'              : 'AX Missile Rack',
-    'atmulticannon'                  : 'AX Multi-Cannon',
-    'basicmissilerack'               : 'Seeker Missile Rack',
-    'beamlaser'                      : 'Beam Laser',
-    ('beamlaser','heat')             : 'Retributor Beam Laser',
-    'cannon'                         : 'Cannon',
-    'causticmissile'                 : 'Enzyme Missile Rack',
-    'drunkmissilerack'               : 'Pack-Hound Missile Rack',
-    'dumbfiremissilerack'            : 'Missile Rack',
-    ('dumbfiremissilerack', 'advanced') : 'Advanced Missile Rack',
-    ('dumbfiremissilerack', 'lasso') : 'Rocket Propelled FSD Disruptor',
-    'flakmortar'                     : 'Remote Release Flak Launcher',
-    'flechettelauncher'              : 'Remote Release Flechette Launcher',
-    'guardian_gausscannon'           : 'Guardian Gauss Cannon',
-    'guardian_plasmalauncher'        : 'Guardian Plasma Charger',
-    'guardian_shardcannon'           : 'Guardian Shard Cannon',
-    'minelauncher'                   : 'Mine Launcher',
-    ('minelauncher','impulse')       : 'Shock Mine Launcher',
-    'mining_abrblstr'                : 'Abrasion Blaster',
-    'mining_seismchrgwarhd'          : 'Seismic Charge Launcher',
-    'mining_subsurfdispmisle'        : 'Sub-Surface Displacement Missile',
-    'mininglaser'                    : 'Mining Laser',
-    ('mininglaser','advanced')       : 'Mining Lance Beam Laser',
-    'multicannon'                    : 'Multi-Cannon',
-    ('multicannon','advanced')       : 'Advanced Multi-Cannon',
-    ('multicannon','strong')         : 'Enforcer Cannon',
-    'plasmaaccelerator'              : 'Plasma Accelerator',
-    ('plasmaaccelerator','advanced') : 'Advanced Plasma Accelerator',
-    'plasmashockcannon'              : 'Shock Cannon',
-    'pulselaser'                     : 'Pulse Laser',
-    ('pulselaser','disruptor')       : 'Pulse Disruptor Laser',
-    'pulselaserburst'                : 'Burst Laser',
-    ('pulselaserburst','scatter')    : 'Cytoscrambler Burst Laser',
-    'railgun'                        : 'Rail Gun',
-    ('railgun','burst')              : 'Imperial Hammer Rail Gun',
-    'slugshot'                       : 'Fragment Cannon',
-    ('slugshot','range')             : 'Pacifier Frag-Cannon',
-}
-
-missiletype_map = {
-    'advancedtorppylon'   : 'Seeker',
-    'atdumbfiremissile'   : 'Dumbfire',
-    'basicmissilerack'    : 'Seeker',
-    'causticmissile'      : 'Dumbfire',
-    'drunkmissilerack'    : 'Swarm',
-    'dumbfiremissilerack' : 'Dumbfire',
-    'mining_subsurfdispmisle' : 'Seeker',
-    'mining_seismchrgwarhd'   : 'Seeker',
-}
-
-weaponmount_map = {
-    'fixed'  : 'Fixed',
-    'gimbal' : 'Gimballed',
-    'turret' : 'Turreted',
-}
-
-weaponclass_map = {
-    'tiny'   : '0',
-    'small'  : '1',
-    'smallfree' : '1',
-    'medium' : '2',
-    'large'  : '3',
-    'huge'   : '4',
-}
-
-# There's no discernable pattern for weapon ratings, so here's a lookup table
-weaponrating_map = {
-    'hpt_advancedtorppylon_fixed_small' : 'I',
-    'hpt_advancedtorppylon_fixed_medium': 'I',
-    'hpt_advancedtorppylon_fixed_large' : 'I',
-    'hpt_atdumbfiremissile_fixed_medium': 'B',
-    'hpt_atdumbfiremissile_fixed_large' : 'A',
-    'hpt_atdumbfiremissile_turret_medium': 'B',
-    'hpt_atdumbfiremissile_turret_large' : 'A',
-    'hpt_atmulticannon_fixed_medium'    : 'E',
-    'hpt_atmulticannon_fixed_large'     : 'C',
-    'hpt_atmulticannon_turret_medium'   : 'F',
-    'hpt_atmulticannon_turret_large'    : 'E',
-    'hpt_basicmissilerack_fixed_small'  : 'B',
-    'hpt_basicmissilerack_fixed_medium' : 'B',
-    'hpt_basicmissilerack_fixed_large'  : 'A',
-    'hpt_beamlaser_fixed_small'         : 'E',
-    'hpt_beamlaser_fixed_medium'        : 'D',
-    'hpt_beamlaser_fixed_large': 'C',
-    'hpt_beamlaser_fixed_huge': 'A',
-    'hpt_beamlaser_gimbal_small': 'E',
-    'hpt_beamlaser_gimbal_medium': 'D',
-    'hpt_beamlaser_gimbal_large': 'C',
-    'hpt_beamlaser_gimbal_huge': 'A',
-    'hpt_beamlaser_turret_small': 'F',
-    'hpt_beamlaser_turret_medium': 'E',
-    'hpt_beamlaser_turret_large': 'D',
-    'hpt_cannon_fixed_small': 'D',
-    'hpt_cannon_fixed_medium': 'D',
-    'hpt_cannon_fixed_large': 'C',
-    'hpt_cannon_fixed_huge': 'B',
-    'hpt_cannon_gimbal_small': 'E',
-    'hpt_cannon_gimbal_medium': 'D',
-    'hpt_cannon_gimbal_large': 'C',
-    'hpt_cannon_gimbal_huge': 'B',
-    'hpt_cannon_turret_small': 'F',
-    'hpt_cannon_turret_medium': 'E',
-    'hpt_cannon_turret_large': 'D',
-    'hpt_causticmissile_fixed_medium': 'B',
-    'hpt_drunkmissilerack_fixed_medium': 'B',
-    'hpt_dumbfiremissilerack_fixed_small': 'B',
-    'hpt_dumbfiremissilerack_fixed_medium': 'B',
-    'hpt_dumbfiremissilerack_fixed_large': 'A',
-    'hpt_flakmortar_fixed_medium': 'B',
-    'hpt_flakmortar_turret_medium': 'B',
-    'hpt_flechettelauncher_fixed_medium': 'B',
-    'hpt_flechettelauncher_turret_medium': 'B',
-    'hpt_guardian_gausscannon_fixed_small': 'D',
-    'hpt_guardian_gausscannon_fixed_medium': 'B',
-    'hpt_guardian_plasmalauncher_fixed_small': 'D',
-    'hpt_guardian_plasmalauncher_fixed_medium': 'B',
-    'hpt_guardian_plasmalauncher_fixed_large': 'C',
-    'hpt_guardian_plasmalauncher_turret_small': 'F',
-    'hpt_guardian_plasmalauncher_turret_medium': 'E',
-    'hpt_guardian_plasmalauncher_turret_large': 'D',
-    'hpt_guardian_shardcannon_fixed_small': 'D',
-    'hpt_guardian_shardcannon_fixed_medium': 'A',
-    'hpt_guardian_shardcannon_fixed_large': 'C',
-    'hpt_guardian_shardcannon_turret_small': 'F',
-    'hpt_guardian_shardcannon_turret_medium': 'D',
-    'hpt_guardian_shardcannon_turret_large': 'D',
-    'hpt_minelauncher_fixed_small': 'I',
-    'hpt_minelauncher_fixed_medium': 'I',
-    'hpt_mining_abrblstr_fixed_small' : 'D',
-    'hpt_mining_abrblstr_turret_small' : 'D',
-    'hpt_mining_seismchrgwarhd_fixed_medium' : 'B',
-    'hpt_mining_seismchrgwarhd_turret_medium' : 'B',
-    'hpt_mining_subsurfdispmisle_fixed_small' : 'B',
-    'hpt_mining_subsurfdispmisle_fixed_medium' : 'B',
-    'hpt_mining_subsurfdispmisle_turret_small' : 'B',
-    'hpt_mining_subsurfdispmisle_turret_medium' : 'B',
-    'hpt_mininglaser_fixed_small': 'D',
-    'hpt_mininglaser_fixed_medium': 'D',
-    'hpt_mininglaser_turret_small': 'D',
-    'hpt_mininglaser_turret_medium': 'D',
-    'hpt_multicannon_fixed_small': 'F',
-    'hpt_multicannon_fixed_medium': 'E',
-    'hpt_multicannon_fixed_large': 'C',
-    'hpt_multicannon_fixed_huge': 'A',
-    'hpt_multicannon_gimbal_small': 'G',
-    'hpt_multicannon_gimbal_medium': 'F',
-    'hpt_multicannon_gimbal_large': 'C',
-    'hpt_multicannon_gimbal_huge': 'A',
-    'hpt_multicannon_turret_small': 'G',
-    'hpt_multicannon_turret_medium': 'F',
-    'hpt_multicannon_turret_large': 'E',
-    'hpt_plasmaaccelerator_fixed_medium': 'C',
-    'hpt_plasmaaccelerator_fixed_large': 'B',
-    'hpt_plasmaaccelerator_fixed_huge': 'A',
-    'hpt_plasmashockcannon_fixed_small': 'D',
-    'hpt_plasmashockcannon_fixed_medium': 'D',
-    'hpt_plasmashockcannon_fixed_large': 'C',
-    'hpt_plasmashockcannon_gimbal_small': 'E',
-    'hpt_plasmashockcannon_gimbal_medium': 'D',
-    'hpt_plasmashockcannon_gimbal_large': 'C',
-    'hpt_plasmashockcannon_turret_small': 'F',
-    'hpt_plasmashockcannon_turret_medium': 'E',
-    'hpt_plasmashockcannon_turret_large': 'D',
-    'hpt_pulselaser_fixed_small': 'F',
-    'hpt_pulselaser_fixed_smallfree': 'F',
-    'hpt_pulselaser_fixed_medium': 'E',
-    'hpt_pulselaser_fixed_large': 'D',
-    'hpt_pulselaser_fixed_huge': 'A',
-    'hpt_pulselaser_gimbal_small': 'G',
-    'hpt_pulselaser_gimbal_medium': 'F',
-    'hpt_pulselaser_gimbal_large': 'E',
-    'hpt_pulselaser_gimbal_huge': 'A',
-    'hpt_pulselaser_turret_small': 'G',
-    'hpt_pulselaser_turret_medium': 'F',
-    'hpt_pulselaser_turret_large': 'F',
-    'hpt_pulselaserburst_fixed_small': 'F',
-    'hpt_pulselaserburst_fixed_medium': 'E',
-    'hpt_pulselaserburst_fixed_large': 'D',
-    'hpt_pulselaserburst_fixed_huge': 'E',
-    'hpt_pulselaserburst_gimbal_small': 'G',
-    'hpt_pulselaserburst_gimbal_medium': 'F',
-    'hpt_pulselaserburst_gimbal_large': 'E',
-    'hpt_pulselaserburst_gimbal_huge': 'E',
-    'hpt_pulselaserburst_turret_small': 'G',
-    'hpt_pulselaserburst_turret_medium': 'F',
-    'hpt_pulselaserburst_turret_large': 'E',
-    'hpt_railgun_fixed_small': 'D',
-    'hpt_railgun_fixed_medium': 'B',
-    'hpt_slugshot_fixed_small': 'E',
-    'hpt_slugshot_fixed_medium': 'A',
-    'hpt_slugshot_fixed_large': 'C',
-    'hpt_slugshot_gimbal_small': 'E',
-    'hpt_slugshot_gimbal_medium': 'D',
-    'hpt_slugshot_gimbal_large': 'C',
-    'hpt_slugshot_turret_small': 'E',
-    'hpt_slugshot_turret_medium': 'D',
-    'hpt_slugshot_turret_large': 'C',
-}
-
-# Old standard weapon variants
-weaponoldvariant_map = {
-    'f'  : 'Focussed',
-    'hi' : 'High Impact',
-    'lh' : 'Low Heat',
-    'oc' : 'Overcharged',
-    'ss' : 'Scatter Spray',
-}
-
-countermeasure_map = {
-    'antiunknownshutdown'      : ('Shutdown Field Neutraliser', 'F'),
-    'chafflauncher'            : ('Chaff Launcher', 'I'),
-    'electroniccountermeasure' : ('Electronic Countermeasure', 'F'),
-    'heatsinklauncher'         : ('Heat Sink Launcher', 'I'),
-    'plasmapointdefence'       : ('Point Defence', 'I'),
-    'xenoscanner'              : ('Xeno Scanner', 'E'),
-}
-
-utility_map = {
-    'cargoscanner'             : 'Cargo Scanner',
-    'cloudscanner'             : 'Frame Shift Wake Scanner',
-    'crimescanner'             : 'Kill Warrant Scanner',
-    'mrascanner'               : 'Pulse Wave Analyser',
-    'shieldbooster'            : 'Shield Booster',
-}
-
-cabin_map = {
-    '0': 'Prisoner Cells',
-    '1': 'Economy Class Passenger Cabin',
-    '2': 'Business Class Passenger Cabin',
-    '3': 'First Class Passenger Cabin',
-    '4': 'Luxury Class Passenger Cabin',
-    '5': 'Passenger Cabin',	# not seen
-}
-
-rating_map = {
-    '1': 'E',
-    '2': 'D',
-    '3': 'C',
-    '4': 'B',
-    '5': 'A',
-}
-
-# Ratings are weird for the following
-
-corrosion_rating_map = {
-    '1': 'E',
-    '2': 'F',
-}
-
-planet_rating_map = {
-    '1': 'H',
-    '2': 'G',
-}
-
-fighter_rating_map = {
-    '1': 'D',
-}
-
-misc_internal_map = {
-    ('detailedsurfacescanner',      'tiny')         : ('Detailed Surface Scanner', 'I'),
-    ('dockingcomputer',             'advanced')     : ('Advanced Docking Computer', 'E'),
-    ('dockingcomputer',             'standard')     : ('Standard Docking Computer', 'E'),
-    'planetapproachsuite'                           : ('Planetary Approach Suite', 'I'),
-    ('stellarbodydiscoveryscanner', 'standard')     : ('Basic Discovery Scanner', 'E'),
-    ('stellarbodydiscoveryscanner', 'intermediate') : ('Intermediate Discovery Scanner', 'D'),
-    ('stellarbodydiscoveryscanner', 'advanced')     : ('Advanced Discovery Scanner', 'C'),
-    'supercruiseassist'                             : ('Supercruise Assist', 'E'),
-}
-
-standard_map = {
-    # 'armour'                   : handled separately
-    'engine'                     : 'Thrusters',
-    ('engine','fast')            : 'Enhanced Performance Thrusters',
-    'fueltank'                   : 'Fuel Tank',
-    'guardianpowerdistributor'   : 'Guardian Hybrid Power Distributor',
-    'guardianpowerplant'         : 'Guardian Hybrid Power Plant',
-    'hyperdrive'                 : 'Frame Shift Drive',
-    'lifesupport'                : 'Life Support',
-    # 'planetapproachsuite'      : handled separately
-    'powerdistributor'           : 'Power Distributor',
-    'powerplant'                 : 'Power Plant',
-    'sensors'                    : 'Sensors',
-}
-
-internal_map = {
-    'buggybay'                   : 'Planetary Vehicle Hangar',
-    'cargorack'                  : 'Cargo Rack',
-    'collection'                 : 'Collector Limpet Controller',
-    'corrosionproofcargorack'    : 'Corrosion Resistant Cargo Rack',
-    'decontamination'            : 'Decontamination Limpet Controller',
-    'fighterbay'                 : 'Fighter Hangar',
-    'fsdinterdictor'             : 'Frame Shift Drive Interdictor',
-    'fuelscoop'                  : 'Fuel Scoop',
-    'fueltransfer'               : 'Fuel Transfer Limpet Controller',
-    'guardianfsdbooster'         : 'Guardian FSD Booster',
-    'guardianhullreinforcement'  : 'Guardian Hull Reinforcement',
-    'guardianmodulereinforcement': 'Guardian Module Reinforcement',
-    'guardianshieldreinforcement': 'Guardian Shield Reinforcement',
-    'hullreinforcement'          : 'Hull Reinforcement Package',
-    'metaalloyhullreinforcement' : 'Meta Alloy Hull Reinforcement',
-    'modulereinforcement'        : 'Module Reinforcement Package',
-    'passengercabin'             : 'Passenger Cabin',
-    'prospector'                 : 'Prospector Limpet Controller',
-    'refinery'                   : 'Refinery',
-    'recon'                      : 'Recon Limpet Controller',
-    'repair'                     : 'Repair Limpet Controller',
-    'repairer'                   : 'Auto Field-Maintenance Unit',
-    'resourcesiphon'             : 'Hatch Breaker Limpet Controller',
-    'shieldcellbank'             : 'Shield Cell Bank',
-    'shieldgenerator'            : 'Shield Generator',
-    ('shieldgenerator','fast')   : 'Bi-Weave Shield Generator',
-    ('shieldgenerator','strong') : 'Prismatic Shield Generator',
-    'unkvesselresearch'          : 'Research Limpet Controller',
-}
-
+from edmc_data import outfitting_armour_map as armour_map
+from edmc_data import outfitting_cabin_map as cabin_map
+from edmc_data import outfitting_corrosion_rating_map as corrosion_rating_map
+from edmc_data import outfitting_countermeasure_map as countermeasure_map
+from edmc_data import outfitting_fighter_rating_map as fighter_rating_map
+from edmc_data import outfitting_internal_map as internal_map
+from edmc_data import outfitting_misc_internal_map as misc_internal_map
+from edmc_data import outfitting_missiletype_map as missiletype_map
+from edmc_data import outfitting_planet_rating_map as planet_rating_map
+from edmc_data import outfitting_rating_map as rating_map
+from edmc_data import outfitting_standard_map as standard_map
+from edmc_data import outfitting_utility_map as utility_map
+from edmc_data import outfitting_weapon_map as weapon_map
+from edmc_data import outfitting_weaponclass_map as weaponclass_map
+from edmc_data import outfitting_weaponmount_map as weaponmount_map
+from edmc_data import outfitting_weaponoldvariant_map as weaponoldvariant_map
+from edmc_data import outfitting_weaponrating_map as weaponrating_map
+from edmc_data import ship_name_map
 
 # Module mass, FSD data etc
 moduledata = OrderedDict()
 
-
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
 # English langauge game. For fitted modules, dict also includes { enabled, priority }.
-# ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
+# ship_name_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
 #
 # Returns None if the module is user-specific (i.e. decal, paintjob, kit) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
@@ -521,7 +208,7 @@ def export(data, filename):
     h.write(header)
     for v in list(data['lastStarport'].get('modules', {}).values()):
         try:
-            m = lookup(v, util_ships.ship_map)
+            m = lookup(v, ship_name_map)
             if m:
                 h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], data['timestamp']))
         except AssertionError as e:
