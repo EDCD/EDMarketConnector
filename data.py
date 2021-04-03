@@ -25,8 +25,26 @@ companion_category_map = {
 # Map Coriolis's names to names displayed in the in-game shipyard.
 coriolis_ship_map = {
     'Cobra Mk III': 'Cobra MkIII',
-    'Cobra Mk IV' : 'Cobra MkIV',
-    'Krait Mk II' : 'Krait MkII',
-    'Viper'       : 'Viper MkIII',
-    'Viper Mk IV' : 'Viper MkIV',
+    'Cobra Mk IV':  'Cobra MkIV',
+    'Krait Mk II':  'Krait MkII',
+    'Viper':        'Viper MkIII',
+    'Viper Mk IV':  'Viper MkIV',
+}
+
+# Map API slot names to E:D Shipyard slot names
+edshipyard_slot_map = {
+    'hugehardpoint':     'H',
+    'largehardpoint':    'L',
+    'mediumhardpoint':   'M',
+    'smallhardpoint':    'S',
+    'tinyhardpoint':     'U',
+    'armour':            'BH',
+    'powerplant':        'RB',
+    'mainengines':       'TM',
+    'frameshiftdrive':   'FH',
+    'lifesupport':       'EC',
+    'powerdistributor':  'PC',
+    'radar':             'SS',
+    'fueltank':          'FS',
+    'military':          'MC',
 }

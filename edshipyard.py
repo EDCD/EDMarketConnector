@@ -8,42 +8,12 @@ import re
 import time
 
 from config import config
+from data import edshipyard_slot_map as slot_map
 import outfitting
 import util_ships
 
 from typing import Dict, Union, List
 __Module = Dict[str, Union[str, List[str]]]
-
-# Map API ship names to E:D Shipyard ship names
-ship_map = util_ships.ship_map.copy()
-
-ship_map.update(
-    {
-        'cobramkiii': 'Cobra Mk III',
-        'cobramkiv' : 'Cobra Mk IV',
-        'viper'     : 'Viper',
-        'viper_mkiv': 'Viper Mk IV',
-    }
-)
-
-
-# Map API slot names to E:D Shipyard slot names
-slot_map = {
-    'hugehardpoint'    : 'H',
-    'largehardpoint'   : 'L',
-    'mediumhardpoint'  : 'M',
-    'smallhardpoint'   : 'S',
-    'tinyhardpoint'    : 'U',
-    'armour'           : 'BH',
-    'powerplant'       : 'RB',
-    'mainengines'      : 'TM',
-    'frameshiftdrive'  : 'FH',
-    'lifesupport'      : 'EC',
-    'powerdistributor' : 'PC',
-    'radar'            : 'SS',
-    'fueltank'         : 'FS',
-    'military'         : 'MC',
-}
 
 
 # Ship masses
