@@ -544,7 +544,7 @@ class Session(object):
 
         self.retrying = False
         if 'timestamp' not in data:
-            logger.trace('timestamp not in data, adding from response headers')
+            # logger.trace('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
         return data
