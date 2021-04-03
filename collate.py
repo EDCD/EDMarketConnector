@@ -72,7 +72,7 @@ def addcommodities(data):
     if isfile(commodityfile):
         __make_backup(commodityfile)
 
-    with open(commodityfile, 'w') as csvfile:
+    with open(commodityfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
         writer.writeheader()
 
