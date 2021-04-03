@@ -6,7 +6,7 @@ import hashlib
 import time
 
 from config import config
-from data import commodity_bracketmap as bracketmap
+from edmc_data import commodity_bracketmap as bracketmap
 
 
 # DEFAULT means semi-colon separation

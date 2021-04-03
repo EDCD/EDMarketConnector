@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 import requests
 
 from config import appname, appversion, config
-from data import companion_category_map as category_map
+from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from protocol import protocolhandler

@@ -1,20 +1,23 @@
 # Export ship loadout in E:D Shipyard plain text format
 
-import pickle
-from collections import defaultdict
 import os
-from os.path import join
+import pickle
 import re
 import time
+from collections import defaultdict
+from os.path import join
+from typing import Dict, List, Union
 
-from config import config
-from data import edshipyard_slot_map as slot_map
 import outfitting
 import util_ships
+from config import config
+from edmc_data import edshipyard_slot_map as slot_map
+from edmc_data import ship_name_map
 
-from typing import Dict, Union, List
 __Module = Dict[str, Union[str, List[str]]]
 
+# Map API ship names to ED Shipyard names
+ship_map = ship_name_map.copy()
 
 # Ship masses
 # TODO: prefer something other than pickle for this storage (dev readability, security)
@@ -142,11 +145,11 @@ def export(data, filename=None):
     string += '---\nCargo : {} T\nFuel  : {} T\n'.format(cargo, fuel)
 
     # Add mass and range
-    assert data['ship']['name'].lower() in util_ships.ship_map, data['ship']['name']
-    assert util_ships.ship_map[data['ship']['name'].lower()] in ships, util_ships.ship_map[data['ship']['name'].lower()]
+    assert data['ship']['name'].lower() in ship_name_map, data['ship']['name']
+    assert ship_name_map[data['ship']['name'].lower()] in ships, ship_name_map[data['ship']['name'].lower()]
 
     try:
-        mass += ships[util_ships.ship_map[data['ship']['name'].lower()]]['hullMass']
+        mass += ships[ship_name_map[data['ship']['name'].lower()]]['hullMass']
         string += 'Mass  : {:.2f} T empty\n        {:.2f} T full\n'.format(mass, mass + fuel + cargo)
 
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']

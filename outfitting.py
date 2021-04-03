@@ -1,28 +1,27 @@
-from collections import OrderedDict
 import pickle
-from os.path import join
 import time
+from collections import OrderedDict
+from os.path import join
 
-import util_ships
 from config import config
-from data import outfitting_armour_map as armour_map
-from data import outfitting_weapon_map as weapon_map
-from data import outfitting_missiletype_map as missiletype_map
-from data import outfitting_weaponmount_map as weaponmount_map
-from data import outfitting_weaponclass_map as weaponclass_map
-from data import outfitting_weaponrating_map as weaponrating_map
-from data import outfitting_weaponoldvariant_map as weaponoldvariant_map
-from data import outfitting_countermeasure_map as countermeasure_map
-from data import outfitting_utility_map as utility_map
-from data import outfitting_cabin_map as cabin_map
-from data import outfitting_rating_map as rating_map
-from data import outfitting_corrosion_rating_map as corrosion_rating_map
-from data import outfitting_planet_rating_map as planet_rating_map
-from data import outfitting_fighter_rating_map as fighter_rating_map
-from data import outfitting_misc_internal_map as misc_internal_map
-from data import outfitting_standard_map as standard_map
-from data import outfitting_internal_map as internal_map
-
+from edmc_data import outfitting_armour_map as armour_map
+from edmc_data import outfitting_cabin_map as cabin_map
+from edmc_data import outfitting_corrosion_rating_map as corrosion_rating_map
+from edmc_data import outfitting_countermeasure_map as countermeasure_map
+from edmc_data import outfitting_fighter_rating_map as fighter_rating_map
+from edmc_data import outfitting_internal_map as internal_map
+from edmc_data import outfitting_misc_internal_map as misc_internal_map
+from edmc_data import outfitting_missiletype_map as missiletype_map
+from edmc_data import outfitting_planet_rating_map as planet_rating_map
+from edmc_data import outfitting_rating_map as rating_map
+from edmc_data import outfitting_standard_map as standard_map
+from edmc_data import outfitting_utility_map as utility_map
+from edmc_data import outfitting_weapon_map as weapon_map
+from edmc_data import outfitting_weaponclass_map as weaponclass_map
+from edmc_data import outfitting_weaponmount_map as weaponmount_map
+from edmc_data import outfitting_weaponoldvariant_map as weaponoldvariant_map
+from edmc_data import outfitting_weaponrating_map as weaponrating_map
+from edmc_data import ship_name_map
 
 # Module mass, FSD data etc
 moduledata = OrderedDict()
@@ -30,7 +29,7 @@ moduledata = OrderedDict()
 # Given a module description from the Companion API returns a description of the module in the form of a
 # dict { category, name, [mount], [guidance], [ship], rating, class } using the same terms found in the
 # English langauge game. For fitted modules, dict also includes { enabled, priority }.
-# ship_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
+# ship_name_map tells us what ship names to use for Armour - i.e. EDDN schema names or in-game names.
 #
 # Returns None if the module is user-specific (i.e. decal, paintjob, kit) or PP-specific in station outfitting.
 # (Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer).
@@ -209,7 +208,7 @@ def export(data, filename):
     h.write(header)
     for v in list(data['lastStarport'].get('modules', {}).values()):
         try:
-            m = lookup(v, util_ships.ship_map)
+            m = lookup(v, ship_name_map)
             if m:
                 h.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (rowheader, m['category'], m['name'], m.get('mount',''), m.get('guidance',''), m.get('ship',''), m['class'], m['rating'], m['id'], data['timestamp']))
         except AssertionError as e:
