@@ -4,20 +4,15 @@
 #
 
 import csv
-import base64
-from collections import OrderedDict
-import pickle
 import json
+import pickle
 import subprocess
 import sys
+from collections import OrderedDict
 from traceback import print_exc
 
-from config import config
 import outfitting
-import companion
-import util_ships
-from data import coriolis_ship_map
-
+from edmc_data import coriolis_ship_map, ship_name_map
 
 if __name__ == "__main__":
 
@@ -32,7 +27,7 @@ if __name__ == "__main__":
     data = json.load(open('coriolis-data/dist/index.json'))
 
     # Symbolic name from in-game name
-    reverse_ship_map = {v: k for k, v in list(util_ships.ship_map.items())}
+    reverse_ship_map = {v: k for k, v in list(ship_name_map.items())}
 
     bulkheads = list(outfitting.armour_map.keys())
 
@@ -91,7 +86,7 @@ if __name__ == "__main__":
         reader = csv.DictReader(csvfile, restval='')
         for row in reader:
             try:
-                module = outfitting.lookup({ 'id': row['id'], 'name': row['symbol'] }, util_ships.ship_map)
+                module = outfitting.lookup({ 'id': row['id'], 'name': row['symbol'] }, ship_name_map)
             except:
                 print(row['symbol'])
                 print_exc()

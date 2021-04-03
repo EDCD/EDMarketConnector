@@ -265,9 +265,9 @@ import plug
 import prefs
 import stats
 import td
-import util_ships
 from commodity import COMMODITY_CSV
 from dashboard import dashboard
+from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -824,7 +824,7 @@ class AppWindow(object):
                     self.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = util_ships.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
@@ -928,7 +928,7 @@ class AppWindow(object):
                     ship_text = monitor.state['ShipName']
 
                 else:
-                    ship_text = util_ships.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    ship_text = ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
 
                 if not ship_text:
                     ship_text = ''

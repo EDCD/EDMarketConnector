@@ -11,7 +11,7 @@ import time
 
 from config import applongname, appversion, config
 
-# These are specific to Trade Dangerous, so don't move to data.py
+# These are specific to Trade Dangerous, so don't move to edmc_data.py
 demandbracketmap = { 0: '?',
                      1: 'L',
                      2: 'M',
