@@ -11,6 +11,7 @@ from os.path import isfile
 from traceback import print_exc
 
 import companion
+import data
 import outfitting
 import util_ships
 
@@ -54,13 +55,13 @@ def addcommodities(data):
         new = {
             'id'       : commodity['id'],
             'symbol'   : commodity['name'],
-            'category' : companion.category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'category' : data.companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
             'name'     : commodity.get('locName') or 'Limpets',
         }
 
         old = commodities.get(key)
 
-        if old and companion.category_map.get(commodity['categoryname'], True):
+        if old and data.companion_category_map.get(commodity['categoryname'], True):
             if new['symbol'] != old['symbol'] or new['name'] != old['name']:
                 raise ValueError('{}: {!r} != {!r}'.format(key, new, old))
 
