@@ -336,7 +336,7 @@ else:  # Linux / Run from source
             super().__init__()
             self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
             self.redirect = f'http://localhost:{self.httpd.server_port}/auth'
-            logger.trace(f'Web server listening on {self.redirect}')
+            logger.info(f'Web server listening on {self.redirect}')
             self.thread: Optional[threading.Thread] = None
 
         def start(self, master) -> None:

@@ -351,14 +351,14 @@ def journal_entry(
         return
 
     this.on_foot = state['OnFoot']
-    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-        logger.trace(f'''{entry["event"]}
-Commander: {cmdr}
-System: {system}
-Station: {station}
-state: {state!r}
-entry: {entry!r}'''
-                     )
+    # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+    #     logger.trace(f'''{entry["event"]}
+# Commander: {cmdr}
+# System: {system}
+# Station: {station}
+# state: {state!r}
+# entry: {entry!r}'''
+#                      )
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -453,10 +453,10 @@ entry: {entry!r}'''
             materials.update(transient)
             this.queue.put((cmdr, materials))
 
-        if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-            logger.trace(f'''{entry["event"]}
-Queueing: {entry!r}'''
-                         )
+        # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+        #     logger.trace(f'''{entry["event"]}
+# Queueing: {entry!r}'''
+#                          )
         this.queue.put((cmdr, entry))
 
 
@@ -561,14 +561,14 @@ def worker() -> None:
                     pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
 
                 if should_send(pending):
-                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.trace("pending has at least one of "
-                                     "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
-                                     " and it passed should_send()")
-                        for p in pending:
-                            if p['event'] in ('Location'):
-                                logger.trace('"Location" event in pending passed should_send(), '
-                                             f'timestamp: {p["timestamp"]}')
+                    # if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                    #     logger.trace("pending has at least one of "
+                    #                  "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                    #                  " and it passed should_send()")
+                    #     for p in pending:
+                    #         if p['event'] in ('Location'):
+                    #             logger.trace('"Location" event in pending passed should_send(), '
+                    #                          f'timestamp: {p["timestamp"]}')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
                     if creds is None:
@@ -583,25 +583,25 @@ def worker() -> None:
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
-                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        data_elided = data.copy()
-                        data_elided['apiKey'] = '<elided>'
-                        logger.trace(
-                            "pending has at least one of "
-                            "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
-                            " Attempting API call with the following events:"
-                        )
+                    # if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                    #     data_elided = data.copy()
+                    #     data_elided['apiKey'] = '<elided>'
+                    #     logger.trace(
+                    #         "pending has at least one of "
+                    #         "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                    #         " Attempting API call with the following events:"
+                    #     )
 
-                        for p in pending:
-                            logger.trace(f"Event: {p!r}")
-                            if p['event'] in ('Location'):
-                                logger.trace('Attempting API call for "Location" event with timestamp: '
-                                             f'{p["timestamp"]}')
+                    #     for p in pending:
+                    #         logger.trace(f"Event: {p!r}")
+                    #         if p['event'] in ('Location'):
+                    #             logger.trace('Attempting API call for "Location" event with timestamp: '
+                    #                          f'{p["timestamp"]}')
 
-                        logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
+                    #     logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
 
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
-                    logger.trace(f'API response content: {r.content}')
+                    # logger.trace(f'API response content: {r.content}')
                     r.raise_for_status()
                     reply = r.json()
                     msg_num = reply['msgnum']
@@ -618,10 +618,12 @@ def worker() -> None:
                     else:
 
                         if msg_num // 100 == 1:
-                            logger.trace('Overall OK')
+                        #     logger.trace('Overall OK')
+                            pass
 
                         elif msg_num // 100 == 5:
-                            logger.trace('Event(s) not currently processed, but saved for later')
+                        #     logger.trace('Event(s) not currently processed, but saved for later')
+                            pass
 
                         else:
                             logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
