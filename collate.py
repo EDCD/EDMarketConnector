@@ -12,7 +12,7 @@ from traceback import print_exc
 
 import companion
 import outfitting
-from edmc_data import ship_name_map
+from edmc_data import companion_category_map, ship_name_map
 
 
 def __make_backup(file_name: str, suffix: str = '.bak') -> None:
@@ -54,13 +54,13 @@ def addcommodities(data):
         new = {
             'id'       : commodity['id'],
             'symbol'   : commodity['name'],
-            'category' : data.companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'category' : companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
             'name'     : commodity.get('locName') or 'Limpets',
         }
 
         old = commodities.get(key)
 
-        if old and data.companion_category_map.get(commodity['categoryname'], True):
+        if old and companion_category_map.get(commodity['categoryname'], True):
             if new['symbol'] != old['symbol'] or new['name'] != old['name']:
                 raise ValueError('{}: {!r} != {!r}'.format(key, new, old))
 
