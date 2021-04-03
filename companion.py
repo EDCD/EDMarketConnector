@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 import requests
 
 from config import appname, appversion, config
+from data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from protocol import protocolhandler
@@ -63,16 +64,6 @@ SERVER_BETA = 'https://pts-companion.orerve.net'
 URL_QUERY = '/profile'
 URL_MARKET = '/market'
 URL_SHIPYARD = '/shipyard'
-
-
-# Map values reported by the Companion interface to names displayed in-game
-# May be imported by plugins
-category_map = {
-    'Narcotics':      'Legal Drugs',
-    'Slaves':         'Slavery',
-    'Waste ':         'Waste',
-    'NonMarketable':  False,  # Don't appear in the in-game market so don't report
-}
 
 commodity_map: Dict = {}
 
