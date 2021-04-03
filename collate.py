@@ -133,7 +133,7 @@ def addmodules(data):
     if isfile(outfile):
         __make_backup(outfile)
 
-    with open(outfile, 'w') as csvfile:
+    with open(outfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
         writer.writeheader()
 
@@ -186,7 +186,7 @@ def addships(data):
     if isfile(shipfile):
         __make_backup(shipfile)
 
-    with open(shipfile, 'w') as csvfile:
+    with open(shipfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
         writer.writeheader()
 
