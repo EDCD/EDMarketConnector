@@ -16,6 +16,7 @@ from config import config
 import outfitting
 import companion
 import util_ships
+from data import coriolis_ship_map
 
 
 if __name__ == "__main__":
@@ -29,15 +30,6 @@ if __name__ == "__main__":
     subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
 
     data = json.load(open('coriolis-data/dist/index.json'))
-
-    # Map Coriolis's names to names displayed in the in-game shipyard
-    coriolis_ship_map = {
-        'Cobra Mk III' : 'Cobra MkIII',
-        'Cobra Mk IV'  : 'Cobra MkIV',
-        'Krait Mk II'  : 'Krait MkII',
-        'Viper'        : 'Viper MkIII',
-        'Viper Mk IV'  : 'Viper MkIV',
-    }
 
     # Symbolic name from in-game name
     reverse_ship_map = {v: k for k, v in list(util_ships.ship_map.items())}

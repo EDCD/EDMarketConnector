@@ -21,3 +21,12 @@ companion_category_map = {
     'Waste ':         'Waste',
     'NonMarketable':  False,  # Don't appear in the in-game market so don't report
 }
+
+# Map Coriolis's names to names displayed in the in-game shipyard.
+coriolis_ship_map = {
+    'Cobra Mk III': 'Cobra MkIII',
+    'Cobra Mk IV' : 'Cobra MkIV',
+    'Krait Mk II' : 'Krait MkII',
+    'Viper'       : 'Viper MkIII',
+    'Viper Mk IV' : 'Viper MkIV',
+}
