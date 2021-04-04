@@ -780,7 +780,7 @@ class AppWindow(object):
                 err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
-                  or (data['commander'].get('docked') or monitor.state['OnFoot']
+                  or (data['commander'].get('docked')
                       and not data.get('lastStarport', {}).get('name'))):
                 err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
