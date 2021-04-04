@@ -741,6 +741,7 @@ class AppWindow(object):
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
         play_bad = False
+        err: Optional[str] = None
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return  # In CQC or on crew - do nothing
@@ -773,19 +774,18 @@ class AppWindow(object):
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
-                self.status['text'] = _('CAPI: No commander data returned')
+                err = self.status['text'] = _('CAPI: No commander data returned')
 
             elif not data.get('commander', {}).get('name'):
-                self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked') or monitor.state['OnFoot']
-                      and not data.get('lastStarport', {}).get('name'))
-                  or (monitor.state['OnFoot'] and data['lastStarport']['name'] != monitor.station)):
-                self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                      and not data.get('lastStarport', {}).get('name'))):
+                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
-                self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
@@ -811,6 +811,8 @@ class AppWindow(object):
                     if last_station != monitor.station:
                         # CAPI lastStarport must match
                         raise companion.ServerLagging()
+
+                self.holdofftime = querytime + companion.holdoff
 
             elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
@@ -841,14 +843,16 @@ class AppWindow(object):
 
                 # Export market data
                 if not self.export_market_data(data):
+                    err = 'Error: Exporting Market data'
                     play_bad = True
 
                 self.holdofftime = querytime + companion.holdoff
 
         # Companion API problem
         except companion.ServerLagging as e:
+            err = str(e)
             if retrying:
-                self.status['text'] = str(e)
+                self.status['text'] = err
                 play_bad = True
 
             else:
@@ -857,17 +861,17 @@ class AppWindow(object):
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
 
-        if not self.status['text']:  # no errors
+        if not err:  # not self.status['text']:  # no errors
             self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
 
         if play_sound and play_bad:
