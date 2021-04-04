@@ -753,8 +753,8 @@ class AppWindow(object):
 
         if not retrying:
             if time() < self.holdofftime:  # Was invoked by key while in cooldown
-                self.status['text'] = ''
                 if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
+                    self.status['text'] = ''
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
 
                 return
