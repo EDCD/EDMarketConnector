@@ -782,6 +782,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 name = self.canonicalise(entry['Received'])
                 self.state[category][name] += entry['Count']
 
+            elif event_type == 'TransferMicroResources':
+                # Moving Odyssey MicroResources between ShipLocker and BackPack
+                for mr in entry['Transfers']:
+                    category = self.category(mr['Category'])
+                    name = self.canonicalise(mr['Name'])
+
+                    if mr['Direction'] == 'ToShipLocker':
+                        self.state[category][name] += mr['Count']
+                        self.state['BackPack'][category][name] -= mr['Count']
+
+                    elif mr['Direction'] == 'ToBackpack':
+                        self.state[category][name] -= mr['Count']
+                        self.state['BackPack'][category][name] += mr['Count']
+
+                    else:
+                        logger.warning(f'TransferMicroResources with unexpected Direction {mr["Direction"]=}: {mr=}')
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
