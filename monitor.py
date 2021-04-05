@@ -107,6 +107,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systemaddress: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
+        self.__init_state()
+
+    def __init_state(self) -> None:
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: Dict = {
@@ -476,34 +479,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.coordinates = None
                 self.systemaddress = None
                 self.started = None
-                self.state = {
-                    'Captain':      None,
-                    'Cargo':        defaultdict(int),
-                    'Credits':      None,
-                    'FID':          None,
-                    'Horizons':     None,
-                    'Loan':         None,
-                    'Raw':          defaultdict(int),
-                    'Manufactured': defaultdict(int),
-                    'Encoded':      defaultdict(int),
-                    'Component':    defaultdict(int),
-                    'Engineers':    {},
-                    'Rank':         {},
-                    'Reputation':   {},
-                    'Statistics':   {},
-                    'Role':         None,
-                    'Friends':      set(),
-                    'ShipID':       None,
-                    'ShipIdent':    None,
-                    'ShipName':     None,
-                    'ShipType':     None,
-                    'HullValue':    None,
-                    'ModulesValue': None,
-                    'Rebuy':        None,
-                    'Modules':      None,
-                    'Route':        None,
-                }
-                self.state['OnFoot'] = False
+                self.__init_state()
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
