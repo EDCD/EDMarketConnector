@@ -767,8 +767,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for mr in entry['MicroResources']:
                     category = self.category(mr['Category'])
                     name = self.canonicalise(mr['Name'])
-
                     self.state[category][name] -= mr['Count']
+
+            elif event_type == 'TradeMicroResources':
+                # Trading some MicroResources for another at a Bar Tender
+                # 'Offered' is what we traded away
+                for offer in entry['Offered']:
+                    category = self.category(offer['Category'])
+                    name = self.canonicalise(offer['Name'])
+                    self.state[category][name] -= offer['Count']
+
+                # For a single item name received
+                category = self.category(entry['Category'])
+                name = self.canonicalise(entry['Received'])
+                self.state[category][name] += entry['Count']
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
