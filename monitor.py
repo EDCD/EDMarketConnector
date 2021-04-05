@@ -139,9 +139,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'CargoJSON':    None,  # The raw data from the last time cargo.json was read
             'Route':        None,  # Last plotted route from Route.json file
             'OnFoot':       False,  # Whether we think you're on-foot
-            'Component':    defaultdict(int),  # Odyssey Components in Ship Locker
-            'Items':        defaultdict(int),  # Odyssey Items in Ship Locker
-            'Consumables':  defaultdict(int),  # Odyssey Consumables in Ship Locker
+            'Component':    defaultdict(int),    # Odyssey Components in Ship Locker
+            'Item':         defaultdict(int),    # Odyssey Items in Ship Locker
+            'Consumable':   defaultdict(int),    # Odyssey Consumables in Ship Locker
+            'BackPack':     {                    # Odyssey BackPack contents
+                'Component':  defaultdict(int),  # BackPack Components
+                'Consumable': defaultdict(int),  # BackPack Consumables
+                'Item':       defaultdict(int),  # BackPack Items
+            },
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -714,13 +719,40 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Item'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
-                self.state['Component'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_components})
+                self.state['Component'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
+                )
 
                 clean_consumables = self.coalesce_cargo(entry['Consumables'])
-                self.state['Consumable'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_consumables})
+                self.state['Consumable'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
+                )
 
                 clean_items = self.coalesce_cargo(entry['Items'])
-                self.state['Item'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_items})
+                self.state['Item'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                )
+
+            elif event_type == 'BackPackMaterials':
+                # Assume this reflects the current state when written
+                self.state['BackPack']['Component'] = defaultdict(int)
+                self.state['BackPack']['Consumable'] = defaultdict(int)
+                self.state['BackPack']['Item'] = defaultdict(int)
+
+                clean_components = self.coalesce_cargo(entry['Components'])
+                self.state['BackPack']['Component'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
+                )
+
+                clean_consumables = self.coalesce_cargo(entry['Consumables'])
+                self.state['BackPack']['Consumable'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
+                )
+
+                clean_items = self.coalesce_cargo(entry['Items'])
+                self.state['BackPack']['Item'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                )
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
