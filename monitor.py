@@ -803,6 +803,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     else:
                         logger.warning(f'TransferMicroResources with unexpected Direction {mr["Direction"]=}: {mr=}')
 
+                # Paranoia check to see if anything has gone negative.
+                # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
+                # materials is impossible when used/picked up anyway.
+                for c in self.state['BackPack']:
+                    for m in self.state['BackPack'][c]:
+                        if self.state['BackPack'][c][m] < 0:
+                            self.state['BackPack'][c][m] = 0
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
