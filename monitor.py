@@ -757,7 +757,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'BuyMicroResources':
                 # Buying from a Pioneer Supplies, goes directly to ShipLocker.
                 # One event per Item, not an array.
-                self.state[entry['Category']][entry['Name']] += entry['Count']
+                category = self.category(entry['Category'])
+                name = self.canonicalise(entry['Name'])
+                self.state[category][name] += entry['Count']
+
+            elif event_type == 'SellMicroResources':
+                # Selling to a Bar Tender on-foot.
+                # One event per whole sale, so it's an array.
+                for mr in entry['MicroResources']:
+                    category = self.category(mr['Category'])
+                    name = self.canonicalise(mr['Name'])
+
+                    self.state[category][name] -= mr['Count']
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
