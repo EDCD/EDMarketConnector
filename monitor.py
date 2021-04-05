@@ -139,13 +139,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'CargoJSON':    None,  # The raw data from the last time cargo.json was read
             'Route':        None,  # Last plotted route from Route.json file
             'OnFoot':       False,  # Whether we think you're on-foot
-            'Component':    defaultdict(int),    # Odyssey Components in Ship Locker
-            'Item':         defaultdict(int),    # Odyssey Items in Ship Locker
-            'Consumable':   defaultdict(int),    # Odyssey Consumables in Ship Locker
-            'BackPack':     {                    # Odyssey BackPack contents
-                'Component':  defaultdict(int),  # BackPack Components
-                'Consumable': defaultdict(int),  # BackPack Consumables
-                'Item':       defaultdict(int),  # BackPack Items
+            'Component':    defaultdict(int),      # Odyssey Components in Ship Locker
+            'Item':         defaultdict(int),      # Odyssey Items in Ship Locker
+            'Consumable':   defaultdict(int),      # Odyssey Consumables in Ship Locker
+            'Data':         defaultdict(int),      # Odyssey Data in Ship Locker
+            'BackPack':     {                      # Odyssey BackPack contents
+                'Component':  defaultdict(int),    # BackPack Components
+                'Consumable': defaultdict(int),    # BackPack Consumables
+                'Item':       defaultdict(int),    # BackPack Items
+                'Data':         defaultdict(int),  # Backpack Data
             },
         }
 
