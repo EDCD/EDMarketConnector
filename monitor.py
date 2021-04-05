@@ -122,7 +122,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Raw':          defaultdict(int),
             'Manufactured': defaultdict(int),
             'Encoded':      defaultdict(int),
-            'Component':    defaultdict(int),  # Odyssey materials
             'Engineers':    {},
             'Rank':         {},
             'Reputation':   {},
@@ -139,7 +138,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Modules':      None,
             'CargoJSON':    None,  # The raw data from the last time cargo.json was read
             'Route':        None,  # Last plotted route from Route.json file
-            'OnFoot':      False,  # Whether we think you're on-foot
+            'OnFoot':       False,  # Whether we think you're on-foot
+            'Component':    defaultdict(int),  # Odyssey Components in Ship Locker
+            'Items':        defaultdict(int),  # Odyssey Items in Ship Locker
+            'Consumables':  defaultdict(int),  # Odyssey Consumables in Ship Locker
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
