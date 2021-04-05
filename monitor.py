@@ -717,7 +717,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
-                # TODO: Assume backpack is empty?
+                # TODO: Really we need a full BackPackMaterials event at the same time.
+                #       In lieu of that, empty the backpack.  This will explicitly
+                #       be wrong if Cmdr relogs at a Settlement with anything in
+                #       backpack.  We can't track when they use/pick up items
+                #       anyway (Odyssey Alpha Phase 1 Hotfix 2).
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
