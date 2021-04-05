@@ -717,6 +717,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
+                # TODO: Assume backpack is empty?
+                self.state['BackPack']['Component'] = defaultdict(int)
+                self.state['BackPack']['Consumable'] = defaultdict(int)
+                self.state['BackPack']['Item'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
