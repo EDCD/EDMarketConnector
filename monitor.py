@@ -707,6 +707,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
+            elif event_type == 'ShipLockerMaterials':
+                # This event has the current totals, so drop any current data
+                self.state['Component'] = defaultdict(int)
+                self.state['Consumable'] = defaultdict(int)
+                self.state['Item'] = defaultdict(int)
+
+                clean_components = self.coalesce_cargo(entry['Components'])
+                self.state['Component'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_components})
+
+                clean_consumables = self.coalesce_cargo(entry['Consumables'])
+                self.state['Consumable'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_consumables})
+
+                clean_items = self.coalesce_cargo(entry['Items'])
+                self.state['Item'].update({self.canonicalise(x['Name']): x['Count'] for x in clean_items})
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
