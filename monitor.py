@@ -754,6 +754,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
                 )
 
+            elif event_type == 'BuyMicroResources':
+                # Buying from a Pioneer Supplies, goes directly to ShipLocker.
+                # One event per Item, not an array.
+                self.state[entry['Category']][entry['Name']] += entry['Count']
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
