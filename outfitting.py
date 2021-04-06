@@ -44,9 +44,9 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
 
     Given the ad-hocery in this implementation a big lookup table might have been simpler and clearer.
 
-    :param module:
-    :param ship_map:
-    :param entitled:
+    :param module: module dict, e.g. from CAPI lastStarport->modules.
+    :param ship_map: dict mapping symbols to English names.
+    :param entitled: Whether to report modules that require e.g. Horizons.
     :return: None if the module is user-specific (i.e. decal, paintjob, kit) or PP-specific in station outfitting.
     """
     # Lazily populate
@@ -257,7 +257,12 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
 
 
 def export(data, filename) -> None:
-    """Export given data to provided filename."""
+    """
+    Export given data about module availability.
+
+    :param data: CAPI data to export.
+    :param filename: Filename to export into.
+    """
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')
 
