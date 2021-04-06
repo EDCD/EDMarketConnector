@@ -83,8 +83,8 @@ def addcommodities(data) -> None:  # noqa: CCR001
     print(f'Added {len(commodities) - size_pre} new commodities')
 
 
-# keep a summary of modules found
-def addmodules(data):
+def addmodules(data):  # noqa: C901, CCR001
+    """Keep a summary of modules found."""
     if not data['lastStarport'].get('modules'):
         return
 
