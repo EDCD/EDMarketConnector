@@ -93,7 +93,7 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 class Credentials(NamedTuple):
     """Credentials holds the set of credentials required to identify an inara API payload to inara."""
 
-    cmdr: str
+    cmdr: Optional[str]
     fid: Optional[str]
     api_key: str
 
@@ -311,7 +311,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
             )
 
 
-def credentials(cmdr: str) -> Optional[str]:
+def credentials(cmdr: Optional[str]) -> Optional[str]:
     """
     Get the credentials for the current commander.
 
@@ -1124,7 +1124,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
                 }
             )
 
-            this.lastcredits = float(data['commander']['credits'])
+            this.lastcredits = int(data['commander']['credits'])
 
 
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
