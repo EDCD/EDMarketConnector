@@ -6,6 +6,7 @@ import argparse
 import html
 import json
 import locale
+import pathlib
 import re
 import sys
 import webbrowser
@@ -15,6 +16,22 @@ from os.path import dirname, isdir, join
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
+
+# Have this as early as possible for people running EDMarketConnector.exe
+# from cmd.exe or a bat file or similar.  Else they might not be in the correct
+# place for things like config.py reading .gitversion
+if getattr(sys, 'frozen', False):
+    # Under py2exe sys.path[0] is the executable name
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
+        # Allow executable to be invoked from any cwd
+        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
+        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
+
+else:
+    # We still want to *try* to have CWD be where the main script is, even if
+    # not frozen.
+    chdir(pathlib.Path(__file__).parent)
 
 from constants import applongname, appname, protocolhandler_redirect
 
@@ -236,14 +253,6 @@ if TYPE_CHECKING:
         """Fake the l10n translation functions for typing."""
         return x
 
-if getattr(sys, 'frozen', False):
-    # Under py2exe sys.path[0] is the executable name
-    if platform == 'win32':
-        chdir(dirname(sys.path[0]))
-        # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
-
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
@@ -256,9 +265,9 @@ import plug
 import prefs
 import stats
 import td
-import util_ships
 from commodity import COMMODITY_CSV
 from dashboard import dashboard
+from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -732,6 +741,7 @@ class AppWindow(object):
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
         play_bad = False
+        err: Optional[str] = None
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return  # In CQC or on crew - do nothing
@@ -743,8 +753,8 @@ class AppWindow(object):
 
         if not retrying:
             if time() < self.holdofftime:  # Was invoked by key while in cooldown
-                self.status['text'] = ''
                 if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
+                    self.status['text'] = ''
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
 
                 return
@@ -764,18 +774,18 @@ class AppWindow(object):
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
-                self.status['text'] = _('CAPI: No commander data returned')
+                err = self.status['text'] = _('CAPI: No commander data returned')
 
             elif not data.get('commander', {}).get('name'):
-                self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
-                      and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
-                self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                      and not data.get('lastStarport', {}).get('name'))):
+                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
-                self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
@@ -802,6 +812,8 @@ class AppWindow(object):
                         # CAPI lastStarport must match
                         raise companion.ServerLagging()
 
+                self.holdofftime = querytime + companion.holdoff
+
             elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
                 raise companion.ServerLagging()
@@ -815,7 +827,7 @@ class AppWindow(object):
                     self.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = util_ships.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
@@ -831,14 +843,16 @@ class AppWindow(object):
 
                 # Export market data
                 if not self.export_market_data(data):
+                    err = 'Error: Exporting Market data'
                     play_bad = True
 
                 self.holdofftime = querytime + companion.holdoff
 
         # Companion API problem
         except companion.ServerLagging as e:
+            err = str(e)
             if retrying:
-                self.status['text'] = str(e)
+                self.status['text'] = err
                 play_bad = True
 
             else:
@@ -847,17 +861,17 @@ class AppWindow(object):
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
 
-        if not self.status['text']:  # no errors
+        if not err:  # not self.status['text']:  # no errors
             self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
 
         if play_sound and play_bad:
@@ -919,7 +933,7 @@ class AppWindow(object):
                     ship_text = monitor.state['ShipName']
 
                 else:
-                    ship_text = util_ships.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    ship_text = ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
 
                 if not ship_text:
                     ship_text = ''

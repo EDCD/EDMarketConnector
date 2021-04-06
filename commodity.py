@@ -6,13 +6,8 @@ import hashlib
 import time
 
 from config import config
+from edmc_data import commodity_bracketmap as bracketmap
 
-bracketmap = {
-    0: '',
-    1: 'Low',
-    2: 'Med',
-    3: 'High',
-}
 
 # DEFAULT means semi-colon separation
 # CSV means comma separation

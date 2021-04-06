@@ -12,7 +12,7 @@ from traceback import print_exc
 
 import companion
 import outfitting
-import util_ships
+from edmc_data import companion_category_map, ship_name_map
 
 
 def __make_backup(file_name: str, suffix: str = '.bak') -> None:
@@ -54,13 +54,13 @@ def addcommodities(data):
         new = {
             'id'       : commodity['id'],
             'symbol'   : commodity['name'],
-            'category' : companion.category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'category' : companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
             'name'     : commodity.get('locName') or 'Limpets',
         }
 
         old = commodities.get(key)
 
-        if old and companion.category_map.get(commodity['categoryname'], True):
+        if old and companion_category_map.get(commodity['categoryname'], True):
             if new['symbol'] != old['symbol'] or new['name'] != old['name']:
                 raise ValueError('{}: {!r} != {!r}'.format(key, new, old))
 
@@ -72,7 +72,7 @@ def addcommodities(data):
     if isfile(commodityfile):
         __make_backup(commodityfile)
 
-    with open(commodityfile, 'w') as csvfile:
+    with open(commodityfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
         writer.writeheader()
 
@@ -107,7 +107,7 @@ def addmodules(data):
             raise ValueError('id: {} != {}'.format(key, module['id']))
 
         try:
-            new = outfitting.lookup(module, util_ships.ship_map, True)
+            new = outfitting.lookup(module, ship_name_map, True)
 
         except Exception:
             print('{}, {}:'.format(module['id'], module['name']))
@@ -133,7 +133,7 @@ def addmodules(data):
     if isfile(outfile):
         __make_backup(outfile)
 
-    with open(outfile, 'w') as csvfile:
+    with open(outfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
         writer.writeheader()
 
@@ -165,7 +165,7 @@ def addships(data):
     for ship in tuple(data_ships.get('shipyard_list', {}).values()) + data_ships.get('unavailable_list'):
         # sanity check
         key = int(ship['id'])
-        new = {'id': key, 'symbol': ship['name'], 'name': util_ships.ship_map.get(ship['name'].lower())}
+        new = {'id': key, 'symbol': ship['name'], 'name': ship_name_map.get(ship['name'].lower())}
         if new:
             old = ships.get(key)
             if old:
@@ -186,7 +186,7 @@ def addships(data):
     if isfile(shipfile):
         __make_backup(shipfile)
 
-    with open(shipfile, 'w') as csvfile:
+    with open(shipfile, 'w', newline='\n') as csvfile:
         writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
         writer.writeheader()
 

@@ -29,14 +29,6 @@ from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
 appcmdname = 'EDMC'
-# Replacing appversion with a function:
-#
-# 1. In setup.py grab the current HEAD short hash and place in a file .gitversion
-# 2. config.py code then needs to check:
-#   a. If we're not frozen and .git/ exists (i.e. not from a tarball ?) use something to get the current HEAD
-#   b. If not frozen and no .gitversion (but there should be) ???
-#   c. If frozen, just read the .gitversion (that had better damned well be there, but catch if it's not).
-# 3. But I don't want to spam EDDN with different 5.0.0-beta1+shorthash when testing... so ???
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
@@ -134,10 +126,9 @@ def appversion() -> semantic_version.Version:
     """
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
-        with open(GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        # Yes, .parent because if frozen we're inside library.zip
+        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
             shorthash = gitv.read()
-
-        # TODO: Check if there was already a build meta data in static_appversion ?
 
     else:
         # Running from source

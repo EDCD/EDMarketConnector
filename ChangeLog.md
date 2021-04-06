@@ -1,6 +1,17 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta4
+===
+
+Plugin Developers
+---
+
+* All of our static data, such as mappings of names, should now be in
+  edmc_data.py.  So adjust any imports accordingly.  Any future such will
+  be placed in this file.  We will endeavour not to make breaking changes to
+  this file without a Major version bump.
+
 Pre-Release 5.0.0-beta3
 ===
 

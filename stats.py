@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, NamedTuple, Optional,
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
+from edmc_data import ship_name_map
 from l10n import Locale
 from monitor import monitor
-from util_ships import ship_map
 
 logger = EDMCLogging.get_main_logger()
 
@@ -216,7 +216,7 @@ def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
             # Set current system, not last docked
             out.append(ShipRet(
                 id=str(ships[0]['id']),
-                type=ship_map.get(ships[0]['name'].lower(), ships[0]['name']),
+                type=ship_name_map.get(ships[0]['name'].lower(), ships[0]['name']),
                 name=str(ships[0].get('shipName', '')),
                 system=companion_data['lastSystem']['name'],
                 station='',
@@ -225,7 +225,7 @@ def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
             out.extend(
                 ShipRet(
                     id=str(ship['id']),
-                    type=ship_map.get(ship['name'].lower(), ship['name']),
+                    type=ship_name_map.get(ship['name'].lower(), ship['name']),
                     name=ship.get('shipName', ''),
                     system=ship['starsystem']['name'],
                     station=ship['station']['name'],
@@ -238,7 +238,7 @@ def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
     return [
         ShipRet(
             id=str(ship['id']),
-            type=ship_map.get(ship['name'].lower(), ship['name']),
+            type=ship_name_map.get(ship['name'].lower(), ship['name']),
             name=ship.get('shipName', ''),
             system=ship['starsystem']['name'],
             station=ship['station']['name'],
