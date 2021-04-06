@@ -410,14 +410,16 @@ def journal_entry(
                     ]
                 )
 
-                new_add_event(
-                    'setCommanderReputationMajorFaction',
-                    entry['timestamp'],
-                    [
-                        {'majorfactionName': k.lower(), 'majorfactionReputation': v / 100.0}
-                        for k, v in state['Reputation'].items() if v is not None
-                    ]
-                )
+                # Don't send the API call with no values.
+                if state['Reputation']:
+                    new_add_event(
+                        'setCommanderReputationMajorFaction',
+                        entry['timestamp'],
+                        [
+                            {'majorfactionName': k.lower(), 'majorfactionReputation': v / 100.0}
+                            for k, v in state['Reputation'].items() if v is not None
+                        ]
+                    )
 
                 if state['Engineers']:  # Not populated < 3.3
                     to_send: List[Mapping[str, Any]] = []
