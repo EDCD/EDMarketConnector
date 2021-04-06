@@ -2,7 +2,6 @@
 
 import dataclasses
 import json
-import sys
 import time
 import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
@@ -37,46 +36,51 @@ FAKE = ('CQC', 'Training', 'Destination')  # Fake systems that shouldn't be sent
 CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
 
 
-this: Any = sys.modules[__name__]  # For holding module globals
-this.session = timeout_session.new_session()
-this.lastlocation = None  # eventData from the last Commander's Flight Log event
-this.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
+class This:
+    """Holds module globals."""
 
-# Cached Cmdr state
-this.events: List[OrderedDictT[str, Any]] = []  # Unsent events
-this.event_lock = Lock
-this.cmdr: Optional[str] = None
-this.FID: Optional[str] = None		# Frontier ID
-this.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
-this.newuser: bool = False  # just entered API Key - send state immediately
-this.newsession: bool = True  # starting a new session - wait for Cargo event
-this.undocked: bool = False  # just undocked
-this.suppress_docked = False  # Skip initial Docked event if started docked
-this.cargo: Optional[OrderedDictT[str, Any]] = None
-this.materials: Optional[OrderedDictT[str, Any]] = None
-this.lastcredits: int = 0  # Send credit update soon after Startup / new game
-this.storedmodules: Optional[OrderedDictT[str, Any]] = None
-this.loadout: Optional[OrderedDictT[str, Any]] = None
-this.fleet: Optional[List[OrderedDictT[str, Any]]] = None
-this.shipswap: bool = False  # just swapped ship
-this.on_foot = False
+    def __init__(self):
+        self.session = timeout_session.new_session()
+        self.lastlocation = None  # eventData from the last Commander's Flight Log event
+        self.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
+        # Cached Cmdr state
+        self.events: List[OrderedDictT[str, Any]] = []  # Unsent events
+        self.event_lock = Lock
+        self.cmdr: Optional[str] = None
+        self.FID: Optional[str] = None  # Frontier ID
+        self.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
+        self.newuser: bool = False  # just entered API Key - send state immediately
+        self.newsession: bool = True  # starting a new session - wait for Cargo event
+        self.undocked: bool = False  # just undocked
+        self.suppress_docked = False  # Skip initial Docked event if started docked
+        self.cargo: Optional[OrderedDictT[str, Any]] = None
+        self.materials: Optional[OrderedDictT[str, Any]] = None
+        self.lastcredits: int = 0  # Send credit update soon after Startup / new game
+        self.storedmodules: Optional[OrderedDictT[str, Any]] = None
+        self.loadout: Optional[OrderedDictT[str, Any]] = None
+        self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
+        self.shipswap: bool = False  # just swapped ship
+        self.on_foot = False
+
+        self.timer_run = True
+
+        # Main window clicks
+        self.system_link = None
+        self.system = None
+        self.system_address = None
+        self.system_population = None
+        self.station_link = None
+        self.station = None
+        self.station_marketid = None
+
+
+this = This()
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
 EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
 WORKER_WAIT_TIME = 35  # Minimum time for worker to wait between sends
 
-this.timer_run = True
-
-
-# Main window clicks
-this.system_link = None
-this.system = None
-this.system_address = None
-this.system_population = None
-this.station_link = None
-this.station = None
-this.station_marketid = None
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 
