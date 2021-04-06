@@ -200,23 +200,23 @@ def plugin_stop() -> None:
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
-    PADX = 10
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-    PADY = 2		# close spacing
+    x_padding = 10
+    x_button_padding = 12  # indent Checkbuttons and Radiobuttons
+    y_padding = 2		# close spacing
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     HyperlinkLabel(
         frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
-    ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    ).grid(columnspan=2, padx=x_padding, sticky=tk.W)  # Don't translate
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged
     )
 
-    this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.log_button.grid(columnspan=2, padx=x_button_padding, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
 
@@ -229,12 +229,12 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     )
 
-    this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
+    this.label.grid(columnspan=2, padx=x_padding, sticky=tk.W)
 
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
-    this.apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
+    this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
     this.apikey = nb.Entry(frame)
-    this.apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.apikey.grid(row=12, column=1, padx=x_padding, pady=y_padding, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
