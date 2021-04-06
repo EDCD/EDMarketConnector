@@ -2,15 +2,12 @@
 
 import dataclasses
 import json
-import sys
 import time
 import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
 from threading import Lock, Thread
-from typing import (
-    TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, MutableMapping, NamedTuple, Optional
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Sequence, Union, cast
 
@@ -37,54 +34,67 @@ FAKE = ('CQC', 'Training', 'Destination')  # Fake systems that shouldn't be sent
 CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
 
 
-this: Any = sys.modules[__name__]  # For holding module globals
-this.session = timeout_session.new_session()
-this.lastlocation = None  # eventData from the last Commander's Flight Log event
-this.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
+class This:
+    """Holds module globals."""
 
-# Cached Cmdr state
-this.events: List[OrderedDictT[str, Any]] = []  # Unsent events
-this.event_lock = Lock
-this.cmdr: Optional[str] = None
-this.FID: Optional[str] = None		# Frontier ID
-this.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
-this.newuser: bool = False  # just entered API Key - send state immediately
-this.newsession: bool = True  # starting a new session - wait for Cargo event
-this.undocked: bool = False  # just undocked
-this.suppress_docked = False  # Skip initial Docked event if started docked
-this.cargo: Optional[OrderedDictT[str, Any]] = None
-this.materials: Optional[OrderedDictT[str, Any]] = None
-this.lastcredits: int = 0  # Send credit update soon after Startup / new game
-this.storedmodules: Optional[OrderedDictT[str, Any]] = None
-this.loadout: Optional[OrderedDictT[str, Any]] = None
-this.fleet: Optional[List[OrderedDictT[str, Any]]] = None
-this.shipswap: bool = False  # just swapped ship
-this.on_foot = False
+    def __init__(self):
+        self.session = timeout_session.new_session()
+        self.thread: Thread
+        self.lastlocation = None  # eventData from the last Commander's Flight Log event
+        self.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
+        # Cached Cmdr state
+        self.events: List[OrderedDictT[str, Any]] = []  # Unsent events
+        self.event_lock = Lock
+        self.cmdr: Optional[str] = None
+        self.FID: Optional[str] = None  # Frontier ID
+        self.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
+        self.newuser: bool = False  # just entered API Key - send state immediately
+        self.newsession: bool = True  # starting a new session - wait for Cargo event
+        self.undocked: bool = False  # just undocked
+        self.suppress_docked = False  # Skip initial Docked event if started docked
+        self.cargo: Optional[List[OrderedDictT[str, Any]]] = None
+        self.materials: Optional[List[OrderedDictT[str, Any]]] = None
+        self.lastcredits: int = 0  # Send credit update soon after Startup / new game
+        self.storedmodules: Optional[List[OrderedDictT[str, Any]]] = None
+        self.loadout: Optional[OrderedDictT[str, Any]] = None
+        self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
+        self.shipswap: bool = False  # just swapped ship
+        self.on_foot = False
+
+        self.timer_run = True
+
+        # Main window clicks
+        self.system_link = None
+        self.system = None
+        self.system_address = None
+        self.system_population = None
+        self.station_link = None
+        self.station = None
+        self.station_marketid = None
+
+        # Prefs UI
+        self.log: 'tk.IntVar'
+        self.log_button: nb.Checkbutton
+        self.label: HyperlinkLabel
+        self.apikey: nb.Entry
+        self.apikey_label: HyperlinkLabel
+
+
+this = This()
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
 EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
 WORKER_WAIT_TIME = 35  # Minimum time for worker to wait between sends
 
-this.timer_run = True
-
-
-# Main window clicks
-this.system_link = None
-this.system = None
-this.system_address = None
-this.system_population = None
-this.station_link = None
-this.station = None
-this.station_marketid = None
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 
 class Credentials(NamedTuple):
     """Credentials holds the set of credentials required to identify an inara API payload to inara."""
 
-    cmdr: str
-    fid: str
+    cmdr: Optional[str]
+    fid: Optional[str]
     api_key: str
 
 
@@ -200,23 +210,23 @@ def plugin_stop() -> None:
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
-    PADX = 10
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-    PADY = 2		# close spacing
+    x_padding = 10
+    x_button_padding = 12  # indent Checkbuttons and Radiobuttons
+    y_padding = 2		# close spacing
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     HyperlinkLabel(
         frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
-    ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    ).grid(columnspan=2, padx=x_padding, sticky=tk.W)  # Don't translate
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged
     )
 
-    this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.log_button.grid(columnspan=2, padx=x_button_padding, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
 
@@ -229,12 +239,12 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     )
 
-    this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
+    this.label.grid(columnspan=2, padx=x_padding, sticky=tk.W)
 
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
-    this.apikey_label.grid(row=12, padx=PADX, sticky=tk.W)
+    this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
     this.apikey = nb.Entry(frame)
-    this.apikey.grid(row=12, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.apikey.grid(row=12, column=1, padx=x_padding, pady=y_padding, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
@@ -251,7 +261,7 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
         if cred:
             this.apikey.insert(0, cred)
 
-    state = tk.DISABLED
+    state: str = tk.DISABLED
     if cmdr and not is_beta and this.log.get():
         state = tk.NORMAL
 
@@ -301,7 +311,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
             )
 
 
-def credentials(cmdr: str) -> Optional[str]:
+def credentials(cmdr: Optional[str]) -> Optional[str]:
     """
     Get the credentials for the current commander.
 
@@ -319,14 +329,18 @@ def credentials(cmdr: str) -> Optional[str]:
         return None
 
 
-def journal_entry(
+def journal_entry(  # noqa: C901, CCR001
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
-) -> None:
-    """Journal entry hook."""
+) -> str:
+    """
+    Journal entry hook.
+
+    :return: str - empty if no error, else error string.
+    """
     if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
         logger.warning(f'INARA support has been disabled via killswitch: {ks.reason}')
         plug.show_error('INARA disabled. See Log.')
-        return
+        return ''
 
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
@@ -422,7 +436,7 @@ def journal_entry(
                     )
 
                 if state['Engineers']:  # Not populated < 3.3
-                    to_send: List[Mapping[str, Any]] = []
+                    to_send_list: List[Mapping[str, Any]] = []
                     for k, v in state['Engineers'].items():
                         e = {'engineerName': k}
                         if isinstance(v, tuple):
@@ -431,12 +445,12 @@ def journal_entry(
                         else:
                             e['rankStage'] = v
 
-                        to_send.append(e)
+                        to_send_list.append(e)
 
                     new_add_event(
                         'setCommanderRankEngineer',
                         entry['timestamp'],
-                        to_send,
+                        to_send_list,
                     )
 
                 # Update location
@@ -451,7 +465,7 @@ def journal_entry(
 
                 # Update ship
                 if state['ShipID']:  # Unknown if started in Fighter or SRV
-                    cur_ship = {
+                    cur_ship: Dict[str, Any] = {
                         'shipType': state['ShipType'],
                         'shipGameID': state['ShipID'],
                         'shipName': state['ShipName'],
@@ -484,17 +498,17 @@ def journal_entry(
 
             elif event_name == 'EngineerProgress' and 'Engineer' in entry:
                 # TODO: due to this var name being used above, the types are weird
-                to_send = {'engineerName': entry['Engineer']}
+                to_send_dict = {'engineerName': entry['Engineer']}
                 if 'Rank' in entry:
-                    to_send['rankValue'] = entry['Rank']
+                    to_send_dict['rankValue'] = entry['Rank']
 
                 else:
-                    to_send['rankStage'] = entry['Progress']
+                    to_send_dict['rankStage'] = entry['Progress']
 
                 new_add_event(
                     'setCommanderRankEngineer',
                     entry['timestamp'],
-                    to_send
+                    to_send_dict
                 )
 
             # PowerPlay status change
@@ -521,7 +535,7 @@ def journal_entry(
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
-                cur_ship: Dict[str, Any] = {
+                cur_ship = {
                     'shipType': state['ShipType'],
                     'shipGameID': state['ShipID'],
                     'shipName': state['ShipName'],  # Can be None
@@ -632,14 +646,15 @@ def journal_entry(
                 # Ignore the following 'Docked' event
                 this.suppress_docked = True
 
-            cargo = [{'itemName': k, 'itemCount': state['Cargo'][k]} for k in sorted(state['Cargo'])]
+            cargo: List[OrderedDictT[str, Any]]
+            cargo = [OrderedDict({'itemName': k, 'itemCount': state['Cargo'][k]}) for k in sorted(state['Cargo'])]
 
             # Send cargo and materials if changed
             if this.cargo != cargo:
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
-            materials: List[Mapping[str, Any]] = []
+            materials: List[OrderedDictT[str, Any]] = []
             for category in ('Raw', 'Manufactured', 'Encoded'):
                 materials.extend(
                     [OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category])]
@@ -730,8 +745,8 @@ def journal_entry(
 
         # Fleet
         if event_name == 'StoredShips':
-            fleet = sorted(
-                [{
+            fleet: List[OrderedDictT[str, Any]] = sorted(
+                [OrderedDict({
                     'shipType': x['ShipType'],
                     'shipGameID': x['ShipID'],
                     'shipName': x.get('Name'),
@@ -739,15 +754,15 @@ def journal_entry(
                     'starsystemName': entry['StarSystem'],
                     'stationName': entry['StationName'],
                     'marketID': entry['MarketID'],
-                } for x in entry['ShipsHere']] +
-                [{
+                }) for x in entry['ShipsHere']] +
+                [OrderedDict({
                     'shipType': x['ShipType'],
                     'shipGameID': x['ShipID'],
                     'shipName': x.get('Name'),
                     'isHot': x['Hot'],
                     'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
                     'marketID': x.get('ShipMarketID'),  # "
-                } for x in entry['ShipsRemote']],
+                }) for x in entry['ShipsRemote']],
                 key=itemgetter('shipGameID')
             )
 
@@ -775,7 +790,7 @@ def journal_entry(
         # Stored modules
         if event_name == 'StoredModules':
             items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
-            modules = []
+            modules: List[OrderedDictT[str, Any]] = []
             for slot in sorted(items):
                 item = items[slot]
                 module: OrderedDictT[str, Any] = OrderedDict([
@@ -812,7 +827,7 @@ def journal_entry(
 
         # Missions
         if event_name == 'MissionAccepted':
-            data = OrderedDict([
+            data: OrderedDictT[str, Any] = OrderedDict([
                 ('missionName', entry['Name']),
                 ('missionGameID', entry['MissionID']),
                 ('influenceGain', entry['Influence']),
@@ -922,7 +937,7 @@ def journal_entry(
             new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
-            data: OrderedDictT[str, Any] = OrderedDict([
+            data = OrderedDict([
                 ('starsystemName', system),
                 ('isPlayer', entry['IsPlayer']),
                 ('isSuccess', entry['Success']),
@@ -973,7 +988,7 @@ def journal_entry(
             # ))
 
             for goal in entry['CurrentGoals']:
-                data: MutableMapping[str, Any] = OrderedDict([
+                data = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('communitygoalName', goal['Title']),
                     ('starsystemName', goal['SystemName']),
@@ -996,7 +1011,7 @@ def journal_entry(
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data: MutableMapping[str, Any] = OrderedDict([
+                data = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('contribution', goal['PlayerContribution']),
                     ('percentileBand', goal['PlayerPercentileBand']),
@@ -1054,8 +1069,10 @@ def journal_entry(
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
+    return ''  # No error
 
-def cmdr_data(data: CAPIData, is_beta):
+
+def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
@@ -1107,10 +1124,10 @@ def cmdr_data(data: CAPIData, is_beta):
                 }
             )
 
-            this.lastcredits = float(data['commander']['credits'])
+            this.lastcredits = int(data['commander']['credits'])
 
 
-def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
+def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 
@@ -1282,7 +1299,7 @@ def try_send_data(url: str, data: Mapping[str, Any]) -> None:
             return
 
 
-def send_data(url: str, data: Mapping[str, Any]) -> bool:
+def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     """
     Write a set of events to the inara API.
 
@@ -1336,7 +1353,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
     return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
 
-def update_location(event: Dict[str, Any] = None) -> None:
+def update_location(event=None) -> None:
     """
     Update other plugins with our response to system and station changes.
 
@@ -1347,12 +1364,12 @@ def update_location(event: Dict[str, Any] = None) -> None:
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
 
 
-def inara_notify_location(eventData: Dict[str, Any]) -> None:
+def inara_notify_location(event_data) -> None:
     """Unused."""
     pass
 
 
-def update_ship(event: Dict[str, Any] = None) -> None:
+def update_ship(event=None) -> None:
     """
     Update other plugins with our response to changing.
 
