@@ -144,8 +144,8 @@ def addmodules(data):  # noqa: C901, CCR001
     print(f'Added {len(modules) - size_pre} new modules')
 
 
-# keep a summary of ships found
-def addships(data):
+def addships(data) -> None:  # noqa: CCR001
+    """Keep a summary of ships found."""
     if not data['lastStarport'].get('ships'):
         return
 
