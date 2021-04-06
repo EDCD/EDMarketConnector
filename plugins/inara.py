@@ -7,9 +7,7 @@ import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
 from operator import itemgetter
 from threading import Lock, Thread
-from typing import (
-    TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, MutableMapping, NamedTuple, Optional
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Sequence, Union, cast
 
@@ -58,7 +56,7 @@ class This:
         self.cargo: Optional[List[OrderedDictT[str, Any]]] = None
         self.materials: Optional[List[OrderedDictT[str, Any]]] = None
         self.lastcredits: int = 0  # Send credit update soon after Startup / new game
-        self.storedmodules: Optional[OrderedDictT[str, Any]] = None
+        self.storedmodules: Optional[List[OrderedDictT[str, Any]]] = None
         self.loadout: Optional[OrderedDictT[str, Any]] = None
         self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
         self.shipswap: bool = False  # just swapped ship
@@ -792,7 +790,7 @@ def journal_entry(  # noqa: C901, CCR001
         # Stored modules
         if event_name == 'StoredModules':
             items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
-            modules = []
+            modules: List[OrderedDictT[str, Any]] = []
             for slot in sorted(items):
                 item = items[slot]
                 module: OrderedDictT[str, Any] = OrderedDict([
@@ -829,7 +827,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Missions
         if event_name == 'MissionAccepted':
-            data = OrderedDict([
+            data: OrderedDictT[str, Any] = OrderedDict([
                 ('missionName', entry['Name']),
                 ('missionGameID', entry['MissionID']),
                 ('influenceGain', entry['Influence']),
@@ -939,7 +937,7 @@ def journal_entry(  # noqa: C901, CCR001
             new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
-            data: OrderedDictT[str, Any] = OrderedDict([
+            data = OrderedDict([
                 ('starsystemName', system),
                 ('isPlayer', entry['IsPlayer']),
                 ('isSuccess', entry['Success']),
@@ -990,7 +988,7 @@ def journal_entry(  # noqa: C901, CCR001
             # ))
 
             for goal in entry['CurrentGoals']:
-                data: MutableMapping[str, Any] = OrderedDict([
+                data = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('communitygoalName', goal['Title']),
                     ('starsystemName', goal['SystemName']),
@@ -1013,7 +1011,7 @@ def journal_entry(  # noqa: C901, CCR001
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data: MutableMapping[str, Any] = OrderedDict([
+                data = OrderedDict([
                     ('communitygoalGameID', goal['CGID']),
                     ('contribution', goal['PlayerContribution']),
                     ('percentileBand', goal['PlayerPercentileBand']),
