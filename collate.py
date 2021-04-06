@@ -52,10 +52,10 @@ def addcommodities(data):
     for commodity in data['lastStarport'].get('commodities'):
         key = int(commodity['id'])
         new = {
-            'id'       : commodity['id'],
-            'symbol'   : commodity['name'],
-            'category' : companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
-            'name'     : commodity.get('locName') or 'Limpets',
+            'id':        commodity['id'],
+            'symbol':    commodity['name'],
+            'category':  companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
+            'name':      commodity.get('locName') or 'Limpets',
         }
 
         old = commodities.get(key)
