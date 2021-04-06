@@ -36,6 +36,8 @@ jobs:
         BASE_REPO_OWNER: ${{github.event.pull_request.base.repo.owner.login}}
 
       run: |
+        echo "BASE_REPO_URL: ${BASE_REPO_URL}"
+        echo "BASE_REPO_OWNER: ${BASE_REPO_OWNER}"
         # Add the 'base' repo as a new remote
         git remote add ${BASE_REPO_OWNER} ${BASE_REPO_URL}
         # And then fetch its references
@@ -70,6 +72,9 @@ jobs:
         BASE_REF: ${{github.base_ref}}
 
       run: |
+        echo "BASE_REPO_URL: ${BASE_REPO_URL}"
+        echo "BASE_REPO_OWNER: ${BASE_REPO_OWNER}"
+        echo "BASE_REF: ${BASE_REF}"
         # Explicitly check for some errors
         # E9 - Runtime (syntax and the like)
         # F63 - 'tests' checking
