@@ -319,7 +319,7 @@ def credentials(cmdr: str) -> Optional[str]:
         return None
 
 
-def journal_entry(
+def journal_entry(  # noqa: C901, CCR001
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
 ) -> None:
     """Journal entry hook."""
@@ -1055,7 +1055,7 @@ def journal_entry(
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data: CAPIData, is_beta):
+def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
@@ -1110,7 +1110,7 @@ def cmdr_data(data: CAPIData, is_beta):
             this.lastcredits = float(data['commander']['credits'])
 
 
-def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:
+def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 
@@ -1282,7 +1282,7 @@ def try_send_data(url: str, data: Mapping[str, Any]) -> None:
             return
 
 
-def send_data(url: str, data: Mapping[str, Any]) -> bool:
+def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     """
     Write a set of events to the inara API.
 
@@ -1347,7 +1347,7 @@ def update_location(event: Dict[str, Any] = None) -> None:
             plug.invoke(plugin, None, 'inara_notify_location', this.lastlocation)
 
 
-def inara_notify_location(eventData: Dict[str, Any]) -> None:
+def inara_notify_location(event_data: Dict[str, Any]) -> None:
     """Unused."""
     pass
 
