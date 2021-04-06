@@ -4,13 +4,43 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 Pre-Release 5.0.0-beta4
 ===
 
+* Now using Python 3.9.4.
+  
+* Some initial support for things new in Odyssey has been added.  We can 
+  detect when you're on-foot and at a station, so as to leverage Frontier 
+  CAPI to send data about the station to EDDN etc.
+  
+  **NB: Due to shortcomings in Journal support we can only detect your 
+  'station' location on orbital stations, and only when you first login 
+  there, not for subsequent Disembarking at one, and not at all for surface 
+  ports, let alone surface settlements.**
+  
+  More support, for things like the 'ShipLocker' inventory of all the new 
+  materials, will be added in a subsequent beta.
+
+* A little TRACE logging output has been commented out for now.
+
 Plugin Developers
 ---
 
-* All of our static data, such as mappings of names, should now be in
-  edmc_data.py.  So adjust any imports accordingly.  Any future such will
-  be placed in this file.  We will endeavour not to make breaking changes to
-  this file without a Major version bump.
+* All static data that is cleared for use by plugins is now in the file 
+  `edmc_data.py` and should be imported from there, not *any* other module.
+  
+  The one thing we didn't move was the 'bracket map' dictionaries in td.py 
+  as they're for use only by the code in that file.
+  
+  All future such data will be added to this file, and we'll endeavour not 
+  to make breaking changes to any of it without increasing our Major version.
+
+* We now change the current working directory of EDMarketConnector.exe to 
+  its location as soon as possible in its execution.  We're also now more 
+  paranoid about ensuring we reference the full path to the `.gitversion` file.
+  
+  However, no plugin should itself call `os.chdir(...)` or equivalent.  You'll
+  change the current working directory for all core code and other plugins as
+  well (it's global to the whole **process**, not per-thread).  Use full 
+  absolute paths instead (`pathlib` is what to use for this)
+
 
 Pre-Release 5.0.0-beta3
 ===
