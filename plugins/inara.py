@@ -747,8 +747,8 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Fleet
         if event_name == 'StoredShips':
-            fleet = sorted(
-                [{
+            fleet: List[OrderedDictT[str, Any]] = sorted(
+                [OrderedDict({
                     'shipType': x['ShipType'],
                     'shipGameID': x['ShipID'],
                     'shipName': x.get('Name'),
@@ -756,15 +756,15 @@ def journal_entry(  # noqa: C901, CCR001
                     'starsystemName': entry['StarSystem'],
                     'stationName': entry['StationName'],
                     'marketID': entry['MarketID'],
-                } for x in entry['ShipsHere']] +
-                [{
+                }) for x in entry['ShipsHere']] +
+                [OrderedDict({
                     'shipType': x['ShipType'],
                     'shipGameID': x['ShipID'],
                     'shipName': x.get('Name'),
                     'isHot': x['Hot'],
                     'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
                     'marketID': x.get('ShipMarketID'),  # "
-                } for x in entry['ShipsRemote']],
+                }) for x in entry['ShipsRemote']],
                 key=itemgetter('shipGameID')
             )
 
