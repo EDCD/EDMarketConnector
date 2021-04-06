@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-#
-# Script for collating lists of seen commodities, modules and ships from dumps of the Companion API output
-#
+"""Collate lists of seen commodities, modules and ships from dumps of the Companion API output."""
 
 import csv
 import json
@@ -22,7 +20,6 @@ def __make_backup(file_name: str, suffix: str = '.bak') -> None:
     :param file_name: The name of the file to make a backup of
     :param suffix: The suffix to use for backup files (default '.bak')
     """
-
     backup_name = file_name + suffix
 
     if isfile(backup_name):
@@ -31,9 +28,13 @@ def __make_backup(file_name: str, suffix: str = '.bak') -> None:
     os.rename(file_name, backup_name)
 
 
-# keep a summary of commodities found using in-game names
-# Assumes that the commodity data has already been 'fixed up'
-def addcommodities(data):
+def addcommodities(data) -> None:  # noqa: CCR001
+    """
+    Keep a summary of commodities found using in-game names.
+
+    Assumes that the commodity data has already been 'fixed up'
+    :param data: - Fixed up commodity data.
+    """
     if not data['lastStarport'].get('commodities'):
         return
 
@@ -104,7 +105,7 @@ def addmodules(data):
         # sanity check
         key = int(key)
         if key != module.get('id'):
-            raise ValueError(f'id: {key} != {module['id']}')
+            raise ValueError(f'id: {key} != {module["id"]}')
 
         try:
             new = outfitting.lookup(module, ship_name_map, True)
