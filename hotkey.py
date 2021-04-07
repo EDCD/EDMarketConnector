@@ -2,16 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
+import tkinter as tk
 from sys import platform
 from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 from config import config
 from EDMCLogging import get_main_logger
 
-# isort: off
-if TYPE_CHECKING:
-    import tkinter as tk
-# isort: on
 
 logger = get_main_logger()
 
