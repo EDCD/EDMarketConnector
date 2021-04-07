@@ -193,7 +193,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with open(pathlib.Path(config.get_str('outdir')) / oldfiles[-1], 'rU') as h:
+        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open('r') as h:
             if h.read() == string:
                 return  # same as last time - don't write
 
