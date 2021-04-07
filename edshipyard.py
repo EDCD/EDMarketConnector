@@ -171,8 +171,10 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
         multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
 
-        range_unladen = multiplier / (mass + fuel) + jumpboost,
+        range_unladen = multiplier / (mass + fuel) + jumpboost
         range_laden = multiplier / (mass + fuel + cargo) + jumpboost
+        # As of 2021-04-07 edsy.org says text import not yet implemented, so ignore the possible issue with
+        # a locale that uses comma for decimal separator.
         string += f'Range : {range_unladen:.2f} LY unladen\n        {range_laden:.2f} LY laden\n'
 
     except Exception:
