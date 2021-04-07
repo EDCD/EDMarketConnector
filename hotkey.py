@@ -1,3 +1,4 @@
+"""Handle keyboard input for manual update triggering."""
 # -*- coding: utf-8 -*-
 
 from os.path import join
@@ -8,11 +9,15 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if platform == 'darwin':
+if platform == 'darwin':  # noqa: C901
 
     import objc
-
-    from AppKit import NSApplication, NSWorkspace, NSBeep, NSSound, NSEvent, NSKeyDown, NSKeyUp, NSFlagsChanged, NSKeyDownMask, NSFlagsChangedMask, NSShiftKeyMask, NSControlKeyMask, NSAlternateKeyMask, NSCommandKeyMask, NSNumericPadKeyMask, NSDeviceIndependentModifierFlagsMask, NSF1FunctionKey, NSF35FunctionKey, NSDeleteFunctionKey, NSClearLineFunctionKey
+    from AppKit import (
+        NSAlternateKeyMask, NSApplication, NSBeep, NSClearLineFunctionKey, NSCommandKeyMask, NSControlKeyMask,
+        NSDeleteFunctionKey, NSDeviceIndependentModifierFlagsMask, NSEvent, NSF1FunctionKey, NSF35FunctionKey,
+        NSFlagsChanged, NSFlagsChangedMask, NSKeyDown, NSKeyDownMask, NSKeyUp, NSNumericPadKeyMask, NSShiftKeyMask,
+        NSSound, NSWorkspace
+    )
 
     class HotkeyMgr:
 
@@ -189,9 +194,9 @@ elif platform == 'win32':
 
     import atexit
     import ctypes
-    from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
     import threading
     import winsound
+    from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 
     RegisterHotKey    = ctypes.windll.user32.RegisterHotKey
     UnregisterHotKey  = ctypes.windll.user32.UnregisterHotKey
