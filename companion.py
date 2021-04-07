@@ -22,7 +22,7 @@ from email.utils import parsedate
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import requests
 
@@ -35,7 +35,7 @@ from protocol import protocolhandler
 logger = get_main_logger()
 
 if TYPE_CHECKING:
-    def _(x): return x  # noqa: E731 # to make flake8 stop complaining that the hacked in _ method doesnt exist
+    def _(x): return x
 
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
@@ -92,6 +92,12 @@ class CAPIData(UserDict):
             self.check_modules_ships()
 
     def check_modules_ships(self) -> None:
+        """
+        Sanity check our `data` for modules and ships being as expected.
+
+        This has side-effects of fixing `data` to be as expected in terms of
+        types of those elements.
+        """
         modules: Dict[str, Any] = self.data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
@@ -158,7 +164,7 @@ def listify(thing: Union[List, Dict]) -> List:
 class ServerError(Exception):
     """Exception Class for CAPI ServerErrors."""
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         # Raised when cannot contact the Companion API server
         self.args = args
         if not args:
@@ -172,7 +178,7 @@ class ServerLagging(Exception):
     servers are too busy.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         self.args = args
         if not args:
             self.args = (_('Error: Frontier server is lagging'),)
@@ -185,7 +191,7 @@ class SKUError(Exception):
     purchased E:D i.e. doesn't have the correct 'SKU'.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         self.args = args
         if not args:
             self.args = (_('Error: Frontier server SKU problem'),)
@@ -194,7 +200,7 @@ class SKUError(Exception):
 class CredentialsError(Exception):
     """Exception Class for CAPI Credentials error."""
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         self.args = args
         if not args:
             self.args = (_('Error: Invalid Credentials'),)
@@ -209,7 +215,7 @@ class CmdrError(Exception):
     for the old Cmdr.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         self.args = args
         if not args:
             self.args = (_('Error: Wrong Cmdr'),)
@@ -218,18 +224,19 @@ class CmdrError(Exception):
 class Auth(object):
     """Handles authentication with the Frontier CAPI service via oAuth2."""
 
-    def __init__(self, cmdr: str):
+    def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
         self.session = requests.Session()
         self.session.headers['User-Agent'] = USER_AGENT
         self.verifier: Union[bytes, None] = None
         self.state: Union[str, None] = None
 
-    def __del__(self):
+    def __del__(self) -> None:
+        """Ensure our Session is closed if we're being deleted."""
         if self.session:
             self.session.close()
 
-    def refresh(self) -> Union[str, None]:
+    def refresh(self) -> Optional[str]:
         """
         Attempt use of Refresh Token to get a valid Access Token.
 
@@ -388,12 +395,12 @@ class Session(object):
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.state = Session.STATE_INIT
-        self.server = None
-        self.credentials = None
-        self.session = None
-        self.auth = None
+        self.server: Optional[str] = None
+        self.credentials: Optional[Dict[str, Any]] = None
+        self.session: Optional[requests.Session] = None
+        self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
     def login(self, cmdr: str = None, is_beta: Union[None, bool] = None) -> bool:
@@ -456,7 +463,7 @@ class Session(object):
 
         try:
             logger.debug('Trying authorize with payload from handler')
-            self.start(self.auth.authorize(protocolhandler.lastpayload))
+            self.start(self.auth.authorize(protocolhandler.lastpayload))  # type: ignore
             self.auth = None
 
         except Exception:
@@ -486,7 +493,7 @@ class Session(object):
 
         try:
             logger.trace('Trying...')
-            r = self.session.get(self.server + endpoint, timeout=timeout)
+            r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)
@@ -598,7 +605,7 @@ class Session(object):
         logger.debug('Forcing a full re-authentication')
         # Force a full re-authentication
         self.close()
-        Auth.invalidate(self.credentials['cmdr'])
+        Auth.invalidate(self.credentials['cmdr'])  # type: ignore
 
     # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
