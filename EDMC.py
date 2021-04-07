@@ -10,7 +10,7 @@ import re
 import sys
 from os.path import getmtime, join
 from time import sleep, time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 # isort: off
 
@@ -68,7 +68,7 @@ EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EX
 JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
 
-def versioncmp(versionstring):
+def versioncmp(versionstring) -> List:
     """Quick and dirty version comparison assuming "strict" numeric only version numbers."""
     return list(map(int, versionstring.split('.')))
 
@@ -106,7 +106,7 @@ def deep_get(target: dict, *args: str, default=None) -> Any:
     return current
 
 
-def main():
+def main():  # noqa: C901, CCR001
     """Run the main code of the program."""
     try:
         # arg parsing
