@@ -44,7 +44,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
         mod_class = module['class']
         mod_rating = module['rating']
         mod_mount = module.get('mount')
-        mod_guidance = module.get('guidance')
+        mod_guidance: str = module.get('guidance')  # type: ignore
 
         ret = f'{mod_class}{mod_rating}'
         if 'guidance' in module:  # Missiles
@@ -54,7 +54,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             else:
                 mount = 'F'
 
-            guidance = mod_guidance[0],
+            guidance = mod_guidance[0]
             ret += f'/{mount}{guidance}'
 
         elif 'mount' in module:  # Hardpoints
@@ -88,22 +88,22 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             cr = class_rating(module)
             mods = v.get('modifications') or v.get('WorkInProgress_modifications') or {}
             if mods.get('OutfittingFieldType_Mass'):
-                mass += (module.get('mass', 0) * mods['OutfittingFieldType_Mass']['value'])
+                mass += float(module.get('mass', 0.0) * mods['OutfittingFieldType_Mass']['value'])
 
             else:
-                mass += module.get('mass', 0)
+                mass += float(module.get('mass', 0.0))  # type: ignore
 
             # Specials
             if 'Fuel Tank' in module['name']:
-                fuel += 2**int(module['class'])
-                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'
+                fuel += 2**int(module['class'])  # type: ignore
+                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'  # type: ignore
 
             elif 'Cargo Rack' in module['name']:
-                cargo += 2**int(module['class'])
-                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'
+                cargo += 2**int(module['class'])  # type: ignore
+                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'  # type: ignore
 
             else:
-                name = module['name']
+                name = module['name']  # type: ignore
 
             if name == 'Frame Shift Drive':
                 fsd = module  # save for range calculation
@@ -114,7 +114,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
                 if mods.get('OutfittingFieldType_MaxFuelPerJump'):
                     fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
 
-            jumpboost += module.get('jumpboost', 0)
+            jumpboost += module.get('jumpboost', 0)  # type: ignore
 
             for s in slot_map:
                 if slot.lower().startswith(s):
@@ -169,7 +169,8 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
         mass += ships[ship_name_map[data['ship']['name'].lower()]]['hullMass']
         string += f'Mass  : {mass:.2f} T empty\n        {mass + fuel + cargo:.2f} T full\n'
 
-        multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0 / fsd['fuelpower']) * fsd['optmass']
+        multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0  # type: ignore
+                         / fsd['fuelpower']) * fsd['optmass']  # type: ignore
 
         range_unladen = multiplier / (mass + fuel) + jumpboost
         range_laden = multiplier / (mass + fuel + cargo) + jumpboost
