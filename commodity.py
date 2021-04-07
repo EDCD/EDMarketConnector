@@ -1,29 +1,34 @@
-# Export various CSV formats
+"""Export various CSV formats."""
 # -*- coding: utf-8 -*-
 
-from os.path import join
-import hashlib
 import time
+from os.path import join
 
 from config import config
 from edmc_data import commodity_bracketmap as bracketmap
-
 
 # DEFAULT means semi-colon separation
 # CSV means comma separation
 (COMMODITY_DEFAULT, COMMODITY_CSV) = range(2)
 
 
-def export(data, kind=COMMODITY_DEFAULT, filename=None):
+def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
+    """
+    Export commodity data from the given CAPI data.
+
+    :param data: CAPI data.
+    :param kind: The type of file to write.
+    :param filename: Filename to write to, or None for a standard format name.
+    :return:
+    """
     querytime = config.get_int('querytime', default=int(time.time()))
 
     if not filename:
-        filename = '{system}.{starport}.{time}.{kind}'.format(
-            system=data['lastSystem']['name'].strip(),
-            starport=data['lastStarport']['name'].strip(),
-            time=time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)),
-            kind='csv'
-        )
+        filename_system = data['lastSystem']['name'].strip(),
+        filename_starport = data['lastStarport']['name'].strip(),
+        filename_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)),
+        filename_kind = 'csv'
+        filename = f'{filename_system}.{filename_starport}.{filename_time}.{filename_kind}'
         filename = join(config.get_str('outdir'), filename)
 
     if kind == COMMODITY_CSV:
