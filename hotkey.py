@@ -14,7 +14,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 
-class AbstractHotkeyMgr(abc.abstractmethod):
+class AbstractHotkeyMgr(abc.ABC):
     """Abstract root class of all platforms specific HotKeyMgr."""
 
     @abstractmethod
@@ -51,7 +51,6 @@ if sys.platform == 'darwin':
 class MacHotkeyMgr(AbstractHotkeyMgr):
     """Hot key management."""
 
-    MODIFIERMASK = NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask | NSNumericPadKeyMask
     POLL = 250
     # https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/#//apple_ref/doc/constant_group/Function_Key_Unicodes
     DISPLAY = {
@@ -66,6 +65,8 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
     (ACQUIRE_INACTIVE, ACQUIRE_ACTIVE, ACQUIRE_NEW) = range(3)
 
     def __init__(self):
+        self.MODIFIERMASK = NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask \
+                            | NSNumericPadKeyMask
         self.root = None
 
         self.keycode = 0
@@ -182,112 +183,113 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         self.keycode = None
         self.modifiers = None
 
-    @objc.callbackFor(NSEvent.addGlobalMonitorForEventsMatchingMask_handler_)
-    def _handler(self, event) -> None:
-        # use event.charactersIgnoringModifiers to handle composing characters like Alt-e
-        if ((event.modifierFlags() & MacHotkeyMgr.MODIFIERMASK) == self.modifiers
-                and ord(event.charactersIgnoringModifiers()[0]) == self.keycode):
-            if config.get_int('hotkey_always'):
-                self.activated = True
-
-            else:  # Only trigger if game client is front process
-                front = NSWorkspace.sharedWorkspace().frontmostApplication()
-                if front and front.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+    if sys.platform == 'darwin':  # noqa: C901
+        @objc.callbackFor(NSEvent.addGlobalMonitorForEventsMatchingMask_handler_)
+        def _handler(self, event) -> None:
+            # use event.charactersIgnoringModifiers to handle composing characters like Alt-e
+            if ((event.modifierFlags() & self.MODIFIERMASK) == self.modifiers
+                    and ord(event.charactersIgnoringModifiers()[0]) == self.keycode):
+                if config.get_int('hotkey_always'):
                     self.activated = True
 
-    def acquire_start(self) -> None:
-        """Start acquiring hotkey state via polling."""
-        self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
-        self.root.after_idle(self._acquire_poll)
+                else:  # Only trigger if game client is front process
+                    front = NSWorkspace.sharedWorkspace().frontmostApplication()
+                    if front and front.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                        self.activated = True
 
-    def acquire_stop(self) -> None:
-        """Stop acquiring hotkey state."""
-        self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
+        def acquire_start(self) -> None:
+            """Start acquiring hotkey state via polling."""
+            self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
+            self.root.after_idle(self._acquire_poll)
 
-    def _acquire_poll(self) -> None:
-        """Perform a poll of current hotkey state."""
-        if config.shutting_down:
-            return
+        def acquire_stop(self) -> None:
+            """Stop acquiring hotkey state."""
+            self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
 
-        # No way of signalling to Tkinter from within the monkey-patched event handler that doesn't
-        # cause Python to crash, so poll.
-        if self.acquire_state:
-            if self.acquire_state == MacHotkeyMgr.ACQUIRE_NEW:
-                # Abuse tkEvent's keycode field to hold our acquired key & modifier
-                self.root.event_generate('<KeyPress>', keycode=self.acquire_key)
-                self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
-            self.root.after(50, self._acquire_poll)
+        def _acquire_poll(self) -> None:
+            """Perform a poll of current hotkey state."""
+            if config.shutting_down:
+                return
 
-    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
-        """
-        Return configuration (keycode, modifiers) or None=clear or False=retain previous.
+            # No way of signalling to Tkinter from within the monkey-patched event handler that doesn't
+            # cause Python to crash, so poll.
+            if self.acquire_state:
+                if self.acquire_state == MacHotkeyMgr.ACQUIRE_NEW:
+                    # Abuse tkEvent's keycode field to hold our acquired key & modifier
+                    self.root.event_generate('<KeyPress>', keycode=self.acquire_key)
+                    self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
+                self.root.after(50, self._acquire_poll)
 
-        :param event: tk event ?
-        :return: False to retain previous, None to not use, else (keycode, modifiers)
-        """
-        (keycode, modifiers) = (event.keycode & 0xffff, event.keycode & 0xffff0000)  # Set by _acquire_poll()
-        if (keycode
-                and not (modifiers & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask))):
-            if keycode == 0x1b:  # Esc = retain previous
-                self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
-                return False
+        def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
+            """
+            Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
-            # BkSp, Del, Clear = clear hotkey
-            elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
-                self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
-                return None
+            :param event: tk event ?
+            :return: False to retain previous, None to not use, else (keycode, modifiers)
+            """
+            (keycode, modifiers) = (event.keycode & 0xffff, event.keycode & 0xffff0000)  # Set by _acquire_poll()
+            if (keycode
+                    and not (modifiers & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask))):
+                if keycode == 0x1b:  # Esc = retain previous
+                    self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
+                    return False
 
-            # don't allow keys needed for typing in System Map
-            elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
-                NSBeep()
-                self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
-                return None
+                # BkSp, Del, Clear = clear hotkey
+                elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
+                    self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
+                    return None
 
-        return (keycode, modifiers)
+                # don't allow keys needed for typing in System Map
+                elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
+                    NSBeep()
+                    self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
+                    return None
 
-    def display(self, keycode, modifiers) -> str:
-        """
-        Return displayable form of given hotkey + modifiers.
+            return (keycode, modifiers)
 
-        :param keycode:
-        :param modifiers:
-        :return: string form
-        """
-        text = ''
-        if modifiers & NSControlKeyMask:
-            text += u'⌃'
+        def display(self, keycode, modifiers) -> str:
+            """
+            Return displayable form of given hotkey + modifiers.
 
-        if modifiers & NSAlternateKeyMask:
-            text += u'⌥'
+            :param keycode:
+            :param modifiers:
+            :return: string form
+            """
+            text = ''
+            if modifiers & NSControlKeyMask:
+                text += u'⌃'
 
-        if modifiers & NSShiftKeyMask:
-            text += u'⇧'
+            if modifiers & NSAlternateKeyMask:
+                text += u'⌥'
 
-        if modifiers & NSCommandKeyMask:
-            text += u'⌘'
+            if modifiers & NSShiftKeyMask:
+                text += u'⇧'
 
-        if (modifiers & NSNumericPadKeyMask) and keycode <= 0x7f:
-            text += u'№'
+            if modifiers & NSCommandKeyMask:
+                text += u'⌘'
 
-        if not keycode:
-            pass
+            if (modifiers & NSNumericPadKeyMask) and keycode <= 0x7f:
+                text += u'№'
 
-        elif ord(NSF1FunctionKey) <= keycode <= ord(NSF35FunctionKey):
-            text += f'F{keycode + 1 - ord(NSF1FunctionKey)}'
+            if not keycode:
+                pass
 
-        elif keycode in MacHotkeyMgr.DISPLAY:  # specials
-            text += MacHotkeyMgr.DISPLAY[keycode]
+            elif ord(NSF1FunctionKey) <= keycode <= ord(NSF35FunctionKey):
+                text += f'F{keycode + 1 - ord(NSF1FunctionKey)}'
 
-        elif keycode < 0x20:  # control keys
-            text += chr(keycode + 0x40)
+            elif keycode in MacHotkeyMgr.DISPLAY:  # specials
+                text += MacHotkeyMgr.DISPLAY[keycode]
 
-        elif keycode < 0xf700:  # key char
-            text += chr(keycode).upper()
+            elif keycode < 0x20:  # control keys
+                text += chr(keycode + 0x40)
 
-        else:
-            text += u'⁈'
+            elif keycode < 0xf700:  # key char
+                text += chr(keycode).upper()
 
-        return text
+            else:
+                text += u'⁈'
+
+            return text
 
     def play_good(self):
         """Play the 'good' sound."""
