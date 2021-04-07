@@ -44,7 +44,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
         mod_class = module['class']
         mod_rating = module['rating']
         mod_mount = module.get('mount')
-        mod_guidance: str = module.get('guidance')  # type: ignore
+        mod_guidance: str = str(module.get('guidance'))
 
         ret = f'{mod_class}{mod_rating}'
         if 'guidance' in module:  # Missiles
