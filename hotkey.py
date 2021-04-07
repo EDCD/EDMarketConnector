@@ -654,9 +654,27 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
 
 class LinuxHotKeyMgr(AbstractHotkeyMgr):
-    """Hot key management."""
+    """
+    Hot key management.
 
-    pass
+    Not actually implemented on Linux.  It's a no-op instead.
+    """
+
+    def register(self, root, keycode, modifiers) -> None:
+        """Register the hotkey handler."""
+        pass
+
+    def unregister(self) -> None:
+        """Unregister the hotkey handling."""
+        pass
+
+    def play_good(self) -> None:
+        """Play the 'good' sound."""
+        pass
+
+    def play_bad(self) -> None:
+        """Play the 'bad' sound."""
+        pass
 
 
 def get_hotkeymgr(*args, **kwargs) -> AbstractHotkeyMgr:
