@@ -177,7 +177,7 @@ class Dashboard(FileSystemEventHandler):
             return
 
         try:
-            with open(pathlib.Path(self.currentdir) / 'Status.json', 'rb') as h:
+            with (pathlib.Path(self.currentdir) / 'Status.json').open('rb') as h:
                 data = h.read().strip()
 
                 if data:  # Can be empty if polling while the file is being re-written
