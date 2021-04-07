@@ -107,14 +107,14 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         # Monkey-patch tk (tkMacOSXKeyEvent.c)
         if not self.tkProcessKeyEvent_old:
             sel = b'tkProcessKeyEvent:'
-            cls = NSApplication.sharedApplication().class__()
-            self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)
-            newmethod = objc.selector(
+            cls = NSApplication.sharedApplication().class__()  # type: ignore
+            self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)  # type: ignore
+            newmethod = objc.selector(  # type: ignore
                 self.tkProcessKeyEvent,
                 selector=self.tkProcessKeyEvent_old.selector,
                 signature=self.tkProcessKeyEvent_old.signature
             )
-            objc.classAddMethod(cls, sel, newmethod)
+            objc.classAddMethod(cls, sel, newmethod)  # type: ignore
 
     def tkProcessKeyEvent(self, cls, the_event):  # noqa: N802
         """
@@ -444,9 +444,9 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         0xa6: u'⇦', 0xa7: u'⇨', 0xa9: u'⊗', 0xab: u'☆', 0xac: u'⌂', 0xb4: u'✉',
     }
 
-    def __init__(self):
-        self.root = None
-        self.thread = None
+    def __init__(self) -> None:
+        self.root: tk.Tk = None  # type: ignore
+        self.thread: threading.Thread = None  # type: ignore
         with open(pathlib.Path(config.respath) / 'snd_good.wav', 'rb') as sg:
             self.snd_good = sg.read()
         with open(pathlib.Path(config.respath) / 'snd_bad.wav', 'rb') as sb:
@@ -479,7 +479,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
         if thread:
             logger.debug('Thread is/was running')
-            self.thread = None
+            self.thread = None  # type: ignore
             logger.debug('Telling thread WM_QUIT')
             PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
             logger.debug('Joining thread')
@@ -496,7 +496,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         # Hotkey must be registered by the thread that handles it
         if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
             logger.debug("We're not the right thread?")
-            self.thread = None
+            self.thread = None  # type: ignore
             return
 
         fake = INPUT(INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None)))
@@ -539,7 +539,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
         logger.debug('Exited GetMessage() loop.')
         UnregisterHotKey(None, 1)
-        self.thread = None
+        self.thread = None  # type: ignore
         logger.debug('Done.')
 
     def acquire_start(self) -> None:
@@ -677,7 +677,7 @@ class LinuxHotKeyMgr(AbstractHotkeyMgr):
         pass
 
 
-def get_hotkeymgr(*args, **kwargs) -> AbstractHotkeyMgr:
+def get_hotkeymgr() -> AbstractHotkeyMgr:
     """
     Determine platform-specific HotkeyMgr.
 
@@ -687,13 +687,13 @@ def get_hotkeymgr(*args, **kwargs) -> AbstractHotkeyMgr:
     :raises ValueError: If unsupported platform.
     """
     if sys.platform == 'darwin':
-        return MacHotkeyMgr(*args, **kwargs)
+        return MacHotkeyMgr()
 
     elif sys.platform == 'win32':
-        return WindowsHotkeyMgr(*args, **kwargs)
+        return WindowsHotkeyMgr()
 
     elif sys.platform == 'linux':
-        return LinuxHotKeyMgr(*args, **kwargs)
+        return LinuxHotKeyMgr()
 
     else:
         raise ValueError(f'Unknown platform: {sys.platform}')
