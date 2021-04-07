@@ -4,11 +4,10 @@
 import pathlib
 import tkinter as tk
 from sys import platform
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from config import config
 from EDMCLogging import get_main_logger
-
 
 logger = get_main_logger()
 
