@@ -60,11 +60,13 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
             ))
 
             if kind == COMMODITY_DEFAULT:
-                line = sep.join((
-                    line,
-                    str(int(commodity['meanPrice'])),
-                    str(commodity['id']),
-                    data['timestamp'] + '\n')
+                line = sep.join(
+                    (
+                        line,
+                        str(int(commodity['meanPrice'])),
+                        str(commodity['id']),
+                        data['timestamp'] + '\n'
+                    )
                 )
 
             else:
