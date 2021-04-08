@@ -1076,16 +1076,20 @@ class AppWindow(object):
 
     def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
+        if not (loadout := monitor.ship()):
+            logger.warning('No ship loadout, aborting.')
+            return ''
+
         if not bool(config.get_int("use_alt_shipyard_open")):
             return plug.invoke(config.get_str('shipyard_provider'),
                                'EDSY',
                                'shipyard_url',
-                               monitor.ship(),
+                               loadout,
                                monitor.is_beta)
 
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
-        target = plug.invoke(provider, 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
         file_name = join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
