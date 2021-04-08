@@ -428,7 +428,7 @@ Msg:\n{msg}'''
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
-                ships['unavailable_list']
+                (ship['name'].lower() for ship in ships['unavailable_list'] or {}),
             )
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -550,7 +550,7 @@ Msg:\n{msg}'''
                 ]),
             })
 
-        this.shipyard = (horizons, shipyard)
+        # this.shipyard = (horizons, shipyard)
 
     def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
