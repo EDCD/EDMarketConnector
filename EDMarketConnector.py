@@ -831,6 +831,13 @@ class AppWindow(object):
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
+                    if not monitor.state['Modules']:
+                        self.ship.configure(state=tk.DISABLED)
+
+                # We might have disabled this in the conditional above.
+                if monitor.state['Modules']:
+                    self.ship.configure(state=True)
+
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
                     monitor.state['Loan'] = data['commander'].get('debt', 0)
@@ -938,7 +945,14 @@ class AppWindow(object):
                 if not ship_text:
                     ship_text = ''
 
-                self.ship.configure(text=ship_text, url=self.shipyard_url)
+                # Ensure the ship type/name text is clickable, if it should be.
+                if monitor.state['Modules']:
+                    ship_state = True
+
+                else:
+                    ship_state = tk.DISABLED
+
+                self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
 
             else:
                 self.cmdr['text'] = ''
