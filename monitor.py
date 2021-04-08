@@ -623,7 +623,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'Disembark':
                 # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
-                self.station = None
+
+                # If we're not exiting one of these then it's from our own ship, and then we should already have
+                # self.station set correctly.
+                if entry['SRV'] or entry['Taxi'] or entry['Multicrew']:
+                    self.station = None
+
                 self.state['OnFoot'] = True
 
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
