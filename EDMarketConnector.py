@@ -831,6 +831,13 @@ class AppWindow(object):
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
 
+                    if not monitor.state['Modules']:
+                        self.ship.configure(state=tk.DISABLED)
+
+                # We might have disabled this in the conditional above.
+                if monitor.state['Modules']:
+                    self.ship.configure(state=True)
+
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
                     monitor.state['Loan'] = data['commander'].get('debt', 0)
@@ -938,7 +945,14 @@ class AppWindow(object):
                 if not ship_text:
                     ship_text = ''
 
-                self.ship.configure(text=ship_text, url=self.shipyard_url)
+                # Ensure the ship type/name text is clickable, if it should be.
+                if monitor.state['Modules']:
+                    ship_state = True
+
+                else:
+                    ship_state = tk.DISABLED
+
+                self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
 
             else:
                 self.cmdr['text'] = ''
@@ -1076,16 +1090,20 @@ class AppWindow(object):
 
     def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
+        if not (loadout := monitor.ship()):
+            logger.warning('No ship loadout, aborting.')
+            return ''
+
         if not bool(config.get_int("use_alt_shipyard_open")):
             return plug.invoke(config.get_str('shipyard_provider'),
                                'EDSY',
                                'shipyard_url',
-                               monitor.ship(),
+                               loadout,
                                monitor.is_beta)
 
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
-        target = plug.invoke(provider, 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+        target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
         file_name = join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
