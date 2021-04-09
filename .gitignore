@@ -18,3 +18,7 @@ EDMarketConnector.VisualElementsManifest.xml
 .idea
 .vscode
 venv
+*.code-workspace
+htmlcov/
+.ignored
+.coverage
