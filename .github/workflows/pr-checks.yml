@@ -17,6 +17,10 @@ jobs:
 
     steps:
 
+    # Debug show the info we have to work with
+    - name: Show github context
+      run: cat $GITHUB_EVENT_PATH
+
     ####################################################################
     # Checkout the necessary commits
     ####################################################################
