@@ -82,7 +82,7 @@ class Dashboard(FileSystemEventHandler):
         elif polling and self.observer:
             logger.debug('Using polling, stopping observer...')
             self.observer.stop()
-            self.observer = None
+            self.observer = None  # type: ignore
             logger.debug('Done')
 
         if not self.observed and not polling:
@@ -130,7 +130,7 @@ class Dashboard(FileSystemEventHandler):
             logger.debug('Joining self.observer...')
             self.observer.join()
             logger.debug('Done')
-            self.observer = None
+            self.observer = None  # type: ignore
 
         logger.debug('Done.')
 
@@ -148,6 +148,7 @@ class Dashboard(FileSystemEventHandler):
             self.process()
 
             if first_time:
+                emitter = None
                 # Watchdog thread
                 if self.observed:
                     emitter = self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
