@@ -25,9 +25,9 @@ jobs:
     - name: Checkout head commits
       # https://github.com/actions/checkout
       uses: actions/checkout@v2
-      with:
-        repository: ${{github.event.pull_request.head.repo.full_name}}
-        fetch-depth: 0
+        #with:
+        #repository: ${{github.event.pull_request.head.repo.full_name}}
+        #fetch-depth: 0
 
     # But we do need the base references
     - name: Fetch base commits
