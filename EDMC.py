@@ -106,7 +106,7 @@ def deep_get(target: dict, *args: str, default=None) -> Any:
     return current
 
 
-def main():  # noqa: C901, CCR001
+def main():
     """Run the main code of the program."""
     try:
         # arg parsing
