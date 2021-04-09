@@ -12,6 +12,7 @@ dump
 *.wixobj
 appcast_win_*.xml
 appcast_mac_*.xml
+ChangeLog.html
 EDMarketConnector.VisualElementsManifest.xml
 *.zip
 
