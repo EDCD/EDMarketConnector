@@ -182,6 +182,7 @@ class AbstractConfig(abc.ABC):
 
     __in_shutdown = False  # Is the application currently shutting down ?
     __auth_force_localserver = False  # Should we use localhost for auth callback ?
+    __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -211,6 +212,19 @@ class AbstractConfig(abc.ABC):
         :return: bool - True if we should use localhost web server.
         """
         return self.__auth_force_localserver
+
+    def set_auth_force_edmc_protocol(self):
+        """Set flag to force use of localhost web server for Frontier Auth callback."""
+        self.__auth_force_edmc_protocol = True
+
+    @property
+    def auth_force_edmc_protocol(self) -> bool:
+        """
+        Determine if use of localhost is forced for Frontier Auth callback.
+
+        :return: bool - True if we should use localhost web server.
+        """
+        return self.__auth_force_edmc_protocol
 
     @property
     def app_dir(self) -> str:

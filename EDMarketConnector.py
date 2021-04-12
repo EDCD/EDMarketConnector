@@ -111,6 +111,15 @@ if __name__ == '__main__':  # noqa: C901
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
 
+    if args.force_edmc_protocol:
+        if sys.platform == 'win32':
+            config.set_auth_force_edmc_protocol()
+
+        else:
+            print("--force-edmc-protocol is only valid on Windows")
+            parser.print_help()
+            exit(1)
+
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
         logger.trace('Begin...')
