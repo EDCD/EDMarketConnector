@@ -90,6 +90,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('--force-edmc-protocol',
+                        help='Force use of the edmc:// protocol handler.  Error if not on Windows',
+                        action='store_true',
+                        )
+
     parser.add_argument('edmc',
                         help='Callback from Frontier Auth',
                         nargs='*'
