@@ -996,6 +996,7 @@ class LinuxConfig(AbstractConfig):
             raise ValueError(f'Unexpected type for value {type(val)=}')
 
         self.config.set(self.SECTION, key, to_set)
+        self.save()
 
     def delete(self, key: str, *, suppress=False) -> None:
         """
