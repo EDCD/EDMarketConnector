@@ -295,7 +295,14 @@ class Auth(object):
         logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
-            f'{SERVER_AUTH}{URL_AUTH}?response_type=code&audience=frontier,steam,epic&scope=capi&client_id={CLIENT_ID}&code_challenge={challenge}&code_challenge_method=S256&state={self.state}&redirect_uri={protocolhandler.redirect}'  # noqa: E501 # I cant make this any shorter
+            f'{SERVER_AUTH}{URL_AUTH}?response_type=code'
+            f'&audience=frontier,steam,epic'
+            f'&scope=auth capi'
+            f'&client_id={CLIENT_ID}'
+            f'&code_challenge={challenge}'
+            f'&code_challenge_method=S256'
+            f'&state={self.state}'
+            f'&redirect_uri={protocolhandler.redirect}'
         )
 
         return None
