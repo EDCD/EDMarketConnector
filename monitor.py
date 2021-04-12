@@ -520,7 +520,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Statistics': {},
                     'Role':       None,
                 })
-                if self._RE_SHIP_ONFOOT.search(entry['Ship']):
+                if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
 
             elif event_type == 'NewCommander':
