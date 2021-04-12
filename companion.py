@@ -329,7 +329,7 @@ class Auth(object):
                 (data[k] for k in ('error_description', 'error', 'message') if k in data),
                 '<unknown error>'
             )
-            raise CredentialsError(f'Error: {error!r}')
+            raise CredentialsError(f'{_("Error")}: {error!r}')
 
         r = None
         try:
@@ -367,16 +367,16 @@ class Auth(object):
 
                 if (usr := data_decode.get('usr')) is None:
                     logger.error('No "usr" in /decode data')
-                    raise CredentialsError("Error: Couldn't check token customer_id")
+                    raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 if (customer_id := usr.get('customer_id')) is None:
                     logger.error('No "usr"->"customer_id" in /decode data')
-                    raise CredentialsError("Error: Couldn't check token customer_id")
+                    raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 # All 'FID' seen in Journals so far have been 'F<id>'
                 # Frontier, Steam and Epic
                 if f'F{customer_id}' != monitor.state.get('FID'):
-                    raise CredentialsError("Error: customer_id doesn't match!")
+                    raise CredentialsError(_("Error: customer_id doesn't match!"))
 
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
                 cmdrs = config.get_list('cmdrs', default=[])
@@ -397,7 +397,7 @@ class Auth(object):
             if r:
                 self.dump(r)
 
-            raise CredentialsError('unable to get token') from e
+            raise CredentialsError(_('Error: unable to get token')) from e
 
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
         self.dump(r)
@@ -405,7 +405,7 @@ class Auth(object):
             (data[k] for k in ('error_description', 'error', 'message') if k in data),
             '<unknown error>'
         )
-        raise CredentialsError(f'Error: {error!r}')
+        raise CredentialsError(f'{_("Error")}: {error!r}')
 
     @staticmethod
     def invalidate(cmdr: str) -> None:
