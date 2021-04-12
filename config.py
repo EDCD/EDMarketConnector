@@ -1008,6 +1008,7 @@ class LinuxConfig(AbstractConfig):
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
+        self.save()
 
     def save(self) -> None:
         """
