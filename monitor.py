@@ -105,6 +105,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.stationtype: Optional[str] = None
         self.coordinates: Optional[Tuple[float, float, float]] = None
         self.systemaddress: Optional[int] = None
+        self.systempopulation: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
         self.__init_state()
