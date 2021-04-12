@@ -563,6 +563,9 @@ running. In this case you won't receive initial events such as "LoadGame",
 "Rank", "Location", etc. However the `state` dictionary will reflect the
 cumulative effect of these missed events.
 
+**NB: Any of the values in this might be `None` if the Cmdr has loaded into
+Arena (CQC) from the Main Menu.**
+
 Similarly, a special "ShutDown" entry is sent when the game stops writing
 to the Journal without writing a "Shutdown" event.
 This might happen, for example, when the game client crashes.
