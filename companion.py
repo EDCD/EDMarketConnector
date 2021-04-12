@@ -341,6 +341,13 @@ class Auth(object):
                 'redirect_uri': protocolhandler.redirect,
             }
 
+            # import http.client as http_client
+            # http_client.HTTPConnection.debuglevel = 1
+            # import logging
+            # requests_log = logging.getLogger("requests.packages.urllib3")
+            # requests_log.setLevel(logging.DEBUG)
+            # requests_log.propagate = True
+
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=request_data, timeout=auth_timeout)
             data = r.json()
             if r.status_code == requests.codes.ok:
