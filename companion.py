@@ -373,6 +373,8 @@ class Auth(object):
                     logger.error('No "usr"->"customer_id" in /decode data')
                     raise CredentialsError("Error: Couldn't check token customer_id")
 
+                # All 'FID' seen in Journals so far have been 'F<id>'
+                # Frontier, Steam and Epic
                 if f'F{customer_id}' != monitor.state.get('FID'):
                     raise CredentialsError("Error: customer_id doesn't match!")
 
