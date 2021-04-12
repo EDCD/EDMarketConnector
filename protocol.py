@@ -113,7 +113,13 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
             protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
 
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
+elif (config.auth_force_edmc_protocol
+      or (
+              sys.platform == 'win32'
+              and getattr(sys, 'frozen', False)
+              and not is_wine
+              and not config.auth_force_localserver
+      )):
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
     from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
@@ -415,7 +421,14 @@ protocolhandler: GenericProtocolHandler
 if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
     protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
 
-elif sys.platform == 'win32' and getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver:
+elif (
+        sys.platform == 'win32'
+        and config.auth_force_edmc_protocol or (
+            getattr(sys, 'frozen', False)
+            and not is_wine
+            and not config.auth_force_localserver
+        )
+        ):
     protocolhandler = WindowsProtocolHandler()
 else:
     protocolhandler = LinuxProtocolHandler()
