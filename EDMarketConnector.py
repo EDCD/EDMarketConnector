@@ -85,10 +85,16 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
-    parser.add_argument('--force-localserver-for-auth',
-                        help='Force EDMC to use a localhost webserver for Frontier Auth callback',
-                        action='store_true'
-                        )
+    auth_options = parser.add_mutually_exclusive_group(required=False)
+    auth_options.add_argument('--force-localserver-for-auth',
+                              help='Force EDMC to use a localhost webserver for Frontier Auth callback',
+                              action='store_true'
+                              )
+
+    auth_options.add_argument('--force-edmc-protocol',
+                              help='Force use of the edmc:// protocol handler.  Error if not on Windows',
+                              action='store_true',
+                              )
 
     parser.add_argument('edmc',
                         help='Callback from Frontier Auth',
@@ -105,6 +111,15 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
+
+    if args.force_edmc_protocol:
+        if sys.platform == 'win32':
+            config.set_auth_force_edmc_protocol()
+
+        else:
+            print("--force-edmc-protocol is only valid on Windows")
+            parser.print_help()
+            exit(1)
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
