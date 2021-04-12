@@ -85,15 +85,16 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
-    parser.add_argument('--force-localserver-for-auth',
-                        help='Force EDMC to use a localhost webserver for Frontier Auth callback',
-                        action='store_true'
-                        )
+    auth_options = parser.add_mutually_exclusive_group(required=False)
+    auth_options.add_argument('--force-localserver-for-auth',
+                              help='Force EDMC to use a localhost webserver for Frontier Auth callback',
+                              action='store_true'
+                              )
 
-    parser.add_argument('--force-edmc-protocol',
-                        help='Force use of the edmc:// protocol handler.  Error if not on Windows',
-                        action='store_true',
-                        )
+    auth_options.add_argument('--force-edmc-protocol',
+                              help='Force use of the edmc:// protocol handler.  Error if not on Windows',
+                              action='store_true',
+                              )
 
     parser.add_argument('edmc',
                         help='Callback from Frontier Auth',
