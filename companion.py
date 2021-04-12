@@ -56,6 +56,7 @@ CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
 SERVER_AUTH = 'https://auth.frontierstore.net'
 URL_AUTH = '/auth'
 URL_TOKEN = '/token'
+URL_DECODE = '/decode'
 
 USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
@@ -307,7 +308,7 @@ class Auth(object):
 
         return None
 
-    def authorize(self, payload: str) -> str:
+    def authorize(self, payload: str) -> str:  # noqa: CCR001
         """Handle oAuth authorization callback.
 
         :return: access token if successful, otherwise raises CredentialsError.
@@ -349,18 +350,42 @@ class Auth(object):
             # requests_log.propagate = True
 
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=request_data, timeout=auth_timeout)
-            data = r.json()
+            data_token = r.json()
             if r.status_code == requests.codes.ok:
+                # Now we need to /decode the token to check the customer_id against FID
+                r = self.session.get(
+                    SERVER_AUTH + URL_DECODE,
+                    headers={
+                        'Authorization': f'Bearer {data_token.get("access_token", "")}',
+                        'Content-Type': 'application/json',
+                    },
+                    timeout=auth_timeout
+                )
+                data_decode = r.json()
+                if r.status_code != requests.codes.ok:
+                    r.raise_for_status()
+
+                if (usr := data_decode.get('usr')) is None:
+                    logger.error('No "usr" in /decode data')
+                    raise CredentialsError("Error: Couldn't check token customer_id")
+
+                if (customer_id := usr.get('customer_id')) is None:
+                    logger.error('No "usr"->"customer_id" in /decode data')
+                    raise CredentialsError("Error: Couldn't check token customer_id")
+
+                if f'F{customer_id}' != monitor.state.get('FID'):
+                    raise CredentialsError("Error: customer_id doesn't match!")
+
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
                 cmdrs = config.get_list('cmdrs', default=[])
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get_list('fdev_apikeys', default=[])
                 tokens = tokens + [''] * (len(cmdrs) - len(tokens))
-                tokens[idx] = data.get('refresh_token', '')
+                tokens[idx] = data_token.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
                 config.save()  # Save settings now for use by command-line app
 
-                return str(data.get('access_token'))
+                return str(data_token.get('access_token'))
 
         except Exception as e:
             logger.exception(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
