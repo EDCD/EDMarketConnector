@@ -1265,6 +1265,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 except OSError:
                     logger.exception("OSError reading old ship loadout default encoding.")
 
+                except ValueError:
+                    # User was on $OtherEncoding, updated windows to be sane and use utf8 everywhere, thus
+                    # the above open() fails, likely with a UnicodeDecodeError, which subclasses UnicodeError which
+                    # subclasses ValueError, this catches ValueError _instead_ of UnicodeDecodeError just to be sure
+                    # that if some other encoding error crops up we grab it too.
+                    logger.exception('ValueError when reading old ship loadout default encoding')
+
             except OSError:
                 logger.exception("OSError reading old ship loadout with default encoding")
 
