@@ -1,6 +1,52 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta3
+===
+
+This pre-release allows for using the application with the Odyssey Phase 1 
+Alpha without constant complaints of 'Error: Frontier server is lagging'.
+Work is on-going for supporting any new items and features in the Alpha, 
+but this application should now be usable with it.  Please
+[report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
+any EDMC errors you experience!
+
+* Add support for detecting if a player is on-foot.  This is then used to 
+  prevent false 'Frontier server lagging' messages.
+  
+  Note that currently your on-foot location can only be detected when you 
+  login, and not when you disembark from an Apex shuttle anywhere.
+  
+* Linux and macOS: You can now set a font name and size in your config file.  
+  Ensuring this is a TTF font, rather than a bitmap font, should allow the 
+  application UI scaling to work.
+  
+    1. 'font' - the font name to attempt using
+    2. 'font_size' - the font size to attempt using.
+  
+  There is no UI for this in Preferences, you will need to edit your
+  [config file](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#location-of-configuration-files)
+  to set or change it, and then restart the application.
+  
+  This is not supported on Windows so as not to risk weird bugs.  UI 
+  Scaling works on Windows without this.
+  
+* Code to do with processing Journal events was reworked and noisy logging 
+  reduced as a consequence.
+  
+Plugin Authors
+---
+
+* The new materials added in Odyssey (for things like Suit and on-foot 
+  Weapon upgrades) are now tracked in the `state['Component']` dictionary.
+  
+  NB: Only from the `MissionCompleted` event at this point, support still 
+  needs adding for the `ShipLockerMaterials` event to synchronise totals at 
+  login.
+  
+* `companion.ship_map` was moved to `util_ships.ship_map` so as to avoid an 
+  import loop from some other changes.
+
 Pre-Release 5.0.0-beta2
 ===
 

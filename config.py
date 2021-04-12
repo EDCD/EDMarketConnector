@@ -40,10 +40,9 @@ appcmdname = 'EDMC'
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
-appversion = '4.2.0-beta1'  #-rc1+a872b5f'
-# For some things we want appversion without (possible) +build metadata
-appversion_nobuild = str(semantic_version.Version(appversion).truncate('prerelease'))
-copyright = u'© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
+# NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
+_static_appversion = '5.0.0-beta3'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
