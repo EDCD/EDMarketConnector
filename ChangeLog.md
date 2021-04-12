@@ -1,6 +1,45 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta5
+===
+
+* Ship Type/Name will now be greyed out, and not clickable, if we don't
+  currently have loadout information for it.  This prevents trying to send an
+  empty loadout to your shipyard provider.
+
+* Sanity check a returned Frontier Authentication token to be sure it's for
+  the current Commander.  If it's not you'll see `Error: customer_id doesn't
+  match!` on the bottom status line.  Double-check you're using the correct
+  credentials when authing!
+
+* Bug fixed when handling CAPI-sourced shipyard information.  This would
+  currently only have shown up on live for Fleet Carriers due to a Frontier 
+  bug with not returning shipyard data at all for normal stations.
+  
+  It has been observed that Frontier has fixed this bug for Odyssey.
+
+* Don't try to get Ship information from `LoadGame` event if directly in CQC.
+  
+* A lot of general code cleanup relating to: Inara, outfitting, Frontier 
+  CAPI, hotkey (manual Updates), dashboard (Status.json monitoring), 
+  commodities files, ED format ship loadout files.
+  
+* Inara: Don't attempt to send an empty 
+  `setCommanderReputationMajorFaction` API call.  This quietens an error 
+  from the Inara API caused when a Cmdr literally has no Major Faction 
+  Reputation yet.
+  
+Plugin Developers
+---
+
+* Initial support for new Odyssey "MicroResources" (Data, Item, Component
+  and Consumable) in the "Ship Locker" and "BackPack".  NB: Currently the
+  `ShipLockerMaterials` event omits a `Data` array, so we can't properly
+  track those.
+  
+  See the updated PLUGINS.md for details about this in the `state` dictionary.
+
 Pre-Release 5.0.0-beta4
 ===
 
