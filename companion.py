@@ -387,6 +387,9 @@ class Auth(object):
 
                 return str(data_token.get('access_token'))
 
+        except CredentialsError:
+            raise
+
         except Exception as e:
             logger.exception(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
             if r:
