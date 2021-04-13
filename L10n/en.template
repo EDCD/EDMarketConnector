@@ -532,6 +532,9 @@
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "UI Scale Percentage";
 
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Unknown";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Update";
 
