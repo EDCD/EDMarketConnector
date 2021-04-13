@@ -531,6 +531,15 @@ Content of `state` (updated to the current journal entry):
 | `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
 | `ModuleInfo`   |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
 | `OnFoot`       |           `bool`            | Whether the Cmdr is on foot                                                                                     |
+| `Component`    |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
+| `Item`         |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
+| `Consumable`   |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
+| `Data`         |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
+| `BackPack`     |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
+| `SuitCurrent`  |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
+| `Suits`        |           `dict`            | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `SuitLoadoutCurrent` |     `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
+| `SuitLoadouts` |           `dict`            | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 
 New in version 4.1.6:
 
@@ -553,8 +562,12 @@ Journal `ModuleInfo` event.
 `OnFoot` is an indication as to if the player is on-foot, rather than in a
 vehicle.
 
-`Component` is a dict tracking your 'on-foot' materials for upgrading Suits 
-and on-foot weapons.
+`Component`, `Item`, `Consumable` & `Data` are `dict`s tracking your 
+Odyssey MicroResources in your Ship Locker.  `BacKPack` contains `dict`s for
+the same when you're on-foot.
+
+`SuitCurrent`, `Suits`, `SuitLoadoutCurrent` & `SuitLoadouts` hold CAPI data
+relating to suits and their loadouts.
 
 ##### Synthetic Events
 
