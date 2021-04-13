@@ -839,6 +839,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 except KeyError:
                     logger.exception(f"Getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
                     # Might mean that a new suit loadout was created and we need a new CAPI fetch ?
+                    self.state['SuitCurrent'] = None
+                    self.state['SuitLoadoutCurrent'] = None
 
                 else:
                     try:

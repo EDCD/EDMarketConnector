@@ -607,11 +607,13 @@ class AppWindow(object):
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
         if (suit := monitor.state.get('SuitCurrent')) is None:
+            self.suit['text'] = f'<{_("Unknown")}>'
             return
 
         suitname = suit['locName']
 
         if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
+            self.suit['text'] = ''
             return
 
         loadout_name = suitloadout['name']
