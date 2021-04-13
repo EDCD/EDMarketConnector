@@ -350,37 +350,48 @@ class AppWindow(object):
         frame.columnconfigure(1, weight=1)
 
         self.cmdr_label = tk.Label(frame)
-        self.ship_label = tk.Label(frame)
-        self.system_label = tk.Label(frame)
-        self.station_label = tk.Label(frame)
-
-        self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
-        self.ship_label.grid(row=2, column=0, sticky=tk.W)
-        self.system_label.grid(row=3, column=0, sticky=tk.W)
-        self.station_label.grid(row=4, column=0, sticky=tk.W)
-
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
+        self.ship_label = tk.Label(frame)
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.suit_label = tk.Label(frame)
+        self.suit = tk.Label(frame)
+        self.system_label = tk.Label(frame)
+        self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
+        self.station_label = tk.Label(frame)
+        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
         # eddb, edsm and inara.  Look for:
         #
         # parent.children['system'] / parent.children['station']
-        self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
 
-        self.cmdr.grid(row=1, column=1, sticky=tk.EW)
-        self.ship.grid(row=2, column=1, sticky=tk.EW)
-        self.system.grid(row=3, column=1, sticky=tk.EW)
-        self.station.grid(row=4, column=1, sticky=tk.EW)
+        ui_row = 1
+
+        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+        self.suit_grid_row = ui_row
+        self.suit_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.suit.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
             if appitem:
                 tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
                 if isinstance(appitem, tuple) and len(appitem) == 2:
-                    row = frame.grid_size()[1]
-                    appitem[0].grid(row=row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=row, column=1, sticky=tk.EW)
+                    ui_row = frame.grid_size()[1]
+                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
+                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
@@ -389,11 +400,11 @@ class AppWindow(object):
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
-        row = frame.grid_size()[1]
-        self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
+        ui_row = frame.grid_size()[1]
+        self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': row, 'columnspan': 2, 'sticky': tk.NSEW})
+                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
@@ -615,6 +626,7 @@ class AppWindow(object):
         self.cmdr_label['text'] = _('Cmdr') + ':'  # Main window
         # Multicrew role label in main window
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
+        self.suit_label['text'] = _('Suit') + ':'  # Main window
         self.system_label['text'] = _('System') + ':'  # Main window
         self.station_label['text'] = _('Station') + ':'  # Main window
         self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
