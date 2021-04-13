@@ -23,6 +23,11 @@ companion_category_map = {
     'NonMarketable':  False,  # Don't appear in the in-game market so don't report
 }
 
+# Map suit symbol names to English localised names
+companion_suit_type_map = {
+    'TacticalSuit_Class1':      'Dominator Suit',
+}
+
 # Map Coriolis's names to names displayed in the in-game shipyard.
 coriolis_ship_map = {
     'Cobra Mk III': 'Cobra MkIII',

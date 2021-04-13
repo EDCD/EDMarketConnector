@@ -114,42 +114,46 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: Dict = {
-            'Captain':      None,  # On a crew
-            'Cargo':        defaultdict(int),
-            'Credits':      None,
-            'FID':          None,  # Frontier Cmdr ID
-            'Horizons':     None,  # Does this user have Horizons?
-            'Loan':         None,
-            'Raw':          defaultdict(int),
-            'Manufactured': defaultdict(int),
-            'Encoded':      defaultdict(int),
-            'Engineers':    {},
-            'Rank':         {},
-            'Reputation':   {},
-            'Statistics':   {},
-            'Role':         None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends':      set(),  # Online friends
-            'ShipID':       None,
-            'ShipIdent':    None,
-            'ShipName':     None,
-            'ShipType':     None,
-            'HullValue':    None,
-            'ModulesValue': None,
-            'Rebuy':        None,
-            'Modules':      None,
-            'CargoJSON':    None,  # The raw data from the last time cargo.json was read
-            'Route':        None,  # Last plotted route from Route.json file
-            'OnFoot':       False,  # Whether we think you're on-foot
-            'Component':    defaultdict(int),      # Odyssey Components in Ship Locker
-            'Item':         defaultdict(int),      # Odyssey Items in Ship Locker
-            'Consumable':   defaultdict(int),      # Odyssey Consumables in Ship Locker
-            'Data':         defaultdict(int),      # Odyssey Data in Ship Locker
+            'Captain':            None,  # On a crew
+            'Cargo':              defaultdict(int),
+            'Credits':            None,
+            'FID':                None,  # Frontier Cmdr ID
+            'Horizons':           None,  # Does this user have Horizons?
+            'Loan':               None,
+            'Raw':                defaultdict(int),
+            'Manufactured':       defaultdict(int),
+            'Encoded':            defaultdict(int),
+            'Engineers':          {},
+            'Rank':               {},
+            'Reputation':         {},
+            'Statistics':         {},
+            'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
+            'Friends':            set(),  # Online friends
+            'ShipID':             None,
+            'ShipIdent':          None,
+            'ShipName':           None,
+            'ShipType':           None,
+            'HullValue':          None,
+            'ModulesValue':       None,
+            'Rebuy':              None,
+            'Modules':            None,
+            'CargoJSON':          None,  # The raw data from the last time cargo.json was read
+            'Route':              None,  # Last plotted route from Route.json file
+            'OnFoot':             False,  # Whether we think you're on-foot
+            'Component':          defaultdict(int),      # Odyssey Components in Ship Locker
+            'Item':               defaultdict(int),      # Odyssey Items in Ship Locker
+            'Consumable':         defaultdict(int),      # Odyssey Consumables in Ship Locker
+            'Data':               defaultdict(int),      # Odyssey Data in Ship Locker
             'BackPack':     {                      # Odyssey BackPack contents
-                'Component':  defaultdict(int),    # BackPack Components
-                'Consumable': defaultdict(int),    # BackPack Consumables
-                'Item':       defaultdict(int),    # BackPack Items
-                'Data':         defaultdict(int),  # Backpack Data
+                'Component':      defaultdict(int),    # BackPack Components
+                'Consumable':     defaultdict(int),    # BackPack Consumables
+                'Item':           defaultdict(int),    # BackPack Items
+                'Data':           defaultdict(int),  # Backpack Data
             },
+            'SuitCurrent':        None,
+            'Suits':              None,
+            'SuitLoadoutCurrent': None,
+            'SuitLoadouts':       None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001

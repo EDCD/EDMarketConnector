@@ -589,6 +589,10 @@ class Session(object):
             # logger.trace('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
+        # Update Odyssey Suit data
+        if endpoint == URL_QUERY:
+            self.suit_update(data)
+
         return data
 
     def profile(self) -> CAPIData:
@@ -631,6 +635,25 @@ class Session(object):
                 data['lastStarport'].update(shipdata)
 
         return data
+
+    def suit_update(self, data: CAPIData) -> None:
+        """
+        Update monitor.state suit data.
+
+        :param data: CAPI data to extra suit data from.
+        """
+        if (current_suit := data.get('suit')) is None:
+            # Probably no Odyssey on the account, so point attempting more.
+            return
+
+        monitor.state['SuitCurrent'] = current_suit
+        monitor.state['Suits'] = data.get('suits')
+
+        if (suit_loadouts := data.get('loadouts')) is None:
+            logger.warning('CAPI data had "suit" but no (suit) "loadouts"')
+
+        monitor.state['SuitLoadoutCurrent'] = data.get('loadout')
+        monitor.state['SuitLoadouts'] = suit_loadouts
 
     def close(self) -> None:
         """Close CAPI authorization session."""
