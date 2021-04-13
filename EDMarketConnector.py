@@ -604,6 +604,19 @@ class AppWindow(object):
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
 
+    def update_suit_text(self) -> None:
+        """Update the suit text for current type and loadout."""
+        if (suit := monitor.state.get('SuitCurrent')) is None:
+            return
+
+        suitname = suit['locName']
+
+        if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
+            return
+
+        loadout_name = suitloadout['name']
+        self.suit['text'] = f'{suitname} ({loadout_name})'
+
     def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
         """
         Toggle the visibility of the 'Suit' row.
@@ -1034,6 +1047,8 @@ class AppWindow(object):
                 self.cmdr['text'] = ''
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship['text'] = ''
+
+            self.update_suit_text()
 
             self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
 

@@ -827,6 +827,33 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         if self.state['BackPack'][c][m] < 0:
                             self.state['BackPack'][c][m] = 0
 
+            elif event_type == 'SwitchSuitLoadout':
+                loadoutid = entry['LoadoutID']
+                # Observed LoadoutID in SwitchSuitLoadout events are, e.g.
+                # 4293000005 for CAPI slot 5.
+                # This *might* actually be "lower 6 bits", but maybe it's not.
+                new_slot = loadoutid - 4293000000
+                try:
+                    self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
+
+                except KeyError:
+                    logger.exception(f"Getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
+                    # Might mean that a new suit loadout was created and we need a new CAPI fetch ?
+
+                else:
+                    try:
+                        new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
+
+                    except KeyError:
+                        logger.exception(f"Getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+
+                    else:
+                        try:
+                            self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
+                        except KeyError:
+                            logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
