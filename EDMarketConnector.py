@@ -373,8 +373,9 @@ class AppWindow(object):
         self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
         self.suit_grid_row = ui_row
-        self.suit_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.suit.grid(row=ui_row, column=1, sticky=tk.EW)
+        # self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W)
+        # self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW)
+        self.suit_shown = False
         ui_row += 1
         self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
         self.system.grid(row=ui_row, column=1, sticky=tk.EW)
@@ -597,6 +598,23 @@ class AppWindow(object):
         config.delete('logdir', suppress=True)
 
         self.postprefs(False)  # Companion login happens in callback from monitor
+
+    def toggle_suit_row(self, visible=True) -> None:
+        """
+        Toggle the visibility of the 'Suit' row.
+
+        :param visible: UNIMPLEMENTED
+        """
+        if not self.suit_shown:
+            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W)
+            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW)
+
+        else:
+            # Hide the Suit row
+            self.suit_label.grid_forget()
+            self.suit.grid_forget()
+
+        self.suit_shown = not self.suit_shown
 
     def postprefs(self, dologin: bool = True):
         """Perform necessary actions after the Preferences dialog is applied."""
