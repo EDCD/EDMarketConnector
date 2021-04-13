@@ -316,6 +316,8 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
+    PADX = 5
+
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
@@ -354,7 +356,7 @@ class AppWindow(object):
         self.ship_label = tk.Label(frame)
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
         self.suit_label = tk.Label(frame)
-        self.suit = tk.Label(frame)
+        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
         self.system_label = tk.Label(frame)
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station_label = tk.Label(frame)
@@ -369,17 +371,19 @@ class AppWindow(object):
         self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
         self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
+
         self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
         self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
+
         self.suit_grid_row = ui_row
-        # self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W)
-        # self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW)
         self.suit_shown = False
         ui_row += 1
+
         self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
         self.system.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
+
         self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
         self.station.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
@@ -411,7 +415,7 @@ class AppWindow(object):
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
@@ -508,7 +512,7 @@ class AppWindow(object):
             theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
             self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
+            self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
             theme.button_bind(self.theme_file_menu,
                               lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
@@ -525,7 +529,7 @@ class AppWindow(object):
                               lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
                                                                 + e.widget.winfo_height()))
-            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=5, sticky=tk.EW)
+            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
             theme.register(self.theme_minimize)  # images aren't automatically registered
             theme.register(self.theme_close)
             self.blank_menubar = tk.Frame(frame)
@@ -598,6 +602,7 @@ class AppWindow(object):
         config.delete('logdir', suppress=True)
 
         self.postprefs(False)  # Companion login happens in callback from monitor
+        self.toggle_suit_row(visible=False)
 
     def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
         """
@@ -612,8 +617,15 @@ class AppWindow(object):
             self.suit_shown = True
 
         if not self.suit_shown:
-            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W)
-            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW)
+            if platform != 'win32':
+                pady = 2
+
+            else:
+
+                pady = 0
+
+            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W, padx=self.PADX, pady=pady)
+            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW, padx=self.PADX, pady=pady)
             self.suit_shown = True
 
         else:
@@ -890,6 +902,13 @@ class AppWindow(object):
                     self.ship.configure(state=True)
 
                 if monitor.state.get('SuitCurrent') is not None:
+                    if (loadout := data.get('loadout')) is not None:
+                        if (suit := loadout.get('suit')) is not None:
+                            if (suitname := suit.get('locName')) is not None:
+                                # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
+                                loadout_name = data['loadouts'][f"{loadout['loadoutSlotId']}"]['name']
+                                self.suit['text'] = f'{suitname} ({loadout_name})'
+
                     self.toggle_suit_row(visible=True)
 
                 else:
