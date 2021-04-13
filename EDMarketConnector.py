@@ -599,22 +599,28 @@ class AppWindow(object):
 
         self.postprefs(False)  # Companion login happens in callback from monitor
 
-    def toggle_suit_row(self, visible=True) -> None:
+    def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
         """
         Toggle the visibility of the 'Suit' row.
 
-        :param visible: UNIMPLEMENTED
+        :param visible: Force visibility to this.
         """
+        if visible is True:
+            self.suit_shown = False
+
+        elif visible is False:
+            self.suit_shown = True
+
         if not self.suit_shown:
             self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W)
             self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW)
+            self.suit_shown = True
 
         else:
             # Hide the Suit row
             self.suit_label.grid_forget()
             self.suit.grid_forget()
-
-        self.suit_shown = not self.suit_shown
+            self.suit_shown = False
 
     def postprefs(self, dologin: bool = True):
         """Perform necessary actions after the Preferences dialog is applied."""
@@ -882,6 +888,12 @@ class AppWindow(object):
                 # We might have disabled this in the conditional above.
                 if monitor.state['Modules']:
                     self.ship.configure(state=True)
+
+                if monitor.state.get('SuitCurrent') is not None:
+                    self.toggle_suit_row(visible=True)
+
+                else:
+                    self.toggle_suit_row(visible=False)
 
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
