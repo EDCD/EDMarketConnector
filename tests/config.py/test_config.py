@@ -137,6 +137,7 @@ class TestNewConfig:
 
         assert res == '1337'
         config.delete(name)
+        config.save()
 
 
 class TestOldNewConfig:

@@ -996,6 +996,7 @@ class LinuxConfig(AbstractConfig):
             raise ValueError(f'Unexpected type for value {type(val)=}')
 
         self.config.set(self.SECTION, key, to_set)
+        self.save()
 
     def delete(self, key: str, *, suppress=False) -> None:
         """
@@ -1007,6 +1008,7 @@ class LinuxConfig(AbstractConfig):
             raise ValueError('attempt to use a closed config')
 
         self.config.remove_option(self.SECTION, key)
+        self.save()
 
     def save(self) -> None:
         """
