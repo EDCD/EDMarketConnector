@@ -856,6 +856,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         except KeyError:
                             logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
 
+            elif event_type == 'DeleteSuitLoadout':
+                # We should remove this from the monitor.state record of loadouts
+                pass
+
+            elif event_type == 'CreateSuitLoadout':
+                # We know we won't have data for this new one
+                pass
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
