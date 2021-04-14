@@ -829,10 +829,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'SwitchSuitLoadout':
                 loadoutid = entry['LoadoutID']
-                # Observed LoadoutID in SwitchSuitLoadout events are, e.g.
-                # 4293000005 for CAPI slot 5.
-                # This *might* actually be "lower 6 bits", but maybe it's not.
-                new_slot = loadoutid - 4293000000
+                new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
                 try:
                     self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
 
@@ -857,8 +854,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
 
             elif event_type == 'DeleteSuitLoadout':
-                # We should remove this from the monitor.state record of loadouts
-                pass
+                # We should remove this from the monitor.state record of loadouts.  The slotid
+                # could end up valid due to CreateSuitLoadout events, but we won't have the
+                # correct new loadout data until next CAPI pull.
+                loadoutid = entry['LoadoutID']
+                slotid = self.suit_loadout_id_from_loadoutid(loadoutid)
+                # This might be a Loadout that was created after our last CAPI pull.
+                try:
+                    self.state['SuitLoadouts'].pop(f'{slotid}')
+
+                except KeyError:
+                    logger.exception(f"slot id {slotid} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'CreateSuitLoadout':
                 # We know we won't have data for this new one
@@ -1067,6 +1073,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def suit_loadout_id_from_loadoutid(self, journal_loadoutid: int) -> int:
+        """
+        Determine the CAPI-oriented numeric slot id for a Suit Loadout.
+
+        :param journal_loadoutid: Journal `LoadoutID` integer value.
+        :return:
+        """
+        # Observed LoadoutID in SwitchSuitLoadout events are, e.g.
+        # 4293000005 for CAPI slot 5.
+        # This *might* actually be "lower 6 bits", but maybe it's not.
+        slotid = journal_loadoutid - 4293000000
+        return slotid
 
     def canonicalise(self, item: Optional[str]) -> str:
         """
