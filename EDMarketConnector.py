@@ -12,10 +12,10 @@ import sys
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
-from os.path import dirname, isdir, join
+from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -55,6 +55,7 @@ import killswitch
 from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
+from companion import CAPIData
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 
@@ -755,26 +756,7 @@ class AppWindow(object):
 
         self.cooldown()
 
-    def dump_capi_data(self, data: Mapping[str, Any]):
-        """Dump CAPI data to file for examination."""
-        if isdir('dump'):
-            system = data['lastSystem']['name']
-
-            if data['commander'].get('docked'):
-                station = f'.{data["lastStarport"]["name"]}'
-
-            else:
-                station = ''
-
-            timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
-                h.write(json.dumps(dict(data),
-                                   ensure_ascii=False,
-                                   indent=2,
-                                   sort_keys=True,
-                                   separators=(',', ': ')).encode('utf-8'))
-
-    def export_market_data(self, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
+    def export_market_data(self, data: CAPIData) -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -902,7 +884,7 @@ class AppWindow(object):
 
             else:
                 if __debug__:  # Recording
-                    self.dump_capi_data(data)
+                    companion.session.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
                     self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
@@ -1351,7 +1333,7 @@ class AppWindow(object):
         self.w.update_idletasks()
 
         try:
-            data = companion.session.station()
+            data: CAPIData = companion.session.station()
             self.status['text'] = ''
             default_extension: str = ''
 

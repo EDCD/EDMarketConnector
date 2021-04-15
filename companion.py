@@ -679,6 +679,25 @@ class Session(object):
         """Log, as error, status of requests.Response from CAPI request."""
         logger.error(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason and r.reason or "None"} {r.text}')
 
+    def dump_capi_data(self, data: CAPIData) -> None:
+        """Dump CAPI data to file for examination."""
+        if os.path.isdir('dump'):
+            system = data['lastSystem']['name']
+
+            if data['commander'].get('docked'):
+                station = f'.{data["lastStarport"]["name"]}'
+
+            else:
+                station = ''
+
+            timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
+            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+                h.write(json.dumps(dict(data),
+                                   ensure_ascii=False,
+                                   indent=2,
+                                   sort_keys=True,
+                                   separators=(',', ': ')).encode('utf-8'))
+
 
 def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully simplified
     """
