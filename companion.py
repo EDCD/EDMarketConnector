@@ -603,7 +603,7 @@ class Session(object):
 
         return data
 
-    def station(self) -> CAPIData:
+    def station(self) -> CAPIData:  # noqa: CCR001
         """Perform CAPI /profile endpoint query for station data."""
         data = self.query(URL_QUERY)
         if 'commander' not in data:
@@ -614,6 +614,13 @@ class Session(object):
             return data
 
         services = data['lastStarport'].get('services', {})
+        if not isinstance(services, dict):
+            # This happens if you're in-ship in-space and force an Update
+            logger.error(f'services is "{type(services)}", not dict !')
+            if __debug__:
+                self.dump_capi_data(data)
+
+            services = {}
 
         last_starport_name = data['lastStarport']['name']
         last_starport_id = int(data['lastStarport']['id'])
@@ -682,13 +689,21 @@ class Session(object):
     def dump_capi_data(self, data: CAPIData) -> None:
         """Dump CAPI data to file for examination."""
         if os.path.isdir('dump'):
-            system = data['lastSystem']['name']
+            try:
+                system = data['lastSystem']['name']
 
-            if data['commander'].get('docked'):
-                station = f'.{data["lastStarport"]["name"]}'
+            except (KeyError, ValueError):
+                system = '<unknown system>'
 
-            else:
-                station = ''
+            try:
+                if data['commander'].get('docked'):
+                    station = f'.{data["lastStarport"]["name"]}'
+
+                else:
+                    station = ''
+
+            except (KeyError, ValueError):
+                station = '<unknown station>'
 
             timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
             with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
