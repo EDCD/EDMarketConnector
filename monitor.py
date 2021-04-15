@@ -870,11 +870,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # We know we won't have data for this new one
                 pass
 
+            # `BuySuit` has no useful info as of 4.0.0.13
+
             elif event_type == 'SellSuit':
                 # Remove from known suits
                 # As of Odyssey Alpha Phase 2, Hotfix 5 (4.0.0.13) this isn't possible as this event
                 # doesn't contain the specific suit ID as per CAPI `suits` dict.
                 pass
+
+            # `LoadoutEquipModule` has no instance-specific ID as of 4.0.0.13
+
+            # `BuyWeapon` has no instance-specific ID as of 4.0.0.13
+            # `SellWeapon` has no instance-specific ID as of 4.0.0.13
+            # `UpgradeWeapon` has no instance-specific ID as of 4.0.0.13
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
