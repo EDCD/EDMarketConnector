@@ -68,7 +68,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
-    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.)$')
+    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.|TacticalSuit_Class.)$')
 
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
