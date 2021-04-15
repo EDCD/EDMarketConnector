@@ -870,6 +870,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # We know we won't have data for this new one
                 pass
 
+            elif event_type == 'SellSuit':
+                # Remove from known suits
+                # As of Odyssey Alpha Phase 2, Hotfix 5 (4.0.0.13) this isn't possible as this event
+                # doesn't contain the specific suit ID as per CAPI `suits` dict.
+                pass
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
