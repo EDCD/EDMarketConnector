@@ -12,10 +12,10 @@ import sys
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
-from os.path import dirname, isdir, join
+from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -55,6 +55,7 @@ import killswitch
 from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
+from companion import CAPIData
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 
@@ -316,6 +317,8 @@ class AppWindow(object):
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
+    PADX = 5
+
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
@@ -350,37 +353,51 @@ class AppWindow(object):
         frame.columnconfigure(1, weight=1)
 
         self.cmdr_label = tk.Label(frame)
-        self.ship_label = tk.Label(frame)
-        self.system_label = tk.Label(frame)
-        self.station_label = tk.Label(frame)
-
-        self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
-        self.ship_label.grid(row=2, column=0, sticky=tk.W)
-        self.system_label.grid(row=3, column=0, sticky=tk.W)
-        self.station_label.grid(row=4, column=0, sticky=tk.W)
-
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
+        self.ship_label = tk.Label(frame)
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.suit_label = tk.Label(frame)
+        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
+        self.system_label = tk.Label(frame)
+        self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
+        self.station_label = tk.Label(frame)
+        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
         # eddb, edsm and inara.  Look for:
         #
         # parent.children['system'] / parent.children['station']
-        self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
 
-        self.cmdr.grid(row=1, column=1, sticky=tk.EW)
-        self.ship.grid(row=2, column=1, sticky=tk.EW)
-        self.system.grid(row=3, column=1, sticky=tk.EW)
-        self.station.grid(row=4, column=1, sticky=tk.EW)
+        ui_row = 1
+
+        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.suit_grid_row = ui_row
+        self.suit_shown = False
+        ui_row += 1
+
+        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
             if appitem:
                 tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
                 if isinstance(appitem, tuple) and len(appitem) == 2:
-                    row = frame.grid_size()[1]
-                    appitem[0].grid(row=row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=row, column=1, sticky=tk.EW)
+                    ui_row = frame.grid_size()[1]
+                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
+                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
@@ -389,17 +406,17 @@ class AppWindow(object):
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
-        row = frame.grid_size()[1]
-        self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
+        ui_row = frame.grid_size()[1]
+        self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': row, 'columnspan': 2, 'sticky': tk.NSEW})
+                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
@@ -496,7 +513,7 @@ class AppWindow(object):
             theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
             self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
+            self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
             theme.button_bind(self.theme_file_menu,
                               lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
@@ -513,7 +530,7 @@ class AppWindow(object):
                               lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
                                                                 + e.widget.winfo_height()))
-            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=5, sticky=tk.EW)
+            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
             theme.register(self.theme_minimize)  # images aren't automatically registered
             theme.register(self.theme_close)
             self.blank_menubar = tk.Frame(frame)
@@ -586,6 +603,52 @@ class AppWindow(object):
         config.delete('logdir', suppress=True)
 
         self.postprefs(False)  # Companion login happens in callback from monitor
+        self.toggle_suit_row(visible=False)
+
+    def update_suit_text(self) -> None:
+        """Update the suit text for current type and loadout."""
+        if (suit := monitor.state.get('SuitCurrent')) is None:
+            self.suit['text'] = f'<{_("Unknown")}>'
+            return
+
+        suitname = suit['locName']
+
+        if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
+            self.suit['text'] = ''
+            return
+
+        loadout_name = suitloadout['name']
+        self.suit['text'] = f'{suitname} ({loadout_name})'
+
+    def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
+        """
+        Toggle the visibility of the 'Suit' row.
+
+        :param visible: Force visibility to this.
+        """
+        if visible is True:
+            self.suit_shown = False
+
+        elif visible is False:
+            self.suit_shown = True
+
+        if not self.suit_shown:
+            if platform != 'win32':
+                pady = 2
+
+            else:
+
+                pady = 0
+
+            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W, padx=self.PADX, pady=pady)
+            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW, padx=self.PADX, pady=pady)
+            self.suit_shown = True
+
+        else:
+            # Hide the Suit row
+            self.suit_label.grid_forget()
+            self.suit.grid_forget()
+            self.suit_shown = False
 
     def postprefs(self, dologin: bool = True):
         """Perform necessary actions after the Preferences dialog is applied."""
@@ -615,6 +678,7 @@ class AppWindow(object):
         self.cmdr_label['text'] = _('Cmdr') + ':'  # Main window
         # Multicrew role label in main window
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
+        self.suit_label['text'] = _('Suit') + ':'  # Main window
         self.system_label['text'] = _('System') + ':'  # Main window
         self.station_label['text'] = _('Station') + ':'  # Main window
         self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
@@ -692,26 +756,7 @@ class AppWindow(object):
 
         self.cooldown()
 
-    def dump_capi_data(self, data: Mapping[str, Any]):
-        """Dump CAPI data to file for examination."""
-        if isdir('dump'):
-            system = data['lastSystem']['name']
-
-            if data['commander'].get('docked'):
-                station = f'.{data["lastStarport"]["name"]}'
-
-            else:
-                station = ''
-
-            timestamp = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
-                h.write(json.dumps(dict(data),
-                                   ensure_ascii=False,
-                                   indent=2,
-                                   sort_keys=True,
-                                   separators=(',', ': ')).encode('utf-8'))
-
-    def export_market_data(self, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
+    def export_market_data(self, data: CAPIData) -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -839,7 +884,7 @@ class AppWindow(object):
 
             else:
                 if __debug__:  # Recording
-                    self.dump_capi_data(data)
+                    companion.session.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
                     self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
@@ -852,6 +897,19 @@ class AppWindow(object):
                 # We might have disabled this in the conditional above.
                 if monitor.state['Modules']:
                     self.ship.configure(state=True)
+
+                if monitor.state.get('SuitCurrent') is not None:
+                    if (loadout := data.get('loadout')) is not None:
+                        if (suit := loadout.get('suit')) is not None:
+                            if (suitname := suit.get('locName')) is not None:
+                                # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
+                                loadout_name = data['loadouts'][f"{loadout['loadoutSlotId']}"]['name']
+                                self.suit['text'] = f'{suitname} ({loadout_name})'
+
+                    self.toggle_suit_row(visible=True)
+
+                else:
+                    self.toggle_suit_row(visible=False)
 
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
@@ -973,6 +1031,8 @@ class AppWindow(object):
                 self.cmdr['text'] = ''
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship['text'] = ''
+
+            self.update_suit_text()
 
             self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
 
@@ -1273,7 +1333,7 @@ class AppWindow(object):
         self.w.update_idletasks()
 
         try:
-            data = companion.session.station()
+            data: CAPIData = companion.session.station()
             self.status['text'] = ''
             default_extension: str = ''
 

@@ -68,7 +68,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
-    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.)$')
+    _RE_SHIP_ONFOOT = re.compile(r'^(FlightSuit|UtilitySuit_Class.|TacticalSuit_Class.|ExplorationSuit_Class.)$')
 
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
@@ -114,42 +114,46 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: Dict = {
-            'Captain':      None,  # On a crew
-            'Cargo':        defaultdict(int),
-            'Credits':      None,
-            'FID':          None,  # Frontier Cmdr ID
-            'Horizons':     None,  # Does this user have Horizons?
-            'Loan':         None,
-            'Raw':          defaultdict(int),
-            'Manufactured': defaultdict(int),
-            'Encoded':      defaultdict(int),
-            'Engineers':    {},
-            'Rank':         {},
-            'Reputation':   {},
-            'Statistics':   {},
-            'Role':         None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends':      set(),  # Online friends
-            'ShipID':       None,
-            'ShipIdent':    None,
-            'ShipName':     None,
-            'ShipType':     None,
-            'HullValue':    None,
-            'ModulesValue': None,
-            'Rebuy':        None,
-            'Modules':      None,
-            'CargoJSON':    None,  # The raw data from the last time cargo.json was read
-            'Route':        None,  # Last plotted route from Route.json file
-            'OnFoot':       False,  # Whether we think you're on-foot
-            'Component':    defaultdict(int),      # Odyssey Components in Ship Locker
-            'Item':         defaultdict(int),      # Odyssey Items in Ship Locker
-            'Consumable':   defaultdict(int),      # Odyssey Consumables in Ship Locker
-            'Data':         defaultdict(int),      # Odyssey Data in Ship Locker
+            'Captain':            None,  # On a crew
+            'Cargo':              defaultdict(int),
+            'Credits':            None,
+            'FID':                None,  # Frontier Cmdr ID
+            'Horizons':           None,  # Does this user have Horizons?
+            'Loan':               None,
+            'Raw':                defaultdict(int),
+            'Manufactured':       defaultdict(int),
+            'Encoded':            defaultdict(int),
+            'Engineers':          {},
+            'Rank':               {},
+            'Reputation':         {},
+            'Statistics':         {},
+            'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
+            'Friends':            set(),  # Online friends
+            'ShipID':             None,
+            'ShipIdent':          None,
+            'ShipName':           None,
+            'ShipType':           None,
+            'HullValue':          None,
+            'ModulesValue':       None,
+            'Rebuy':              None,
+            'Modules':            None,
+            'CargoJSON':          None,  # The raw data from the last time cargo.json was read
+            'Route':              None,  # Last plotted route from Route.json file
+            'OnFoot':             False,  # Whether we think you're on-foot
+            'Component':          defaultdict(int),      # Odyssey Components in Ship Locker
+            'Item':               defaultdict(int),      # Odyssey Items in Ship Locker
+            'Consumable':         defaultdict(int),      # Odyssey Consumables in Ship Locker
+            'Data':               defaultdict(int),      # Odyssey Data in Ship Locker
             'BackPack':     {                      # Odyssey BackPack contents
-                'Component':  defaultdict(int),    # BackPack Components
-                'Consumable': defaultdict(int),    # BackPack Consumables
-                'Item':       defaultdict(int),    # BackPack Items
-                'Data':         defaultdict(int),  # Backpack Data
+                'Component':      defaultdict(int),    # BackPack Components
+                'Consumable':     defaultdict(int),    # BackPack Consumables
+                'Item':           defaultdict(int),    # BackPack Items
+                'Data':           defaultdict(int),  # Backpack Data
             },
+            'SuitCurrent':        None,
+            'Suits':              None,
+            'SuitLoadoutCurrent': None,
+            'SuitLoadouts':       None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -823,6 +827,63 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         if self.state['BackPack'][c][m] < 0:
                             self.state['BackPack'][c][m] = 0
 
+            elif event_type == 'SwitchSuitLoadout':
+                loadoutid = entry['LoadoutID']
+                new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
+                try:
+                    self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
+
+                except KeyError:
+                    logger.exception(f"Getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
+                    # Might mean that a new suit loadout was created and we need a new CAPI fetch ?
+                    self.state['SuitCurrent'] = None
+                    self.state['SuitLoadoutCurrent'] = None
+
+                else:
+                    try:
+                        new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
+
+                    except KeyError:
+                        logger.exception(f"Getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+
+                    else:
+                        try:
+                            self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
+                        except KeyError:
+                            logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
+
+            elif event_type == 'DeleteSuitLoadout':
+                # We should remove this from the monitor.state record of loadouts.  The slotid
+                # could end up valid due to CreateSuitLoadout events, but we won't have the
+                # correct new loadout data until next CAPI pull.
+                loadoutid = entry['LoadoutID']
+                slotid = self.suit_loadout_id_from_loadoutid(loadoutid)
+                # This might be a Loadout that was created after our last CAPI pull.
+                try:
+                    self.state['SuitLoadouts'].pop(f'{slotid}')
+
+                except KeyError:
+                    logger.exception(f"slot id {slotid} doesn't exist, not in last CAPI pull ?")
+
+            elif event_type == 'CreateSuitLoadout':
+                # We know we won't have data for this new one
+                pass
+
+            # `BuySuit` has no useful info as of 4.0.0.13
+
+            elif event_type == 'SellSuit':
+                # Remove from known suits
+                # As of Odyssey Alpha Phase 2, Hotfix 5 (4.0.0.13) this isn't possible as this event
+                # doesn't contain the specific suit ID as per CAPI `suits` dict.
+                pass
+
+            # `LoadoutEquipModule` has no instance-specific ID as of 4.0.0.13
+
+            # `BuyWeapon` has no instance-specific ID as of 4.0.0.13
+            # `SellWeapon` has no instance-specific ID as of 4.0.0.13
+            # `UpgradeWeapon` has no instance-specific ID as of 4.0.0.13
+
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
@@ -1026,6 +1087,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def suit_loadout_id_from_loadoutid(self, journal_loadoutid: int) -> int:
+        """
+        Determine the CAPI-oriented numeric slot id for a Suit Loadout.
+
+        :param journal_loadoutid: Journal `LoadoutID` integer value.
+        :return:
+        """
+        # Observed LoadoutID in SwitchSuitLoadout events are, e.g.
+        # 4293000005 for CAPI slot 5.
+        # This *might* actually be "lower 6 bits", but maybe it's not.
+        slotid = journal_loadoutid - 4293000000
+        return slotid
 
     def canonicalise(self, item: Optional[str]) -> str:
         """

@@ -589,6 +589,10 @@ class Session(object):
             # logger.trace('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
+        # Update Odyssey Suit data
+        if endpoint == URL_QUERY:
+            self.suit_update(data)
+
         return data
 
     def profile(self) -> CAPIData:
@@ -632,6 +636,25 @@ class Session(object):
 
         return data
 
+    def suit_update(self, data: CAPIData) -> None:
+        """
+        Update monitor.state suit data.
+
+        :param data: CAPI data to extra suit data from.
+        """
+        if (current_suit := data.get('suit')) is None:
+            # Probably no Odyssey on the account, so point attempting more.
+            return
+
+        monitor.state['SuitCurrent'] = current_suit
+        monitor.state['Suits'] = data.get('suits')
+
+        if (suit_loadouts := data.get('loadouts')) is None:
+            logger.warning('CAPI data had "suit" but no (suit) "loadouts"')
+
+        monitor.state['SuitLoadoutCurrent'] = data.get('loadout')
+        monitor.state['SuitLoadouts'] = suit_loadouts
+
     def close(self) -> None:
         """Close CAPI authorization session."""
         self.state = Session.STATE_INIT
@@ -655,6 +678,25 @@ class Session(object):
     def dump(self, r: requests.Response) -> None:
         """Log, as error, status of requests.Response from CAPI request."""
         logger.error(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason and r.reason or "None"} {r.text}')
+
+    def dump_capi_data(self, data: CAPIData) -> None:
+        """Dump CAPI data to file for examination."""
+        if os.path.isdir('dump'):
+            system = data['lastSystem']['name']
+
+            if data['commander'].get('docked'):
+                station = f'.{data["lastStarport"]["name"]}'
+
+            else:
+                station = ''
+
+            timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
+            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+                h.write(json.dumps(dict(data),
+                                   ensure_ascii=False,
+                                   indent=2,
+                                   sort_keys=True,
+                                   separators=(',', ': ')).encode('utf-8'))
 
 
 def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully simplified
