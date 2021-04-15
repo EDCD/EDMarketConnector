@@ -1,6 +1,7 @@
 .gitversion
 .DS_Store
 build
+ChangeLog.html
 dist.*
 dump
 *.bak
