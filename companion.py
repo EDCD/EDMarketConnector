@@ -603,8 +603,18 @@ class Session(object):
 
         return data
 
-    def station(self) -> CAPIData:
-        """Perform CAPI /profile endpoint query for station data."""
+    def station(self) -> CAPIData:  # noqa: CCR001
+        """
+        Perform CAPI quer(y|ies) for station data.
+
+        A /profile query is performed to check that we are docked (or on foot)
+        and the station name and marketid match the prior Docked event.
+        If they do match, and the services list says they're present, also
+        retrieve CAPI market and/or shipyard/outfitting data and merge into
+        the /profile data.
+
+        :return: Possibly augmented CAPI data.
+        """
         data = self.query(URL_QUERY)
         if 'commander' not in data:
             logger.error('No commander in returned data')
@@ -613,10 +623,33 @@ class Session(object):
         if not data['commander'].get('docked') and not monitor.state['OnFoot']:
             return data
 
-        services = data['lastStarport'].get('services', {})
+        # Sanity checks in case data isn't as we expect, and maybe 'docked' flag
+        # is also lagging.
+        if (last_starport := data.get('lastStarport')) is None:
+            logger.error("No lastStarport in data!")
+            return data
 
-        last_starport_name = data['lastStarport']['name']
-        last_starport_id = int(data['lastStarport']['id'])
+        if ((last_starport_name := last_starport.get('name')) is None
+                or last_starport_name == ''):
+            # This could well be valid if you've been out exploring for a long
+            # time.
+            logger.warning("No lastStarport name!")
+            return data
+
+        services = last_starport.get('services', {})
+        if not isinstance(services, dict):
+            # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
+            # this be an empty list when you've jumped to another system
+            # and not yet docked.  As opposed to no services key at all
+            # or an empty dict.
+            logger.error(f'services is "{type(services)}", not dict !')
+            if __debug__:
+                self.dump_capi_data(data)
+
+            # Set an empty dict so as to not have to retest below.
+            services = {}
+
+        last_starport_id = int(last_starport.get('id'))
 
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
@@ -682,13 +715,21 @@ class Session(object):
     def dump_capi_data(self, data: CAPIData) -> None:
         """Dump CAPI data to file for examination."""
         if os.path.isdir('dump'):
-            system = data['lastSystem']['name']
+            try:
+                system = data['lastSystem']['name']
 
-            if data['commander'].get('docked'):
-                station = f'.{data["lastStarport"]["name"]}'
+            except (KeyError, ValueError):
+                system = '<unknown system>'
 
-            else:
-                station = ''
+            try:
+                if data['commander'].get('docked'):
+                    station = f'.{data["lastStarport"]["name"]}'
+
+                else:
+                    station = ''
+
+            except (KeyError, ValueError):
+                station = '<unknown station>'
 
             timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
             with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
