@@ -22,7 +22,7 @@ from email.utils import parsedate
 # TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
 from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
 
 import requests
 
@@ -846,6 +846,36 @@ def ship(data: CAPIData) -> CAPIData:
 
     # subset of "ship" that's not noisy
     return filter_ship(data['ship'])
+
+
+V = TypeVar('V')
+
+
+def index_possibly_sparse_list(data: Union[Mapping[str, V], List[V]], key: int) -> V:
+    """
+    Index into a "list" that may or may not be sparseified into a dict.
+
+    :param data: List or Dict to index
+    :param key: Key to use to index
+    :raises ValueError: When data is of an unexpected type
+    :return: The value at the key
+
+    >>> data = {"1": "test"}
+    >>> index_possibly_sparse_list(data, 1)
+    'test'
+
+    >>> data = ["test_list"]
+    >>> index_possibly_sparse_list(data, 0)
+    'test_list'
+    """
+    if isinstance(data, list):
+        return data[key]
+
+    elif isinstance(data, (dict, OrderedDict)):
+        return data[str(key)]
+
+    else:
+        raise ValueError(f'Unexpected data type {type(data)}')
 
 
 # singleton

@@ -55,7 +55,7 @@ import killswitch
 from config import appversion, appversion_nobuild, config, copyright
 # isort: on
 
-from companion import CAPIData
+from companion import CAPIData, index_possibly_sparse_list
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 
@@ -903,7 +903,10 @@ class AppWindow(object):
                         if (suit := loadout.get('suit')) is not None:
                             if (suitname := suit.get('locName')) is not None:
                                 # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
-                                loadout_name = data['loadouts'][f"{loadout['loadoutSlotId']}"]['name']
+                                loadout_name = index_possibly_sparse_list(
+                                    data['loadouts'], loadout['loadoutSlotId']
+                                )['name']
+
                                 self.suit['text'] = f'{suitname} ({loadout_name})'
 
                     self.toggle_suit_row(visible=True)
