@@ -5,7 +5,7 @@ import abc
 import inspect
 import pathlib
 from collections import defaultdict
-from typing import Any, TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 import semantic_version
 
@@ -16,9 +16,8 @@ if TYPE_CHECKING:
     from types import ModuleType
     from plugin.manager import PluginManager
 
-from plugin import decorators
+from plugin import decorators, event
 from plugin.plugin_info import PluginInfo
-from plugin import event
 
 
 class Plugin(abc.ABC):
@@ -56,7 +55,9 @@ class Plugin(abc.ABC):
     def _find_callbacks(self) -> Dict[str, List[Callable]]:
         out: Dict[str, List[Callable]] = defaultdict(list)
 
-        for field in self.__dict__.values():
+        field_names = list(self.__class__.__dict__.keys()) + list(self.__dict__.keys())
+
+        for field in (getattr(self, f) for f in field_names):
             callbacks: Optional[List[str]] = getattr(field, decorators.CALLBACK_MARKER, None)
             if callbacks is None:
                 continue
