@@ -103,8 +103,12 @@ def test_double_load(plugin_manager: PluginManager) -> None:
 
 
 def test_hooks_created(plugin_manager: PluginManager) -> None:
-    plugin_manager.load_plugin(good_path / )
-    ...
+    """Test that after loading, callbacks are where and what they are expected to be."""
+    p = plugin_manager.load_plugin(good_path / 'simple_with_callback')
+    assert p is not None
+
+    assert 'core.journal_event' in p.callbacks
+    assert p.callbacks['core.journal_event'][0] == getattr(p.plugin, 'on_journal')
 
 
 def test_unload_call(plugin_manager: PluginManager):
