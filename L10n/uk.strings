@@ -121,6 +121,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Редагувати";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
+
 /* Top rank. [stats.py] */
 "Elite" = "Еліта";
 
@@ -223,6 +226,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Обліковий запис Inara";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Інформація про міграцію плагінів";
+
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сполучення клавіш";
 
@@ -295,6 +301,9 @@
 /* [prefs.py] */
 "OK" = "Згода";
 
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
+
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Тільки тоді, коли Elite: Dangerous є активним додатком";
 
@@ -336,18 +345,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Сховище плагінів";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
-
-/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Плагіни без підтримки Python 3.x";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Інформація про міграцію плагінів";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Капітан I рангу";
@@ -525,4 +522,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} необхідні дозволи для використання ярликів";
-

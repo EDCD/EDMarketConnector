@@ -1,11 +1,11 @@
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "Procenat UI skaliranja";
+/* Language name */
+"!Language" = "Srpski (Latinica)";
+
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 znači potpuno neprozirno.{CR}Prozor se osvežava u realnom vremenu.";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 znači podrazumevano{CR}Restart je potreban{CR}da bi se promene primenile!";
-
-/* Language name */
-"!Language" = "Srpski (Latinica)";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "O {APP}";
@@ -46,11 +46,11 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Potraži...";
 
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: Nema podataka o komandiru";
-
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Nema podataka o komandiru";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Champion";
@@ -130,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Izmeni";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Dodaci (plugins) bez Python 3.x podrške";
+
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
@@ -148,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
+/* [companion.py] */
+"Error" = "Greška";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Greška: Nemoguće povezivanje na EDDN";
 
@@ -156,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Greška: Nemoguće povezivanje na Inara";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Greška: Nemoguća provera tokena customer_id";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Greška: customer_id se ne poklapa!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
@@ -174,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Greška: Pogrešni kredencijali";
+
+/* [companion.py] */
+"Error: unable to get token" = "Greška: nemoguće dobaviti token";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Greška: Pogrešan Cmdr";
@@ -235,6 +250,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara kredencijali";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Informacije o migraciji dodataka (plugins)";
+
 /* Changed journal update_lock failed [monitor.py] */
 "Journal directory already locked" = "Žurnal direktorijum je već zaključan";
 
@@ -262,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Pozajmica";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Log Nivo";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "Prijavljivanje...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Prozirnost glavnog prozora";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "Fajl sa market podacima u CSV formatu";
@@ -310,6 +334,9 @@
 /* [prefs.py] */
 "OK" = "OK";
 
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Proverite da li postoji nadograđena verzija ili obavesite autora da treba da promeni kod za Python 3.x.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
+
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Samo kada je Elite: Dangerous aktivna aplikacija";
 
@@ -352,17 +379,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Folder za dodatke (plugins)";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Dodaci (plugins) bez Python 3.x podrške";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Proverite da li postoji nadograđena verzija ili obavesite autora da treba da promeni kod za Python 3.x.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Dodaci (plugins) bez Python 3.x podrške";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Informacije o migraciji dodataka (plugins)";
+"Plugins Without Python 3.x Support:" = "Pluginovi bez podrške za Python 3.x:";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -511,6 +529,12 @@
 /* Trade rank. [stats.py] */
 "Tycoon" = "Tycoon";
 
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Procenat UI skaliranja";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Nepoznato";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Osveži";
 
@@ -549,6 +573,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi skraćenice";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Log Nivo";

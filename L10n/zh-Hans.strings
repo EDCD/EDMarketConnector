@@ -1,11 +1,11 @@
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "UI 缩放比例";
+/* Language name */
+"!Language" = "简体中文";
+
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 为完全不透明{CR}效果实时更新";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 为默认设置{CR}需要重启应用{CR}以使修改生效";
-
-/* Language name */
-"!Language" = "简体中文";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "关于 {APP}";
@@ -46,11 +46,11 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "浏览…";
 
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI：没有指挥官数据";
-
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI：没有指挥官数据";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Champion";
@@ -130,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "编辑";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC：不支持 Python 3.x 的插件";
+
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
@@ -148,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
+/* [companion.py] */
+"Error" = "错误";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "错误：无法连接到 EDDN";
 
@@ -156,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "错误：无法连接到 Inara";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "错误：无法检查 customer_id 令牌";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "错误：customer_id 不匹配！";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "错误：EDSM {MSG}";
@@ -174,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "错误：无效的登录凭证";
+
+/* [companion.py] */
+"Error: unable to get token" = "错误：无法获取令牌";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "错误：指挥官不一致";
@@ -235,6 +250,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara 授权凭证";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "关于插件迁移";
+
 /* Changed journal update_lock failed [monitor.py] */
 "Journal directory already locked" = "日志目录已被锁定";
 
@@ -262,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "贷款";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "诊断模式";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "登录中…";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "主窗口透明度";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "货物市场数据，以 CSV 文件格式";
@@ -310,6 +334,9 @@
 /* [prefs.py] */
 "OK" = "确定";
 
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "一项或多项你所启用的插件尚不支持 Python 3.x，详情请见 {FILE} > {SETTINGS} > {PLUGINS}。请检查上述插件是否有可用的更新，若没有，则应与插件的开发者就 Python 3.x 的支持问题取得联系。\n\n你也可以禁用某一项插件，只需在其文件夹名称的末尾添加 {DISABLED} 即可。";
+
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "仅当 Elite: Dangerous 在前台运行时生效";
 
@@ -352,17 +379,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "插件文件夹";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC：不支持 Python 3.x 的插件";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "一项或多项你所启用的插件尚不支持 Python 3.x，详情请见 {FILE} > {SETTINGS} > {PLUGINS}。请检查上述插件是否有可用的更新，若没有，则应与插件的开发者就 Python 3.x 的支持问题取得联系。\n\n你也可以禁用某一项插件，只需在其文件夹名称的末尾添加 {DISABLED} 即可。";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "不支持 Python 3.x 的插件";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "关于插件迁移";
+"Plugins Without Python 3.x Support:" = "不支持 Python 3.x 的插件：";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -511,6 +529,12 @@
 /* Trade rank. [stats.py] */
 "Tycoon" = "Tycoon";
 
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "UI 缩放比例";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "未知";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "更新";
 
@@ -549,6 +573,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} 需要权限以使用快捷键";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "诊断模式";

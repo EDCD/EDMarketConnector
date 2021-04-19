@@ -1,11 +1,8 @@
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "Skalowanie UI";
+/* Language name */
+"!Language" = "Polski";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 oznacza wartość domyślną{CR}Zmiany zostaną wprowadzone po{CR}ponownym uruchomieniu programu!";
-
-/* Language name */
-"!Language" = "Polski";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "{APP}...";
@@ -46,11 +43,11 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Przeglądaj...";
 
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: Nie zwrócono danych dowódcy";
-
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Nie zwrócono danych dowódcy";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Champion";
@@ -129,6 +126,9 @@
 
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Edycja";
+
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Pluginy Nie Wspierające Python 3.x";
 
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
@@ -235,6 +235,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara - uprawnienia";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Informacja o migracji pluginów";
+
 /* Changed journal update_lock failed [monitor.py] */
 "Journal directory already locked" = "Katalog dziennika zablokowany";
 
@@ -261,6 +264,9 @@
 
 /* Cmdr stats. [stats.py] */
 "Loan" = "Pożyczka";
+
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Poziom logowania";
 
 /* [EDMarketConnector.py] */
 "Logging in..." = "Logowanie...";
@@ -310,6 +316,9 @@
 /* [prefs.py] */
 "OK" = "OK";
 
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Co najmniej jeden z uruchomionych pluginów nie wspiera Python 3.x. Sprawdź listę w '{FILE}' > '{SETTINGS}', sekcja '{PLUGINS}'. Upewnij się, że dostępna jest aktualna wersja pluginu, w przeciwnym razie poinformuj twórcę, że należy zaktualizować kod do wersji Python 3.x.\n\nMożesz wyłączyć plugin, dodając '{DISABLED}' na koniec nazwy jego folderu.";
+
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Tylko gdy Elite: Dangerous jest aplikacją aktywną";
 
@@ -351,18 +360,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Folder pluginów";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Pluginy Nie Wspierające Python 3.x";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Co najmniej jeden z uruchomionych pluginów nie wspiera Python 3.x. Sprawdź listę w '{FILE}' > '{SETTINGS}', sekcja '{PLUGINS}'. Upewnij się, że dostępna jest aktualna wersja pluginu, w przeciwnym razie poinformuj twórcę, że należy zaktualizować kod do wersji Python 3.x.\n\nMożesz wyłączyć plugin, dodając '{DISABLED}' na koniec nazwy jego folderu.";
-
-/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Pluginy nie wspierające Python 3.x";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Informacja o migracji pluginów";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -511,6 +508,9 @@
 /* Trade rank. [stats.py] */
 "Tycoon" = "Tycoon";
 
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Skalowanie UI";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualizacja";
 
@@ -549,6 +549,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} wymaga uprawnień by{CR}móc korzystać ze skrótów klawiszowych.";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Poziom logowania";
