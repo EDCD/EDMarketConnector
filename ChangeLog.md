@@ -1,6 +1,37 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Pre-Release 5.0.0-beta6
+===
+
+This adds a new UI element 'Suit', below 'Ship' when applicable that 
+details the type of suit you currently have equipped and its Loadout name.  
+This UI element is collapsed/hidden if no suit/on-foot state is detected,
+i.e. not playing Odyssey (Alpha or otherwise).
+
+* Updated translations.  Once more, thanks to all the translators!
+
+* There is a new CL arg for EDMarketConnector.exe `--force-edmc-protocol`, but
+  this is really only of use to core developers (its purpose being to force 
+  use of the edmc:// protocol for Frontier Auth callbacks, even when not 
+  'frozen').
+
+* Slightly improve checking of old ship loadout files before writing a new one.
+
+* Linux config will be flushed to disk after any change.  This means that 
+  EDMC.py can now actually make use of the latest CAPI auth if it's been 
+  updated by EDMarketConnector.py since that started.
+  
+Plugin Developers
+---
+
+We now have support for Odyssey Suits and their Loadouts.  See PLUGINS.md 
+for details, particuarly the way in which `state[Suits]` might be either a 
+`list` or a `dict` and how to deal with that.  
+NB: This data is only guaranteed up to date and correct after a fresh CAPI
+data pull, as the current Journal events don't allow for updating it on the
+fly (this should change in a future Odyssey patch).
+
 Pre-Release 5.0.0-beta5
 ===
 
