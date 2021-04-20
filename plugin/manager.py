@@ -176,6 +176,31 @@ class PluginManager:
 
         return plugin, module
 
+    def load_plugins(
+        self, paths: Sequence[pathlib.Path], autoresolve_sys_path=True
+    ) -> list[Optional[LoadedPlugin]]:
+        """
+        Load all plugins described by paths.
+
+        Plugins that error on load will return None rather than a LoadedPlugin
+
+        :param paths: The paths to load
+        :param autoresolve_sys_path: See load_plugin, defaults to True
+        :return: Loaded plugins, same order as the given paths (assuming an order exists in the sequence)
+        """
+        out: list[Optional[LoadedPlugin]] = []
+
+        for path in paths:
+            try:
+                res = self.load_plugin(path)
+
+            except PluginLoadingException:
+                res = None
+
+            out.append(res)
+
+        return out
+
     def load_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> Optional[LoadedPlugin]:
         """
         Load either a normal or legacy plugin from the given path.
