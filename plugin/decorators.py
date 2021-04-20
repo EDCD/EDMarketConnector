@@ -1,7 +1,7 @@
 """New plugin system."""
 
 
-from typing import Any, Callable, List, Type, TypeVar
+from typing import Any, Callable, Type, TypeVar
 
 from EDMCLogging import get_main_logger
 from plugin.plugin import Plugin
@@ -32,38 +32,48 @@ def edmc_plugin(cls: Type[Plugin]) -> Type[Plugin]:
 _F = TypeVar('_F', bound=Callable[..., Any])
 
 
-def hook(name: str) -> Callable[[_F], _F]:
+def _list_decorate(attr_name: str, attr_content: str, func: _F) -> _F:
+    logger.debug(f'Found function {func!r} to be marked with attr {attr_name!r} and content {attr_content!r}')
+    if not hasattr(func, attr_name):
+        setattr(func, attr_name, [attr_content])
+        return func
+
+    res: list[str] = getattr(func, attr_name)
+    if not isinstance(res, list):
+        raise ValueError(f'Unexpected type on attribute {attr_name!r}: {type(res)=} {res=}')
+
+    if attr_content in res:
+        raise ValueError(f'Name {attr_content!r} already exists in {func!r}s {attr_name!r} attribute!')
+
+    res.append(attr_content)
+    setattr(func, attr_name, res)
+    return func
+
+
+def hook(name: str) -> Callable[['_F'], _F]:
     """
     Create event callback.
 
     :param name: The event to hook onto
     :return: (Internal python decoration implementation)
     """
-    def decorate(func: _F) -> _F:
-        """
-        Decorate a function.
+    # return functools.partial(_list_decorate, attr_name=CALLBACK_MARKER, attr_content=name)
 
-        The outer function is used to provide name to us at the decorate site
-        """
-        logger.debug(f"Found function {func!r} marked as {name!r} callback")
-        # If this hook is already being used as a callback, just add the given name, otherwise, set it
-        if hasattr(func, CALLBACK_MARKER):
-            current: List[str] = getattr(func, CALLBACK_MARKER)
-            logger.trace(f"func {func!r} already marked as callback for others: {current}")
+    def _decorate(func: _F) -> _F:
+        res = _list_decorate(CALLBACK_MARKER, name, func)
+        return res
 
-            if not isinstance(current, list):
-                raise ValueError(f"Hook function has marker with unexpected content. THIS IS A BUG: {current!r}")
+    return _decorate
 
-            if name in current:
-                raise ValueError(f"Hook function hooked onto {name!r} multiple times")
 
-            current.append(name)
-            setattr(func, CALLBACK_MARKER, current)
+def provider(name: str) -> Callable[[_F], _F]:
+    """
+    Create a provider callback.
 
-        else:
-            setattr(func, CALLBACK_MARKER, [name])
+    :param name: The provider ID that this provider provides data to
+    :return: (Internal python decoration implementation)
+    """
+    def _decorate(func: _F) -> _F:
+        raise NotImplementedError
 
-        logger.trace(f"successfully marked callback {func!r} as a callback for event {name!r}")
-        return func
-
-    return decorate
+    return _decorate
