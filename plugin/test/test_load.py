@@ -42,7 +42,7 @@ LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
 
 
 GOOD_TESTS: List[Tuple[pathlib.Path, ContextManager]] = [
-    (path, nullcontext()) for path in good_path.iterdir() if path.is_dir()]
+    (path, nullcontext()) for path in good_path.iterdir() if path.is_dir() and '__pycache' not in str(path)]
 
 TESTS = GOOD_TESTS + [
     (bad_path / 'no_plugin', pytest.raises(PluginHasNoPluginClassException)),
@@ -57,8 +57,6 @@ TESTS = GOOD_TESTS + [
             PluginLoadingException, match='returned an invalid type for its PluginInfo'
         )
     ),
-
-    # Legacy plugins
 
 ] + LEGACY_TESTS
 
@@ -117,6 +115,18 @@ def test_hooks_created(plugin_manager: PluginManager) -> None:
 
     assert 'core.journal_event' in p.callbacks
     assert p.callbacks['core.journal_event'][0] == getattr(p.plugin, 'on_journal')
+
+
+def test_multiple_hooks(plugin_manager: PluginManager) -> None:
+    """Test that a method with multiple @hook decorators is resolved correctly."""
+    p = plugin_manager.load_plugin(good_path / 'multi_callback')
+    assert p is not None
+
+    assert len(p.callbacks) == 2
+    assert 'core.journal_event' in p.callbacks
+    assert 'uncore.not_journal_event' in p.callbacks
+    assert p.callbacks['core.journal_event'][0] == p.callbacks['uncore.not_journal_event'][0]  # type: ignore
+    assert p.callbacks['uncore.not_journal_event'][0] == getattr(p.plugin, 'multiple_things')
 
 
 def test_unload_call(plugin_manager: PluginManager):
