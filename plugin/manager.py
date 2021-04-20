@@ -6,7 +6,7 @@ import importlib
 import pathlib
 import sys
 from fnmatch import fnmatch
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 
 from plugin.event import BaseEvent
 
@@ -188,7 +188,6 @@ class PluginManager:
             except PluginLoadingException as e:
                 self.log.exception(f'Unable to load plugin at {path}: {e}')
                 raise
-                return None
 
             except Exception as e:
                 self.log.exception(f'Exception occurred during loading plugin at {path}: {e} THIS IS A BUG!')
@@ -363,6 +362,7 @@ class PluginManager:
 
     def fire_event(self, event: BaseEvent) -> list[list[Any]]:
         """Call all callbacks listening for the given event."""
+        # TODO: rather a dict[plugin_name, list[any]] ?
         out: list[list[Any]] = []
         for name, p in self.plugins.items():
             self.log.trace(f'Firing event {event.name} for plugin {name}')
@@ -370,5 +370,17 @@ class PluginManager:
             out.append(res)
 
         return out
+
+    def fire_targeted_event(self, target: Union[LoadedPlugin, str], event: BaseEvent) -> list[Any]:
+        """Fire an event just for a particular plugin."""
+        if isinstance(target, str):
+            found = self.get_plugin(target)
+            if found is None:
+                raise PluginDoesNotExistException(found)
+
+            target = found
+
+        self.log.trace(f'Firing targeted event {event.name} at {target.info.name}')
+        return target.fire_event(event)
 
     # TODO: Register(System|station)Provider method, to allow it to be dynamic to plugins
