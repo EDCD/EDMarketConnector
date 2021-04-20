@@ -6,10 +6,10 @@ from typing import Any, ContextManager, List, Tuple
 import pytest
 
 from plugin.decorators import CALLBACK_MARKER
-from plugin.manager import (
-    PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException,
-    PluginManager
+from plugin.exceptions import (
+    PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
 )
+from plugin.manager import PluginManager
 from plugin.plugin import LEGACY_CALLBACK_LUT
 
 from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, legacy_path
