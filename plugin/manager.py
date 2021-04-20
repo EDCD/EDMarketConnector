@@ -5,10 +5,14 @@ import dataclasses
 import importlib
 import pathlib
 import sys
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Type
+from fnmatch import fnmatch
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type
+
+from plugin.event import BaseEvent
 
 if TYPE_CHECKING:
     from types import ModuleType
+    from EDMCLogging import LoggerMixin
 
 from EDMCLogging import get_main_logger, get_plugin_logger
 from plugin import decorators
@@ -35,6 +39,39 @@ class LoadedPlugin:
             f'Plugin {self.info.name} from {self.module} on {self.plugin._manager}'
             f' with {len(self.callbacks)} callbacks'
         )
+
+    @property
+    def log(self) -> 'LoggerMixin':
+        """Get the plugin logger represented by this LoadedPlugin."""
+        return self.plugin.log
+
+    def _fire_event_funcs(self, event: BaseEvent, funcs: list[Callable]) -> list[Any]:
+        out = []
+        for func in funcs:
+            try:
+                res = func(event)
+                if res is not None:
+                    out.append(res)
+
+            except Exception:
+                self.log.exception(f'Caught an exception while firing event {event.name!r} on func {func}')
+
+        return out
+
+    def fire_event(self, event: BaseEvent) -> list[Any]:
+        """
+        Call all event callbacks that match the given event.
+
+        :param event: the event to pass
+        """
+        results = []
+        for e, funcs in self.callbacks.items():
+            if not (e == event.name or e == '*' or fnmatch(event.name, e)):
+                continue
+
+            results.extend(self._fire_event_funcs(event, funcs))
+
+        return results
 
 
 class PluginManager:
@@ -213,6 +250,7 @@ class PluginManager:
         """
         # TODO: PLUGINS.md indicates that for legacy plugins, plugins _with_ an __init__.py should be loaded first
         # TODO: Likely this will be done a step above in whatever is done for ordering the list for iteration
+        self.log.trace(f'start load of {path} ({autoresolve_sys_path=}')
 
         plugin, module = self.__get_plugin_at(path, autoresolve_sys_path=autoresolve_sys_path)
 
@@ -323,7 +361,14 @@ class PluginManager:
 
         del self.plugins[name]
 
-    def fire_event(self, name: str, data):
-        ...
+    def fire_event(self, event: BaseEvent) -> list[list[Any]]:
+        """Call all callbacks listening for the given event."""
+        out: list[list[Any]] = []
+        for name, p in self.plugins.items():
+            self.log.trace(f'Firing event {event.name} for plugin {name}')
+            res = p.fire_event(event)
+            out.append(res)
+
+        return out
 
     # TODO: Register(System|station)Provider method, to allow it to be dynamic to plugins

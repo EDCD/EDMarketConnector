@@ -1,17 +1,16 @@
 """Testing suite for plugin loading system."""
 import pathlib
 from contextlib import nullcontext
-from plugin.plugin import LEGACY_CALLBACK_LUT
 from typing import Any, ContextManager, List, Tuple
 
 import pytest
 
+from plugin.decorators import CALLBACK_MARKER
 from plugin.manager import (
     PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException,
     PluginManager
 )
-
-from plugin.decorators import CALLBACK_MARKER
+from plugin.plugin import LEGACY_CALLBACK_LUT
 
 from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, legacy_path
 
@@ -41,8 +40,11 @@ LEGACY_TESTS: List[Tuple[pathlib.Path, Any]] = [
     ),
 ]
 
-TESTS = [
-    (good_path / 'simple', nullcontext()),
+
+GOOD_TESTS: List[Tuple[pathlib.Path, ContextManager]] = [
+    (path, nullcontext()) for path in good_path.iterdir() if path.is_dir()]
+
+TESTS = GOOD_TESTS + [
     (bad_path / 'no_plugin', pytest.raises(PluginHasNoPluginClassException)),
     (bad_path / 'error', pytest.raises(PluginLoadingException, match="This doesn't load")),
     (bad_path / 'class_init_error', pytest.raises(PluginLoadingException, match='Exception in init')),
@@ -59,6 +61,12 @@ TESTS = [
     # Legacy plugins
 
 ] + LEGACY_TESTS
+
+
+def test_load_them_all(plugin_manager: PluginManager) -> None:
+    """Test that loading all of the good together plugins behaves as expected."""
+    loaded = plugin_manager.load_plugins([x[0] for x in GOOD_TESTS])
+    assert all(lambda x: x is not None for x in loaded)
 
 
 @pytest.mark.parametrize('path,context', TESTS, ids=_idfn)
