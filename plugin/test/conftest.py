@@ -4,7 +4,7 @@ import typing
 
 from pytest import fixture
 
-from plugin.manager import PluginManager  # noqa: E402 # Has to be after the path fiddling
+from plugin.manager import PluginManager
 
 
 @fixture
