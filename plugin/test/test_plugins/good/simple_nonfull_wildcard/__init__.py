@@ -15,12 +15,12 @@ class GoodCallbackPlugin(Plugin):
         """Nothing Special."""
         self.called: list[event.BaseEvent] = []
         return PluginInfo(
-            name="good_callback",
+            name="good_callback_core_wildcard",
             version=semantic_version.Version.coerce('0.0.1'),
             authors=['A_D']
         )
 
-    @hook('core.journal_event')
+    @hook('core.*')
     def on_journal(self, e: event.JournalEvent):
         """Fake callback."""
         self.called.append(e)
