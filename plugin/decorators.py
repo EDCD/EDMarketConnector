@@ -10,6 +10,7 @@ logger = get_main_logger()
 
 CALLBACK_MARKER = "__edmc_callback_marker__"
 PLUGIN_MARKER = "__edmc_plugin_marker__"
+PROVIDER_MARKER = "__edmc_provider_marker__"
 
 
 def edmc_plugin(cls: Type[Plugin]) -> Type[Plugin]:
@@ -57,11 +58,8 @@ def hook(name: str) -> Callable[['_F'], _F]:
     :param name: The event to hook onto
     :return: (Internal python decoration implementation)
     """
-    # return functools.partial(_list_decorate, attr_name=CALLBACK_MARKER, attr_content=name)
-
     def _decorate(func: _F) -> _F:
-        res = _list_decorate(CALLBACK_MARKER, name, func)
-        return res
+        return _list_decorate(CALLBACK_MARKER, name, func)
 
     return _decorate
 
@@ -74,6 +72,6 @@ def provider(name: str) -> Callable[[_F], _F]:
     :return: (Internal python decoration implementation)
     """
     def _decorate(func: _F) -> _F:
-        raise NotImplementedError
+        return _list_decorate(PROVIDER_MARKER, name, func)
 
     return _decorate
