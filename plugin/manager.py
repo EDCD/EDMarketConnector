@@ -1,7 +1,6 @@
 """Main plugin engine."""
 from __future__ import annotations
 
-import dataclasses
 import importlib
 import pathlib
 import sys
