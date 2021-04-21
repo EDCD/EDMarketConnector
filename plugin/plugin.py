@@ -52,13 +52,13 @@ class Plugin(abc.ABC):
         # TODO: replacement of plug.show_error
         ...
 
-    def _find_callbacks(self) -> Dict[str, List[Callable]]:
+    def _find_marked_funcs(self, marker) -> Dict[str, List[Callable]]:
         out: Dict[str, List[Callable]] = defaultdict(list)
 
         field_names = list(self.__class__.__dict__.keys()) + list(self.__dict__.keys())
 
         for field in (getattr(self, f) for f in field_names):
-            callbacks: Optional[List[str]] = getattr(field, decorators.CALLBACK_MARKER, None)
+            callbacks: Optional[List[str]] = getattr(field, marker, None)
             if callbacks is None:
                 continue
 
@@ -86,19 +86,14 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 }
 
 
-def journal_entry_breakout(e: event.JournalEvent) -> Tuple[str, bool, Optional[str], Optional[str], Dict, Dict]:
-    return (e.commander, e.is_beta, e.system, e.station, e.data, e.state)
-
-
 LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
     # All of these callables should accept an event.BaseEvent or a subclass thereof
     # 'core.setup_ui': 'plugin_app',
     # 'core.setup_preferences_ui': 'plugin_prefs',
     # 'core.preferences_closed': 'prefs_changed',
-    'core.journal_entry': journal_entry_breakout,
+    'core.journal_entry': lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
     # 'core.dashboard_entry': 'dashboard_entry',
     # 'core.commander_data': 'cmdr_data',
-
 
     # 'inara.notify_ship': 'inara_notify_ship',
     # 'inara.notify_location': 'inara_notify_location',
@@ -133,7 +128,11 @@ class MigratedPlugin(Plugin):
         self.setup_callbacks()
 
     def setup_callbacks(self) -> None:
-        # TODO: Update arch with how this works
+        """
+        Set up shimmed callbacks for any event the legacy plugin may have.
+
+        See ARCHITECHTURE.md for more explanation.
+        """
         for new_hook, old_callback in LEGACY_CALLBACK_LUT.items():
             callback: Optional[Callable] = getattr(self.module, old_callback, None)
             if callback is None:
@@ -206,19 +205,6 @@ class MigratedPlugin(Plugin):
             return f(*breakout(e))
 
         setattr(wrapper, "original_func", f)
-        return wrapper
-
-    @staticmethod
-    def journal_callback(f: MigratedPlugin.JOURNAL_EVENT_SIG) -> Callable[[event.JournalEvent], None]:
-        """
-        Wrapper around legacy journal_event calls.
-
-        :param f: Legacy journal_event function
-        :return: Wrapped callback to the legacy journal_event
-        """
-        def wrapper(e: event.JournalEvent) -> None:
-            f(e.commander, e.is_beta, e.system, e.station, e.data, e.state)
-
         return wrapper
 
     def unload(self) -> None:
