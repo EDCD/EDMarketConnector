@@ -24,10 +24,13 @@ There are two decorators that currently defined by plugin:
 
 1. `edmc_plugin`
 2. `hook`
+3. `provider`
 
 `ecmc_plugin` is a class decorator that marks the given class as an edmc plugin to be instantiated later in loading
 
 `hook` is a function decorator that marks the given function as an edmc callback for any number of events
+
+`provider` decorates a function that provides information, such as ship and station links for the main EDMC UI.
 
 ### Loading
 
@@ -54,8 +57,19 @@ use in its `PluginInfo`. Said information is extracted if possible from the modu
 `__author__` or `__credits__`, and `__doc__` respectively. If no version is found, a dummy version is substited.
 `PluginInfo.name` uses the info returned from `plugin_start3`.
 
-NB: As legacy plugins do _not_ support reloading, any attempt to reload or unloading these will throw a 
+NB: As legacy plugins do _not_ support reloading, any attempt to reload or unloading these will throw a
 `NotImplementedError`
+
+#### Shimming events
+
+The `MigratedPlugin` class has a lookup table that tells it what func names to look
+for and what they should map to in new event terms.
+
+Once a given function name has been found, another LUT that contains functions to break
+an event object out into the argument format that the methods expect.
+
+Finally, the function is wrapped with an event handler on the `MigratedPlugin` instance,
+which will breakout the event it is passed, pass the breakout to the legacy function, and return the result from the legacy function back to the event source.
 
 ### Post instantiation of class
 
@@ -73,7 +87,15 @@ changed, but was made to allow for assumptions that may or may not be made in im
 ## Event Engine
 
 Events are identified by a namespace, and are hooked using the decorator `@hook("namespace.event_name")`.
-You can hook onto all events in a given namespace using `@hook("namespace")`, and all events fired with the special event name `*`.
+Event names here are globbed, and thus you can hook onto all events in a given namespace using `@hook("namespace.*")`,
+and all events fired with the name `*`.
 
 Some `core` events are special, and will work directly with your plugin rather than
 being global, eg $plugin_prefs_changed_here
+
+## TODO
+
+- Further tests for unloading that work with unload callbacks, and a test to ensure legacy plugins explode correctly
+  when unloaded
+- Integrate into EDMC
+  - Replacement for legacy functions that are deprecationwarning-ed to hell
