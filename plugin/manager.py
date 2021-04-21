@@ -25,20 +25,32 @@ from plugin.plugin_info import PluginInfo
 PLUGIN_MODULE_PAIR = Tuple[Optional[Plugin], Optional['ModuleType']]
 
 
-@dataclasses.dataclass
 class LoadedPlugin:
     """LoadedPlugin represents a single plugin, its module, and callbacks."""
 
-    info: PluginInfo
-    plugin: Plugin
-    module: ModuleType
-    callbacks: Dict[str, List[Callable]]
+    def __init__(self, info: PluginInfo, plugin: Plugin, module: ModuleType) -> None:
+        self.info: PluginInfo = info
+        self.plugin: Plugin = plugin
+        self.module: ModuleType = module
+        self.callbacks: Dict[str, List[Callable]] = plugin._find_marked_funcs(decorators.CALLBACK_MARKER)
+        self.providers: Dict[str, Callable] = {}
+
+        for provides, funcs in plugin._find_marked_funcs(decorators.PROVIDER_MARKER).items():
+            if len(funcs) != 1:
+                raise ValueError('plugin {self} provides multiple functions for provider {provides!r}')
+
+            self.providers[provides] = funcs[0]
 
     def __str__(self) -> str:
+        """Represent this plugin as a string."""
         return (
             f'Plugin {self.info.name} from {self.module} on {self.plugin._manager}'
             f' with {len(self.callbacks)} callbacks'
         )
+
+    def __repr__(self) -> str:
+        """Python(ish) string representation."""
+        return f'LoadedPlugin({self.info}, {self.plugin}, {self.module})'
 
     @property
     def log(self) -> 'LoggerMixin':
@@ -72,6 +84,10 @@ class LoadedPlugin:
             results.extend(self._fire_event_funcs(event, funcs))
 
         return results
+
+    def provides(self, name: str) -> Optional[Callable]:
+        """If this plugin provides a given provider name, return the function that provides it."""
+        return self.providers.get(name, None)
 
 
 class PluginManager:
@@ -280,7 +296,7 @@ class PluginManager:
         if info.name in self.plugins:
             raise PluginAlreadyLoadedException(info.name)
 
-        loaded = LoadedPlugin(info, plugin, module, plugin._find_callbacks())
+        loaded = LoadedPlugin(info, plugin, module)
         self.plugins[info.name] = loaded
         self.log.trace(f'successfully loaded {loaded}')
 
