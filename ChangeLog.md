@@ -1,6 +1,11 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+**As of release 5.0.0 (including betas) we no longer support Windows 7.  
+This is due to moving to Python 3.9.x, which itself does not now support 
+Windows 7.  The application (both EDMarketConnector.exe and EDMC.exe) will 
+crash on startup due to a missing DLL.**
+
 Pre-Release 5.0.0-beta6
 ===
 
