@@ -1,16 +1,16 @@
 """Plugin that generates a SystemExit on unload."""
 
-import pathlib
 import sys
 
 import semantic_version
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin
-from plugin.plugin import Plugin, PluginInfo
+from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class UnloadSystemExit(Plugin):
+class UnloadSystemExit(BasePlugin):
     """Throws an exception during unload."""
 
     def load(self) -> PluginInfo:

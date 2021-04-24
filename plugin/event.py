@@ -1,4 +1,4 @@
-
+"""Events for use with manager.pys event system."""
 import time
 from typing import Any, Dict, Optional
 

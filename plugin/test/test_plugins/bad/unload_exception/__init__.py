@@ -2,12 +2,13 @@
 
 import semantic_version
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin
-from plugin.plugin import Plugin, PluginInfo
+from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class UnloadException(Plugin):
+class UnloadException(BasePlugin):
     """Throws an exception during unload."""
 
     def load(self) -> PluginInfo:

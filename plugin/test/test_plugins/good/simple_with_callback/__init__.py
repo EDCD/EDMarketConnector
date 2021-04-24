@@ -2,13 +2,13 @@
 import semantic_version
 
 from plugin import event
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin, hook
-from plugin.plugin import Plugin
 from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class GoodCallbackPlugin(Plugin):
+class GoodCallbackPlugin(BasePlugin):
     """Plugin that loads correctly."""
 
     def load(self) -> PluginInfo:

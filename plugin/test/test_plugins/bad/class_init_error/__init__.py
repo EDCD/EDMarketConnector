@@ -1,12 +1,12 @@
 """Plugin that errors on __init__()."""
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin
-from plugin.plugin import Plugin
 from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class Broken(Plugin):
+class Broken(BasePlugin):
     """Test plugin."""
 
     def __init__(self, logger, manager, path) -> None:
@@ -14,5 +14,5 @@ class Broken(Plugin):
         raise Exception('Exception in init')
 
     def load(self) -> PluginInfo:
-        """Required."""
+        """Implement method required by ABC."""
         return super().load()

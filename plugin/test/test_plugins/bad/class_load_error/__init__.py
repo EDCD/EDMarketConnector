@@ -1,12 +1,12 @@
 """Plugin that errors on load()."""
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin
-from plugin.plugin import Plugin
 from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class Broken(Plugin):
+class Broken(BasePlugin):
     """Test Plugin."""
 
     def load(self) -> PluginInfo:

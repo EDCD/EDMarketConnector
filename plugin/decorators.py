@@ -1,10 +1,10 @@
-"""New plugin system."""
+"""Decorators for marking plugins and callbacks."""
 
 
 from typing import Any, Callable, Type, TypeVar
 
 from EDMCLogging import get_main_logger
-from plugin.plugin import Plugin
+from plugin.base_plugin import BasePlugin
 
 logger = get_main_logger()
 
@@ -13,11 +13,11 @@ PLUGIN_MARKER = "__edmc_plugin_marker__"
 PROVIDER_MARKER = "__edmc_provider_marker__"
 
 
-def edmc_plugin(cls: Type[Plugin]) -> Type[Plugin]:
+def edmc_plugin(cls: Type[BasePlugin]) -> Type[BasePlugin]:
     """Mark any classes decorated with this function."""
     logger.info(f"Found plugin class {cls!r}")
 
-    if not issubclass(cls, Plugin):
+    if not issubclass(cls, BasePlugin):
         raise ValueError(f"Cannot decorate non-subclass of Plugin {cls!r} as EDMC Plugin")
 
     if hasattr(cls, PLUGIN_MARKER):
@@ -27,7 +27,7 @@ def edmc_plugin(cls: Type[Plugin]) -> Type[Plugin]:
     logger.trace(f"Successfully marked class {cls!r} as EDMC plugin")
     return cls
 
-# Varidic generics are _not_ currently supported, see https://github.com/python/typing/issues/193
+# Variadic generics are _not_ currently supported, see https://github.com/python/typing/issues/193
 
 
 _F = TypeVar('_F', bound=Callable[..., Any])
