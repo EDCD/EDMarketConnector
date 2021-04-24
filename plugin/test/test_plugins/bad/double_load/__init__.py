@@ -1,13 +1,13 @@
 """Test Plugin."""
 import semantic_version
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin
-from plugin.plugin import Plugin
 from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class Broken(Plugin):
+class Broken(BasePlugin):
     """Valid (but not loadable twice) plugin."""
 
     def load(self) -> PluginInfo:

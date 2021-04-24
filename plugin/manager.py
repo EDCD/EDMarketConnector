@@ -7,29 +7,29 @@ import sys
 from fnmatch import fnmatch
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 
-from plugin.event import BaseEvent
-
 if TYPE_CHECKING:
     from types import ModuleType
     from EDMCLogging import LoggerMixin
 
 from EDMCLogging import get_main_logger, get_plugin_logger
 from plugin import decorators
+from plugin.base_plugin import BasePlugin
+from plugin.event import BaseEvent
 from plugin.exceptions import (
     PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
 )
-from plugin.plugin import MigratedPlugin, Plugin
+from plugin.legacy_plugin import MigratedPlugin
 from plugin.plugin_info import PluginInfo
 
-PLUGIN_MODULE_PAIR = Tuple[Optional[Plugin], Optional['ModuleType']]
+PLUGIN_MODULE_PAIR = Tuple[Optional[BasePlugin], Optional['ModuleType']]
 
 
 class LoadedPlugin:
     """LoadedPlugin represents a single plugin, its module, and callbacks."""
 
-    def __init__(self, info: PluginInfo, plugin: Plugin, module: ModuleType) -> None:
+    def __init__(self, info: PluginInfo, plugin: BasePlugin, module: ModuleType) -> None:
         self.info: PluginInfo = info
-        self.plugin: Plugin = plugin
+        self.plugin: BasePlugin = plugin
         self.module: ModuleType = module
         self.callbacks: Dict[str, List[Callable]] = plugin._find_marked_funcs(decorators.CALLBACK_MARKER)
         self.providers: Dict[str, Callable] = {}
@@ -154,7 +154,7 @@ class PluginManager:
             self.log.error(f"Unable to load module {path}")
             raise PluginLoadingException(f"Exception occurred while loading: {e}") from e
 
-        uninstantiated: Optional[Type[Plugin]] = None
+        uninstantiated: Optional[Type[BasePlugin]] = None
 
         self.log.trace(f'Searching for decorated plugin class in module at {path}')
         # Okay, we have the module loaded, lets find any actual plugins
@@ -171,7 +171,7 @@ class PluginManager:
             raise PluginHasNoPluginClassException
 
         plugin_logger = get_plugin_logger(path.parts[-1])
-        instance: Optional[Plugin] = None
+        instance: Optional[BasePlugin] = None
 
         try:
             instance = uninstantiated(plugin_logger, self, path)
@@ -189,7 +189,7 @@ class PluginManager:
         if not path.exists() or (not init.exists() and not load.exists()):
             raise PluginDoesNotExistException
 
-        plugin: Optional[Plugin] = None
+        plugin: Optional[BasePlugin] = None
         module: Optional[ModuleType] = None
 
         if init.exists():

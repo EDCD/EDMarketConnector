@@ -1,7 +1,9 @@
 """Testing suite for plugin loading system."""
+from __future__ import annotations
+
 import pathlib
 from contextlib import nullcontext
-from typing import Any, ContextManager, List, Tuple
+from typing import TYPE_CHECKING, Any, ContextManager, List, Tuple
 
 import pytest
 
@@ -9,10 +11,12 @@ from plugin.decorators import CALLBACK_MARKER
 from plugin.exceptions import (
     PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
 )
-from plugin.manager import PluginManager
-from plugin.plugin import LEGACY_CALLBACK_LUT
+from plugin.legacy_plugin import LEGACY_CALLBACK_LUT
 
 from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, legacy_path
+
+if TYPE_CHECKING:
+    from plugin.manager import PluginManager
 
 
 def _idfn(test_data) -> str:

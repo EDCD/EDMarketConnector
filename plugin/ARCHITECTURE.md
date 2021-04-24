@@ -95,6 +95,7 @@ being global, eg $plugin_prefs_changed_here
 
 ## TODO
 
+- Legacy plugins need `_` to be pushed into their global namespace
 - Further tests for unloading that work with unload callbacks, and a test to ensure legacy plugins explode correctly
   when unloaded
 - Integrate into EDMC

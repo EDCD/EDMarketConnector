@@ -1,14 +1,14 @@
 """Test plugin that loads correctly."""
 import semantic_version
 
+from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin, hook
-from plugin.plugin import Plugin
 from plugin.event import BaseEvent
 from plugin.plugin_info import PluginInfo
 
 
 @edmc_plugin
-class GoodPlugin(Plugin):
+class GoodPlugin(BasePlugin):
     """Plugin that loads correctly."""
 
     def load(self) -> PluginInfo:
