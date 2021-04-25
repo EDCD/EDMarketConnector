@@ -9,6 +9,7 @@ import locale
 import pathlib
 import re
 import sys
+import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
@@ -16,6 +17,7 @@ from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Optional, Tuple
+from infi.systray import SysTrayIcon
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -329,6 +331,18 @@ class AppWindow(object):
         self.w.columnconfigure(0, weight=1)
 
         self.prefsdialog = None
+
+        self.only_tray_close = 0
+
+        def open_window(systray):
+            self.only_tray_close = 2
+            shutdown_thread = threading.Thread(target=systray.shutdown)
+            shutdown_thread.setDaemon(True)
+            shutdown_thread.start()
+            self.w.deiconify()
+
+        menu_options = (("Open", None, open_window),)
+        self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
 
         plug.load_plugins(master)
 
@@ -1373,6 +1387,23 @@ class AppWindow(object):
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
+        value = bool(config.get_int('close_system_tray'))
+
+        if value:
+            self.w.withdraw()
+            self.systray.start()
+        else:
+            self.exit()
+
+    def exit_tray(self, systray):
+        if self.only_tray_close > 0:
+            self.only_tray_close -= 1
+        else:
+            exit_thread = threading.Thread(target=self.exit)
+            exit_thread.setDaemon(True)
+            exit_thread.start()
+
+    def exit(self):
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
