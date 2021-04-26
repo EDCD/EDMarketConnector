@@ -19,9 +19,6 @@
 /* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Always on top";
 
-/* Appearance setting. [EDMarketConnector.py] */
-"Minimize to system tray" = "Minimize to system tray";
-
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
@@ -312,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimize to system tray";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
