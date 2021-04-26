@@ -792,13 +792,13 @@ class PreferencesDialog(tk.Toplevel):
         )
         self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
-        self.system_tray_button = nb.Checkbutton(
-            appearance_frame,
-            text=_('Close to system tray'),
-            variable=self.close_system_tray,
-            command=self.themevarchanged
-        )
-        self.system_tray_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
+        if platform == 'win32':
+            nb.Checkbutton(
+                appearance_frame,
+                text=_('Close to system tray'),
+                variable=self.close_system_tray,
+                command=self.themevarchanged
+            ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
