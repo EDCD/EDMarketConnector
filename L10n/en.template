@@ -19,6 +19,9 @@
 /* Appearance setting. [EDMarketConnector.py] */
 "Always on top" = "Always on top";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimize to system tray";
+
 /* CQC rank. [stats.py] */
 "Amateur" = "Amateur";
 
