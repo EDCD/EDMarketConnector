@@ -1392,8 +1392,7 @@ class AppWindow(object):
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
-        value = config.get_bool('minimize_system_tray')
-        if platform == 'win32' and value is not None and value:
+        if platform == 'win32':
             shutdown_thread = threading.Thread(target=self.systray.shutdown)
             shutdown_thread.setDaemon(True)
             shutdown_thread.start()
