@@ -335,7 +335,7 @@ class AppWindow(object):
 
         self.only_tray_close = 0
 
-        def open_window(systray):
+        def open_window(systray) -> None:
             self.only_tray_close = 2
             shutdown_thread = threading.Thread(target=systray.shutdown)
             shutdown_thread.setDaemon(True)
@@ -1393,6 +1393,7 @@ class AppWindow(object):
         if value:
             self.w.withdraw()
             self.systray.start()
+
         else:
             self.exit()
 
@@ -1400,6 +1401,7 @@ class AppWindow(object):
         """Tray icon is shutting down."""
         if self.only_tray_close > 0:
             self.only_tray_close -= 1
+
         else:
             exit_thread = threading.Thread(target=self.exit)
             exit_thread.setDaemon(True)

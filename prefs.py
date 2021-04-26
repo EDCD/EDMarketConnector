@@ -636,7 +636,7 @@ class PreferencesDialog(tk.Toplevel):
         # Appearance theme and language setting
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-        self.close_system_tray = tk.BooleanVar(value=bool(config.get_int('close_system_tray')))
+        self.close_system_tray = tk.BooleanVar(value=config.get_bool('close_system_tray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
