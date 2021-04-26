@@ -17,6 +17,7 @@ from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Optional, Tuple
+
 from infi.systray import SysTrayIcon
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -1395,7 +1396,8 @@ class AppWindow(object):
         else:
             self.exit()
 
-    def exit_tray(self, systray):
+    def exit_tray(self, systray) -> None:
+        """Tray icon is shutting down."""
         if self.only_tray_close > 0:
             self.only_tray_close -= 1
         else:
@@ -1403,7 +1405,8 @@ class AppWindow(object):
             exit_thread.setDaemon(True)
             exit_thread.start()
 
-    def exit(self):
+    def exit(self) -> None:
+        """Actual application shutdown."""
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
