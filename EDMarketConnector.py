@@ -334,16 +334,24 @@ class AppWindow(object):
             import threading
             from infi.systray import SysTrayIcon
 
-            self.only_tray_close = 0
+            self.only_tray_close = 0  # This is kind of a hack.
+            # When the tray icon is double click to reopen the EDMC window, I want the tray icon to disappear. To do
+            # that I have to call the `shutdown()` method of the systray object. Calling the shutdown method triggers
+            # the method associated with `on_quit` twice, once for WM_DESTROY and again for WM_CLOSE. This is not the
+            # case when the application is exited by clicking on `Quit` in the tray menu. So, to handle this, we are
+            # creating this class variable and setting it to 2 when `Open` is called from the tray menu (either by
+            # clicking open or by double clicking the icon) and decrementing it by 1 when the tray shutdown is triggered
 
             def open_window(systray) -> None:
                 self.only_tray_close = 2
+                # Shutdown needs to happen in a separate thread to prevent joining with itself
                 shutdown_thread = threading.Thread(target=systray.shutdown)
                 shutdown_thread.setDaemon(True)
                 shutdown_thread.start()
                 self.w.deiconify()
 
             menu_options = (("Open", None, open_window),)
+            # Method associated with on_quit is called whenever the systray is closing
             self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
 
         plug.load_plugins(master)
@@ -1391,7 +1399,7 @@ class AppWindow(object):
         """Application shutdown procedure."""
         if platform == 'win32':
             value = bool(config.get_int('close_system_tray'))
-
+            # When exit is called, either exit application or minimize to system tray
             if value:
                 self.w.withdraw()
                 self.systray.start()
@@ -1405,6 +1413,7 @@ class AppWindow(object):
     def exit_tray(self, systray) -> None:
         """Tray icon is shutting down."""
         import threading
+        # Hack to see if the tray shutdown has been called by calling quit or calling shutdown
         if self.only_tray_close > 0:
             self.only_tray_close -= 1
 
