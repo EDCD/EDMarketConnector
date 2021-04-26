@@ -264,6 +264,7 @@ if __name__ == '__main__':  # noqa: C901
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
     import update
+    from infi.systray import SysTrayIcon
 # isort: on
 
     def _(x: str) -> str:
@@ -334,7 +335,7 @@ class AppWindow(object):
         if platform == 'win32':
             from infi.systray import SysTrayIcon
 
-            def open_window(systray) -> None:
+            def open_window(systray: 'SysTrayIcon') -> None:
                 self.w.deiconify()
 
             menu_options = (("Open", None, open_window),)
@@ -1383,7 +1384,7 @@ class AppWindow(object):
             logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
-    def exit_tray(self, systray) -> None:
+    def exit_tray(self, systray: 'SysTrayIcon') -> None:
         """Tray icon is shutting down."""
         exit_thread = threading.Thread(target=self.onexit)
         exit_thread.setDaemon(True)
