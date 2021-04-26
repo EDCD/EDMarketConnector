@@ -505,6 +505,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Suit";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
