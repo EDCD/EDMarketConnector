@@ -499,6 +499,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = True  # First event in 3.0
 
             elif event_type == 'LoadGame':
+                # alpha4
+                # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.mode = entry.get('GameMode')
@@ -623,11 +625,45 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'Embark':
                 # If we've embarked then we're no longer on the station.
+
+                # alpha4
+                # This event is logged when a player (on foot) gets into a ship or SRV
+                # Parameters:
+                #     • SRV: true if getting into SRV, false if getting into a ship
+                #     • Taxi: true when boarding a taxi transposrt ship
+                #     • Multicrew: true when boarding another player’s vessel
+                #     • ID: player’s ship ID (if players own vessel)
+                #     • StarSystem
+                #     • SystemAddress
+                #     • Body
+                #     • BodyID
+                #     • OnStation: bool
+                #     • OnPlanet: bool
+                #     • StationName (if at a station)
+                #     • StationType
+                #     • MarketID
                 self.station = None
                 self.state['OnFoot'] = False
 
             elif event_type == 'Disembark':
                 # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
+                # alpha4
+                # This event is logged when the player steps out of a ship or SRV
+                #
+                # Parameters:
+                #     • SRV: true if getting out of SRV, false if getting out of a ship
+                #     • Taxi: true when getting out of a taxi transposrt ship
+                #     • Multicrew: true when getting out of another player’s vessel
+                #     • ID: player’s ship ID (if players own vessel)
+                #     • StarSystem
+                #     • SystemAddress
+                #     • Body
+                #     • BodyID
+                #     • OnStation: bool
+                #     • OnPlanet: bool
+                #     • StationName (if at a station)
+                #     • StationType
+                #     • MarketID
 
                 # If we're not exiting one of these then it's from our own ship, and then we should already have
                 # self.station set correctly.
@@ -637,6 +673,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['OnFoot'] = True
 
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
+                # alpha4 - any changes ?
+                # Location:
+                # New in Odyssey:
+                #     • Taxi: bool
+                #     • Multicrew: bool
+                #     • InSRV: bool
+                #     • OnFoot: bool
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
@@ -734,6 +777,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #       be wrong if Cmdr relogs at a Settlement with anything in
                 #       backpack.  We can't track when they use/pick up items
                 #       anyway (Odyssey Alpha Phase 1 Hotfix 2).
+                # alpha4 - This should be changed
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
@@ -754,6 +798,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 )
 
             elif event_type == 'BackPackMaterials':
+                # alpha4 -
+                # Lists the contents of the backpack, eg when disembarking from ship
+
                 # Assume this reflects the current state when written
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
@@ -777,6 +824,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'BuyMicroResources':
                 # Buying from a Pioneer Supplies, goes directly to ShipLocker.
                 # One event per Item, not an array.
+                # alpha4 - update current credits ?
                 category = self.category(entry['Category'])
                 name = self.canonicalise(entry['Name'])
                 self.state[category][name] += entry['Count']
@@ -784,6 +832,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'SellMicroResources':
                 # Selling to a Bar Tender on-foot.
                 # One event per whole sale, so it's an array.
+                # alpha4 - update current credits ?
                 for mr in entry['MicroResources']:
                     category = self.category(mr['Category'])
                     name = self.canonicalise(mr['Name'])
@@ -827,7 +876,47 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         if self.state['BackPack'][c][m] < 0:
                             self.state['BackPack'][c][m] = 0
 
+            elif event_type == 'CollectItems':
+                # alpha4
+                # When picking up items from the ground
+                # Parameters:
+                #     • Name
+                #     • Type
+                #     • OwnerID
+                pass
+
+            elif event_type == 'DropItems':
+                # alpha4
+                # Parameters:
+                #     • Name
+                #     • Type
+                #     • OwnerID
+                #     • MissionID
+                #     • Count
+                pass
+
+            elif event_type == 'UseConsumable':
+                # alpha4
+                # When using an item from the player’s inventory (backpack)
+                #
+                # Parameters:
+                #     • Name
+                #     • Type
+                pass
+
             elif event_type == 'SwitchSuitLoadout':
+                # alpha4
+                # This event is logged when a player selects a different flight suit from the ship’s locker
+                #
+                # Parameters:
+                #     • SuitID
+                #     • SuitName
+                #     • LoadoutID
+                #     • LoadoutName
+                #     • Modules: array of objects
+                #         ◦ SlotName
+                #         ◦ SuitModuleID
+                #         ◦ ModuleName
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
                 try:
@@ -853,6 +942,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         except KeyError:
                             logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
 
+            elif event_type == 'CreateSuitLoadout':
+                # We know we won't have data for this new one
+                # Parameters:
+                #     • SuitID
+                #     • SuitName
+                #     • LoadoutID
+                #     • LoadoutName
+                pass
+
             elif event_type == 'DeleteSuitLoadout':
                 # We should remove this from the monitor.state record of loadouts.  The slotid
                 # could end up valid due to CreateSuitLoadout events, but we won't have the
@@ -866,23 +964,109 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 except KeyError:
                     logger.exception(f"slot id {slotid} doesn't exist, not in last CAPI pull ?")
 
-            elif event_type == 'CreateSuitLoadout':
-                # We know we won't have data for this new one
+            elif event_type == 'RenameSuitLoadout':
+                # alpha4
+                # Parameters:
+                #     • SuitID
+                #     • SuitName
+                #     • LoadoutID
+                #     • Loadoutname
                 pass
 
             # `BuySuit` has no useful info as of 4.0.0.13
+            elif event_type == 'BuySuit':
+                # alpha4 - should have 'SuitID'
+                # update credits
+                pass
 
             elif event_type == 'SellSuit':
                 # Remove from known suits
                 # As of Odyssey Alpha Phase 2, Hotfix 5 (4.0.0.13) this isn't possible as this event
                 # doesn't contain the specific suit ID as per CAPI `suits` dict.
+                # alpha4
+                # This event is logged when a player sells a flight suit
+                #
+                # Parameters:
+                #     • Name
+                #     • Price
+                #     • SuitID
+                # update credits total
+                pass
+
+            elif event_type == 'UpgradeSuit':
+                # alpha4
+                # This event is logged when the player upgrades their flight suit
+                #
+                # Parameters:
+                #     • Name
+                #     • SuitID
+                #     • Class
+                #     • Cost
+                # Update credits total ?
                 pass
 
             # `LoadoutEquipModule` has no instance-specific ID as of 4.0.0.13
+            elif event_type == 'LoadoutEquipModule':
+                # alpha4 - should have necessary IDs
+                pass
+
+            elif event_type == 'LoadoutRemoveModule':
+                # alpha4
+                # This event is logged when a player removes a weapon from a suit loadout
+                #
+                # Parameters:
+                #     • SuitID
+                #     • SuitName
+                #     • LoadoutID
+                #     • LoadoutName
+                #     • ModuleName: weapon or other item removed from loadout
+                #     • SuitModuleID
+                pass
 
             # `BuyWeapon` has no instance-specific ID as of 4.0.0.13
+            elif event_type == 'BuyWeapon':
+                # alpha4
+                # Parameters:
+                #     • Name
+                #     • Price
+                #     • SuitModuleID
+                # update credits
+                pass
+
             # `SellWeapon` has no instance-specific ID as of 4.0.0.13
+            elif event_type == 'SellWeapon':
+                # alpha4
+                # This event is logged when a player sells a hand weapon
+                #
+                # Parameters:
+                #     • Name
+                #     • Price
+                #     • SuitModuleID
+                # Update credits total
+                pass
+
             # `UpgradeWeapon` has no instance-specific ID as of 4.0.0.13
+            elif event_type == 'UpgradeWeapon':
+                # alpha4
+                pass
+
+            # alpha4
+            elif event_type == 'ScanOrganic':
+                pass
+
+            elif event_type == 'SellOrganicData':
+                # alpha4 - update current credits ?
+                pass
+
+            # alpha4 - Credits updates
+            elif event_type == 'BookDropship':
+                pass
+            elif event_type == 'BookTaxi':
+                pass
+            elif event_type == 'CancelDropship':
+                pass
+            elif event_type == 'CancelTaxi':
+                pass
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
