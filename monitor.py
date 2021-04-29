@@ -153,7 +153,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'SuitCurrent':        None,
             'Suits':              None,
             'SuitLoadoutCurrent': None,
-            'SuitLoadouts':       None,
+            'SuitLoadouts':       {},
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -982,13 +982,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Loadout 1" }
 
-                slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                 try:
-                    self.state['SuitLoadouts'].pop(f'{slotid}')
+                    self.state['SuitLoadouts'].pop(f'{loadout_id}')
 
                 except KeyError:
                     # This should no longer happen, as we're now handling CreateSuitLoadout properly
-                    logger.exception(f"slot id {slotid} doesn't exist, not in last CAPI pull ?")
+                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'RenameSuitLoadout':
                 # alpha4
@@ -1002,7 +1002,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Art L/K" }
                 loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
+                try:
+                    self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
+
+                except KeyError:
+                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'BuySuit':
                 # alpha4 :
