@@ -1082,16 +1082,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 }
 
             elif event_type == 'LoadoutRemoveModule':
-                # alpha4
-                # This event is logged when a player removes a weapon from a suit loadout
-                #
-                # Parameters:
-                #     • SuitID
-                #     • SuitName
-                #     • LoadoutID
-                #     • LoadoutName
-                #     • ModuleName: weapon or other item removed from loadout
-                #     • SuitModuleID
                 # alpha4 - triggers if selecting an already-equipped weapon into a different slot
                 # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutRemoveModule", "LoadoutName":"Dom L/K/K",
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
@@ -1100,25 +1090,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                 self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
 
-            # `BuyWeapon` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'BuyWeapon':
                 # alpha4
-                # Parameters:
-                #     • Name
-                #     • Price
-                #     • SuitModuleID
+                # { "timestamp":"2021-04-29T11:10:51Z", "event":"BuyWeapon", "Name":"Wpn_M_AssaultRifle_Laser_FAuto",
+                # "Name_Localised":"TK Aphelion", "Price":125000, "SuitModuleID":1698372938719590 }
                 # update credits
-                pass
+                self.state['Credits'] -= entry.get('Price', 0)
 
-            # `SellWeapon` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'SellWeapon':
-                # alpha4
-                # This event is logged when a player sells a hand weapon
-                #
-                # Parameters:
-                #     • Name
-                #     • Price
-                #     • SuitModuleID
+                # We're not actually keeping track of all owned weapons, only those in
+                # Suit Loadouts.
                 # alpha4:
                 # { "timestamp":"2021-04-29T10:50:34Z", "event":"SellWeapon", "Name":"wpn_m_assaultrifle_laser_fauto",
                 # "Name_Localised":"TK Aphelion", "Price":75000, "SuitModuleID":1698364962722310 }
@@ -1136,8 +1117,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Update credits total
                 self.state['Credits'] += entry.get('Price', 0)
 
-            # `UpgradeWeapon` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'UpgradeWeapon':
+                # We're not actually keeping track of all owned weapons, only those in
+                # Suit Loadouts.
                 # alpha4
                 pass
 
