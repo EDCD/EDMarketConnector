@@ -949,7 +949,32 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • SuitName
                 #     • LoadoutID
                 #     • LoadoutName
-                pass
+                # alpha4:
+                # { "timestamp":"2021-04-29T09:37:08Z", "event":"CreateSuitLoadout", "SuitID":1698364940285172,
+                # "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit", "LoadoutID":4293000001,
+                # "LoadoutName":"Dom L/K/K", "Modules":[
+                # {
+                #   "SlotName":"PrimaryWeapon1",
+                #   "SuitModuleID":1698364962722310,
+                #   "ModuleName":"wpn_m_assaultrifle_laser_fauto",
+                #   "ModuleName_Localised":"TK Aphelion"
+                # },
+                # { "SlotName":"PrimaryWeapon2",
+                # "SuitModuleID":1698364956302993, "ModuleName":"wpn_m_assaultrifle_kinetic_fauto",
+                # "ModuleName_Localised":"Karma AR-50" }, { "SlotName":"SecondaryWeapon",
+                # "SuitModuleID":1698292655291850, "ModuleName":"wpn_s_pistol_kinetic_sauto",
+                # "ModuleName_Localised":"Karma P-15" } ] }
+                new_loadout = {
+                    'loadoutSlotId': self.suit_loadout_id_from_loadoutid(entry['LoadoutID']),
+                    'suit': {
+                        'name': entry['SuitName'],
+                        'locName': entry.get('SuitName_Localised', entry['SuitName']),
+                        'suitId': entry['SuitID'],
+                    },
+                    'mame': entry['LoadoutName'],
+                    'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
+                }
+                self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
 
             elif event_type == 'DeleteSuitLoadout':
                 # We should remove this from the monitor.state record of loadouts.  The slotid
@@ -1617,6 +1642,29 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             x[0]['Count'] += inventory_item['Count']
 
         return out
+
+    def suit_loadout_slots_array_to_dict(self, loadout: dict) -> dict:
+        """
+        Return a CAPI-style Suit loadout from a Journal style dict.
+
+        :param loadout: e.g. Journal 'CreateSuitLoadout'->'Modules'.
+        :return: CAPI-style dict for a suit loadout.
+        """
+        loadout_slots = {x['SlotName']: x for x in loadout}
+        slots = {}
+        for s in ('PrimaryWeapon1', 'PrimaryWeapon2', 'SecondaryWeapon'):
+            if loadout_slots.get(s) is None:
+                continue
+
+            slots[s] = {
+                'name':           loadout_slots[s]['ModuleName'],
+                # 'id': None, # FDevID ?
+                'weaponrackId':   loadout_slots[s]['SuitModuleID'],
+                'locName':        loadout_slots[s].get('ModuleName_Localised', loadout_slots[s]['ModuleName']),
+                'locDescription': '',
+            }
+
+        return slots
 
 
 # singleton
