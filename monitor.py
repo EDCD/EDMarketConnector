@@ -977,16 +977,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
 
             elif event_type == 'DeleteSuitLoadout':
-                # We should remove this from the monitor.state record of loadouts.  The slotid
-                # could end up valid due to CreateSuitLoadout events, but we won't have the
-                # correct new loadout data until next CAPI pull.
-                loadoutid = entry['LoadoutID']
-                slotid = self.suit_loadout_id_from_loadoutid(loadoutid)
-                # This might be a Loadout that was created after our last CAPI pull.
+                # alpha4:
+                # { "timestamp":"2021-04-29T10:32:27Z", "event":"DeleteSuitLoadout", "SuitID":1698365752966423,
+                # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
+                # "LoadoutName":"Loadout 1" }
+
+                slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                 try:
                     self.state['SuitLoadouts'].pop(f'{slotid}')
 
                 except KeyError:
+                    # This should no longer happen, as we're now handling CreateSuitLoadout properly
                     logger.exception(f"slot id {slotid} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'RenameSuitLoadout':
