@@ -1072,7 +1072,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon2", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
-                pass
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
+                    'name':           entry['ModuleName'],
+                    'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
+                    'id':             None,
+                    'weaponrackId':   entry['SuitModuleID'],
+                    'locDescription': '',
+                }
 
             elif event_type == 'LoadoutRemoveModule':
                 # alpha4
