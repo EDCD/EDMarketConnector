@@ -1013,11 +1013,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
                 new_suit = {
-                    'name':    entry['Name'],
-                    'locName': entry.get('Name_Localised', entry['Name']),
-                    # 'id': ???,  # Is this an FDev ID for suit type ?
-                    'suitId':  entry['SuitID'],
-                    'slots':   [],
+                    'name':      entry['Name'],
+                    'locName':   entry.get('Name_Localised', entry['Name']),
+                    'id': None,  # Is this an FDev ID for suit type ?
+                    'suitId':    entry['SuitID'],
+                    'slots':     [],
                 }
                 if self.state['Suits'] is None:
                     self.state['Suits'] = {entry['SuitID']: new_suit}
@@ -1698,7 +1698,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             slots[s] = {
                 'name':           loadout_slots[s]['ModuleName'],
-                # 'id': None, # FDevID ?
+                'id':             None,  # FDevID ?
                 'weaponrackId':   loadout_slots[s]['SuitModuleID'],
                 'locName':        loadout_slots[s].get('ModuleName_Localised', loadout_slots[s]['ModuleName']),
                 'locDescription': '',
