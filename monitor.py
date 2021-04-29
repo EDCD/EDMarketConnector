@@ -997,7 +997,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • SuitName
                 #     • LoadoutID
                 #     • Loadoutname
-                pass
+                # alpha4:
+                # { "timestamp":"2021-04-29T10:35:55Z", "event":"RenameSuitLoadout", "SuitID":1698365752966423,
+                # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
+                # "LoadoutName":"Art L/K" }
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
 
             elif event_type == 'BuySuit':
                 # alpha4 :
