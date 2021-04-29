@@ -973,10 +973,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Loadoutname
                 pass
 
-            # `BuySuit` has no useful info as of 4.0.0.13
             elif event_type == 'BuySuit':
-                # alpha4 - should have 'SuitID'
+                # alpha4 :
+                # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
+                # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
+                self.state['Suits'].update(
+                    {entry['SuitID']: {
+                        'name': entry['Name'],
+                        'locName': entry.get('Name_Localised', entry['Name']),
+                        # 'id': ???,  # Is this an FDev ID for suit type ?
+                        'suitId': entry['SuitID'],
+                        'slots': [],
+                    }}
+                )
+
                 # update credits
+                self.state['Credits'] -= entry.get('Price', 0)
                 pass
 
             elif event_type == 'SellSuit':
