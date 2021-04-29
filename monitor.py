@@ -1009,8 +1009,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4:
                 # { "timestamp":"2021-04-29T09:15:51Z", "event":"SellSuit", "SuitID":1698364937435505,
                 # "Name":"explorationsuit_class1", "Name_Localised":"Artemis Suit", "Price":90000 }
+                try:
+                    self.state['Suits'].pop(entry['SuitID'])
+
+                except KeyError:
+                    logger.exception(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
+
                 # update credits total
-                pass
+                self.state['Credits'] += entry.get('Price', 0)
 
             elif event_type == 'UpgradeSuit':
                 # alpha4
