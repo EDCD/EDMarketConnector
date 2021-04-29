@@ -1066,9 +1066,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Actual alpha4 - need to grind mats
                 pass
 
-            # `LoadoutEquipModule` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'LoadoutEquipModule':
-                # alpha4 - should have necessary IDs
+                # alpha4:
+                # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutEquipModule", "LoadoutName":"Dom L/K/K",
+                # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
+                # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon2", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
+                # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
                 pass
 
             elif event_type == 'LoadoutRemoveModule':
@@ -1082,7 +1085,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • LoadoutName
                 #     • ModuleName: weapon or other item removed from loadout
                 #     • SuitModuleID
-                pass
+                # alpha4 - triggers if selecting an already-equipped weapon into a different slot
+                # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutRemoveModule", "LoadoutName":"Dom L/K/K",
+                # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
+                # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon1", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
+                # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
 
             # `BuyWeapon` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'BuyWeapon':
