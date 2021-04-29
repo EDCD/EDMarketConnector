@@ -1103,8 +1103,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Name
                 #     • Price
                 #     • SuitModuleID
+                # alpha4:
+                # { "timestamp":"2021-04-29T10:50:34Z", "event":"SellWeapon", "Name":"wpn_m_assaultrifle_laser_fauto",
+                # "Name_Localised":"TK Aphelion", "Price":75000, "SuitModuleID":1698364962722310 }
+
+                # We need to look over all Suit Loadouts for ones that used this specific weapon
+                # and update them to entirely empty that slot.
+                for sl in self.state['SuitLoadouts']:
+                    for w in self.state['SuitLoadouts'][sl]['slots']:
+                        if self.state['SuitLoadouts'][sl]['slots'][w]['weaponrackId'] == entry['SuitModuleID']:
+                            self.state['SuitLoadouts'][sl]['slots'].pop(w)
+                            # We've changed the dict, so iteration breaks, but also the weapon
+                            # could only possibly have been here once.
+                            break
+
                 # Update credits total
-                pass
+                self.state['Credits'] += entry.get('Price', 0)
 
             # `UpgradeWeapon` has no instance-specific ID as of 4.0.0.13
             elif event_type == 'UpgradeWeapon':
