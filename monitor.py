@@ -977,19 +977,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
-                self.state['Suits'].update(
-                    {entry['SuitID']: {
-                        'name': entry['Name'],
-                        'locName': entry.get('Name_Localised', entry['Name']),
-                        # 'id': ???,  # Is this an FDev ID for suit type ?
-                        'suitId': entry['SuitID'],
-                        'slots': [],
-                    }}
-                )
+                new_suit = {
+                    'name':    entry['Name'],
+                    'locName': entry.get('Name_Localised', entry['Name']),
+                    # 'id': ???,  # Is this an FDev ID for suit type ?
+                    'suitId':  entry['SuitID'],
+                    'slots':   [],
+                }
+                if self.state['Suits'] is None:
+                    self.state['Suits'] = {entry['SuitID']: new_suit}
+
+                else:
+                    self.state['Suits'].update(
+                        {entry['SuitID']: new_suit}
+                    )
 
                 # update credits
                 self.state['Credits'] -= entry.get('Price', 0)
-                pass
 
             elif event_type == 'SellSuit':
                 # Remove from known suits
@@ -1002,6 +1006,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Name
                 #     • Price
                 #     • SuitID
+                # alpha4:
+                # { "timestamp":"2021-04-29T09:15:51Z", "event":"SellSuit", "SuitID":1698364937435505,
+                # "Name":"explorationsuit_class1", "Name_Localised":"Artemis Suit", "Price":90000 }
                 # update credits total
                 pass
 
