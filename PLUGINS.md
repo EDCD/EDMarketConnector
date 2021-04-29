@@ -537,16 +537,15 @@ Content of `state` (updated to the current journal entry):
 | `Data`         |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
 | `BackPack`     |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
 | `SuitCurrent`  |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
-| `Suits`        |     `dict` or `list`[1]     | CAPI-returned data of owned suits.  NB: Type depends on if array is sparse or not.  May be `None` if no data.                                               |
+| `Suits`        |           `dict`[1]         | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |     `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
-| `SuitLoadouts` |           `dict`            | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+| `SuitLoadouts` |           `dict`[1]         | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 
-[1] - With `Suits` there's a caveat depending on all the slots from 0 are
-contiguously used or not.   If they are then the type is `list` and
-indexing is purely numeric.  If not then it's a `dict` and you need to index it
-with a string.  There is `companion.index_possibly_sparse_list()` to aid
-with this, or if you wish to iterate over it use `companion.listify()` to
-fill in any gaps and have a `list` to operate on.
+[1] - Some data from the CAPI is sometimes returned as a `list` (when all 
+members are present) and other times as an integer-keyed `dict` (when at 
+least one member is missing, so the indices are not contiguous).  We choose to
+always convert to the integer-keyed `dict` form so that code utilising the data
+is simpler.
 
 New in version 4.1.6:
 

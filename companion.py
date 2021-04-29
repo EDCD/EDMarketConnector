@@ -680,13 +680,24 @@ class Session(object):
             return
 
         monitor.state['SuitCurrent'] = current_suit
-        monitor.state['Suits'] = data.get('suits')
+        # It's easier to always have this in the 'sparse array' dict form
+        suits = data.get('suits')
+        if isinstance(suits, list):
+            monitor.state['Suits'] = dict(enumerate(suits))
+
+        else:
+            monitor.state['Suits'] = suits
 
         if (suit_loadouts := data.get('loadouts')) is None:
             logger.warning('CAPI data had "suit" but no (suit) "loadouts"')
 
         monitor.state['SuitLoadoutCurrent'] = data.get('loadout')
-        monitor.state['SuitLoadouts'] = suit_loadouts
+        # It's easier to always have this in the 'sparse array' dict form
+        if isinstance(suit_loadouts, list):
+            monitor.state['SuitLoadouts'] = dict(enumerate(suit_loadouts))
+
+        else:
+            monitor.state['SuitLoadouts'] = suit_loadouts
 
     def close(self) -> None:
         """Close CAPI authorization session."""
