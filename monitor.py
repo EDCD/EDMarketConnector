@@ -1027,7 +1027,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • SuitID
                 #     • Class
                 #     • Cost
-                # Update credits total ?
+                # Update credits total ?  It shouldn't even involve credits!
+                # Actual alpha4 - need to grind mats
                 pass
 
             # `LoadoutEquipModule` has no instance-specific ID as of 4.0.0.13
