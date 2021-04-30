@@ -914,7 +914,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Parameters:
                 #     • Name
                 #     • Type
-                pass
+                for c in self.state['BackPackMaterials']['Consumables']:
+                    if c['Name'] == entry['Name']:
+                        c['Count'] -= 1
 
             elif event_type == 'SwitchSuitLoadout':
                 # alpha4
@@ -1144,8 +1146,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4
                 pass
 
-            # alpha4
             elif event_type == 'ScanOrganic':
+                # Nothing of interest to our state.
                 pass
 
             elif event_type == 'SellOrganicData':
