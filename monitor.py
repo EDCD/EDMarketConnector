@@ -1021,7 +1021,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 }
 
                 # update credits
-                self.state['Credits'] -= entry.get('Price', 0)
+                if price := entry.get('Price') is None:
+                    logger.error(f"BuySuit didn't contain Price: {entry}")
+
+                else:
+                    self.state['Credits'] -= price
 
             elif event_type == 'SellSuit':
                 # Remove from known suits
@@ -1044,7 +1048,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     logger.exception(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
 
                 # update credits total
-                self.state['Credits'] += entry.get('Price', 0)
+                if price := entry.get('Price') is None:
+                    logger.error(f"SellSuit didn't contain Price: {entry}")
+
+                else:
+                    self.state['Credits'] += price
 
             elif event_type == 'UpgradeSuit':
                 # alpha4
@@ -1088,7 +1096,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T11:10:51Z", "event":"BuyWeapon", "Name":"Wpn_M_AssaultRifle_Laser_FAuto",
                 # "Name_Localised":"TK Aphelion", "Price":125000, "SuitModuleID":1698372938719590 }
                 # update credits
-                self.state['Credits'] -= entry.get('Price', 0)
+                if price := entry.get('Price') is None:
+                    logger.error(f"BuyWeapon didn't contain Price: {entry}")
+
+                else:
+                    self.state['Credits'] -= price
 
             elif event_type == 'SellWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
@@ -1108,7 +1120,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             break
 
                 # Update credits total
-                self.state['Credits'] += entry.get('Price', 0)
+                if price := entry.get('Price') is None:
+                    logger.error(f"SellWeapon didn't contain Price: {entry}")
+
+                else:
+                    self.state['Credits'] += price
 
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
