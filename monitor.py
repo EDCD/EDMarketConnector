@@ -805,6 +805,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
+                self.state['BackPack']['Data'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['BackPack']['Component'].update(
@@ -819,6 +820,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 clean_items = self.coalesce_cargo(entry['Items'])
                 self.state['BackPack']['Item'].update(
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                )
+
+                clean_data = self.coalesce_cargo(entry['Data'])
+                self.state['BackPack']['Data'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
             elif event_type == 'BuyMicroResources':
