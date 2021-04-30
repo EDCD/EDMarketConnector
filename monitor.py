@@ -1012,20 +1012,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
-                new_suit = {
+                self.state['Suits'][entry['SuitID']] = {
                     'name':      entry['Name'],
                     'locName':   entry.get('Name_Localised', entry['Name']),
                     'id': None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
                     'slots':     [],
                 }
-                if self.state['Suits'] is None:
-                    self.state['Suits'] = {entry['SuitID']: new_suit}
-
-                else:
-                    self.state['Suits'].update(
-                        {entry['SuitID']: new_suit}
-                    )
 
                 # update credits
                 self.state['Credits'] -= entry.get('Price', 0)
