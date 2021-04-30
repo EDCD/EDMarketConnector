@@ -151,7 +151,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'Data':           defaultdict(int),  # Backpack Data
             },
             'SuitCurrent':        None,
-            'Suits':              None,
+            'Suits':              {},
             'SuitLoadoutCurrent': None,
             'SuitLoadouts':       {},
         }
