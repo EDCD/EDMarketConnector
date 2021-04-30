@@ -921,12 +921,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Parameters:
                 #     • Name
                 #     • Type
-                for c in self.state['BackPackMaterials']['Consumable']:
-                    if c['Name'] == entry['Name']:
-                        c['Count'] -= 1
+                for c in self.state['BackPack']['Consumable']:
+                    if c == entry['Name']:
+                        self.state['BackPack']['Consumable'][c] -= 1
                         # Paranoia in case we lost track
-                        if i['Count'] < 0:
-                            i['Count'] = 0
+                        if self.state['BackPack']['Consumable'][c] < 0:
+                            self.state['BackPack']['Consumable'][c] = 0
 
             elif event_type == 'SwitchSuitLoadout':
                 # alpha4
