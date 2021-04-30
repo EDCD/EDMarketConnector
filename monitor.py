@@ -995,7 +995,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         'locName': entry.get('SuitName_Localised', entry['SuitName']),
                         'suitId': entry['SuitID'],
                     },
-                    'mame': entry['LoadoutName'],
+                    'name': entry['LoadoutName'],
                     'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
                 }
                 self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
