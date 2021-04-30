@@ -895,7 +895,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Name
                 #     • Type
                 #     • OwnerID
-                pass
+                for i in self.state['BackPackMaterials'][entry['Type']]:
+                    if i['Name'] == entry['Name']:
+                        i['Count'] += entry['Count']
 
             elif event_type == 'DropItems':
                 # alpha4
@@ -905,7 +907,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OwnerID
                 #     • MissionID
                 #     • Count
-                pass
+                for i in self.state['BackPackMaterials'][entry['Type']]:
+                    if i['Name'] == entry['Name']:
+                        i['Count'] -= entry['Count']
+                        # Paranoia in case we lost track
+                        if i['Count'] < 0:
+                            i['Count'] = 0
 
             elif event_type == 'UseConsumable':
                 # alpha4
@@ -914,9 +921,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Parameters:
                 #     • Name
                 #     • Type
-                for c in self.state['BackPackMaterials']['Consumables']:
+                for c in self.state['BackPackMaterials']['Consumable']:
                     if c['Name'] == entry['Name']:
                         c['Count'] -= 1
+                        # Paranoia in case we lost track
+                        if i['Count'] < 0:
+                            i['Count'] = 0
 
             elif event_type == 'SwitchSuitLoadout':
                 # alpha4
