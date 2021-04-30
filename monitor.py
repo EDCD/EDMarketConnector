@@ -772,15 +772,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
+                self.state['Data'] = defaultdict(int)
                 # TODO: Really we need a full BackPackMaterials event at the same time.
                 #       In lieu of that, empty the backpack.  This will explicitly
                 #       be wrong if Cmdr relogs at a Settlement with anything in
-                #       backpack.  We can't track when they use/pick up items
-                #       anyway (Odyssey Alpha Phase 1 Hotfix 2).
-                # alpha4 - This should be changed
+                #       backpack.
+                #       Still no BackPackMaterials at the same time in 4.0.0.31
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
+                self.state['BackPack']['Data'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
@@ -795,6 +796,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 clean_items = self.coalesce_cargo(entry['Items'])
                 self.state['Item'].update(
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                )
+
+                clean_data = self.coalesce_cargo(entry['Data'])
+                self.state['Data'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
             elif event_type == 'BackPackMaterials':
