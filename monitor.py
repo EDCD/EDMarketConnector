@@ -1168,15 +1168,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for bd in entry['BioData']:
                     self.state['Credits'] += bd['Value'] + bd['Bonus']
 
-            # alpha4 - Credits updates
             elif event_type == 'BookDropship':
-                pass
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'BookTaxi':
-                pass
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'CancelDropship':
-                pass
+                self.state['Credits'] += entry['Refund']
+
             elif event_type == 'CancelTaxi':
-                pass
+                self.state['Credits'] += entry['Refund']
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
