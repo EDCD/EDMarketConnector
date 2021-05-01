@@ -310,6 +310,9 @@
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimiziranje u system tray";
+
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
 
@@ -501,6 +504,9 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
+
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Odijelo";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";

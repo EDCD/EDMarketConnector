@@ -310,6 +310,9 @@
 /* Federation rank. [stats.py] */
 "Midshipman" = "Guardiamarina";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimizar a la bandeja de sistema";
+
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Casi perdido";
 

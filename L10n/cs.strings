@@ -310,6 +310,9 @@
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimalizovat do lišty";
+
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
 
@@ -502,6 +505,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Oblek";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
@@ -531,6 +537,9 @@
 
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "Procenta UI škálování";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Neznámý";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualizovat";

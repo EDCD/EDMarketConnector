@@ -310,6 +310,9 @@
 /* Federation rank. [stats.py] */
 "Midshipman" = "Гардемарин";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Сворачивать в системный трей";
+
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Почти бесцельный";
 
@@ -501,6 +504,9 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Статус";
+
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Костюм";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Изыскатель";

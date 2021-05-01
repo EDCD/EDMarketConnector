@@ -310,6 +310,9 @@
 /* Federation rank. [stats.py] */
 "Midshipman" = "Fähnrich";
 
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "In die Taskleiste minimieren";
+
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Fast Planlos";
 
@@ -501,6 +504,9 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
+
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Anzug";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Landkundiger";

@@ -1,6 +1,9 @@
 /* Language name */
 "!Language" = "Polski";
 
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 oznacza nieprzeźroczyste.{CR}Okno aktualizowane w czasie rzeczywistym.";
+
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 oznacza wartość domyślną{CR}Zmiany zostaną wprowadzone po{CR}ponownym uruchomieniu programu!";
 
@@ -148,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
+/* [companion.py] */
+"Error" = "Błąd";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Błąd: Brak połączenia z EDDN";
 
@@ -156,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Błąd: Nie można połączyć się z serwisem Inara";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Błąd: Nie można sprawdzić ID klienta z tokenu";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Błąd: ID klienta nie pasuje!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Błąd: EDSM {MSG}";
@@ -174,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Błąd: Dane uwierzytelniające niepoprawne";
+
+/* [companion.py] */
+"Error: unable to get token" = "Błąd: Nie można pobrać tokenu";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Błąd: Niepoprawny Cmdr";
@@ -274,6 +289,9 @@
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
 
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Przeźroczystość okna głównego";
+
 /* [prefs.py] */
 "Market data in CSV format file" = "Dane rynkowe w formacie CSV";
 
@@ -291,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Zminimalizuj do zasobnika systemowego";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
@@ -360,6 +381,9 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Folder pluginów";
+
+/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
+"Plugins Without Python 3.x Support:" = "Pluginy nie obsługiwane przez Python 3.x:";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -481,6 +505,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Kombinezon";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
@@ -510,6 +537,9 @@
 
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "Skalowanie UI";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Nieznany";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualizacja";
