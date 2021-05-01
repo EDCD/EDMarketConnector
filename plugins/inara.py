@@ -395,6 +395,12 @@ def journal_entry(  # noqa: C901, CCR001
         this.station = None
         this.station_marketid = None
 
+    if entry['event'] == 'Embark' and not entry.get('OnStation'):
+        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
+        # Undocked event.
+        this.station = None
+        this.station_marketid = None
+
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
