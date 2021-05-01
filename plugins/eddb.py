@@ -123,7 +123,13 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
 
     this.station_marketid = entry.get('MarketID') or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry', 'Embark'):
+    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
+        this.station = None
+        this.station_marketid = None
+
+    if entry['event'] == 'Embark' and not entry.get('OnStation'):
+        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
+        # Undocked event.
         this.station = None
         this.station_marketid = None
 
