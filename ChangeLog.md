@@ -6,6 +6,48 @@ This is due to moving to Python 3.9.x, which itself does not now support
 Windows 7.  The application (both EDMarketConnector.exe and EDMC.exe) will 
 crash on startup due to a missing DLL.**
 
+Pre-Release 5.0.0-beta7
+===
+
+* There is a new option on the 'Appearance' tab of Settings 'Minimize to system
+  tray' for Windows users.  When this is active then EDMarketConnector.exe 
+  will indeed minimize to the system tray, and not be on the taskbar.
+  
+  The systray icon will always be present, with option 'Open' to restore the
+  window, along with a 'Quit' option.
+  
+  Thanks to Garud for the work on this.
+
+* More work has been done for Odyssey, with extra and expanded Journal 
+  events now available.  Suits and their Loadouts will track better now, 
+  although we still require a CAPI data pull (an 'Update') to be guaranteed 
+  data about them.
+
+Plugin Developers
+---
+
+* The `state` passed to plugins has for a long time had a `'Credits'` member, 
+  but until now no effort was made to keep this record of the credits balance 
+  up to date after the initial `LoadGame` event.  This has now been addressed,
+  and the balance should stay in sync as best it can from the available 
+  Journal events.  It will always correct back to the actual balance on each 
+  CAPI data pull.
+
+* `Suits` and `SuitLoadouts` in `state` will now always be a `dict`, even if
+  the array is not sparse, and will never be `None`.  This allows for 
+  consistency in how you access the members.  Note that the `id` field found
+  on e.g. weapon details in suit loadouts may be `None` if we got the data
+  from the Journal rather than the CAPI data.
+
+* `BackPack` items will now track better.  However note that the lack of a 
+  Journal event when throwing a grenade, along with no `BackPackMaterials` 
+  event if logging in on-foot means that we can't track this inventory 
+  perfectly.
+
+* Ship `Cargo` in `state` now takes account of any `CargoTransfer` events.
+  This was added to the game in the Fleet Carriers update, but also covers
+  transfers to/from an SRV.
+
 Pre-Release 5.0.0-beta6
 ===
 
