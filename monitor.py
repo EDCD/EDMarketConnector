@@ -772,15 +772,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
+                self.state['Data'] = defaultdict(int)
                 # TODO: Really we need a full BackPackMaterials event at the same time.
                 #       In lieu of that, empty the backpack.  This will explicitly
                 #       be wrong if Cmdr relogs at a Settlement with anything in
-                #       backpack.  We can't track when they use/pick up items
-                #       anyway (Odyssey Alpha Phase 1 Hotfix 2).
-                # alpha4 - This should be changed
+                #       backpack.
+                #       Still no BackPackMaterials at the same time in 4.0.0.31
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
+                self.state['BackPack']['Data'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
@@ -797,6 +798,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
                 )
 
+                clean_data = self.coalesce_cargo(entry['Data'])
+                self.state['Data'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
+                )
+
             elif event_type == 'BackPackMaterials':
                 # alpha4 -
                 # Lists the contents of the backpack, eg when disembarking from ship
@@ -805,6 +811,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BackPack']['Component'] = defaultdict(int)
                 self.state['BackPack']['Consumable'] = defaultdict(int)
                 self.state['BackPack']['Item'] = defaultdict(int)
+                self.state['BackPack']['Data'] = defaultdict(int)
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['BackPack']['Component'].update(
@@ -819,6 +826,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 clean_items = self.coalesce_cargo(entry['Items'])
                 self.state['BackPack']['Item'].update(
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                )
+
+                clean_data = self.coalesce_cargo(entry['Data'])
+                self.state['BackPack']['Data'].update(
+                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
             elif event_type == 'BuyMicroResources':
@@ -883,7 +895,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Name
                 #     • Type
                 #     • OwnerID
-                pass
+                for i in self.state['BackPack'][entry['Type']]:
+                    if i == entry['Name']:
+                        self.state['BackPack'][entry['Type']][i] += entry['Count']
 
             elif event_type == 'DropItems':
                 # alpha4
@@ -893,7 +907,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OwnerID
                 #     • MissionID
                 #     • Count
-                pass
+                for i in self.state['BackPack'][entry['Type']]:
+                    if i == entry['Name']:
+                        self.state['BackPack'][entry['Type']][i] -= entry['Count']
+                        # Paranoia in case we lost track
+                        if self.state['BackPack'][entry['Type']][i] < 0:
+                            self.state['BackPack'][entry['Type']][i] = 0
 
             elif event_type == 'UseConsumable':
                 # alpha4
@@ -902,7 +921,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Parameters:
                 #     • Name
                 #     • Type
-                pass
+                for c in self.state['BackPack']['Consumable']:
+                    if c == entry['Name']:
+                        self.state['BackPack']['Consumable'][c] -= 1
+                        # Paranoia in case we lost track
+                        if self.state['BackPack']['Consumable'][c] < 0:
+                            self.state['BackPack']['Consumable'][c] = 0
 
             elif event_type == 'SwitchSuitLoadout':
                 # alpha4
@@ -971,7 +995,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         'locName': entry.get('SuitName_Localised', entry['SuitName']),
                         'suitId': entry['SuitID'],
                     },
-                    'mame': entry['LoadoutName'],
+                    'name': entry['LoadoutName'],
                     'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
                 }
                 self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
@@ -1132,8 +1156,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4
                 pass
 
-            # alpha4
             elif event_type == 'ScanOrganic':
+                # Nothing of interest to our state.
                 pass
 
             elif event_type == 'SellOrganicData':
