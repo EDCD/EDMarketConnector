@@ -929,18 +929,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack']['Consumable'][c] = 0
 
             elif event_type == 'SwitchSuitLoadout':
-                # alpha4
-                # This event is logged when a player selects a different flight suit from the ship’s locker
-                #
-                # Parameters:
-                #     • SuitID
-                #     • SuitName
-                #     • LoadoutID
-                #     • LoadoutName
-                #     • Modules: array of objects
-                #         ◦ SlotName
-                #         ◦ SuitModuleID
-                #         ◦ ModuleName
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
                 # If this application is run with the latest Journal showing such an event then we won't
@@ -1008,13 +996,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Loadout 1" }
 
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                try:
-                    self.state['SuitLoadouts'].pop(f'{loadout_id}')
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'].pop(f'{loadout_id}')
 
-                except KeyError:
-                    # This should no longer happen, as we're now handling CreateSuitLoadout properly
-                    logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+                    except KeyError:
+                        # This should no longer happen, as we're now handling CreateSuitLoadout properly
+                        logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'RenameSuitLoadout':
                 # alpha4
@@ -1027,12 +1016,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T10:35:55Z", "event":"RenameSuitLoadout", "SuitID":1698365752966423,
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Art L/K" }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                try:
-                    self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
 
-                except KeyError:
-                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+                    except KeyError:
+                        logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'BuySuit':
                 # alpha4 :
@@ -1067,18 +1057,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4:
                 # { "timestamp":"2021-04-29T09:15:51Z", "event":"SellSuit", "SuitID":1698364937435505,
                 # "Name":"explorationsuit_class1", "Name_Localised":"Artemis Suit", "Price":90000 }
-                try:
-                    self.state['Suits'].pop(entry['SuitID'])
+                if self.state['Suits']:
+                    try:
+                        self.state['Suits'].pop(entry['SuitID'])
 
-                except KeyError:
-                    logger.exception(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
+                    except KeyError:
+                        logger.debug(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
 
-                # update credits total
-                if price := entry.get('Price') is None:
-                    logger.error(f"SellSuit didn't contain Price: {entry}")
+                    # update credits total
+                    if price := entry.get('Price') is None:
+                        logger.error(f"SellSuit didn't contain Price: {entry}")
 
-                else:
-                    self.state['Credits'] += price
+                    else:
+                        self.state['Credits'] += price
 
             elif event_type == 'UpgradeSuit':
                 # alpha4
@@ -1091,6 +1082,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Cost
                 # Update credits total ?  It shouldn't even involve credits!
                 # Actual alpha4 - need to grind mats
+                # if self.state['Suits']:
                 pass
 
             elif event_type == 'LoadoutEquipModule':
@@ -1099,14 +1091,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon2", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
-                    'name':           entry['ModuleName'],
-                    'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
-                    'id':             None,
-                    'weaponrackId':   entry['SuitModuleID'],
-                    'locDescription': '',
-                }
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
+                            'name':           entry['ModuleName'],
+                            'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
+                            'id':             None,
+                            'weaponrackId':   entry['SuitModuleID'],
+                            'locDescription': '',
+                        }
+
+                    except KeyError:
+                        logger.error(f"LoadoutEquipModule: {entry}")
 
             elif event_type == 'LoadoutRemoveModule':
                 # alpha4 - triggers if selecting an already-equipped weapon into a different slot
@@ -1114,8 +1111,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon1", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
+
+                    except KeyError:
+                        logger.error(f"LoadoutRemoveModule: {entry}")
 
             elif event_type == 'BuyWeapon':
                 # alpha4
