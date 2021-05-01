@@ -639,9 +639,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
 
             elif event_type == 'Embark':
-                # If we've embarked then we're no longer on the station.
-
-                # alpha4
                 # This event is logged when a player (on foot) gets into a ship or SRV
                 # Parameters:
                 #     • SRV: true if getting into SRV, false if getting into a ship
@@ -658,6 +655,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationType
                 #     • MarketID
                 self.station = None
+                if entry.get('OnStation'):
+                    self.station = entry.get('StationName', '')
+
                 self.state['OnFoot'] = False
 
             elif event_type == 'Disembark':
