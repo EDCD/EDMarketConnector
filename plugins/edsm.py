@@ -382,6 +382,12 @@ def journal_entry(
         this.station = None
         this.station_marketid = None
 
+    if entry['event'] == 'Embark' and not entry.get('OnStation'):
+        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
+        # Undocked event.
+        this.station = None
+        this.station_marketid = None
+
     if config.get_str('station_provider') == 'EDSM':
         to_set = this.station
         if not this.station:

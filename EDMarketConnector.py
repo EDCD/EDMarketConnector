@@ -1109,14 +1109,29 @@ class AppWindow(object):
                 if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-            # Auto-Update after docking, but not if auth callback is pending
-            if (
-                    entry['event'] in ('StartUp', 'Location', 'Docked')
-                    and monitor.station
-                    and not config.get_int('output') & config.OUT_MKT_MANUAL
-                    and config.get_int('output') & config.OUT_STATION_ANY
-                    and companion.session.state != companion.Session.STATE_AUTH
-            ):
+            auto_update = False
+            # Only if auth callback is not pending
+            if companion.session.state != companion.Session.STATE_AUTH:
+                # Only if configured to do so
+                if (not config.get_int('output') & config.OUT_MKT_MANUAL
+                        and config.get_int('output') & config.OUT_STATION_ANY):
+                    if entry['event'] in ('StartUp', 'Location', 'Docked') and monitor.station:
+                        # TODO: Can you log out in a docked Taxi and then back in to
+                        #       the taxi, so 'Location' should be covered here too ?
+                        if entry['event'] == 'Docked' and entry.get('Taxi'):
+                            # In Odyssey there's a 'Docked' event for an Apex taxi,
+                            # but the CAPI data isn't updated until you Disembark.
+                            auto_update = False
+
+                        else:
+                            auto_update = True
+
+                    # In Odyssey if you are in a Taxi the `Docked` event for it is before
+                    # the CAPI data is updated, but CAPI *is* updated after you `Disembark`.
+                    elif entry['event'] == 'Disembark' and entry.get('Taxi') and entry.get('OnStation'):
+                        auto_update = True
+
+            if auto_update:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             if entry['event'] == 'ShutDown':

@@ -552,6 +552,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
 
+                self.state['Credits'] -= entry['ShipPrice']
+
             elif event_type == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = None
@@ -602,8 +604,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Value':    entry['BuyPrice'],
                 }
 
+                self.state['Credits'] -= entry['BuyPrice']
+
+            elif event_type == 'ModuleRetrieve':
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
+                self.state['Credits'] += entry['SellPrice']
+
+            elif event_type == 'ModuleSellRemote':
+                self.state['Credits'] += entry['SellPrice']
+
+            elif event_type == 'ModuleStore':
+                self.state['Modules'].pop(entry['Slot'], None)
+                self.state['Credits'] -= entry['Cost']
 
             elif event_type == 'ModuleSwap':
                 to_item = self.state['Modules'].get(entry['ToSlot'])
@@ -624,9 +639,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
 
             elif event_type == 'Embark':
-                # If we've embarked then we're no longer on the station.
-
-                # alpha4
                 # This event is logged when a player (on foot) gets into a ship or SRV
                 # Parameters:
                 #     • SRV: true if getting into SRV, false if getting into a ship
@@ -643,6 +655,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationType
                 #     • MarketID
                 self.station = None
+                if entry.get('OnStation'):
+                    self.station = entry.get('StationName', '')
+
                 self.state['OnFoot'] = False
 
             elif event_type == 'Disembark':
@@ -767,6 +782,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
+            elif event_type == 'CargoTransfer':
+                for c in entry['Transfers']:
+                    name = self.canonicalise(c['Type'])
+                    if c['Direction'] == 'toship':
+                        self.state['Cargo'][name] += c['Count']
+
+                    else:
+                        # So it's *from* the ship
+                        self.state['Cargo'][name] -= c['Count']
+
             elif event_type == 'ShipLockerMaterials':
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
@@ -836,15 +861,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'BuyMicroResources':
                 # Buying from a Pioneer Supplies, goes directly to ShipLocker.
                 # One event per Item, not an array.
-                # alpha4 - update current credits ?
                 category = self.category(entry['Category'])
                 name = self.canonicalise(entry['Name'])
                 self.state[category][name] += entry['Count']
 
+                self.state['Credits'] -= entry['Price']
+
             elif event_type == 'SellMicroResources':
                 # Selling to a Bar Tender on-foot.
+                self.state['Credits'] += entry['Price']
                 # One event per whole sale, so it's an array.
-                # alpha4 - update current credits ?
                 for mr in entry['MicroResources']:
                     category = self.category(mr['Category'])
                     name = self.canonicalise(mr['Name'])
@@ -929,42 +955,32 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack']['Consumable'][c] = 0
 
             elif event_type == 'SwitchSuitLoadout':
-                # alpha4
-                # This event is logged when a player selects a different flight suit from the ship’s locker
-                #
-                # Parameters:
-                #     • SuitID
-                #     • SuitName
-                #     • LoadoutID
-                #     • LoadoutName
-                #     • Modules: array of objects
-                #         ◦ SlotName
-                #         ◦ SuitModuleID
-                #         ◦ ModuleName
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
-                try:
-                    self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
-
-                except KeyError:
-                    logger.exception(f"Getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
-                    # Might mean that a new suit loadout was created and we need a new CAPI fetch ?
-                    self.state['SuitCurrent'] = None
-                    self.state['SuitLoadoutCurrent'] = None
-
-                else:
+                # If this application is run with the latest Journal showing such an event then we won't
+                # yet have the CAPI data, so no idea about Suits or Loadouts.
+                if self.state['Suits'] and self.state['SuitLoadouts']:
                     try:
-                        new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
+                        self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
 
                     except KeyError:
-                        logger.exception(f"Getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+                        logger.debug(f"KeyError getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
+                        self.state['SuitCurrent'] = None
+                        self.state['SuitLoadoutCurrent'] = None
 
                     else:
                         try:
-                            self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+                            new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
 
                         except KeyError:
-                            logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
+                            logger.debug(f"KeyError getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+
+                        else:
+                            try:
+                                self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
+                            except KeyError:
+                                logger.debug(f"KeyError getting switched-to suit from slot {new_slot} ({loadoutid}")
 
             elif event_type == 'CreateSuitLoadout':
                 # We know we won't have data for this new one
@@ -1006,13 +1022,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Loadout 1" }
 
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                try:
-                    self.state['SuitLoadouts'].pop(f'{loadout_id}')
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'].pop(f'{loadout_id}')
 
-                except KeyError:
-                    # This should no longer happen, as we're now handling CreateSuitLoadout properly
-                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+                    except KeyError:
+                        # This should no longer happen, as we're now handling CreateSuitLoadout properly
+                        logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'RenameSuitLoadout':
                 # alpha4
@@ -1025,12 +1042,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T10:35:55Z", "event":"RenameSuitLoadout", "SuitID":1698365752966423,
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Art L/K" }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                try:
-                    self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['name'] = entry['LoadoutName']
 
-                except KeyError:
-                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+                    except KeyError:
+                        logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'BuySuit':
                 # alpha4 :
@@ -1065,18 +1083,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4:
                 # { "timestamp":"2021-04-29T09:15:51Z", "event":"SellSuit", "SuitID":1698364937435505,
                 # "Name":"explorationsuit_class1", "Name_Localised":"Artemis Suit", "Price":90000 }
-                try:
-                    self.state['Suits'].pop(entry['SuitID'])
+                if self.state['Suits']:
+                    try:
+                        self.state['Suits'].pop(entry['SuitID'])
 
-                except KeyError:
-                    logger.exception(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
+                    except KeyError:
+                        logger.debug(f"SellSuit for a suit we didn't know about? {entry['SuitID']}")
 
-                # update credits total
-                if price := entry.get('Price') is None:
-                    logger.error(f"SellSuit didn't contain Price: {entry}")
+                    # update credits total
+                    if price := entry.get('Price') is None:
+                        logger.error(f"SellSuit didn't contain Price: {entry}")
 
-                else:
-                    self.state['Credits'] += price
+                    else:
+                        self.state['Credits'] += price
 
             elif event_type == 'UpgradeSuit':
                 # alpha4
@@ -1089,6 +1108,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Cost
                 # Update credits total ?  It shouldn't even involve credits!
                 # Actual alpha4 - need to grind mats
+                # if self.state['Suits']:
                 pass
 
             elif event_type == 'LoadoutEquipModule':
@@ -1097,14 +1117,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon2", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
-                    'name':           entry['ModuleName'],
-                    'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
-                    'id':             None,
-                    'weaponrackId':   entry['SuitModuleID'],
-                    'locDescription': '',
-                }
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
+                            'name':           entry['ModuleName'],
+                            'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
+                            'id':             None,
+                            'weaponrackId':   entry['SuitModuleID'],
+                            'locDescription': '',
+                        }
+
+                    except KeyError:
+                        logger.error(f"LoadoutEquipModule: {entry}")
 
             elif event_type == 'LoadoutRemoveModule':
                 # alpha4 - triggers if selecting an already-equipped weapon into a different slot
@@ -1112,8 +1137,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon1", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
-                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
+                if self.state['SuitLoadouts']:
+                    loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    try:
+                        self.state['SuitLoadouts'][loadout_id]['slots'].pop(entry['SlotName'])
+
+                    except KeyError:
+                        logger.error(f"LoadoutRemoveModule: {entry}")
 
             elif event_type == 'BuyWeapon':
                 # alpha4
@@ -1153,7 +1183,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
                 # Suit Loadouts.
-                # alpha4
+                # alpha4 - credits?  Shouldn't cost any!
                 pass
 
             elif event_type == 'ScanOrganic':
@@ -1161,18 +1191,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 pass
 
             elif event_type == 'SellOrganicData':
-                # alpha4 - update current credits ?
-                pass
+                for bd in entry['BioData']:
+                    self.state['Credits'] += bd['Value'] + bd['Bonus']
 
-            # alpha4 - Credits updates
             elif event_type == 'BookDropship':
-                pass
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'BookTaxi':
-                pass
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'CancelDropship':
-                pass
+                self.state['Credits'] += entry['Refund']
+
             elif event_type == 'CancelTaxi':
-                pass
+                self.state['Credits'] += entry['Refund']
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
@@ -1201,12 +1233,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
 
+                if event_type == 'BuyDrones':
+                    self.state['Credits'] -= entry['TotalCost']
+
+                elif event_type == 'MarketBuy':
+                    self.state['Credits'] -= entry['TotalCost']
+
             elif event_type in ('EjectCargo', 'MarketSell', 'SellDrones'):
                 commodity = self.canonicalise(entry['Type'])
                 cargo = self.state['Cargo']
                 cargo[commodity] -= entry.get('Count', 1)
                 if cargo[commodity] <= 0:
                     cargo.pop(commodity)
+
+                if event_type == 'MarketSell':
+                    self.state['Credits'] += entry['TotalSale']
+
+                elif event_type == 'SellDrones':
+                    self.state['Credits'] += entry['TotalSale']
 
             elif event_type == 'SearchAndRescue':
                 for item in entry.get('Items', []):
@@ -1289,6 +1333,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     module['Engineering'].pop('ExperimentalEffect_Localised', None)
 
             elif event_type == 'MissionCompleted':
+                self.state['Credits'] += entry['Reward']
+
                 for reward in entry.get('CommodityReward', []):
                     commodity = self.canonicalise(reward['Name'])
                     self.state['Cargo'][commodity] += reward.get('Count', 1)
@@ -1371,6 +1417,77 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.state['Friends'].discard(entry['Name'])
+
+            # Try to keep Credits total updated
+            elif event_type in ('MultiSellExplorationData', 'SellExplorationData'):
+                self.state['Credits'] += entry['TotalEarnings']
+
+            elif event_type == 'BuyExplorationData':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'BuyTradeData':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'BuyAmmo':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'CommunityGoalReward':
+                self.state['Credits'] += entry['Reward']
+
+            elif event_type == 'CrewHire':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'FetchRemoteModule':
+                self.state['Credits'] -= entry['TransferCost']
+
+            elif event_type == 'MissionAbandoned':
+                # Is this paid at this point, or just a fine to pay later ?
+                # self.state['Credits'] -= entry['Fine']
+                pass
+
+            elif event_type in ('PayBounties', 'PayFines', 'PayLegacyFines'):
+                self.state['Credits'] -= entry['Amount']
+
+            elif event_type == 'RedeemVoucher':
+                self.state['Credits'] += entry['Amount']
+
+            elif event_type in ('RefuelAll', 'RefuelPartial', 'Repair', 'RepairAll', 'RestockVehicle'):
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'SellShipOnRebuy':
+                self.state['Credits'] += entry['ShipPrice']
+
+            elif event_type == 'ShipyardSell':
+                self.state['Credits'] += entry['ShipPrice']
+
+            elif event_type == 'ShipyardTransfer':
+                self.state['Credits'] -= entry['TransferPrice']
+
+            elif event_type == 'PowerplayFastTrack':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'PowerplaySalary':
+                self.state['Credits'] += entry['Amount']
+
+            elif event_type == 'SquadronCreated':
+                # v30 docs don't actually say anything about credits cost
+                pass
+
+            elif event_type == 'CarrierBuy':
+                self.state['Credits'] -= entry['Price']
+
+            elif event_type == 'CarrierBankTransfer':
+                self.state['Credits'] = entry['PlayerBalance']
+
+            elif event_type == 'CarrierDecommission':
+                # v30 doc says nothing about citing the refund amount
+                pass
+
+            elif event_type == 'NpcCrewPaidWage':
+                self.state['Credits'] -= entry['Amount']
+
+            elif event_type == 'Resurrect':
+                self.state['Credits'] -= entry['Cost']
 
             return entry
 
