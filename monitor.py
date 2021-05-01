@@ -943,28 +943,30 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #         ◦ ModuleName
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
-                try:
-                    self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
-
-                except KeyError:
-                    logger.debug(f"Getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
-                    # Might mean that a new suit loadout was created and we need a new CAPI fetch ?
-                    self.state['SuitCurrent'] = None
-                    self.state['SuitLoadoutCurrent'] = None
-
-                else:
+                # If this application is run with the latest Journal showing such an event then we won't
+                # yet have the CAPI data, so no idea about Suits or Loadouts.
+                if self.state['Suits'] and self.state['SuitLoadouts']:
                     try:
-                        new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
+                        self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
 
                     except KeyError:
-                        logger.exception(f"Getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+                        logger.debug(f"KeyError getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
+                        self.state['SuitCurrent'] = None
+                        self.state['SuitLoadoutCurrent'] = None
 
                     else:
                         try:
-                            self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+                            new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
 
                         except KeyError:
-                            logger.exception(f"Getting switched-to suit from slot {new_slot} ({loadoutid}")
+                            logger.debug(f"KeyError getting switched-to suit ID from slot {new_slot} ({loadoutid})")
+
+                        else:
+                            try:
+                                self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
+                            except KeyError:
+                                logger.debug(f"KeyError getting switched-to suit from slot {new_slot} ({loadoutid}")
 
             elif event_type == 'CreateSuitLoadout':
                 # We know we won't have data for this new one
