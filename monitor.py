@@ -552,6 +552,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
 
+                self.state['Credits'] -= entry['ShipPrice']
+
             elif event_type == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = None
@@ -602,8 +604,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Value':    entry['BuyPrice'],
                 }
 
+                self.state['Credits'] -= entry['BuyPrice']
+
+            elif event_type == 'ModuleRetrieve':
+                self.state['Credits'] -= entry['Cost']
+
             elif event_type == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
+                self.state['Credits'] += entry['SellPrice']
+
+            elif event_type == 'ModuleSellRemote':
+                self.state['Credits'] += entry['SellPrice']
+
+            elif event_type == 'ModuleStore':
+                self.state['Modules'].pop(entry['Slot'], None)
+                self.state['Credits'] -= entry['Cost']
 
             elif event_type == 'ModuleSwap':
                 to_item = self.state['Modules'].get(entry['ToSlot'])
@@ -767,6 +782,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
+            elif event_type == 'CargoTransfer':
+                # TODO: Transfers between ship and FC/SRV
+                pass
+
             elif event_type == 'ShipLockerMaterials':
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
@@ -836,15 +855,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'BuyMicroResources':
                 # Buying from a Pioneer Supplies, goes directly to ShipLocker.
                 # One event per Item, not an array.
-                # alpha4 - update current credits ?
                 category = self.category(entry['Category'])
                 name = self.canonicalise(entry['Name'])
                 self.state[category][name] += entry['Count']
 
+                self.state['Credits'] -= entry['Price']
+
             elif event_type == 'SellMicroResources':
                 # Selling to a Bar Tender on-foot.
+                self.state['Credits'] += entry['Price']
                 # One event per whole sale, so it's an array.
-                # alpha4 - update current credits ?
                 for mr in entry['MicroResources']:
                     category = self.category(mr['Category'])
                     name = self.canonicalise(mr['Name'])
@@ -1157,7 +1177,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
                 # Suit Loadouts.
-                # alpha4
+                # alpha4 - credits?  Shouldn't cost any!
                 pass
 
             elif event_type == 'ScanOrganic':
@@ -1207,12 +1227,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
 
+                if event_type == 'BuyDrones':
+                    self.state['Credits'] -= entry['TotalCost']
+
+                elif event_type == 'MarketBuy':
+                    self.state['Credits'] -= entry['TotalCost']
+
             elif event_type in ('EjectCargo', 'MarketSell', 'SellDrones'):
                 commodity = self.canonicalise(entry['Type'])
                 cargo = self.state['Cargo']
                 cargo[commodity] -= entry.get('Count', 1)
                 if cargo[commodity] <= 0:
                     cargo.pop(commodity)
+
+                if event_type == 'MarketSell':
+                    self.state['Credits'] += entry['TotalSale']
+
+                elif event_type == 'SellDrones':
+                    self.state['Credits'] += entry['TotalSale']
 
             elif event_type == 'SearchAndRescue':
                 for item in entry.get('Items', []):
@@ -1295,6 +1327,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     module['Engineering'].pop('ExperimentalEffect_Localised', None)
 
             elif event_type == 'MissionCompleted':
+                self.state['Credits'] += entry['Reward']
+
                 for reward in entry.get('CommodityReward', []):
                     commodity = self.canonicalise(reward['Name'])
                     self.state['Cargo'][commodity] += reward.get('Count', 1)
@@ -1377,6 +1411,77 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.state['Friends'].discard(entry['Name'])
+
+            # Try to keep Credits total updated
+            elif event_type in ('MultiSellExplorationData', 'SellExplorationData'):
+                self.state['Credits'] += entry['TotalEarnings']
+
+            elif event_type == 'BuyExplorationData':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'BuyTradeData':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'BuyAmmo':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'CommunityGoalReward':
+                self.state['Credits'] += entry['Reward']
+
+            elif event_type == 'CrewHire':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'FetchRemoteModule':
+                self.state['Credits'] -= entry['TransferCost']
+
+            elif event_type == 'MissionAbandoned':
+                # Is this paid at this point, or just a fine to pay later ?
+                # self.state['Credits'] -= entry['Fine']
+                pass
+
+            elif event_type in ('PayBounties', 'PayFines', 'PayLegacyFines'):
+                self.state['Credits'] -= entry['Amount']
+
+            elif event_type == 'RedeemVoucher':
+                self.state['Credits'] += entry['Amount']
+
+            elif event_type in ('RefuelAll', 'RefuelPartial', 'Repair', 'RepairAll', 'RestockVehicle'):
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'SellShipOnRebuy':
+                self.state['Credits'] += entry['ShipPrice']
+
+            elif event_type == 'ShipyardSell':
+                self.state['Credits'] += entry['ShipPrice']
+
+            elif event_type == 'ShipyardTransfer':
+                self.state['Credits'] -= entry['TransferPrice']
+
+            elif event_type == 'PowerplayFastTrack':
+                self.state['Credits'] -= entry['Cost']
+
+            elif event_type == 'PowerplaySalary':
+                self.state['Credits'] += entry['Amount']
+
+            elif event_type == 'SquadronCreated':
+                # v30 docs don't actually say anything about credits cost
+                pass
+
+            elif event_type == 'CarrierBuy':
+                self.state['Credits'] -= entry['Price']
+
+            elif event_type == 'CarrierBankTransfer':
+                self.state['Credits'] = entry['PlayerBalance']
+
+            elif event_type == 'CarrierDecommission':
+                # v30 doc says nothing about citing the refund amount
+                pass
+
+            elif event_type == 'NpcCrewPaidWage':
+                self.state['Credits'] -= entry['Amount']
+
+            elif event_type == 'Resurrect':
+                self.state['Credits'] -= entry['Cost']
 
             return entry
 
