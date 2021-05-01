@@ -1165,8 +1165,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 pass
 
             elif event_type == 'SellOrganicData':
-                # alpha4 - update current credits ?
-                pass
+                for bd in entry['BioData']:
+                    self.state['Credits'] += bd['Value'] + bd['Bonus']
 
             # alpha4 - Credits updates
             elif event_type == 'BookDropship':
