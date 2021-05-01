@@ -1014,7 +1014,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 except KeyError:
                     # This should no longer happen, as we're now handling CreateSuitLoadout properly
-                    logger.exception(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+                    logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
             elif event_type == 'RenameSuitLoadout':
                 # alpha4
