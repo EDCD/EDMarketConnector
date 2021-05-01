@@ -9,15 +9,6 @@ crash on startup due to a missing DLL.**
 Pre-Release 5.0.0-beta7
 ===
 
-* There is a new option on the 'Appearance' tab of Settings 'Minimize to system
-  tray' for Windows users.  When this is active then EDMarketConnector.exe 
-  will indeed minimize to the system tray, and not be on the taskbar.
-  
-  The systray icon will always be present, with option 'Open' to restore the
-  window, along with a 'Quit' option.
-  
-  Thanks to Garud for the work on this.
-
 * More work has been done for Odyssey, with extra and expanded Journal 
   events now available.  Suits and their Loadouts will track better now, 
   although we still require a CAPI data pull (an 'Update') to be guaranteed 
