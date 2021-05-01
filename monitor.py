@@ -783,8 +783,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in clean})
 
             elif event_type == 'CargoTransfer':
-                # TODO: Transfers between ship and FC/SRV
-                pass
+                for c in entry['Transfers']:
+                    name = self.canonicalise(c['Type'])
+                    if c['Direction'] == 'toship':
+                        self.state['Cargo'][name] += c['Count']
+
+                    else:
+                        # So it's *from* the ship
+                        self.state['Cargo'][name] -= c['Count']
 
             elif event_type == 'ShipLockerMaterials':
                 # This event has the current totals, so drop any current data
