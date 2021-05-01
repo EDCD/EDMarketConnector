@@ -636,7 +636,7 @@ class PreferencesDialog(tk.Toplevel):
         # Appearance theme and language setting
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-        self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
+        # self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
@@ -792,13 +792,13 @@ class PreferencesDialog(tk.Toplevel):
         )
         self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
-        if platform == 'win32':
-            nb.Checkbutton(
-                appearance_frame,
-                text=_('Minimize to system tray'),
-                variable=self.minimize_system_tray,
-                command=self.themevarchanged
-            ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
+        # if platform == 'win32':
+        #     nb.Checkbutton(
+        #         appearance_frame,
+        #         text=_('Minimize to system tray'),
+        #         variable=self.minimize_system_tray,
+        #         command=self.themevarchanged
+        #     ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
@@ -1172,7 +1172,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('ui_scale', self.ui_scale.get())
         config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
-        config.set('minimize_system_tray', self.minimize_system_tray.get())
+        # config.set('minimize_system_tray', self.minimize_system_tray.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])

@@ -9,7 +9,7 @@ import locale
 import pathlib
 import re
 import sys
-import threading
+# import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
@@ -264,7 +264,7 @@ if __name__ == '__main__':  # noqa: C901
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
     import update
-    from infi.systray import SysTrayIcon
+    # from infi.systray import SysTrayIcon
 # isort: on
 
     def _(x: str) -> str:
@@ -332,16 +332,16 @@ class AppWindow(object):
 
         self.prefsdialog = None
 
-        if platform == 'win32':
-            from infi.systray import SysTrayIcon
+        # if platform == 'win32':
+        #     from infi.systray import SysTrayIcon
 
-            def open_window(systray: 'SysTrayIcon') -> None:
-                self.w.deiconify()
+        #     def open_window(systray: 'SysTrayIcon') -> None:
+        #         self.w.deiconify()
 
-            menu_options = (("Open", None, open_window),)
-            # Method associated with on_quit is called whenever the systray is closing
-            self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
-            self.systray.start()
+        #     menu_options = (("Open", None, open_window),)
+        #     # Method associated with on_quit is called whenever the systray is closing
+        #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
+        #     self.systray.start()
 
         plug.load_plugins(master)
 
@@ -1399,18 +1399,18 @@ class AppWindow(object):
             logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
-    def exit_tray(self, systray: 'SysTrayIcon') -> None:
-        """Tray icon is shutting down."""
-        exit_thread = threading.Thread(target=self.onexit)
-        exit_thread.setDaemon(True)
-        exit_thread.start()
+    # def exit_tray(self, systray: 'SysTrayIcon') -> None:
+    #     """Tray icon is shutting down."""
+    #     exit_thread = threading.Thread(target=self.onexit)
+    #     exit_thread.setDaemon(True)
+    #     exit_thread.start()
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
-        if platform == 'win32':
-            shutdown_thread = threading.Thread(target=self.systray.shutdown)
-            shutdown_thread.setDaemon(True)
-            shutdown_thread.start()
+        # if platform == 'win32':
+        #     shutdown_thread = threading.Thread(target=self.systray.shutdown)
+        #     shutdown_thread.setDaemon(True)
+        #     shutdown_thread.start()
 
         config.set_shutdown()  # Signal we're in shutdown now.
 
