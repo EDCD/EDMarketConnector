@@ -1048,6 +1048,9 @@ class AppWindow(object):
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship['text'] = ''
 
+            if monitor.cmdr and monitor.is_beta:
+                self.cmdr['text'] += ' (beta)'
+
             self.update_suit_text()
 
             self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
