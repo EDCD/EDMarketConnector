@@ -1,14 +1,16 @@
 """State classes for monitor.py."""
 from __future__ import annotations
+
+import warnings
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Any, DefaultDict, Optional, Tuple, TypeVar
+from typing import Any, DefaultDict, MutableMapping, Optional, Tuple, TypeVar, Union
+from operator import attrgetter
 
+# spell-checker: words ddict fdev DDINT
 DDINT = DefaultDict[str, int]
 V = TypeVar('V')
-
-# spell-checker: words ddict fdev
 
 
 def _make_int_ddict(): return defaultdict(int)
@@ -34,41 +36,55 @@ class Engineer:
     rank_progress: Optional[int] = None
     rank: Optional[int] = None
 
+    @staticmethod
+    def from_dict(source: dict[str, Any]) -> Engineer:
+        """Create an Engineer instance from the given source dict."""
+        return Engineer(
+            name=source['Engineer'],
+            id=source['EngineerID'],
+            progress=source['Progress'],
+            rank_progress=source.get('RankProgress'),
+            rank=source.get('Rank'),
+        )
+
 
 @dataclass
 class Rank:
-    """Rank with a superpower."""
+    """Rank in a field."""
 
     name: str
     level: int
-    progress: int
+    progress: Optional[int]  # None if unknown
 
 
 @dataclass
 class Reputation:
-    """Reputation with a faction."""
+    """Reputation with a superpower."""
 
     faction: str
     level: float
+
+# TODO: reputation with factions?
 
 
 @dataclass
 class Ship:
     """Player Ship."""
 
-    id: str
     type: str
+    id: Optional[int] = None
 
-    ident: str  # player specified
-    name: str
+    ident: Optional[str] = None  # player specified
+    name: Optional[str] = None
 
-    hull_value: int
-    modules_value: int
-    rebuy: int
-    hot: bool
+    hull_value: Optional[int] = None
+    modules_value: Optional[int] = None
+    rebuy: Optional[int] = None
+    hot: bool = False
+
+    # TODO: fuel capacity for both main and reserve tanks
 
     modules: dict[str, ShipModule] = field(default_factory=dict)  # TODO
-    cargo_json: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -77,24 +93,63 @@ class ShipModule:
 
     slot: str  # TODO: remove this? its more relevant ON a ship
     name: str
-    power: float
+    # power: float # TODO: Not a thing?
     priority: int
+    value: int
+    health: float
 
-    engineering: ShipModuleEngineering
+    # hardpoints
+    ammo_clip_size: Optional[int]
+    ammo: Optional[int]
+
+    engineering: Optional[ShipModuleEngineering]
+
+    @staticmethod
+    def from_loadout_dict(source: dict[str, Any], name: str) -> ShipModule:
+        """
+        Create a ShipModule from a loadout Module entry.
+
+        :param source: The single module dict to represent
+        :param name: The cannonicalised name (TODO: Possibly replace this later)
+        :return: A ShipModule that contains the data from `Source`
+        """
+        slot = str(source['Slot'])
+        ammo = source.get('AmmoInHopper')
+        clip_size = source.get('AmmoInClip')
+        if 'Hardpoint' in slot and not slot.startswith('TinyHardpoint') and (ammo == clip_size == 1):
+            # This is a laser weapon, pretend ammo doesn't exist.
+            ammo = None
+            clip_size = None
+
+        engineering = None
+        if 'Engineering' in source:
+            engineering = ShipModuleEngineering.from_journal(source['Engineering'])
+
+        return ShipModule(
+            slot=slot,
+            name=name,
+            priority=source['Priority'],
+            ammo=ammo,
+            ammo_clip_size=clip_size,
+            engineering=engineering,
+            value=source['Value'],
+            health=source['Health'],
+        )
 
 
 @dataclass
 class ShipModuleEngineering:
     """Engineering on a module."""
 
-    engineer: Engineer
+    engineer_name: str
+    engineer_id: int
     blueprint_name: str
     blueprint_id: int
     level: int
     quality: float
     modifiers: list[EngineeringModifier]
-    experimental_effect: str
-    experimental_effect_localised: str
+    experimental_effect: Optional[str]
+    experimental_effect_localised: Optional[str]
 
     @dataclass
     class EngineeringModifier:
@@ -113,6 +168,35 @@ class ShipModuleEngineering:
                 'LessIsGood': int(self.less_is_good)
             }
 
+        @staticmethod
+        def from_journal(source: dict[str, Any]) -> ShipModuleEngineering.EngineeringModifier:
+            return ShipModuleEngineering.EngineeringModifier(
+                label=source['Label'], value=source['Value'], original_value=source['OriginalValue'],
+                less_is_good=bool(source['LessIsGood'])
+            )
+
+    @staticmethod
+    def from_journal(source: dict[str, Any]) -> ShipModuleEngineering:
+        """
+        Construct a ShipModuleEngineering instance from a journal loadout module engineering dict.
+
+        :param source: Source dictionary of engineering data
+        :return: A fully set up ShipModuleEngineering instance
+        """
+        modifiers = [ShipModuleEngineering.EngineeringModifier.from_journal(x) for x in source['Modifiers']]
+
+        return ShipModuleEngineering(
+            engineer_name=source['Engineer'],
+            engineer_id=source['EngineerID'],
+            blueprint_id=source['BlueprintID'],
+            blueprint_name=source['BlueprintName'],
+            level=source['Level'],
+            quality=source['Quality'],
+            modifiers=modifiers,
+            experimental_effect=source.get('ExperimentalEffect'),
+            experimental_effect_localised=source.get('ExperimentalEffect_Localised'),
+        )
+
 
 @dataclass
 class OdysseyComponents:
@@ -123,10 +207,48 @@ class OdysseyComponents:
     consumables: DefaultDict[str, int] = field(default_factory=_make_int_ddict)
     data: DefaultDict[str, int] = field(default_factory=_make_int_ddict)
 
+    @staticmethod
+    def from_dict(source: dict[str, list[MutableMapping[str, Any]]]) -> OdysseyComponents:
+        def get_data(name: str) -> DDINT:
+            return defaultdict(int, {v['Name']: v['Count'] for v in source.get(name, [])})
+
+        return OdysseyComponents(
+            components=get_data('Components'),
+            items=get_data('Items'),
+            consumables=get_data('Consumables'),
+            data=get_data('Data'),
+        )
+
+    def by_name(self, name: str) -> DDINT:
+        name = name.lower()
+        if name in ('components', 'component'):
+            return self.components
+
+        elif name in ('items', 'item'):
+            return self.items
+
+        elif name in ('consumables', 'consumable'):
+            return self.consumables
+
+        elif name == 'data':
+            return self.data
+
+        else:
+            raise ValueError(f'Unknown Odyssey Component type {name=!r}')
+
+    def __getitem__(self, name: str):
+        return self.by_name(name)
+
+    def ensure_non_negative(self):
+        self.components = defaultdict(int, {n: max(c, 0) for n, c in self.components.items()})
+        self.items = defaultdict(int, {n: max(c, 0) for n, c in self.items.items()})
+        self.consumables = defaultdict(int, {n: max(c, 0) for n, c in self.consumables.items()})
+        self.data = defaultdict(int, {n: max(c, 0) for n, c in self.data.items()})
+
 
 @dataclass
 class Suit:
-    """ED: Odyssey suit"""
+    """ED: Odyssey suit."""
 
     id: int
     name: str
@@ -226,16 +348,17 @@ class MonitorState:
         # states
         self.horizons: bool = False
         self.on_foot: bool = False
-
+        # TODO: a lot of these optionals could probably not exist as they're promised set after start
         self.captain: Optional[str] = None
         self.cargo: DefaultDict[str, int] = defaultdict(int)
+        self.cargo_json: Optional[dict[str, Any]] = None
         self.credits: Optional[int] = None
         self.frontier_id: str = ""
         self.loan: DefaultDict[str, int] = defaultdict(int)
         self.materials = Materials()
-        self.engineers: list[Engineer] = []
-        self.ranks: list[Rank] = []
-        self.reputation: list[Reputation] = []
+        self.engineers: dict[str, Engineer] = {}
+        self.ranks: dict[str, Rank] = {}
+        self.reputation: dict[str, Reputation] = {}
         self.statistics: dict[str, Any] = {}
         self.role: Optional[str] = None
         self.friends: set[str] = set()
@@ -250,16 +373,34 @@ class MonitorState:
         self.suits: list[Suit] = []
         self.suit_loadouts: dict[str, Any] = {}
 
+        # TODO: system/station/etc? would be cleaner to keep it to one class
+
         # stuff that isnt implemented here. Either plugins dumped it in here or we have a bug
         self.extra: dict[str, Any] = {}
 
+    def validate(self):
+        """Check that all the QOL dicts are maintained correctly."""
+        to_check = (
+            (self.engineers, "Engineer", attrgetter('name')),
+            (self.ranks, 'Rank', attrgetter('name')),
+            (self.reputation, 'Reputation', attrgetter('faction')),
+            (self.ship.modules if self.ship is not None else {}, 'Ship Module', attrgetter('slot'))
+        )
+
+        for dict, name, predicate in to_check:
+            for n in dict:
+                if (result := predicate(dict)) != n:
+                    raise ValueError(f'{name} under name {n} is actually {result}')
+
     # TODO:
-    def __getitem__(self, name: str) -> dict[str, Any]:
-        ...
+
+    # def __getitem__(self, name: str) -> dict[str, Any]:
+    #     """Legacy frontend to access as a dict."""
+    #     warnings.warn("Accessing MonitorState as a dict is discoraged. Access fields directly.", DeprecationWarning)
+    #     return self.to_dict()[name]
 
     def to_dict(self) -> dict[str, Any]:
         """Return a legacy style dict for use in plugins."""
-
         return {
             'Captain':      self.captain,  # On a crew
             'Cargo':        self.cargo,
@@ -273,11 +414,13 @@ class MonitorState:
             # if we have progress with this engineer, rank and rank_progress in a tuple, otherwise, just the progress
             'Engineers': {
                 e.name: (e.rank, e.rank_progress) if e.rank is not None
-                else e.progress for e in self.engineers
+                else e.progress for e in self.engineers.values()
             },
 
-            'Rank':               {r.name: (r.level, max(r.progress, 100)) for r in self.ranks},
-            'Reputation':         {r.faction: r.level for r in self.reputation},
+            'Rank':               {
+                r.name: (r.level, max(r.progress if r.progress is not None else 0, 100)) for r in self.ranks.values()
+            },
+            'Reputation':         {r.faction: r.level for r in self.reputation.values()},
             'Statistics':         deepcopy(self.statistics),
             'Role':               self.role,  # Crew role - None, Idle, FireCon, FighterCon
             'Friends':            set(self.friends),  # Online friends
@@ -290,7 +433,7 @@ class MonitorState:
             'Rebuy':              self.ship.rebuy if self.ship is not None else None,
             'Modules':            deepcopy(self.ship.modules) if self.ship is not None else None,
             # The raw data from the last time cargo.json was read
-            'CargoJSON':          deepcopy(self.ship.cargo_json) if self.ship is not None else None,
+            'CargoJSON':          deepcopy(self.cargo_json) if self.cargo_json is not None else None,
             'Route':              self.route._to_dict() if self.route is not None else None,
             'NavRoute':           self.route._to_dict() if self.route is not None else None,
             'OnFoot':             self.on_foot,  # Whether we think you're on-foot
