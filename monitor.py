@@ -607,7 +607,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] -= entry['BuyPrice']
 
             elif event_type == 'ModuleRetrieve':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
@@ -618,7 +618,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'ModuleStore':
                 self.state['Modules'].pop(entry['Slot'], None)
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'ModuleSwap':
                 to_item = self.state['Modules'].get(entry['ToSlot'])
