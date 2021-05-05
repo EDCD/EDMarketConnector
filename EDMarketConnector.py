@@ -1482,16 +1482,11 @@ class AppWindow(object):
 
     def oniconify(self, event=None) -> None:
         """Handle minimization of the application."""
-        value = config.get_bool('minimize_system_tray')
-        if platform == 'win32' and value is not None and value:
-            self.w.withdraw()
-
-        else:
-            self.w.overrideredirect(0)  # Can't iconize while overrideredirect
-            self.w.iconify()
-            self.w.update_idletasks()  # Size and windows styles get recalculated here
-            self.w.wait_visibility()  # Need main window to be re-created before returning
-            theme.active = None  # So theme will be re-applied on map
+        self.w.overrideredirect(0)  # Can't iconize while overrideredirect
+        self.w.iconify()
+        self.w.update_idletasks()  # Size and windows styles get recalculated here
+        self.w.wait_visibility()  # Need main window to be re-created before returning
+        theme.active = None  # So theme will be re-applied on map
 
     # TODO: Confirm this is unused and remove.
     def onmap(self, event=None) -> None:
