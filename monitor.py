@@ -690,7 +690,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # We're definitely on-foot now
                 self.state['OnFoot'] = True
 
-            elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
+            elif event_type == 'Docked':
+                self.station = entry.get('StationName')  # May be None
+                self.station_marketid = entry.get('MarketID')  # May be None
+                self.stationtype = entry.get('StationType')  # May be None
+                self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
+
+            elif event_type in ('Location', 'FSDJump', 'CarrierJump'):
                 # alpha4 - any changes ?
                 # Location:
                 # New in Odyssey:
@@ -710,13 +716,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
-                elif self.system != entry['StarSystem']:
-                    self.coordinates = None  # Docked event doesn't include coordinates
-
                 self.systemaddress = entry.get('SystemAddress')
 
-                if event_type in ('Location', 'FSDJump', 'CarrierJump'):
-                    self.systempopulation = entry.get('Population')
+                self.systempopulation = entry.get('Population')
 
                 self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
 
@@ -729,7 +731,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
-                self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
+                self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
 
             elif event_type == 'ApproachBody':
                 self.planet = entry['Body']
