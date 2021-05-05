@@ -687,6 +687,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.state['OnFoot'] = True
 
+            elif event_type == 'DropshipDeploy':
+                # We're definitely on-foot now
+                self.state['OnFoot'] = True
+
             elif event_type in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
                 # alpha4 - any changes ?
                 # Location:
@@ -1196,6 +1200,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'BookDropship':
                 self.state['Credits'] -= entry['Cost']
+                # Technically we *might* now not be OnFoot.
+                # The problem is that this event is recorded both for signing up for
+                # an on-foot CZ, and when you use the Dropship to return after the
+                # CZ completes.
+                #
+                # In the first case we're still in-station and thus still on-foot.
+                #
+                # In the second case we should instantly be in the Dropship and thus
+                # not still on-foot, BUT it doesn't really matter as the next significant
+                # event is going to be Disembark to on-foot anyway.
 
             elif event_type == 'BookTaxi':
                 self.state['Credits'] -= entry['Cost']
