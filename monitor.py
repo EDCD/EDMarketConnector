@@ -661,8 +661,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['OnFoot'] = False
 
             elif event_type == 'Disembark':
-                # We don't yet have a way, other than LoadGame+Location, to detect if we *are* on a station on-foot.
-                # alpha4
                 # This event is logged when the player steps out of a ship or SRV
                 #
                 # Parameters:
@@ -680,9 +678,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationType
                 #     • MarketID
 
-                # If we're not exiting one of these then it's from our own ship, and then we should already have
-                # self.station set correctly.
-                if entry['SRV'] or entry['Taxi'] or entry['Multicrew']:
+                if entry.get('OnStation', False):
+                    self.station = entry.get('StationName', '')
+
+                else:
                     self.station = None
 
                 self.state['OnFoot'] = True
