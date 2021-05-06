@@ -6,6 +6,31 @@ This is due to moving to Python 3.9.x, which itself does not now support
 Windows 7.  The application (both EDMarketConnector.exe and EDMC.exe) will 
 crash on startup due to a missing DLL.**
 
+Pre-Release 5.0.0-beta8
+===
+
+* If the application detects it's running against a non-live (alpha or beta)
+  version of the game it will append " (beta)" to the Commander name on the 
+  main UI.
+  
+* Don't assume some Journal events always have a 'Cost' value.
+
+* Removed a stray piece of code relating to the aborted systray 
+  implementation.  This would have caused minimising of the application to 
+  hide the window.  Only triggered if you'd tried our `develop` branch 
+  whilst the systray code was active, and left the option "Minimize to systray"
+  active.
+
+Plugin Developers
+---
+
+* `monitor.state['OnFoot']` is now set True for a `DropshipDeploy` event.
+
+* Better detect that we're back on-foot from `Disembark` on a station.
+
+* Better `Docked` event processing to cater for the more limited form of this
+  event in an Apex taxi.
+
 Pre-Release 5.0.0-beta7
 ===
 
