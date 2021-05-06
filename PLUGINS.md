@@ -77,6 +77,20 @@ reduce noise in HTTP requests
 `from ttkHyperlinkLabel import HyperlinkLabel` and `import myNotebook as nb` -
 For creating UI elements.
 
+In addition to the above we also explicitly package the following python 
+modules for plugin use:
+
+- shutil
+- sqlite3
+- zipfile
+
+And, of course, anything in the [Python Standard Library](https://docs.python.org/3/library/)
+will always be available, dependent on the version of Python we're using to 
+build Windows installed versions.   Check the 'Startup' line in an application
+[Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
+for the version of Python being used.
+
+
 ---
 
 ## Logging
