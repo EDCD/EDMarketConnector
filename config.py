@@ -843,6 +843,16 @@ class LinuxConfig(AbstractConfig):
             logger.debug(f'Error occurred while reading in file. Assuming that we are creating a new one: {e}')
             self.config.add_section(self.SECTION)
 
+        # Ensure that our section exists
+        try:
+            self.config[self.SECTION].get("this_does_not_exist", fallback=None)
+        except KeyError:
+            logger.info("Config section not found. Backing up existing file (if any) and readding a section header")
+            if self.filename.exists():
+                (self.filename.parent / f'{appname}.ini.backup').write_bytes(self.filename.read_bytes())
+
+            self.config.add_section(self.SECTION)
+
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
             self.set('outdir', self.home)
 
