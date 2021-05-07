@@ -836,11 +836,17 @@ class LinuxConfig(AbstractConfig):
         self.filename.parent.mkdir(exist_ok=True, parents=True)
 
         self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
+        self.config.read(self.filename)  # read() ignores files that dont exist
 
+        # Ensure that our section exists. This is here because configparser will happily create files for us, but it
+        # does not magically create sections
         try:
-            self.config.read(self.filename)
-        except Exception as e:
-            logger.debug(f'Error occurred while reading in file. Assuming that we are creating a new one: {e}')
+            self.config[self.SECTION].get("this_does_not_exist", fallback=None)
+        except KeyError:
+            logger.info("Config section not found. Backing up existing file (if any) and readding a section header")
+            if self.filename.exists():
+                (self.filename.parent / f'{appname}.ini.backup').write_bytes(self.filename.read_bytes())
+
             self.config.add_section(self.SECTION)
 
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
