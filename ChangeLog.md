@@ -102,6 +102,12 @@ Changes and Enhancements
 Odyssey
 ---
 
+Every effort was made during the Odyssey Alphas to ensure that this 
+application will continue to function correctly with it.  As always, make a
+[Bug Report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
+if you find anything not working, but be sure to check our
+[Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618) first.
+
 * A new UI element 'Suit' now appears below 'Ship' when applicable. It
   details the type of suit you currently have equipped and its Loadout name.  
   This UI element is collapsed/hidden if no suit/on-foot state is detected,
