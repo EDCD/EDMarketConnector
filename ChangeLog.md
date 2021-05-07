@@ -1,350 +1,166 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-**As of release 5.0.0 (including betas) we no longer support Windows 7.  
-This is due to moving to Python 3.9.x, which itself does not now support 
-Windows 7.  The application (both EDMarketConnector.exe and EDMC.exe) will 
-crash on startup due to a missing DLL.**
-
-Pre-Release 5.0.0-beta8
+Pre-Release 5.0.0-rc1
 ===
 
+Python 3.9
+---
+* We now test against, and package with, Python 3.9.5.
+
+  **As a consequence of this we no longer support Windows 7.  
+  This is due to Python 3.9.x itself not supporting Windows 7.  The 
+  application (both EDMarketConnector.exe and EDMC.exe) will crash on startup
+  due to a missing DLL.**
+
+  This should have no other impact on users or plugin developers, other
+  than the latter now being free to use features that were introduced since the
+  Python 3.7 series.
+
+  Developers can check the contents of the `.python-version` file
+  in the source (it's not distributed with the Windows installer) for the
+  currently used version in a given branch.
+
+Changes and Enhancements
+---
 * If the application detects it's running against a non-live (alpha or beta)
   version of the game it will append " (beta)" to the Commander name on the 
   main UI.
-  
-* Don't assume some Journal events always have a 'Cost' value.
-
-* Removed a stray piece of code relating to the aborted systray 
-  implementation.  This would have caused minimising of the application to 
-  hide the window.  Only triggered if you'd tried our `develop` branch 
-  whilst the systray code was active, and left the option "Minimize to systray"
-  active.
-
-Plugin Developers
----
-
-* `monitor.state['OnFoot']` is now set True for a `DropshipDeploy` event.
-
-* Better detect that we're back on-foot from `Disembark` on a station.
-
-* Better `Docked` event processing to cater for the more limited form of this
-  event in an Apex taxi.
-
-Pre-Release 5.0.0-beta7
-===
-
-* More work has been done for Odyssey, with extra and expanded Journal 
-  events now available.  Suits and their Loadouts will track better now, 
-  although we still require a CAPI data pull (an 'Update') to be guaranteed 
-  data about them.
-
-Plugin Developers
----
-
-* The `state` passed to plugins has for a long time had a `'Credits'` member, 
-  but until now no effort was made to keep this record of the credits balance 
-  up to date after the initial `LoadGame` event.  This has now been addressed,
-  and the balance should stay in sync as best it can from the available 
-  Journal events.  It will always correct back to the actual balance on each 
-  CAPI data pull.
-
-* `Suits` and `SuitLoadouts` in `state` will now always be a `dict`, even if
-  the array is not sparse, and will never be `None`.  This allows for 
-  consistency in how you access the members.  Note that the `id` field found
-  on e.g. weapon details in suit loadouts may be `None` if we got the data
-  from the Journal rather than the CAPI data.
-
-* `BackPack` items will now track better.  However note that the lack of a 
-  Journal event when throwing a grenade, along with no `BackPackMaterials` 
-  event if logging in on-foot means that we can't track this inventory 
-  perfectly.
-
-* Ship `Cargo` in `state` now takes account of any `CargoTransfer` events.
-  This was added to the game in the Fleet Carriers update, but also covers
-  transfers to/from an SRV.
-
-Pre-Release 5.0.0-beta6
-===
-
-This adds a new UI element 'Suit', below 'Ship' when applicable that 
-details the type of suit you currently have equipped and its Loadout name.  
-This UI element is collapsed/hidden if no suit/on-foot state is detected,
-i.e. not playing Odyssey (Alpha or otherwise).
 
 * Updated translations.  Once more, thanks to all the translators!
 
-* There is a new CL arg for EDMarketConnector.exe `--force-edmc-protocol`, but
-  this is really only of use to core developers (its purpose being to force 
-  use of the edmc:// protocol for Frontier Auth callbacks, even when not 
+* We now sanity check a returned Frontier Authentication token to be sure
+  it's for the current Commander.  If it's not you'll see
+  `Error: customer_id doesn't match!` on the bottom status line.  Double-check
+  you're using the correct credentials when authing!
+
+* New 'Main window transparency' slider on `Settings` > `Appearance`.
+
+* New command-line argument for EDMarketConnector.exe `--reset-ui`.  This will:
+
+  1. Reset to the default Theme.
+  2. Reset the UI transparency to fully opaque.
+
+  The intention is this can be used if you've lost sight of the main window
+  due to tweaking these options.
+
+* New CL arg for EDMarketConnector.exe `--force-edmc-protocol`.
+  This is really only of use to core developers (its purpose being to force
+  use of the edmc:// protocol for Frontier Auth callbacks, even when not
   'frozen').
 
-* Slightly improve checking of old ship loadout files before writing a new one.
-
-* Linux config will be flushed to disk after any change.  This means that 
-  EDMC.py can now actually make use of the latest CAPI auth if it's been 
+* Linux config will be flushed to disk after any change.  This means that
+  EDMC.py can now actually make use of the latest CAPI auth if it's been
   updated by EDMarketConnector.py since that started.
   
-Plugin Developers
----
+  If you want to run multiple instances of the application under Linux then 
+  please check the updated [Troubleshooting: Multi-Accounting](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#multi-accounting)
+  wiki page.
 
-We now have support for Odyssey Suits and their Loadouts.  See PLUGINS.md 
-for details, particuarly the way in which `state[Suits]` might be either a 
-`list` or a `dict` and how to deal with that.  
-NB: This data is only guaranteed up to date and correct after a fresh CAPI
-data pull, as the current Journal events don't allow for updating it on the
-fly (this should change in a future Odyssey patch).
-
-Pre-Release 5.0.0-beta5
-===
-
-* Ship Type/Name will now be greyed out, and not clickable, if we don't
-  currently have loadout information for it.  This prevents trying to send an
-  empty loadout to your shipyard provider.
-
-* Sanity check a returned Frontier Authentication token to be sure it's for
-  the current Commander.  If it's not you'll see `Error: customer_id doesn't
-  match!` on the bottom status line.  Double-check you're using the correct
-  credentials when authing!
-
-* Bug fixed when handling CAPI-sourced shipyard information.  This would
-  currently only have shown up on live for Fleet Carriers due to a Frontier 
-  bug with not returning shipyard data at all for normal stations.
-  
-  It has been observed that Frontier has fixed this bug for Odyssey.
-
-* Don't try to get Ship information from `LoadGame` event if directly in CQC.
-  
-* A lot of general code cleanup relating to: Inara, outfitting, Frontier 
-  CAPI, hotkey (manual Updates), dashboard (Status.json monitoring), 
-  commodities files, ED format ship loadout files.
-  
-* Inara: Don't attempt to send an empty 
-  `setCommanderReputationMajorFaction` API call.  This quietens an error 
-  from the Inara API caused when a Cmdr literally has no Major Faction 
-  Reputation yet.
-  
-Plugin Developers
----
-
-* Initial support for new Odyssey "MicroResources" (Data, Item, Component
-  and Consumable) in the "Ship Locker" and "BackPack".  NB: Currently the
-  `ShipLockerMaterials` event omits a `Data` array, so we can't properly
-  track those.
-  
-  See the updated PLUGINS.md for details about this in the `state` dictionary.
-
-Pre-Release 5.0.0-beta4
-===
-
-* Now using Python 3.9.4.
-  
-* Some initial support for things new in Odyssey has been added.  We can 
-  detect when you're on-foot and at a station, so as to leverage Frontier 
-  CAPI to send data about the station to EDDN etc.
-  
-  **NB: Due to shortcomings in Journal support we can only detect your 
-  'station' location on orbital stations, and only when you first login 
-  there, not for subsequent Disembarking at one, and not at all for surface 
-  ports, let alone surface settlements.**
-  
-  More support, for things like the 'ShipLocker' inventory of all the new 
-  materials, will be added in a subsequent beta.
-
-* A little TRACE logging output has been commented out for now.
-
-Plugin Developers
----
-
-* All static data that is cleared for use by plugins is now in the file 
-  `edmc_data.py` and should be imported from there, not *any* other module.
-  
-  The one thing we didn't move was the 'bracket map' dictionaries in td.py 
-  as they're for use only by the code in that file.
-  
-  All future such data will be added to this file, and we'll endeavour not 
-  to make breaking changes to any of it without increasing our Major version.
-
-* We now change the current working directory of EDMarketConnector.exe to 
-  its location as soon as possible in its execution.  We're also now more 
-  paranoid about ensuring we reference the full path to the `.gitversion` file.
-  
-  However, no plugin should itself call `os.chdir(...)` or equivalent.  You'll
-  change the current working directory for all core code and other plugins as
-  well (it's global to the whole **process**, not per-thread).  Use full 
-  absolute paths instead (`pathlib` is what to use for this)
-
-
-Pre-Release 5.0.0-beta3
-===
-
-This pre-release allows for using the application with the Odyssey Phase 1 
-Alpha without constant complaints of 'Error: Frontier server is lagging'.
-Work is on-going for supporting any new items and features in the Alpha, 
-but this application should now be usable with it.  Please
-[report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
-any EDMC errors you experience!
-
-* Add support for detecting if a player is on-foot.  This is then used to 
-  prevent false 'Frontier server lagging' messages.
-  
-  Note that currently your on-foot location can only be detected when you 
-  login, and not when you disembark from an Apex shuttle anywhere.
-  
 * Linux and macOS: You can now set a font name and size in your config file.  
-  Ensuring this is a TTF font, rather than a bitmap font, should allow the 
+  Ensuring this is a TTF font, rather than a bitmap font, should allow the
   application UI scaling to work.
-  
-    1. 'font' - the font name to attempt using
-    2. 'font_size' - the font size to attempt using.
-  
+
+  1. 'font' - the font name to attempt using
+  2. 'font_size' - the font size to attempt using.
+
   There is no UI for this in Preferences, you will need to edit your
   [config file](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#location-of-configuration-files)
   to set or change it, and then restart the application.
-  
-  This is not supported on Windows so as not to risk weird bugs.  UI 
+
+  This is not supported on Windows so as not to risk weird bugs.  UI
   Scaling works on Windows without this.
-  
-* Code to do with processing Journal events was reworked and noisy logging 
-  reduced as a consequence.
-  
-Plugin Authors
----
 
-* The new materials added in Odyssey (for things like Suit and on-foot 
-  Weapon upgrades) are now tracked in the `state['Component']` dictionary.
-  
-  NB: Only from the `MissionCompleted` event at this point, support still 
-  needs adding for the `ShipLockerMaterials` event to synchronise totals at 
-  login.
-  
-* `companion.ship_map` was moved to `util_ships.ship_map` so as to avoid an 
-  import loop from some other changes.
-
-Pre-Release 5.0.0-beta2
-===
-
-* Support the 'JournalAlpha' files from the Odyssey Alpha.  We've confirmed
-  any data from these is correctly tagged as 'beta' for the is_beta flag
-  passed to plugins.
-
-  Any data from Odyssey Alpha is sent to EDDN using the test schemas.
-
-  No data from Odyssey Alpha is sent to the EDSM or Inara APIs.
-
-* Fix ship loadout export to files to not trip up in the face of file encoding
-  issues. This relates to the 'Ship Loadout' option on the 'Output' tab of
-  Settings/Preferences.
-  
-Plugin Authors
----
-
-* `config.appversion()` now returns a `semantic_version.Version`.  In contexts 
-  where you're expecting a string this should mostly just work.  If needs 
-  be wrap it in a `str()`.
-  
-* Example plugin
-  [plugintest](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/plugintest)
-  updated.  This includes an example of how to check core EDMC version if needs
-  be.  This example is also in
-  [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#checking-core-edmc-version).
-
-Pre-Release 5.0.0-beta1
-===
-
-This release comes after some substantial code cleanup and is our first based
-on Python 3.9 rather than 3.7.  Other than what is noted in this changelog 
-it should have the same functionality as 4.2.4.
-
-* We are now testing and building with Python 3.9 (3.9.2 specifically at 
-  this point).  This should have no impact on users or plugin developers, other
-  than the latter now being free to use features that were introduced since the
-  Python 3.7 series.
-  
-  For developers you can check the contents of the `.python-version` file 
-  in the source (it's not distributed with the Windows installer) for the 
-  currently used version in a given branch.
-  
-* We now also cite the git 'short hash' in the version string.  For a Windows 
-  install of the application this is sourced from the `.gitversion` file 
+* We now also cite the git 'short hash' in the version string.  For a Windows
+  install of the application this is sourced from the `.gitversion` file
   (written during the build process).
-  
+
   When running from source we attempt to use the command `git rev-parse --short HEAD`
   to obtain this.  If this doesn't work it will be set to 'UNKNOWN'.
 
-* New 'Main window transparency' slider on `Settings` > `Appearance`.
-  
-* New command-line argument for EDMarketConnector.exe `--reset-ui`.  This will:
-
-    1. Reset to the default Theme.
-    2. Reset the UI transparency to fully opaque.
-
-  The intention is this can be used if you've lost sight of the main window 
-  due to tweaking these options.
-  
 * We have added a 'killswitch' feature to turn off specific functionality if it
-  is found to have a bug.  An example use of this would be in an "oh 
-  shit! we're sending bad data to EDDN!" moment so as to protect EDDN 
+  is found to have a bug.  An example use of this would be in an "oh
+  shit! we're sending bad data to EDDN!" moment so as to protect EDDN
   listeners such as EDDB.
-  
-  If we ever have to use this we'll announce it clearly and endeavour to 
-  get a fixed version of the program released ASAP.  We will **NOT** be 
+
+  If we ever have to use this we'll announce it clearly and endeavour to
+  get a fixed version of the program released ASAP.  We will **NOT** be
   using this merely to try and get some laggards to upgrade.
 
-* Our logging code will make best efforts to still show class name and 
-  other such fields if it has trouble finding any of the required data for 
-  the calling frame.  This means no longer seeing `??:??:??` when there is 
+* Our logging code will make best efforts to still show class name and
+  other such fields if it has trouble finding any of the required data for
+  the calling frame.  This means no longer seeing `??:??:??` when there is
   an issue with this.
 
 * macOS: We've managed to test the latest code on macOS Catalina.  Other than
   [keyboard shortcut support not working](https://github.com/EDCD/EDMarketConnector/issues/906)
   it appears to be working.
-  
-* We've pulled the latest Coriolis data which might have caused changes to 
+
+* We've pulled the latest Coriolis data which might have caused changes to
   ship and module names as written out to some files.
 
-Plugin Developers
------------------
+Odyssey
+---
 
-* config.py has undergone a major rewrite.  You should no longer be using 
-  `config.get(...)` or `config.getint(...)`, which will both give a 
-  deprecation warning.  
-  Use instead the correct config.get_<type> function:
-  
-     * `config.get_list(<key>)`
-     * `config.get_str(<key>)`
-     * `config.get_bool(<key>)`
-     * `config.get_int(<key>)`
-    
-  Setting still uses `config.set(...)`.
+This adds a new UI element 'Suit', below 'Ship' when applicable that
+details the type of suit you currently have equipped and its Loadout name.  
+This UI element is collapsed/hidden if no suit/on-foot state is detected,
+i.e. not playing Odyssey (Alpha or otherwise).
 
-* The files `stations.p` and `systems.p` have been removed from the Windows 
-  Installer.  These were never intended for third-party use.  Their core 
-  code use was for generating EDDB-id links, but we long since changed the 
-  EDDB plugin's handlers for that to use alternate URL formats based on 
-  game IDs or names.
-  
-  If you were using either to lookup EDDB IDs for systems and/or stations 
-  then please see how `system_url()` and `station_url` now work in 
-  `plugins/eddb.py`.
-  
-  This change also removed the core (not plugin) `eddb.py` file which 
-  generated these files.  You can find it still in the git history if needs 
-  be.  It had gotten to the stage where generating `systems.p` took many 
-  hours and required 64-bit Python to have any hope of working due to 
-  memory usage.
-  
-* Support has been added for the `NavRoute` (not `Route` as v28 of the 
-  official Journal documentation erroneously labels it) Journal event and 
-  its associated file `NavRoute.json`.  See [PLUGINS.md:Events documentation](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#journal-entry)
-  
-* Similarly there is now support for the `ModuleInfo` event and its 
-  associated `ModulesInfo.json` file.
+* More work has been done for Odyssey, with extra and expanded Journal
+  events now available.  Suits and their Loadouts will track better now,
+  although we still require a CAPI data pull (an 'Update') to be guaranteed
+  data about them.
+
+* Some initial support for things new in Odyssey has been added.  We can
+  detect when you're on-foot and at a station, so as to leverage Frontier
+  CAPI to send data about the station to EDDN etc.
+
+  **NB: Due to shortcomings in Journal support we can only detect your
+  'station' location on orbital stations, and only when you first login
+  there, not for subsequent Disembarking at one, and not at all for surface
+  ports, let alone surface settlements.**
+
+  More support, for things like the 'ShipLocker' inventory of all the new
+  materials, will be added in a subsequent beta.
+
+* Add support for detecting if a player is on-foot.  This is then used to
+  prevent false 'Frontier server lagging' messages.
+
+  Note that currently your on-foot location can only be detected when you
+  login, and not when you disembark from an Apex shuttle anywhere.
+
+Bug Fixes
+---
+
+* Fix ship loadout export to files to not trip up in the face of file encoding
+  issues. This relates to the 'Ship Loadout' option on the 'Output' tab of
+  Settings/Preferences.
+
+* Ship Type/Name will now be greyed out, and not clickable, if we don't
+  currently have loadout information for it.  This prevents trying to send an
+  empty loadout to your shipyard provider.
+
+* Bug fixed when handling CAPI-sourced shipyard information.  This happens
+  due to a Frontier bug with not returning shipyard data at all for normal
+  stations.
+
+  It has been observed that Frontier has fixed this bug for Odyssey.
+
+* Don't try to get Ship information from `LoadGame` event if directly in CQC.
+
+* Inara: Don't attempt to send an empty
+  `setCommanderReputationMajorFaction` API call.  This quietens an error
+  from the Inara API caused when a Cmdr literally has no Major Faction
+  Reputation yet.
 
 Code Clean Up
 -------------
 
-* Some code to do with processing Journal events has been re-factored.
+* Code pertaining to processing Journal events was reworked and noisy logging
+  reduced as a consequence.
+
+* A little TRACE logging output has been commented out for now.
 
 * The code for `File` > `Status` has been cleaned up.
 
@@ -352,6 +168,128 @@ Code Clean Up
 
 * Code handling the Frontier Authorisation callback on Windows has been
   cleaned up.
+
+* A lot of general code cleanup relating to: Inara, outfitting, Frontier
+  CAPI, hotkey (manual Updates), dashboard (Status.json monitoring),
+  commodities files, and ED format ship loadout files.
+
+Plugin Developers
+---
+
+* The files `stations.p` and `systems.p` have been removed from the Windows
+  Installer.  These were never intended for third-party use.  Their core
+  code use was for generating EDDB-id URLs, but we long since changed the
+  EDDB plugin's handlers for that to use alternate URL formats based on
+  game IDs or names.
+
+  If you were using either to lookup EDDB IDs for systems and/or stations
+  then please see how `system_url()` and `station_url` now work in
+  `plugins/eddb.py`.
+
+  This change also removed the core (not plugin) `eddb.py` file which
+  generated these files.  You can find it still in the git history if needs
+  be.  It had gotten to the stage where generating `systems.p` took many
+  hours and required 64-bit Python to have any hope of working due to
+  memory usage.
+
+* All static data that is cleared for use by plugins is now in the file
+  `edmc_data.py` and should be imported from there, not *any* other module.
+
+  The one thing we didn't move was the 'bracket map' dictionaries in `td.py`
+  as they're for use only by the code in that file.
+
+  All future such data will be added to this file, and we'll endeavour not
+  to make breaking changes to any of it without increasing our Major version.
+
+* `config.appversion()` is now a function that returns a `semantic_version.Version`.
+  In contexts where you're expecting a string this should mostly
+  just work.  If needs be wrap it in `str()`.
+
+* Example plugin
+  [plugintest](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/plugintest)
+  updated.  This includes an example of how to check core EDMC version if needs
+  be.  This example is also in
+  [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#checking-core-edmc-version).
+
+* `config.py` has undergone a major rewrite.  You should no longer be using
+  `config.get(...)` or `config.getint(...)`, which will both give a
+  deprecation warning.  
+  Use instead the correct `config.get_<type>()` function:
+
+  * `config.get_list(<key>)`
+  * `config.get_str(<key>)`
+  * `config.get_bool(<key>)`
+  * `config.get_int(<key>)`
+
+  Setting still uses `config.set(...)`.
+
+* We now change the current working directory of EDMarketConnector.exe to
+  its location as soon as possible in its execution.  We're also
+  paranoid about ensuring we reference the full path to the `.gitversion` file.
+
+  However, no plugin should itself call `os.chdir(...)` or equivalent.  You'll
+  change the current working directory for all core code and other plugins as
+  well (it's global to the whole **process**, not per-thread).  Use full
+  absolute paths instead (`pathlib` is what to use for this)
+
+* The `state` passed to plugins in `journal_entry()` calls (which is 
+  actually `monitor.state` in the core code) has received many additions 
+  relating to Odyssey, as well as other fixes and enhancements.
+
+    1. Support has been added for the `NavRoute` (not `Route` as v28 of the
+  official Journal documentation erroneously labels it) Journal event and
+  its associated file `NavRoute.json`.  See [PLUGINS.md:Events documentation](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#journal-entry)
+
+    1. Similarly, there is now support for the `ModuleInfo` event and its
+  associated `ModulesInfo.json` file.
+
+    1. `state['Credits']` - until now no effort was made to keep this 
+    record of the credits balance up to date after the initial `LoadGame`
+    event.  This has now been addressed, and the balance should stay in sync
+    as best it can from the available Journal events.  It will always correct
+    back to the actual balance on each CAPI data pull or game relog/restart.
+
+    1. `state['Cargo']` now takes account of any `CargoTransfer` events.
+    This was added to the game in the Fleet Carriers update, but also covers
+    transfers to/from an SRV.
+
+    1. `state['OnFoot']` is a new boolean, set true whenever we detect
+     the Cmdr is on-foot, i.e. not in any type of vehicle (Cmdr's own ship,
+     multi-crew in another Cmdr's ship, Apex taxi, or a Dropship).
+
+    1. `state['Suits']` and `state['SuitLoadouts']` added as `dict`s containing
+    information about the Cmdr's owned Suits and the Loadouts the Cmdr has
+    defined to utilise them (and on-foot weapons).
+    Note that in the raw CAPI data these are arrays if all members 
+    contiguously exist, else a dictionary, but we have chosen to always coerce
+    these to a python `dict` for simplicity.  They will be empty `dict`s, not
+    `None` if there is no data.      
+    The `id` field found on e.g. weapon details in suit loadouts may be `None`
+    if we got the data from the Journal rather than the CAPI data.
+    NB: This data is only guaranteed up to date and correct after a fresh CAPI
+    data pull, as the current Journal events don't allow for updating it on the
+    fly (this should change in a future Odyssey patch).
+       
+    1. `state['SuitCurrent']` and `state['SuitLoadoutCurrent']` contain the
+       obvious "currently in use" data as per the Suits/SuitLoadouts.
+       
+    1. Tracking of the new Odyssey 'Microresources' has been added:
+       1. `Component` - `dict` for 'Ship Locker' inventory.
+       1. `Item` - `dict` for 'Ship Locker' inventory.
+       1. `Consumable` - `dict` for 'Ship Locker' inventory.
+       1. `Data` - `dict` for 'Ship Locker' inventory.
+       1. `BackPack` - on-foot inventory, a `dict` containing again 
+          dicts for `Component`, `Item`, `Consumable` and `Data`.
+    However note that the lack of a Journal event when throwing a grenade, 
+    along with no `BackPackMaterials` event if logging in on-foot means that
+    we can't track the BackPack inventory perfectly.
+
+  See the updated `PLUGINS.md` file for details.
+
+* Note that during the Odyssey Alpha it was observed that the CAPI `data['commander']['docked']`
+  boolean was **always true** if the Cmdr was in their ship.  This is a 
+  regression from pre-Odyssey behaviour.  The core EDMC code copes with 
+  this.
 
 Release 4.2.7
 ===
