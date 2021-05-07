@@ -46,7 +46,7 @@ Changes and Enhancements
 
 * New CL arg for EDMarketConnector.exe `--force-edmc-protocol`.
   This is really only of use to core developers (its purpose being to force
-  use of the edmc:// protocol for Frontier Auth callbacks, even when not
+  use of the `edmc://` protocol for Frontier Auth callbacks, even when not
   'frozen').
 
 * Linux config will be flushed to disk after any change.  This means that
@@ -102,33 +102,22 @@ Changes and Enhancements
 Odyssey
 ---
 
-This adds a new UI element 'Suit', below 'Ship' when applicable that
-details the type of suit you currently have equipped and its Loadout name.  
-This UI element is collapsed/hidden if no suit/on-foot state is detected,
-i.e. not playing Odyssey (Alpha or otherwise).
+* A new UI element 'Suit' now appears below 'Ship' when applicable. It
+  details the type of suit you currently have equipped and its Loadout name.  
+  This UI element is collapsed/hidden if no suit/on-foot state is detected,
+  e.g. not playing Odyssey.
 
-* More work has been done for Odyssey, with extra and expanded Journal
-  events now available.  Suits and their Loadouts will track better now,
-  although we still require a CAPI data pull (an 'Update') to be guaranteed
-  data about them.
-
-* Some initial support for things new in Odyssey has been added.  We can
-  detect when you're on-foot and at a station, so as to leverage Frontier
-  CAPI to send data about the station to EDDN etc.
-
-  **NB: Due to shortcomings in Journal support we can only detect your
-  'station' location on orbital stations, and only when you first login
-  there, not for subsequent Disembarking at one, and not at all for surface
-  ports, let alone surface settlements.**
-
-  More support, for things like the 'ShipLocker' inventory of all the new
-  materials, will be added in a subsequent beta.
-
-* Add support for detecting if a player is on-foot.  This is then used to
-  prevent false 'Frontier server lagging' messages.
-
-  Note that currently your on-foot location can only be detected when you
-  login, and not when you disembark from an Apex shuttle anywhere.
+* Note that we can only reliably know about Suits and their Loadouts from a 
+  CAPI data pull (which is what we do automatically on docking if 
+  configured to do so, or when you press the 'Update' button).  We do 
+  attempt to gather this data from Journal events as well, but if you 
+  switch to a Suit Loadout that hasn't been mentioned in them yet we won't 
+  be able to display that until the next CAPI data pull.
+  
+If anyone becomes aware of a 'suit loadouts' site/tool, a la Coriolis/EDSY 
+but for Odyssey Suits, do let us know so we can add support for it!
+We're already kicking around ideas to e.g. place JSON text in the clipboard 
+if the Suit Loadout is clicked.
 
 Bug Fixes
 ---
@@ -232,7 +221,7 @@ Plugin Developers
   well (it's global to the whole **process**, not per-thread).  Use full
   absolute paths instead (`pathlib` is what to use for this)
 
-* The `state` passed to plugins in `journal_entry()` calls (which is 
+* The `state` dict passed to plugins in `journal_entry()` calls (which is 
   actually `monitor.state` in the core code) has received many additions 
   relating to Odyssey, as well as other fixes and enhancements.
 
