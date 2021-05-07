@@ -55,7 +55,7 @@ Changes and Enhancements
   
   If you want to run multiple instances of the application under Linux then 
   please check the updated [Troubleshooting: Multi-Accounting](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#multi-accounting)
-  wiki page.
+  wiki entry.
 
 * Linux and macOS: You can now set a font name and size in your config file.  
   Ensuring this is a TTF font, rather than a bitmap font, should allow the
@@ -187,7 +187,9 @@ Plugin Developers
   hours and required 64-bit Python to have any hope of working due to
   memory usage.
 
-* All static data that is cleared for use by plugins is now in the file
+* All static data that is
+  [cleared for use by plugins](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports)
+  is now in the file
   `edmc_data.py` and should be imported from there, not *any* other module.
 
   The one thing we didn't move was the 'bracket map' dictionaries in `td.py`
