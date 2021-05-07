@@ -836,14 +836,10 @@ class LinuxConfig(AbstractConfig):
         self.filename.parent.mkdir(exist_ok=True, parents=True)
 
         self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
+        self.config.read(self.filename)  # read() ignores files that dont exist
 
-        try:
-            self.config.read(self.filename)
-        except Exception as e:
-            logger.debug(f'Error occurred while reading in file. Assuming that we are creating a new one: {e}')
-            self.config.add_section(self.SECTION)
-
-        # Ensure that our section exists
+        # Ensure that our section exists. This is here because configparser will happily create files for us, but it
+        # does not magically create sections
         try:
             self.config[self.SECTION].get("this_does_not_exist", fallback=None)
         except KeyError:
