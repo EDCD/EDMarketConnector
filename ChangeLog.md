@@ -9,9 +9,10 @@ Python 3.9
 * We now test against, and package with, Python 3.9.5.
 
   **As a consequence of this we no longer support Windows 7.  
-  This is due to Python 3.9.x itself not supporting Windows 7.  The 
-  application (both EDMarketConnector.exe and EDMC.exe) will crash on startup
-  due to a missing DLL.**
+  This is due to
+  [Python 3.9.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  The application (both EDMarketConnector.exe and EDMC.exe) will crash on
+  startup due to a missing DLL.**
 
   This should have no other impact on users or plugin developers, other
   than the latter now being free to use features that were introduced since the
