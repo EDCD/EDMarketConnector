@@ -173,13 +173,13 @@ Plugin Developers
 ---
 
 * The files `stations.p` and `systems.p` have been removed from the Windows
-  Installer.  These were never intended for third-party use.  Their core
-  code use was for generating EDDB-id URLs, but we long since changed the
+  Installer.  These were never intended for third-party use.  Their use in
+  core code was for generating EDDB-id URLs, but we long since changed the
   EDDB plugin's handlers for that to use alternate URL formats based on
   game IDs or names.
 
   If you were using either to lookup EDDB IDs for systems and/or stations
-  then please see how `system_url()` and `station_url` now work in
+  then please see how `system_url()` and `station_url()` now work in
   `plugins/eddb.py`.
 
   This change also removed the core (not plugin) `eddb.py` file which
@@ -228,7 +228,7 @@ Plugin Developers
   However, no plugin should itself call `os.chdir(...)` or equivalent.  You'll
   change the current working directory for all core code and other plugins as
   well (it's global to the whole **process**, not per-thread).  Use full
-  absolute paths instead (`pathlib` is what to use for this)
+  absolute paths instead (`pathlib` is what to use for this).
 
 * The `state` dict passed to plugins in `journal_entry()` calls (which is 
   actually `monitor.state` in the core code) has received many additions 
@@ -253,7 +253,7 @@ Plugin Developers
 
     1. `state['OnFoot']` is a new boolean, set true whenever we detect
      the Cmdr is on-foot, i.e. not in any type of vehicle (Cmdr's own ship,
-     multi-crew in another Cmdr's ship, Apex taxi, or a Dropship).
+     SRV, multi-crew in another Cmdr's ship, Apex taxi, or a Dropship).
 
     1. `state['Suits']` and `state['SuitLoadouts']` added as `dict`s containing
     information about the Cmdr's owned Suits and the Loadouts the Cmdr has
@@ -262,6 +262,8 @@ Plugin Developers
     contiguously exist, else a dictionary, but we have chosen to always coerce
     these to a python `dict` for simplicity.  They will be empty `dict`s, not
     `None` if there is no data.      
+    We use the CAPI data names for keys, not the Journal ones - e.g. `slots`
+    for weapons equipped, not `Modules`.
     The `id` field found on e.g. weapon details in suit loadouts may be `None`
     if we got the data from the Journal rather than the CAPI data.
     NB: This data is only guaranteed up to date and correct after a fresh CAPI
@@ -284,10 +286,12 @@ Plugin Developers
 
   See the updated `PLUGINS.md` file for details.
 
-* Note that during the Odyssey Alpha it was observed that the CAPI `data['commander']['docked']`
-  boolean was **always true** if the Cmdr was in their ship.  This is a 
-  regression from pre-Odyssey behaviour.  The core EDMC code copes with 
-  this.
+* Note that during the Odyssey Alpha it was observed that the CAPI
+  `data['commander']['docked']` boolean was **always true** if the Cmdr was
+  in their ship.  This is a regression from pre-Odyssey behaviour.  The
+  core EDMC code copes with this.  Please add a reproduction to the issue
+  about this:
+  [PTS CAPI saying Commander is Docked after jumping to new system](https://issues.frontierstore.net/issue-detail/28638).
 
 Release 4.2.7
 ===
