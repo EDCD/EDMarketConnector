@@ -552,7 +552,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Rebuy'] = None
                 self.state['Modules'] = None
 
-                self.state['Credits'] -= entry['ShipPrice']
+                self.state['Credits'] -= entry.get('ShipPrice', 0)
 
             elif event_type == 'ShipyardSwap':
                 self.state['ShipID'] = entry['ShipID']
@@ -604,17 +604,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Value':    entry['BuyPrice'],
                 }
 
-                self.state['Credits'] -= entry['BuyPrice']
+                self.state['Credits'] -= entry.get('BuyPrice', 0)
 
             elif event_type == 'ModuleRetrieve':
                 self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
-                self.state['Credits'] += entry['SellPrice']
+                self.state['Credits'] += entry.get('SellPrice', 0)
 
             elif event_type == 'ModuleSellRemote':
-                self.state['Credits'] += entry['SellPrice']
+                self.state['Credits'] += entry.get('SellPrice', 0)
 
             elif event_type == 'ModuleStore':
                 self.state['Modules'].pop(entry['Slot'], None)
@@ -870,11 +870,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 name = self.canonicalise(entry['Name'])
                 self.state[category][name] += entry['Count']
 
-                self.state['Credits'] -= entry['Price']
+                self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'SellMicroResources':
                 # Selling to a Bar Tender on-foot.
-                self.state['Credits'] += entry['Price']
+                self.state['Credits'] += entry.get('Price', 0)
                 # One event per whole sale, so it's an array.
                 for mr in entry['MicroResources']:
                     category = self.category(mr['Category'])
@@ -1197,10 +1197,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'SellOrganicData':
                 for bd in entry['BioData']:
-                    self.state['Credits'] += bd['Value'] + bd['Bonus']
+                    self.state['Credits'] += bd.get('Value', 0) + bd.get('Bonus', 0)
 
             elif event_type == 'BookDropship':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
                 # Technically we *might* now not be OnFoot.
                 # The problem is that this event is recorded both for signing up for
                 # an on-foot CZ, and when you use the Dropship to return after the
@@ -1213,13 +1213,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # event is going to be Disembark to on-foot anyway.
 
             elif event_type == 'BookTaxi':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'CancelDropship':
-                self.state['Credits'] += entry['Refund']
+                self.state['Credits'] += entry.get('Refund', 0)
 
             elif event_type == 'CancelTaxi':
-                self.state['Credits'] += entry['Refund']
+                self.state['Credits'] += entry.get('Refund', 0)
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
@@ -1249,10 +1249,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
 
                 if event_type == 'BuyDrones':
-                    self.state['Credits'] -= entry['TotalCost']
+                    self.state['Credits'] -= entry.get('TotalCost', 0)
 
                 elif event_type == 'MarketBuy':
-                    self.state['Credits'] -= entry['TotalCost']
+                    self.state['Credits'] -= entry.get('TotalCost', 0)
 
             elif event_type in ('EjectCargo', 'MarketSell', 'SellDrones'):
                 commodity = self.canonicalise(entry['Type'])
@@ -1262,10 +1262,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     cargo.pop(commodity)
 
                 if event_type == 'MarketSell':
-                    self.state['Credits'] += entry['TotalSale']
+                    self.state['Credits'] += entry.get('TotalSale', 0)
 
                 elif event_type == 'SellDrones':
-                    self.state['Credits'] += entry['TotalSale']
+                    self.state['Credits'] += entry.get('TotalSale', 0)
 
             elif event_type == 'SearchAndRescue':
                 for item in entry.get('Items', []):
@@ -1348,7 +1348,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     module['Engineering'].pop('ExperimentalEffect_Localised', None)
 
             elif event_type == 'MissionCompleted':
-                self.state['Credits'] += entry['Reward']
+                self.state['Credits'] += entry.get('Reward', 0)
 
                 for reward in entry.get('CommodityReward', []):
                     commodity = self.canonicalise(reward['Name'])
@@ -1435,74 +1435,75 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Try to keep Credits total updated
             elif event_type in ('MultiSellExplorationData', 'SellExplorationData'):
-                self.state['Credits'] += entry['TotalEarnings']
+                self.state['Credits'] += entry.get('TotalEarnings', 0)
 
             elif event_type == 'BuyExplorationData':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'BuyTradeData':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'BuyAmmo':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'CommunityGoalReward':
-                self.state['Credits'] += entry['Reward']
+                self.state['Credits'] += entry.get('Reward', 0)
 
             elif event_type == 'CrewHire':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'FetchRemoteModule':
-                self.state['Credits'] -= entry['TransferCost']
+                self.state['Credits'] -= entry.get('TransferCost', 0)
 
             elif event_type == 'MissionAbandoned':
                 # Is this paid at this point, or just a fine to pay later ?
-                # self.state['Credits'] -= entry['Fine']
+                # self.state['Credits'] -= entry.get('Fine', 0)
                 pass
 
             elif event_type in ('PayBounties', 'PayFines', 'PayLegacyFines'):
-                self.state['Credits'] -= entry['Amount']
+                self.state['Credits'] -= entry.get('Amount', 0)
 
             elif event_type == 'RedeemVoucher':
-                self.state['Credits'] += entry['Amount']
+                self.state['Credits'] += entry.get('Amount', 0)
 
             elif event_type in ('RefuelAll', 'RefuelPartial', 'Repair', 'RepairAll', 'RestockVehicle'):
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'SellShipOnRebuy':
-                self.state['Credits'] += entry['ShipPrice']
+                self.state['Credits'] += entry.get('ShipPrice', 0)
 
             elif event_type == 'ShipyardSell':
-                self.state['Credits'] += entry['ShipPrice']
+                self.state['Credits'] += entry.get('ShipPrice', 0)
 
             elif event_type == 'ShipyardTransfer':
-                self.state['Credits'] -= entry['TransferPrice']
+                self.state['Credits'] -= entry.get('TransferPrice', 0)
 
             elif event_type == 'PowerplayFastTrack':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'PowerplaySalary':
-                self.state['Credits'] += entry['Amount']
+                self.state['Credits'] += entry.get('Amount', 0)
 
             elif event_type == 'SquadronCreated':
                 # v30 docs don't actually say anything about credits cost
                 pass
 
             elif event_type == 'CarrierBuy':
-                self.state['Credits'] -= entry['Price']
+                self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'CarrierBankTransfer':
-                self.state['Credits'] = entry['PlayerBalance']
+                if (newbal := entry.get('PlayerBalance')):
+                    self.state['Credits'] = newbal
 
             elif event_type == 'CarrierDecommission':
                 # v30 doc says nothing about citing the refund amount
                 pass
 
             elif event_type == 'NpcCrewPaidWage':
-                self.state['Credits'] -= entry['Amount']
+                self.state['Credits'] -= entry.get('Amount', 0)
 
             elif event_type == 'Resurrect':
-                self.state['Credits'] -= entry['Cost']
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             return entry
 
