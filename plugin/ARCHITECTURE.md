@@ -90,8 +90,18 @@ Events are identified by a namespace, and are hooked using the decorator `@hook(
 Event names here are globbed, and thus you can hook onto all events in a given namespace using `@hook("namespace.*")`,
 and all events fired with the name `*`.
 
+all non-special `core` events are as follows:
+| Event Name      | Expected Signature              | Description                                                     |
+| :-------------- | :------------------------------ | --------------------------------------------------------------- |
+| `journal_event` | `(event.JournalEvent) -> None`  | Event fired when a new journal event is seen                    |
+| `cmdr_data`     | `(event.BaseDataEvent) -> None` | Event fired when new data comes in from CAPI TODO: `capi_data`? |
+
 Some `core` events are special, and will work directly with your plugin rather than
-being global, eg $plugin_prefs_changed_here
+being global, they are documented below
+
+| Event Name       | Expected Signature                         | Description        |
+| :--------------- | :----------------------------------------- | ------------------ |
+| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI |
 
 ## TODO
 
