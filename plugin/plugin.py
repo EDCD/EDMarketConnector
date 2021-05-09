@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Optional, final
 
 import config
 import constants
+import killswitch
 import l10n
 from plugin.base_plugin import BasePlugin
 from theme import _Theme, theme
@@ -29,6 +30,8 @@ class EDMCPlugin(BasePlugin):
 
     def __init__(self, logger: LoggerMixin, manager: PluginManager, path: pathlib.Path) -> None:
         super().__init__(logger, manager, path)
+
+        self.killswitch: killswitch.KillSwitchSet = killswitch.active  # Not final so plugins can set their own
 
     @final
     def translate(self, s: str, context: Optional[str] = None) -> str:
