@@ -674,7 +674,7 @@ before returning from this function.
 import plug
 
 def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]):
-    is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
+    is_deployed = entry['Flags'] & edmc_data.FlagsHardpointsDeployed
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
@@ -693,7 +693,7 @@ typically about once a second when in orbital flight.
 For more info on `Status.json`, See the "Status File" section in the Frontier
 [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661).
 That includes the available `entry` properties and the list of `"Flags"`.
-Refer to the source code of [plug.py](./plug.py) for the list of available
+Refer to [edmc_data.py](./edmc_data.py) for the list of available
 constants.
 
 ---
