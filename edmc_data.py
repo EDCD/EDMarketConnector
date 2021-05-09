@@ -416,6 +416,20 @@ FlagsAverageAltitude = 1 << 29   # Altitude from Average radius
 FlagsFsdJump = 1 << 30
 FlagsSrvHighBeam = 1 << 31
 
+# Status.json / Dashboard flags2
+Flags2OnFoot = 1 << 0
+Flags2InTaxi = 1 << 1  # (or dropship/shuttle)
+Flags2InMulticrew = 1 << 2  # (ie in someone else’s ship)
+Flags2OnFootInStation = 1 << 3
+Flags2OnFootOnPlanet = 1 << 4
+Flags2AimDownSight = 1 << 5
+Flags2LowOxygen = 1 << 6
+Flags2LowHealth = 1 << 7
+Flags2Cold = 1 << 8
+Flags2Hot = 1 << 9
+Flags2VeryCold = 1 << 10
+Flags2VeryHot = 1 << 11
+
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0
 GuiFocusInternalPanel = 1        # right hand side
