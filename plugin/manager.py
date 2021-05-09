@@ -75,12 +75,17 @@ class LoadedPlugin:
 
         :param event: the event to pass
         """
+        called: set[Callable] = set()
         results = []
         for e, funcs in self.callbacks.items():
             if not (e == event.name or e == '*' or fnmatch(event.name, e)):
                 continue
 
-            results.extend(self._fire_event_funcs(event, funcs))
+            for f in filter(lambda f: f in called, funcs):
+                self.log.warn(f'Refusing to call func {f} on {self} repeatedly for event {event.name}')
+
+            results.extend(self._fire_event_funcs(event, [f for f in funcs if f not in called]))
+            called = called.union(funcs)
 
         return results
 
