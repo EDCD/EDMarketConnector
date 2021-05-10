@@ -45,8 +45,8 @@ from contextlib import suppress
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
-from typing import TYPE_CHECKING, Tuple, cast
 from traceback import print_exc
+from typing import TYPE_CHECKING, Tuple, cast
 
 from config import appcmdname, appname, config
 
