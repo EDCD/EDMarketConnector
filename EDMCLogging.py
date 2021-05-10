@@ -363,6 +363,9 @@ class EDMCContextFilter(logging.Filter):
                                 else:
                                     caller_qualname = f"<property {name} on {class_name}>"
 
+                            elif not hasattr(fn, '__qualname__'):
+                                caller_qualname = name
+
                             elif hasattr(fn, '__qualname__') and fn.__qualname__:
                                 caller_qualname = fn.__qualname__
 
