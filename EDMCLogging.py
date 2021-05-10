@@ -41,9 +41,11 @@ import logging.handlers
 import os
 import pathlib
 import tempfile
+from contextlib import suppress
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
+from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
 
 from config import appcmdname, appname, config
@@ -85,7 +87,10 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
 )
 
 if TYPE_CHECKING:
+    from types import FrameType
+
     # Fake type that we can use here to tell type checkers that trace exists
+
     class LoggerMixin(logging.Logger):
         """LoggerMixin is a fake class that tells type checkers that trace exists on a given type."""
 
@@ -318,65 +323,83 @@ class EDMCContextFilter(logging.Filter):
 
                 # We've given up, so just return '??' to signal we couldn't get the info
                 return '??', '??', module_name
+            try:
+                args, _, _, value_dict = inspect.getargvalues(frame)
+                if len(args) and args[0] in ('self', 'cls'):
+                    frame_class: 'object' = value_dict[args[0]]
 
-            args, _, _, value_dict = inspect.getargvalues(frame)
-            if len(args) and args[0] in ('self', 'cls'):
-                frame_class: 'object' = value_dict[args[0]]
+                    if frame_class:
+                        # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
+                        # For more detail, see _Py_Mangle in CPython's Python/compile.c.
+                        name = frame_info.function
+                        class_name = frame_class.__class__.__name__.lstrip("_")
+                        if name.startswith("__") and not name.endswith("__") and class_name:
+                            name = f'_{class_name}{frame_info.function}'
 
-                if frame_class:
-                    # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
-                    # For more detail, see _Py_Mangle in CPython's Python/compile.c.
-                    name = frame_info.function
-                    class_name = frame_class.__class__.__name__.lstrip("_")
-                    if name.startswith("__") and not name.endswith("__") and class_name:
-                        name = f'_{class_name}{frame_info.function}'
+                        # Find __qualname__ of the caller
+                        fn = inspect.getattr_static(frame_class, name, None)
+                        if fn is None:
+                            # For some reason getattr_static cant grab this. Try and grab it with getattr, bail out
+                            # if we get a RecursionError indicating a property
+                            try:
+                                fn = getattr(frame_class, name, None)
+                            except RecursionError:
+                                print(
+                                    "EDMCLogging:EDMCContextFilter:caller_attributes():"
+                                    "Failed to get attribute for function info. Bailing out"
+                                )
+                                # class_name is better than nothing for __qualname__
+                                return class_name, class_name, module_name
 
-                    # Find __qualname__ of the caller
-                    fn = inspect.getattr_static(frame_class, name, None)
-                    if fn is None:
-                        # For some reason getattr_static cant grab this. Try and grab it with getattr, bail out
-                        # if we get a RecursionError indicating a property
-                        try:
-                            fn = getattr(frame_class, name, None)
-                        except RecursionError:
-                            print(
-                                "EDMCLogging:EDMCContextFilter:caller_attributes():"
-                                "Failed to get attribute for function info. Bailing out"
-                            )
-                            # class_name is better than nothing for __qualname__
-                            return class_name, class_name, module_name
+                        if fn is not None:
+                            if isinstance(fn, property):
+                                class_name = str(frame_class)
+                                # If somehow you make your __class__ or __class__.__qualname__ recursive,
+                                # I'll be impressed.
+                                if hasattr(frame_class, '__class__') and hasattr(frame_class.__class__, "__qualname__"):
+                                    class_name = frame_class.__class__.__qualname__
+                                    caller_qualname = f"{class_name}.{name}(property)"
 
-                    if fn is not None:
-                        if isinstance(fn, property):
-                            class_name = str(frame_class)
-                            # If somehow you make your __class__ or __class__.__qualname__ recursive, I'll be impressed.
-                            if hasattr(frame_class, '__class__') and hasattr(frame_class.__class__, "__qualname__"):
-                                class_name = frame_class.__class__.__qualname__
-                                caller_qualname = f"{class_name}.{name}(property)"
+                                else:
+                                    caller_qualname = f"<property {name} on {class_name}>"
 
-                            else:
-                                caller_qualname = f"<property {name} on {class_name}>"
+                            elif hasattr(fn, '__qualname__') and fn.__qualname__:
+                                caller_qualname = fn.__qualname__
 
-                        elif fn.__qualname__:
-                            caller_qualname = fn.__qualname__
+                        # Find containing class name(s) of caller, if any
+                        if (
+                            frame_class.__class__ and hasattr(frame_class.__class__, '__qualname__')
+                            and frame_class.__class__.__qualname__
+                        ):
+                            caller_class_names = frame_class.__class__.__qualname__
 
-                    # Find containing class name(s) of caller, if any
-                    if frame_class.__class__ and frame_class.__class__.__qualname__:
-                        caller_class_names = frame_class.__class__.__qualname__
+                # It's a call from the top level module file
+                elif frame_info.function == '<module>':
+                    caller_class_names = '<none>'
+                    caller_qualname = value_dict['__name__']
 
-            # It's a call from the top level module file
-            elif frame_info.function == '<module>':
-                caller_class_names = '<none>'
-                caller_qualname = value_dict['__name__']
+                elif frame_info.function != '':
+                    caller_class_names = '<none>'
+                    caller_qualname = frame_info.function
 
-            elif frame_info.function != '':
-                caller_class_names = '<none>'
-                caller_qualname = frame_info.function
+                module_name = cls.munge_module_name(frame_info, module_name)
 
-            module_name = cls.munge_module_name(frame_info, module_name)
+            except Exception as e:
+                print('ALERT!  Something went VERY wrong in handling finding info to log')
+                print('ALERT!  Information is as follows')
+                with suppress(Exception):
 
-            # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
-            del frame
+                    print(f'ALERT!  {e=}')
+                    print_exc()
+                    print(f'ALERT!  {frame=}')
+                    with suppress(Exception):
+                        print(f'ALERT!  {fn=}')  # type: ignore
+                    with suppress(Exception):
+                        print(f'ALERT!  {cls=}')
+
+            finally:  # Ensure this always happens
+                # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
+                del frame
 
         if caller_qualname == '':
             print('ALERT!  Something went wrong with finding caller qualname for logging!')
@@ -398,19 +421,19 @@ class EDMCContextFilter(logging.Filter):
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        frame: 'frame' = getframe(0)
+        frame: 'FrameType' = getframe(0)
         while frame:
             if isinstance(frame.f_locals.get('self'), logging.Logger):
-                frame = frame.f_back  # Want to start on the next frame below
+                frame = cast('FrameType', frame.f_back)  # Want to start on the next frame below
                 break
-            frame = frame.f_back
+            frame = cast('FrameType', frame.f_back)
         # Now continue up through frames until we find the next one where
         # that is *not* true, as it should be the call site of the logger
         # call
         while frame:
             if not isinstance(frame.f_locals.get('self'), logging.Logger):
                 break  # We've found the frame we want
-            frame = frame.f_back
+            frame = cast('FrameType', frame.f_back)
         return frame
 
     @classmethod
