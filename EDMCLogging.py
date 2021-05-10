@@ -385,17 +385,17 @@ class EDMCContextFilter(logging.Filter):
                 module_name = cls.munge_module_name(frame_info, module_name)
 
             except Exception as e:
-                print("ALERT!  Something went VERY wrong in handling finding info to log")
-                print("ALERT!  Information is as follows")
+                print('ALERT!  Something went VERY wrong in handling finding info to log')
+                print('ALERT!  Information is as follows')
                 with suppress(Exception):
 
-                    print(f"ALERT!  {e=}")
+                    print(f'ALERT!  {e=}')
                     print_exc()
-                    print(f"ALERT!  {frame=}")
+                    print(f'ALERT!  {frame=}')
                     with suppress(Exception):
-                        print(f"ALERT!  {fn=}")  # type: ignore
+                        print(f'ALERT!  {fn=}')  # type: ignore
                     with suppress(Exception):
-                        print(f"ALERT!  {cls=}")
+                        print(f'ALERT!  {cls=}')
 
             finally:  # Ensure this always happens
                 # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
