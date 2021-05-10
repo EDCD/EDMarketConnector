@@ -1,3 +1,4 @@
+"""Test that logging works correctly from a class-definition caller."""
 import sys
 
 sys.path += "../"  # Dont ask me why for this one it breaks, it just does.
@@ -15,17 +16,17 @@ class ClassVarLogger:
     """Test class with logger attached."""
 
     @classmethod
-    def set_logger(cls, logger):
+    def set_logger(cls, logger) -> None:
         """Set the passed logger onto the _class_."""
-        ClassVarLogger.logger = logger
+        ClassVarLogger.logger = logger  # type: ignore
 
 
-def log_stuff(msg: str):
-    """Wrapper logger func."""
+def log_stuff(msg: str) -> None:
+    """Wrap logging in another function."""
     ClassVarLogger.logger.debug(msg)  # type: ignore # its there
 
 
-def test_class_logger(caplog: 'LogCaptureFixture'):
+def test_class_logger(caplog: 'LogCaptureFixture') -> None:
     """
     Test that logging from a class variable doesn't explode.
 
