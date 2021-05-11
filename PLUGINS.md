@@ -329,12 +329,28 @@ You can use `set()` and `get_$type()` (where type is one of: `int`, `bool`,
 settings in a platform-independent way. Previously this was done with a single
 set and two get methods, the new methods provide better type safety.
 
+If you want to maintain compatibility with pre-5.0.0 versions of this 
+application (please encourage plugin users to update!) then you'll need to 
+do something like:
+
+```python
+from config import config
+
+config_getstring = getattr(config, 'get_str', getattr(config, 'get'))
+config_getbool = getattr(config, 'get_bool', getattr(config, 'get'))
+config_getlist = getattr(config, 'get_list', getattr(config, 'get'))
+config_getinteger = getattr(config, 'get_int', getattr(config, 'getint'))
+
+...
+somebool = config_getbool('myplugin_bool')
+```
+
 **Be sure to use a unique prefix for any settings you save so as not to clash
 with core EDMC or other plugins.**
 
 Use `number_from_string()` from EDMC's `l10n.Locale` object to parse input
 numbers in a locale-independent way.  NB: the old CamelCase versions of
-`number_from_string` and `string_from_number` do still exist, but arexi
+`number_from_string` and `string_from_number` do still exist, but are
 deprecated. They will continue to work, but will throw warnings.
 
 Note that in the following example the function signature defines that it
