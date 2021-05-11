@@ -221,6 +221,28 @@ Plugin Developers
 
   Setting still uses `config.set(...)`.
 
+  For ease of maintaining compatibility with pre-5.0.0 versions include 
+  this code in at least one module/file (no harm in it being in all that 
+  manipulate plugin config):
+  
+```
+from config import config
+
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
+
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = config.get
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
+```
+
+
 * We now change the current working directory of EDMarketConnector.exe to
   its location as soon as possible in its execution.  We're also
   paranoid about ensuring we reference the full path to the `.gitversion` file.
