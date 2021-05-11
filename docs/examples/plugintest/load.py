@@ -11,7 +11,20 @@ import zipfile
 import semantic_version
 from SubA import SubA
 
-from config import appname, appversion
+from config import appname, appversion, config
+
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
+
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = config.get
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
 
 # This could also be returned from plugin_start3()
 plugin_name = os.path.basename(os.path.dirname(__file__))
@@ -100,6 +113,22 @@ def plugin_start3(plugin_dir: str) -> str:
     elif callable(appversion):
         # From 5.0.0-beta1 it's a function, returning semantic_version.Version
         core_version = appversion()
+
+    config.set('plugintest_bool', True)
+    somebool = config.get_bool('plugintest_bool')
+    logger.debug(f'Stored bool: {somebool=}')
+
+    config.set('plugintest_str', 'Test String')
+    somestr = config.get_str('plugintest_str')
+    logger.debug(f'Stored str: {somestr=}')
+
+    config.set('plugintest_int', 42)
+    someint = config.get_int('plugintest_int')
+    logger.debug(f'Stored int: {someint=}')
+
+    config.set('plugintest_list', ['test', 'one', 'two'])
+    somelist = config.get_list('plugintest_list')
+    logger.debug(f'Stored list: {somelist=}')
 
     logger.info(f'Core EDMC version: {core_version}')
     # And then compare like this
