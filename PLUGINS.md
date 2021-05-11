@@ -331,18 +331,24 @@ set and two get methods, the new methods provide better type safety.
 
 If you want to maintain compatibility with pre-5.0.0 versions of this 
 application (please encourage plugin users to update!) then you'll need to 
-do something like:
+include this code in at least once in your plugin (no harm in putting it in
+all modules/files):
 
 ```python
 from config import config
 
-config_getstring = getattr(config, 'get_str', getattr(config, 'get'))
-config_getbool = getattr(config, 'get_bool', getattr(config, 'get'))
-config_getlist = getattr(config, 'get_list', getattr(config, 'get'))
-config_getinteger = getattr(config, 'get_int', getattr(config, 'getint'))
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
 
-...
-somebool = config_getbool('myplugin_bool')
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = config.get
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
 ```
 
 **Be sure to use a unique prefix for any settings you save so as not to clash
