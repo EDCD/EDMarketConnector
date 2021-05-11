@@ -21,7 +21,7 @@ if not hasattr(config, 'get_str'):
     config.get_str = config.get
 
 if not hasattr(config, 'get_bool'):
-    config.get_bool = config.get
+    config.get_bool = lambda key: bool(config.getint(key))
 
 if not hasattr(config, 'get_list'):
     config.get_list = config.get
@@ -116,19 +116,19 @@ def plugin_start3(plugin_dir: str) -> str:
 
     config.set('plugintest_bool', True)
     somebool = config.get_bool('plugintest_bool')
-    logger.debug(f'Stored bool: {somebool=}')
+    logger.debug(f'Stored bool: {somebool=} ({type(somebool)})')
 
     config.set('plugintest_str', 'Test String')
     somestr = config.get_str('plugintest_str')
-    logger.debug(f'Stored str: {somestr=}')
+    logger.debug(f'Stored str: {somestr=} ({type(somestr)})')
 
     config.set('plugintest_int', 42)
     someint = config.get_int('plugintest_int')
-    logger.debug(f'Stored int: {someint=}')
+    logger.debug(f'Stored int: {someint=} ({type(someint)})')
 
     config.set('plugintest_list', ['test', 'one', 'two'])
     somelist = config.get_list('plugintest_list')
-    logger.debug(f'Stored list: {somelist=}')
+    logger.debug(f'Stored list: {somelist=} ({type(somelist)})')
 
     logger.info(f'Core EDMC version: {core_version}')
     # And then compare like this

@@ -345,7 +345,7 @@ if not hasattr(config, 'get_str'):
     config.get_str = config.get
 
 if not hasattr(config, 'get_bool'):
-    config.get_bool = config.get
+    config.get_bool = lambda key: bool(config.getint(key))
 
 if not hasattr(config, 'get_list'):
     config.get_list = config.get
