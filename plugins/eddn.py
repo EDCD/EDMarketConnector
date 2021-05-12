@@ -491,6 +491,7 @@ Msg:\n{msg}'''
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
                     ('commodities', commodities),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -525,6 +526,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -554,6 +556,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -896,6 +899,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             with path.open('rb') as f:
                 entry = json.load(f)
+                entry['odyssey'] = this.odyssey
                 if entry['event'] == 'Market':
                     this.eddn.export_journal_commodities(cmdr, is_beta, entry)
 
