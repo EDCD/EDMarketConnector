@@ -52,6 +52,13 @@ All plugin developers would benefit from having a GitHub account and then
 setting up a watch on [EDMarketConnector](https://github.com/EDCD/EDMarketConnector/)
 of at least 'Releases' under 'Custom'.
 
+NB: If you had any beta or -rc1 of 5.0.0 installed and see anything weird 
+with this full release it would be advisable to manually uninstall, confirm 
+the installation directory (default `c:\Program Files (x86)\EDMarketConnector`)
+is empty, and then re-install 5.0.0 to be sure you have a clean, working, 
+install.  Anyone upgrading from 4.2.7 or earlier shouldn't see any issues 
+with this.
+
 Changes and Enhancements
 ---
 
