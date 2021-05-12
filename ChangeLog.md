@@ -221,9 +221,12 @@ Plugin Developers
 
   Setting still uses `config.set(...)`.
 
-  For ease of maintaining compatibility with pre-5.0.0 versions include 
-  this code in at least one module/file (no harm in it being in all that 
-  manipulate plugin config):
+  So:
+
+    1. Replace all instances of `config.get()` and `config.getint()` as above.
+    2. For ease of maintaining compatibility with pre-5.0.0 versions include 
+       this code in at least one module/file (no harm in it being in all that 
+       manipulate plugin config):
   
 ```
 from config import config
