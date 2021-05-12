@@ -189,7 +189,10 @@ include variables, and even the returns of functions, in the output.
 ## Checking core EDMC version
 
 If you have code that needs to act differently under different versions of 
-this application then you can check the core version using:
+this application then you can check utilise `config.appversion`.
+
+Prior to version 5.0.0 this was a simple string.  From 5.0.0 onwards it is,
+instead, a function which returns an instance of `semantic_version.Version`.
 
 ```python
 import semantic_version
@@ -252,7 +255,7 @@ application crashes or hangs.
 
 ### Use a thread for long-running code
 
-By default your plugin code will be running in the main thread.  So, if you 
+By default, your plugin code will be running in the main thread.  So, if you 
 perform some operation that takes significant time (more than a second) you 
 will be blocking both the core code from continuing *and* any other plugins 
 from running their main-thread code.
