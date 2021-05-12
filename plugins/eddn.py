@@ -560,6 +560,7 @@ Msg:\n{msg}'''
 
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
+        :param is_odyssey: did we detect Odyssey ?
         :param entry: the journal entry to send
         """
         msg = {
@@ -769,6 +770,11 @@ def journal_entry(  # noqa: C901, CCR001
         return filtered
 
     this.on_foot = state['OnFoot']
+
+    # Note if we're under Odyssey
+    # The only event this is already in is `LoadGame` which isn't sent to EDDN.
+    entry['odyssey'] = state['Odyssey']
+
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
