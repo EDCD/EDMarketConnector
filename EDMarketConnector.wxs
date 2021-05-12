@@ -239,6 +239,9 @@
 					<Component Id="EDMarketConnector_localserver_auth.bat" Guid="*">
 					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - localserver-auth.bat" />
 					</Component>
+					<Component Id="EDMarketConnector_localserver_resetui.bat" Guid="*">
+					    <File KeyPath="yes" Source="SourceDir\EDMarketConnector - reset-ui.bat" />
+					</Component>
 					<Component Id="gitversion" Guid="*">
 					    <File KeyPath="yes" Source="SourceDir\.gitversion" />
 					</Component>
@@ -621,6 +624,7 @@
 			<ComponentRef Id="WinSparkle.dll" />
 			<ComponentRef Id="EDMarketConnector_TRACE.bat" />
 			<ComponentRef Id="EDMarketConnector_localserver_auth.bat" />
+			<ComponentRef Id="EDMarketConnector_localserver_resetui.bat" />
 			<ComponentRef Id="zh_CN.strings" />
 			<ComponentRef Id="auto.tcl" />
 			<ComponentRef Id="clock.tcl" />

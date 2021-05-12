@@ -75,6 +75,9 @@ Changes and Enhancements
 
   The intention is this can be used if you've lost sight of the main window
   due to tweaking these options.
+  
+  There is a new file `EDMarketConnector - reset-ui.bat` to make utilising 
+  this easy on Windows.
 
 * New CL arg for EDMarketConnector.exe `--force-edmc-protocol`.
   This is really only of use to core developers (its purpose being to force
@@ -118,6 +121,9 @@ Changes and Enhancements
   If we ever have to use this we'll announce it clearly and endeavour to
   get a fixed version of the program released ASAP.  We will **NOT** be
   using this merely to try and get some laggards to upgrade.
+  
+  Plugin Developers: See [Killswitches.md](./docs/Killswitches.md) for more 
+  information about this.
 
 * Our logging code will make best efforts to still show class name and
   other such fields if it has trouble finding any of the required data for

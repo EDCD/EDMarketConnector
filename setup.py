@@ -18,8 +18,6 @@ from os.path import exists, isdir, join
 from tempfile import gettempdir
 from typing import Any, Generator, Set
 
-import semantic_version
-
 from config import (
     appcmdname, applongname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head, update_feed,
     update_interval
@@ -223,6 +221,7 @@ elif sys.platform == 'win32':
             f'{appname}.ico',
             'EDMarketConnector - TRACE.bat',
             'EDMarketConnector - localserver-auth.bat',
+            'EDMarketConnector - reset-ui.bat',
         ]),
         ('L10n', [join('L10n', x) for x in os.listdir('L10n') if x.endswith('.strings')]),
         ('plugins', PLUGINS),
