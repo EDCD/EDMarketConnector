@@ -267,7 +267,7 @@ Msg:\n{msg}'''
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
@@ -310,6 +310,7 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
+                ('odyssey',     is_odyssey),
             ])
 
             if 'economies' in data['lastStarport']:
@@ -367,7 +368,7 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -407,12 +408,13 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
+                    ('odyssey',     is_odyssey),
                 ]),
             })
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -446,6 +448,7 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
+                    ('odyssey',     is_odyssey),
                 ]),
             })
 
@@ -934,9 +937,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
                 status['text'] = _('Sending data to EDDN...')
                 status.update_idletasks()
 
-            this.eddn.export_commodities(data, is_beta)
-            this.eddn.export_outfitting(data, is_beta)
-            this.eddn.export_shipyard(data, is_beta)
+            this.eddn.export_commodities(data, is_beta, this.odyssey)
+            this.eddn.export_outfitting(data, is_beta, this.odyssey)
+            this.eddn.export_shipyard(data, is_beta, this.odyssey)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
