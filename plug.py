@@ -19,55 +19,6 @@ import logging
 
 logger = get_main_logger()
 
-# Dashboard Flags constants
-FlagsDocked = 1 << 0  # on a landing pad
-FlagsLanded = 1 << 1  # on planet surface
-FlagsLandingGearDown = 1 << 2
-FlagsShieldsUp = 1 << 3
-FlagsSupercruise = 1 << 4
-FlagsFlightAssistOff = 1 << 5
-FlagsHardpointsDeployed = 1 << 6
-FlagsInWing = 1 << 7
-FlagsLightsOn = 1 << 8
-FlagsCargoScoopDeployed = 1 << 9
-FlagsSilentRunning = 1 << 10
-FlagsScoopingFuel = 1 << 11
-FlagsSrvHandbrake = 1 << 12
-FlagsSrvTurret = 1 << 13  # using turret view
-FlagsSrvUnderShip = 1 << 14  # turret retracted
-FlagsSrvDriveAssist = 1 << 15
-FlagsFsdMassLocked = 1 << 16
-FlagsFsdCharging = 1 << 17
-FlagsFsdCooldown = 1 << 18
-FlagsLowFuel = 1 << 19  # <25%
-FlagsOverHeating = 1 << 20  # > 100%
-FlagsHasLatLong = 1 << 21
-FlagsIsInDanger = 1 << 22
-FlagsBeingInterdicted = 1 << 23
-FlagsInMainShip = 1 << 24
-FlagsInFighter = 1 << 25
-FlagsInSRV = 1 << 26
-FlagsAnalysisMode = 1 << 27  # Hud in Analysis mode
-FlagsNightVision = 1 << 28
-FlagsAverageAltitude = 1 << 29  # Altitude from Average radius
-FlagsFsdJump = 1 << 30
-FlagsSrvHighBeam = 1 << 31
-
-# Dashboard GuiFocus constants
-GuiFocusNoFocus = 0
-GuiFocusInternalPanel = 1	# right hand side
-GuiFocusExternalPanel = 2	# left hand side
-GuiFocusCommsPanel = 3		# top
-GuiFocusRolePanel = 4		# bottom
-GuiFocusStationServices = 5
-GuiFocusGalaxyMap = 6
-GuiFocusSystemMap = 7
-GuiFocusOrrery = 8
-GuiFocusFSS = 9
-GuiFocusSAA = 10
-GuiFocusCodex = 11
-
-
 # List of loaded Plugins
 PLUGINS = []
 PLUGINS_not_py3 = []
@@ -173,10 +124,10 @@ def load_plugins(master):
     last_error['root'] = master
 
     internal = []
-    for name in sorted(os.listdir(config.internal_plugin_dir)):
+    for name in sorted(os.listdir(config.internal_plugin_dir_path)):
         if name.endswith('.py') and not name[0] in ['.', '_']:
             try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir, name), logger)
+                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except Exception as e:
@@ -188,9 +139,9 @@ def load_plugins(master):
 
     found = []
     # Load any plugins that are also packages first
-    for name in sorted(os.listdir(config.plugin_dir),
-                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir, n, '__init__.py')), n.lower())):
-        if not os.path.isdir(os.path.join(config.plugin_dir, name)) or name[0] in ['.', '_']:
+    for name in sorted(os.listdir(config.plugin_dir_path),
+                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
+        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
@@ -198,14 +149,14 @@ def load_plugins(master):
         else:
             try:
                 # Add plugin's folder to load path in case plugin has internal package dependencies
-                sys.path.append(os.path.join(config.plugin_dir, name))
+                sys.path.append(os.path.join(config.plugin_dir_path, name))
 
                 # Create a logger for this 'found' plugin.  Must be before the
                 # load.py is loaded.
                 import EDMCLogging
 
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
-                found.append(Plugin(name, os.path.join(config.plugin_dir, name, 'load.py'), plugin_logger))
+                found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
@@ -307,8 +258,8 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
-    if entry['event'] in ('Location'):
-        logger.trace('Notifying plugins of "Location" event')
+    # if entry['event'] in ('Location'):
+    #     logger.trace('Notifying plugins of "Location" event')
 
     error = None
     for plugin in PLUGINS:
@@ -371,7 +322,6 @@ def show_error(err):
     :param err:
     .. versionadded:: 2.3.7
     """
-
     if config.shutting_down:
         logger.info(f'Called during shutdown: "{str(err)}"')
         return

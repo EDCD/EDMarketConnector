@@ -6,12 +6,25 @@ import logging
 import os
 import shutil
 import sqlite3
-import sys
 import zipfile
 
+import semantic_version
 from SubA import SubA
 
-from config import appname
+from config import appname, appversion, config
+
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
+
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = lambda key: bool(config.getint(key))
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
 
 # This could also be returned from plugin_start3()
 plugin_name = os.path.basename(os.path.dirname(__file__))
@@ -32,9 +45,16 @@ if not logger.hasHandlers():
     logger.addHandler(logger_channel)
 
 
-this = sys.modules[__name__]  # For holding module globals
-this.DBFILE = 'plugintest.db'
-this.mt = None
+class This:
+    """Module global variables."""
+
+    def __init__(self):
+        self.DBFILE = 'plugintest.db'
+        self.plugin_test: PluginTest
+        self.suba: SubA
+
+
+this = This()
 
 
 class PluginTest(object):
@@ -86,8 +106,42 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir:
     :return: 'Pretty' name of this plugin.
     """
+    # Up until 5.0.0-beta1 config.appversion is a string
+    if isinstance(appversion, str):
+        core_version = semantic_version.Version(appversion)
+
+    elif callable(appversion):
+        # From 5.0.0-beta1 it's a function, returning semantic_version.Version
+        core_version = appversion()
+
+    config.set('plugintest_bool', True)
+    somebool = config.get_bool('plugintest_bool')
+    logger.debug(f'Stored bool: {somebool=} ({type(somebool)})')
+
+    config.set('plugintest_str', 'Test String')
+    somestr = config.get_str('plugintest_str')
+    logger.debug(f'Stored str: {somestr=} ({type(somestr)})')
+
+    config.set('plugintest_int', 42)
+    someint = config.get_int('plugintest_int')
+    logger.debug(f'Stored int: {someint=} ({type(someint)})')
+
+    config.set('plugintest_list', ['test', 'one', 'two'])
+    somelist = config.get_list('plugintest_list')
+    logger.debug(f'Stored list: {somelist=} ({type(somelist)})')
+
+    logger.info(f'Core EDMC version: {core_version}')
+    # And then compare like this
+    if core_version < semantic_version.Version('5.0.0-beta1'):
+        logger.info('EDMC core version is before 5.0.0-beta1')
+
+    else:
+        logger.info('EDMC core version is at least 5.0.0-beta1')
+
+    # Yes, just blow up if config.appverison is neither str or callable
+
     logger.info(f'Folder is {plugin_dir}')
-    this.mt = PluginTest(plugin_dir)
+    this.plugin_test = PluginTest(plugin_dir)
 
     this.suba = SubA(logger)
 
@@ -117,5 +171,9 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     :param state:
     :return: None
     """
-    logger.debug(f'cmdr = "{cmdrname}", is_beta = "{is_beta}", system = "{system}", station = "{station}"')
-    this.mt.store(entry['timestamp'], cmdrname, system, station, entry['event'])
+    logger.debug(
+            f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
+            f', system = "{system}", station = "{station}"'
+            f', event = "{entry["event"]}"'
+    )
+    this.plugin_test.store(entry['timestamp'], cmdrname, system, station, entry['event'])

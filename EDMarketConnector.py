@@ -1,19 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Entry point for the main GUI application."""
 
 import argparse
 import html
 import json
 import locale
+import pathlib
 import re
 import sys
+# import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
-from os.path import dirname, isdir, join
+from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Tuple
+
+# Have this as early as possible for people running EDMarketConnector.exe
+# from cmd.exe or a bat file or similar.  Else they might not be in the correct
+# place for things like config.py reading .gitversion
+if getattr(sys, 'frozen', False):
+    # Under py2exe sys.path[0] is the executable name
+    if platform == 'win32':
+        chdir(dirname(sys.path[0]))
+        # Allow executable to be invoked from any cwd
+        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
+        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
+
+else:
+    # We still want to *try* to have CWD be where the main script is, even if
+    # not frozen.
+    chdir(pathlib.Path(__file__).parent)
 
 from constants import applongname, appname, protocolhandler_redirect
 
@@ -27,11 +46,17 @@ if __name__ == '__main__':
         import tempfile
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
-        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='a', buffering=1)
+        sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
-# After the redirect in case config does logging setup
+# These need to be after the stdout/err redirect because they will cause
+# logging to be set up.
+# isort: off
+import killswitch
 from config import appversion, appversion_nobuild, config, copyright
+# isort: on
+
+from companion import CAPIData, index_possibly_sparse_list
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 
@@ -45,20 +70,33 @@ if __name__ == '__main__':  # noqa: C901
                     "such as EDSM, Inara.cz and EDDB."
     )
 
-    parser.add_argument('--trace',
-                        help='Set the Debug logging loglevel to TRACE',
-                        action='store_true',
-                        )
+    parser.add_argument(
+        '--trace',
+        help='Set the Debug logging loglevel to TRACE',
+        action='store_true',
+    )
+
+    parser.add_argument(
+        '--reset-ui',
+        help='reset UI theme and transparency to defaults',
+        action='store_true'
+    )
 
     parser.add_argument('--suppress-dupe-process-popup',
                         help='Suppress the popup from when the application detects another instance already running',
                         action='store_true'
                         )
 
-    parser.add_argument('--force-localserver-for-auth',
-                        help='Force EDMC to use a localhost webserver for Frontier Auth callback',
-                        action='store_true'
-                        )
+    auth_options = parser.add_mutually_exclusive_group(required=False)
+    auth_options.add_argument('--force-localserver-for-auth',
+                              help='Force EDMC to use a localhost webserver for Frontier Auth callback',
+                              action='store_true'
+                              )
+
+    auth_options.add_argument('--force-edmc-protocol',
+                              help='Force use of the edmc:// protocol handler.  Error if not on Windows',
+                              action='store_true',
+                              )
 
     parser.add_argument('edmc',
                         help='Callback from Frontier Auth',
@@ -76,7 +114,16 @@ if __name__ == '__main__':  # noqa: C901
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
 
-    def handle_edmc_callback_or_foregrounding():  # noqa: CCR001
+    if args.force_edmc_protocol:
+        if sys.platform == 'win32':
+            config.set_auth_force_edmc_protocol()
+
+        else:
+            print("--force-edmc-protocol is only valid on Windows")
+            parser.print_help()
+            exit(1)
+
+    def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
         logger.trace('Begin...')
 
@@ -109,7 +156,7 @@ if __name__ == '__main__':  # noqa: C901
                 ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
                 ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
 
-                def window_title(h):
+                def window_title(h: int) -> Optional[str]:
                     if h:
                         text_length = GetWindowTextLength(h) + 1
                         buf = ctypes.create_unicode_buffer(text_length)
@@ -119,7 +166,7 @@ if __name__ == '__main__':  # noqa: C901
                     return None
 
                 @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-                def enumwindowsproc(window_handle, l_param):
+                def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
                     """
                     Determine if any window for the Application exists.
 
@@ -142,7 +189,6 @@ if __name__ == '__main__':  # noqa: C901
                                 if GetProcessHandleFromHwnd(window_handle):
                                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        logger.debug('Invoked with edmc:// protocol handler arg')
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         ShowWindow(window_handle, SW_RESTORE)
@@ -217,19 +263,13 @@ if __name__ == '__main__':  # noqa: C901
 # isort: off
 if TYPE_CHECKING:
     from logging import trace, TRACE  # type: ignore # noqa: F401
+    import update
+    # from infi.systray import SysTrayIcon
 # isort: on
 
     def _(x: str) -> str:
         """Fake the l10n translation functions for typing."""
         return x
-
-if getattr(sys, 'frozen', False):
-    # Under py2exe sys.path[0] is the executable name
-    if platform == 'win32':
-        chdir(dirname(sys.path[0]))
-        # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tk')
 
 import tkinter as tk
 import tkinter.filedialog
@@ -245,6 +285,7 @@ import stats
 import td
 from commodity import COMMODITY_CSV
 from dashboard import dashboard
+from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
@@ -271,14 +312,18 @@ SHIPYARD_HTML_TEMPLATE = """
 
 
 class AppWindow(object):
+    """Define the main application window."""
+
     # Tkinter Event types
     EVENT_KEYPRESS = 2
     EVENT_BUTTON = 4
     EVENT_VIRTUAL = 35
 
-    def __init__(self, master):  # noqa: C901
+    PADX = 5
 
-        self.holdofftime = config.getint('querytime') + companion.holdoff
+    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+
+        self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
 
         self.w = master
         self.w.title(applongname)
@@ -287,14 +332,28 @@ class AppWindow(object):
 
         self.prefsdialog = None
 
+        # if platform == 'win32':
+        #     from infi.systray import SysTrayIcon
+
+        #     def open_window(systray: 'SysTrayIcon') -> None:
+        #         self.w.deiconify()
+
+        #     menu_options = (("Open", None, open_window),)
+        #     # Method associated with on_quit is called whenever the systray is closing
+        #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
+        #     self.systray.start()
+
         plug.load_plugins(master)
 
         if platform != 'darwin':
             if platform == 'win32':
                 self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+
             else:
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                               tk.PhotoImage(file=join(config.respath, 'EDMarketConnector.png')))  # noqa: E501
+                               tk.PhotoImage(file=join(config.respath_path, 'EDMarketConnector.png')))
+
+            # TODO: Export to files and merge from them in future ?
             self.theme_icon = tk.PhotoImage(
                 data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
             self.theme_minimize = tk.BitmapImage(
@@ -307,33 +366,51 @@ class AppWindow(object):
         frame.columnconfigure(1, weight=1)
 
         self.cmdr_label = tk.Label(frame)
-        self.ship_label = tk.Label(frame)
-        self.system_label = tk.Label(frame)
-        self.station_label = tk.Label(frame)
-
-        self.cmdr_label.grid(row=1, column=0, sticky=tk.W)
-        self.ship_label.grid(row=2, column=0, sticky=tk.W)
-        self.system_label.grid(row=3, column=0, sticky=tk.W)
-        self.station_label.grid(row=4, column=0, sticky=tk.W)
-
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
+        self.ship_label = tk.Label(frame)
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.suit_label = tk.Label(frame)
+        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
+        self.system_label = tk.Label(frame)
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
+        self.station_label = tk.Label(frame)
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
+        # system and station text is set/updated by the 'provider' plugins
+        # eddb, edsm and inara.  Look for:
+        #
+        # parent.children['system'] / parent.children['station']
 
-        self.cmdr.grid(row=1, column=1, sticky=tk.EW)
-        self.ship.grid(row=2, column=1, sticky=tk.EW)
-        self.system.grid(row=3, column=1, sticky=tk.EW)
-        self.station.grid(row=4, column=1, sticky=tk.EW)
+        ui_row = 1
+
+        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.suit_grid_row = ui_row
+        self.suit_shown = False
+        ui_row += 1
+
+        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
+
+        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
+        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
+        ui_row += 1
 
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
             if appitem:
                 tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
                 if isinstance(appitem, tuple) and len(appitem) == 2:
-                    row = frame.grid_size()[1]
-                    appitem[0].grid(row=row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=row, column=1, sticky=tk.EW)
+                    ui_row = frame.grid_size()[1]
+                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
+                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
@@ -342,17 +419,21 @@ class AppWindow(object):
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
-        row = frame.grid_size()[1]
-        self.button.grid(row=row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=row, columnspan=2, sticky=tk.NSEW)
+        ui_row = frame.grid_size()[1]
+        self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': row, 'columnspan': 2, 'sticky': tk.NSEW})  # noqa: E501
+                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.getandsend)
         theme.button_bind(self.theme_button, self.getandsend)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=5, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+
+        # The type needs defining for adding the menu entry, but won't be
+        # properly set until later
+        self.updater: update.Updater = None
 
         self.menubar = tk.Menu()
         if platform == 'darwin':
@@ -374,7 +455,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.edit_menu)
             self.w.bind('<Command-c>', self.copy)
             self.view_menu = tk.Menu(self.menubar, name='view')
-            self.view_menu.add_command(command=lambda: stats.StatsDialog(self))
+            self.view_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.menubar.add_cascade(menu=self.view_menu)
             window_menu = tk.Menu(self.menubar, name='window')
             self.menubar.add_cascade(menu=window_menu)
@@ -393,17 +474,17 @@ class AppWindow(object):
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
         else:
-            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
-            self.file_menu.add_command(command=lambda: stats.StatsDialog(self))
+            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+            self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
             self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
-            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
@@ -413,7 +494,7 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=self.help_menu)
             if platform == 'win32':
                 # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value=config.getint('always_ontop'))
+                self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 self.system_menu.add_separator()
                 self.system_menu.add_checkbutton(label=_('Always on top'),
@@ -434,7 +515,7 @@ class AppWindow(object):
                                       image=self.theme_icon, cursor='fleur',
                                       anchor=tk.W, compound=tk.LEFT)
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
-            self.drag_offset = None
+            self.drag_offset: Tuple[Optional[int], Optional[int]] = (None, None)
             theme_titlebar.bind('<Button-1>', self.drag_start)
             theme_titlebar.bind('<B1-Motion>', self.drag_continue)
             theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
@@ -445,7 +526,7 @@ class AppWindow(object):
             theme_close.grid(row=0, column=4, padx=2)
             theme.button_bind(theme_close, self.onexit, image=self.theme_close)
             self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_file_menu.grid(row=1, column=0, padx=5, sticky=tk.W)
+            self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
             theme.button_bind(self.theme_file_menu,
                               lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
@@ -462,7 +543,7 @@ class AppWindow(object):
                               lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                                 e.widget.winfo_rooty()
                                                                 + e.widget.winfo_height()))
-            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=5, sticky=tk.EW)
+            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
             theme.register(self.theme_minimize)  # images aren't automatically registered
             theme.register(self.theme_close)
             self.blank_menubar = tk.Frame(frame)
@@ -474,13 +555,13 @@ class AppWindow(object):
             self.w.resizable(tk.TRUE, tk.FALSE)
 
         # update geometry
-        if config.get('geometry'):
-            match = re.match('\+([\-\d]+)\+([\-\d]+)', config.get('geometry'))  # noqa: W605
+        if config.get_str('geometry'):
+            match = re.match(r'\+([\-\d]+)\+([\-\d]+)', config.get_str('geometry'))
             if match:
                 if platform == 'darwin':
                     # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
                     if int(match.group(2)) >= 0:
-                        self.w.geometry(config.get('geometry'))
+                        self.w.geometry(config.get_str('geometry'))
                 elif platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
                     import ctypes
@@ -490,10 +571,11 @@ class AppWindow(object):
                     MONITOR_DEFAULTTONULL = 0  # noqa: N806
                     if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
                                                              MONITOR_DEFAULTTONULL):
-                        self.w.geometry(config.get('geometry'))
+                        self.w.geometry(config.get_str('geometry'))
                 else:
-                    self.w.geometry(config.get('geometry'))
-        self.w.attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+                    self.w.geometry(config.get_str('geometry'))
+
+        self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
         theme.register(frame)
         theme.apply(self.w)
@@ -525,23 +607,64 @@ class AppWindow(object):
             self.updater = update.Updater(tkroot=self.w, provider='internal')
             self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        try:
-            config.get_password('')  # Prod SecureStorage on Linux to initialise
-        except RuntimeError:
-            pass
-
         # Migration from <= 3.30
-        for username in config.get('fdev_usernames') or []:
+        for username in config.get_list('fdev_usernames', default=[]):
             config.delete_password(username)
-        config.delete('fdev_usernames')
-        config.delete('username')
-        config.delete('password')
-        config.delete('logdir')
+        config.delete('fdev_usernames', suppress=True)
+        config.delete('username', suppress=True)
+        config.delete('password', suppress=True)
+        config.delete('logdir', suppress=True)
 
         self.postprefs(False)  # Companion login happens in callback from monitor
+        self.toggle_suit_row(visible=False)
 
-    # callback after the Preferences dialog is applied
-    def postprefs(self, dologin=True):
+    def update_suit_text(self) -> None:
+        """Update the suit text for current type and loadout."""
+        if (suit := monitor.state.get('SuitCurrent')) is None:
+            self.suit['text'] = f'<{_("Unknown")}>'
+            return
+
+        suitname = suit['locName']
+
+        if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
+            self.suit['text'] = ''
+            return
+
+        loadout_name = suitloadout['name']
+        self.suit['text'] = f'{suitname} ({loadout_name})'
+
+    def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
+        """
+        Toggle the visibility of the 'Suit' row.
+
+        :param visible: Force visibility to this.
+        """
+        if visible is True:
+            self.suit_shown = False
+
+        elif visible is False:
+            self.suit_shown = True
+
+        if not self.suit_shown:
+            if platform != 'win32':
+                pady = 2
+
+            else:
+
+                pady = 0
+
+            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W, padx=self.PADX, pady=pady)
+            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW, padx=self.PADX, pady=pady)
+            self.suit_shown = True
+
+        else:
+            # Hide the Suit row
+            self.suit_label.grid_forget()
+            self.suit.grid_forget()
+            self.suit_shown = False
+
+    def postprefs(self, dologin: bool = True):
+        """Perform necessary actions after the Preferences dialog is applied."""
         self.prefsdialog = None
         self.set_labels()  # in case language has changed
 
@@ -551,7 +674,7 @@ class AppWindow(object):
         self.station.configure(url=self.station_url)
 
         # (Re-)install hotkey monitoring
-        hotkeymgr.register(self.w, config.getint('hotkey_code'), config.getint('hotkey_mods'))
+        hotkeymgr.register(self.w, config.get_int('hotkey_code'), config.get_int('hotkey_mods'))
 
         # Update Journal lock if needs be.
         journal_lock.update_lock(self.w)
@@ -563,11 +686,12 @@ class AppWindow(object):
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
 
-    # set main window labels, e.g. after language change
     def set_labels(self):
+        """Set main window labels, e.g. after language change."""
         self.cmdr_label['text'] = _('Cmdr') + ':'  # Main window
         # Multicrew role label in main window
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
+        self.suit_label['text'] = _('Suit') + ':'  # Main window
         self.system_label['text'] = _('System') + ':'  # Main window
         self.station_label['text'] = _('Station') + ':'  # Main window
         self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
@@ -608,38 +732,89 @@ class AppWindow(object):
         self.edit_menu.entryconfigure(0, label=_('Copy'))  # As in Copy and Paste
 
     def login(self):
+        """Initiate CAPI/Frontier login and set other necessary state."""
         if not self.status['text']:
             self.status['text'] = _('Logging in...')
+
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
+
         if platform == 'darwin':
             self.view_menu.entryconfigure(0, state=tk.DISABLED)  # Status
             self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Save Raw Data
+
         else:
             self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
             self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
+
         self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 # Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
+
                 if platform == 'darwin':
                     self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                     self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
+
                 else:
                     self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                     self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
+
         except Exception as e:
             logger.debug('Frontier CAPI Auth', exc_info=e)
             self.status['text'] = str(e)
+
         self.cooldown()
 
-    def getandsend(self, event=None, retrying=False):  # noqa: C901
+    def export_market_data(self, data: CAPIData) -> bool:  # noqa: CCR001
+        """
+        Export CAPI market data.
 
+        :return: True if all OK, else False to trigger play_bad in caller.
+        """
+        if config.get_int('output') & (config.OUT_STATION_ANY):
+            if not data['commander'].get('docked') and not monitor.state['OnFoot']:
+                if not self.status['text']:
+                    # Signal as error because the user might actually be docked
+                    # but the server hosting the Companion API hasn't caught up
+                    self.status['text'] = _("You're not docked at a station!")
+                    return False
+
+            # Ignore possibly missing shipyard info
+            elif (config.get_int('output') & config.OUT_MKT_EDDN) \
+                    and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
+                if not self.status['text']:
+                    self.status['text'] = _("Station doesn't have anything!")
+
+            elif not data['lastStarport'].get('commodities'):
+                if not self.status['text']:
+                    self.status['text'] = _("Station doesn't have a market!")
+
+            elif config.get_int('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
+                # Fixup anomalies in the commodity data
+                fixed = companion.fixup(data)
+                if config.get_int('output') & config.OUT_MKT_CSV:
+                    commodity.export(fixed, COMMODITY_CSV)
+
+                if config.get_int('output') & config.OUT_MKT_TD:
+                    td.export(fixed)
+
+        return True
+
+    def getandsend(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
+        """
+        Perform CAPI data retrieval and associated actions.
+
+        This can be triggered by hitting the main UI 'Update' button,
+        automatically on docking, or due to a retry.
+        """
         auto_update = not event
-        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.getint('hotkey_mute')
+        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
         play_bad = False
+        err: Optional[str] = None
 
         if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
             return  # In CQC or on crew - do nothing
@@ -651,12 +826,15 @@ class AppWindow(object):
 
         if not retrying:
             if time() < self.holdofftime:  # Was invoked by key while in cooldown
-                self.status['text'] = ''
                 if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
+                    self.status['text'] = ''
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
+
                 return
+
             elif play_sound:
                 hotkeymgr.play_good()
+
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
@@ -669,49 +847,85 @@ class AppWindow(object):
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
-                self.status['text'] = _('CAPI: No commander data returned')
+                err = self.status['text'] = _('CAPI: No commander data returned')
 
             elif not data.get('commander', {}).get('name'):
-                self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
-                      and not data.get('lastStarport', {}).get('name'))):  # Only care if docked
-                self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                      and not data.get('lastStarport', {}).get('name'))):
+                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
-                self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
-                # Companion API return doesn't match Journal
+                # Companion API Commander doesn't match Journal
                 raise companion.CmdrError()
 
-            elif ((auto_update and not data['commander'].get('docked'))
-                  or (data['lastSystem']['name'] != monitor.system)
-                  or ((data['commander']['docked']
-                       and data['lastStarport']['name'] or None) != monitor.station)
-                  or (data['ship']['id'] != monitor.state['ShipID'])
-                  or (data['ship']['name'].lower() != monitor.state['ShipType'])):
+            elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
+                # auto update is only when just docked
+                raise companion.ServerLagging()
+
+            elif data['lastSystem']['name'] != monitor.system:
+                # CAPI system must match last journal one
+                raise companion.ServerLagging()
+
+            elif data['lastStarport']['name'] != monitor.station:
+                if monitor.state['OnFoot'] and monitor.station:
+                    raise companion.ServerLagging()
+
+                else:
+                    last_station = None
+                    if data['commander']['docked']:
+                        last_station = data['lastStarport']['name']
+
+                    if last_station != monitor.station:
+                        # CAPI lastStarport must match
+                        raise companion.ServerLagging()
+
+                self.holdofftime = querytime + companion.holdoff
+
+            elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
+                # CAPI ship must match
+                raise companion.ServerLagging()
+
+            elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
+                # CAPI ship type must match
                 raise companion.ServerLagging()
 
             else:
-
                 if __debug__:  # Recording
-                    if isdir('dump'):
-                        with open('dump/{system}{station}.{timestamp}.json'.format(
-                                system=data['lastSystem']['name'],
-                                station=data['commander'].get('docked') and '.' + data['lastStarport']['name'] or '',
-                                timestamp=strftime('%Y-%m-%dT%H.%M.%S', localtime())), 'wb') as h:
-                            h.write(json.dumps(dict(data),
-                                               ensure_ascii=False,
-                                               indent=2,
-                                               sort_keys=True,
-                                               separators=(',', ': ')).encode('utf-8'))
+                    companion.session.dump_capi_data(data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = companion.ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
                     monitor.state['ShipID'] = data['ship']['id']
                     monitor.state['ShipType'] = data['ship']['name'].lower()
+
+                    if not monitor.state['Modules']:
+                        self.ship.configure(state=tk.DISABLED)
+
+                # We might have disabled this in the conditional above.
+                if monitor.state['Modules']:
+                    self.ship.configure(state=True)
+
+                if monitor.state.get('SuitCurrent') is not None:
+                    if (loadout := data.get('loadout')) is not None:
+                        if (suit := loadout.get('suit')) is not None:
+                            if (suitname := suit.get('locName')) is not None:
+                                # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
+                                loadout_name = index_possibly_sparse_list(
+                                    data['loadouts'], loadout['loadoutSlotId']
+                                )['name']
+
+                                self.suit['text'] = f'{suitname} ({loadout_name})'
+
+                    self.toggle_suit_row(visible=True)
+
+                else:
+                    self.toggle_suit_row(visible=False)
 
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
@@ -724,85 +938,44 @@ class AppWindow(object):
                     play_bad = True
 
                 # Export market data
-                if config.getint('output') & (config.OUT_STATION_ANY):
-                    if not data['commander'].get('docked'):
-                        if not self.status['text']:
-                            # Signal as error because the user might actually be docked
-                            # but the server hosting the Companion API hasn't caught up
-                            self.status['text'] = _("You're not docked at a station!")
-                            play_bad = True
-                    # Ignore possibly missing shipyard info
-                    elif (config.getint('output') & config.OUT_MKT_EDDN) \
-                            and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have anything!")
-                    elif not data['lastStarport'].get('commodities'):
-                        if not self.status['text']:
-                            self.status['text'] = _("Station doesn't have a market!")
-                    elif config.getint('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
-                        # Fixup anomalies in the commodity data
-                        fixed = companion.fixup(data)
-                        if config.getint('output') & config.OUT_MKT_CSV:
-                            commodity.export(fixed, COMMODITY_CSV)
-                        if config.getint('output') & config.OUT_MKT_TD:
-                            td.export(fixed)
+                if not self.export_market_data(data):
+                    err = 'Error: Exporting Market data'
+                    play_bad = True
 
                 self.holdofftime = querytime + companion.holdoff
 
         # Companion API problem
         except companion.ServerLagging as e:
+            err = str(e)
             if retrying:
-                self.status['text'] = str(e)
+                self.status['text'] = err
                 play_bad = True
+
             else:
                 # Retry once if Companion server is unresponsive
                 self.w.after(int(SERVER_RETRY * 1000), lambda: self.getandsend(event, True))
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
-            self.status['text'] = str(e)
+            err = self.status['text'] = str(e)
             play_bad = True
 
-        if not self.status['text']:  # no errors
+        if not err:  # not self.status['text']:  # no errors
             self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
+
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
         self.cooldown()
 
-    def retry_for_shipyard(self, tries):
-        # Try again to get shipyard data and send to EDDN. Don't report errors if can't get or send the data.
-        try:
-            data = companion.session.station()
-            if data['commander'].get('docked'):
-                if data.get('lastStarport', {}).get('ships'):
-                    report = 'Success'
-                else:
-                    report = 'Failure'
-            else:
-                report = 'Undocked!'
-            logger.debug(f'Retry for shipyard - {report}')
-            if not data['commander'].get('docked'):
-                # might have un-docked while we were waiting for retry in which case station data is unreliable
-                pass
-            elif (data.get('lastSystem', {}).get('name') == monitor.system and
-                  data.get('lastStarport', {}).get('name') == monitor.station and
-                  data.get('lastStarport', {}).get('ships', {}).get('shipyard_list')):
-                self.eddn.export_shipyard(data, monitor.is_beta)
-            elif tries > 1:  # bogus data - retry
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.retry_for_shipyard(tries - 1))
-        except Exception:
-            pass
-
-    # Handle event(s) from the journal
-    def journal_event(self, event: str):  # noqa: C901
+    def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
         Handle a Journal event passed through event queue from monitor.py.
 
@@ -810,8 +983,12 @@ class AppWindow(object):
         :return:
         """
 
-        def crewroletext(role):
-            # Return translated crew role. Needs to be dynamic to allow for changing language.
+        def crewroletext(role: str) -> str:
+            """
+            Return translated crew role.
+
+            Needs to be dynamic to allow for changing language.
+            """
             return {
                 None:         '',
                 'Idle':       '',
@@ -824,10 +1001,11 @@ class AppWindow(object):
             logger.debug('monitor.thread is None, assuming shutdown and returning')
             return
 
-        while True:
+        while not monitor.event_queue.empty():
             entry = monitor.get_entry()
             if not entry:
-                logger.trace('No entry from monitor.get_entry()')
+                # This is expected due to some monitor.py code that appends `None`
+                # logger.trace('No entry from monitor.get_entry()')
                 return
 
             # Update main window
@@ -836,21 +1014,44 @@ class AppWindow(object):
                 self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
                 self.ship_label['text'] = _('Role') + ':'  # Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
+
             elif monitor.cmdr:
                 if monitor.group:
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
+
                 else:
                     self.cmdr['text'] = monitor.cmdr
+
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
-                self.ship.configure(
-                    text=monitor.state['ShipName']
-                    or companion.ship_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
-                    or '',
-                    url=self.shipyard_url)
+
+                # TODO: Show something else when on_foot
+                if monitor.state['ShipName']:
+                    ship_text = monitor.state['ShipName']
+
+                else:
+                    ship_text = ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+
+                if not ship_text:
+                    ship_text = ''
+
+                # Ensure the ship type/name text is clickable, if it should be.
+                if monitor.state['Modules']:
+                    ship_state = True
+
+                else:
+                    ship_state = tk.DISABLED
+
+                self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
+
             else:
                 self.cmdr['text'] = ''
                 self.ship_label['text'] = _('Ship') + ':'  # Main window
                 self.ship['text'] = ''
+
+            if monitor.cmdr and monitor.is_beta:
+                self.cmdr['text'] += ' (beta)'
+
+            self.update_suit_text()
 
             self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
 
@@ -870,34 +1071,36 @@ class AppWindow(object):
                     'Synthesis',
                     'JoinACrew'):
                 self.status['text'] = ''  # Periodically clear any old error
+
             self.w.update_idletasks()
 
             # Companion login
             if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
-                if not config.get('cmdrs') or monitor.cmdr not in config.get('cmdrs'):
-                    config.set('cmdrs', (config.get('cmdrs') or []) + [monitor.cmdr])
+                if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
+                    config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
             if not entry['event'] or not monitor.mode:
-                logger.trace('Startup or in CQC, returning')
+                # logger.trace('Startup or in CQC, returning')
                 return  # Startup or in CQC
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
                 logger.info('Startup or LoadGame event')
+
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
-                if config.getint('disable_autoappupdatecheckingame') and 1:
+                if config.get_int('disable_autoappupdatecheckingame') and 1:
                     self.updater.setAutomaticUpdatesCheck(False)
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
-                # Can start dashboard monitoring
+
+                # Can't start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
 
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
-                    and config.getint('output') & config.OUT_SHIP:
+                    and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            # Plugins
             err = plug.notify_journal_entry(monitor.cmdr,
                                             monitor.is_beta,
                                             monitor.system,
@@ -906,15 +1109,32 @@ class AppWindow(object):
                                             monitor.state)
             if err:
                 self.status['text'] = err
-                if not config.getint('hotkey_mute'):
+                if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
-            # Auto-Update after docking, but not if auth callback is pending
-            if entry['event'] in ('StartUp', 'Location', 'Docked') \
-                    and monitor.station \
-                    and not config.getint('output') & config.OUT_MKT_MANUAL \
-                    and config.getint('output') & config.OUT_STATION_ANY \
-                    and companion.session.state != companion.Session.STATE_AUTH:
+            auto_update = False
+            # Only if auth callback is not pending
+            if companion.session.state != companion.Session.STATE_AUTH:
+                # Only if configured to do so
+                if (not config.get_int('output') & config.OUT_MKT_MANUAL
+                        and config.get_int('output') & config.OUT_STATION_ANY):
+                    if entry['event'] in ('StartUp', 'Location', 'Docked') and monitor.station:
+                        # TODO: Can you log out in a docked Taxi and then back in to
+                        #       the taxi, so 'Location' should be covered here too ?
+                        if entry['event'] == 'Docked' and entry.get('Taxi'):
+                            # In Odyssey there's a 'Docked' event for an Apex taxi,
+                            # but the CAPI data isn't updated until you Disembark.
+                            auto_update = False
+
+                        else:
+                            auto_update = True
+
+                    # In Odyssey if you are in a Taxi the `Docked` event for it is before
+                    # the CAPI data is updated, but CAPI *is* updated after you `Disembark`.
+                    elif entry['event'] == 'Disembark' and entry.get('Taxi') and entry.get('OnStation'):
+                        auto_update = True
+
+            if auto_update:
                 self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
 
             if entry['event'] == 'ShutDown':
@@ -923,9 +1143,14 @@ class AppWindow(object):
                 self.updater.setAutomaticUpdatesCheck(True)
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
-    # cAPI auth
-    def auth(self, event=None):
-        logger.debug('Received "<<CompanionAuthEvent>>')
+    def auth(self, event=None) -> None:
+        """
+        Handle Frontier auth callback.
+
+        This is the callback function for the CompanionAuthEvent Tk event.
+        It is triggered by the event() function of class GenericProtocolHandler
+        in protocol.py.
+        """
         try:
             companion.session.auth_callback()
             # Successfully authenticated with the Frontier website
@@ -947,33 +1172,48 @@ class AppWindow(object):
 
         self.cooldown()
 
-    # Handle Status event
-    def dashboard_event(self, event):
-        entry = dashboard.status
-        if entry:
-            # Currently we don't do anything with these events
-            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
-            if err:
-                self.status['text'] = err
-                if not config.getint('hotkey_mute'):
-                    hotkeymgr.play_bad()
+    def dashboard_event(self, event) -> None:
+        """
+        Handle DashBoardEvent tk event.
 
-    # Display asynchronous error from plugin
-    def plugin_error(self, event=None):
+        Event is sent by code in dashboard.py.
+        """
+        if not dashboard.status:
+            return
+
+        entry = dashboard.status
+        # Currently we don't do anything with these events
+        err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+        if err:
+            self.status['text'] = err
+            if not config.get_int('hotkey_mute'):
+                hotkeymgr.play_bad()
+
+    def plugin_error(self, event=None) -> None:
+        """Display asynchronous error from plugin."""
         if plug.last_error.get('msg'):
             self.status['text'] = plug.last_error['msg']
             self.w.update_idletasks()
-            if not config.getint('hotkey_mute'):
+            if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname):
-        if not bool(config.getint("use_alt_shipyard_open")):
-            return plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
+    def shipyard_url(self, shipname: str) -> str:
+        """Despatch a ship URL to the configured handler."""
+        if not (loadout := monitor.ship()):
+            logger.warning('No ship loadout, aborting.')
+            return ''
+
+        if not bool(config.get_int("use_alt_shipyard_open")):
+            return plug.invoke(config.get_str('shipyard_provider'),
+                               'EDSY',
+                               'shipyard_url',
+                               loadout,
+                               monitor.is_beta)
 
         # Avoid file length limits if possible
-        provider = config.get('shipyard_provider') or 'EDSY'
-        target = plug.invoke(config.get('shipyard_provider'), 'EDSY', 'shipyard_url', monitor.ship(), monitor.is_beta)
-        file_name = join(config.app_dir, "last_shipyard.html")
+        provider = config.get_str('shipyard_provider', default='EDSY')
+        target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+        file_name = join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
             print(SHIPYARD_HTML_TEMPLATE.format(
@@ -984,18 +1224,22 @@ class AppWindow(object):
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system):
-        return plug.invoke(config.get('system_provider'), 'EDSM', 'system_url', monitor.system)
+    def system_url(self, system: str) -> str:
+        """Despatch a system URL to the configured handler."""
+        return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
 
-    def station_url(self, station):
-        return plug.invoke(config.get('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
+    def station_url(self, station: str) -> str:
+        """Despatch a station URL to the configured handler."""
+        return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
-    def cooldown(self):
+    def cooldown(self) -> None:
+        """Display and update the cooldown timer for 'Update' button."""
         if time() < self.holdofftime:
             # Update button in main window
             self.button['text'] = self.theme_button['text'] \
                 = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))
             self.w.after(1000, self.cooldown)
+
         else:
             self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
             self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
@@ -1004,30 +1248,38 @@ class AppWindow(object):
                                                                  monitor.system and
                                                                  tk.NORMAL or tk.DISABLED)
 
-    def ontop_changed(self, event=None):
+    def ontop_changed(self, event=None) -> None:
+        """Set main window 'on top' state as appropriate."""
         config.set('always_ontop', self.always_ontop.get())
         self.w.wm_attributes('-topmost', self.always_ontop.get())
 
-    def copy(self, event=None):
+    def copy(self, event=None) -> None:
+        """Copy system, and possible station, name to clipboard."""
         if monitor.system:
             self.w.clipboard_clear()
             self.w.clipboard_append(monitor.station and f'{monitor.system},{monitor.station}' or monitor.system)
 
-    def help_general(self, event=None):
+    def help_general(self, event=None) -> None:
+        """Open Wiki Help page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
 
-    def help_privacy(self, event=None):
+    def help_privacy(self, event=None) -> None:
+        """Open Wiki Privacy page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
 
-    def help_releases(self, event=None):
+    def help_releases(self, event=None) -> None:
+        """Open Releases page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
     class HelpAbout(tk.Toplevel):
+        """The applications Help > About popup."""
+
         showing = False
 
-        def __init__(self, parent):
+        def __init__(self, parent: tk.Tk):
             if self.__class__.showing:
                 return
+
             self.__class__.showing = True
 
             tk.Toplevel.__init__(self, parent)
@@ -1064,11 +1316,11 @@ class AppWindow(object):
             # version <link to changelog>
             ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.appversion_label = tk.Label(frame, text=appversion)
+            self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
-                                                 f'{appversion_nobuild}',
+                                                 f'{appversion_nobuild()}',
                                              underline=True)
             self.appversion.grid(row=row, column=2, sticky=tk.W)
             row += 1
@@ -1097,36 +1349,45 @@ class AppWindow(object):
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
 
-            logger.info(f'Current version is {appversion}')
+            logger.info(f'Current version is {appversion()}')
 
-        def apply(self):
+        def apply(self) -> None:
+            """Close the window."""
             self._destroy()
 
-        def _destroy(self):
-            self.parent.wm_attributes('-topmost', config.getint('always_ontop') and 1 or 0)
+        def _destroy(self) -> None:
+            """Set parent window's topmost appropriately as we close."""
+            self.parent.wm_attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self):
+    def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
+        """Save newly acquired CAPI data in the configured file."""
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
 
         try:
-            data = companion.session.station()
+            data: CAPIData = companion.session.station()
             self.status['text'] = ''
             default_extension: str = ''
+
             if platform == 'darwin':
                 default_extension = '.json'
+
             last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
             last_starport: str = ''
+
             if data['commander'].get('docked'):
                 last_starport = '.' + data.get('lastStarport', {}).get('name', 'Unknown')
+
             timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            f = tkinter.filedialog.asksaveasfilename(parent=self.w,
-                                                     defaultextension=default_extension,
-                                                     filetypes=[('JSON', '.json'), ('All Files', '*')],
-                                                     initialdir=config.get('outdir'),
-                                                     initialfile=f'{last_system}{last_starport}.{timestamp}')
+            f = tkinter.filedialog.asksaveasfilename(
+                parent=self.w,
+                defaultextension=default_extension,
+                filetypes=[('JSON', '.json'), ('All Files', '*')],
+                initialdir=config.get_str('outdir'),
+                initialfile=f'{last_system}{last_starport}.{timestamp}'
+            )
             if f:
                 with open(f, 'wb') as h:
                     h.write(json.dumps(dict(data),
@@ -1136,11 +1397,24 @@ class AppWindow(object):
                                        separators=(',', ': ')).encode('utf-8'))
         except companion.ServerError as e:
             self.status['text'] = str(e)
+
         except Exception as e:
             logger.debug('"other" exception', exc_info=e)
             self.status['text'] = str(e)
 
-    def onexit(self, event=None):
+    # def exit_tray(self, systray: 'SysTrayIcon') -> None:
+    #     """Tray icon is shutting down."""
+    #     exit_thread = threading.Thread(target=self.onexit)
+    #     exit_thread.setDaemon(True)
+    #     exit_thread.start()
+
+    def onexit(self, event=None) -> None:
+        """Application shutdown procedure."""
+        # if platform == 'win32':
+        #     shutdown_thread = threading.Thread(target=self.systray.shutdown)
+        #     shutdown_thread.setDaemon(True)
+        #     shutdown_thread.start()
+
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
@@ -1195,44 +1469,57 @@ class AppWindow(object):
         """Initiate dragging the window."""
         self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
 
-    def drag_continue(self, event):
-        if self.drag_offset:
+    def drag_continue(self, event) -> None:
+        """Continued handling of window drag."""
+        if self.drag_offset[0]:
             offset_x = event.x_root - self.drag_offset[0]
             offset_y = event.y_root - self.drag_offset[1]
             self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
 
-    def drag_end(self, event):
-        self.drag_offset = None
+    def drag_end(self, event) -> None:
+        """Handle end of window dragging."""
+        self.drag_offset = (None, None)
 
-    def oniconify(self, event=None):
+    def oniconify(self, event=None) -> None:
+        """Handle minimization of the application."""
         self.w.overrideredirect(0)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
         self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None  # So theme will be re-applied on map
 
-    def onmap(self, event=None):
+    # TODO: Confirm this is unused and remove.
+    def onmap(self, event=None) -> None:
+        """Perform a now unused function."""
         if event.widget == self.w:
             theme.apply(self.w)
 
-    def onenter(self, event=None):
-        if config.getint('theme') > 1:
+    def onenter(self, event=None) -> None:
+        """Handle when our window gains focus."""
+        # TODO: This assumes that 1) transparent is at least 2, 2) there are
+        #       no new themes added after that.
+        if config.get_int('theme') > 1:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
-    def onleave(self, event=None):
-        if config.getint('theme') > 1 and event.widget == self.w:
+    def onleave(self, event=None) -> None:
+        """Handle when our window loses focus."""
+        # TODO: This assumes that 1) transparent is at least 2, 2) there are
+        #       no new themes added after that.
+        if config.get_int('theme') > 1 and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
-def test_logging():
+def test_logging() -> None:
+    """Simple test of top level logging."""
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
 
 def log_locale(prefix: str) -> None:
+    """Log all of the current local settings."""
     logger.debug(f'''Locale: {prefix}
 Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
 Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
@@ -1242,15 +1529,66 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
 
+def setup_killswitches():
+    """Download and setup the main killswitch list."""
+    logger.debug('fetching killswitches...')
+    killswitch.setup_main_list()
+
+
+def show_killswitch_poppup(root=None):
+    """Show a warning popup if there are any killswitches that match the current version."""
+    if len(kills := killswitch.kills_for_version()) == 0:
+        return
+
+    text = (
+        "Some EDMC Features have been disabled due to known issues.\n"
+        "Please update EDMC as soon as possible to resolve any issues.\n"
+    )
+
+    tl = tk.Toplevel(root)
+    tl.wm_attributes('-topmost', True)
+    tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
+
+    tl.columnconfigure(1, weight=1)
+    tl.title("EDMC Features have been disabled")
+
+    frame = tk.Frame(tl)
+    frame.grid()
+    t = tk.Label(frame, text=text)
+    t.grid(columnspan=2)
+    idx = 1
+
+    for version in kills:
+        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        idx += 1
+        for id, reason in version.kills.items():
+            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
+            tk.Label(frame, text=reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            idx += 1
+        idx += 1
+
+    ok_button = tk.Button(frame, text="ok", command=tl.destroy)
+    ok_button.grid(columnspan=2, sticky=tk.EW)
+
+    theme.apply(tl)
+
+
 # Run the app
-if __name__ == "__main__":  # noqa C901
-    logger.info(f'Startup v{appversion} : Running on Python v{sys.version}')
+if __name__ == "__main__":  # noqa: C901
+    logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
 sys.path: {sys.path}'''
                  )
+
+    if args.reset_ui:
+        config.set('theme', 0)  # 'Default' theme uses ID 0
+        config.set('ui_transparency', 100)  # 100 is completely opaque
+        config.delete('font')
+        config.delete('font_size')
+        logger.info('reset theme, font, font size, and transparency to default.')
 
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
@@ -1259,6 +1597,9 @@ sys.path: {sys.path}'''
     # Trying to set a UTF-8 encoding on those older versions will fail with
     #   locale.Error: unsupported locale setting
     # but we do need to make the attempt for when we're running from source.
+    #
+    # Note that this locale magic is partially done in l10n.py as well. So
+    # removing or modifying this may or may not have the desired effect.
     log_locale('Initial Locale')
 
     try:
@@ -1301,7 +1642,8 @@ sys.path: {sys.path}'''
 
             except Exception:
                 logger.exception(
-                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')")
+                    f"Exception other than locale.Error on setting LC_ALL=('{locale_startup[0]}', 'UTF_8')"
+                )
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
@@ -1311,8 +1653,10 @@ sys.path: {sys.path}'''
     # test_logging()
 
     class A(object):
+        """Simple top-level class."""
 
         class B(object):
+            """Simple second-level class."""
 
             def __init__(self):
                 logger.debug('A call from A.B.__init__')
@@ -1324,23 +1668,32 @@ sys.path: {sys.path}'''
 
             @property
             def test_prop(self):
+                """Test property."""
                 logger.debug("test log from property")
                 return "Test property is testy"
 
     # abinit = A.B()
 
     # Plain, not via `logger`
-    print(f'{applongname} {appversion}')
+    print(f'{applongname} {appversion()}')
 
-    Translations.install(config.get('language') or None)  # Can generate errors so wait til log set up
+    Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
+    setup_killswitches()
     root = tk.Tk(className=appname.lower())
+    if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
+        size = config.get_int('font_size', default=-1)
+        if size == -1:
+            size = 10
+
+        logger.info(f'Overriding tkinter default font to {f!r} at size {size}')
+        tk.font.nametofont('TkDefaultFont').configure(family=f, size=size)
 
     # UI Scaling
     """
     We scale the UI relative to what we find tk-scaling is on startup.
     """
-    ui_scale = config.getint('ui_scale')
+    ui_scale = config.get_int('ui_scale')
     # NB: This *also* catches a literal 0 value to re-set to the default 100
     if not ui_scale:
         ui_scale = 100
@@ -1352,7 +1705,8 @@ sys.path: {sys.path}'''
     app = AppWindow(root)
 
     def messagebox_not_py3():
-        plugins_not_py3_last = config.getint('plugins_not_py3_last') or 0
+        """Display message about plugins not updated for Python 3.x."""
+        plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
             # Yes, this is horribly hacky so as to be sure we match the key
             # that we told Translators to use.
@@ -1378,7 +1732,15 @@ sys.path: {sys.path}'''
             )
             config.set('plugins_not_py3_last', int(time()))
 
+    # UI Transparency
+    ui_transparency = config.get_int('ui_transparency')
+    if ui_transparency == 0:
+        ui_transparency = 100
+
+    root.wm_attributes('-alpha', ui_transparency / 100)
+
     root.after(0, messagebox_not_py3)
+    root.after(1, show_killswitch_poppup, root)
     root.mainloop()
 
     logger.info('Exiting')

@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Українська";
 
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 означає повністю непрозоре. {CR} Вікно буде оновлюватись в режимі реального часу";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 означає, що {CR} потрібно перезапустити за замовчуванням, щоб зміни вступили в силу {CR}!";
+
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Про {APP}";
 
@@ -42,6 +48,9 @@
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Кадет";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Не отримано данних пілота";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Чемпіон";
@@ -121,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Редагувати";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
+
 /* Top rank. [stats.py] */
 "Elite" = "Еліта";
 
@@ -139,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Підприємець";
 
+/* [companion.py] */
+"Error" = "Помилка";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Помилка: Немає зв'язку з EDDN!";
 
@@ -147,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Помилка: Не вдалося перевірити токен customer_id";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Error: customer_id не співпадає!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
@@ -165,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
+
+/* [companion.py] */
+"Error: unable to get token" = "Помилка: не вдалося отримати токен";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Помилка! Не той обліковий запис!";
@@ -220,8 +244,17 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Гаряча клавіша";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Ігнорувати";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Обліковий запис Inara";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Інформація про міграцію плагінів";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "Каталог журналу вже заблокований";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Сполучення клавіш";
@@ -247,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Борг";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Рівень подробиць журналу";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "Вхід в...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Пан";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Прозорість головного вікна";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "Ринкові дані у форматі CSV файлу";
@@ -270,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Гардемарин";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Згорнути програму";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Здебільшого Безцільний";
@@ -294,6 +336,9 @@
 
 /* [prefs.py] */
 "OK" = "Згода";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Тільки тоді, коли Elite: Dangerous є активним додатком";
@@ -337,17 +382,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Сховище плагінів";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Плагіни без підтримки Python 3.x";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Інформація про міграцію плагінів";
+"Plugins Without Python 3.x Support:" = "Плагіни без підтримки Python 3.x:";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Капітан I рангу";
@@ -403,6 +439,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Інформація про реліз";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Повторна спроба";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Посада";
 
@@ -448,6 +487,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Корабельна верф";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Закриття...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Зброєносець";
 
@@ -463,11 +505,17 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Статус";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Костюм";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Геодезист";
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Система";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Нове розташування каталогу журналів уже заблоковано. {CR} Ви можете спробувати вирішити це, а потім повторити спробу, або Ігнорувати це.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Тема";
@@ -486,6 +534,12 @@
 
 /* Trade rank. [stats.py] */
 "Tycoon" = "Магнат";
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Відсоток шкали інтерфейсу користувача";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Невідомо";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Оновлення";
@@ -525,4 +579,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} необхідні дозволи для використання ярликів";
-

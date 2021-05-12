@@ -2,13 +2,13 @@
 
 import time
 
-from companion import ship_map
 from config import config
+from edmc_data import ship_name_map
 
 
 def export(data, filename):
 
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')
@@ -19,6 +19,6 @@ def export(data, filename):
 
     h = open(filename, 'wt')
     h.write(header)
-    for (name,fdevid) in [(ship_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list')]:
+    for (name,fdevid) in [(ship_name_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list')]:
         h.write('%s,%s,%s,%s\n' % (rowheader, name, fdevid, data['timestamp']))
     h.close()

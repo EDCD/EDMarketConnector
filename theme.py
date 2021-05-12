@@ -6,26 +6,25 @@
 #
 
 import os
-from sys import platform
-from os.path import join
-
 import tkinter as tk
-from tkinter import ttk
+from os.path import join
+from sys import platform
 from tkinter import font as tkFont
-from ttkHyperlinkLabel import HyperlinkLabel
+from tkinter import ttk
 
-from config import appname, applongname, config
+from config import applongname, appname, config
+from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
     from traceback import print_exc
 
 if platform == "linux":
-    from ctypes import *
+    from ctypes import POINTER, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll, Structure, byref
 
 
 if platform == 'win32':
     import ctypes
-    from ctypes.wintypes import LPCWSTR, DWORD, LPCVOID
+    from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
     FR_PRIVATE  = 0x10
@@ -33,10 +32,11 @@ if platform == 'win32':
     AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif platform == 'linux':
+    # pyright: reportUnboundVariable=false
     XID = c_ulong 	# from X.h: typedef unsigned long XID
     Window = XID
     Atom = c_ulong
-    Display = c_void_p	# Opaque
+    Display = c_void_p  # Opaque
 
     PropModeReplace = 0
     PropModePrepend = 1
@@ -207,21 +207,21 @@ class _Theme(object):
             style.theme_use('clam')
 
         # Default dark theme colors
-        if not config.get('dark_text'):
+        if not config.get_str('dark_text'):
             config.set('dark_text', '#ff8000')	# "Tangerine" in OSX color picker
-        if not config.get('dark_highlight'):
+        if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
         if theme:
             # Dark
-            (r, g, b) = root.winfo_rgb(config.get('dark_text'))
+            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
             self.current = {
                 'background'         : 'grey4',	# OSX inactive dark titlebar color
-                'foreground'         : config.get('dark_text'),
-                'activebackground'   : config.get('dark_text'),
+                'foreground'         : config.get_str('dark_text'),
+                'activebackground'   : config.get_str('dark_text'),
                 'activeforeground'   : 'grey4',
                 'disabledforeground' : '#%02x%02x%02x' % (int(r/384), int(g/384), int(b/384)),
-                'highlight'          : config.get('dark_highlight'),
+                'highlight'          : config.get_str('dark_highlight'),
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
                 'font'               : (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
                                         tkFont.Font(family='Euro Caps', size=10, weight=tkFont.NORMAL) or
@@ -309,7 +309,7 @@ class _Theme(object):
     # Apply configured theme
     def apply(self, root):
 
-        theme = config.getint('theme')
+        theme = config.get_int('theme')
         self._colors(root, theme)
 
         # Apply colors
@@ -338,7 +338,7 @@ class _Theme(object):
             self.active = theme
 
         if platform == 'darwin':
-            from AppKit import NSApplication, NSAppearance, NSMiniaturizableWindowMask, NSResizableWindowMask
+            from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask
             root.update_idletasks()	# need main window to be created
             appearance = NSAppearance.appearanceNamed_(theme and
                                                        'NSAppearanceNameDarkAqua' or

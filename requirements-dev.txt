@@ -1,27 +1,41 @@
+# So that you don't get warnings like:
+# Using legacy 'setup.py install' for flake8-annotations-coverage, since package 'wheel' is not installed.
+wheel
+
 # Static analysis tools
-flake8==3.8.3
-flake8-annotations-coverage==0.0.4
+flake8==3.9.2
+flake8-annotations-coverage==0.0.5
 flake8-cognitive-complexity==0.1.0
-flake8-comprehensions==3.2.3
-flake8-docstrings==1.5.0
-isort==5.5.2
+flake8-comprehensions==3.5.0
+flake8-docstrings==1.6.0
+isort==5.8.0
 flake8-isort==4.0.0
-flake8-json==19.8.0
-flake8-noqa==1.0.5
+flake8-json==21.1.0
+flake8-noqa==1.1.0
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.1
 
+mypy==0.812
 pep8-naming==0.11.1
+safety==1.10.3
 
 # Code formatting tools
-autopep8==1.5.4
+autopep8==1.5.7
 
 # HTML changelogs
 grip==4.5.2
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.10.0.2; sys_platform == 'win32'
+py2exe==0.10.4.0; sys_platform == 'win32'
+
+# Testing
+pytest==6.2.4
+pytest-cov==2.11.1  # Pytest code coverage support
+coverage[toml]==5.5 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+# For manipulating folder permissions and the like.
+pywin32==300; sys_platform == 'win32'
+
 
 # All of the normal requirements
 -r requirements.txt

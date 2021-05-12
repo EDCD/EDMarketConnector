@@ -1,11 +1,11 @@
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "UI-Skalierung in Prozent";
+/* Language name */
+"!Language" = "Deutsch";
+
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 bedeutet komplett undurchsichtig.{CR}Fenster wird in Echtzeit aktualisiert";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 bedeutet Standardwert{CR}Neustart erforderlich, um{CR}Änderungen zu übernehmen!";
-
-/* Language name */
-"!Language" = "Deutsch";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Über {APP}";
@@ -46,11 +46,11 @@
 /* Folder selection button on Windows. [prefs.py] */
 "Browse..." = "Durchsuchen...";
 
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: Keine Kommandanten-Daten erhalten";
-
 /* Federation rank. [stats.py] */
 "Cadet" = "Kadett";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: Keine Kommandanten-Daten erhalten";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Sieger";
@@ -130,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Bearbeiten";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins ohne Python 3.x Support";
+
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
@@ -148,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Unternehmer";
 
+/* [companion.py] */
+"Error" = "Fehler";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Fehler: Keine Verbindung zum EDDN";
 
@@ -156,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Fehler: Verbindung zu Inara fehlgeschlagen";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Fehler: Konnte das Token customer_id nicht prüfen";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Fehler: customer_id stimmt nicht überein!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Fehler: EDSM {MSG}";
@@ -174,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Fehler: Ungültige Anmeldedaten";
+
+/* [companion.py] */
+"Error: unable to get token" = "Fehler: konnte Token nicht erhalten";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Fehler: Falscher Kdt.";
@@ -235,6 +250,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara-Anmeldedaten";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Informationen zum Migrieren von Plugins";
+
 /* Changed journal update_lock failed [monitor.py] */
 "Journal directory already locked" = "Journal-Ordner bereits gesperrt";
 
@@ -262,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Kredit";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Log-Level";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "Anmelden...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Fürst";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Durchsichtigkeit Hauptfenster";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "Marktdaten als CSV Datei";
@@ -285,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Fähnrich";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "In die Taskleiste minimieren";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Fast Planlos";
@@ -309,6 +336,9 @@
 
 /* [prefs.py] */
 "OK" = "OK";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Eins oder mehr deiner aktivierten Plugins hat noch keinen Support für Python 3.x. Du kannst dir die Liste im '{PLUGINS}'-Tab unter '{FILE}' > '{SETTINGS}' ansehen. Du solltest prüfen, ob es für diese Updates gibt und ansonsten dem Entwickler Bescheid geben, dass sie ihren Code für Python 3.x aktualisieren müssen.\n\nDu kannst ein Plugin deaktivieren, indem du dessen Ordner ein '{DISABLED}' am Ende des Namens anhängst.";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Nur wenn Elite: Dangerous geöffnet ist";
@@ -352,17 +382,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Plugin-Ordner";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins ohne Python 3.x Support";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Eins oder mehr deiner aktivierten Plugins hat noch keinen Support für Python 3.x. Du kannst dir die Liste im '{PLUGINS}'-Tab unter '{FILE}' > '{SETTINGS}' ansehen. Du solltest prüfen, ob es für diese Updates gibt und ansonsten dem Entwickler Bescheid geben, dass sie ihren Code für Python 3.x aktualisieren müssen.\n\nDu kannst ein Plugin deaktivieren, indem du dessen Ordner ein '{DISABLED}' am Ende des Namens anhängst.";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Plugins ohne Python 3.x Support";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Informationen zum Migrieren von Plugins";
+"Plugins Without Python 3.x Support:" = "Plugins ohne Python 3.x Support";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Kapitän";
@@ -484,6 +505,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Anzug";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Landkundiger";
 
@@ -510,6 +534,12 @@
 
 /* Trade rank. [stats.py] */
 "Tycoon" = "Magnat";
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "UI-Skalierung in Prozent";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Unbekannt";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Aktualisieren";
@@ -549,6 +579,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} benötigt für Tastenkürzel Systemrechte (Bedienungshilfen)";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Log-Level";

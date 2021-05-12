@@ -121,6 +121,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Ändra";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins utan stöd för Python 3.x";
+
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
@@ -223,6 +226,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara autentiseringsuppgifter";
 
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Information om migrering av plugins";
+
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Genväg, tangentbord";
 
@@ -295,6 +301,9 @@
 /* [prefs.py] */
 "OK" = "OK";
 
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "En eller flera aktiverade plugins har inte stöd för Python 3.x. Var vänlig kontrollera listan med plugins under fliken '{PLUGINS}' under '{FILE}' > '{SETTINGS}'. Kontrollera om det finns en nyare version tillgänglig eller informera utvecklaren.\n\nDu kan också avaktivera din plugin genom att ändra slutet av namnet på mappen till '{DISABLED}'";
+
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Bara när: Elite Dangerous är det aktiva programmet";
 
@@ -336,18 +345,6 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Mapp för plugins";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins utan stöd för Python 3.x";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "En eller flera aktiverade plugins har inte stöd för Python 3.x. Var vänlig kontrollera listan med plugins under fliken '{PLUGINS}' under '{FILE}' > '{SETTINGS}'. Kontrollera om det finns en nyare version tillgänglig eller informera utvecklaren.\n\nDu kan också avaktivera din plugin genom att ändra slutet av namnet på mappen till '{DISABLED}'";
-
-/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Plugins utan stöd för Python 3.x";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Information om migrering av plugins";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -522,4 +519,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} behöver rättigheter för att använda genvägar";
-

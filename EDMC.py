@@ -10,7 +10,7 @@ import re
 import sys
 from os.path import getmtime, join
 from time import sleep, time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 # isort: off
 
@@ -68,7 +68,7 @@ EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EX
 JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
 
-def versioncmp(versionstring):
+def versioncmp(versionstring) -> List:
     """Quick and dirty version comparison assuming "strict" numeric only version numbers."""
     return list(map(int, versionstring.split('.')))
 
@@ -106,7 +106,7 @@ def deep_get(target: dict, *args: str, default=None) -> Any:
     return current
 
 
-def main():
+def main():  # noqa: C901, CCR001
     """Run the main code of the program."""
     try:
         # arg parsing
@@ -145,9 +145,9 @@ def main():
             updater = Updater(provider='internal')
             newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
-                print(f'{appversion} ({newversion.title!r} is available)')
+                print(f'{appversion()} ({newversion.title!r} is available)')
             else:
-                print(appversion)
+                print(appversion())
 
             return
 
@@ -160,7 +160,7 @@ def main():
                 sys.exit(EXIT_ARGS)
             edmclogger.set_channels_loglevel(args.loglevel)
 
-        logger.debug(f'Startup v{appversion} : Running on Python v{sys.version}')
+        logger.debug(f'Startup v{appversion()} : Running on Python v{sys.version}')
         logger.debug(f'''Platform: {sys.platform}
 argv[0]: {sys.argv[0]}
 exec_prefix: {sys.exec_prefix}
@@ -189,7 +189,10 @@ sys.path: {sys.path}'''
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                logdir = config.get('journaldir') or config.default_journal_dir
+                logdir = config.get_str('journaldir', default=config.default_journal_dir)
+                if not logdir:
+                    logdir = config.default_journal_dir
+
                 logger.debug(f'logdir = "{logdir}"')
                 logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
                                   key=lambda x: x.split('.')[1:])
@@ -215,7 +218,7 @@ sys.path: {sys.path}'''
             # Get data from Companion API
             if args.p:
                 logger.debug(f'Attempting to use commander "{args.p}"')
-                cmdrs = config.get('cmdrs') or []
+                cmdrs = config.get_list('cmdrs', default=[])
                 if args.p in cmdrs:
                     idx = cmdrs.index(args.p)
 
@@ -231,7 +234,7 @@ sys.path: {sys.path}'''
 
             else:
                 logger.debug(f'Attempting to use commander "{monitor.cmdr}" from Journal File')
-                cmdrs = config.get('cmdrs') or []
+                cmdrs = config.get_list('cmdrs', default=[])
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
 

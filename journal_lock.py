@@ -13,7 +13,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     def _(x: str) -> str:
         return x
 
@@ -33,7 +33,7 @@ class JournalLock:
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
-        self.journal_dir: str = config.get('journaldir') or config.default_journal_dir
+        self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir_path: Optional[pathlib.Path] = None
         self.set_path_from_journaldir()
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
@@ -42,6 +42,7 @@ class JournalLock:
         self.locked = False
 
     def set_path_from_journaldir(self):
+        """Set self.journal_dir_path from self.journal_dir."""
         if self.journal_dir is None:
             self.journal_dir_path = None
 
@@ -49,8 +50,24 @@ class JournalLock:
             try:
                 self.journal_dir_path = pathlib.Path(self.journal_dir)
 
-            except Exception:
+            except Exception:  # pragma: no cover
                 logger.exception("Couldn't make pathlib.Path from journal_dir")
+
+    def open_journal_dir_lockfile(self) -> bool:
+        """Open journal_dir lockfile ready for locking."""
+        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
+        logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        try:
+            self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
+
+        # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
+        # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
+        except Exception as e:  # For remote FS this could be any of a wide range of exceptions
+            logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
+                           f" Aborting duplicate process checks: {e!r}")
+            return False
+
+        return True
 
     def obtain_lock(self) -> JournalLockResult:
         """
@@ -61,18 +78,22 @@ class JournalLock:
         if self.journal_dir_path is None:
             return JournalLockResult.JOURNALDIR_IS_NONE
 
-        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
-        logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
-        try:
-            self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
-
-        # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
-        # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
-        except Exception as e:  # For remote FS this could be any of a wide range of exceptions
-            logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
-                           f" Aborting duplicate process checks: {e!r}")
+        if not self.open_journal_dir_lockfile():
             return JournalLockResult.JOURNALDIR_READONLY
 
+        return self._obtain_lock()
+
+    def _obtain_lock(self) -> JournalLockResult:
+        """
+        Actual code for obtaining a lock.
+
+        This is split out so tests can call *just* it, without the attempt
+        at opening the file.  If we call open_journal_dir_lockfile() we
+        re-use self.journal_dir_lockfile and in the process close the
+        previous handle stored in it and thus release the lock.
+
+        :return: LockResult - See the class Enum definition
+        """
         if platform == 'win32':
             logger.trace('win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
@@ -86,7 +107,7 @@ class JournalLock:
                             f", assuming another process running: {e!r}")
                 return JournalLockResult.ALREADY_LOCKED
 
-        else:
+        else:  # pytest coverage only sees this on !win32
             logger.trace('NOT win32, using fcntl')
             try:
                 import fcntl
@@ -112,7 +133,7 @@ class JournalLock:
 
         return JournalLockResult.LOCKED
 
-    def release_lock(self) -> bool:
+    def release_lock(self) -> bool:  # noqa: CCR001
         """
         Release lock on journal directory.
 
@@ -139,7 +160,7 @@ class JournalLock:
             else:
                 unlocked = True
 
-        else:
+        else:  # pytest coverage only sees this on !win32
             logger.trace('NOT win32, using fcntl')
             try:
                 import fcntl
@@ -158,7 +179,8 @@ class JournalLock:
                 unlocked = True
 
         # Close the file whether or not the unlocking succeeded.
-        self.journal_dir_lockfile.close()
+        if hasattr(self, 'journal_dir_lockfile'):
+            self.journal_dir_lockfile.close()
 
         self.journal_dir_lockfile_name = None
         # Avoids type hint issues, see 'declaration' in JournalLock.__init__()
@@ -166,7 +188,7 @@ class JournalLock:
 
         return unlocked
 
-    class JournalAlreadyLocked(tk.Toplevel):
+    class JournalAlreadyLocked(tk.Toplevel):  # pragma: no cover
         """Pop-up for when Journal directory already locked."""
 
         def __init__(self, parent: tk.Tk, callback: Callable) -> None:
@@ -230,7 +252,7 @@ class JournalLock:
 
         :param parent: - The parent tkinter window.
         """
-        current_journaldir = config.get('journaldir') or config.default_journal_dir
+        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
             return  # Still the same
@@ -242,9 +264,9 @@ class JournalLock:
 
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
-            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
+            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)  # pragma: no cover
 
-    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:
+    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:  # pragma: no cover
         """
         Try again to obtain a lock on the Journal Directory.
 
@@ -256,7 +278,7 @@ class JournalLock:
         if not retry:
             return
 
-        current_journaldir = config.get('journaldir') or config.default_journal_dir
+        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir = current_journaldir
         self.set_path_from_journaldir()
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:

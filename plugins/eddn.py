@@ -1,4 +1,4 @@
-# Export to EDDN
+"""Handle exporting data to EDDN."""
 
 import itertools
 import json
@@ -10,22 +10,25 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, Iterator, List, Mapping, MutableMapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, TextIO
+from typing import TextIO, Tuple
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
-from companion import category_map
-from config import applongname, appversion, config
+import plug
+from companion import CAPIData, category_map
+from config import applongname, appversion_nobuild, config
 from EDMCLogging import get_main_logger
+from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if sys.platform != 'win32':
-    from fcntl import lockf, LOCK_EX, LOCK_NB
+    from fcntl import LOCK_EX, LOCK_NB, lockf
 
 
 if TYPE_CHECKING:
@@ -34,18 +37,43 @@ if TYPE_CHECKING:
 
 logger = get_main_logger()
 
-this: Any = sys.modules[__name__]  # For holding module globals
 
-# Track location to add to Journal events
-this.systemaddress = None
-this.coordinates = None
-this.planet = None
+class This:
+    """Holds module globals."""
 
-# Avoid duplicates
-this.marketId = None
-this.commodities = None
-this.outfitting: Optional[Tuple[bool, MutableMapping[str, Any]]] = None
-this.shipyard = None
+    def __init__(self):
+        # Track if we're on foot
+        self.on_foot = False
+        # Track location to add to Journal events
+        self.systemaddress: Optional[str] = None
+        self.coordinates: Optional[Tuple] = None
+        self.planet: Optional[str] = None
+
+        # Avoid duplicates
+        self.marketId: Optional[str] = None
+        self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
+        self.outfitting: Optional[Tuple[bool, List[str]]] = None
+        self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
+
+        # For the tkinter parent window, so we can call update_idletasks()
+        self.parent: tk.Tk
+
+        # To hold EDDN class instance
+        self.eddn: EDDN
+
+        # tkinter UI bits.
+        self.eddn_station: tk.IntVar
+        self.eddn_station_button: nb.Checkbutton
+
+        self.eddn_system: tk.IntVar
+        self.eddn_system_button: nb.Checkbutton
+
+        self.eddn_delay: tk.IntVar
+        self.eddn_delay_button: nb.Checkbutton
+
+
+this = This()
+
 
 HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
@@ -53,6 +81,8 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 
 class EDDN:
+    """EDDN Data export."""
+
     # SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
     UPLOAD = f'{SERVER}/upload/'
@@ -70,7 +100,7 @@ class EDDN:
 
     def load_journal_replay(self) -> bool:
         """
-        Load cached journal entries from disk
+        Load cached journal entries from disk.
 
         :return: a bool indicating success
         """
@@ -100,9 +130,7 @@ class EDDN:
             return True
 
     def flush(self):
-        """
-        flush flushes the replay file, clearing any data currently there that is not in the replaylog list
-        """
+        """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
@@ -111,28 +139,35 @@ class EDDN:
         self.replayfile.flush()
 
     def close(self):
-        """
-        close closes the replay file
-        """
+        """Close down the EDDN class instance."""
+        logger.debug('Closing replayfile...')
         if self.replayfile:
             self.replayfile.close()
 
         self.replayfile = None
+        logger.debug('Done.')
+
+        logger.debug('Closing EDDN requests.Session.')
+        self.session.close()
 
     def send(self, cmdr: str, msg: Mapping[str, Any]) -> None:
         """
-        Send sends an update to EDDN
+        Send sends an update to EDDN.
 
-        :param cmdr: the CMDR to use as the uploader ID
-        :param msg: the payload to send
+        :param cmdr: the CMDR to use as the uploader ID.
+        :param msg: the payload to send.
         """
+        if (res := killswitch.get_disabled('plugins.eddn.send')).disabled:
+            logger.warning(f"eddn.send has been disabled via killswitch. Returning. ({res.reason})")
+            return
+
         uploader_id = cmdr
 
-        to_send: OrderedDictT[str, str] = OrderedDict([
+        to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
                 ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
-                ('softwareVersion', appversion),
+                ('softwareVersion', str(appversion_nobuild())),
                 ('uploaderID',      uploader_id),
             ])),
             ('message', msg['message']),
@@ -162,14 +197,12 @@ Msg:\n{msg}'''
 
         r.raise_for_status()
 
-    def sendreplay(self) -> None:
-        """
-        sendreplay updates EDDN with cached journal lines
-        """
+    def sendreplay(self) -> None:  # noqa: CCR001
+        """Send cached Journal lines to EDDN."""
         if not self.replayfile:
             return  # Probably closing app
 
-        status: Dict[str, Any] = self.parent.children['status']
+        status: tk.Widget = self.parent.children['status']
 
         if not self.replaylog:
             status['text'] = ''
@@ -230,9 +263,10 @@ Msg:\n{msg}'''
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
-        export_commodities updates EDDN with the commodities on the current (lastStarport) station.
+        Update EDDN with the commodities on the current (lastStarport) station.
+
         Once the send is complete, this.commodities is updated with the new data.
 
         :param data: a dict containing the starport data
@@ -290,15 +324,28 @@ Msg:\n{msg}'''
         this.commodities = commodities
 
     def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[Dict, Dict]:
+        """
+        Produce a sanity-checked version of ships and modules from CAPI data.
+
+        Principally this catches where the supplied CAPI data either doesn't
+        contain expected elements, or they're not of the expected type (e.g.
+        a list instead of a dict).
+
+        :param data: The raw CAPI data.
+        :return: Sanity-checked data.
+        """
         modules: Dict[str, Any] = data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
                 logger.debug('modules was None.  FC or Damaged Station?')
+
             elif isinstance(modules, list):
                 if len(modules) == 0:
                     logger.debug('modules is empty list. FC or Damaged Station?')
+
                 else:
                     logger.error(f'modules is non-empty list: {modules!r}')
+
             else:
                 logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
             # Set a safe value
@@ -308,6 +355,7 @@ Msg:\n{msg}'''
         if ships is None or not isinstance(ships, dict):
             if ships is None:
                 logger.debug('ships was None')
+
             else:
                 logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
             # Set a safe value
@@ -315,9 +363,10 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: Mapping[str, Any], is_beta: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
-        export_outfitting updates EDDN with the current (lastStarport) station's outfitting options, if any.
+        Update EDDN with the current (lastStarport) station's outfitting options, if any.
+
         Once the send is complete, this.outfitting is updated with the given data.
 
         :param data: dict containing the outfitting data
@@ -331,7 +380,7 @@ Msg:\n{msg}'''
             data['lastStarport'].get('economies', {}),
             modules,
             ships
-            )
+        )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
@@ -342,6 +391,7 @@ Msg:\n{msg}'''
         outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
         )
+
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
@@ -358,10 +408,11 @@ Msg:\n{msg}'''
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: Dict[str, Any], is_beta: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
-        export_shipyard updates EDDN with the current (lastStarport) station's outfitting options, if any.
-        once the send is complete, this.shipyard is updated to the new data.
+        Update EDDN with the current (lastStarport) station's outfitting options, if any.
+
+        Once the send is complete, this.shipyard is updated to the new data.
 
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
@@ -372,12 +423,12 @@ Msg:\n{msg}'''
             data['lastStarport'].get('economies', {}),
             modules,
             ships
-            )
+        )
 
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
-                ships['unavailable_list']
+                (ship['name'].lower() for ship in ships['unavailable_list'] or {}),
             )
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -398,15 +449,16 @@ Msg:\n{msg}'''
 
     def export_journal_commodities(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
-        export_journal_commodities updates EDDN with the commodities list on the current station (lastStarport) from
-        data in the journal. As a side effect, it also updates this.commodities with the data
+        Update EDDN with Journal commodities data from the current station (lastStarport).
+
+        As a side effect, it also updates this.commodities with the data.
 
         :param cmdr: The commander to send data under
         :param is_beta: whether or not we're in beta mode
         :param entry: the journal entry containing the commodities data
         """
         items: List[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: Sequence[OrderedDictT[AnyStr, Any]] = sorted((OrderedDict([
+        commodities: List[OrderedDictT[str, Any]] = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -435,12 +487,13 @@ Msg:\n{msg}'''
                 ]),
             })
 
-        this.commodities: OrderedDictT[str, Any] = commodities
+        this.commodities = commodities
 
     def export_journal_outfitting(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
-        export_journal_outfitting updates EDDN with station outfitting based on a journal entry. As a side effect,
-        it also updates this.outfitting with the data
+        Update EDDN with Journal oufitting data from the current station (lastStarport).
+
+        As a side effect, it also updates this.outfitting with the data.
 
         :param cmdr: The commander to send data under
         :param is_beta: Whether or not we're in beta mode
@@ -472,8 +525,9 @@ Msg:\n{msg}'''
 
     def export_journal_shipyard(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
-        export_journal_shipyard updates EDDN with station shipyard data based on a journal entry. As a side effect,
-        this.shipyard is updated with the data.
+        Update EDDN with Journal shipyard data from the current station (lastStarport).
+
+        As a side effect, this.shipyard is updated with the data.
 
         :param cmdr: the commander to send this update under
         :param is_beta: Whether or not we're in beta mode
@@ -496,12 +550,13 @@ Msg:\n{msg}'''
                 ]),
             })
 
-        this.shipyard = (horizons, shipyard)
+        # this.shipyard = (horizons, shipyard)
 
     def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
-        export_journal_entry updates EDDN with a line from the journal. Additionally if additional lines are cached,
-        it may send those as well.
+        Update EDDN with an event from the journal.
+
+        Additionally if additional lines are cached, it may send those as well.
 
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
@@ -515,23 +570,28 @@ Msg:\n{msg}'''
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
-            self.replayfile.write(f'{self.replaylog[-1]}\n')
+            self.replayfile.write(f'{self.replaylog[-1]}\n')  # type: ignore
 
             if (
                 entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
-                (config.getint('output') & config.OUT_SYS_DELAY)
+                (config.get_int('output') & config.OUT_SYS_DELAY)
             ):
                 self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
 
         else:
             # Can't access replay file! Send immediately.
-            status: MutableMapping[str, str] = self.parent.children['status']
-            status['text'] = _('Sending data to EDDN...')
+            self.parent.children['status']['text'] = _('Sending data to EDDN...')
             self.parent.update_idletasks()
             self.send(cmdr, msg)
-            status['text'] = ''
+            self.parent.children['status']['text'] = ''
 
     def canonicalise(self, item: str) -> str:
+        """
+        Canonicalise the given commodity name.
+
+        :param item: Name of an commodity we want the canonical name for.
+        :return: The canonical name for this commodity.
+        """
         match = self.CANONICALISE_RE.match(item)
         return match and match.group(1) or item
 
@@ -539,27 +599,52 @@ Msg:\n{msg}'''
 # Plugin callbacks
 
 def plugin_start3(plugin_dir: str) -> str:
+    """
+    Start this plugin.
+
+    :param plugin_dir: `str` - The full path to this plugin's directory.
+    :return: `str` - Name of this plugin to use in UI.
+    """
     return 'EDDN'
 
 
 def plugin_app(parent: tk.Tk) -> None:
+    """
+    Set up any plugin-specific UI.
+
+    In this case we need the tkinter parent in order to later call
+    `update_idletasks()` on it.
+
+    TODO: Re-work the whole replaylog and general sending to EDDN so this isn't
+          necessary.
+
+    :param parent: tkinter parent frame.
+    """
     this.parent = parent
     this.eddn = EDDN(parent)
     # Try to obtain exclusive lock on journal cache, even if we don't need it yet
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
-        this.status['text'] = 'Error: Is another copy of this app already running?'
+        this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
+    """
+    Set up Preferences pane for this plugin.
+
+    :param parent: tkinter parent to attach to.
+    :param cmdr: `str` - Name of current Cmdr.
+    :param is_beta: `bool` - True if this is a beta version of the Game.
+    :return: The tkinter frame we created.
+    """
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
-    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.getint('output'))):
+    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
 
     else:
-        output: int = config.getint('output')
+        output = config.get_int('output')
 
     eddnframe = nb.Frame(parent)
 
@@ -603,15 +688,27 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
 
 
 def prefsvarchanged(event=None) -> None:
+    """
+    Handle changes to EDDN Preferences.
+
+    :param event: tkinter event ?
+    """
     this.eddn_station_button['state'] = tk.NORMAL
     this.eddn_system_button['state'] = tk.NORMAL
     this.eddn_delay_button['state'] = this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
+    """
+    Handle when Preferences have been changed.
+
+    :param cmdr: `str` - Name of current Cmdr.
+    :param is_beta: `bool` - True if this is a beta version of the Game.
+    """
     config.set(
         'output',
-        (config.getint('output') & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
+        (config.get_int('output')
+         & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
         (this.eddn_station.get() and config.OUT_MKT_EDDN) +
         (this.eddn_system.get() and config.OUT_SYS_EDDN) +
         (this.eddn_delay.get() and config.OUT_SYS_DELAY)
@@ -619,12 +716,40 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def plugin_stop() -> None:
+    """Handle stopping this plugin."""
+    logger.debug('Calling this.eddn.close()')
     this.eddn.close()
+    logger.debug('Done.')
 
 
-def journal_entry(  # noqa: C901
-    cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
+def journal_entry(  # noqa: C901, CCR001
+        cmdr: str,
+        is_beta: bool,
+        system: str,
+        station: str,
+        entry: MutableMapping[str, Any],
+        state: Mapping[str, Any]
 ) -> Optional[str]:
+    """
+    Process a new Journal entry.
+
+    :param cmdr: `str` - Name of currennt Cmdr.
+    :param is_beta: `bool` - True if this is a beta version of the Game.
+    :param system: `str` - Name of system Cmdr is in.
+    :param station: `str` - Name of station Cmdr is docked at, if applicable.
+    :param entry: `dict` - The data for this Journal entry.
+    :param state: `dict` - Current `monitor.state` data.
+    :return: `str` - Error message, or `None` if no errors.
+    """
+    if (ks := killswitch.get_disabled("plugins.eddn.journal")).disabled:
+        logger.warning(f"EDDN journal handler has been disabled via killswitch: {ks.reason}")
+        plug.show_error("EDDN journal handler disabled. See Log.")
+        return None
+
+    elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'Handling of event {entry["event"]} disabled via killswitch: {ks.reason}')
+        return None
+
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
         filtered: OrderedDictT[str, Any] = OrderedDict()
@@ -643,21 +768,22 @@ def journal_entry(  # noqa: C901
 
         return filtered
 
+    this.on_foot = state['OnFoot']
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet: Optional[str] = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
         elif entry['event'] == 'FSDJump':
-            this.planet: Optional[str] = None
+            this.planet = None
 
         if 'StarPos' in entry:
-            this.coordinates: Optional[Tuple[int, int, int]] = tuple(entry['StarPos'])
+            this.coordinates = tuple(entry['StarPos'])
 
         elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates: Optional[Tuple[int, int, int]] = None  # Docked event doesn't include coordinates
+            this.coordinates = None  # Docked event doesn't include coordinates
 
-        this.systemaddress: Optional[str] = entry.get('SystemAddress')
+        this.systemaddress = entry.get('SystemAddress')  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
         this.planet = entry['Body']
@@ -666,7 +792,7 @@ def journal_entry(  # noqa: C901
         this.planet = None
 
     # Send interesting events to EDDN, but not when on a crew
-    if (config.getint('output') & config.OUT_SYS_EDDN and not state['Captain'] and
+    if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
             ('StarPos' in entry or this.coordinates)):
 
@@ -740,7 +866,7 @@ def journal_entry(  # noqa: C901
             logger.debug('Failed in export_journal_entry', exc_info=e)
             return str(e)
 
-    elif (config.getint('output') & config.OUT_MKT_EDDN and not state['Captain'] and
+    elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
             entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
         # Market.json, Outfitting.json or Shipyard.json to process
 
@@ -749,7 +875,12 @@ def journal_entry(  # noqa: C901
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = entry['MarketID']
 
-            path = pathlib.Path(str(config.get('journaldir') or config.default_journal_dir)) / f'{entry["event"]}.json'
+            journaldir = config.get_str('journaldir')
+            if journaldir is None or journaldir == '':
+                journaldir = config.default_journal_dir
+
+            path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
+
             with path.open('rb') as f:
                 entry = json.load(f)
                 if entry['event'] == 'Market':
@@ -769,9 +900,19 @@ def journal_entry(  # noqa: C901
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
+    return None
 
-def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
-    if data['commander'].get('docked') and config.getint('output') & config.OUT_MKT_EDDN:
+
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
+    """
+    Process new CAPI data.
+
+    :param data: CAPI data to process.
+    :param is_beta: bool - True if this is a beta version of the Game.
+    :return: str - Error message, or `None` if no errors.
+    """
+    if (data['commander'].get('docked') or (this.on_foot and monitor.station)
+            and config.get_int('output') & config.OUT_MKT_EDDN):
         try:
             if this.marketId != data['lastStarport']['id']:
                 this.commodities = this.outfitting = this.shipyard = None
@@ -798,11 +939,21 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> str:
             logger.debug('Failed exporting data', exc_info=e)
             return str(e)
 
+    return None
+
 
 MAP_STR_ANY = Mapping[str, Any]
 
 
 def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+    """
+    Indicate if the supplied data indicates a player has Horizons access.
+
+    :param economies: Economies of where the Cmdr is docked.
+    :param modules: Modules available at the docked station.
+    :param ships: Ships available at the docked station.
+    :return: bool - True if the Cmdr has Horizons access.
+    """
     economies_colony = False
     modules_horizons = False
     ship_horizons = False

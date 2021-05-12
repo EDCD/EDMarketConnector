@@ -25,16 +25,17 @@ You will need several pieces of software installed, or the files from their
  into your checkout of the EDMC git files.
 1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
  This is needed for the internationalisation support in EDMC.
- [Windows 10 SDK, version 1903 (10.0.18362.1)](https://go.microsoft.com/fwlink/?linkid=2083338)
+ [Windows 10 SDK, version 2004 (10.0.19041.0)](https://go.microsoft.com/fwlink/p/?linkid=2120843)
  is the most recently tested version.  Technically you only need the following
  components: `MSI Tools`, `Windows SDK for Desktop C++ x86 Apps` (which will
  auto-select some others).  NB: If you have need to uninstall this it's
- "Windows Software Development Kit - Windows 10.0.18362.1" in
+ "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.7 for Windows.
- [v3.7.9](https://www.python.org/downloads/release/python-379/) is the most
+1. [Python](https://python.org): 32-bit version of Python 3.9 for Windows.
+ [v3.9.2](https://www.python.org/downloads/release/python-392/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
- file, for the 32-bit version.
+ file, for the 32-bit version.  Double-check the version against the
+   `.python.version` file, as it should always contain the intended version.
 1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
  so will be picked up with the `pip install` below.  Latest tested as per
  `requirements-dev.txt`.
@@ -92,9 +93,6 @@ that.
  appears in the EXE properties, and is also used as the location of WinSparkle
  registry entries on Windows.
 
-1. Location of release files. To change this edit `setup.py`.  Look for the
-`appcast.write()` statement and change the `url="...` line.
-
 1. Application names, version and URL of the file with latest release
  information. These are all in the `config.py` file.  See the
  `from config import ...` lines in setup.py.
@@ -112,6 +110,21 @@ that.
 	 URL doesn't change over application versions) version of the
 	 appcast_win_<version>.xml file.  The original upstream value is
 	 `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
+       
+1. Location of release files.  This needs to be cited correctly in the
+   `edmarketconnector.xml` file, which is what the application queries to
+   see if there is a newer version.
+   Look for the `url="...` line in the `<enclosure ...` that is like:
+
+       <enclosure
+            url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
+            sparkle:os="windows"
+            sparkle:installerArguments="/passive LAUNCH=yes"
+            sparkle:version="4.2.3"
+            length="11382784"
+            type="application/octet-stream"
+       />
+
 
 ## Adding a new file
 
@@ -162,8 +175,12 @@ Before you create a new install each time you should:
 1. Ensure the data sourced from coriolis.io is up to date and works:
     1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for
      this.**
+        1. `cd coriolis-data`
+        1. `git pull`
+        1. `npm install` - to check it's worked.
     1. Run `coriolis.py` to update `modules.p` and `ships.p`
     1. XXX: Test ?
+    1. `git commit` the changes to the repo and the `.p` files.
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
 
 # Preparing to Package
@@ -212,11 +229,18 @@ a `stable` release, as well as any social media posts you make.
 		string, not the Windows A.B.C.D form.**
 	1. As you're working in a version-specific branch, `release-4.0.2`, you
 	can safely commit these changes and push to GitHub.
-     **Do not merge the branch with `releases` until the GitHub release is in
-     place.**
+     **Do not merge the branch with `releases` until the GitHub release is in place.**
 
 If you're wondering, you needed to get the changelog prepared before building
 the .exe and .msi because ChangeLog.md is bundled with the install.
+
+
+# Adding killswitches 
+
+If anything in this new release addresses a bug that causes, e.g. bad data
+to be sent over EDDN, then you should add an appropriate entry to the
+killswitches.json file *in the `releases` branch*.  That file **must only ever
+be commited to the `releases` branch!!!**  See [docs/Killswitches.md](docs/Killswitches.md).
 
 # Packaging & Installer Generation
 
@@ -231,9 +255,9 @@ else you might need this, which assumes correct python.exe is in your PATH:
 
 		python.exe setup.py py2exe
 	
-else you'll have to specify the path to python.exe:
+else you'll have to specify the path to python.exe, e.g.:
 
-		"%LOCALAPPDATA%\Programs\Python\Python37-32\python.exe" setup.py py2exe
+		"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
 
 Output will be something like (`...` denoting parts elided for brevity):
 
@@ -270,6 +294,9 @@ without errors.
 Finally, uninstall your current version of ED Market Connector and re-install
 using the newly generated `EDMarketConnector_win_4.0.2.msi` file.  Check the
 resulting installation does work (the installer will run the program for you).
+If it doesn't then check if there are any files, particularly `.dll` or `.pyd`
+files in `dist.win32` that aren't yet specified in the `EDMarketConnector.wxs`
+file, i.e. they're not packaged into the installer.
 
 Update `edmarketconnector.xml` once more to set the `length=` attribute of the
 enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.
@@ -346,3 +373,22 @@ If you are making a pre-release then:
 1. **DO NOT** merge into `stable`.
 1. *Do* merge the code into `beta` after you have made a 'pre-release' on
  GitHub.
+
+# Changing Python version
+
+When changing the Python version (Major.Minor.Patch) used:
+
+1. Change the contents of `.python-version` so that pyenv notices.
+
+1. Any version change:
+
+   1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
+   based build use the correct version.
+   
+1. Major or Minor level changes:
+
+    1. `setup.py` will need its version check updating.
+    1. `EDMarketConnector.wxs` will need updating to reference the correct
+       pythonXX.dll file.
+    1. `.pre-commit-config.yaml` will need the `default_language_version`
+       section updated to the appropriate version.

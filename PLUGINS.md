@@ -9,6 +9,9 @@ wiki.
 
 ## Writing a Plugin
 
+Check [Releasing.md](docs/Releasing.md#environment) to be sure of the current
+version of Python that we've tested against.
+
 Plugins are loaded when EDMC starts up.
 
 Each plugin has it's own folder in the `plugins` directory:
@@ -28,15 +31,20 @@ If you're developing your plugin simply against an install of EDMarketConnector
 then you'll be relying on the bundled version of Python (it's baked 
 into the .exe via the py2exe build process).
 
----
-
-### Examples
-
-We have some example plugins available in the docs/examples directory. See the readme in each folder for more info.
+Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pitfalls)
+section, else you might inadvertently cause issues for the core EDMC code
+including whole application crashes.
 
 ---
 
-### Available imports
+## Examples
+
+We have some example plugins available in the docs/examples directory. See the
+readme in each folder for more info.
+
+---
+
+## Available imports
 
 **`import`ing anything from the core EDMarketConnector code that is not
 explicitly mentioned here is unsupported and may lead to your plugin
@@ -52,30 +60,40 @@ breaking with future code changes.**
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
-`from companion import category_map` - Or any of the other static date
-contained therein.   NB: There's a plan to move such to a `data` module.
+`import edmc_data` (or specific 'from' imports) - This contains various static
+data that used to be in other files.  You should **not** now import anything
+from the original files unless specified as allowed in this section.
 
-`import plug` - Mostly for using `plug.show_error()`.  Also the flags
-for `dashboard_entry()` to be useful (see example below).  Relying on anything
-else isn't supported.
+`import plug` - For using `plug.show_error()` only.
 
 `from monitor import game_running` - in case a plugin needs to know if we
  think the game is running.  *NB: This is a function, and should be called as
  such.  Using the bare word `game_running` will always be `True`.*
 
-`import timeout_session` - provides a method called `new_session` that creates a requests.session with a default timeout
-on all requests. Recommended to reduce noise in HTTP requests
+`import timeout_session` - provides a method called `new_session` that creates
+a requests.session with a default timeout on all requests. Recommended to
+reduce noise in HTTP requests
 
-```python
-from ttkHyperlinkLabel import HyperlinkLabel
-import myNotebook as nb
-```
-
+`from ttkHyperlinkLabel import HyperlinkLabel` and `import myNotebook as nb` -
 For creating UI elements.
+
+In addition to the above we also explicitly package the following python 
+modules for plugin use:
+
+- shutil
+- sqlite3
+- zipfile
+
+And, of course, anything in the [Python Standard Library](https://docs.python.org/3/library/)
+will always be available, dependent on the version of Python we're using to 
+build Windows installed versions.   Check the 'Startup' line in an application
+[Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
+for the version of Python being used.
+
 
 ---
 
-### Logging
+## Logging
 
 In the past the only way to provide any logged output from a
 plugin was to use `print(...)` statements.  When running the application from
@@ -87,7 +105,8 @@ EDMC now implements proper logging using the Python `logging` module.  Plugin
 developers should now use the following code instead of simple `print(...)`
 statements.
 
-Insert this at the top-level of your load.py file (so not inside `plugin_start3()` ):
+Insert this at the top-level of your load.py file (so not inside
+`plugin_start3()`):
 
 ```python
 import logging
@@ -158,8 +177,8 @@ Replace all `print(...)` statements with one of the following:
         logger.debug('Exception we only note in debug output', exc_info=e)
 ```
 
-Remember you can use [fstrings](https://www.python.org/dev/peps/pep-0498/) to include variables, and even the returns of
-functions, in the output.
+Remember you can use [fstrings](https://www.python.org/dev/peps/pep-0498/) to
+include variables, and even the returns of functions, in the output.
 
 ```python
     logger.debug(f"Couldn't frob the {thing} with the {wotsit()}")
@@ -167,7 +186,41 @@ functions, in the output.
 
 ---
 
-### Startup
+## Checking core EDMC version
+
+If you have code that needs to act differently under different versions of 
+this application then you can check utilise `config.appversion`.
+
+Prior to version 5.0.0 this was a simple string.  From 5.0.0 onwards it is,
+instead, a function which returns an instance of `semantic_version.Version`.
+
+```python
+import semantic_version
+from config import appversion
+
+...
+    # Up until 5.0.0-beta1 config.appversion is a string
+    if isinstance(appversion, str):
+        core_version = semantic_version.Version(appversion)
+
+    elif callable(appversion):
+        # From 5.0.0-beta1 it's a function, returning semantic_version.Version
+        core_version = appversion()
+
+    # Yes, just blow up if config.appverison is neither str or callable
+
+    logger.info(f'Core EDMC version: {core_version}')
+    # And then compare like this
+    if core_version < semantic_version.Version('5.0.0-beta1'):
+        logger.info('EDMC core version is before 5.0.0-beta1')
+
+    else:
+        logger.info('EDMC core version is at least 5.0.0-beta1')
+```
+
+---
+
+## Startup
 
 EDMC will import the `load.py` file as a module and then call the
 `plugin_start3()` function.
@@ -192,20 +245,77 @@ Mac, and `$TMP/EDMarketConnector.log` on Linux.
 | `plugin_dir` | `str` | The directory that your plugin is located in.           |
 | `RETURN`     | `str` | The name you want to be used for your plugin internally |
 
-### Shutdown
+---
 
-This gets called when the user closes the program:
+## Avoiding potential pitfalls
+
+There are a number of things that your code should either do or avoiding 
+doing so as to play nicely with the core EDMC code and not risk causing 
+application crashes or hangs.
+
+### Use a thread for long-running code
+
+By default, your plugin code will be running in the main thread.  So, if you 
+perform some operation that takes significant time (more than a second) you 
+will be blocking both the core code from continuing *and* any other plugins 
+from running their main-thread code.
+
+This includes any connections to remote services, such as a website or 
+remote database.  So please place such code within its own thread.
+
+See the [EDSM plugin](https://github.com/EDCD/EDMarketConnector/blob/main/plugins/edsm.py)
+code for an example of using a thread worker, along
+with a queue to send data, and telling the sub-thread to stop during shutdown.
+
+### All tkinter calls in main thread
+
+The only tkinter calls that should ever be made from a sub-thread are 
+`event_generate()` calls to send data back to the main thread.
+
+Any attempt to manipulate tkinter UI elements directly from a sub-thread 
+will most likely crash the whole program.
+
+See the [EDSM plugin](https://github.com/EDCD/EDMarketConnector/blob/main/plugins/edsm.py)
+code for an example of using `event_generate()` to cause the plugin main 
+thread code to update a UI element.  Start from the `plugin_app()` 
+implementation.
+
+### Do not call tkinter `event_generate` during shutdown.
+
+However, you must **not** make *any* tkinter `event_generate()` call whilst 
+the application is shutting down.
+
+The application shutdown sequence is itself triggered from the `<<Quit>>` event
+handler, and generating another event from any code in, or called from,
+there causes the application to hang somewhere in the tk libraries.
+
+You can detect if the application is shutting down with the boolean
+`config.shutting_down`.  Note that although this is technically a function 
+its implementation is of a property on `config.AbstractConfig` and thus you 
+should treat it as a variable.
+
+**Do NOT use**:
 
 ```python
-def plugin_stop() -> None:
-    """
-    EDMC is closing
-    """
-    print("Farewell cruel world!")
+   from config import shutting_down
+
+    if shutting_down():
+       # During shutdown
 ```
 
-If your plugin uses one or more threads to handle Events then `stop()` and `join()`
-(to wait for their exit -- Recommended, not required) the threads before returning from this function.
+as this will cause the 'During shutdown' branch to *always* be taken, as in 
+this context you're testing if the function exists, and that is always True.
+
+So instead use:
+
+```python
+   from config import shutting_down
+
+    if shutting_down:
+        # During shutdown
+```
+
+---
 
 ## Plugin Hooks
 
@@ -217,20 +327,47 @@ title will be the value that you returned from `plugin_start3`. Use widgets
 from EDMC's myNotebook.py for the correct look-and-feel. You can be notified
 when the settings dialog is closed so you can save your settings.
 
-You can use `set()`, `get()` and `getint()` from EDMC's `config.config` object
-to retrieve your plugin's settings in a platform-independent way.
+You can use `set()` and `get_$type()` (where type is one of: `int`, `bool`,
+`str`, `list`) from EDMC's `config.config` object to retrieve your plugin's
+settings in a platform-independent way. Previously this was done with a single
+set and two get methods, the new methods provide better type safety.
+
+If you want to maintain compatibility with pre-5.0.0 versions of this 
+application (please encourage plugin users to update!) then you'll need to 
+include this code in at least once in your plugin (no harm in putting it in
+all modules/files):
+
+```python
+from config import config
+
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
+
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = lambda key: bool(config.getint(key))
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
+```
 
 **Be sure to use a unique prefix for any settings you save so as not to clash
 with core EDMC or other plugins.**
 
-Use `numberFromString()` from EDMC's `l10n.Locale` object to parse input
-numbers in a locale-independent way.
+Use `number_from_string()` from EDMC's `l10n.Locale` object to parse input
+numbers in a locale-independent way.  NB: the old CamelCase versions of
+`number_from_string` and `string_from_number` do still exist, but are
+deprecated. They will continue to work, but will throw warnings.
 
 Note that in the following example the function signature defines that it
 returns `Optional[tk.Frame]` only because we need to allow for `None` if
 something goes wrong with the creation of the frame (the calling code checks
 this).  You absolutely need to return the `nb.Frame()` instance that you get
 as in the code below.
+
 ```python
 import tkinter as tk
 from tkinter import ttk
@@ -245,7 +382,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.F
    Return a TK Frame for adding to the EDMC settings dialog.
    """
    global my_setting
-   my_setting = tk.IntVar(value=config.getint("MyPluginSetting"))  # Retrieve saved value from config
+   my_setting = tk.IntVar(value=config.get_int("MyPluginSetting"))  # Retrieve saved value from config
    frame = nb.Frame(parent)
    nb.Label(frame, text="Hello").grid()
    nb.Label(frame, text="Commander").grid()
@@ -275,6 +412,8 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 | `cmdr`    | `str`  | The current commander                   |
 | `is_beta` | `bool` | If the game is currently a beta version |
 
+---
+
 ### Display
 
 You can also have your plugin add an item to the EDMC main window and update
@@ -284,7 +423,7 @@ For a more complicated item create a tk.Frame widget and populate it with other
 ttk widgets. Return `None` if you just want to use this as a callback after the
 main window and all other plugins are initialised.
 
-You can use `stringFromNumber()` from EDMC's `l10n.Locale` object to format
+You can use `string_from_number()` from EDMC's `l10n.Locale` object to format
 numbers in your widgets in a locale-independent way.
 
 ```python
@@ -315,12 +454,15 @@ def some_other_function() -> None:
 | `parent`  |                   `tk.Frame`                    | The root EDMC window                                        |
 | `RETURN`  | `Union[tk.Widget, Tuple[tk.Widget, tk.Widget]]` | A widget to add to the main window. See below for more info |
 
-The return from plugin_app can either be any widget (Frame, Label, Notebook, etc.), or a 2 tuple of widgets. In the case of
-a 2 tuple, indices 0 and 1 are placed automatically in the outer grid on column indices 0 and 1. Otherwise, the only thing done
-to your return widget is it is set to use a columnspan of 2, and placed on the grid.
+The return from `plugin_app()` can either be any widget (`Frame`, `Label`,
+`Notebook`, etc.), or a 2-tuple of widgets. In the case of a 2-tuple, indices
+0 and 1 are placed automatically in the outer grid on column indices 0 and 1.
+Otherwise, the only thing done to your return widget is it is set to use a
+columnspan of 2, and placed on the grid.
 
-You can dynamically add and remove widgets on the main window by returning a tk.Frame from `plugin_app()` and later
-creating and destroying child widgets of that frame.
+You can dynamically add and remove widgets on the main window by returning a
+`tk.Frame` from `plugin_app()` and later creating and destroying child widgets
+of that frame.
 
 ```python
 from typing import Option
@@ -347,6 +489,11 @@ def some_other_function_called_later() -> None:
     new_widget_2.grid(row=row, column=1, sticky=tk.W)
     theme.update(this.frame)  # Apply theme colours to the frame and its children, including the new widgets
 ```
+
+Remember, you must **NOT** manipulate any tkinter elements from a sub-thread!
+See [Avoiding potential pitfalls](#avoiding-potential-pitfalls).
+
+---
 
 ### Events
 
@@ -406,6 +553,7 @@ Content of `state` (updated to the current journal entry):
 | `Raw`          |           `dict`            | Current raw engineering materials                                                                               |
 | `Manufactured` |           `dict`            | Current manufactured engineering materials                                                                      |
 | `Encoded`      |           `dict`            | Current encoded engineering materials                                                                           |
+| `Component`    |           `dict`            | Current component materials                                                                                     |
 | `Engineers`    |           `dict`            | Current Raw engineering materials                                                                               |
 | `Rank`         | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
 | `Statistics`   |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
@@ -419,11 +567,62 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue` |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`        |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`      |           `dict`            | Currently fitted modules                                                                                        |
+| `NavRoute`     |           `dict`            | Last plotted multi-hop route                                                                                    |
+| `ModuleInfo`   |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
+| `OnFoot`       |           `bool`            | Whether the Cmdr is on foot                                                                                     |
+| `Component`    |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
+| `Item`         |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
+| `Consumable`   |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
+| `Data`         |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
+| `BackPack`     |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
+| `SuitCurrent`  |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
+| `Suits`        |           `dict`[1]         | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `SuitLoadoutCurrent` |     `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
+| `SuitLoadouts` |           `dict`[1]         | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+
+[1] - Some data from the CAPI is sometimes returned as a `list` (when all 
+members are present) and other times as an integer-keyed `dict` (when at 
+least one member is missing, so the indices are not contiguous).  We choose to
+always convert to the integer-keyed `dict` form so that code utilising the data
+is simpler.
+
+New in version 4.1.6:
+
+`CargoJSON` contains the raw data from the last read of `Cargo.json` passed
+through json.load. It contains more information about the cargo contents, such
+as the mission ID for mission specific cargo
+
+**NB: Because this is only the data loaded from the `Cargo.json` file, and that
+is not written at Commander login (instead the in-Journal `Cargo` event
+contains all the data), this will not be populated at login.**
+
+New in version 5.0.0:
+
+`NavRoute` contains the `json.load()` of `NavRoute.json` as indicated by a
+journal `NavRoute` event.
+
+`ModuleInfo` contains the `json.load()` of `ModulesInfo.json` as indicated by a
+Journal `ModuleInfo` event.
+
+`OnFoot` is an indication as to if the player is on-foot, rather than in a
+vehicle.
+
+`Component`, `Item`, `Consumable` & `Data` are `dict`s tracking your 
+Odyssey MicroResources in your Ship Locker.  `BacKPack` contains `dict`s for
+the same when you're on-foot.
+
+`SuitCurrent`, `Suits`, `SuitLoadoutCurrent` & `SuitLoadouts` hold CAPI data
+relating to suits and their loadouts.
+
+##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
 running. In this case you won't receive initial events such as "LoadGame",
 "Rank", "Location", etc. However the `state` dictionary will reflect the
 cumulative effect of these missed events.
+
+**NB: Any of the values in this might be `None` if the Cmdr has loaded into
+Arena (CQC) from the Main Menu.**
 
 Similarly, a special "ShutDown" entry is sent when the game stops writing
 to the Journal without writing a "Shutdown" event.
@@ -437,17 +636,77 @@ between the two scenarios.
 This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
 
-#### Player Dashboard
+##### Augmented Events
+
+In some cases we augment the events, as seen in the Journal, with extra data.
+Examples of this are:
+
+1. Every `Cargo` event passed to plugins contains the data from
+   `Cargo.json` (but see above for caveats).
+
+1. Every `NavRoute` event contains the full `Route` array as loaded from
+    `NavRoute.json`.  You do not need to access this via
+   `monitor.state['NavRoute']`, although it is available there.
+   
+    *NB: There is no indication available when a player cancels a route.*  The
+    game itself does not provide any such, not in a Journal event, not in a
+   `Status.json` flag.
+   
+    The Journal documentation v28 is incorrect about the event
+    and file being `Route(.json)` the word is `NavRoute`.  Also the format of
+    the data is, e.g.
+   
+    ```json
+   { "timestamp":"2021-03-10T11:31:37Z",
+      "event":"NavRoute",
+      "Route": [
+         { "StarSystem": "Esuvit", "SystemAddress": 2869709317505, "StarPos": [-13.18750,-1.15625,-92.68750], "StarClass": "M" },
+         { "StarSystem": "Ndozins", "SystemAddress": 3446451210595, "StarPos": [-14.31250,-10.68750,-60.56250], "StarClass": "M" },
+         { "StarSystem": "Tascheter Sector MN-T b3-6", "SystemAddress": 13864825529753, "StarPos": [-11.87500,-21.96875,-29.03125], "StarClass": "M" },
+         { "StarSystem": "LP 823-4", "SystemAddress": 9466778953129, "StarPos": [-8.62500,-27.84375,3.93750], "StarClass": "M" }
+      ]
+   }
+    ```
+
+1. Every `ModuleInfo` event contains the full data as loaded from the
+  `ModulesInfo.json` file.  It's also available as `monitor.stat['ModuleInfo']`
+   (noting that we used the singular form there to stay consistent with the
+   Journal event name).
+   
+---
+
+### Shutdown
+
+This gets called when the user closes the program:
+
+```python
+def plugin_stop() -> None:
+    """
+    EDMC is closing
+    """
+    print("Farewell cruel world!")
+```
+
+If your plugin uses one or more threads to handle Events then `stop()` and
+`join()` (to wait for their exit -- Recommended, not required) the threads
+before returning from this function.
+
+---
+
+### Player Dashboard
 
 ```python
 import plug
 
 def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]):
-    is_deployed = entry['Flags'] & plug.FlagsHardpointsDeployed
+    is_deployed = entry['Flags'] & edmc_data.FlagsHardpointsDeployed
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
-This gets called when something on the player's cockpit display changes -
+`dashboard_entry()` is called with the latest data from the `Status.json` 
+file when an update to that file is detected.
+
+This will be when something on the player's cockpit display changes -
 typically about once a second when in orbital flight.
 
 | Parameter |  Type  | Description                       |
@@ -456,19 +715,15 @@ typically about once a second when in orbital flight.
 | `is_beta` | `bool` | if the game is currently in beta  |
 | `entry`   | `dict` | Data from status.json (see below) |
 
- For more info on `status.json`, See the "Status File" section in the Frontier [Journal documentation](https://forums.frontier.co.uk/showthread.php/401661) for the available `entry` properties and for the list of available `"Flags"`. Refer to the source code of [plug.py](./plug.py) for the list of available  constants.
+For more info on `Status.json`, See the "Status File" section in the Frontier
+[Journal documentation](https://forums.frontier.co.uk/showthread.php/401661).
+That includes the available `entry` properties and the list of `"Flags"`.
+Refer to [edmc_data.py](./edmc_data.py) for the list of available
+constants.
 
-New in version 4.1.6:
+---
 
-`CargoJSON` contains the raw data from the last read of `Cargo.json` passed
-through json.load. It contains more information about the cargo contents, such
-as the mission ID for mission specific cargo
-
-**NB: Because this is only the data loaded from the `Cargo.json` file, and that
-is not written at Commander login (instead the in-Journal `Cargo` event
-contains all the data), this will not be populated at login.**
-
-#### Getting Commander Data
+### Commander Data from Frontier CAPI
 
 ```python
 def cmdr_data(data, is_beta):
@@ -481,16 +736,19 @@ def cmdr_data(data, is_beta):
     logger.info(data['commander']['name'])
 ```
 
-This gets called when EDMC has just fetched fresh Cmdr and station data from
-Frontier's servers.
+This gets called when the application has just fetched fresh Cmdr and station 
+data from Frontier's servers.
 
 | Parameter |       Type       | Description                                                                                              |
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    | `Dict[str, Any]` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
 
-#### Plugin-specific events
+---
 
+### Plugin-specific events
+
+#### EDSM Notify System
 ```python
 def edsm_notify_system(reply):
     """
@@ -517,6 +775,7 @@ some time after the corresponding `journal_entry()` event.
 | :-------- | :--------------: | :--------------------------------------------------------------------------------------------- |
 | `reply`   | `Dict[str, Any]` | Response to an API call to [EDSM's journal API target](https://www.edsm.net/en/api-journal-v1) |
 
+#### Inara Notify Location
 ```python
 def inara_notify_location(event_data):
     """
@@ -543,8 +802,7 @@ event.
 | :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------- |
 | `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `Commander Flight Log` event](https://inara.cz/inara-api-docs/#event-29) |
 
----
-
+#### Inara Notify Ship
 ```python
 def inara_notify_ship(event_data):
     """
@@ -564,6 +822,8 @@ time after the corresponding `journal_entry()` event.
 | :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------------------------- |
 | `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `addCommanderShip` or `setCommanderShip` event](https://inara.cz/inara-api-docs/#event-11) |
 
+---
+
 ## Error messages
 
 You can display an error in EDMC's status area by returning a string from your
@@ -575,6 +835,8 @@ sound to be played (unless the user has muted sound).
 The status area is shared between EDMC itself and all other plugins, so your
 message won't be displayed for very long. Create a dedicated widget if you need
 to display routine status information.
+
+---
 
 ## Localisation
 
@@ -609,6 +871,8 @@ See EDMC's own [`L10n`](https://github.com/EDCD/EDMarketConnector/tree/main/L10n
 folder for the list of supported language codes and for example translation
 files.
 
+---
+
 ## Python Package Plugins
 
 A _Package Plugin_ is both a standard Python package (i.e. contains an
@@ -618,6 +882,8 @@ before any non-Package plugins.
 
 Other plugins can access features in a Package Plugin by `import`ing the
 package by name in the usual way.
+
+---
 
 ## Distributing a Plugin
 
@@ -631,7 +897,10 @@ plugin's folder:
 If there are any external dependencies then include them in the plugin's
 folder.
 
-Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive, as well as the `__pycache__` directory.
+Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive, as
+well as the `__pycache__` directory.
+
+---
 
 ## Disable a plugin
 
@@ -641,29 +910,33 @@ plugin folder to append ".disabled". Eg,
 
 Disabled and enabled plugins are listed on the "Plugins" Settings tab
 
-## Migration
+---
 
-Starting with pre-release 3.5 EDMC uses Python **3.7**.   The first full
-release under Python 3.7 was 4.0.0.0.  This is a brief outline of the steps
-required to migrate a plugin from earlier versions of EDMC:
+## Migration from Python 2.7
+
+Starting with pre-release 3.5 EDMC used Python 3.7.   The first full
+release under Python 3.7 was 4.0.0.0.   The 4.2.x series was the last to use
+Python 3.7, with releases moving on to the latest Python 3.9.x after that.
+
+This is a brief outline of the steps required to migrate a plugin from earlier
+versions of EDMC:
 
 - Rename the function `plugin_start` to `plugin_start3(plugin_dir)`.
     Plugins without a `plugin_start3` function are listed as disabled on EDMC's
     "Plugins" tab and a message like "plugin SuperSpaceHelper needs migrating"
-    appears in the log. Such plugins are also listed in a section "Plugins Without
-    Python 3.x Support:" on the Settings > Plugins tab.
+    appears in the log. Such plugins are also listed in a section "Plugins
+    Without Python 3.x Support:" on the Settings > Plugins tab.
 
 - Check that callback functions `plugin_prefs`, `prefs_changed`,
-    `journal_entry`, `dashboard_entry` and `cmdr_data` if used are declared with
-    the correct number of arguments.  Older versions of this app were tolerant
-    of missing arguments in these function declarations.
+    `journal_entry`, `dashboard_entry` and `cmdr_data`, if used, are declared
+    with the correct number of arguments.  Older versions of this app were
+    tolerant of missing arguments in these function declarations.
 
-- Port the code to Python 3.7. The [2to3](https://docs.python.org/3/library/2to3.html)
-    tool can automate much of this work.
+- Port the code to Python 3.9+. The
+ [2to3](https://docs.python.org/3/library/2to3.html)
+ tool can automate much of this work.
 
-Depending on the complexity of the plugin it may be feasible to make it
-compatible with both EDMC 3.4 + Python 2.7 and EDMC 3.5 + Python 3.7.
-
-[Here's](https://python-future.org/compatible_idioms.html) a guide on writing
-Python 2/3 compatible code and [here's](https://github.com/Marginal/HabZone/commit/3c41cd41d5ad81ef36aab40e967e3baf77b4bd06)
-an example of the changes required for a simple plugin.
+We advise *against* making any attempt to have a plugin's code work under 
+both Python 2.7 and 3.x.  We no longer maintain the Python 2.7-based 
+versions of this application and you shouldn't support use of them with 
+your plugin.

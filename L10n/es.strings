@@ -1,6 +1,12 @@
 /* Language name */
 "!Language" = "Español";
 
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 significa completamente opaco.{CR}La ventana se actualiza en tiempo real.";
+
+/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Por Defecto{CR}Se requiere reiniciar{CR}para que los cambios surtan efecto!";
+
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Acerca de {APP}";
 
@@ -42,6 +48,9 @@
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadete";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: No se devolvió datos de comandante";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Campeón";
@@ -121,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Editar";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins Sin Soporte para Python 3.x";
+
 /* Top rank. [stats.py] */
 "Elite" = "Élite";
 
@@ -139,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Empresario";
 
+/* [companion.py] */
+"Error" = "Error";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Error: No se puede conectar a EDDN";
 
@@ -147,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Error: No se puede conectar con Inara";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Error: No se pudo comprobar el token customer_id";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Error: ¡customer_id no coincide!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
@@ -165,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Error: Credenciales Inválidas";
+
+/* [companion.py] */
+"Error: unable to get token" = "Error: no se pudo conseguir el token";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Error: Cmdt Incorrecto";
@@ -220,8 +244,17 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Tecla de acceso directo";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Ignorar";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Credenciales de Inara";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Información sobre migración de plugins";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "El Directorio Journal ya está bloqueado";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Tecla de acceso directo";
@@ -247,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Préstamo";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Nivel de registro";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "Identificándose...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Señor";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Transparencia de la ventana principal";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "Datos de mercado en formato CSV";
@@ -270,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Guardiamarina";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Minimizar a la bandeja de sistema";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Casi perdido";
@@ -294,6 +336,9 @@
 
 /* [prefs.py] */
 "OK" = "Aceptar";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o más de tus plugins habilitados aún no tienen soporte para Python 3.x. Por favor, consulta la lista en la pestaña '{PLUGINS}' de '{FILE}' > '{SETTINGS}'. Deberías comprobar si hay una versión actualizada disponible, si no, avisa al desarrollador de que necesita actualizar el código para Python 3.x.\n\nPuedes deshabilitar un plugin cambiando el nombre de su carpeta para que tenga '{DISABLED}' al final del nombre.";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Solo cuando Elite: Dangerous es la aplicación activa";
@@ -337,17 +382,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Carpeta de Plugins";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins Sin Soporte para Python 3.x";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o más de tus plugins habilitados aún no tienen soporte para Python 3.x. Por favor, consulta la lista en la pestaña '{PLUGINS}' de '{FILE}' > '{SETTINGS}'. Deberías comprobar si hay una versión actualizada disponible, si no, avisa al desarrollador de que necesita actualizar el código para Python 3.x.\n\nPuedes deshabilitar un plugin cambiando el nombre de su carpeta para que tenga '{DISABLED}' al final del nombre.";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Plugins sin Soporte para Python 3.x";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Información sobre migración de plugins";
+"Plugins Without Python 3.x Support:" = "Plugins sin soporte para Python 3.x:";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Capitán de navío";
@@ -403,6 +439,9 @@
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Notas de la versión";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Reintentar";
+
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Rol";
 
@@ -448,6 +487,9 @@
 /* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
 "Shipyard" = "Astillero";
 
+/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
+"Shutting down..." = "Apagando...";
+
 /* Empire rank. [stats.py] */
 "Squire" = "Escudero";
 
@@ -469,6 +511,9 @@
 /* Main window. [EDMarketConnector.py] */
 "System" = "Sistema";
 
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "La localización Directorio Journal ya está bloqueada.{CR}Puedes intentar resolverlo y pulsar Reintentar, o elegir Ignorar esto.";
+
 /* Appearance setting. [prefs.py] */
 "Theme" = "Tema";
 
@@ -487,8 +532,17 @@
 /* Trade rank. [stats.py] */
 "Tycoon" = "Magnate";
 
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Porcentaje escala UI";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Desconocido";
+
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Actualizar";
+
+/* Option to use alternate URL method on shipyard links [prefs.py] */
+"Use alternate URL method" = "Usar método URL alternativo";
 
 /* Status dialog subtitle - CR value of ship. [stats.py] */
 "Value" = "Valor";
@@ -522,4 +576,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} necesita permisos para usar teclas de acceso directo";
-

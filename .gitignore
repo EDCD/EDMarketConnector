@@ -1,5 +1,7 @@
+.gitversion
 .DS_Store
 build
+ChangeLog.html
 dist.*
 dump
 *.bak
@@ -17,3 +19,7 @@ EDMarketConnector.VisualElementsManifest.xml
 .idea
 .vscode
 venv
+*.code-workspace
+htmlcov/
+.ignored
+.coverage

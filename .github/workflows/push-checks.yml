@@ -9,7 +9,7 @@ name: Push-Checks
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
 
 jobs:
   build:
@@ -17,26 +17,30 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.4
       with:
         fetch-depth: 0
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2.2.2
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest wheel
+        pip install wheel flake8 pytest
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+    
+    - name: Setup flake8 annotations
+      uses: rbialon/flake8-annotations@v1
+    
     - name: Lint with flake8
       env:
         ROOT_SHA: ${{github.base_ref}}
-        
       run: |
         DATA=$(jq --raw-output .before $GITHUB_EVENT_PATH)
 
+        echo "DATA: ${DATA}"
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
         git diff "$DATA" | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "$DATA" | flake8 . --count --exit-zero --statistics --diff
+        git diff "$DATA" | flake8 . --count --statistics --diff

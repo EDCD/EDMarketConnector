@@ -1,0 +1,6 @@
+[run]
+omit = 
+	# The tests themselves
+	tests/*
+	# Any venv files
+	venv/*

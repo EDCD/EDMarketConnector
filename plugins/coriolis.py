@@ -8,10 +8,10 @@ import io
 # Migrate settings from <= 3.01
 from config import config
 
-if not config.get('shipyard_provider') and config.getint('shipyard'):
+if not config.get_str('shipyard_provider') and config.get_int('shipyard'):
     config.set('shipyard_provider', 'Coriolis')
 
-config.delete('shipyard')
+config.delete('shipyard', suppress=True)
 
 
 def plugin_start3(_):

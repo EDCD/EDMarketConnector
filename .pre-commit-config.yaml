@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: 'v3.4.0'
     hooks:
       - id: check-merge-conflict 
       - id: debug-statements 
@@ -14,14 +14,23 @@ repos:
         #    hooks:
         #      - id: autopep8
 
-# flake8 --show-source <file>
--   repo: https://gitlab.com/pycqa/flake8
-    rev: ''
-    hooks:
-      - id: flake8
+### # flake8 --show-source <file>
+### -   repo: https://gitlab.com/pycqa/flake8
+###     rev: ''
+###     hooks:
+###       - id: flake8
+#
+# Try using local flake8
+- repo: local
+  hooks:
+    - id: flake8
+      name: flake8
+      entry: flake8
+      language: system
+      types: [ python ]
 
 -   repo: https://github.com/pre-commit/pygrep-hooks
-    rev: ''
+    rev: 'v1.8.0'
     hooks:
       - id: python-no-eval 
       - id: python-no-log-warn 
@@ -31,7 +40,7 @@ repos:
 # mypy - static type checking
 # mypy --follow-imports skip <file>
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: ''
+    rev: 'v0.812'
     hooks:
       - id: mypy
         args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
@@ -50,7 +59,7 @@ repos:
 
 # safety.exe check -r requirements.txt
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: ''
+    rev: 'v1.2.1'
     hooks:
       - id: python-safety-dependencies-check 
         entry: safety
@@ -58,10 +67,8 @@ repos:
         language: system
 
 default_language_version:
-    python: python3.7
+    python: python3.9
 
 default_stages: [ commit, push ]
 
 #files: '([^\.].+/)*.py'
-
-exclude: cp37-setup-new.py

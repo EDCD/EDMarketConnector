@@ -11,6 +11,7 @@ import time
 
 from config import applongname, appversion, config
 
+# These are specific to Trade Dangerous, so don't move to edmc_data.py
 demandbracketmap = { 0: '?',
                      1: 'L',
                      2: 'M',
@@ -22,9 +23,9 @@ stockbracketmap =  { 0: '-',
 
 def export(data):
 
-    querytime = config.getint('querytime') or int(time.time())
+    querytime = config.get_int('querytime', default=int(time.time()))
 
-    filename = join(config.get('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    filename = join(config.get_str('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
 
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
@@ -34,7 +35,7 @@ def export(data):
             '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'
             '@ {system}/{starport}\n'.format(
                 appname=applongname,
-                appversion=appversion,
+                appversion=appversion(),
                 platform=platform == 'darwin' and "Mac OS" or system(),
                 cmdr=data['commander']['name'].strip(),
                 system=data['lastSystem']['name'].strip(),

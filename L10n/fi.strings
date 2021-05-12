@@ -1,11 +1,11 @@
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "Käyttöliittymän skaalausprosentti";
+/* Language name */
+"!Language" = "Suomi";
+
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 tarkoittaa täysin peittävää.{CR}Ikkuna päivittyy reaaliajassa.";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 tarkoittaa oletusta{CR}Muutosten käyttöönotto{CR}edellyttää uudelleenkäynnistystä!";
-
-/* Language name */
-"!Language" = "Suomi";
 
 /* App menu entry on OSX. [EDMarketConnector.py] */
 "About {APP}" = "Ohjelmasta {APP}";
@@ -48,6 +48,9 @@
 
 /* Federation rank. [stats.py] */
 "Cadet" = "Cadet";
+
+/* No 'commander' data in CAPI [EDMarketConnector.py] */
+"CAPI: No commander data returned" = "CAPI: tietoja ei löytynyt";
 
 /* CQC rank. [stats.py] */
 "Champion" = "Champion";
@@ -127,6 +130,9 @@
 /* Menu title. [EDMarketConnector.py] */
 "Edit" = "Muokkaa";
 
+/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Lisäosat ilman Python 3.x -tukea";
+
 /* Top rank. [stats.py] */
 "Elite" = "Elite";
 
@@ -145,6 +151,9 @@
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
 
+/* [companion.py] */
+"Error" = "Virhe";
+
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
 
@@ -153,6 +162,12 @@
 
 /* [inara.py] */
 "Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
+
+/* [companion.py] */
+"Error: Couldn't check token customer_id" = "Virhe: Ei kyetty tarkastamaan polettia customer_id";
+
+/* [companion.py] */
+"Error: customer_id doesn't match!" = "Virhe: customer_id ei löydy vastaavuutta!";
 
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
@@ -171,6 +186,9 @@
 
 /* [companion.py] */
 "Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
+
+/* [companion.py] */
+"Error: unable to get token" = "Virhe: ei kyetty saamaan polettia";
 
 /* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
 "Error: Wrong Cmdr" = "Virhe: väärä komentaja";
@@ -226,8 +244,17 @@
 /* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
 "Hotkey" = "Pikanäppäin";
 
+/* Changed journal update_lock failed [monitor.py] */
+"Ignore" = "Älä huomioi";
+
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inaran kirjautuminen";
+
+/* Settings>Plugins>Information on migrating plugins [prefs.py] */
+"Information on migrating plugins" = "Tietoja lisäosien siirrosta";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Journal directory already locked" = "Journal -hakemisto on jo lukittu";
 
 /* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
 "Keyboard shortcut" = "Näppäimistöoikopolku";
@@ -253,11 +280,17 @@
 /* Cmdr stats. [stats.py] */
 "Loan" = "Lainaa jäljellä";
 
+/* Label for user configured level of logging [prefs.py] */
+"Log Level" = "Lokin syvyys";
+
 /* [EDMarketConnector.py] */
 "Logging in..." = "Kirjaudutaan...";
 
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
+
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Pääikkunan läpinäkyvyys";
 
 /* [prefs.py] */
 "Market data in CSV format file" = "Markkinadata CSV -formaatissa";
@@ -276,6 +309,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Pienennä tehtäväpalkkiin";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
@@ -300,6 +336,9 @@
 
 /* [prefs.py] */
 "OK" = "OK";
+
+/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Yksi tai useampi käyttämistäsi lisäosista ei sisällä vielä Pyhton 3.x -tukea. Tarkista tiedoston '{FILE}' > '{SETTINGS}' välilehti '{PLUGINS}' lisäosista, onko niistä uudempaa versiota saatavilla; muussa tapauksessa ota yhteyttä sen kehittäjään ja kerro, että sen lähdekoodi on päivitettävä Python 3.x -tasolle.\n\nVoit estää lisäosan toiminnan nimeämällä sen hakemiston siten, että se päättyy tekstiin '{DISABLED}'.";
 
 /* Hotkey/Shortcut setting. [prefs.py] */
 "Only when Elite: Dangerous is the active app" = "Vain jos Elite:Dangerous on käynnissä";
@@ -343,17 +382,8 @@
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Lisäosien hakemistosijainti";
 
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Lisäosat ilman Python 3.x -tukea";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Yksi tai useampi käyttämistäsi lisäosista ei sisällä vielä Pyhton 3.x -tukea. Tarkista tiedoston '{FILE}' > '{SETTINGS}' välilehti '{PLUGINS}' lisäosista, onko niistä uudempaa versiota saatavilla; muussa tapauksessa ota yhteyttä sen kehittäjään ja kerro, että sen lähdekoodi on päivitettävä Python 3.x -tasolle.\n\nVoit estää lisäosan toiminnan nimeämällä sen hakemiston siten, että se päättyy tekstiin '{DISABLED}'.";
-
 /* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support" = "Lisäosat ilman Python 3.x -tukea";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Tietoja lisäosien siirrosta";
+"Plugins Without Python 3.x Support:" = "Lisäosat, joissa ei ole Python 3.x -tukea:";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -408,6 +438,9 @@
 
 /* Help menu item. [EDMarketConnector.py] */
 "Release Notes" = "Julkaisutiedot";
+
+/* Changed journal update_lock failed [monitor.py] */
+"Retry" = "Yritä uudelleen";
 
 /* Multicrew role label in main window. [EDMarketConnector.py] */
 "Role" = "Rooli";
@@ -472,11 +505,17 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Tila";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Asuste";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
 /* Main window. [EDMarketConnector.py] */
 "System" = "Järjestelmä";
+
+/* Changed journal update_lock failed [monitor.py] */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Uusi Journal -hakemisto on jo lukittu.{CR}Voit joko yrittää ratkaista tämän ja yrittää uudelleen, tai jättää asian huomiotta.";
 
 /* Appearance setting. [prefs.py] */
 "Theme" = "Teema";
@@ -495,6 +534,12 @@
 
 /* Trade rank. [stats.py] */
 "Tycoon" = "Tycoon";
+
+/* Label for 'UI Scaling' option [prefs.py] */
+"UI Scale Percentage" = "Käyttöliittymän skaalausprosentti";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Tuntematon";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Päivitä";
@@ -534,6 +579,3 @@
 
 /* Shortcut settings prompt on OSX. [prefs.py] */
 "{APP} needs permission to use shortcuts" = "{APP} tarvitsee lupasi pikakuvakkeiden käyttämiseen";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Lokin syvyys";

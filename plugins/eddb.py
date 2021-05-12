@@ -24,13 +24,21 @@
 
 
 import sys
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
 import requests
 
+import EDMCLogging
+import killswitch
+import plug
+from companion import CAPIData
 from config import config
 
 if TYPE_CHECKING:
     from tkinter import Tk
+
+
+logger = EDMCLogging.get_main_logger()
 
 
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
@@ -45,6 +53,7 @@ this.system_population: Optional[int] = None
 this.station_link: 'Optional[Tk]' = None
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None
+this.on_foot = False
 
 
 def system_url(system_name: str) -> str:
@@ -62,6 +71,7 @@ def station_url(system_name: str, station_name: str) -> str:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
 
     return system_url(system_name)
+
 
 def plugin_start3(plugin_dir):
     return 'eddb'
@@ -82,7 +92,18 @@ def prefs_changed(cmdr, is_beta):
     # through correctly.  We don't want a static string.
     pass
 
+
 def journal_entry(cmdr, is_beta, system, station, entry, state):
+    if (ks := killswitch.get_disabled('plugins.eddb.journal')).disabled:
+        logger.warning(f'Journal processing for EDDB has been disabled: {ks.reason}')
+        plug.show_error('EDDB Journal processing disabled. See Log')
+        return
+
+    elif (ks := killswitch.get_disabled(f'plugins.eddb.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'Processing of event {entry["event"]} has been disabled: {ks.reason}')
+        return
+
+    this.on_foot = state['OnFoot']
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -96,21 +117,31 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.system_population = pop
 
     this.station = entry.get('StationName') or this.station
+    # on_foot station detection
+    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+        this.station = entry['Body']
+
     this.station_marketid = entry.get('MarketID') or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
         this.station = None
         this.station_marketid = None
 
+    if entry['event'] == 'Embark' and not entry.get('OnStation'):
+        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
+        # Undocked event.
+        this.station = None
+        this.station_marketid = None
+
     # Only actually change URLs if we are current provider.
-    if config.get('system_provider') == 'eddb':
+    if config.get_str('system_provider') == 'eddb':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     # But only actually change the URL if we are current station provider.
-    if config.get('station_provider') == 'eddb':
+    if config.get_str('station_provider') == 'eddb':
         text = this.station
         if not text:
             if this.system_population is not None and this.system_population > 0:
@@ -125,7 +156,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data, is_beta):
+def cmdr_data(data: CAPIData, is_beta):
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid and data['commander']['docked']:
         this.station_marketid = data['lastStarport']['id']
@@ -138,14 +169,14 @@ def cmdr_data(data, is_beta):
         this.station = data['lastStarport']['name']
 
     # Override standard URL functions
-    if config.get('system_provider') == 'eddb':
+    if config.get_str('system_provider') == 'eddb':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'eddb':
-        if data['commander']['docked']:
+    if config.get_str('station_provider') == 'eddb':
+        if data['commander']['docked'] or this.on_foot and this.station:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":

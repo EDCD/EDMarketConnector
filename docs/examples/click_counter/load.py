@@ -26,7 +26,7 @@ class ClickCounter:
 
     def __init__(self) -> None:
         # Be sure to use names that wont collide in our config variables
-        self.click_count: Optional[tk.StringVar] = tk.StringVar(value=str(config.getint('click_counter_count')))
+        self.click_count: Optional[tk.StringVar] = tk.StringVar(value=str(config.get_int('click_counter_count')))
         logger.info("ClickCounter instantiated")
 
     def on_load(self) -> str:

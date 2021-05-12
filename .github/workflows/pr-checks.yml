@@ -17,6 +17,10 @@ jobs:
 
     steps:
 
+    # Debug show the info we have to work with
+    - name: Show github context
+      run: cat $GITHUB_EVENT_PATH
+
     ####################################################################
     # Checkout the necessary commits
     ####################################################################
@@ -24,10 +28,11 @@ jobs:
     # based on.
     - name: Checkout head commits
       # https://github.com/actions/checkout
-      uses: actions/checkout@v2
-      with:
-        repository: ${{github.event.pull_request.head.repo.full_name}}
-        fetch-depth: 0
+      uses: actions/checkout@v2.3.4
+      #with:
+        #ref: ${{github.head.sha}}
+        #repository: ${{github.event.pull_request.head.repo.full_name}}
+        #fetch-depth: 0
 
     # But we do need the base references
     - name: Fetch base commits
@@ -36,6 +41,8 @@ jobs:
         BASE_REPO_OWNER: ${{github.event.pull_request.base.repo.owner.login}}
 
       run: |
+        echo "BASE_REPO_URL: ${BASE_REPO_URL}"
+        echo "BASE_REPO_OWNER: ${BASE_REPO_OWNER}"
         # Add the 'base' repo as a new remote
         git remote add ${BASE_REPO_OWNER} ${BASE_REPO_URL}
         # And then fetch its references
@@ -45,25 +52,20 @@ jobs:
     ####################################################################
     # Get Python set up
     ####################################################################
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2.2.2
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8
+        pip install wheel flake8
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; elif [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
     ####################################################################
 
-    ####################################################################
-    # Show full github context to aid debugging.
-    ####################################################################
-    - name: Show github context
-      run: |
-        env
-        cat $GITHUB_EVENT_PATH
-    ####################################################################
+    # Have issues be annotated on run
+    - name: Setup flake8 annotations
+      uses: rbialon/flake8-annotations@v1
 
     ####################################################################
     # Lint with flake8
@@ -75,6 +77,9 @@ jobs:
         BASE_REF: ${{github.base_ref}}
 
       run: |
+        echo "BASE_REPO_URL: ${BASE_REPO_URL}"
+        echo "BASE_REPO_OWNER: ${BASE_REPO_OWNER}"
+        echo "BASE_REF: ${BASE_REF}"
         # Explicitly check for some errors
         # E9 - Runtime (syntax and the like)
         # F63 - 'tests' checking

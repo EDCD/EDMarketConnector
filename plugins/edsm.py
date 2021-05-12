@@ -9,15 +9,17 @@
 #  4) Ensure the EDSM API call(back) for setting the image at end of system
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
+from companion import CAPIData
 import json
 import sys
 import tkinter as tk
 from queue import Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple, cast
 
 import requests
 
+import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appversion, config
@@ -53,6 +55,7 @@ this.system_population: Optional[int] = None
 this.station_link: tk.Tk = None
 this.station: Optional[str] = None
 this.station_marketid: Optional[int] = None  # Frontier MarketID
+this.on_foot = False
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 __cleanup = str.maketrans({' ': None, '\n': None})
 IMG_KNOWN_B64 = """
@@ -123,29 +126,31 @@ def plugin_start3(plugin_dir: str) -> str:
     this._IMG_ERROR = tk.PhotoImage(data=IMG_ERR_B64)  # BBC Mode 5 '?'
 
     # Migrate old settings
-    if not config.get('edsm_cmdrs'):
-        if isinstance(config.get('cmdrs'), list) and config.get('edsm_usernames') and config.get('edsm_apikeys'):
+    if not config.get_list('edsm_cmdrs'):
+        if isinstance(config.get_list('cmdrs'), list) and config.get_list('edsm_usernames') and config.get_list('edsm_apikeys'):
             # Migrate <= 2.34 settings
-            config.set('edsm_cmdrs', config.get('cmdrs'))
+            config.set('edsm_cmdrs', config.get_list('cmdrs'))
 
-        elif config.get('edsm_cmdrname'):
+        elif config.get_list('edsm_cmdrname'):
             # Migrate <= 2.25 settings. edsm_cmdrs is unknown at this time
-            config.set('edsm_usernames', [config.get('edsm_cmdrname') or ''])
-            config.set('edsm_apikeys',   [config.get('edsm_apikey') or ''])
+            config.set('edsm_usernames', [config.get_str('edsm_cmdrname', default='')])
+            config.set('edsm_apikeys',   [config.get_str('edsm_apikey', default='')])
 
-        config.delete('edsm_cmdrname')
-        config.delete('edsm_apikey')
+        config.delete('edsm_cmdrname', suppress=True)
+        config.delete('edsm_apikey', suppress=True)
 
-    if config.getint('output') & 256:
+    if config.get_int('output') & 256:
         # Migrate <= 2.34 setting
         config.set('edsm_out', 1)
 
-    config.delete('edsm_autoopen')
-    config.delete('edsm_historical')
+    config.delete('edsm_autoopen', suppress=True)
+    config.delete('edsm_historical', suppress=True)
 
+    logger.debug('Starting worker thread...')
     this.thread = Thread(target=worker, name='EDSM worker')
     this.thread.daemon = True
     this.thread.start()
+    logger.debug('Done.')
 
     return 'EDSM'
 
@@ -158,13 +163,16 @@ def plugin_app(parent: tk.Tk) -> None:
 
 
 def plugin_stop() -> None:
-    """Plugin exit hook."""
+    """Stop this plugin."""
+    logger.debug('Signalling queue to close...')
     # Signal thread to close and wait for it
     this.queue.put(None)
     this.thread.join()
     this.thread = None
+    this.session.close()
     # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
     this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
+    logger.debug('Done.')
 
 
 def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
@@ -184,7 +192,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
 
-    this.log = tk.IntVar(value=config.getint('edsm_out') and 1)
+    this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
         frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
     )
@@ -284,9 +292,10 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
     if cmdr and not is_beta:
         # TODO: remove this when config is rewritten.
-        cmdrs: List[str] = list(config.get('edsm_cmdrs') or [])
-        usernames: List[str] = list(config.get('edsm_usernames') or [])
-        apikeys: List[str] = list(config.get('edsm_apikeys') or [])
+        cmdrs: List[str] = config.get_list('edsm_cmdrs', default=[])
+        usernames: List[str] = config.get_list('edsm_usernames', default=[])
+        apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
+
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             usernames.extend([''] * (1 + idx - len(usernames)))
@@ -314,15 +323,15 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     if not cmdr:
         return None
 
-    cmdrs = config.get('edsm_cmdrs')
+    cmdrs = config.get_list('edsm_cmdrs')
     if not cmdrs:
         # Migrate from <= 2.25
         cmdrs = [cmdr]
         config.set('edsm_cmdrs', cmdrs)
 
-    if cmdr in cmdrs and config.get('edsm_usernames') and config.get('edsm_apikeys'):
+    if cmdr in cmdrs and config.get_list('edsm_usernames') and config.get_list('edsm_apikeys'):
         idx = cmdrs.index(cmdr)
-        return (config.get('edsm_usernames')[idx], config.get('edsm_apikeys')[idx])
+        return (config.get_list('edsm_usernames')[idx], config.get_list('edsm_apikeys')[idx])
 
     else:
         return None
@@ -332,14 +341,24 @@ def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> None:
     """Journal Entry hook."""
-    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-        logger.trace(f'''{entry["event"]}
-Commander: {cmdr}
-System: {system}
-Station: {station}
-state: {state!r}
-entry: {entry!r}'''
-                     )
+    if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
+        logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+        plug.show_error('EDSM Handler disabled. See Log.')
+        return
+
+    elif (ks := killswitch.get_disabled(f'plugins.edsm.journal.event.{entry["event"]}')).disabled:
+        logger.warning(f'Handling of event {entry["event"]} has been disabled via killswitch: {ks.reason}')
+        return
+
+    this.on_foot = state['OnFoot']
+    # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+    #     logger.trace(f'''{entry["event"]}
+# Commander: {cmdr}
+# System: {system}
+# Station: {station}
+# state: {state!r}
+# entry: {entry!r}'''
+#                      )
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -353,13 +372,23 @@ entry: {entry!r}'''
         this.system_population = pop
 
     this.station = entry.get('StationName', this.station)
-    this.station_marketid = entry.get('MarketID', this.station)
+    # on_foot station detection
+    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+        this.station = entry['Body']
+
+    this.station_marketid = entry.get('MarketID', this.station_marketid)
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
         this.station = None
         this.station_marketid = None
 
-    if config.get('station_provider') == 'EDSM':
+    if entry['event'] == 'Embark' and not entry.get('OnStation'):
+        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
+        # Undocked event.
+        this.station = None
+        this.station_marketid = None
+
+    if config.get_str('station_provider') == 'EDSM':
         to_set = this.station
         if not this.station:
             if this.system_population and this.system_population > 0:
@@ -405,7 +434,7 @@ entry: {entry!r}'''
 
     # Send interesting events to EDSM
     if (
-        config.getint('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
+        config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
         entry['event'] not in this.discardedEvents
     ):
         # Introduce transient states into the event
@@ -430,15 +459,15 @@ entry: {entry!r}'''
             materials.update(transient)
             this.queue.put((cmdr, materials))
 
-        if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-            logger.trace(f'''{entry["event"]}
-Queueing: {entry!r}'''
-                         )
+        # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+        #     logger.trace(f'''{entry["event"]}
+# Queueing: {entry!r}'''
+#                          )
         this.queue.put((cmdr, entry))
 
 
 # Update system data
-def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
+def cmdr_data(data: CAPIData, is_beta: bool) -> None:
     """CAPI Entry Hook."""
     system = data['lastSystem']['name']
 
@@ -455,14 +484,14 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
 
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
-    if config.get('system_provider') == 'EDSM':
+    if config.get_str('system_provider') == 'EDSM':
         this.system_link['text'] = this.system
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    if config.get('station_provider') == 'EDSM':
-        if data['commander']['docked']:
+    if config.get_str('station_provider') == 'EDSM':
+        if data['commander']['docked'] or this.on_foot and this.station:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
@@ -485,10 +514,11 @@ def cmdr_data(data: Mapping[str, Any], is_beta: bool) -> None:
 # Worker thread
 def worker() -> None:
     """
-    Upload worker.
+    Handle uploading events to EDSM API.
 
     Processes `this.queue` until the queued item is None.
     """
+    logger.debug('Starting...')
     pending = []  # Unsent events
     closing = False
 
@@ -496,11 +526,18 @@ def worker() -> None:
         item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
             (cmdr, entry) = item
+
         else:
+            logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
 
         retrying = 0
         while retrying < 3:
+            if (res := killswitch.get_disabled("plugins.edsm.worker")).disabled:
+                logger.warning(
+                    f'EDSM worker has been disabled via kill switch. Not uploading data. ({res.reason})'
+                )
+                break
             try:
                 if TYPE_CHECKING:
                     # Tell the type checker that these two are bound.
@@ -517,6 +554,7 @@ def worker() -> None:
                     r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
                     r.raise_for_status()
                     this.discardedEvents = set(r.json())
+
                     this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
                     if not this.discardedEvents:
                         logger.error(
@@ -529,14 +567,14 @@ def worker() -> None:
                     pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
 
                 if should_send(pending):
-                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.trace("pending has at least one of "
-                                     "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
-                                     " and it passed should_send()")
-                        for p in pending:
-                            if p['event'] in ('Location'):
-                                logger.trace('"Location" event in pending passed should_send(), '
-                                             f'timestamp: {p["timestamp"]}')
+                    # if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                    #     logger.trace("pending has at least one of "
+                    #                  "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                    #                  " and it passed should_send()")
+                    #     for p in pending:
+                    #         if p['event'] in ('Location'):
+                    #             logger.trace('"Location" event in pending passed should_send(), '
+                    #                          f'timestamp: {p["timestamp"]}')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
                     if creds is None:
@@ -547,29 +585,29 @@ def worker() -> None:
                         'commanderName': username.encode('utf-8'),
                         'apiKey': apikey,
                         'fromSoftware': applongname,
-                        'fromSoftwareVersion': appversion,
+                        'fromSoftwareVersion': str(appversion()),
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
-                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        data_elided = data.copy()
-                        data_elided['apiKey'] = '<elided>'
-                        logger.trace(
-                            "pending has at least one of "
-                            "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
-                            " Attempting API call with the following events:"
-                        )
+                    # if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                    #     data_elided = data.copy()
+                    #     data_elided['apiKey'] = '<elided>'
+                    #     logger.trace(
+                    #         "pending has at least one of "
+                    #         "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                    #         " Attempting API call with the following events:"
+                    #     )
 
-                        for p in pending:
-                            logger.trace(f"Event: {p!r}")
-                            if p['event'] in ('Location'):
-                                logger.trace('Attempting API call for "Location" event with timestamp: '
-                                             f'{p["timestamp"]}')
+                    #     for p in pending:
+                    #         logger.trace(f"Event: {p!r}")
+                    #         if p['event'] in ('Location'):
+                    #             logger.trace('Attempting API call for "Location" event with timestamp: '
+                    #                          f'{p["timestamp"]}')
 
-                        logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
+                    #     logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
 
                     r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
-                    logger.trace(f'API response content: {r.content}')
+                    # logger.trace(f'API response content: {r.content}')
                     r.raise_for_status()
                     reply = r.json()
                     msg_num = reply['msgnum']
@@ -586,10 +624,12 @@ def worker() -> None:
                     else:
 
                         if msg_num // 100 == 1:
-                            logger.trace('Overall OK')
+                        #     logger.trace('Overall OK')
+                            pass
 
                         elif msg_num // 100 == 5:
-                            logger.trace('Event(s) not currently processed, but saved for later')
+                        #     logger.trace('Event(s) not currently processed, but saved for later')
+                            pass
 
                         else:
                             logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
@@ -598,9 +638,8 @@ def worker() -> None:
                             if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
                                 # Update main window's system status
                                 this.lastlookup = r
-
+                                # calls update_status in main thread
                                 if not config.shutting_down:
-                                    # calls update_status in main thread
                                     this.system_link.event_generate('<<EDSMStatus>>', when="tail")
 
                             if r['msgnum'] // 100 != 1:
@@ -610,6 +649,7 @@ def worker() -> None:
                         pending = []
 
                 break  # No exception, so assume success
+
             except Exception as e:
                 logger.debug(f'Attempt to send API events: retrying == {retrying}', exc_info=e)
                 retrying += 1
@@ -618,7 +658,10 @@ def worker() -> None:
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if closing:
+            logger.debug('closing, so returning.')
             return
+
+    logger.debug('Done.')
 
 
 def should_send(entries: List[Mapping[str, Any]]) -> bool:
