@@ -44,6 +44,10 @@ class This:
     def __init__(self):
         # Track if we're on foot
         self.on_foot = False
+
+        # Running under Odyssey?
+        self.odyssey = False
+
         # Track location to add to Journal events
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
@@ -773,7 +777,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     # Note if we're under Odyssey
     # The only event this is already in is `LoadGame` which isn't sent to EDDN.
-    entry['odyssey'] = state['Odyssey']
+    this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
