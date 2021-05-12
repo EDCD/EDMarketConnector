@@ -35,6 +35,23 @@ Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pit
 section, else you might inadvertently cause issues for the core EDMC code
 including whole application crashes.
 
+It is highly advisable to ensure you are aware of all EDMarketConnector 
+releases, including the pre-releases.  The -beta and -rc changelogs will 
+contain valuable information about any forthcoming changes that affect plugins.
+The easiest way is:
+
+ 1. Login to [GitHub](https://github.com).
+ 2. Navigate to [EDMarketConnector](https://github.com/EDCD/EDMarketConnector).
+ 3. Click the 'Watch' (or 'Unwatch' if you previously set up any watches on 
+ us).  It's currently (2021-05-13) the left-most button of 3 near the 
+ top-right of the page.
+ 4. Click 'Custom'.
+ 5. Ensure 'Releases' is selected.
+ 6. Click 'Apply'.
+
+And, of course, either ensure you check your GitHub messages regularly, or 
+have it set up to email you such notifications.
+
 ---
 
 ## Examples
