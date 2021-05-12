@@ -216,6 +216,17 @@ Plugin Developers
 * `config.appversion()` is now a function that returns a `semantic_version.Version`.
   In contexts where you're expecting a string this should mostly
   just work.  If needs be wrap it in `str()`.
+  
+  For backwards compatibility with pre-5.0.0 you can use:
+
+```python
+    from config import appversion
+
+    if callable(appversion):
+        edmc_version = appversion()
+    else:
+        edmc_version = appversion
+```
 
 * Example plugin
   [plugintest](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/plugintest)
