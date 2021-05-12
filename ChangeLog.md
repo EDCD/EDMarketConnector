@@ -1,7 +1,7 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-Pre-Release 5.0.0-rc1
+Release 5.0.0
 ===
 
 Python 3.9
@@ -22,21 +22,38 @@ Python 3.9
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
-Changes and Enhancements
+This Update Is Mandatory
 ---
 
-* Due to some Plugin API changes (see below) users might need to update 
-  their plugins.  A check of all the
-  [Plugins we know about](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37)
-  only found one with an issue related to the move to `edmc_data.py`, the
-  developer was informed and the issue addressed.
-  
-  Other plugins should, at most, log deprecation warnings about the 
-  `config` changes (again, see below).
-  
-  **In the first instance please report any issues with plugins to *their* 
-  developers, not us.  They can contact us about EDMC core code issues if 
-  they find such in their investigations.**
+This release is a **mandatory upgrade for the release of Elite Dangerous 
+Odyssey**.  Any bug reports against earlier releases, pertaining to Odyssey or
+not, will be directed to reproduce them with 5.0.0 or later.  There are also
+minor bugs in 4.2.7 and earlier that have been fixed in this version.  There
+will **NOT** be another 4.2.x release.
+
+The major version has been incremented not for Odyssey support, but because 
+we have made some minor breaking changes to the APIs we provide for plugin 
+developers.
+
+Due to these plugin API changes (see below) users might need to update their
+plugins.  A check of all the
+[Plugins we know about](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37)
+only found one with an issue related to the move to `edmc_data.py`, the
+developer was informed and the issue addressed.
+
+Other plugins should, at most, log deprecation warnings about the
+`config` changes (again, see below).
+
+**In the first instance please report any issues with plugins to *their*
+developers, not us.  They can contact us about EDMC core code issues if
+they find such in their investigations.**
+
+All plugin developers would benefit from having a GitHub account and then 
+setting up a watch on [EDMarketConnector](https://github.com/EDCD/EDMarketConnector/)
+of at least 'Releases' under 'Custom'.
+
+Changes and Enhancements
+---
 
 * If the application detects it's running against a non-live (alpha or beta)
   version of the game it will append " (beta)" to the Commander name on the 
@@ -270,6 +287,8 @@ if not hasattr(config, 'get_list'):
     config.get_list = config.get
 ```
 
+* Utilising our provided logging from a class-level, i.e. not a solid 
+  instance of a class, property/function will now work.
 
 * We now change the current working directory of EDMarketConnector.exe to
   its location as soon as possible in its execution.  We're also
@@ -336,6 +355,10 @@ if not hasattr(config, 'get_list'):
 
   See the updated `PLUGINS.md` file for details.
 
+* As `Status.json`, and thus the EDMC 'dashboard' output now has a 'flags2' 
+  key we have added the associated constants to `edmc_data.py` with a 
+  `Flags2` prefix on the names.
+  
 * Note that during the Odyssey Alpha it was observed that the CAPI
   `data['commander']['docked']` boolean was **always true** if the Cmdr was
   in their ship.  This is a regression from pre-Odyssey behaviour.  The
