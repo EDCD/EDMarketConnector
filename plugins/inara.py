@@ -386,7 +386,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     this.station = entry.get('StationName', this.station)
     # on_foot station detection
-    if not this.station and entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
         this.station = entry['Body']
 
     this.station_marketid = entry.get('MarketID', this.station_marketid) or this.station_marketid

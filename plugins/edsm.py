@@ -373,10 +373,10 @@ def journal_entry(
 
     this.station = entry.get('StationName', this.station)
     # on_foot station detection
-    if not this.station and entry['event'] == 'Location' and entry['BodyType'] == 'Station':
+    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
         this.station = entry['Body']
 
-    this.station_marketid = entry.get('MarketID', this.station)
+    this.station_marketid = entry.get('MarketID', this.station_marketid)
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
         this.station = None
