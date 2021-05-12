@@ -24,6 +24,20 @@ Python 3.9
 
 Changes and Enhancements
 ---
+
+* Due to some Plugin API changes (see below) users might need to update 
+  their plugins.  A check of all the
+  [Plugins we know about](https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37)
+  only found one with an issue related to the move to `edmc_data.py`, the
+  developer was informed and the issue addressed.
+  
+  Other plugins should, at most, log deprecation warnings about the 
+  `config` changes (again, see below).
+  
+  **In the first instance please report any issues with plugins to *their* 
+  developers, not us.  They can contact us about EDMC core code issues if 
+  they find such in their investigations.**
+
 * If the application detects it's running against a non-live (alpha or beta)
   version of the game it will append " (beta)" to the Commander name on the 
   main UI.
