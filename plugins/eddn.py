@@ -44,6 +44,10 @@ class This:
     def __init__(self):
         # Track if we're on foot
         self.on_foot = False
+
+        # Running under Odyssey?
+        self.odyssey = False
+
         # Track location to add to Journal events
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
@@ -263,7 +267,7 @@ Msg:\n{msg}'''
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
@@ -306,6 +310,7 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
+                ('odyssey',     is_odyssey),
             ])
 
             if 'economies' in data['lastStarport']:
@@ -363,7 +368,7 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -403,12 +408,13 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
+                    ('odyssey',     is_odyssey),
                 ]),
             })
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -442,6 +448,7 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
+                    ('odyssey',     is_odyssey),
                 ]),
             })
 
@@ -484,6 +491,7 @@ Msg:\n{msg}'''
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
                     ('commodities', commodities),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -518,6 +526,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -547,6 +556,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
+                    ('odyssey',     entry['odyssey'])
                 ]),
             })
 
@@ -560,6 +570,7 @@ Msg:\n{msg}'''
 
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
+        :param is_odyssey: did we detect Odyssey ?
         :param entry: the journal entry to send
         """
         msg = {
@@ -769,6 +780,11 @@ def journal_entry(  # noqa: C901, CCR001
         return filtered
 
     this.on_foot = state['OnFoot']
+
+    # Note if we're under Odyssey
+    # The only event this is already in is `LoadGame` which isn't sent to EDDN.
+    this.odyssey = entry['odyssey'] = state['Odyssey']
+
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
@@ -883,6 +899,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             with path.open('rb') as f:
                 entry = json.load(f)
+                entry['odyssey'] = this.odyssey
                 if entry['event'] == 'Market':
                     this.eddn.export_journal_commodities(cmdr, is_beta, entry)
 
@@ -924,9 +941,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
                 status['text'] = _('Sending data to EDDN...')
                 status.update_idletasks()
 
-            this.eddn.export_commodities(data, is_beta)
-            this.eddn.export_outfitting(data, is_beta)
-            this.eddn.export_shipyard(data, is_beta)
+            this.eddn.export_commodities(data, is_beta, this.odyssey)
+            this.eddn.export_outfitting(data, is_beta, this.odyssey)
+            this.eddn.export_shipyard(data, is_beta, this.odyssey)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
