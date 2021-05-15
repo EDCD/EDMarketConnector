@@ -570,7 +570,6 @@ Msg:\n{msg}'''
 
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
-        :param is_odyssey: did we detect Odyssey ?
         :param entry: the journal entry to send
         """
         msg = {
