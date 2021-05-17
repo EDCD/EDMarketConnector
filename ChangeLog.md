@@ -26,7 +26,7 @@ In the 5.0.1 changelog we said:
   <blockquote>We will **NOT** be using this merely to try and get some
   laggards to upgrade.</blockquote>
 
-However from now on there is an exception to this.  **After** this 
+However, from now on there is an exception to this.  **After** this 
 release any subsequent -beta or -rc versions will be killswitched *after* 
 their full release is published.
 
