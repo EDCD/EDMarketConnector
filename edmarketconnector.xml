@@ -36,10 +36,82 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.0.0</title>
+			<title>Release 5.0.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<h2>Release 5.0.1</h2>
+<p>The main reason for this release is to add an 'odyssey' boolean flag to all
+EDDN messages for the benefit of listeners, e.g. eddb.io, inara.cz,
+edsm.net, spansh.co.uk, etc.  <strong>Please do update so as to make their lives
+easier once Odyssey has launched!</strong></p>
+<ul>
+<li>
+<p>Translations have been updated again.  Thanks to all the contributors.
+See <a href="https://github.com/EDCD/EDMarketConnector/wiki/Translations">wiki:Translations</a>
+and <a href="https://github.com/EDCD/EDMarketConnector/issues/24">Translations welcome</a>
+for links and discussion if you want to help.</p>
+</li>
+<li>
+<p>Changed the error message "<code>Error: Frontier server is down</code>" to
+"<code>Error: Frontier CAPI didn't respond</code>" to make it clear this pertains to
+the CAPI and not the game servers.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-killswitches" class="anchor" href="#killswitches" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Killswitches</h2>
+<p>In the 5.0.0 changelog we said:</p>
+  <blockquote>We will **NOT** be using this merely to try and get some
+  laggards to upgrade.</blockquote>
+<p>However, from now on there is an exception to this.  <strong>After</strong> this
+release any subsequent -beta or -rc versions will be killswitched <em>after</em>
+their full release is published.</p>
+<p>For example, if we put out a <code>5.0.2-beta1</code> and <code>5.0.2-rc1</code> before the full
+<code>5.0.2</code>, then when <code>5.0.2</code> was published we would activate all available
+killswitches for versions <code>5.0.2-beta1</code> and <code>5.0.2-rc1</code>.  In this example
+<code>5.0.1</code> would <strong>not</strong> be killswitched as part of <em>this policy</em> (but still
+could be if, e.g. a data corruption bug was found in it).</p>
+<p>In general please do <strong>not</strong> linger on any -beta or -rc release if there
+has been a subsequent release.  Upgrade to the equivalent full release once it
+is published.</p>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>Please make the effort to subscribe to GitHub notifications of new
+EDMarketConnector releases:</p>
+<ol>
+<li>Login to <a href="https://github.com">GitHub</a>.</li>
+<li>Navigate to <a href="https://github.com/EDCD/EDMarketConnector">EDMarketConnector</a>.</li>
+<li>Click the 'Watch' (or 'Unwatch' if you previously set up any watches on
+us).  It's currently (2021-05-13) the left-most button of 3 near the
+top-right of the page.</li>
+<li>Click 'Custom'.</li>
+<li>Ensure 'Releases' is selected.</li>
+<li>Click 'Apply'.</li>
+</ol>
+<p>This way you'll be aware, as early as possible, of any -beta and -rc
+changelogs and changes that might affect your work.</p>
+</li>
+<li>
+<p><code>state</code> passed to <code>journal_entry()</code> has a new member <code>Odyssey</code> (note the
+capital <code>O</code>) which is a boolean indicating if the <code>LoadGame</code> event both has
+an <code>Odyssey</code> key, and if so, what the value was.  Defaults to <code>False</code>.</p>
+</li>
+<li>
+<p>PLUGINS.md updated to document the <code>state['Horizons']</code> flag that has been
+present in it since version 3.0 of the game.</p>
+</li>
+<li>
+<p>The <code>stations.p</code> and <code>systems.p</code> files that were deprecated in 5.0.0 have
+now also been removed in git.  As this release is made they will no
+longer be in the <code>develop</code>, <code>main</code> or <code>stable</code> branches.  If you truly
+need to find a copy look at the <code>Release/4.2.7</code> tag, but do read the 5.0.0
+changelog for why we stopped using them and what you can change to also
+not need them.</p>
+</li>
+</ul>
 
 <h2>Release 5.0.0</h2>
 <ul>
@@ -453,11 +525,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.0/EDMarketConnector_win_5.0.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.1/EDMarketConnector_win_5.0.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.0.0"
-				length="10166272"
+				sparkle:version="5.0.1"
+				length="10194944"
 				type="application/octet-stream"
 			/>
 		</item>
