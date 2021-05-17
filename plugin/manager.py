@@ -28,6 +28,7 @@ class LoadedPlugin:
     """LoadedPlugin represents a single plugin, its module, and callbacks."""
 
     def __init__(self, info: PluginInfo, plugin: BasePlugin, module: ModuleType) -> None:
+        # TODO: System to mark incompatibilities
         self.info: PluginInfo = info
         self.plugin: BasePlugin = plugin
         self.module: ModuleType = module
