@@ -14,6 +14,7 @@ from time import gmtime, localtime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
+from util import deep_get
 
 import monitor_state
 
@@ -572,7 +573,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         self.state_2.ship.ident = entry['UserShipId']
 
                 else:
-                    logger.warn('Attempt to set ship info when ship was None')
+                    logger.warning('Attempt to set ship info when ship was None')
 
             elif event_type == 'ShipyardBuy':
                 self.state['ShipID'] = None
@@ -673,7 +674,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'ModuleRetrieve':
                 self.state['Credits'] -= entry.get('Cost', 0)
-                self.state_2 -= entry.get('Cost', 0)
+                self.state_2.credits -= entry.get('Cost', 0)
 
             elif event_type == 'ModuleSell':
                 self.state['Modules'].pop(entry['Slot'], None)
@@ -1140,6 +1141,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             except KeyError:
                                 logger.debug(f"KeyError getting switched-to suit from slot {new_slot} ({loadoutid}")
 
+                # I dont want to mess with the above logic here, so Im going to replicate it with the new classes
+                # instead
+
+                if self.state_2.suits and self.state_2.suit_loadouts:
+                    self.state_2.current_suit_loadout = self.state_2.suit_loadouts.get(new_slot)
+                    if self.state_2.current_suit_loadout is None:
+                        logger.debug(f"KeyError getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
+                        self.state_2.current_suit = None
+                        self.state_2.current_suit_loadout = None
+
+                    else:
+                        self.state_2.current_suit = self.state_2.current_suit_loadout.suit
+
             elif event_type == 'CreateSuitLoadout':
                 # We know we won't have data for this new one
                 # Parameters:
@@ -1174,6 +1188,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 }
                 self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
 
+                slot = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                suit = self.state_2.suit_by_id(entry['SuitID'])
+                if suit is None:
+                    logger.warning(
+                        f'Unknown suit {entry["SuitID"]} ({entry["SuitName"]})!'
+                        f'Setting it to nothing in the loadout (entry["LoadoutName"])'
+                    )
+
+                self.state_2.suit_loadouts[str(slot)] = monitor_state.SuitLoadout(
+                    id=slot,
+                    name=entry['LoadoutName'],
+                    suit=suit,
+                    modules=self.suit_loadout_slots_array_to_dict(entry['Modules']),
+                )
+
             elif event_type == 'DeleteSuitLoadout':
                 # alpha4:
                 # { "timestamp":"2021-04-29T10:32:27Z", "event":"DeleteSuitLoadout", "SuitID":1698365752966423,
@@ -1188,6 +1217,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     except KeyError:
                         # This should no longer happen, as we're now handling CreateSuitLoadout properly
                         logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
+
+                if self.state_2.suit_loadouts:
+                    id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    if id in self.state_2.suit_loadouts:
+                        del self.state_2.suit_loadouts[id]
+                    else:
+                        logger.debug(f"loadout slot id {id} doesn't exist, not in last CAPI pull?")
 
             elif event_type == 'RenameSuitLoadout':
                 # alpha4
@@ -1208,6 +1244,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     except KeyError:
                         logger.debug(f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?")
 
+                if self.state_2.suit_loadouts:
+                    id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                    if id in self.state_2.suit_loadouts:
+                        del self.state_2.suit_loadouts[id]
+
+                    else:
+                        logger.debug(f"loadout slot id {id} doesn't exist, not in last CAPI pull?")
+
             elif event_type == 'BuySuit':
                 # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
@@ -1226,6 +1270,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.state['Credits'] -= price
+                    self.state_2.credits -= price
+
+                if (oldsuit := self.state_2.suit_by_id(entry['SuitID'])) is not None:
+                    logger.warning(f'Suit with ID {oldsuit.id} already exists! {oldsuit}')
+                    # TODO: if this is the case either bail here, or go update all loadouts with this suit
+
+                self.state_2.suits.append(monitor_state.Suit(
+                    id=entry['SuitID'],
+                    name=entry['Name'],
+                    localised_name=entry.get('Name_Localised'),
+                    fdev_id=None
+                ))
 
             elif event_type == 'SellSuit':
                 # Remove from known suits
@@ -1254,6 +1310,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     else:
                         self.state['Credits'] += price
+
+                if (suit := self.state_2.suit_by_id(entry['SuitID'])) is not None:
+                    self.state_2.suits.remove(suit)
+                else:
+                    logger.warning(f'Unable to fund suit {entry["SuitID"]} ({entry["Name"]}) to delete')
+
+                self.state_2.credits -= entry.get('Price', 0)
 
             elif event_type == 'UpgradeSuit':
                 # alpha4
@@ -1289,6 +1352,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     except KeyError:
                         logger.error(f"LoadoutEquipModule: {entry}")
 
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                if (loadout := self.state_2.suit_loadouts.get(loadout_id)) is not None:
+                    loadout.modules[entry['SlotName']] = {
+                        'name':           entry['ModuleName'],
+                        'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
+                        'id':             None,
+                        'weaponrackId':   entry['SuitModuleID'],
+                        'locDescription': '',
+                    }
+
+                else:
+                    logger.error(f'LoadoutEquipModule references Loadout that does not exist: {entry}')
+
             elif event_type == 'LoadoutRemoveModule':
                 # alpha4 - triggers if selecting an already-equipped weapon into a different slot
                 # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutRemoveModule", "LoadoutName":"Dom L/K/K",
@@ -1303,6 +1379,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     except KeyError:
                         logger.error(f"LoadoutRemoveModule: {entry}")
 
+                loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                if (loadout := self.state_2.suit_loadouts.get(loadout_id)) is not None:
+                    slotname = entry['SlotName']
+                    if slotname in loadout.modules:
+                        del loadout.modules[slotname]
+
+                    else:
+                        logger.error(f'LoadoutRemoveModule references slot that does not exist! {entry}')
+
             elif event_type == 'BuyWeapon':
                 # alpha4
                 # { "timestamp":"2021-04-29T11:10:51Z", "event":"BuyWeapon", "Name":"Wpn_M_AssaultRifle_Laser_FAuto",
@@ -1313,6 +1398,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.state['Credits'] -= price
+                    self.state_2.credits -= price
 
             elif event_type == 'SellWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
@@ -1331,12 +1417,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             # could only possibly have been here once.
                             break
 
+                target_module = entry['SuitModuleID']
+                for ld in self.state_2.suit_loadouts.values():
+                    to_remove = filter(lambda w: ld.modules[w]['weaponRackId'] == target_module, ld.modules)
+                    for name in to_remove:
+                        del ld.modules[name]
+
                 # Update credits total
                 if price := entry.get('Price') is None:
                     logger.error(f"SellWeapon didn't contain Price: {entry}")
 
                 else:
                     self.state['Credits'] += price
+                    self.state_2.credits += price
 
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
@@ -1352,8 +1445,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for bd in entry['BioData']:
                     self.state['Credits'] += bd.get('Value', 0) + bd.get('Bonus', 0)
 
+                self.state_2.credits += sum(bd.get('Value', 0) + bd.get('Bonus', 0) for bd in entry['BioData'])
+
             elif event_type == 'BookDropship':
                 self.state['Credits'] -= entry.get('Cost', 0)
+                self.state_2.credits -= entry.get('Cost', 0)
                 # Technically we *might* now not be OnFoot.
                 # The problem is that this event is recorded both for signing up for
                 # an on-foot CZ, and when you use the Dropship to return after the
@@ -1367,12 +1463,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'BookTaxi':
                 self.state['Credits'] -= entry.get('Cost', 0)
+                self.state_2.credits -= entry.get('Cost', 0)
 
             elif event_type == 'CancelDropship':
                 self.state['Credits'] += entry.get('Refund', 0)
+                self.state_2.credits += entry.get('Refund', 0)
 
             elif event_type == 'CancelTaxi':
                 self.state['Credits'] += entry.get('Refund', 0)
+                self.state_2.credits += entry.get('Refund', 0)
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
@@ -1385,6 +1484,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     else:
                         self.state['NavRoute'] = entry
+                        self.state_2.route = monitor_state.NavRoute.from_dict(dict(**entry))
 
             elif event_type == 'ModuleInfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
@@ -1396,6 +1496,29 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     else:
                         self.state['ModuleInfo'] = entry
+                        if self.state_2.ship is None:
+                            logger.error('ModulesInfo with no ship????')
+                        else:
+                            if (
+                                any(mod['Slot'] not in self.state_2.ship.modules for mod in entry['Modules'])
+                                or len(self.state_2.ship.modules) != len(entry['Modules'])
+                            ):
+                                logger.warning(
+                                    f'ModulesInfo references Module that we dont know about!'
+                                    f'\n{entry=}\n{self.state_2.ship.modules=}'
+                                )
+
+                            for mod in entry['Modules']:
+                                mod_slot = mod['Slot']
+                                ship_mod = self.state_2.ship.modules[mod_slot]
+                                if ship_mod.name.casefold() != mod['Item'].casefold():
+                                    logger.warning(
+                                        'ModulesInfo and current ship do not agree with contents of slot! Not updating!'
+                                        f'{mod_slot=}: MI: {mod["Item"]} CS: {ship_mod.name}'
+                                    )
+                                else:
+                                    ship_mod.priority = mod['Priority']
+                                    # ship_mod.power = mod['Power'] # Not in the startup LOADOUT so not tracked
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
                 commodity = self.canonicalise(entry['Type'])

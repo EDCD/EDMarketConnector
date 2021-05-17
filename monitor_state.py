@@ -1,12 +1,11 @@
 """State classes for monitor.py."""
 from __future__ import annotations
 
-import warnings
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Any, DefaultDict, MutableMapping, Optional, Tuple, TypeVar, Union
 from operator import attrgetter
+from typing import Any, DefaultDict, MutableMapping, Optional, Tuple, TypeVar
 
 # spell-checker: words ddict fdev DDINT
 DDINT = DefaultDict[str, int]
@@ -93,7 +92,7 @@ class ShipModule:
 
     slot: str  # TODO: remove this? its more relevant ON a ship
     name: str
-    # power: float # TODO: Not a thing?
+    # power: float # # TODO: Not a thing? Or, at least, not in the starting Loadout.
     priority: int
     value: int
     health: float
@@ -293,7 +292,7 @@ class SuitLoadout:
 
     id: int  # This is _also_ the slot that this loadout is in
     name: str
-    suit: Suit
+    suit: Optional[Suit]
     modules: dict[str, Any]
 
     @property
@@ -308,9 +307,7 @@ class SuitLoadout:
     def _to_dict(self) -> dict[str, Any]:
         return {
             'loadoutSlotID': self.id,
-
-            "suit": self.suit._to_dict(),
-
+            "suit": self.suit._to_dict() if self.suit is not None else {},
             "name": self.name,
             "slots": deepcopy(self.modules),
         }
@@ -336,6 +333,21 @@ class NavRoute:
     timestamp: str
     route: list[System]
 
+    @staticmethod
+    def from_dict(d: dict[str, Any]) -> NavRoute:
+        """Construct a NavRoute instance from a NavRoute.json."""
+        route = []
+        for route_raw in d['Route']:
+            pos = route_raw['StarPos']  # this makes pylance happy
+            route.append(System(
+                name=route_raw['StarSystem'],
+                address=route_raw['SystemAddress'],
+                position=(pos[0], pos[1], pos[2]),
+                star_class=route_raw['StarClass']
+            ))
+
+        return NavRoute(timestamp=d['timestamp'], route=route)
+
     def _to_dict(self) -> dict[str, Any]:
         to_ret: dict[str, Any] = {"timestamp": self.timestamp, "event": "NavRoute"}
         return to_ret | {system.name: system._to_dict() for system in self.route}
@@ -352,7 +364,7 @@ class MonitorState:
         self.captain: Optional[str] = None
         self.cargo: DefaultDict[str, int] = defaultdict(int)
         self.cargo_json: Optional[dict[str, Any]] = None
-        self.credits: Optional[int] = None
+        self.credits: int = None  # type: ignore # Set when it matters
         self.frontier_id: str = ""
         self.loan: DefaultDict[str, int] = defaultdict(int)
         self.materials = Materials()
@@ -370,8 +382,8 @@ class MonitorState:
 
         self.current_suit: Optional[Suit] = None
         self.current_suit_loadout: Optional[SuitLoadout] = None
-        self.suits: list[Suit] = []
-        self.suit_loadouts: dict[str, Any] = {}
+        self.suits: list[Suit] = []  # Sparse list
+        self.suit_loadouts: dict[int, SuitLoadout] = {}  # this is by _slot_. See monitor#suit_loadout_id_from_loadoutid
 
         # TODO: system/station/etc? would be cleaner to keep it to one class
 
@@ -398,6 +410,19 @@ class MonitorState:
     #     """Legacy frontend to access as a dict."""
     #     warnings.warn("Accessing MonitorState as a dict is discoraged. Access fields directly.", DeprecationWarning)
     #     return self.to_dict()[name]
+
+    def suit_by_id(self, id: int) -> Optional[Suit]:
+        """
+        Get a suit by its ID (SuitID in journals).
+
+        :param id: the ID to search for
+        :return: a suit or None
+        """
+        for s in self.suits:
+            if s.id == id:
+                return s
+
+        return None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a legacy style dict for use in plugins."""
