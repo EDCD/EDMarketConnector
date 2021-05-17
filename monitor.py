@@ -1,12 +1,12 @@
 """Monitor for new Journal files and contents of latest."""
 
-from copy import deepcopy
 import json
 import queue
 import re
 import threading
 from calendar import timegm
 from collections import OrderedDict, defaultdict
+from copy import deepcopy
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
@@ -14,7 +14,6 @@ from time import gmtime, localtime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
-from util import deep_get
 
 import monitor_state
 
