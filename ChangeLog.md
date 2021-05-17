@@ -1,6 +1,55 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Release 5.0.1
+===
+
+The main reason for this release is to add an 'odyssey' boolean flag to all 
+EDDN messages for the benefit of listeners, e.g. eddb.io, inara.cz,
+edsm.net, spansh.co.uk, etc.  **Please do update so as to make their lives 
+easier once Odyssey has launched!**
+
+* Translations have been updated again.  Thanks to all the contributors.
+  See [wiki:Translations](https://github.com/EDCD/EDMarketConnector/wiki/Translations)
+  and [Translations welcome](https://github.com/EDCD/EDMarketConnector/issues/24)
+  for links and discussion if you want to help.
+  
+* Changed the error message "`Error: Frontier server is down`" to
+  "`Error: Frontier CAPI didn't respond`" to make it clear this pertains to 
+  the CAPI and not the game servers.
+
+Plugin Developers
+---
+
+* Please make the effort to subscribe to GitHub notifications of new 
+EDMarketConnector releases:
+
+  1. Login to [GitHub](https://github.com).
+  2. Navigate to [EDMarketConnector](https://github.com/EDCD/EDMarketConnector).
+  3. Click the 'Watch' (or 'Unwatch' if you previously set up any watches on 
+  us).  It's currently (2021-05-13) the left-most button of 3 near the 
+  top-right of the page.
+  4. Click 'Custom'.
+  5. Ensure 'Releases' is selected.
+  6. Click 'Apply'.
+  
+  This way you'll be aware, as early as possible, of any -beta and -rc 
+  changelogs and changes that might affect your work.
+
+* `state` passed to `journal_entry()` has a new member `Odyssey` (note the 
+  capital `O`) which is a boolean indicating if the `LoadGame` event both has 
+  an `Odyssey` key, and if so, what the value was.  Defaults to `False`.
+
+* PLUGINS.md updated to document the `state['Horizons']` flag that has been 
+  present in it since version 3.0 of the game.
+  
+* The `stations.p` and `systems.p` files that were deprecated in 5.0.0 have 
+  now also been removed in git.  As this release is made they will no 
+  longer be in the `develop`, `main` or `stable` branches.  If you truly 
+  need to find a copy look at the `Release/4.2.7` tag, but do read the 5.0.0
+  changelog for why we stopped using them and what you can change to also 
+  not need them.
+  
 Release 5.0.0
 ===
 
