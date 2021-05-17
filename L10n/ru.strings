@@ -1,3 +1,6 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Ошибка: CAPI Frontier не отвечает";
+
 /* Language name */
 "!Language" = "Русский";
 
@@ -124,6 +127,15 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Расположение файла журнала E:D";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "Обработка журнала EDDB отключена. См. логи.";
+
+/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
+"EDDN journal handler disabled. See Log." = "Обработчик журнала EDDN отключен. См. логи.";
+
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "Обработчик журнала EDSM отключен. См. логи.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Эрл";
 
@@ -172,7 +184,8 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Ошибка: EDSM {MSG}";
 
-/* Raised when cannot contact the Companion API server. [companion.py] */
+
+/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Ошибка: сервера Frontier недоступны";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
@@ -249,6 +262,9 @@
 
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Учётные данные Inara";
+
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara отключена. См. логи.";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "Информация о мигрирующих плагинах";

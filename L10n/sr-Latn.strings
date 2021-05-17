@@ -1,3 +1,6 @@
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Greška: Frontier CAPI nije odgovorio";
+
 /* Language name */
 "!Language" = "Srpski (Latinica)";
 
@@ -124,6 +127,15 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Lokacija E:D Journal fajlova";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "Obrada žurnala za EDDB je deaktivirana. Pogledajte Log.";
+
+/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
+"EDDN journal handler disabled. See Log." = "Obrada žurnala za EDDN je deaktivirana. Pogledajte Log.";
+
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "EDSM obrada je deaktivirana. Pogledajte Log.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 
@@ -172,7 +184,8 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
 
-/* Raised when cannot contact the Companion API server. [companion.py] */
+
+/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Greška: Frontier server je nedostupan";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
@@ -249,6 +262,9 @@
 
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara kredencijali";
+
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara je deaktivirana. Pogledajte Log.";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "Informacije o migraciji dodataka (plugins)";

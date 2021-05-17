@@ -130,6 +130,7 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
 
+
 /* [companion.py] */
 "Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
 
