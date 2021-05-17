@@ -21,7 +21,7 @@ easier once Odyssey has launched!**
 Killswitches
 ---
 
-In the 5.0.1 changelog we said:
+In the 5.0.0 changelog we said:
 
   <blockquote>We will **NOT** be using this merely to try and get some
   laggards to upgrade.</blockquote>
