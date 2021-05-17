@@ -130,6 +130,9 @@
 /* When EDDN journal handling has been killswitched [plugins/eddn.py] */
 "EDDN journal handler disabled. See Log." = "EDDN journal handler disabled. See Log.";
 
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "EDSM Handler disabled. See Log.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 

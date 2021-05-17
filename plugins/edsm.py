@@ -343,7 +343,7 @@ def journal_entry(
     """Journal Entry hook."""
     if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
         logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
-        plug.show_error('EDSM Handler disabled. See Log.')
+        plug.show_error(_('EDSM Handler disabled. See Log.'))
         return
 
     elif (ks := killswitch.get_disabled(f'plugins.edsm.journal.event.{entry["event"]}')).disabled:
