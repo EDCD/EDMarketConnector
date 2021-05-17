@@ -93,7 +93,7 @@ class ShipModule:
     slot: str  # TODO: remove this? its more relevant ON a ship
     name: str
     # power: float # # TODO: Not a thing? Or, at least, not in the starting Loadout.
-    priority: int
+    priority: Optional[int]
     value: int
     health: float
 
@@ -127,11 +127,11 @@ class ShipModule:
         return ShipModule(
             slot=slot,
             name=name,
-            priority=source['Priority'],
+            priority=source.get('Priority'),
             ammo=ammo,
             ammo_clip_size=clip_size,
             engineering=engineering,
-            value=source['Value'],
+            value=source.get('Value', 0),
             health=source['Health'],
         )
 
@@ -443,7 +443,7 @@ class MonitorState:
             },
 
             'Rank':               {
-                r.name: (r.level, max(r.progress if r.progress is not None else 0, 100)) for r in self.ranks.values()
+                r.name: (r.level, min(r.progress if r.progress is not None else 0, 100)) for r in self.ranks.values()
             },
             'Reputation':         {r.faction: r.level for r in self.reputation.values()},
             'Statistics':         deepcopy(self.statistics),
