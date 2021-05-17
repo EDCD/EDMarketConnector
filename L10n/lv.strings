@@ -145,7 +145,8 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Kļūda: EDSM {MSG}";
 
-/* Raised when cannot contact the Companion API server. [companion.py] */
+
+/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Kļūda: Frontier serveris nav aktīvs";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */

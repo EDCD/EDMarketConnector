@@ -169,7 +169,7 @@ class ServerError(Exception):
         # Raised when cannot contact the Companion API server
         self.args = args
         if not args:
-            self.args = (_('Error: Frontier server is down'),)
+            self.args = (_("Error: Frontier CAPI didn't respond"),)
 
 
 class ServerLagging(Exception):

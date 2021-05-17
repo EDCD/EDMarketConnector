@@ -119,6 +119,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Credits':            None,
             'FID':                None,  # Frontier Cmdr ID
             'Horizons':           None,  # Does this user have Horizons?
+            'Odyssey':            False,  # Have we detected we're running under Odyssey?
             'Loan':               None,
             'Raw':                defaultdict(int),
             'Manufactured':       defaultdict(int),
@@ -520,6 +521,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Credits':    entry['Credits'],
                     'FID':        entry.get('FID'),   # From 3.3
                     'Horizons':   entry['Horizons'],  # From 3.0
+                    'Odyssey':    entry.get('Odyssey', False),  # From 4.0 Odyssey
                     'Loan':       entry['Loan'],
                     'Engineers':  {},
                     'Rank':       {},

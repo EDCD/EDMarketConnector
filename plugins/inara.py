@@ -327,8 +327,8 @@ def journal_entry(  # noqa: C901, CCR001
     :return: str - empty if no error, else error string.
     """
     if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
-        logger.warning(f'INARA support has been disabled via killswitch: {ks.reason}')
-        plug.show_error('INARA disabled. See Log.')
+        logger.warning(f'Inara support has been disabled via killswitch: {ks.reason}')
+        plug.show_error(_('Inara disabled. See Log.'))
         return ''
 
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:

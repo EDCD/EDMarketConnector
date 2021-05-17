@@ -124,6 +124,15 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D 日志文件位置";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "EDDB Journal Processing 已禁用。请查看诊断日志。";
+
+/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
+"EDDN journal handler disabled. See Log." = "EDDN Journal Handler 已禁用。请查看诊断日志。";
+
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "EDSM Handler 已禁用。请查看诊断日志。";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 
@@ -172,7 +181,8 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "错误：EDSM {MSG}";
 
-/* Raised when cannot contact the Companion API server. [companion.py] */
+
+/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "错误：Frontier 服务器不可用";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
@@ -250,6 +260,9 @@
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inara 授权凭证";
 
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara 已禁用。请查看诊断日志。";
+
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "关于插件迁移";
 
@@ -309,6 +322,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "最小化到系统托盘";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
@@ -501,6 +517,9 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "状态";
+
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "套装";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";

@@ -35,6 +35,23 @@ Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pit
 section, else you might inadvertently cause issues for the core EDMC code
 including whole application crashes.
 
+It is highly advisable to ensure you are aware of all EDMarketConnector 
+releases, including the pre-releases.  The -beta and -rc changelogs will 
+contain valuable information about any forthcoming changes that affect plugins.
+The easiest way is:
+
+ 1. Login to [GitHub](https://github.com).
+ 2. Navigate to [EDMarketConnector](https://github.com/EDCD/EDMarketConnector).
+ 3. Click the 'Watch' (or 'Unwatch' if you previously set up any watches on 
+ us).  It's currently (2021-05-13) the left-most button of 3 near the 
+ top-right of the page.
+ 4. Click 'Custom'.
+ 5. Ensure 'Releases' is selected.
+ 6. Click 'Apply'.
+
+And, of course, either ensure you check your GitHub messages regularly, or 
+have it set up to email you such notifications.
+
 ---
 
 ## Examples
@@ -549,6 +566,8 @@ Content of `state` (updated to the current journal entry):
 | `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`      |            `int`            | Current credits balance                                                                                         |
 | `FID`          |            `str`            | Frontier commander ID                                                                                           |
+| `Horizons`     |           `bool`            | From `LoadGame` event.                                                                                          |
+| `Odyssey`      |           `bool`            | From `LoadGame` event.  `False` if not present, else the event value.                                           |
 | `Loan`         |       `Optional[int]`       | Current loan amount, if any                                                                                     |
 | `Raw`          |           `dict`            | Current raw engineering materials                                                                               |
 | `Manufactured` |           `dict`            | Current manufactured engineering materials                                                                      |
@@ -614,6 +633,19 @@ the same when you're on-foot.
 `SuitCurrent`, `Suits`, `SuitLoadoutCurrent` & `SuitLoadouts` hold CAPI data
 relating to suits and their loadouts.
 
+New in version 5.0.1:
+
+`Odyssey` boolean based on the presence of such a flag in the `LoadGame` 
+event.  Defaults to `False`, i.e. if no such key in the event.
+
+The previously undocumented`Horizons` boolean is similarly from `LoadGame`, 
+but blindly retrieves the value rather than having a strict default.  There's
+be an exception if it wasn't there, and the value would be `None`.  Note that
+this is **NOT** the same as the return from
+[plugins/eddn.py:is_horizons()](./plugins/eddn.py). That function is necessary
+because CAPI data doesn't (didn't always?) have an indication of Horizons or
+not.
+
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
@@ -645,8 +677,7 @@ Examples of this are:
    `Cargo.json` (but see above for caveats).
 
 1. Every `NavRoute` event contains the full `Route` array as loaded from
-    `NavRoute.json`.  You do not need to access this via
-   `monitor.state['NavRoute']`, although it is available there.
+    `NavRoute.json`.
    
     *NB: There is no indication available when a player cancels a route.*  The
     game itself does not provide any such, not in a Journal event, not in a
@@ -669,9 +700,8 @@ Examples of this are:
     ```
 
 1. Every `ModuleInfo` event contains the full data as loaded from the
-  `ModulesInfo.json` file.  It's also available as `monitor.stat['ModuleInfo']`
-   (noting that we used the singular form there to stay consistent with the
-   Journal event name).
+  `ModulesInfo.json` file.  Note that we use the singular form here to 
+   stay consistent with the Journal event name.
    
 ---
 

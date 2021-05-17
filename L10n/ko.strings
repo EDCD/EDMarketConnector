@@ -172,7 +172,8 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "오류: EDSM {MSG}";
 
-/* Raised when cannot contact the Companion API server. [companion.py] */
+
+/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "오류: Frontier 서버 CAPI 연결 불가";
 
 /* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
