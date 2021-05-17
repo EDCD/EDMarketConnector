@@ -32,7 +32,7 @@ You will need several pieces of software installed, or the files from their
  "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
 1. [Python](https://python.org): 32-bit version of Python 3.9 for Windows.
- [v3.9.2](https://www.python.org/downloads/release/python-392/) is the most
+ [v3.9.5](https://www.python.org/downloads/release/python-395/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.  Double-check the version against the
    `.python.version` file, as it should always contain the intended version.
