@@ -1,10 +1,10 @@
 """CMDR Status information."""
 import csv
+import tkinter
 import tkinter as tk
 from sys import platform
 from tkinter import ttk
-import tkinter
-from typing import Callable, TYPE_CHECKING, Any, AnyStr, Dict, List, NamedTuple, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, NamedTuple, Optional, Sequence, cast
 
 import companion
 import EDMCLogging
@@ -12,7 +12,6 @@ import myNotebook as nb  # noqa: N813
 from edmc_data import ship_name_map
 from l10n import Locale
 from monitor import monitor
-from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = EDMCLogging.get_main_logger()
 
