@@ -1,6 +1,9 @@
 """General Utility Functions."""
 
 
+from typing import Any
+
+
 def deep_get(target: dict, *args: str, default=None) -> Any:
     """
     Walk into a dict and return the specified deep value.
