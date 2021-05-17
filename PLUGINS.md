@@ -662,8 +662,7 @@ Examples of this are:
    `Cargo.json` (but see above for caveats).
 
 1. Every `NavRoute` event contains the full `Route` array as loaded from
-    `NavRoute.json`.  You do not need to access this via
-   `monitor.state['NavRoute']`, although it is available there.
+    `NavRoute.json`.
    
     *NB: There is no indication available when a player cancels a route.*  The
     game itself does not provide any such, not in a Journal event, not in a
@@ -686,9 +685,8 @@ Examples of this are:
     ```
 
 1. Every `ModuleInfo` event contains the full data as loaded from the
-  `ModulesInfo.json` file.  It's also available as `monitor.stat['ModuleInfo']`
-   (noting that we used the singular form there to stay consistent with the
-   Journal event name).
+  `ModulesInfo.json` file.  Note that we use the singular form here to 
+   stay consistent with the Journal event name.
    
 ---
 
