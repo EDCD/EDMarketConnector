@@ -37,7 +37,7 @@ killswitches for versions `5.0.2-beta1` and `5.0.2-rc1`.  In this example
 could be if, e.g. a data corruption bug was found in it).
 
 In general please do **not** linger on any -beta or -rc release if there 
-has been a subsequent release, upgrade to the equivalent full release once it
+has been a subsequent release.  Upgrade to the equivalent full release once it
 is published.
 
 Plugin Developers
