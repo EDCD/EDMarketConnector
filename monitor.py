@@ -1,6 +1,7 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
+from logging import exception
 import queue
 import re
 import threading
@@ -44,9 +45,11 @@ elif platform == 'win32':
 
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
+    if TYPE_CHECKING:
+        import ctypes.windll  # type: ignore
 
     EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
+    EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)  # type: ignore
 
     CloseHandle = ctypes.windll.kernel32.CloseHandle
 
@@ -475,6 +478,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # TODO(A_D): a bunch of these can be simplified to use if itertools.product and filters
         if line is None:
             return {'event': None}  # Fake startup event
+
+        def diff_dicts(a_main: dict, b: dict) -> dict:
+            MISSING = KeyError
+            out = {}
+            for key in a_main.keys():
+                if (a_val := a_main[key]) != (b_val := b.get(key, MISSING)):
+                    out[key] = ('Old: ' + str(a_val)[:100], 'New: ' + str(b_val)[:100])
+
+            return out
+
+        try:
+            print(json.dumps(diff_dicts(self.state, self.state_2.to_dict()), indent=4))
+        except Exception:
+            logger.exception('Couldnt diff dicts')
 
         try:
             # Preserve property order because why not?
@@ -1498,25 +1515,30 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         if self.state_2.ship is None:
                             logger.error('ModulesInfo with no ship????')
                         else:
+                            # TODO:  either ship needs to always be created with:
+                            # - hpt_shipdatalinkscanner
+                            # - int_codexscanner
+                            # - int_stellarbodydiscoveryscanner_standard
+                            # TODO: Or we need to ignore them here. Currently this causes warnings
                             if (
                                 any(mod['Slot'] not in self.state_2.ship.modules for mod in entry['Modules'])
                                 or len(self.state_2.ship.modules) != len(entry['Modules'])
                             ):
                                 logger.warning(
-                                    f'ModulesInfo references Module that we dont know about!'
-                                    f'\n{entry=}\n{self.state_2.ship.modules=}'
+                                    'ModulesInfo references Module that we dont know about!'
+                                    # f'\n{entry=}\n{self.state_2.ship.modules=}'
                                 )
 
                             for mod in entry['Modules']:
                                 mod_slot = mod['Slot']
-                                ship_mod = self.state_2.ship.modules[mod_slot]
-                                if ship_mod.name.casefold() != mod['Item'].casefold():
+                                ship_mod = self.state_2.ship.modules.get(mod_slot)
+                                if ship_mod is None or (ship_mod.name.casefold() != mod['Item'].casefold()):
                                     logger.warning(
                                         'ModulesInfo and current ship do not agree with contents of slot! Not updating!'
-                                        f'{mod_slot=}: MI: {mod["Item"]} CS: {ship_mod.name}'
+                                        f'{mod_slot=}: MI: {mod["Item"]} CS: {ship_mod.name if ship_mod is not None else None}'
                                     )
                                 else:
-                                    ship_mod.priority = mod['Priority']
+                                    ship_mod.priority = mod.get('Priority')
                                     # ship_mod.power = mod['Power'] # Not in the startup LOADOUT so not tracked
 
             elif event_type in ('CollectCargo', 'MarketBuy', 'BuyDrones', 'MiningRefined'):
