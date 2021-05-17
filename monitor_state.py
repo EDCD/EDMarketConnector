@@ -84,15 +84,24 @@ class Ship:
     # TODO: fuel capacity for both main and reserve tanks
 
     modules: dict[str, ShipModule] = field(default_factory=dict)  # TODO
+    modules_timestamp: str = ""
+
+    def _modules_dict(self) -> dict[str, Any]:
+        return {
+            'timestamp': self.modules_timestamp,
+            'event': 'ModuleInfo',
+            'Modules': [{'Slot': s} | m._to_dict() for s, m in self.modules.items()]
+        }
 
 
 @dataclass
 class ShipModule:
     """Module on a ship."""
 
-    slot: str  # TODO: remove this? its more relevant ON a ship
+    slot: str  # TODO: remove this? its more relevant ON a ship -- I think we shall define this as only available when
+    # TODO: on a ship, and will need to add some checking to ensure everything is behaving
     name: str
-    # power: float # # TODO: Not a thing? Or, at least, not in the starting Loadout.
+    power: float  # TODO: Not a thing? Or, at least, not in the starting Loadout.
     priority: Optional[int]
     value: int
     health: float
@@ -133,7 +142,16 @@ class ShipModule:
             engineering=engineering,
             value=source.get('Value', 0),
             health=source['Health'],
+            power=source.get('Power', 0)
         )
+
+    def _to_dict(self) -> dict[str, Any]:
+        return {
+            'Slot': self.slot,
+            'Item': self.name,
+            'Power': self.power,
+            'Priority': self.priority
+        }
 
 
 @dataclass
@@ -366,7 +384,7 @@ class MonitorState:
         self.cargo_json: Optional[dict[str, Any]] = None
         self.credits: int = None  # type: ignore # Set when it matters
         self.frontier_id: str = ""
-        self.loan: DefaultDict[str, int] = defaultdict(int)
+        self.loan: DefaultDict[str, int] = defaultdict(int)  # TODO: this probably should just be an int.
         self.materials = Materials()
         self.engineers: dict[str, Engineer] = {}
         self.ranks: dict[str, Rank] = {}
