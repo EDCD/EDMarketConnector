@@ -18,6 +18,28 @@ easier once Odyssey has launched!**
   "`Error: Frontier CAPI didn't respond`" to make it clear this pertains to 
   the CAPI and not the game servers.
 
+Killswitches
+---
+
+In the 5.0.1 changelog we said:
+
+  <blockquote>We will **NOT** be using this merely to try and get some
+  laggards to upgrade.</blockquote>
+
+However from now on there is an exception to this.  **After** this 
+release any subsequent -beta or -rc versions will be killswitched *after* 
+their full release is published.
+
+For example, if we put out a `5.0.2-beta1` and `5.0.2-rc1` before the full 
+`5.0.2`, then when `5.0.2` was published we would activate all available 
+killswitches for versions `5.0.2-beta1` and `5.0.2-rc1`.  In this example
+`5.0.1` would **not** be killswitched as part of *this policy* (but still 
+could be if, e.g. a data corruption bug was found in it).
+
+In general please do **not** linger on any -beta or -rc release if there 
+has been a subsequent release, upgrade to the equivalent full release once it
+is published.
+
 Plugin Developers
 ---
 
