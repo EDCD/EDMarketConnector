@@ -40,6 +40,7 @@ from commodity import COMMODITY_DEFAULT
 from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater
+from util import deep_get
 
 sys.path.append(config.internal_plugin_dir)
 # This import must be after the sys.path.append.
@@ -71,39 +72,6 @@ JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 def versioncmp(versionstring) -> List:
     """Quick and dirty version comparison assuming "strict" numeric only version numbers."""
     return list(map(int, versionstring.split('.')))
-
-
-def deep_get(target: dict, *args: str, default=None) -> Any:
-    """
-    Walk into a dict and return the specified deep value.
-
-    Example usage:
-
-        >>> thing = {'a': {'b': {'c': 'foo'} } }
-        >>> deep_get(thing, ('a', 'b', 'c'), None)
-        'foo'
-        >>> deep_get(thing, ('a', 'b'), None)
-        {'c': 'foo'}
-        >>> deep_get(thing, ('a', 'd'), None)
-        None
-
-    :param target: The dict to walk into for the desired value.
-    :param args: The list of keys to walk down through.
-    :param default: What to return if the target has no value.
-    :return: The value at the target deep key.
-    """
-    if not hasattr(target, 'get'):
-        raise ValueError(f"Cannot call get on {target} ({type(target)})")
-
-    current = target
-    for arg in args:
-        res = current.get(arg)
-        if res is None:
-            return default
-
-        current = res
-
-    return current
 
 
 def main():  # noqa: C901, CCR001
