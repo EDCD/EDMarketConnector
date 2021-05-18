@@ -1025,6 +1025,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Parameters:
                 #     • Name
                 #     • Type
+
+                # TODO: XXX: From v31 doc
+                #   12.2 BackpackChange
+                # This is written when there is any change to the contents of the
+                # suit backpack – note this can be written at the same time as other
+                # events like UseConsumable
                 for c in self.state['BackPack']['Consumable']:
                     if c == entry['Name']:
                         self.state['BackPack']['Consumable'][c] -= 1
