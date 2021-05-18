@@ -272,6 +272,9 @@ application crashes or hangs.
 
 ### Be careful about the name of your plugin directory
 
+You might want your plugin directory name to be usable in import statements.
+See the section on [packaging extra modules](#your-plugin-directory-name-must-be-importable).
+
 ### Use a thread for long-running code
 
 By default, your plugin code will be running in the main thread.  So, if you 
