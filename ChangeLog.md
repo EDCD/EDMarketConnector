@@ -1,6 +1,22 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+* We now test against, and package with, Python 3.9.5.
+
+  **As a consequence of this we no longer support Windows 7.  
+  This is due to
+  [Python 3.9.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  The application (both EDMarketConnector.exe and EDMC.exe) will crash on
+  startup due to a missing DLL.**
+
+  This should have no other impact on users or plugin developers, other
+  than the latter now being free to use features that were introduced since the
+  Python 3.7 series.
+
+  Developers can check the contents of the `.python-version` file
+  in the source (it's not distributed with the Windows installer) for the
+  currently used version in a given branch.
+
 Release 5.0.1
 ===
 
