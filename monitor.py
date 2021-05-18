@@ -1625,8 +1625,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                                 self.state[category].pop(material)
 
                 for name, category in itertools.product(('raw', 'manufactured', 'encoded'), entry['Materials']):
-                    if name in self.state_2.materials[category]:
-                        canonicalised = self.canonicalise(name)
+                    canonicalised = self.canonicalise(name)
+                    if canonicalised in self.state_2.materials[category]:
                         self.state_2.materials[category][canonicalised] -= entry['Materials'][name]['Count']
 
                 self.state_2.materials.check_numbers()
