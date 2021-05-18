@@ -270,6 +270,8 @@ There are a number of things that your code should either do or avoiding
 doing so as to play nicely with the core EDMC code and not risk causing 
 application crashes or hangs.
 
+### Be careful about the name of your plugin directory
+
 ### Use a thread for long-running code
 
 By default, your plugin code will be running in the main thread.  So, if you 
@@ -924,11 +926,90 @@ plugin's folder:
     &rarr; Compressed (zipped) folder.
 - Mac: In Finder right click on your plugin's folder and choose Compress.
 
-If there are any external dependencies then include them in the plugin's
-folder.
+If there are any external dependencies then
+[include them](#packaging-extra-modules) in the plugin's folder.
 
 Optionally, for tidiness delete any `.pyc` and `.pyo` files in the archive, as
 well as the `__pycache__` directory.
+
+
+---
+
+## Packaging extra modules
+EDMarketConnector's Windows installs only package a minimal set of modules.
+All of the 'stdlib' of Python is provided, plus any modules the core
+application code uses and a small number of additional modules for the
+use of plugins.  See
+[Plugins:Available imports](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports)
+for a list.
+
+As such if your plugin requires additional modules you will need to package
+them with your plugin.  There is no general Python interpreter in which to
+rely on [pip](https://pypi.org/project/pip/) to install them.
+
+### Environment
+
+It will be easier of you are using a Python
+[virtual environment](https://docs.python.org/3/library/venv.html) for
+actually testing the plugin.  This is so that you can be sure it is working
+*because* you have copied all the correct Python modules inside your
+plugin, and not because they are installed within the Python site-packages
+in some applicable location (system level or user level).
+
+So, setup a virtual environment to use when running EDMarketConnector
+code to test your plugin, and use the 'system' non-virtual Python to
+install modules in order to have somewhere to copy them from.
+
+NB: If you use PyCharm it's possible to have it do the work of
+[creating a virtual environment](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
+for your project.
+
+### Install the modules for the system Python
+Technically you could also do this within an additional virtual environment.
+If they were in your plugin testing virtual environment then you can't be
+sure you have all the necessary files copied into your plugin so it will
+work within a vanilla Windows EDMarketConnector install.
+
+We'll use `xml_dataclasses` for this example.
+
+    pip install xml_dataclasses
+
+### Copy the module files into your plugin directory
+
+1. Assuming it's a 'simple' module with no caveats, now we copy:
+  1. `pip show xml_dataclasses` - `Location` is where it was installed.
+  1. If you have a POSIX-compliant command-line environment:
+
+         cp -pr <Location> <plugin_dir>
+
+  or just use Windows File Explorer, or other GUI means, to copy.
+
+### Your plugin directory name **must** be importable
+You're going to have to refer to your plugin directory in order to import
+anything within it.  This means it should be compatible with such.
+
+1. Do **not** use hyphens (`-`) as word separators, or full-stops (`.`).
+1. You can use underscore (`_`) as a word separator.
+
+So:
+
+ - `EDMC-My-Plugin` **BAD**.
+ - `EDMC.My.Plugin` **BAD**.
+ - `EDMC_My_Plugin` **GOOD**.
+
+NB: No, you can't use `from . import xml_dataclasses` because the way
+EDMarketConnector:plug.py loads 'found' plugins prevents this from working.
+
+### Test the module import
+
+Add an import of this module to your plugin code:
+
+    from EDMC_My_Plugin import xml_dataclasses
+
+If you're lucky you won't have the "surprise!" of learning your chosen
+extra module itself requires other modules.  If you are gifted such a surprise
+then you will need to repeat the [Copy](#copy-the-module-files-into-your-plugin-directory)
+step for the extra module(s) until it works.
 
 ---
 
