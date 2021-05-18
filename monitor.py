@@ -12,9 +12,10 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
+from typing import DefaultDict, TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
+import itertools
 
 import monitor_state
 
@@ -1545,11 +1546,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 commodity = self.canonicalise(entry['Type'])
                 self.state['Cargo'][commodity] += entry.get('Count', 1)
 
+                self.state_2.cargo[commodity] += entry.get('Count', 1)
+
                 if event_type == 'BuyDrones':
                     self.state['Credits'] -= entry.get('TotalCost', 0)
+                    self.state_2.credits -= entry.get('TotalCost', 0)
 
                 elif event_type == 'MarketBuy':
                     self.state['Credits'] -= entry.get('TotalCost', 0)
+                    self.state_2.credits -= entry.get('TotalCost', 0)
 
             elif event_type in ('EjectCargo', 'MarketSell', 'SellDrones'):
                 commodity = self.canonicalise(entry['Type'])
@@ -1558,17 +1563,26 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if cargo[commodity] <= 0:
                     cargo.pop(commodity)
 
+                self.state_2.cargo[commodity] -= entry.get('Count', 1)
+                self.state_2.check_cargo()
+
                 if event_type == 'MarketSell':
                     self.state['Credits'] += entry.get('TotalSale', 0)
+                    self.state_2.credits += entry.get('TotalSale', 0)
 
                 elif event_type == 'SellDrones':
                     self.state['Credits'] += entry.get('TotalSale', 0)
+                    self.state_2.credits += entry.get('TotalSale', 0)
 
             elif event_type == 'SearchAndRescue':
                 for item in entry.get('Items', []):
                     commodity = self.canonicalise(item['Name'])
                     cargo = self.state['Cargo']
                     cargo[commodity] -= item.get('Count', 1)
+
+                    self.state_2.cargo[commodity] -= item.get('Count', 1)
+                    self.state_2.check_cargo()
+
                     if cargo[commodity] <= 0:
                         cargo.pop(commodity)
 
@@ -1579,9 +1593,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, [])
                     })
 
+                    self.state_2.materials[category] = defaultdict(
+                        int,
+                        {self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, [])}
+                    )
+                    self.state_2.materials.check_numbers()
+
             elif event_type == 'MaterialCollected':
                 material = self.canonicalise(entry['Name'])
                 self.state[entry['Category']][material] += entry['Count']
+
+                self.state_2.materials[entry['Category']][material] += entry['Count']
 
             elif event_type in ('MaterialDiscarded', 'ScientificResearch'):
                 material = self.canonicalise(entry['Name'])
@@ -1589,6 +1611,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 state_category[material] -= entry['Count']
                 if state_category[material] <= 0:
                     state_category.pop(material)
+
+                self.state_2.materials[entry['Category']][material] -= entry['Count']
+                self.state_2.materials.check_numbers()
 
             elif event_type == 'Synthesis':
                 for category in ('Raw', 'Manufactured', 'Encoded'):
@@ -1598,6 +1623,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state[category][material] -= x['Count']
                             if self.state[category][material] <= 0:
                                 self.state[category].pop(material)
+
+                for name, category in itertools.product(('raw', 'manufactured', 'encoded'), entry['Materials']):
+                    if name in self.state_2.materials[category]:
+                        canonicalised = self.canonicalise(name)
+                        self.state_2.materials[category][canonicalised] -= entry['Materials'][name]['Count']
+
+                self.state_2.materials.check_numbers()
 
             elif event_type == 'MaterialTrade':
                 category = self.category(entry['Paid']['Category'])
@@ -1611,6 +1643,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 category = self.category(received['Category'])
                 state_category[received['Material']] += received['Quantity']
+
+                recv_mat, recv_cat, recv_qnt = received['Material'], received['Category'], received['Quantity']
+                paid_mat, paid_cat, paid_qnt = paid['Material'], paid['Category'], paid['Quantity']
+
+                self.state_2.materials[recv_cat][recv_mat] += recv_qnt
+                self.state_2.materials[paid_cat][paid_mat] -= paid_qnt
+                self.state_2.materials.check_numbers()
 
             elif event_type == 'EngineerCraft' or (
                 event_type == 'EngineerLegacyConvert' and not entry.get('IsPreview')

@@ -23,6 +23,36 @@ class Materials:
     encoded: DefaultDict[str, int] = field(default_factory=_make_int_ddict)
     manufactured: DefaultDict[str, int] = field(default_factory=_make_int_ddict)
 
+    def __getitem__(self, name: str) -> DefaultDict[str, int]:
+        """
+        Access materials as a dict.
+
+        This is not recommended unless you're using values from another list. Otherwise, use the names directly.
+        """
+        name = name.casefold()
+        if name not in ('raw', 'manufactured', 'encoded'):
+            raise KeyError(f'Material type {name} does not exist')
+
+        return getattr(self, name)
+
+    def __setitem__(self, name: str, data: DDINT):
+        """
+        Access materials as a dict.
+
+        This is not recommended unless you're using values from another list. Otherwise, use the names directly.
+        """
+        name = name.casefold()
+        if name not in ('raw', 'manufactured', 'encoded'):
+            raise KeyError(f'Material type {name} does not exist')
+
+        setattr(self, name, data)
+
+    def check_numbers(self):
+        """Verify that nothing is negative."""
+        for category in ('raw', 'manufactured', 'encoded'):
+            for name in filter(lambda name: self[category][name] <= 0, set(self[category].keys())):
+                del self[category][name]
+
 
 @dataclass
 class Engineer:
@@ -421,6 +451,12 @@ class MonitorState:
             for n in dict:
                 if (result := predicate(dict)) != n:
                     raise ValueError(f'{name} under name {n} is actually {result}')
+
+    def check_cargo(self):
+        """Check that the cargo dict has no zero or lower contents."""
+        for name in set(self.cargo.keys()):  # Make sure that modifying while iterating wont break anything
+            if self.cargo[name] <= 0:
+                del self.cargo[name]
 
     # TODO:
 
