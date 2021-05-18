@@ -1043,6 +1043,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # also there's one additional journal event that was missed out from
             # this version of the docs: "SuitLoadout": # when starting on foot, or
             # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
+            elif event_type == 'SuitLoadout':
+                new_loadout = {
+                    'loadoutSlotId': self.suit_loadout_id_from_loadoutid(entry['LoadoutID']),
+                    'suit': {
+                        'name': entry['SuitName'],
+                        'locName': entry.get('SuitName_Localised', entry['SuitName']),
+                        'suitId': entry['SuitID'],
+                    },
+                    'name': entry['LoadoutName'],
+                    'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
+                }
+                self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
+                self.state['SuitLoadoutCurrent'] = new_loadout
+                # TODO: Well we know about the **SUIT**, as opposed to the Loadout ?
+                # self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
             elif event_type == 'SwitchSuitLoadout':
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
