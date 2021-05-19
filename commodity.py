@@ -24,9 +24,9 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
     querytime = config.get_int('querytime', default=int(time.time()))
 
     if not filename:
-        filename_system = data['lastSystem']['name'].strip(),
-        filename_starport = data['lastStarport']['name'].strip(),
-        filename_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime)),
+        filename_system = data['lastSystem']['name'].strip()
+        filename_starport = data['lastStarport']['name'].strip()
+        filename_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))
         filename_kind = 'csv'
         filename = f'{filename_system}.{filename_starport}.{filename_time}.{filename_kind}'
         filename = join(config.get_str('outdir'), filename)
