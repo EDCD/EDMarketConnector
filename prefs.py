@@ -535,10 +535,9 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         with row as cur_row:
+            shipyard_provider = config.get_str('shipyard_provider')
             self.shipyard_provider = tk.StringVar(
-                value=str(
-                    config.get_str('shipyard_provider') in plug.provides('shipyard_url')
-                    and config.get_str('shipyard_provider', default='EDSY'))
+                value=str(shipyard_provider if shipyard_provider in plug.provides('shipyard_url') else 'EDSY')
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
             nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
