@@ -25,7 +25,15 @@ def export(data):
 
     querytime = config.get_int('querytime', default=int(time.time()))
 
+    #
+    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
+    #  brainfart we had with dangling commas in commodity.py:export() !!!
+    #
     filename = join(config.get_str('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    #
+    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
+    #  brainfart we had with dangling commas in commodity.py:export() !!!
+    #
 
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
