@@ -1668,14 +1668,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             for e in entry['Engineers']:
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
-                        logger.warning(f"Engineer entry without '{f=}' key: {e=}")
+                        logger.warning(f"Engineer entry without '{f}' key: {e=}")
                         return False
 
         if 'Progress' in entry:
             for e in entry['Engineers']:
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
-                        logger.warning(f"Engineer entry without '{f=}' key: {e=}")
+                        logger.warning(f"Engineer entry without '{f}' key: {e=}")
                         return False
 
         return True
