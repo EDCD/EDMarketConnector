@@ -1635,7 +1635,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
     #       designed for this in the future.  This is a bandaid for a known issue.
-    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001
+    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001 C901
         """
         Check an `EngineerProgress` Journal event for validity.
 
@@ -1668,14 +1668,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             for e in entry['Engineers']:
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
-                        logger.warning(f"Engineer entry without '{f}' key: {e=}")
+                        # For some Progress there's no Rank/RankProgress yet
+                        if f in ('Rank', 'RankProgress'):
+                            if (progress := e.get('Progress', None)) is not None:
+                                if progress in ('Invited', 'Known'):
+                                    continue
+
+                        logger.warning(f"Engineer entry without '{f}' key: {e=} in {entry=}")
                         return False
 
         if 'Progress' in entry:
             for e in entry['Engineers']:
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
-                        logger.warning(f"Engineer entry without '{f}' key: {e=}")
+                        logger.warning(f"Engineer entry without '{f}' key: {e=} in {entry=}")
                         return False
 
         return True
