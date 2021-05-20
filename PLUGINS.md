@@ -599,6 +599,7 @@ Content of `state` (updated to the current journal entry):
 | `Consumable`   |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
 | `Data`         |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
 | `BackPack`     |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
+| `BackpackJSON` |           `dict`            | Content of Backpack.json as of last read.                                                                       |
 | `SuitCurrent`  |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
 | `Suits`        |           `dict`[1]         | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |     `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |

@@ -151,6 +151,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'Item':           defaultdict(int),    # BackPack Items
                 'Data':           defaultdict(int),  # Backpack Data
             },
+            'BackpackJSON':       None,  # Raw JSON from `Backpack.json` file, if available
             'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
@@ -866,17 +867,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
-            elif event_type == 'Backpack':
+            elif event_type == 'BackPack':
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
                 with open(join(self.currentdir, 'Backpack.json'), 'rb') as backpack:  # type: ignore
                     try:
-                        entry = json.load(backpack)
+                        # Preserve property order because why not?
+                        entry = json.load(backpack, object_pairs_hook=OrderedDict)
 
                     except json.JSONDecodeError:
                         logger.exception('Failed decoding Backpack.json', exc_info=True)
 
                     else:
+                        # Store in monitor.state
+                        self.state['BackpackJSON'] = entry
+
                         # Assume this reflects the current state when written
                         self.state['BackPack']['Component'] = defaultdict(int)
                         self.state['BackPack']['Consumable'] = defaultdict(int)
