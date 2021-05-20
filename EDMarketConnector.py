@@ -633,6 +633,14 @@ class AppWindow(object):
         loadout_name = suitloadout['name']
         self.suit['text'] = f'{suitname} ({loadout_name})'
 
+    def suit_show_if_set(self) -> None:
+        """Show UI Suit row if we have data, else hide."""
+        if self.suit['text'] != '':
+            self.toggle_suit_row(visible=True)
+
+        else:
+            self.toggle_suit_row(visible=False)
+
     def toggle_suit_row(self, visible: Optional[bool] = None) -> None:
         """
         Toggle the visibility of the 'Suit' row.
@@ -922,10 +930,7 @@ class AppWindow(object):
 
                                 self.suit['text'] = f'{suitname} ({loadout_name})'
 
-                    self.toggle_suit_row(visible=True)
-
-                else:
-                    self.toggle_suit_row(visible=False)
+                self.suit_show_if_set()
 
                 if data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = data['commander']['credits']
@@ -1052,6 +1057,7 @@ class AppWindow(object):
                 self.cmdr['text'] += ' (beta)'
 
             self.update_suit_text()
+            self.suit_show_if_set()
 
             self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
 
