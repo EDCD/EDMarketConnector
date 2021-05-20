@@ -1040,7 +1040,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #          # Paranoia in case we lost track
                 #          if self.state['BackPack']['Consumable'][c] < 0:
                 #              self.state['BackPack']['Consumable'][c] = 0
-                ...
+                pass
 
             # TODO:
             # <https://forums.frontier.co.uk/threads/575010/>
