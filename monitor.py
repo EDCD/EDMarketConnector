@@ -1044,20 +1044,34 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # this version of the docs: "SuitLoadout": # when starting on foot, or
             # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
             elif event_type == 'SuitLoadout':
+                suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                # Initial suit containing just the data that is then embedded in
+                # the loadout
+                new_suit = {
+                    'name':    entry['SuitName'],
+                    'locName': entry.get('SuitName_Localised', entry['SuitName']),
+                    'suitId':  entry['SuitID'],
+                }
+
+                # Make the new loadout, in the CAPI format
                 new_loadout = {
-                    'loadoutSlotId': self.suit_loadout_id_from_loadoutid(entry['LoadoutID']),
-                    'suit': {
-                        'name': entry['SuitName'],
-                        'locName': entry.get('SuitName_Localised', entry['SuitName']),
-                        'suitId': entry['SuitID'],
-                    },
+                    'loadoutSlotId': suit_slotid,
+                    'suit': new_suit,
                     'name': entry['LoadoutName'],
                     'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
                 }
+
+                # Assign this loadout into our state
                 self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
                 self.state['SuitLoadoutCurrent'] = new_loadout
-                # TODO: Well we know about the **SUIT**, as opposed to the Loadout ?
-                # self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
+
+                # Now add in the extra fields for new_suit to be a 'full' Suit structure
+                new_suit['id'] = None  # Not available in 4.0.0.100 journal event
+                new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
+
+                # Ensure new_suit is in self.state['Suits']
+                self.state['Suits'][suit_slotid] = new_suit
+                self.state['SuitCurrent'] = new_suit
 
             elif event_type == 'SwitchSuitLoadout':
                 loadoutid = entry['LoadoutID']
