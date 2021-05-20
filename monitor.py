@@ -762,20 +762,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state[event_type] = payload
 
             elif event_type == 'EngineerProgress':
-                engineers = self.state['Engineers']
-                if 'Engineers' in entry:  # Startup summary
-                    self.state['Engineers'] = {
-                        e['Engineer']: ((e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'])
-                        for e in entry['Engineers']
-                    }
+                # Sanity check - at least once the 'Engineer' (name) was missing from this in early
+                # Odyssey 4.0.0.100.  Might only have been a server issue causing incomplete data.
 
-                else:  # Promotion
-                    engineer = entry['Engineer']
-                    if 'Rank' in entry:
-                        engineers[engineer] = (entry['Rank'], entry.get('RankProgress', 0))
+                if self.event_valid_engineerprogress(entry):
+                    engineers = self.state['Engineers']
+                    if 'Engineers' in entry:  # Startup summary
+                        self.state['Engineers'] = {
+                            e['Engineer']: ((e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'])
+                            for e in entry['Engineers']
+                        }
 
-                    else:
-                        engineers[engineer] = entry['Progress']
+                    else:  # Promotion
+                        engineer = entry['Engineer']
+                        if 'Rank' in entry:
+                            engineers[engineer] = (entry['Rank'], entry.get('RankProgress', 0))
+
+                        else:
+                            engineers[engineer] = entry['Progress']
 
             elif event_type == 'Cargo' and entry.get('Vessel') == 'Ship':
                 self.state['Cargo'] = defaultdict(int)
@@ -1628,6 +1632,53 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    # TODO: *This* will need refactoring and a proper validation infrastructure
+    #       designed for this in the future.  This is a bandaid for a known issue.
+    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001
+        """
+        Check an `EngineerProgress` Journal event for validity.
+
+        :param entry: Journal event dict
+        :return: True if passes validation, else False.
+        """
+        # The event should have at least one of thes
+        if 'Engineers' not in entry and 'Progress' not in entry:
+            logger.warning(f"EngineerProgress has neither 'Engineers' nor 'Progress': {entry=}")
+            return False
+
+        # But not both of them
+        if 'Engineers' in entry and 'Progress' in entry:
+            logger.warning(f"EngineerProgress has BOTH 'Engineers' and 'Progress': {entry=}")
+            return False
+
+        if 'Engineers' in entry:
+            # 'Engineers' version should have a list as value
+            if not isinstance(entry['Engineers'], list):
+                logger.warning(f"EngineerProgress 'Engineers' is not a list: {entry=}")
+                return False
+
+            # It should have at least one entry?  This might still be valid ?
+            if len(entry['Engineers']) < 1:
+                logger.warning(f"EngineerProgress 'Engineers' list is empty ?: {entry=}")
+                # TODO: As this might be valid, we might want to only log
+                return False
+
+            # And that list should have all of these keys
+            for e in entry['Engineers']:
+                for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
+                    if f not in e:
+                        logger.warning(f"Engineer entry without '{f=}' key: {e=}")
+                        return False
+
+        if 'Progress' in entry:
+            for e in entry['Engineers']:
+                for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
+                    if f not in e:
+                        logger.warning(f"Engineer entry without '{f=}' key: {e=}")
+                        return False
+
+        return True
 
     def suit_loadout_id_from_loadoutid(self, journal_loadoutid: int) -> int:
         """
