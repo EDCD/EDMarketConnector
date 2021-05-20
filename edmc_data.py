@@ -429,6 +429,11 @@ Flags2Cold = 1 << 8
 Flags2Hot = 1 << 9
 Flags2VeryCold = 1 << 10
 Flags2VeryHot = 1 << 11
+Flags2GlideMode = 1 << 12
+Flags2OnFootInHangar = 1 << 13
+Flags2OnFootSocialSpace = 1 << 14
+Flags2OnFootExterior = 1 << 15
+Flags2BreathableAtmosphere = 1 << 16
 
 # Dashboard GuiFocus constants
 GuiFocusNoFocus = 0

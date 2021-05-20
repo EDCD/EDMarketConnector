@@ -835,6 +835,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
+            # Journal v31 implies this was removed before Odyssey launch
             elif event_type == 'BackPackMaterials':
                 # alpha4 -
                 # Lists the contents of the backpack, eg when disembarking from ship
@@ -864,6 +865,76 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BackPack']['Data'].update(
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
+
+            elif event_type == 'Backpack':
+                # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
+                #       said it's `Backpack.json`
+                with open(join(self.currentdir, 'Backpack.json'), 'rb') as backpack:  # type: ignore
+                    try:
+                        entry = json.load(backpack)
+
+                    except json.JSONDecodeError:
+                        logger.exception('Failed decoding Backpack.json', exc_info=True)
+
+                    else:
+                        # Assume this reflects the current state when written
+                        self.state['BackPack']['Component'] = defaultdict(int)
+                        self.state['BackPack']['Consumable'] = defaultdict(int)
+                        self.state['BackPack']['Item'] = defaultdict(int)
+                        self.state['BackPack']['Data'] = defaultdict(int)
+
+                        clean_components = self.coalesce_cargo(entry['Components'])
+                        self.state['BackPack']['Component'].update(
+                            {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
+                        )
+
+                        clean_consumables = self.coalesce_cargo(entry['Consumables'])
+                        self.state['BackPack']['Consumable'].update(
+                            {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
+                        )
+
+                        clean_items = self.coalesce_cargo(entry['Items'])
+                        self.state['BackPack']['Item'].update(
+                            {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                        )
+
+                        clean_data = self.coalesce_cargo(entry['Data'])
+                        self.state['BackPack']['Data'].update(
+                            {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
+                        )
+
+            elif event_type == 'BackpackChange':
+                # Changes to Odyssey Backpack contents *other* than from a Transfer
+                # See TransferMicroResources event for that.
+
+                if entry.get('Added') is not None:
+                    changes = 'Added'
+
+                elif entry.get('Removed') is not None:
+                    changes = 'Removed'
+
+                else:
+                    logger.warning(f'BackpackChange with neither Added nor Removed: {entry=}')
+                    changes = ''
+
+                if changes != '':
+                    for c in entry[changes]:
+                        category = self.category(c['Type'])
+                        name = self.canonicalise(c['Name'])
+
+                        if changes == 'Removed':
+                            self.state['BackPack'][category][name] -= c['Count']
+
+                        elif changes == 'Added':
+                            self.state['BackPack'][category][name] += c['Count']
+
+                # Paranoia check to see if anything has gone negative.
+                # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
+                # materials is impossible when used/picked up anyway.
+                for c in self.state['BackPack']:
+                    for m in self.state['BackPack'][c]:
+                        if self.state['BackPack'][c][m] < 0:
+                            self.state['BackPack'][c][m] = 0
 
             elif event_type == 'BuyMicroResources':
                 # Buying from a Pioneer Supplies, goes directly to ShipLocker.
@@ -948,18 +1019,63 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack'][entry['Type']][i] = 0
 
             elif event_type == 'UseConsumable':
-                # alpha4
-                # When using an item from the player’s inventory (backpack)
+                # TODO: XXX: From v31 doc
+                #   12.2 BackpackChange
+                # This is written when there is any change to the contents of the
+                # suit backpack – note this can be written at the same time as other
+                # events like UseConsumable
+
+                # In 4.0.0.100 it is observed that:
                 #
-                # Parameters:
-                #     • Name
-                #     • Type
-                for c in self.state['BackPack']['Consumable']:
-                    if c == entry['Name']:
-                        self.state['BackPack']['Consumable'][c] -= 1
-                        # Paranoia in case we lost track
-                        if self.state['BackPack']['Consumable'][c] < 0:
-                            self.state['BackPack']['Consumable'][c] = 0
+                #  1. Throw of any grenade type *only* causes a BackpackChange event, no
+                #     accompanying 'UseConsumable'.
+                #  2. Using an Energy Cell causes both UseConsumable and BackpackChange,
+                #     in that order.
+                #  3. Medkit acts the same as Energy Cell.
+                #
+                #  Thus we'll just ignore 'UseConsumable' for now.
+                #  for c in self.state['BackPack']['Consumable']:
+                #      if c == entry['Name']:
+                #          self.state['BackPack']['Consumable'][c] -= 1
+                #          # Paranoia in case we lost track
+                #          if self.state['BackPack']['Consumable'][c] < 0:
+                #              self.state['BackPack']['Consumable'][c] = 0
+                pass
+
+            # TODO:
+            # <https://forums.frontier.co.uk/threads/575010/>
+            # also there's one additional journal event that was missed out from
+            # this version of the docs: "SuitLoadout": # when starting on foot, or
+            # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
+            elif event_type == 'SuitLoadout':
+                suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+                # Initial suit containing just the data that is then embedded in
+                # the loadout
+                new_suit = {
+                    'name':    entry['SuitName'],
+                    'locName': entry.get('SuitName_Localised', entry['SuitName']),
+                    'suitId':  entry['SuitID'],
+                }
+
+                # Make the new loadout, in the CAPI format
+                new_loadout = {
+                    'loadoutSlotId': suit_slotid,
+                    'suit': new_suit,
+                    'name': entry['LoadoutName'],
+                    'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
+                }
+
+                # Assign this loadout into our state
+                self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
+                self.state['SuitLoadoutCurrent'] = new_loadout
+
+                # Now add in the extra fields for new_suit to be a 'full' Suit structure
+                new_suit['id'] = None  # Not available in 4.0.0.100 journal event
+                new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
+
+                # Ensure new_suit is in self.state['Suits']
+                self.state['Suits'][suit_slotid] = new_suit
+                self.state['SuitCurrent'] = new_suit
 
             elif event_type == 'SwitchSuitLoadout':
                 loadoutid = entry['LoadoutID']
