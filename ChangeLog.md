@@ -17,6 +17,60 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.0.2
+===
+
+This release is primarily aimed at getting the UI "`Suit: ...`" line working 
+properly.
+
+* The "`Suit: ...`" UI line should now function as best it can given the 
+  available data from the game.  It should not appear if you have launched 
+  the Horizons version of the game, even if your account has Odyssey 
+  enabled.  You might see "`<Unknown>`" as the text when this application 
+  does not yet have the required data.
+  
+* Changed the less than obvious "`unable to get endpoint: /profile`" error 
+  message to "`Frontier CAPI query failure: /profile`", and similarly for the 
+  other CAPI endpoints we attempt to access.  This new form is potentially 
+  translated, but translators need time to do that.
+
+  In addition the old message "`Received error {r.status_code} from server`"
+  has been changed to "`Frontier CAPI server error: {r.status_code}`" and is 
+  potentially translated.
+
+* The filenames used for 'Market data in CSV format file' will now be sane, 
+  and as they were before 5.0.0.
+  
+* Linux: 'Shipyard provider' will no longer default to showing 'False' if 
+  no specific provider has been selected.
+  
+Plugin Developers
+---
+
+* Extra `Flagse` values added in the live release of Odyssey have been added to
+  `edmc_data.py`.
+
+* Odyssey 'BackPack' values should now track better, but might still not be 
+  perfect due to Journal bugs/shortcomings.
+  
+* `state` passed to `journal_entry()` now has a `BackpackJSON` (note the case)
+  member which is a copy of the data from the `Backpack.json` (yes, that's 
+  currently the correct case) file that is written when there's a `BackPack`
+  (guess what, yes, that is currently the correct case) event written to 
+  the Journal.
+  
+* `state['Credits']` tracking is almost certainly not perfect.  We're 
+  accounting for the credits component of `SuitUpgrade` now, but there 
+  might be other such we've yet accounted for.
+
+* `state['Suits']` and associated other keys should now be tracking from 
+  Journal events, where possible, as well as CAPI data.
+  
+* There is a section in PLUGINS.md about how to package an extra Python 
+  module with your plugin.  Note the new caveat in
+  [PLUGINS.md:Avoiding-pitfalls](./PLUGINS.md#avoiding-potential-pitfalls)
+  about the name of your plugin's directory.
+
 Release 5.0.1
 ===
 
