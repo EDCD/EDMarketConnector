@@ -541,7 +541,7 @@ class Session(object):
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)
-            raise ServerError(f'Frontier CAPI query failure: {endpoint}') from e
+            raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
             logger.info('Redirected back to Auth Server')
