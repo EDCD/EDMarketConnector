@@ -16,10 +16,10 @@ from typing import TextIO, Tuple
 
 import requests
 
+import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
-import edmc_data
 from companion import CAPIData, category_map
 from config import applongname, appversion_nobuild, config
 from EDMCLogging import get_main_logger
