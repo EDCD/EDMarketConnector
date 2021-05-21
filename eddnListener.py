@@ -1,15 +1,24 @@
 """Simple HTTP listener to be used with debugging EDDN sends."""
 import threading
 from http import server
-from typing import Any
+from typing import Any, Tuple
+import pathlib
+import tempfile
 
 from EDMCLogging import get_main_logger
+from config import appname
 
 logger = get_main_logger()
 
 
 class LoggingHandler(server.BaseHTTPRequestHandler):
     """HTTP Handler implementation that logs to EDMCs logger."""
+
+    def __init__(self, request: bytes, client_address: Tuple[str, int], server) -> None:
+        super().__init__(request, client_address, server)
+        self.output_lock = threading.Lock()
+        self.output_file_path = pathlib.Path(tempfile.gettempdir()) / f'{appname}' / 'eddn-listener.jsonl'
+        self.output_file = self.output_file_path.open('w')
 
     def log_message(self, format: str, *args: Any) -> None:
         """Override default handler logger with EDMC logger."""
@@ -19,8 +28,9 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         """Handle POST."""
         logger.info("Received a POST!")
         data = self.rfile.read(int(self.headers['Content-Length']))
-        logger.info(f"POST DATA FOLLOWS\n{data.decode('utf-8', errors='replace')}")
-        self.send_response(200, "OK")
+
+        with self.output_lock:
+            self.output_file.write(data.decode('utf-8', errors='replace'))
 
 
 def run_listener(port: int = 9090) -> None:
