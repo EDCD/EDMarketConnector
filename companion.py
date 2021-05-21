@@ -17,6 +17,7 @@ import random
 import time
 import urllib.parse
 import webbrowser
+import socket
 from builtins import object, range, str
 from email.utils import parsedate
 from os.path import join
@@ -168,6 +169,10 @@ class ServerError(Exception):
         self.args = args
         if not args:
             self.args = (_("Error: Frontier CAPI didn't respond"),)
+
+
+class ServerConnectionError(ServerError):
+    """Exception class for CAPI connection errors."""
 
 
 class ServerLagging(Exception):
@@ -536,6 +541,10 @@ class Session(object):
         try:
             logger.trace('Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
+
+        except requests.ConnectionError as e:
+            logger.debug(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
+            raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)

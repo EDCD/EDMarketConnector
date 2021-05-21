@@ -979,6 +979,11 @@ class AppWindow(object):
             companion.session.invalidate()
             self.login()
 
+        except companion.ServerConnectionError as e:
+            logger.debug(f'Exception while contacting server: {e}')
+            err = self.status['text'] = str(e)
+            play_bad = True
+
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
             err = self.status['text'] = str(e)
