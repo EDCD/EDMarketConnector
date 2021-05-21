@@ -620,6 +620,11 @@ class AppWindow(object):
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
+        if not monitor.state['Odyssey']:
+            # Odyssey not detected, no text should be set so it will hide
+            self.suit['text'] = ''
+            return
+
         if (suit := monitor.state.get('SuitCurrent')) is None:
             self.suit['text'] = f'<{_("Unknown")}>'
             return
