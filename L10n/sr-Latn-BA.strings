@@ -1,6 +1,3 @@
-/* Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier CAPI didn't respond" = "Greška: Frontier CAPI nije odgovorio";
-
 /* Language name */
 "!Language" = "Srpski (Latinica, Bosna i Hercegovina)";
 
@@ -184,6 +181,9 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Greška: EDSM {MSG}";
 
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Greška: Frontier CAPI nije odgovorio";
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Greška: Frontier server je nedostupan";

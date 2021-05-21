@@ -432,6 +432,11 @@ def journal_entry(
     elif entry['event'] == 'NavBeaconScan':
         this.navbeaconscan = entry['NumBodies']
 
+    elif entry['event'] == 'BackPack':
+        # Use the stored file contents, not the empty journal event
+        if state['BackpackJSON']:
+            entry = state['BackpackJSON']
+
     # Send interesting events to EDSM
     if (
         config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and

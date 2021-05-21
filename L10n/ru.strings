@@ -1,6 +1,3 @@
-/* Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier CAPI didn't respond" = "Ошибка: CAPI Frontier не отвечает";
-
 /* Language name */
 "!Language" = "Русский";
 
@@ -184,6 +181,9 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Ошибка: EDSM {MSG}";
 
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Ошибка: CAPI Frontier не отвечает";
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Ошибка: сервера Frontier недоступны";

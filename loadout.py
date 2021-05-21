@@ -32,6 +32,14 @@ def export(data, filename=None):
     querytime = config.get_int('querytime', default=int(time.time()))
 
     # Write
+    #
+    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
+    #  brainfart we had with dangling commas in commodity.py:export() !!!
+    #
     filename = join(config.get_str('outdir'), '%s.%s.txt' % (ship, time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
+    #
+    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
+    #  brainfart we had with dangling commas in commodity.py:export() !!!
+    #
     with open(filename, 'wt') as h:
         h.write(string)

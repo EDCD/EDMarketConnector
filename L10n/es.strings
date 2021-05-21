@@ -124,6 +124,15 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "Localización del archivo de Journal de E:D";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "Procesamiento de Journal para EDDB desactivado. Ver Log.";
+
+/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
+"EDDN journal handler disabled. See Log." = "Manejo de Journal para EDDN desactivado. Ver Log.";
+
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "Manejo de Journal para EDSM desactivado. Ver Log.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Conde Palatino";
 
@@ -172,6 +181,9 @@
 /* [edsm.py] */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
 
+
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Error: El CAPI de Frontier no respondió";
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Error: El servidor de Frontier está caído";
@@ -250,6 +262,9 @@
 
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Credenciales de Inara";
+
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara desactivado. Ver Log.";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "Información sobre migración de plugins";
@@ -505,6 +520,9 @@
 
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Estado";
+
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Traje";
 
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Topógrafo";

@@ -449,14 +449,17 @@ def journal_entry(  # noqa: C901, CCR001
                     )
 
                 # Update location
-                new_add_event(
-                    'setCommanderTravelLocation',
-                    entry['timestamp'],
-                    OrderedDict([
-                        ('starsystemName', system),
-                        ('stationName', station),		# Can be None
-                    ])
-                )
+                # Might not be available if this event is a 'StartUp' and we're replaying
+                # a log.
+                if system:
+                    new_add_event(
+                        'setCommanderTravelLocation',
+                        entry['timestamp'],
+                        OrderedDict([
+                            ('starsystemName', system),
+                            ('stationName', station),  # Can be None
+                        ])
+                    )
 
                 # Update ship
                 if state['ShipID']:  # Unknown if started in Fighter or SRV
