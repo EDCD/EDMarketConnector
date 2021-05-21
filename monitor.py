@@ -1057,7 +1057,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # this version of the docs: "SuitLoadout": # when starting on foot, or
             # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
             elif event_type == 'SuitLoadout':
-                self.store_suitloadout_from_event(entry)
+                suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid)
 
             elif event_type == 'SwitchSuitLoadout':
                 # 4.0.0.101
@@ -1073,7 +1074,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName":"wpn_s_pistol_plasma_charged",
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
-                self.store_suitloadout_from_event(entry)
+                suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid)
 
             elif event_type == 'CreateSuitLoadout':
                 # 4.0.0.101
@@ -1087,17 +1089,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "SlotName":"SecondaryWeapon", "SuitModuleID":1700217869872834,
                 # "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
                 #
-                new_loadout = {
-                    'loadoutSlotId': self.suit_loadout_id_from_loadoutid(entry['LoadoutID']),
-                    'suit': {
-                        'name': entry['SuitName'],
-                        'locName': entry.get('SuitName_Localised', entry['SuitName']),
-                        'suitId': entry['SuitID'],
-                    },
-                    'name': entry['LoadoutName'],
-                    'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
-                }
-                self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
+                _, _ = self.suitloadout_store_from_event(entry)
 
             elif event_type == 'DeleteSuitLoadout':
                 # alpha4:
@@ -1587,7 +1579,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
 
-    def store_suitloadout_from_event(self, entry) -> None:
+    def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
         """
         Store Suit and SuitLoadout data from a journal event.
 
@@ -1595,6 +1587,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         event.
 
         :param entry: Journal entry - 'SwitchSuitLoadout' or 'SuitLoadout'
+        :return Tuple[suit_slotid, suitloadout_slotid]: The IDs we set data for.
         """
         suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Initial suit containing just the data that is then embedded in
@@ -1614,13 +1607,36 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         }
         # Assign this loadout into our state
         self.state['SuitLoadouts'][f"{new_loadout['loadoutSlotId']}"] = new_loadout
-        self.state['SuitLoadoutCurrent'] = new_loadout
+
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
         new_suit['id'] = None  # Not available in 4.0.0.100 journal event
         new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
         # Ensure new_suit is in self.state['Suits']
         self.state['Suits'][f"{suit_slotid}"] = new_suit
-        self.state['SuitCurrent'] = new_suit
+
+        return suit_slotid, new_loadout['loadoutSlotId']
+
+    def suit_and_loadout_setcurrent(self, suit_slotid: int, suitloadout_slotid: int) -> bool:
+        """
+        Set self.state for SuitCurrent and SuitLoadoutCurrent as requested.
+
+        If the specified slots are unknown we abort and return False, else
+        return True.
+
+        :param suit_slotid: Numeric ID of the slot for the suit.
+        :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
+        :return: True if we could do this, False if not.
+        """
+        str_suitid = f"{suit_slotid}"
+        str_suitloadoutid = f"{suitloadout_slotid}"
+
+        if (self.state['Suits'].get(str_suitid, False)
+                and self.state['SuitLoadouts'].get(str_suitloadoutid, False)):
+            self.state['SuitCurrent'] = self.state['Suits'][str_suitid]
+            self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][str_suitloadoutid]
+            return True
+
+        return False
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
     #       designed for this in the future.  This is a bandaid for a known issue.
