@@ -1076,27 +1076,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.store_suitloadout_from_event(entry)
 
             elif event_type == 'CreateSuitLoadout':
-                # We know we won't have data for this new one
-                # Parameters:
-                #     • SuitID
-                #     • SuitName
-                #     • LoadoutID
-                #     • LoadoutName
-                # alpha4:
-                # { "timestamp":"2021-04-29T09:37:08Z", "event":"CreateSuitLoadout", "SuitID":1698364940285172,
-                # "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit", "LoadoutID":4293000001,
-                # "LoadoutName":"Dom L/K/K", "Modules":[
-                # {
-                #   "SlotName":"PrimaryWeapon1",
-                #   "SuitModuleID":1698364962722310,
-                #   "ModuleName":"wpn_m_assaultrifle_laser_fauto",
-                #   "ModuleName_Localised":"TK Aphelion"
-                # },
-                # { "SlotName":"PrimaryWeapon2",
-                # "SuitModuleID":1698364956302993, "ModuleName":"wpn_m_assaultrifle_kinetic_fauto",
-                # "ModuleName_Localised":"Karma AR-50" }, { "SlotName":"SecondaryWeapon",
-                # "SuitModuleID":1698292655291850, "ModuleName":"wpn_s_pistol_kinetic_sauto",
-                # "ModuleName_Localised":"Karma P-15" } ] }
+                # 4.0.0.101
+                #
+                # { "timestamp":"2021-05-21T11:13:15Z", "event":"CreateSuitLoadout", "SuitID":1700216165682989,
+                # "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit", "LoadoutID":4293000004,
+                # "LoadoutName":"P/P/K", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700216182854765,
+                # "ModuleName":"wpn_m_assaultrifle_plasma_fauto", "ModuleName_Localised":"Manticore Oppressor" },
+                # { "SlotName":"PrimaryWeapon2", "SuitModuleID":1700216190363340,
+                # "ModuleName":"wpn_m_shotgun_plasma_doublebarrel", "ModuleName_Localised":"Manticore Intimidator" },
+                # { "SlotName":"SecondaryWeapon", "SuitModuleID":1700217869872834,
+                # "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
+                #
                 new_loadout = {
                     'loadoutSlotId': self.suit_loadout_id_from_loadoutid(entry['LoadoutID']),
                     'suit': {
