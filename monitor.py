@@ -1087,6 +1087,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['SuitCurrent'] = new_suit
 
             elif event_type == 'SwitchSuitLoadout':
+                # 4.0.0.101
+                #
+                # { "timestamp":"2021-05-21T10:39:43Z", "event":"SwitchSuitLoadout",
+                #   "SuitID":1700217809818876, "SuitName":"utilitysuit_class1",
+                #   "SuitName_Localised":"Maverick Suit", "LoadoutID":4293000002,
+                #   "LoadoutName":"K/P", "Modules":[ { "SlotName":"PrimaryWeapon1",
+                #   "SuitModuleID":1700217863661544,
+                #   "ModuleName":"wpn_m_assaultrifle_kinetic_fauto",
+                #   "ModuleName_Localised":"Karma AR-50" },
+                #   { "SlotName":"SecondaryWeapon", "SuitModuleID":1700216180036986,
+                #   "ModuleName":"wpn_s_pistol_plasma_charged",
+                #   "ModuleName_Localised":"Manticore Tormentor" } ] }
+                #
                 loadoutid = entry['LoadoutID']
                 new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
                 # If this application is run with the latest Journal showing such an event then we won't
