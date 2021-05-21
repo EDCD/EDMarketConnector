@@ -93,6 +93,8 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('--eddn-local', help='Redirect EDDN requests to a local webserver', action='store_true')
+
     auth_options = parser.add_mutually_exclusive_group(required=False)
     auth_options.add_argument('--force-localserver-for-auth',
                               help='Force EDMC to use a localhost webserver for Frontier Auth callback',
@@ -128,6 +130,12 @@ if __name__ == '__main__':  # noqa: C901
             print("--force-edmc-protocol is only valid on Windows")
             parser.print_help()
             exit(1)
+
+    if args.eddn_local:
+        import eddnListener
+        import edmc_data
+        eddnListener.run_listener()
+        edmc_data.EDDN_DEBUG_SERVER = True
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""

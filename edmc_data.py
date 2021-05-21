@@ -570,3 +570,5 @@ edmc_suit_symbol_localised = {
         'utilitysuit':     'Traje Maverick',
     },
 }
+
+EDDN_DEBUG_SERVER = False  # Are we using a local server for debugging?

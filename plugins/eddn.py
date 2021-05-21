@@ -19,6 +19,7 @@ import requests
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
+import edmc_data
 from companion import CAPIData, category_map
 from config import applongname, appversion_nobuild, config
 from EDMCLogging import get_main_logger
@@ -87,9 +88,12 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 class EDDN:
     """EDDN Data export."""
 
-    # SERVER = 'http://localhost:8081'	# testing
     SERVER = 'https://eddn.edcd.io:4430'
+    if edmc_data.EDDN_DEBUG_SERVER:
+        SERVER = '127.0.0.1:9090'
+
     UPLOAD = f'{SERVER}/upload/'
+
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
