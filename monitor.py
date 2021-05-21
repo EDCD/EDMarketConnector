@@ -1057,34 +1057,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # this version of the docs: "SuitLoadout": # when starting on foot, or
             # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
             elif event_type == 'SuitLoadout':
-                suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-                # Initial suit containing just the data that is then embedded in
-                # the loadout
-                new_suit = {
-                    'name':    entry['SuitName'],
-                    'locName': entry.get('SuitName_Localised', entry['SuitName']),
-                    'suitId':  entry['SuitID'],
-                }
-
-                # Make the new loadout, in the CAPI format
-                new_loadout = {
-                    'loadoutSlotId': suit_slotid,
-                    'suit': new_suit,
-                    'name': entry['LoadoutName'],
-                    'slots': self.suit_loadout_slots_array_to_dict(entry['Modules']),
-                }
-
-                # Assign this loadout into our state
-                self.state['SuitLoadouts'][new_loadout['loadoutSlotId']] = new_loadout
-                self.state['SuitLoadoutCurrent'] = new_loadout
-
-                # Now add in the extra fields for new_suit to be a 'full' Suit structure
-                new_suit['id'] = None  # Not available in 4.0.0.100 journal event
-                new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
-
-                # Ensure new_suit is in self.state['Suits']
-                self.state['Suits'][suit_slotid] = new_suit
-                self.state['SuitCurrent'] = new_suit
+                self.store_suitloadout_from_event(entry)
 
             elif event_type == 'SwitchSuitLoadout':
                 # 4.0.0.101
@@ -1100,32 +1073,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName":"wpn_s_pistol_plasma_charged",
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
-                loadoutid = entry['LoadoutID']
-                new_slot = self.suit_loadout_id_from_loadoutid(loadoutid)
-                # If this application is run with the latest Journal showing such an event then we won't
-                # yet have the CAPI data, so no idea about Suits or Loadouts.
-                if self.state['Suits'] and self.state['SuitLoadouts']:
-                    try:
-                        self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][f'{new_slot}']
-
-                    except KeyError:
-                        logger.debug(f"KeyError getting suit loadout after switch, bad slot: {new_slot} ({loadoutid})")
-                        self.state['SuitCurrent'] = None
-                        self.state['SuitLoadoutCurrent'] = None
-
-                    else:
-                        try:
-                            new_suitid = self.state['SuitLoadoutCurrent']['suit']['suitId']
-
-                        except KeyError:
-                            logger.debug(f"KeyError getting switched-to suit ID from slot {new_slot} ({loadoutid})")
-
-                        else:
-                            try:
-                                self.state['SuitCurrent'] = self.state['Suits'][f'{new_suitid}']
-
-                            except KeyError:
-                                logger.debug(f"KeyError getting switched-to suit from slot {new_slot} ({loadoutid}")
+                self.store_suitloadout_from_event(entry)
 
             elif event_type == 'CreateSuitLoadout':
                 # We know we won't have data for this new one
@@ -1648,6 +1596,41 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def store_suitloadout_from_event(self, entry) -> None:
+        """
+        Store Suit and SuitLoadout data from a journal event.
+
+        Also use set currently in-use instances of them as being as per this
+        event.
+
+        :param entry: Journal entry - 'SwitchSuitLoadout' or 'SuitLoadout'
+        """
+        suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
+        # Initial suit containing just the data that is then embedded in
+        # the loadout
+        new_suit = {
+            'name':    entry['SuitName'],
+            'locName': entry.get('SuitName_Localised', entry['SuitName']),
+            'suitId':  entry['SuitID'],
+        }
+        # Make the new loadout, in the CAPI format
+        new_loadout = {
+            'loadoutSlotId': suit_slotid,
+            'suit':          new_suit,
+            'name':          entry['LoadoutName'],
+            'slots':         self.suit_loadout_slots_array_to_dict(
+                entry['Modules']),
+        }
+        # Assign this loadout into our state
+        self.state['SuitLoadouts'][f"{new_loadout['loadoutSlotId']}"] = new_loadout
+        self.state['SuitLoadoutCurrent'] = new_loadout
+        # Now add in the extra fields for new_suit to be a 'full' Suit structure
+        new_suit['id'] = None  # Not available in 4.0.0.100 journal event
+        new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
+        # Ensure new_suit is in self.state['Suits']
+        self.state['Suits'][f"{suit_slotid}"] = new_suit
+        self.state['SuitCurrent'] = new_suit
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
     #       designed for this in the future.  This is a bandaid for a known issue.
