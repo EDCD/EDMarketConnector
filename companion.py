@@ -556,7 +556,7 @@ class Session(object):
             # Server error. Typically 500 "Internal Server Error" if server is down
             logger.debug('500 status back from CAPI')
             self.dump(r)
-            raise ServerError(f'Received error {r.status_code} from server')
+            raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
 
         try:
             r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
