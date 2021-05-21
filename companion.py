@@ -17,7 +17,6 @@ import random
 import time
 import urllib.parse
 import webbrowser
-import socket
 from builtins import object, range, str
 from email.utils import parsedate
 from os.path import join
