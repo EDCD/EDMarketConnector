@@ -1058,7 +1058,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # when disembarking from a ship, with the same info as found in "CreateSuitLoadout"
             elif event_type == 'SuitLoadout':
                 suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
-                self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid)
+                if not self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid):
+                    logger.error(f"Event was: {entry}")
 
             elif event_type == 'SwitchSuitLoadout':
                 # 4.0.0.101
@@ -1075,7 +1076,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
                 suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
-                self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid)
+                if not self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid):
+                    logger.error(f"Event was: {entry}")
 
             elif event_type == 'CreateSuitLoadout':
                 # 4.0.0.101
@@ -1636,6 +1638,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][str_suitloadoutid]
             return True
 
+        logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suit_slotid=}, "
+                     f"{str_suitloadoutid=}")
         return False
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
