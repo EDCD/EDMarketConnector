@@ -1229,10 +1229,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • SuitID
                 #     • Class
                 #     • Cost
-                # Update credits total ?  It shouldn't even involve credits!
-                # Actual alpha4 - need to grind mats
-                # if self.state['Suits']:
-                pass
+                # TODO: Update self.state['Suits'] when we have an example to work from
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'LoadoutEquipModule':
                 # alpha4:
