@@ -1,12 +1,12 @@
 """Simple HTTP listener to be used with debugging EDDN sends."""
+import pathlib
+import tempfile
 import threading
 from http import server
 from typing import Any, Tuple
-import pathlib
-import tempfile
 
-from EDMCLogging import get_main_logger
 from config import appname
+from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
