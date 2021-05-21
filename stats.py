@@ -426,7 +426,9 @@ class StatsResults(tk.Toplevel):
         """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False):
+    def addpagerow(
+        self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False
+    ):
         """
         Add a single row to parent.
 
