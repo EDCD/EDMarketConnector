@@ -1135,10 +1135,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
+                loc_name = entry.get('Name_Localised', entry['Name'])
                 self.state['Suits'][entry['SuitID']] = {
                     'name':      entry['Name'],
-                    'locName':   entry.get('Name_Localised', entry['Name']),
-                    'id': None,  # Is this an FDev ID for suit type ?
+                    'locName':   loc_name,
+                    'edmcName':  self.suit_sane_name(loc_name),
+                    'id':        None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
                     'slots':     [],
                 }
