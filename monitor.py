@@ -1584,6 +1584,27 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
 
+    def suit_sane_name(self, name: str) -> str:
+        """
+        Given an input suit name return the best 'sane' name we can.
+
+        AS of 4.0.0.102 the Journal events are fine for a Grade 1 suit, but
+        anything above that has broken SuitName_Localised strings, e.g.
+        $TacticalSuit_Class1_Name;
+
+        Also, if there isn't a SuitName_Localised value at all we'll use the
+        plain SuitName which can be, e.g. tacticalsuit_class3
+
+        If the names were correct we would get 'Dominator Suit' in this instance,
+        however what we want to return is, e.g. 'Dominator'.  As that's both
+        sufficient for disambiguation and more succinct.
+
+        :param name: Name that could be in any of the forms.
+        :return: Our sane version of this suit's name.
+        """
+        # TODO: Localisation ?
+        return name
+
     def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
         """
         Store Suit and SuitLoadout data from a journal event.
@@ -1603,10 +1624,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if suit is None:
             # Initial suit containing just the data that is then embedded in
             # the loadout
+
+            # TODO: Attempt to map SuitName_Localised to something sane, if it
+            #       isn't already.
+            suitname = entry.get('SuitName_Localised', entry['SuitName'])
+            edmc_suitname = self.suit_sane_name(suitname)
             suit = {
-                'locName': entry.get('SuitName_Localised', entry['SuitName']),
-                'suitId':  entry['SuitID'],
-                'name':    entry['SuitName'],
+                'edmcName': edmc_suitname,
+                'locName':  suitname,
+                'suitId':   entry['SuitID'],
+                'name':     entry['SuitName'],
             }
 
         suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
