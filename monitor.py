@@ -1600,7 +1600,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Check if this looks like a suit we already have stored, so as
         # to avoid 'bad' Journal localised names.
         suit = self.state['Suits'].get(f"{suitid}", None)
-        if not suit:
+        if suit is None:
             # Initial suit containing just the data that is then embedded in
             # the loadout
             suit = {
