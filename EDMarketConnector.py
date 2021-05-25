@@ -93,7 +93,11 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
-    parser.add_argument('--eddn-local', help='Redirect EDDN requests to a local webserver', action='store_true')
+    parser.add_argument(
+        '--debug-sender',
+        help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
+        action='append',
+    )
 
     auth_options = parser.add_mutually_exclusive_group(required=False)
     auth_options.add_argument('--force-localserver-for-auth',
@@ -131,11 +135,16 @@ if __name__ == '__main__':  # noqa: C901
             parser.print_help()
             exit(1)
 
-    if args.eddn_local:
-        import eddnListener
-        import edmc_data
-        eddnListener.run_listener()
-        edmc_data.EDDN_DEBUG_SERVER = True
+    if args.debug_sender and len(args.debug_sender) > 0:
+        import config as conf_module
+        import debug_webserver
+        from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
+
+        conf_module.debug_senders = [x.casefold() for x in args.debug_sender]  # duplicate the list just in case
+        for d in conf_module.debug_senders:
+            logger.info(f'marked {d} for debug')
+
+        debug_webserver.run_listener(DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT)
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""

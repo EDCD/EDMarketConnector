@@ -22,7 +22,8 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config
+from config import applongname, appversion, config, debug_senders
+from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -528,7 +529,13 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> None:
         this.system_link.update_idletasks()
 
 
+TARGET_URL = 'https://www.edsm.net/api-journal-v1'
+if 'edsm' in debug_senders:
+    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
+
 # Worker thread
+
+
 def worker() -> None:
     """
     Handle uploading events to EDSM API.
@@ -623,9 +630,10 @@ def worker() -> None:
 
                     #     logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
 
-                    r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
+                    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
                     # logger.trace(f'API response content: {r.content}')
                     r.raise_for_status()
+
                     reply = r.json()
                     msg_num = reply['msgnum']
                     msg = reply['msg']

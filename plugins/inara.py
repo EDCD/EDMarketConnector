@@ -1,6 +1,7 @@
 """Inara Sync."""
 
 import json
+from logging import debug
 import threading
 import time
 import tkinter as tk
@@ -17,8 +18,9 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
+import edmc_data
 from companion import CAPIData
-from config import applongname, appversion, config
+from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -126,6 +128,9 @@ STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00
 
 
 TARGET_URL = 'https://inara.cz/inapi/v1/'
+DEBUG = 'inara' in debug_senders
+if DEBUG:
+    TARGET_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/inara'
 
 
 def system_url(system_name: str) -> str:
