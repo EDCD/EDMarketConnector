@@ -504,9 +504,13 @@ edmc_suit_shortnames = {
     'Maverick Suit':  'Maverick',
 }
 
-edmc_suit_symbol_to_en = {
-    'explorationsuit': 'Artemis Suit',
-    'flightsuit':      'Flight Suit',
-    'tacticalsuit':    'Dominator Suit',
-    'utilitysuit':     'Maverick Suit',
+edmc_suit_symbol_localised = {
+    # The key here should match what's seen in Fileheader 'language', but with
+    # any in-file `\\` already unescaped to a single `\`.
+    r'English\UK': {
+        'explorationsuit': 'Artemis Suit',
+        'flightsuit':      'Flight Suit',
+        'tacticalsuit':    'Dominator Suit',
+        'utilitysuit':     'Maverick Suit',
+    },
 }

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 import util_ships
 from config import config
-from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_to_en
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -501,9 +501,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.started = None
                 self.__init_state()
                 # In self.state as well, as that's what plugins get
-                self.stat['GameLanguage'] = entry['language']
-                self.stat['GameVersion'] = entry['gameversion']
-                self.stat['GameBuild'] = entry['build']
+                self.state['GameLanguage'] = entry['language']
+                self.state['GameVersion'] = entry['gameversion']
+                self.state['GameBuild'] = entry['build']
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
@@ -1622,7 +1622,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             name = n
 
         # Now turn either of those into an English '<type> Suit' form
-        name = edmc_suit_symbol_to_en.get(name.lower(), name)
+        if loc_lookup := edmc_suit_symbol_localised.get(self.state['GameLanguage']):
+            name = loc_lookup.get(name.lower(), name)
 
         # Finally, map that to a form without the verbose ' Suit' on the end
         name = edmc_suit_shortnames.get(name, name)
