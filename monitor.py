@@ -115,6 +115,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: Dict = {
+            'GameLanguage':       None,  # From `Fileheader
+            'GameVersion':        None,  # From `Fileheader
+            'GameBuild':          None,  # From `Fileheader
             'Captain':            None,  # On a crew
             'Cargo':              defaultdict(int),
             'Credits':            None,
@@ -497,13 +500,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = None
                 self.__init_state()
+                # In self.state as well, as that's what plugins get
+                self.stat['GameLanguage'] = entry['language']
+                self.stat['GameVersion'] = entry['gameversion']
+                self.stat['GameBuild'] = entry['build']
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
 
             elif event_type == 'LoadGame':
-                # alpha4
-                # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.mode = entry.get('GameMode')

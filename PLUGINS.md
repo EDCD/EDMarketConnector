@@ -566,6 +566,9 @@ Content of `state` (updated to the current journal entry):
 
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
+| `GameLanguage` |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
+| `GameVersion`  |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
+| `GameBuild`    |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
 | `Captain`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
 | `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
 | `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
