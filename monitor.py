@@ -1603,6 +1603,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :return: Our sane version of this suit's name.
         """
         # TODO: Localisation ?
+        # Stage 1: Is it in `$<type>_Class<X>_Name;` form ?
+        if (m := re.fullmatch(r'^\$([^_]+)_Class([0-9]+)_Name$', name)):
+            n, c = m.group(1, 2)
+            name = n
+
+        # Stage 2: Is it in `<type>_class<x>` form ?
+        # Stage 3: Is it in verbose `<type> Suit` form ?
         return name
 
     def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
