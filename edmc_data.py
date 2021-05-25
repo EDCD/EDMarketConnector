@@ -513,4 +513,5 @@ edmc_suit_symbol_localised = {
         'tacticalsuit':    'Dominator Suit',
         'utilitysuit':     'Maverick Suit',
     },
+    # r'Russian\RU': {
 }
