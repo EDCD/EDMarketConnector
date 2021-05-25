@@ -1072,6 +1072,10 @@ if 'my_plugin' in debug_senders:
 
 ```
 
+For returned data, you can modify `debug_webserver.DEFAULT_RESPONSES` (`dict[str, Union[Callable[[str], str]], str])`
+with either a function that accepts a single string (the raw post data) and returns a single string
+(the response to send), or with a string if your required response is simple.
+
 ## Disable a plugin
 
 EDMC now lets you disable a plugin without deleting it, simply rename the
