@@ -1075,8 +1075,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName":"wpn_s_pistol_plasma_charged",
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
-                suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
-                if not self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid):
+                suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
                     logger.error(f"Event was: {entry}")
 
             elif event_type == 'CreateSuitLoadout':
@@ -1091,7 +1091,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "SlotName":"SecondaryWeapon", "SuitModuleID":1700217869872834,
                 # "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
                 #
-                _, _ = self.suitloadout_store_from_event(entry)
+                suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                # Creation doesn't mean equipping it
+                #  if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
+                #      logger.error(f"Event was: {entry}")
 
             elif event_type == 'DeleteSuitLoadout':
                 # alpha4:
@@ -1591,45 +1594,52 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param entry: Journal entry - 'SwitchSuitLoadout' or 'SuitLoadout'
         :return Tuple[suit_slotid, suitloadout_slotid]: The IDs we set data for.
         """
-        suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-        # Initial suit containing just the data that is then embedded in
-        # the loadout
-        new_suit = {
-            'name':    entry['SuitName'],
-            'locName': entry.get('SuitName_Localised', entry['SuitName']),
-            'suitId':  entry['SuitID'],
-        }
+        # This is the full ID from Frontier, it's not a sparse array slot id
+        suitid = entry['SuitID']
+
+        # Check if this looks like a suit we already have stored, so as
+        # to avoid 'bad' Journal localised names.
+        suit = self.state['Suits'].get(f"{suitid}", None)
+        if not suit:
+            # Initial suit containing just the data that is then embedded in
+            # the loadout
+            suit = {
+                'locName': entry.get('SuitName_Localised', entry['SuitName']),
+                'suitId':  entry['SuitID'],
+                'name':    entry['SuitName'],
+            }
+
+        suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Make the new loadout, in the CAPI format
         new_loadout = {
-            'loadoutSlotId': suit_slotid,
-            'suit':          new_suit,
+            'loadoutSlotId': suitloadout_slotid,
+            'suit':          suit,
             'name':          entry['LoadoutName'],
-            'slots':         self.suit_loadout_slots_array_to_dict(
-                entry['Modules']),
+            'slots':         self.suit_loadout_slots_array_to_dict(entry['Modules']),
         }
         # Assign this loadout into our state
-        self.state['SuitLoadouts'][f"{new_loadout['loadoutSlotId']}"] = new_loadout
+        self.state['SuitLoadouts'][f"{suitloadout_slotid}"] = new_loadout
 
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
-        new_suit['id'] = None  # Not available in 4.0.0.100 journal event
-        new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
-        # Ensure new_suit is in self.state['Suits']
-        self.state['Suits'][f"{suit_slotid}"] = new_suit
+        suit['id'] = suit.get('id')  # Not available in 4.0.0.100 journal event
+        suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
+        # Ensure the suit is in self.state['Suits']
+        self.state['Suits'][f"{suitid}"] = suit
 
-        return suit_slotid, new_loadout['loadoutSlotId']
+        return suitid, suitloadout_slotid
 
-    def suit_and_loadout_setcurrent(self, suit_slotid: int, suitloadout_slotid: int) -> bool:
+    def suit_and_loadout_setcurrent(self, suitid: int, suitloadout_slotid: int) -> bool:
         """
         Set self.state for SuitCurrent and SuitLoadoutCurrent as requested.
 
         If the specified slots are unknown we abort and return False, else
         return True.
 
-        :param suit_slotid: Numeric ID of the slot for the suit.
+        :param suitid: Numeric ID of the suit.
         :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
         :return: True if we could do this, False if not.
         """
-        str_suitid = f"{suit_slotid}"
+        str_suitid = f"{suitid}"
         str_suitloadoutid = f"{suitloadout_slotid}"
 
         if (self.state['Suits'].get(str_suitid, False)
@@ -1638,7 +1648,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][str_suitloadoutid]
             return True
 
-        logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suit_slotid=}, "
+        logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suitid=}, "
                      f"{str_suitloadoutid=}")
         return False
 
