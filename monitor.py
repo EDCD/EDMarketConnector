@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 import util_ships
 from config import config
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_to_en
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -1604,12 +1605,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """
         # TODO: Localisation ?
         # Stage 1: Is it in `$<type>_Class<X>_Name;` form ?
-        if (m := re.fullmatch(r'^\$([^_]+)_Class([0-9]+)_Name$', name)):
+        if m := re.fullmatch(r'^\$([^_]+)_Class([0-9]+)_Name;$', name):
             n, c = m.group(1, 2)
             name = n
 
         # Stage 2: Is it in `<type>_class<x>` form ?
+        elif m := re.fullmatch(r'^([^_]+)_class([0-9]+)$', name):
+            n, c = m.group(1, 2)
+            name = n
+
+        # Now turn either of those into an English '<type> Suit' form
+        name = edmc_suit_symbol_to_en.get(name.lower(), name)
+
         # Stage 3: Is it in verbose `<type> Suit` form ?
+        name = edmc_suit_shortnames.get(name, name)
+
         return name
 
     def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:

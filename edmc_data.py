@@ -495,3 +495,18 @@ ship_name_map = {
     'viper_mkiv':                   'Viper MkIV',
     'vulture':                      'Vulture',
 }
+
+# Odyssey Suit Names
+edmc_suit_shortnames = {
+    'Artemis Suit':   'Artemis',
+    'Dominator Suit': 'Dominator',
+    'Flight Suit':    'Flight',
+    'Maverick Suit':  'Maverick',
+}
+
+edmc_suit_symbol_to_en = {
+    'explorationsuit': 'Artemis Suit',
+    'flightsuit':      'Flight Suit',
+    'tacticalsuit':    'Dominator Suit',
+    'utilitysuit':     'Maverick Suit',
+}
