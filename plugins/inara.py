@@ -1,7 +1,6 @@
 """Inara Sync."""
 
 import json
-from logging import debug
 import threading
 import time
 import tkinter as tk
@@ -14,11 +13,11 @@ from typing import Sequence, Union, cast
 
 import requests
 
+import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
-import edmc_data
 from companion import CAPIData
 from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
