@@ -1696,6 +1696,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             for e in entry.get('Engineers', entry):
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
+                        # For some Progress there's no Rank/RankProgress yet
+                        if f in ('Rank', 'RankProgress'):
+                            if (progress := e.get('Progress', None)) is not None:
+                                if progress in ('Invited', 'Known'):
+                                    continue
+
                         logger.warning(f"Engineer entry without '{f}' key: {e=} in {entry=}")
                         return False
 
