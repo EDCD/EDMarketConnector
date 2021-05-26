@@ -655,6 +655,11 @@ this is **NOT** the same as the return from
 because CAPI data doesn't (didn't always?) have an indication of Horizons or
 not.
 
+New in version 5.0.3:
+
+The `Suits` members have an additional key:value pair `edmcName` which is our
+preferred name for display on the UI, for the in-use game language.
+
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
