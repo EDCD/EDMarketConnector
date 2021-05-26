@@ -500,16 +500,20 @@ ship_name_map = {
 edmc_suit_shortnames = {
     'Flight Suit':      'Flight',     # EN
     'Flug-Anzug':       'Flug',       # DE
+    'Летный комбинезон': 'Летный',    # RU
     'Traje de vuelo':   'de vuelo',   # ES
     'Artemis Suit':     'Artemis',    # EN
     'Artemis-Anzug':    'Artemis',    # DE
-    'Traje Artemis':    'Artemis',   # ES
+    'Traje Artemis':    'Artemis',    # ES
+    'Комбинезон Artemis': 'Artemis',  # RU
     'Dominator Suit':   'Dominator',  # EN
     'Dominator-Anzug':  'Dominator',  # DE
     'Traje Dominator':  'Dominator',  # ES
+    'Комбинезон Dominator': 'Dominator',  # RU
     'Maverick Suit':    'Maverick',   # EN
     'Maverick-Anzug':   'Maverick',   # DE
     'Traje Maverick':   'Maverick',   # ES
+    'Комбинезон Maverick':  'Maverick',  # RU
 }
 
 edmc_suit_symbol_localised = {
@@ -521,19 +525,12 @@ edmc_suit_symbol_localised = {
         'tacticalsuit':    'Dominator Suit',
         'utilitysuit':     'Maverick Suit',
     },
-    # r'Russian\RU': {
-    # { "timestamp":"2021-05-25T19:04:54Z", "event":"SwitchSuitLoadout", "SuitID":1700222635552764, "SuitName":"flightsuit", "SuitName_Localised":"Летный комбинезон", "LoadoutID":4293000000, "LoadoutName":"Снаряжение по умолчанию", "Modules":[ { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:04:58Z", "event":"SwitchSuitLoadout", "SuitID":1700399023825621, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Комбинезон Dominator", "LoadoutID":4293000001, "LoadoutName":"Боевой 1", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700399051643021, "ModuleName":"wpn_m_sniper_plasma_charged", "ModuleName_Localised":"Manticore Executioner" }, { "SlotName":"PrimaryWeapon2", "SuitModuleID":1700399078090377, "ModuleName":"wpn_m_shotgun_plasma_doublebarrel", "ModuleName_Localised":"Manticore Intimidator" }, { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:05:02Z", "event":"SwitchSuitLoadout", "SuitID":1700575627706590, "SuitName":"tacticalsuit_class2", "SuitName_Localised":"$TacticalSuit_Class1_Name;", "LoadoutID":4293000002, "LoadoutName":"Снаряжение: 1", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700575634697937, "ModuleName":"wpn_m_assaultrifle_plasma_fauto", "ModuleName_Localised":"Manticore Oppressor" }, { "SlotName":"PrimaryWeapon2", "SuitModuleID":1700399051643021, "ModuleName":"wpn_m_sniper_plasma_charged", "ModuleName_Localised":"Manticore Executioner" }, { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:05:05Z", "event":"SwitchSuitLoadout", "SuitID":1700563770964710, "SuitName":"utilitysuit_class1", "SuitName_Localised":"Комбинезон Maverick", "LoadoutID":4293000003, "LoadoutName":"ывы ", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700399078090377, "ModuleName":"wpn_m_shotgun_plasma_doublebarrel", "ModuleName_Localised":"Manticore Intimidator" }, { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:05:07Z", "event":"SwitchSuitLoadout", "SuitID":1700571499909982, "SuitName":"explorationsuit_class2", "SuitName_Localised":"$ExplorationSuit_Class1_Name;", "LoadoutID":4293000004, "LoadoutName":"Снаряжение: 2", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700399061224625, "ModuleName":"wpn_m_submachinegun_kinetic_fauto", "ModuleName_Localised":"Karma C-44" }, { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:05:18Z", "event":"SuitLoadout", "SuitID":1700571499909982, "SuitName":"explorationsuit_class2", "SuitName_Localised":"$ExplorationSuit_Class1_Name;", "LoadoutID":4293000004, "LoadoutName":"Снаряжение: 2", "Modules":[ { "SlotName":"PrimaryWeapon1", "SuitModuleID":1700399061224625, "ModuleName":"wpn_m_submachinegun_kinetic_fauto", "ModuleName_Localised":"Karma C-44" }, { "SlotName":"SecondaryWeapon", "SuitModuleID":1700222635552854, "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
-    # { "timestamp":"2021-05-25T19:05:18Z", "event":"BackPack" }
-    # { "timestamp":"2021-05-25T19:05:19Z", "event":"ReceiveText", "From":"Crown Prospect", "Message":"$STATION_NoFireZone_entered;", "Message_Localised":"Вы вошли в зону запрета огня", "Channel":"npc" }
-    # { "timestamp":"2021-05-25T19:05:32Z", "event":"BuySuit", "Name":"ExplorationSuit_Class1", "Name_Localised":"Комбинезон Artemis", "Price":150000, "SuitID":1700758324607786 }
-    # { "timestamp":"2021-05-25T19:05:47Z", "event":"Friends", "Status":"Online", "Name":"Automatic system" }
-    # { "timestamp":"2021-05-25T19:05:51Z", "event":"CreateSuitLoadout", "SuitID":1700758324607786, "SuitName":"explorationsuit_class1", "SuitName_Localised":"Комбинезон Artemis", "LoadoutID":4293000005, "LoadoutName":"Снаряжение: 3", "Modules":[  ] }
-    # { "timestamp":"2021-05-25T19:05:53Z", "event":"SwitchSuitLoadout", "SuitID":1700758324607786, "SuitName":"explorationsuit_class1", "SuitName_Localised":"Комбинезон Artemis", "LoadoutID":4293000005, "LoadoutName":"Снаряжение: 3", "Modules":[  ] }
+    r'Russian\RU': {
+        'flightsuit':      'Летный комбинезон',
+        'explorationsuit': 'Комбинезон Artemis',
+        'tacticalsuit':    'Комбинезон Dominator',
+        'utilitysuit':     'Комбинезон Maverick',
+    },
     r'German\DE': {
         'flightsuit':      'Flug-Anzug',
         'explorationsuit': 'Artemis-Anzug',
