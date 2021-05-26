@@ -500,12 +500,16 @@ ship_name_map = {
 edmc_suit_shortnames = {
     'Flight Suit':      'Flight',     # EN
     'Flug-Anzug':       'Flug',       # DE
+    'Traje de vuelo':   'de vuelo',   # ES
     'Artemis Suit':     'Artemis',    # EN
     'Artemis-Anzug':    'Artemis',    # DE
+    'Traje Artemis':    'Artemis',   # ES
     'Dominator Suit':   'Dominator',  # EN
     'Dominator-Anzug':  'Dominator',  # DE
+    'Traje Dominator':  'Dominator',  # ES
     'Maverick Suit':    'Maverick',   # EN
     'Maverick-Anzug':   'Maverick',   # DE
+    'Traje Maverick':   'Maverick',   # ES
 }
 
 edmc_suit_symbol_localised = {
@@ -535,5 +539,11 @@ edmc_suit_symbol_localised = {
         'explorationsuit': 'Artemis-Anzug',
         'tacticalsuit':    'Dominator-Anzug',
         'utilitysuit':     'Maverick-Anzug',
+    },
+    r'Spanish\ES': {
+        'flightsuit':      'Traje de vuelo',
+        'explorationsuit': 'Traje Artemis',
+        'tacticalsuit':    'Traje Dominator',
+        'utilitysuit':     'Traje Maverick',
     },
 }
