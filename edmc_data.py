@@ -499,20 +499,28 @@ ship_name_map = {
 # Odyssey Suit Names
 edmc_suit_shortnames = {
     'Flight Suit':      'Flight',     # EN
-    'Flug-Anzug':       'Flug',       # DE
-    'Летный комбинезон': 'Летный',    # RU
-    'Traje de vuelo':   'de vuelo',   # ES
     'Artemis Suit':     'Artemis',    # EN
-    'Artemis-Anzug':    'Artemis',    # DE
-    'Traje Artemis':    'Artemis',    # ES
-    'Комбинезон Artemis': 'Artemis',  # RU
     'Dominator Suit':   'Dominator',  # EN
-    'Dominator-Anzug':  'Dominator',  # DE
-    'Traje Dominator':  'Dominator',  # ES
-    'Комбинезон Dominator': 'Dominator',  # RU
     'Maverick Suit':    'Maverick',   # EN
+
+    'Flug-Anzug':       'Flug',       # DE
+    'Artemis-Anzug':    'Artemis',    # DE
+    'Dominator-Anzug':  'Dominator',  # DE
     'Maverick-Anzug':   'Maverick',   # DE
+
+    'Traje de vuelo':   'de vuelo',   # ES
+    'Traje Artemis':    'Artemis',    # ES
+    'Traje Dominator':  'Dominator',  # ES
     'Traje Maverick':   'Maverick',   # ES
+
+    'Combinaison de vol': 'de vol',  # FR
+    'Combinaison Artemis': 'Artemis',  # FR
+    'Combinaison Dominator': 'Dominator',  # FR
+    'Combinaison Maverick': 'Maverick',  # FR
+
+    'Летный комбинезон': 'Летный',    # RU
+    'Комбинезон Artemis': 'Artemis',  # RU
+    'Комбинезон Dominator': 'Dominator',  # RU
     'Комбинезон Maverick':  'Maverick',  # RU
 }
 
@@ -525,17 +533,23 @@ edmc_suit_symbol_localised = {
         'tacticalsuit':    'Dominator Suit',
         'utilitysuit':     'Maverick Suit',
     },
-    r'Russian\RU': {
-        'flightsuit':      'Летный комбинезон',
-        'explorationsuit': 'Комбинезон Artemis',
-        'tacticalsuit':    'Комбинезон Dominator',
-        'utilitysuit':     'Комбинезон Maverick',
-    },
     r'German\DE': {
         'flightsuit':      'Flug-Anzug',
         'explorationsuit': 'Artemis-Anzug',
         'tacticalsuit':    'Dominator-Anzug',
         'utilitysuit':     'Maverick-Anzug',
+    },
+    r'French\FR': {
+        'flightsuit':      'Combinaison de vol',
+        'explorationsuit': 'Combinaison Artemis',
+        'tacticalsuit':    'Combinaison Dominator',
+        'utilitysuit':     'Combinaison Maverick',
+    },
+    r'Russian\RU': {
+        'flightsuit':      'Летный комбинезон',
+        'explorationsuit': 'Комбинезон Artemis',
+        'tacticalsuit':    'Комбинезон Dominator',
+        'utilitysuit':     'Комбинезон Maverick',
     },
     r'Spanish\ES': {
         'flightsuit':      'Traje de vuelo',
