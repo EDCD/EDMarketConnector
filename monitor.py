@@ -1651,7 +1651,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param entry: Journal event dict
         :return: True if passes validation, else False.
         """
-        # The event should have at least one of thes
+        # The event should have at least one of these
         if 'Engineers' not in entry and 'Progress' not in entry:
             logger.warning(f"EngineerProgress has neither 'Engineers' nor 'Progress': {entry=}")
             return False
@@ -1687,7 +1687,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         return False
 
         if 'Progress' in entry:
-            for e in entry['Engineers']:
+            # Progress can be only a single Engineer, so it's not an array
+            # { "timestamp":"2021-05-24T17:57:52Z",
+            #   "event":"EngineerProgress",
+            #   "Engineer":"Felicity Farseer",
+            #   "EngineerID":300100,
+            #   "Progress":"Invited" }
+            for e in entry.get('Engineers', entry):
                 for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
                     if f not in e:
                         logger.warning(f"Engineer entry without '{f}' key: {e=} in {entry=}")
