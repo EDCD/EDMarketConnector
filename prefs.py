@@ -821,7 +821,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Button(
                 plugins_frame,
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: webbrowser.open(f'file:///{plugdir.get()}')
+                command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
             ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
 
         nb.Label(
