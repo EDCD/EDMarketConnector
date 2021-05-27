@@ -1610,7 +1610,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param name: Name that could be in any of the forms.
         :return: Our sane version of this suit's name.
         """
-        # TODO: Localisation ?
+        # WORKAROUND 4.0.0.200 | 2021-05-27: Suit names above Grade 1 aren't localised
+        #    properly by Frontier, so we do it ourselves.
         # Stage 1: Is it in `$<type>_Class<X>_Name;` form ?
         if m := re.fullmatch(r'(?i)^\$([^_]+)_Class([0-9]+)_Name;$', name):
             n, c = m.group(1, 2)
@@ -1621,9 +1622,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             n, c = m.group(1, 2)
             name = n
 
-        # Now turn either of those into an English '<type> Suit' form
+        # Now turn either of those into a '<type> Suit' (modulo language) form
         if loc_lookup := edmc_suit_symbol_localised.get(self.state['GameLanguage']):
             name = loc_lookup.get(name.lower(), name)
+        # WORKAROUND END
 
         # Finally, map that to a form without the verbose ' Suit' on the end
         name = edmc_suit_shortnames.get(name, name)
