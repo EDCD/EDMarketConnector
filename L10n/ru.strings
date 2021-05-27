@@ -230,6 +230,12 @@
 /* Section heading in settings. [prefs.py] */
 "File location" = "Путь хранения файлов";
 
+/* Failures to access Frontier CAPI endpoints [companion.py] */
+"Frontier CAPI query failure" = "Неудача при запросе к Frontier CAPI";
+
+/* Server errors from Frontier CAPI server [companion.py] */
+"Frontier CAPI server error" = "Серверная ошибка Frontier CAPI";
+
 /* CQC rank. [stats.py] */
 "Gladiator" = "Гладиатор";
 

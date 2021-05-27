@@ -461,6 +461,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "État";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Combinaison";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Éclaireur";
 

@@ -1,9 +1,10 @@
 """CMDR Status information."""
 import csv
+import tkinter
 import tkinter as tk
 from sys import platform
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, NamedTuple, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, NamedTuple, Optional, Sequence, cast
 
 import companion
 import EDMCLogging
@@ -342,10 +343,11 @@ class StatsResults(tk.Toplevel):
 
         page = self.addpage(notebook)
         for thing in stats[1:3]:
-            self.addpagerow(page, [thing[0], self.credits(int(thing[1]))])  # assumes things two and three are money
+            # assumes things two and three are money
+            self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
 
         for thing in stats[3:]:
-            self.addpagerow(page, thing)
+            self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
         notebook.add(page, text=_('Status'))  # Status dialog title
@@ -361,7 +363,7 @@ class StatsResults(tk.Toplevel):
         shiplist = ships(data)
         for ship_data in shiplist:
             # skip id, last item is money
-            self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))])
+            self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))], with_copy=True)
 
         ttk.Frame(page).grid(pady=5)         # bottom spacer
         notebook.add(page, text=_('Ships'))  # Status dialog title
@@ -417,14 +419,16 @@ class StatsResults(tk.Toplevel):
         :param header: The headers to add to the page
         :param align: The alignment of the page, defaults to None
         """
-        self.addpagerow(parent, header, align=align)
+        self.addpagerow(parent, header, align=align, with_copy=False)
         ttk.Separator(parent, orient=tk.HORIZONTAL).grid(columnspan=len(header), padx=10, pady=2, sticky=tk.EW)
 
     def addpagespacer(self, parent) -> None:
         """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None):
+    def addpagerow(
+        self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False
+    ):
         """
         Add a single row to parent.
 
@@ -434,7 +438,11 @@ class StatsResults(tk.Toplevel):
         """
         row = -1  # To silence unbound warnings
         for i in range(len(content)):
+            # label = HyperlinkLabel(parent, text=content[i], popup_copy=True)
             label = nb.Label(parent, text=content[i])
+            if with_copy:
+                label.bind('<Button-1>', self.copy_callback(label, content[i]))
+
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)
                 row = parent.grid_size()[1]-1
@@ -449,3 +457,16 @@ class StatsResults(tk.Toplevel):
         """Localised string of given int, including a trailing ` Cr`."""
         # TODO: Locale is a class, this calls an instance method on it with an int as its `self`
         return Locale.string_from_number(value, 0) + ' Cr'  # type: ignore
+
+    @staticmethod
+    def copy_callback(label: tk.Label, text_to_copy: str) -> Callable[..., None]:
+        """Copy data in Label to clipboard."""
+        def do_copy(event: tkinter.Event) -> None:
+            label.clipboard_clear()
+            label.clipboard_append(text_to_copy)
+            old_bg = label['bg']
+            label['bg'] = 'gray49'
+
+            label.after(100, (lambda: label.configure(bg=old_bg)))
+
+        return do_copy

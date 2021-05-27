@@ -17,6 +17,54 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.0.3
+===
+
+* You can now click on a 'cell' in the "File" > "Status" popup to copy that 
+  text to the clipboard.  This was a relatively easy, and non-intrusive, code 
+  change.  We'll look at richer, fuller, copy functionality in the future.
+
+* Suit names, for all grades, should now be displaying as just the relevant 
+  word, never a symbol, and with the redundant 'suit' word(s) from all 
+  languages removed.  Note that Frontier have *not* translated the 
+  following, so neither do we: "Artemis", "Dominator", "Maverick".  The 'Flight 
+  Suit' should, approximately, use the Frontier-supplied translation for 
+  'Flight' in this context.  In essence the displayed name is now as short 
+  as possible whilst disambiguating the suit names from each other.
+  
+Bug Fixes
+---
+
+* The check for "source, but with extra changes?" in appversion will now 
+  not cause an error if the "git" command isn't available.  Also, the extra 
+  text added to the build number is now ".DIRTY".
+
+* Actually properly handle the "you just made progress" version of the 
+  `EngineerProgress` Journal event, so that it doesn't throw errors.
+  
+Plugin Developers
+---
+
+* The backpack and ship locker tracking of micro-resources **might** now 
+  actually be correct with respect to 'reality' in-game.  This is in part 
+  thanks to Frontier changes to some events in 4.0.0.200.
+
+* Suit names will now only be sourced from Journal events if the
+  application didn't (yet) have the equivalent CAPI data.
+
+* The displayed Suit name is stored in an extra "edmcName" key within
+  `state['Suits']` and `state['SuitCurrent']`.  What was found in the 
+  Journal or CAPI data is still present in the "name" and "locName" values.
+  
+* The "language", "gameversion" and "build" values from the "Fileheader" event
+  are all now stored in `state[]` fields.  See [PLUGINS.md](./PLUGINS.md) for
+  updated documentation.
+
+* We have a new [Contributing.md](./Contributing.md) policy of adding 
+  comments in a defined format when we add or change code such that there's a
+  'hack', 'magic' or 'workaround' in play.  You might find some of this 
+  enlightening going forwards.
+  
 Release 5.0.2
 ===
 

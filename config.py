@@ -33,7 +33,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.0.2'
+_static_appversion = '5.0.3'
 copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
@@ -96,20 +96,11 @@ def git_shorthash_from_head() -> str:
     """
     Determine short hash for current git HEAD.
 
-    Includes -DIRTY if any changes have been made from HEAD
+    Includes `.DIRTY` if any changes have been made from HEAD
 
     :return: str - None if we couldn't determine the short hash.
     """
     shorthash: str = None  # type: ignore
-    dirty = False
-
-    with contextlib.suppress(Exception):
-        result = subprocess.run('git diff --stat HEAD'.split(), capture_output=True)
-        if len(result.stdout) > 0:
-            dirty = True
-
-        if len(result.stderr) > 0:
-            logger.warning(f'Data from git on stderr:\n{str(result.stderr)}')
 
     try:
         git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
@@ -127,7 +118,16 @@ def git_shorthash_from_head() -> str:
             logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
             shorthash = None  # type: ignore
 
-    return shorthash + ('-WORKING-DIR-IS-DIRTY' if dirty else '')
+    if shorthash is not None:
+        with contextlib.suppress(Exception):
+            result = subprocess.run('git diff --stat HEAD'.split(), capture_output=True)
+            if len(result.stdout) > 0:
+                shorthash += '.DIRTY'
+
+            if len(result.stderr) > 0:
+                logger.warning(f'Data from git on stderr:\n{str(result.stderr)}')
+
+    return shorthash
 
 
 def appversion() -> semantic_version.Version:

@@ -124,6 +124,15 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "E:D lokikirjan tiedostosijainti";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "EDDB lokikirjan käsittely ei käytössä. Katso lokitiedot.";
+
+/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
+"EDDN journal handler disabled. See Log." = "EDDB lokikirjan käsittelijä ei käytössä. Katso lokitiedot.";
+
+/* When EDSM functionality has been killswitched [plugins/edsm.py] */
+"EDSM Handler disabled. See Log." = "ESDM käsittelijä ei käytössä. Katso lokitiedot.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 
@@ -173,6 +182,9 @@
 "Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
 
 
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "Virhe: Frontier CAPI ei vastaa.";
+
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Virhe: Frontierin palvelin ei vastaa";
 
@@ -218,6 +230,12 @@
 /* Section heading in settings. [prefs.py] */
 "File location" = "Tiedostosijainti";
 
+/* Failures to access Frontier CAPI endpoints [companion.py] */
+"Frontier CAPI query failure" = "Frontier CAPI kyselyvirhe.";
+
+/* Server errors from Frontier CAPI server [companion.py] */
+"Frontier CAPI server error" = "Frontier CAPI palvelinvirhe.";
+
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
@@ -250,6 +268,9 @@
 
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Inaran kirjautuminen";
+
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara ei käytössä. Katso lokitiedot.";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "Tietoja lisäosien siirrosta";
