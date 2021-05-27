@@ -877,7 +877,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
                 )
 
-            elif event_type == 'BackPack':
+            elif event_type in ('BackPack', 'Backpack'):  # WORKAROUND 4.0.0.200: BackPack becomes Backpack
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
                 with open(join(self.currentdir, 'Backpack.json'), 'rb') as backpack:  # type: ignore
@@ -984,19 +984,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'TransferMicroResources':
                 # Moving Odyssey MicroResources between ShipLocker and BackPack
+                # Backpack dropped as its done in BackpackChange
+                #
+                #  from: 4.0.0.200 -- Locker(Old|New)Count is now a thing.
                 for mr in entry['Transfers']:
                     category = self.category(mr['Category'])
                     name = self.canonicalise(mr['Name'])
 
-                    if mr['Direction'] == 'ToShipLocker':
-                        self.state[category][name] += mr['Count']
-                        self.state['BackPack'][category][name] -= mr['Count']
-
-                    elif mr['Direction'] == 'ToBackpack':
-                        self.state[category][name] -= mr['Count']
-                        self.state['BackPack'][category][name] += mr['Count']
-
-                    else:
+                    self.state[category][name] = mr['LockerNewCount']
+                    if mr['Direction'] not in ('ToShipLocker', 'ToBackpack'):
                         logger.warning(f'TransferMicroResources with unexpected Direction {mr["Direction"]=}: {mr=}')
 
                 # Paranoia check to see if anything has gone negative.
@@ -1014,9 +1010,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • Name
                 #     • Type
                 #     • OwnerID
-                for i in self.state['BackPack'][entry['Type']]:
-                    if i == entry['Name']:
-                        self.state['BackPack'][entry['Type']][i] += entry['Count']
+
+                # Handled by BackpackChange
+                # for i in self.state['BackPack'][entry['Type']]:
+                #     if i == entry['Name']:
+                #         self.state['BackPack'][entry['Type']][i] += entry['Count']
+                pass
 
             elif event_type == 'DropItems':
                 # alpha4
@@ -1026,12 +1025,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OwnerID
                 #     • MissionID
                 #     • Count
-                for i in self.state['BackPack'][entry['Type']]:
-                    if i == entry['Name']:
-                        self.state['BackPack'][entry['Type']][i] -= entry['Count']
-                        # Paranoia in case we lost track
-                        if self.state['BackPack'][entry['Type']][i] < 0:
-                            self.state['BackPack'][entry['Type']][i] = 0
+
+                # This is handled by BackpackChange.
+                # for i in self.state['BackPack'][entry['Type']]:
+                #     if i == entry['Name']:
+                #         self.state['BackPack'][entry['Type']][i] -= entry['Count']
+                #         # Paranoia in case we lost track
+                #         if self.state['BackPack'][entry['Type']][i] < 0:
+                #             self.state['BackPack'][entry['Type']][i] = 0
+                pass
 
             elif event_type == 'UseConsumable':
                 # TODO: XXX: From v31 doc
