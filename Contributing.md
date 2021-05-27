@@ -325,6 +325,21 @@ literals.
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
+### Mark hacks and workarounds with a specific comment
+
+We often write hacks or workarounds to make EDMC work on a given version or around a specific bug.
+Please mark all hacks, workarounds, magic with one of the following comments, where applicable:
+```
+# HACK $elite-version-number | $date: $description
+# MAGIC $elite-version-number | $date: $description
+# WORKAROUND $elite-version-number | $date: $description
+```
+
+The description should cover exactly why the hack is needed, what it does, what is required / expected for it to be removed.
+Please be verbose here, more info about weird choices is always prefered over magic that we struggle to understand in six months.
+
+Additionally, if your hack is over around 5 lines, please include a `# HACK END` or similar comment to indicate the end of the hack.
+
 ---
 
 ## Git commit conventions
