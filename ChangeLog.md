@@ -45,7 +45,7 @@ Bug Fixes
 Plugin Developers
 ---
 
-* The backpack and ship locker tracking of micro-resources might now 
+* The backpack and ship locker tracking of micro-resources **might** now 
   actually be correct with respect to 'reality' in-game.  This is in part 
   thanks to Frontier changes to some events in 4.0.0.200.
 

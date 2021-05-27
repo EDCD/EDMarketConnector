@@ -230,6 +230,12 @@
 /* Section heading in settings. [prefs.py] */
 "File location" = "파일 위치";
 
+/* Failures to access Frontier CAPI endpoints [companion.py] */
+"Frontier CAPI query failure" = "Frontier CAPI 쿼리 실패";
+
+/* Server errors from Frontier CAPI server [companion.py] */
+"Frontier CAPI server error" = "Frontier CAPI 서버 에러";
+
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
