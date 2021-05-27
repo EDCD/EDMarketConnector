@@ -519,9 +519,10 @@ edmc_suit_shortnames = {
     'Combinaison Maverick':   'Maverick',   # FR
 
     'Traje voador':           'voador',     # PT-BR
-    'Traje Artemis':          'Artemis',    # PT-BR
-    'Traje Dominator':        'Dominator',  # PT-BR
-    'Traje Maverick':         'Maverick',   # PT-BR
+    #  These are duplicates of the ES ones, but kept here for clarity
+    #  'Traje Artemis':          'Artemis',    # PT-BR
+    #  'Traje Dominator':        'Dominator',  # PT-BR
+    #  'Traje Maverick':         'Maverick',   # PT-BR
 
     'Летный комбинезон':      'Летный',     # RU
     'Комбинезон Artemis':     'Artemis',    # RU
