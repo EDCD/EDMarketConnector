@@ -17,6 +17,19 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.0.4
+===
+
+This is a minor bugfix release, ensuring that Odyssey Suit names (and loadout) 
+will actually display if you're in your ship on login and never leave it.
+
+NB: This still requires a Frontier CAPI data pull, either automatically 
+because you're docked if you have that option set, or by pressing the 
+'Update' button.  We can't display data when we don't have it from either 
+CAPI or Journal sources.  You'll also see '`<Unknown>`' between the time we 
+see the Journal LoadGame event during login and when there's either a 
+Journal suit-related event, or a CAPI data pull completes.
+
 Release 5.0.3
 ===
 
