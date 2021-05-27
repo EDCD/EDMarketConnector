@@ -36,10 +36,87 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.0.2</title>
+			<title>Release 5.0.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.9.5.</p>
+<p><strong>As a consequence of this we no longer support Windows 7.<br>
+This is due to
+<a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.9.x itself not supporting Windows 7</a>.
+The application (both EDMarketConnector.exe and EDMC.exe) will crash on
+startup due to a missing DLL.</strong></p>
+<p>This should have no other impact on users or plugin developers, other
+than the latter now being free to use features that were introduced since the
+Python 3.7 series.</p>
+<p>Developers can check the contents of the <code>.python-version</code> file
+in the source (it's not distributed with the Windows installer) for the
+currently used version in a given branch.</p>
+</li>
+</ul>
+
+<h2>Release 5.0.3</h2>
+<ul>
+<li>
+<p>You can now click on a 'cell' in the "File" &gt; "Status" popup to copy that
+text to the clipboard.  This was a relatively easy, and non-intrusive, code
+change.  We'll look at richer, fuller, copy functionality in the future.</p>
+</li>
+<li>
+<p>Suit names, for all grades, should now be displaying as just the relevant
+word, never a symbol, and with the redundant 'suit' word(s) from all
+languages removed.  Note that Frontier have <em>not</em> translated the
+following, so neither do we: "Artemis", "Dominator", "Maverick".  The 'Flight
+Suit' should, approximately, use the Frontier-supplied translation for
+'Flight' in this context.  In essence the displayed name is now as short
+as possible whilst disambiguating the suit names from each other.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>The check for "source, but with extra changes?" in appversion will now
+not cause an error if the "git" command isn't available.  Also, the extra
+text added to the build number is now ".DIRTY".</p>
+</li>
+<li>
+<p>Actually properly handle the "you just made progress" version of the
+<code>EngineerProgress</code> Journal event, so that it doesn't throw errors.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>The backpack and ship locker tracking of micro-resources <strong>might</strong> now
+actually be correct with respect to 'reality' in-game.  This is in part
+thanks to Frontier changes to some events in 4.0.0.200.</p>
+</li>
+<li>
+<p>Suit names will now only be sourced from Journal events if the
+application didn't (yet) have the equivalent CAPI data.</p>
+</li>
+<li>
+<p>The displayed Suit name is stored in an extra "edmcName" key within
+<code>state['Suits']</code> and <code>state['SuitCurrent']</code>.  What was found in the
+Journal or CAPI data is still present in the "name" and "locName" values.</p>
+</li>
+<li>
+<p>The "language", "gameversion" and "build" values from the "Fileheader" event
+are all now stored in <code>state[]</code> fields.  See <a href="./PLUGINS.md">PLUGINS.md</a> for
+updated documentation.</p>
+</li>
+<li>
+<p>We have a new <a href="./Contributing.md">Contributing.md</a> policy of adding
+comments in a defined format when we add or change code such that there's a
+'hack', 'magic' or 'workaround' in play.  You might find some of this
+enlightening going forwards.</p>
+</li>
+</ul>
 
 <h2>Release 5.0.2</h2>
 <p>This release is primarily aimed at getting the UI "<code>Suit: ...</code>" line working
@@ -589,10 +666,10 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.2/EDMarketConnector_win_5.0.2.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.3/EDMarketConnector_win_5.0.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.0.2"
+				sparkle:version="5.0.3"
 				length="10190848"
 				type="application/octet-stream"
 			/>
