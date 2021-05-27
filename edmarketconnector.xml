@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.0.3</title>
+			<title>Release 5.0.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,17 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.0.4</h2>
+<p>This is a minor bugfix release, ensuring that Odyssey Suit names (and loadout)
+will actually display if you're in your ship on login and never leave it.</p>
+<p>NB: This still requires a Frontier CAPI data pull, either automatically
+because you're docked if you have that option set, or by pressing the
+'Update' button.  We can't display data when we don't have it from either
+CAPI or Journal sources.  You'll also see '<code>&lt;Unknown&gt;</code>' between the time we
+see the Journal LoadGame event during login and when there's either a
+Journal suit-related event, or a CAPI data pull completes.</p>
+
 
 <h2>Release 5.0.3</h2>
 <ul>
@@ -666,11 +677,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.3/EDMarketConnector_win_5.0.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.4/EDMarketConnector_win_5.0.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.0.3"
-				length="10190848"
+				sparkle:version="5.0.4"
+				length="10174464"
 				type="application/octet-stream"
 			/>
 		</item>
