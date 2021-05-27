@@ -660,6 +660,11 @@ New in version 5.0.3:
 The `Suits` members have an additional key:value pair `edmcName` which is our
 preferred name for display on the UI, for the in-use game language.
 
+The "language", "gameversion" and "build" values from the "Fileheader" event
+are all now stored in `state[]` fields; "GameLanguage", "GameVersion" and
+"GameBuild".
+
+
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
