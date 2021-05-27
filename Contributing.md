@@ -338,7 +338,7 @@ Please mark all hacks, workarounds, magic with one of the following comments, wh
 The description should cover exactly why the hack is needed, what it does, what is required / expected for it to be removed.
 Please be verbose here, more info about weird choices is always prefered over magic that we struggle to understand in six months.
 
-Additionally, if your hack is giant, please include a `# HACK END` or similar comment to indicate the end of the hack.
+Additionally, if your hack is over around 5 lines, please include a `# HACK END` or similar comment to indicate the end of the hack.
 
 ---
 
