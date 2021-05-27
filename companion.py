@@ -688,6 +688,9 @@ class Session(object):
         else:
             monitor.state['Suits'] = suits
 
+        # We need to be setting our edmcName for all suits
+        monitor.state['SuitCurrent']['edmcName'] = monitor.suit_sane_name(monitor.state['SuitCurrent']['locName'])
+
         if (suit_loadouts := data.get('loadouts')) is None:
             logger.warning('CAPI data had "suit" but no (suit) "loadouts"')
 

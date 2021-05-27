@@ -983,6 +983,8 @@ class AppWindow(object):
         if play_sound and play_bad:
             hotkeymgr.play_bad()
 
+        self.update_suit_text()
+        self.suit_show_if_set()
         self.cooldown()
 
     def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
