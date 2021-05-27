@@ -629,7 +629,7 @@ class AppWindow(object):
             self.suit['text'] = f'<{_("Unknown")}>'
             return
 
-        suitname = suit['locName']
+        suitname = suit['edmcName']
 
         if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
             self.suit['text'] = ''
@@ -927,7 +927,7 @@ class AppWindow(object):
                 if monitor.state.get('SuitCurrent') is not None:
                     if (loadout := data.get('loadout')) is not None:
                         if (suit := loadout.get('suit')) is not None:
-                            if (suitname := suit.get('locName')) is not None:
+                            if (suitname := suit.get('edmcName')) is not None:
                                 # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
                                 loadout_name = index_possibly_sparse_list(
                                     data['loadouts'], loadout['loadoutSlotId']

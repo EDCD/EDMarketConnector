@@ -96,7 +96,7 @@ def git_shorthash_from_head() -> str:
     """
     Determine short hash for current git HEAD.
 
-    Includes -DIRTY if any changes have been made from HEAD
+    Includes +DIRTY if any changes have been made from HEAD
 
     :return: str - None if we couldn't determine the short hash.
     """
@@ -122,7 +122,7 @@ def git_shorthash_from_head() -> str:
         with contextlib.suppress(Exception):
             result = subprocess.run('git diff --stat HEAD'.split(), capture_output=True)
             if len(result.stdout) > 0:
-                shorthash += '-WORKING-DIR-IS-DIRTY'
+                shorthash += '+DIRTY'
 
             if len(result.stderr) > 0:
                 logger.warning(f'Data from git on stderr:\n{str(result.stderr)}')

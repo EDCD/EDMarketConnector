@@ -566,6 +566,9 @@ Content of `state` (updated to the current journal entry):
 
 | Field          |            Type             | Description                                                                                                     |
 | :------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
+| `GameLanguage` |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
+| `GameVersion`  |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
+| `GameBuild`    |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
 | `Captain`      |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
 | `Cargo`        |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
 | `CargoJSON`    |           `dict`            | content of cargo.json as of last read.                                                                          |
@@ -651,6 +654,11 @@ this is **NOT** the same as the return from
 [plugins/eddn.py:is_horizons()](./plugins/eddn.py). That function is necessary
 because CAPI data doesn't (didn't always?) have an indication of Horizons or
 not.
+
+New in version 5.0.3:
+
+The `Suits` members have an additional key:value pair `edmcName` which is our
+preferred name for display on the UI, for the in-use game language.
 
 ##### Synthetic Events
 

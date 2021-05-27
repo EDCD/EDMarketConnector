@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 import util_ships
 from config import config
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -114,6 +115,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: Dict = {
+            'GameLanguage':       None,  # From `Fileheader
+            'GameVersion':        None,  # From `Fileheader
+            'GameBuild':          None,  # From `Fileheader
             'Captain':            None,  # On a crew
             'Cargo':              defaultdict(int),
             'Credits':            None,
@@ -496,13 +500,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = None
                 self.__init_state()
+                # In self.state as well, as that's what plugins get
+                self.state['GameLanguage'] = entry['language']
+                self.state['GameVersion'] = entry['gameversion']
+                self.state['GameBuild'] = entry['build']
 
             elif event_type == 'Commander':
                 self.live = True  # First event in 3.0
 
             elif event_type == 'LoadGame':
-                # alpha4
-                # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 self.mode = entry.get('GameMode')
@@ -1075,8 +1081,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName":"wpn_s_pistol_plasma_charged",
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
-                suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
-                if not self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid):
+                suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
                     logger.error(f"Event was: {entry}")
 
             elif event_type == 'CreateSuitLoadout':
@@ -1091,7 +1097,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "SlotName":"SecondaryWeapon", "SuitModuleID":1700217869872834,
                 # "ModuleName":"wpn_s_pistol_kinetic_sauto", "ModuleName_Localised":"Karma P-15" } ] }
                 #
-                _, _ = self.suitloadout_store_from_event(entry)
+                suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
+                # Creation doesn't mean equipping it
+                #  if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
+                #      logger.error(f"Event was: {entry}")
 
             elif event_type == 'DeleteSuitLoadout':
                 # alpha4:
@@ -1131,10 +1140,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
+                loc_name = entry.get('Name_Localised', entry['Name'])
                 self.state['Suits'][entry['SuitID']] = {
                     'name':      entry['Name'],
-                    'locName':   entry.get('Name_Localised', entry['Name']),
-                    'id': None,  # Is this an FDev ID for suit type ?
+                    'locName':   loc_name,
+                    'edmcName':  self.suit_sane_name(loc_name),
+                    'id':        None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
                     'slots':     [],
                 }
@@ -1581,6 +1592,44 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
 
+    def suit_sane_name(self, name: str) -> str:
+        """
+        Given an input suit name return the best 'sane' name we can.
+
+        AS of 4.0.0.102 the Journal events are fine for a Grade 1 suit, but
+        anything above that has broken SuitName_Localised strings, e.g.
+        $TacticalSuit_Class1_Name;
+
+        Also, if there isn't a SuitName_Localised value at all we'll use the
+        plain SuitName which can be, e.g. tacticalsuit_class3
+
+        If the names were correct we would get 'Dominator Suit' in this instance,
+        however what we want to return is, e.g. 'Dominator'.  As that's both
+        sufficient for disambiguation and more succinct.
+
+        :param name: Name that could be in any of the forms.
+        :return: Our sane version of this suit's name.
+        """
+        # TODO: Localisation ?
+        # Stage 1: Is it in `$<type>_Class<X>_Name;` form ?
+        if m := re.fullmatch(r'(?i)^\$([^_]+)_Class([0-9]+)_Name;$', name):
+            n, c = m.group(1, 2)
+            name = n
+
+        # Stage 2: Is it in `<type>_class<x>` form ?
+        elif m := re.fullmatch(r'(?i)^([^_]+)_class([0-9]+)$', name):
+            n, c = m.group(1, 2)
+            name = n
+
+        # Now turn either of those into an English '<type> Suit' form
+        if loc_lookup := edmc_suit_symbol_localised.get(self.state['GameLanguage']):
+            name = loc_lookup.get(name.lower(), name)
+
+        # Finally, map that to a form without the verbose ' Suit' on the end
+        name = edmc_suit_shortnames.get(name, name)
+
+        return name
+
     def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
         """
         Store Suit and SuitLoadout data from a journal event.
@@ -1591,45 +1640,58 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param entry: Journal entry - 'SwitchSuitLoadout' or 'SuitLoadout'
         :return Tuple[suit_slotid, suitloadout_slotid]: The IDs we set data for.
         """
-        suit_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
-        # Initial suit containing just the data that is then embedded in
-        # the loadout
-        new_suit = {
-            'name':    entry['SuitName'],
-            'locName': entry.get('SuitName_Localised', entry['SuitName']),
-            'suitId':  entry['SuitID'],
-        }
+        # This is the full ID from Frontier, it's not a sparse array slot id
+        suitid = entry['SuitID']
+
+        # Check if this looks like a suit we already have stored, so as
+        # to avoid 'bad' Journal localised names.
+        suit = self.state['Suits'].get(f"{suitid}", None)
+        if suit is None:
+            # Initial suit containing just the data that is then embedded in
+            # the loadout
+
+            # TODO: Attempt to map SuitName_Localised to something sane, if it
+            #       isn't already.
+            suitname = entry.get('SuitName_Localised', entry['SuitName'])
+            edmc_suitname = self.suit_sane_name(suitname)
+            suit = {
+                'edmcName': edmc_suitname,
+                'locName':  suitname,
+                'suitId':   entry['SuitID'],
+                'name':     entry['SuitName'],
+            }
+
+        suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Make the new loadout, in the CAPI format
         new_loadout = {
-            'loadoutSlotId': suit_slotid,
-            'suit':          new_suit,
+            'loadoutSlotId': suitloadout_slotid,
+            'suit':          suit,
             'name':          entry['LoadoutName'],
-            'slots':         self.suit_loadout_slots_array_to_dict(
-                entry['Modules']),
+            'slots':         self.suit_loadout_slots_array_to_dict(entry['Modules']),
         }
         # Assign this loadout into our state
-        self.state['SuitLoadouts'][f"{new_loadout['loadoutSlotId']}"] = new_loadout
+        self.state['SuitLoadouts'][f"{suitloadout_slotid}"] = new_loadout
 
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
-        new_suit['id'] = None  # Not available in 4.0.0.100 journal event
-        new_suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
-        # Ensure new_suit is in self.state['Suits']
-        self.state['Suits'][f"{suit_slotid}"] = new_suit
+        suit['id'] = suit.get('id')  # Not available in 4.0.0.100 journal event
+        suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
+        # Ensure the suit is in self.state['Suits']
+        self.state['Suits'][f"{suitid}"] = suit
 
-        return suit_slotid, new_loadout['loadoutSlotId']
+        return suitid, suitloadout_slotid
 
-    def suit_and_loadout_setcurrent(self, suit_slotid: int, suitloadout_slotid: int) -> bool:
+    def suit_and_loadout_setcurrent(self, suitid: int, suitloadout_slotid: int) -> bool:
         """
         Set self.state for SuitCurrent and SuitLoadoutCurrent as requested.
 
         If the specified slots are unknown we abort and return False, else
         return True.
 
-        :param suit_slotid: Numeric ID of the slot for the suit.
+        :param suitid: Numeric ID of the suit.
         :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
         :return: True if we could do this, False if not.
         """
-        str_suitid = f"{suit_slotid}"
+        str_suitid = f"{suitid}"
         str_suitloadoutid = f"{suitloadout_slotid}"
 
         if (self.state['Suits'].get(str_suitid, False)
@@ -1638,7 +1700,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][str_suitloadoutid]
             return True
 
-        logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suit_slotid=}, "
+        logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suitid=}, "
                      f"{str_suitloadoutid=}")
         return False
 

@@ -495,3 +495,78 @@ ship_name_map = {
     'viper_mkiv':                   'Viper MkIV',
     'vulture':                      'Vulture',
 }
+
+# Odyssey Suit Names
+edmc_suit_shortnames = {
+    'Flight Suit':            'Flight',     # EN
+    'Artemis Suit':           'Artemis',    # EN
+    'Dominator Suit':         'Dominator',  # EN
+    'Maverick Suit':          'Maverick',   # EN
+
+    'Flug-Anzug':             'Flug',       # DE
+    'Artemis-Anzug':          'Artemis',    # DE
+    'Dominator-Anzug':        'Dominator',  # DE
+    'Maverick-Anzug':         'Maverick',   # DE
+
+    'Traje de vuelo':         'de vuelo',   # ES
+    'Traje Artemis':          'Artemis',    # ES
+    'Traje Dominator':        'Dominator',  # ES
+    'Traje Maverick':         'Maverick',   # ES
+
+    'Combinaison de vol':     'de vol',     # FR
+    'Combinaison Artemis':    'Artemis',    # FR
+    'Combinaison Dominator':  'Dominator',  # FR
+    'Combinaison Maverick':   'Maverick',   # FR
+
+    'Traje voador':           'voador',     # PT-BR
+    #  These are duplicates of the ES ones, but kept here for clarity
+    #  'Traje Artemis':          'Artemis',    # PT-BR
+    #  'Traje Dominator':        'Dominator',  # PT-BR
+    #  'Traje Maverick':         'Maverick',   # PT-BR
+
+    'Летный комбинезон':      'Летный',     # RU
+    'Комбинезон Artemis':     'Artemis',    # RU
+    'Комбинезон Dominator':   'Dominator',  # RU
+    'Комбинезон Maverick':    'Maverick',   # RU
+}
+
+edmc_suit_symbol_localised = {
+    # The key here should match what's seen in Fileheader 'language', but with
+    # any in-file `\\` already unescaped to a single `\`.
+    r'English\UK': {
+        'flightsuit':      'Flight Suit',
+        'explorationsuit': 'Artemis Suit',
+        'tacticalsuit':    'Dominator Suit',
+        'utilitysuit':     'Maverick Suit',
+    },
+    r'German\DE': {
+        'flightsuit':      'Flug-Anzug',
+        'explorationsuit': 'Artemis-Anzug',
+        'tacticalsuit':    'Dominator-Anzug',
+        'utilitysuit':     'Maverick-Anzug',
+    },
+    r'French\FR': {
+        'flightsuit':      'Combinaison de vol',
+        'explorationsuit': 'Combinaison Artemis',
+        'tacticalsuit':    'Combinaison Dominator',
+        'utilitysuit':     'Combinaison Maverick',
+    },
+    r'Portuguese\BR': {
+        'flightsuit':      'Traje voador',
+        'explorationsuit': 'Traje Artemis',
+        'tacticalsuit':    'Traje Dominator',
+        'utilitysuit':     'Traje Maverick',
+    },
+    r'Russian\RU': {
+        'flightsuit':      'Летный комбинезон',
+        'explorationsuit': 'Комбинезон Artemis',
+        'tacticalsuit':    'Комбинезон Dominator',
+        'utilitysuit':     'Комбинезон Maverick',
+    },
+    r'Spanish\ES': {
+        'flightsuit':      'Traje de vuelo',
+        'explorationsuit': 'Traje Artemis',
+        'tacticalsuit':    'Traje Dominator',
+        'utilitysuit':     'Traje Maverick',
+    },
+}
