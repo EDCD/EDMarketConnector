@@ -35,7 +35,7 @@ override_mode = ''
 
 normal_textvar = tk.StringVar()
 beta_textvar = tk.StringVar()
-override_textvar = tk.StringVar()
+override_textvar = tk.StringVar()  # This will always contain a _localised_ version
 
 
 def plugin_start3(_) -> str:
@@ -47,7 +47,8 @@ def plugin_start3(_) -> str:
 
     normal_textvar.set(value=normal_url)
     beta_textvar.set(value=beta_url)
-    override_textvar.set(value=override_mode)
+    if override_mode == DEFAULT_OVERRIDE_MODE:
+        override_textvar.set(value=_("Auto"))
 
     return 'Coriolis'
 
@@ -82,7 +83,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     nb.OptionMenu(
         conf_frame,
         override_textvar,
-        override_textvar.get(),
+        _('Auto'),
         _('Normal'), _('Beta'), _('Auto')
     ).grid(sticky=tk.W, row=cur_row, column=1, padx=PADX)
     cur_row += 1
@@ -105,7 +106,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     if override_mode not in ('beta', 'normal', 'auto'):
         logger.warning(f'Unexpected value {override_mode=!r}. defaulting to "auto"')
         override_mode = 'auto'
-        override_textvar.set(value=override_mode)
+        override_textvar.set(value=_('Auto'))
 
     config.set('coriolis_normal_url', normal_url)
     config.set('coriolis_beta_url', beta_url)
