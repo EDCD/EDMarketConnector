@@ -1,21 +1,18 @@
 """
 Plugin hooks for EDMC - Ian Norton, Jonathan Harris
 """
-from builtins import str
-from builtins import object
-import os
 import importlib
-import sys
+import logging
 import operator
-import threading  # noqa: F401 - We don't use it, but plugins might
-from typing import Optional
+import os
+import sys
 import tkinter as tk
+from builtins import object, str
+from typing import Optional
 
 import myNotebook as nb  # noqa: N813
-
-from config import appcmdname, appname, config
+from config import config
 from EDMCLogging import get_main_logger
-import logging
 
 logger = get_main_logger()
 
@@ -140,7 +137,7 @@ def load_plugins(master):
     found = []
     # Load any plugins that are also packages first
     for name in sorted(os.listdir(config.plugin_dir_path),
-                       key = lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
+                       key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
         if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
@@ -172,6 +169,7 @@ def provides(fn_name):
     """
     return [p.name for p in PLUGINS if p._get_func(fn_name)]
 
+
 def invoke(plugin_name, fallback, fn_name, *args):
     """
     Invoke a function on a named plugin
@@ -187,7 +185,7 @@ def invoke(plugin_name, fallback, fn_name, *args):
             return plugin._get_func(fn_name)(*args)
     for plugin in PLUGINS:
         if plugin.name == fallback:
-            assert plugin._get_func(fn_name), plugin.name	# fallback plugin should provide the function
+            assert plugin._get_func(fn_name), plugin.name  # fallback plugin should provide the function
             return plugin._get_func(fn_name)(*args)
 
 

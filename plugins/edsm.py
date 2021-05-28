@@ -9,19 +9,19 @@
 #  4) Ensure the EDSM API call(back) for setting the image at end of system
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
-from companion import CAPIData
 import json
 import sys
 import tkinter as tk
 from queue import Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, List, Mapping, MutableMapping, Optional, Tuple
 
 import requests
 
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
+from companion import CAPIData
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -629,11 +629,11 @@ def worker() -> None:
                     else:
 
                         if msg_num // 100 == 1:
-                        #     logger.trace('Overall OK')
+                            #     logger.trace('Overall OK')
                             pass
 
                         elif msg_num // 100 == 5:
-                        #     logger.trace('Event(s) not currently processed, but saved for later')
+                            #     logger.trace('Event(s) not currently processed, but saved for later')
                             pass
 
                         else:
