@@ -47,8 +47,9 @@ def plugin_start3(path: str) -> str:
 
     normal_textvar.set(value=normal_url)
     beta_textvar.set(value=beta_url)
-    if override_mode == DEFAULT_OVERRIDE_MODE:
-        override_textvar.set(value=_("Auto"))
+    override_textvar.set(
+        value={'auto': _('Auto'), 'normal': _('Normal'), 'beta': _('Beta')}.get(override_mode, _('Auto'))
+    )
 
     return 'Coriolis'
 
