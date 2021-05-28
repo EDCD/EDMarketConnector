@@ -6,9 +6,10 @@ import io
 import json
 import tkinter as tk
 from typing import TYPE_CHECKING, Union
-from EDMCLogging import get_main_logger
 
 import myNotebook as nb  # noqa: N813 # its not my fault.
+from EDMCLogging import get_main_logger
+from plug import show_error
 
 if TYPE_CHECKING:
     def _(s: str) -> str:
@@ -59,7 +60,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     conf_frame.columnconfigure(index=1, weight=1)
     cur_row = 0
     nb.Label(conf_frame, text=_(
-        'Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with "/import?data="\n'
+        "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='"
     )).grid(sticky=tk.EW, row=cur_row, column=0, columnspan=3)
     cur_row += 1
 
@@ -77,12 +78,12 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     )
     cur_row += 1
 
-    nb.Label(conf_frame, text=_('Override beta/normal selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
+    nb.Label(conf_frame, text=_('Override Beta/Normal selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.OptionMenu(
         conf_frame,
         override_textvar,
         override_textvar.get(),
-        'normal', 'beta', 'auto'
+        _('Normal'), _('Beta'), _('Auto')
     ).grid(sticky=tk.W, row=cur_row, column=1, padx=PADX)
     cur_row += 1
 
@@ -95,6 +96,11 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     normal_url = normal_textvar.get()
     beta_url = beta_textvar.get()
     override_mode = override_textvar.get()
+    override_mode = {  # Convert to unlocalised names
+        _('Normal'): 'normal',
+        _('Beta'): 'beta',
+        _('Auto'): 'auto',
+    }.get(override_mode, override_mode)
 
     if override_mode not in ('beta', 'normal', 'auto'):
         logger.warning(f'Unexpected value {override_mode=!r}. defaulting to "auto"')
@@ -107,6 +113,12 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def _get_target_url(is_beta: bool) -> str:
+    global override_mode
+    if override_mode not in ('auto', 'normal', 'beta'):
+        show_error(_('Invalid Coriolis override mode!'))
+        logger.warning(f'Unexpected override mode {override_mode!r}! defaulting to auto!')
+        override_mode = 'auto'
+
     if override_mode == 'beta':
         return beta_url
     elif override_mode == 'normal':
