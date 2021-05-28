@@ -76,7 +76,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
         conf_frame,
         override_textvar,
         override_textvar.get(),
-        'normal', 'beta', 'default'
+        'normal', 'beta', 'auto'
     ).grid(sticky=tk.W, row=cur_row, column=1, padx=PADX)
 
     return conf_frame
