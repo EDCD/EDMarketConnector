@@ -624,7 +624,7 @@
 "Beta URL" = "Beta URL";
 
 /* Coriolis config title label [plugins/coriolis.py] */
-"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with 'import?data='" = "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with 'import?data='";
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='";
 
 /* Coriolis invalid mode warning [plugins/coriolis.py] */
 "Invalid Coriolis override mode!" = "Invalid Coriolis override mode!";
