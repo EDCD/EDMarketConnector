@@ -185,7 +185,6 @@ elif sys.platform == 'win32':
             'optimize': 2,
             'packages': [
                 'sqlite3',  # Included for plugins
-                'http',  # Included for plugins
             ],
             'includes': [
                 'dataclasses',
