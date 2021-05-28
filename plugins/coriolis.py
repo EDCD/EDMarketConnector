@@ -60,15 +60,21 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     cur_row = 0
     nb.Label(conf_frame, text=_(
         'Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with "/import?data="\n'
-    )).grid(sticky=tk.EW, row=cur_row, column=0, columnspan=2)
+    )).grid(sticky=tk.EW, row=cur_row, column=0, columnspan=3)
     cur_row += 1
 
     nb.Label(conf_frame, text=_('Normal URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.Entry(conf_frame, textvariable=normal_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
+    nb.Button(conf_frame, text=_("Reset"), command=lambda: normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
+        sticky=tk.W, row=cur_row, column=2, padx=PADX
+    )
     cur_row += 1
 
     nb.Label(conf_frame, text=_('Beta URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.Entry(conf_frame, textvariable=beta_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
+    nb.Button(conf_frame, text=_('Reset'), command=lambda: beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
+        sticky=tk.W, row=cur_row, column=2, padx=PADX
+    )
     cur_row += 1
 
     nb.Label(conf_frame, text=_('Override beta/normal selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
@@ -78,6 +84,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
         override_textvar.get(),
         'normal', 'beta', 'auto'
     ).grid(sticky=tk.W, row=cur_row, column=1, padx=PADX)
+    cur_row += 1
 
     return conf_frame
 
