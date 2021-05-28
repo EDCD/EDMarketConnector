@@ -38,7 +38,7 @@ beta_textvar = tk.StringVar()
 override_textvar = tk.StringVar()  # This will always contain a _localised_ version
 
 
-def plugin_start3(_) -> str:
+def plugin_start3(path: str) -> str:
     """Set up URLs."""
     global normal_url, beta_url, override_mode
     normal_url = config.get_str('coriolis_normal_url', default=DEFAULT_NORMAL_URL)
