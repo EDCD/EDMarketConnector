@@ -122,6 +122,7 @@ def _get_target_url(is_beta: bool) -> str:
 
     if override_mode == 'beta':
         return beta_url
+
     elif override_mode == 'normal':
         return normal_url
 
