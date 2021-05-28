@@ -191,6 +191,8 @@ elif sys.platform == 'win32':
                 'shutil',  # Included for plugins
                 'timeout_session',
                 'zipfile',  # Included for plugins
+                'threading',  # Included for plugins (though it should always be there anyway)
+                'http',  # Included for plugins
             ],
             'excludes': [
                 'distutils',

@@ -19,9 +19,8 @@ os.environ["EDMC_NO_UI"] = "1"
 # See EDMCLogging.py docs.
 # workaround for https://github.com/EDCD/EDMarketConnector/issues/568
 from EDMCLogging import edmclogger, logger, logging
-
 if TYPE_CHECKING:
-    from logging import trace, TRACE  # type: ignore # noqa: F401
+    from logging import TRACE  # type: ignore # noqa: F401 # needed to make mypy happy
 
 edmclogger.set_channels_loglevel(logging.INFO)
 

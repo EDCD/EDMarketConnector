@@ -12,14 +12,14 @@ from sys import platform
 from tkinter import font as tkFont
 from tkinter import ttk
 
-from config import applongname, appname, config
+from config import config
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if __debug__:
     from traceback import print_exc
 
 if platform == "linux":
-    from ctypes import POINTER, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll, Structure, byref
+    from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
 
 
 if platform == 'win32':
