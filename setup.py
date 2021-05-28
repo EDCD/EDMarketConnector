@@ -185,13 +185,13 @@ elif sys.platform == 'win32':
             'optimize': 2,
             'packages': [
                 'sqlite3',  # Included for plugins
-                'threading',  # Included for plugins (though it should always be there anyway)
                 'http',  # Included for plugins
             ],
             'includes': [
                 'dataclasses',
                 'shutil',  # Included for plugins
                 'timeout_session',
+                'threading',  # Included for plugins (though it should always be there anyway)
                 'zipfile',  # Included for plugins
             ],
             'excludes': [
