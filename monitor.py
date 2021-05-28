@@ -708,7 +708,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationType
                 #     • MarketID
 
-                if entry.get('onstation', False):
+                if entry.get('OnStation', False):
                     self.station = entry.get('StationName', '')
 
                 else:
