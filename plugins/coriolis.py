@@ -84,7 +84,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     nb.OptionMenu(
         conf_frame,
         override_textvar,
-        _('Auto'),
+        override_textvar.get(),
         _('Normal'), _('Beta'), _('Auto')
     ).grid(sticky=tk.W, row=cur_row, column=1, padx=PADX)
     cur_row += 1
