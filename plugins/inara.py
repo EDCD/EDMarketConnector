@@ -567,15 +567,32 @@ def journal_entry(  # noqa: C901, CCR001
                     this.suppress_docked = False
 
                 else:
+                    to_send = {
+                        'starsystemName': system,
+                        'stationName': station,
+                        'shipType': state['ShipType'],
+                        'shipGameID': state['ShipID'],
+                    }
+
+                    if entry.get('Taxi'):
+                        # we're in a taxi, dont store ShipType or shipGameID
+                        del to_send['shipType']
+                        del to_send['shipGameID']
+
+                        # We were in a taxi. What kind?
+                        if state['Dropship'] is not None and state['Dropship']:
+                            to_send['isTaxiDropship'] = True
+
+                        elif state['Taxi'] is not None and state['Taxi']:
+                            to_send['isTaxiShuttle'] = True
+
+                        else:  # we dont know one way or another. Given we were told it IS a taxi, assume its a shuttle.
+                            to_send['isTaxiShuttle'] = True
+
                     new_add_event(
                         'addCommanderTravelDock',
                         entry['timestamp'],
-                        {
-                            'starsystemName': system,
-                            'stationName': station,
-                            'shipType': state['ShipType'],
-                            'shipGameID': state['ShipID'],
-                        }
+                        to_send
                     )
 
             elif event_name == 'Undocked':
@@ -599,15 +616,29 @@ def journal_entry(  # noqa: C901, CCR001
 
             elif event_name == 'FSDJump':
                 this.undocked = False
+                to_send = {
+                    'starsystemName': entry['StarSystem'],
+                    'jumpDistance': entry['JumpDist'],
+                    'shipType': state['ShipType'],
+                    'shipGameID': state['ShipID'],
+                    # TODO: coords for the starsystem
+                }
+
+                if state['Taxi'] is not None and state['Taxi']:
+                    del to_send['shipType']
+                    del to_send['shipGameID']
+
+                    # taxi. What kind?
+                    if state['Dropship'] is not None and state['Dropship']:
+                        to_send['isTaxiDropship'] = True
+
+                    else:
+                        to_send['isTaxiShuttle'] = True
+
                 new_add_event(
                     'addCommanderTravelFSDJump',
                     entry['timestamp'],
-                    {
-                        'starsystemName': entry['StarSystem'],
-                        'jumpDistance': entry['JumpDist'],
-                        'shipType': state['ShipType'],
-                        'shipGameID': state['ShipID'],
-                    }
+                    to_send
                 )
 
                 if entry.get('Factions'):
@@ -1040,13 +1071,12 @@ def journal_entry(  # noqa: C901, CCR001
                 if state.get('ShipType') is not None:
                     to_send_data['shipType'] = state['ShipType']
 
-                # TODO: Can Touchdown ever show for either of these? I dont think so
                 to_send_data['isTaxiShuttle'] = False
                 to_send_data['isTaxiDropShip'] = False
 
                 new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
 
-            # Community Goals
+        # Community Goals
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
