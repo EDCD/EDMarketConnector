@@ -1,4 +1,4 @@
-certifi==2020.12.5
+certifi==2021.5.30
 requests==2.25.1
 watchdog==2.1.2
 # Commented out because this doesn't package well with py2exe
