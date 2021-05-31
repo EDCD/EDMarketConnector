@@ -20,6 +20,8 @@ import timeout_session
 from companion import CAPIData
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
+# Yes I know. Im using it for `monitor.planet` Which probably should be rolled into state as a body and bodyType pair
+from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
@@ -975,7 +977,76 @@ def journal_entry(  # noqa: C901, CCR001
                 }
             )
 
-        # Community Goals
+        # New Odyssey features
+        elif event_name == 'DropshipDeploy':
+            new_add_event(
+                'addCommanderTravelLand',
+                entry['timestamp'],
+                {
+                    'starsystemName': entry['StarSystem'],
+                    'starsystemBodyName': entry['Body'],
+                    'isTaxiDropship': True,
+                }
+            )
+
+        elif event_name == 'Touchdown':
+            # Touchdown has FAR more info available on Odyssey vs Horizons:
+            # Horizons:
+            # {"timestamp":"2021-05-31T09:10:54Z","event":"Touchdown",
+            # "PlayerControlled":true,"Latitude":46.691929,"Longitude":-92.679977}
+            #
+            # Odyssey:
+            # {"timestamp":"2021-05-31T08:48:08Z","event":"Touchdown","PlayerControlled":true,"Taxi":false,
+            # "Multicrew":false,"StarSystem":"Gateway","SystemAddress":2832631665362,"Body":"Saunder's Rock","BodyID":2,
+            # "OnStation":false,"OnPlanet":true,"Latitude":54.79665,"Longitude":-99.498253}
+            #
+            # So we're going to do a lot of checking here and bail out if we dont like the look of ANYTHING here
+
+            to_send_data: Optional[Dict[str, Any]] = {}  # This is a glorified sentinel until lower down.
+            # On Horizons, neither of these exist on TouchDown
+            star_system_name = entry.get('StarSystem', this.system)
+            body_name = entry.get('Body', monitor.planet)
+
+            if star_system_name is None:
+                logger.warning('Refusing to update addCommanderTravelLand as we dont have a StarSystem!')
+                to_send_data = None
+
+            if body_name is None:
+                logger.warning('Refusing to update addCommanderTravelLand as we dont have a Body!')
+                to_send_data = None
+
+            if (op := entry.get('OnPlanet')) is not None and not op:
+                logger.warning('Refusing to update addCommanderTravelLand when OnPlanet is False!')
+                logger.warning(f'{entry=}')
+                to_send_data = None
+
+            if not entry['PlayerControlled']:
+                logger.info("Not updating inara addCommanderTravelLand for autonomous recall landing")
+                to_send_data = None
+
+            if to_send_data is not None:
+                # Above checks passed. Lets build and send this!
+                to_send_data['starsystemName'] = star_system_name  # Required
+                to_send_data['starsystemBodyName'] = body_name     # Required
+
+                # Following are optional
+
+                # lat/long is always there unless its an automated (recall) landing. Thus as we're sure its _not_
+                # we can assume this exists. If it doesn't its a bug anyway.
+                to_send_data['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
+                if state.get('ShipID') is not None:
+                    to_send_data['shipGameID'] = state['ShipID']
+
+                if state.get('ShipType') is not None:
+                    to_send_data['shipType'] = state['ShipType']
+
+                # TODO: Can Touchdown ever show for either of these? I dont think so
+                to_send_data['isTaxiShuttle'] = False
+                to_send_data['isTaxiDropShip'] = False
+
+                new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
+
+            # Community Goals
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
@@ -1250,7 +1321,8 @@ def new_worker():
                     'appVersion': str(appversion()),
                     'APIkey': creds.api_key,
                     'commanderName': creds.cmdr,
-                    'commanderFrontierID': creds.fid
+                    'commanderFrontierID': creds.fid,
+                    'isBeingDeveloped': True,  # TODO: Remove once update is complete
                 },
                 'events': [
                     {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
@@ -1307,6 +1379,10 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
+    # TODO: Remove this. Its here to ensure we dont forget that we're running test code
+    for x in range(20):
+        logger.info("INARA IS SENDING HEADERS THAT INDICATE DEV MODE!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
     reply = r.json()
