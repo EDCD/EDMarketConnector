@@ -589,6 +589,11 @@ def journal_entry(  # noqa: C901, CCR001
                         else:  # we dont know one way or another. Given we were told it IS a taxi, assume its a shuttle.
                             to_send['isTaxiShuttle'] = True
 
+                    if entry.get('MarketID') is not None:
+                        to_send['marketID'] = entry['MarketID']
+
+                    # TODO: we _can_ include a Body name here, but I'm not entirely sure how best to go about doing that
+
                     new_add_event(
                         'addCommanderTravelDock',
                         entry['timestamp'],
@@ -618,10 +623,10 @@ def journal_entry(  # noqa: C901, CCR001
                 this.undocked = False
                 to_send = {
                     'starsystemName': entry['StarSystem'],
+                    'starsystemCoords': entry['StarPos'],
                     'jumpDistance': entry['JumpDist'],
                     'shipType': state['ShipType'],
                     'shipGameID': state['ShipID'],
-                    # TODO: coords for the starsystem
                 }
 
                 if state['Taxi'] is not None and state['Taxi']:
@@ -652,16 +657,21 @@ def journal_entry(  # noqa: C901, CCR001
                     )
 
             elif event_name == 'CarrierJump':
+                to_send = {
+                    'starsystemName': entry['StarSystem'],
+                    'stationName': entry['StationName'],
+                    'marketID': entry['MarketID'],
+                    'shipType': state['ShipType'],
+                    'shipGameID': state['ShipID'],
+                }
+
+                if entry.get('StarPos') is not None:
+                    to_send['starsystemCoords'] = entry['StarPos']
+
                 new_add_event(
                     'addCommanderTravelCarrierJump',
                     entry['timestamp'],
-                    {
-                        'starsystemName': entry['StarSystem'],
-                        'stationName': entry['StationName'],
-                        'marketID': entry['MarketID'],
-                        'shipType': state['ShipType'],
-                        'shipGameID': state['ShipID'],
-                    }
+                    to_send
                 )
 
                 if entry.get('Factions'):
@@ -1075,6 +1085,19 @@ def journal_entry(  # noqa: C901, CCR001
                 to_send_data['isTaxiDropShip'] = False
 
                 new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
+
+        elif event_name == 'ShipLockerMaterials':
+            TYPES = ('Items', 'Components', 'Data', 'Consumables')
+            # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
+            reset_data = [{'itemType': t} for t in TYPES]
+            set_data = []
+            for typ in TYPES:
+                set_data.extend([
+                    {'itemName': thing['Name'], 'itemCount': thing['Count'], 'itemType': typ} for thing in entry[typ]
+                ])
+
+            new_add_event('resetCommanderInventory', entry['timestamp'], reset_data)
+            new_add_event('setCommanderInventory', entry['timestamp'], set_data)
 
         # Community Goals
         if event_name == 'CommunityGoal':
