@@ -1157,7 +1157,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             new_add_event('updateCommanderSuitLoadout', entry['timestamp'], to_send)
 
-            # Community Goals
+        # Community Goals
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
