@@ -1087,17 +1087,44 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
 
         elif event_name == 'ShipLockerMaterials':
-            TYPES = ('Items', 'Components', 'Data', 'Consumables')
+            odyssey_nonplural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
             # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
-            reset_data = [{'itemType': t} for t in TYPES]
+            reset_data = [{'itemType': t} for t in odyssey_nonplural_microresource_types]
             set_data = []
-            for typ in TYPES:
+            for typ in odyssey_nonplural_microresource_types:
                 set_data.extend([
                     {'itemName': thing['Name'], 'itemCount': thing['Count'], 'itemType': typ} for thing in entry[typ]
                 ])
 
             new_add_event('resetCommanderInventory', entry['timestamp'], reset_data)
             new_add_event('setCommanderInventory', entry['timestamp'], set_data)
+
+        elif event_name in ('CreateSuitLoadout', 'SuitLoadout'):
+            # CreateSuitLoadout and SuitLoadout are pretty much the same event:
+            # ╙─╴% cat Journal.* | jq 'select(.event == "SuitLoadout" or .event == "CreateSuitLoadout") | keys' -c \
+            # | uniq
+            #
+            # ["LoadoutID","LoadoutName","Modules","SuitID","SuitMods","SuitName","SuitName_Localised","event",
+            # "timestamp"]
+
+            to_send = {
+                'loadoutGameID':       entry['LoadoutID'],
+                'loadoutName':         entry['LoadoutName'],
+                'suitGameID':          entry['SuitID'],
+                'suitType':            entry['SuitName'],
+                'suitMods':            entry['SuitMods'],
+                'suitLoadout': [
+                    {
+                        'slotName':    x['SlotName'],
+                        'itemName':    x['ModuleName'],
+                        'itemClass':   x['Class'],
+                        'itemGameID':  x['SuitModuleID'],
+                        'engineering': x['WeaponMods'],  # TODO: Verify.
+                    } for x in entry['Modules']
+                ],
+            }
+
+            new_add_event('setCommanderSuitLoadout', entry['timestamp'], to_send)
 
         # Community Goals
         if event_name == 'CommunityGoal':
