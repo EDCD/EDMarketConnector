@@ -1126,7 +1126,38 @@ def journal_entry(  # noqa: C901, CCR001
 
             new_add_event('setCommanderSuitLoadout', entry['timestamp'], to_send)
 
-        # Community Goals
+        elif event_name == 'DeleteSuitLoadout':
+            new_add_event('delCommanderSuitLoadout', entry['timestamp'], {'loadoutGameID': entry['LoadoutID']})
+
+        elif event_name == 'RenameSuitLoadout':
+            to_send = {
+                'loadoutGameID': entry['LoadoutID'],
+                'loadoutName':   entry['LoadoutName'],
+                # may as well...
+                'suitType': entry['SuitName'],
+                'suitGameID': entry['SuitID']
+            }
+            new_add_event('updateCommanderSuitLoadout', entry['timestamp'], {})
+
+        elif event_name == 'LoadoutEquipModule':
+            to_send = {
+                'loadoutGameID': entry['LoadoutID'],
+                'loadoutName': entry['LoadoutName'],
+                'suitType': entry['SuitName'],
+                'suitGameID': entry['SuitID'],
+                'suitLoadout': [
+                    {
+                        'slotName': entry['SlotName'],
+                        'itemName': entry['ModuleName'],
+                        'itemGameID': entry['SuitModuleID'],
+                        # TODO: As of 4.0.0.200, this event does *NOT* include the class
+                    }
+                ],
+            }
+
+            new_add_event('updateCommanderSuitLoadout', entry['timestamp'], to_send)
+
+            # Community Goals
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
