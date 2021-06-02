@@ -1085,11 +1085,11 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
 
         elif event_name == 'ShipLockerMaterials':
-            odyssey_nonplural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
+            odyssey_plural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
             # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
-            reset_data = [{'itemType': t} for t in odyssey_nonplural_microresource_types]
+            reset_data = [{'itemType': t} for t in odyssey_plural_microresource_types]
             set_data = []
-            for typ in odyssey_nonplural_microresource_types:
+            for typ in odyssey_plural_microresource_types:
                 set_data.extend([
                     {'itemName': thing['Name'], 'itemCount': thing['Count'], 'itemType': typ} for thing in entry[typ]
                 ])
