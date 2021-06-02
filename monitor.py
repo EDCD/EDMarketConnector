@@ -705,7 +705,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.station = None
 
                 self.state['OnFoot'] = True
-                if self.state['Taxi'] is not None and not self.state['Taxi']:
+                if self.state['Taxi'] is not None and self.state['Taxi'] != entry.get('Taxi', False):
                     logger.warning('Disembarked from a taxi but we didn\'t know we were in a taxi?')
 
                 self.state['Taxi'] = False
