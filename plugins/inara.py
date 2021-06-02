@@ -20,8 +20,6 @@ import timeout_session
 from companion import CAPIData
 from config import applongname, appversion, config
 from EDMCLogging import get_main_logger
-# Yes I know. Im using it for `monitor.planet` Which probably should be rolled into state as a body and bodyType pair
-from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
@@ -1046,7 +1044,7 @@ def journal_entry(  # noqa: C901, CCR001
             to_send_data: Optional[Dict[str, Any]] = {}  # This is a glorified sentinel until lower down.
             # On Horizons, neither of these exist on TouchDown
             star_system_name = entry.get('StarSystem', this.system)
-            body_name = entry.get('Body', monitor.planet)
+            body_name = entry.get('Body', state['Body'] if state['BodyType'] == 'Planet' else None)
 
             if star_system_name is None:
                 logger.warning('Refusing to update addCommanderTravelLand as we dont have a StarSystem!')
@@ -1150,7 +1148,8 @@ def journal_entry(  # noqa: C901, CCR001
                         'slotName': entry['SlotName'],
                         'itemName': entry['ModuleName'],
                         'itemGameID': entry['SuitModuleID'],
-                        # TODO: As of 4.0.0.200, this event does *NOT* include the class
+                        'itemClass': entry['Class'],
+                        'engineering': [],  # TODO: Check casing of names for this
                     }
                 ],
             }

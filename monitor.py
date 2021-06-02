@@ -162,6 +162,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'SuitLoadouts':       {},
             'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
+            'Body':               None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -263,6 +264,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systemaddress = None
         self.is_beta = False
         self.state['OnFoot'] = False
+        self.state['Body'] = None
+        self.state['BodyType'] = None
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -539,6 +542,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Role':       None,
                     'Taxi':       None,
                     'Dropship':   None,
+                    'Body':       None,
+                    'BodyType':   None,
                 })
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
@@ -729,12 +734,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OnFoot: bool
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+                    self.state['Body'] = entry.get('Body')
+                    self.state['BodyType'] = entry.get('BodyType')
 
                     # if event_type == 'Location':
                     #     logger.trace('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
+                    self.state['Body'] = None
+                    self.state['BodyType'] = None
 
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])  # type: ignore
@@ -762,9 +771,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'ApproachBody':
                 self.planet = entry['Body']
+                self.state['Body'] = entry['Body']
+                self.state['BodyType'] = 'Planet'  # Best guess. Journal says always planet.
 
             elif event_type in ('LeaveBody', 'SupercruiseEntry'):
                 self.planet = None
+                self.state['Body'] = None
+                self.state['BodyType'] = None
 
             elif event_type in ('Rank', 'Promotion'):
                 payload = dict(entry)
@@ -1516,6 +1529,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.state['OnFoot'] = False
 
+                self.state['Body'] = None
+                self.state['BodyType'] = None
+
             elif event_type == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
 
@@ -1530,6 +1546,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+
+                self.state['Body'] = None
+                self.state['BodyType'] = None
                 # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'Friends':
@@ -1610,6 +1629,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'Resurrect':
                 self.state['Credits'] -= entry.get('Cost', 0)
+
+            # HACK (not game related / 2021-06-2): self.planet is moved into a more general self.state['Body'].
+            # This exists to help plugins doing what they SHOULDN'T BE cope. It will be removed at some point.
+            if self.state['Body'] is None or self.state['BodyType'] == 'Planet':
+                self.planet = self.state['Body']
 
             return entry
 
