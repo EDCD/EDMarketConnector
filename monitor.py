@@ -163,6 +163,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
             'Body':               None,
+            'BodyType':           None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
