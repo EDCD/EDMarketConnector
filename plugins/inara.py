@@ -587,7 +587,7 @@ def journal_entry(  # noqa: C901, CCR001
                         else:  # we dont know one way or another. Given we were told it IS a taxi, assume its a shuttle.
                             to_send['isTaxiShuttle'] = True
 
-                    if entry.get('MarketID') is not None:
+                    if 'MarketID' in entry:
                         to_send['marketID'] = entry['MarketID']
 
                     # TODO: we _can_ include a Body name here, but I'm not entirely sure how best to go about doing that
@@ -663,7 +663,7 @@ def journal_entry(  # noqa: C901, CCR001
                     'shipGameID': state['ShipID'],
                 }
 
-                if entry.get('StarPos') is not None:
+                if 'StarPos' in entry:
                     to_send['starsystemCoords'] = entry['StarPos']
 
                 new_add_event(
@@ -1110,7 +1110,7 @@ def journal_entry(  # noqa: C901, CCR001
                 'loadoutName':         entry['LoadoutName'],
                 'suitGameID':          entry['SuitID'],
                 'suitType':            entry['SuitName'],
-                'suitMods':            [{'blueprintName': mod} for mod in entry['SuitMods']],
+                'suitMods':            entry['SuitMods'],
                 'suitLoadout': [
                     {
                         'slotName':    x['SlotName'],
