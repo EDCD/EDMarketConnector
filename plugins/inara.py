@@ -1432,7 +1432,6 @@ def new_worker():
                     'APIkey': creds.api_key,
                     'commanderName': creds.cmdr,
                     'commanderFrontierID': creds.fid,
-                    'isBeingDeveloped': True,  # TODO: Remove once update is complete
                 },
                 'events': [
                     {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
@@ -1489,9 +1488,6 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
-    # TODO: Remove this. Its here to ensure we dont forget that we're running test code
-    for x in range(20):
-        logger.info("INARA IS SENDING HEADERS THAT INDICATE DEV MODE!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
