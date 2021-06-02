@@ -1110,14 +1110,14 @@ def journal_entry(  # noqa: C901, CCR001
                 'loadoutName':         entry['LoadoutName'],
                 'suitGameID':          entry['SuitID'],
                 'suitType':            entry['SuitName'],
-                'suitMods':            entry['SuitMods'],
+                'suitMods':            [{'blueprintName': mod} for mod in entry['SuitMods']],
                 'suitLoadout': [
                     {
                         'slotName':    x['SlotName'],
                         'itemName':    x['ModuleName'],
                         'itemClass':   x['Class'],
                         'itemGameID':  x['SuitModuleID'],
-                        'engineering': x['WeaponMods'],  # TODO: Verify.
+                        'engineering': [{'blueprintName': mod} for mod in x['WeaponMods']],
                     } for x in entry['Modules']
                 ],
             }
@@ -1149,7 +1149,7 @@ def journal_entry(  # noqa: C901, CCR001
                         'itemName': entry['ModuleName'],
                         'itemGameID': entry['SuitModuleID'],
                         'itemClass': entry['Class'],
-                        'engineering': [],  # TODO: Check casing of names for this
+                        'engineering': [{'blueprintName': mod} for mod in entry['WeaponMods']],
                     }
                 ],
             }
