@@ -96,12 +96,26 @@ all non-special `core` events are as follows:
 | `journal_event` | `(event.JournalEvent) -> None`  | Event fired when a new journal event is seen                    |
 | `cmdr_data`     | `(event.BaseDataEvent) -> None` | Event fired when new data comes in from CAPI TODO: `capi_data`? |
 
-Some `core` events are special, and will work directly with your plugin rather than
-being global, they are documented below
+TODO: finish this
 
-| Event Name       | Expected Signature                         | Description                                                              |
-| :--------------- | :----------------------------------------- | ------------------------------------------------------------------------ |
-| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI (Note that the old style tuple pair is NOT supported) |
+Some `core` events are special, and will work directly with your plugin rather than being global, they are
+documented below
+
+| Event Name       | Expected Signature                         | Description                                                                  |
+| :--------------- | :----------------------------------------- | ---------------------------------------------------------------------------- |
+| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI (Note that the old style tuple pair is NOT supported) [1] |
+
+[1]: As an implementation detail, this is fired globally on startup, to simplify getting plugin UIs for all plugins
+
+### Firing Events
+
+Events are fired either by using `PluginManager.fire_event` or `PluginManager.fire_targeted_event`. For both, the event
+ends up in `LoadedPlugin.fire_event`, which then does the dirty work of finding all of the callbacks that match the
+given event name. `LoadedPlugin.fire_event` returns a list of results, which are the return values from each callback,
+assuming the callback did not return `None`.
+
+Thus it is always safe to assume that `PluginManager.fire_event` returned a dict of at worst `string -> empty list`, or
+for `fire_targeted_event`, an empty list on its own. 
 
 ## TODO
 
