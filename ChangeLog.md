@@ -56,7 +56,8 @@ Plugin Developers
 ---
 
 There are some new members of the `state` dictionary passed to 
-`journal_entry()`.  See [PLUGINS.md](./PLUGINS.md) for the details.
+`journal_entry()`; Taxi, Dropship, Body and BodyType.  See
+[PLUGINS.md](./PLUGINS.md) for the details.
 
 Release 5.0.4
 ===
