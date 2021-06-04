@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "通常版";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "ベータ版";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "自動";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "ベータ版/通常版の選択を上書きする";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "リセット";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "通常版URL";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "ベータ版URL";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "coriolis.ioの船のロードアウトとして使用するURLを設定してください。URLの最後は「/import?data=」で終わる必要があります";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "無効なCoriolis上書きモードです！";
 /* Language name */
 "!Language" = "日本語";
 

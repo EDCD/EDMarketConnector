@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "普通版";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "测试版";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "自动";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "覆盖模式选项";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "重置";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "普通版链接";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "测试版链接";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "设置链接以使用 coriolis.io 的飞船配置。注意，链接必须以 /import?data= 结尾";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "无效的 Coriolis 覆盖模式！";
 /* Language name */
 "!Language" = "简体中文";
 
@@ -182,6 +208,9 @@
 "Error: EDSM {MSG}" = "错误：EDSM {MSG}";
 
 
+/* Raised when cannot contact the Companion API server. [companion.py] */
+"Error: Frontier CAPI didn't respond" = "错误：Frontier CAPI 无响应";
+
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "错误：Frontier 服务器不可用";
 
@@ -226,6 +255,12 @@
 
 /* Section heading in settings. [prefs.py] */
 "File location" = "保存位置";
+
+/* Failures to access Frontier CAPI endpoints [companion.py] */
+"Frontier CAPI query failure" = "无法访问 Frontier CAPI";
+
+/* Server errors from Frontier CAPI server [companion.py] */
+"Frontier CAPI server error" = "Frontier CAPI 服务器错误";
 
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
