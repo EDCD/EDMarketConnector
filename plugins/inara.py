@@ -624,7 +624,7 @@ def journal_entry(  # noqa: C901, CCR001
                     to_send = {
                         'starsystemName':       system,
                         'stationName':          entry['Name'],
-                        'marketid':             entry['MarketID'],
+                        'marketID':             entry['MarketID'],
                         'starsystemBodyName':   entry['BodyName'],
                         'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
                     }
