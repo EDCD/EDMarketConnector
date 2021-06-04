@@ -16,7 +16,7 @@ from plugin import decorators
 from plugin.base_plugin import BasePlugin
 from plugin.event import BaseEvent
 from plugin.exceptions import (
-    PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
+    LegacyPluginNeedsMigrating, PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
 )
 from plugin.legacy_plugin import MigratedPlugin
 from plugin.plugin_info import PluginInfo
@@ -102,7 +102,8 @@ class PluginManager:
         self.log = get_main_logger()
         self.log.info("starting new plugin management engine")
         self.plugins: Dict[str, LoadedPlugin] = {}
-        self._plugins_previously_loaded: Set[str] = set()
+        self.failed_loading: Dict[pathlib.Path, Exception] = {}  # path -> reason
+        # self._plugins_previously_loaded: Set[str] = set()
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
         """
@@ -272,7 +273,13 @@ class PluginManager:
         # TODO: Likely this will be done a step above in whatever is done for ordering the list for iteration
         self.log.trace(f'start load of {path} ({autoresolve_sys_path=}')
 
-        plugin, module = self.__get_plugin_at(path, autoresolve_sys_path=autoresolve_sys_path)
+        plugin, module = None, None
+        try:
+            plugin, module = self.__get_plugin_at(path, autoresolve_sys_path=autoresolve_sys_path)
+        except LegacyPluginNeedsMigrating as e:
+            # This is the only "expected" exception that can happen here.
+            self.failed_loading[path] = e
+            return None
 
         if plugin is None or module is None:
             raise ValueError('All attempts to load both failed and did not raise any exceptions. THIS IS A BUG')
@@ -283,8 +290,8 @@ class PluginManager:
         self.log.trace(f'Calling load method on {plugin}')
         try:
             info = plugin.load()
-        except PluginLoadingException:
-            # TODO: store this to note that it was tried but failed
+        except PluginLoadingException as e:
+            self.failed_loading[path] = e
             return None
 
         except Exception as e:
@@ -381,14 +388,16 @@ class PluginManager:
 
         del self.plugins[name]
 
-    def fire_event(self, event: BaseEvent) -> list[list[Any]]:
+    def fire_event(self, event: BaseEvent) -> Dict[str, List[Any]]:
         """Call all callbacks listening for the given event."""
-        # TODO: rather a dict[plugin_name, list[any]] ?
-        out: list[list[Any]] = []
+        out: Dict[str, Any] = {}
         for name, p in self.plugins.items():
             self.log.trace(f'Firing event {event.name} for plugin {name}')
             res = p.fire_event(event)
-            out.append(res)
+            if name in out:
+                self.log.warning(f'Two plugins with the same name?????? {out[name]=} {name=} {res=}')
+
+            out[name] = res
 
         return out
 
@@ -404,4 +413,21 @@ class PluginManager:
         self.log.trace(f'Firing targeted event {event.name} at {target.info.name}')
         return target.fire_event(event)
 
-    # TODO: Register(System|station)Provider method, to allow it to be dynamic to plugins
+    def get_providers(self, name: str) -> List[LoadedPlugin]:
+        """
+        Get all LoadedPlugins that provide the given provider name.
+
+        :param name: The provider name to search for
+        :return: A list of plugins that provide the given name
+        """
+        out = []
+        for p in self.plugins.values():
+            if p.provides(name):
+                out.append(p)
+
+        return out
+
+    @staticmethod
+    def is_valid_plugin_directory(p: pathlib.Path) -> bool:
+        """Return whether or not the given path is a valid plugin directory."""
+        return p.is_dir() and p.exists() and not (p.name.startswith('.') or p.name.startswith('_'))

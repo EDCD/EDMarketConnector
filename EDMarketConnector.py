@@ -7,6 +7,8 @@ import html
 import locale
 import pathlib
 import queue
+from plugin.exceptions import LegacyPluginNeedsMigrating
+from plugin import event
 import re
 import sys
 # import threading
@@ -16,7 +18,7 @@ from os import chdir, environ
 from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import Any, List, TYPE_CHECKING, Optional, Tuple, Union, cast
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -387,6 +389,9 @@ from l10n import Translations
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
+from plugin.manager import PluginManager
+import plugin
+import plugin.event
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -442,7 +447,10 @@ class AppWindow(object):
         #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
         #     self.systray.start()
 
-        plug.load_plugins(master)
+        self.plugin_manager = PluginManager()
+        self._load_all_plugins()
+
+        # plug.load_plugins(master)
 
         if platform != 'darwin':
             if platform == 'win32':
@@ -501,17 +509,19 @@ class AppWindow(object):
         self.station.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
 
-        for plugin in plug.PLUGINS:
-            appitem = plugin.get_app(frame)
-            if appitem:
-                tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
-                if isinstance(appitem, tuple) and len(appitem) == 2:
-                    ui_row = frame.grid_size()[1]
-                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+        self.setup_plugin_uis(frame)
 
-                else:
-                    appitem.grid(columnspan=2, sticky=tk.EW)
+        # for plugin in plug.PLUGINS:
+        #     appitem = plugin.get_app(frame)
+        #     if appitem:
+        #         tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
+        #         if isinstance(appitem, tuple) and len(appitem) == 2:
+        #             ui_row = frame.grid_size()[1]
+        #             appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
+        #             appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+
+        #         else:
+        #             appitem.grid(columnspan=2, sticky=tk.EW)
 
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
@@ -568,7 +578,9 @@ class AppWindow(object):
             self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
             self.w.createcommand('tkAboutDialog', lambda: self.w.call('tk::mac::standardAboutPanel'))
             self.w.createcommand("::tk::mac::Quit", self.onexit)
-            self.w.createcommand("::tk::mac::ShowPreferences", lambda: prefs.PreferencesDialog(self.w, self.postprefs))
+            self.w.createcommand("::tk::mac::ShowPreferences",
+                                 lambda: prefs.PreferencesDialog(self.w, self.postprefs, self.plugin_manager)
+                                 )
             self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)  # click on app in dock = restore
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
@@ -576,7 +588,8 @@ class AppWindow(object):
             self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
             self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.file_menu.add_command(command=self.save_raw)
-            self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
+            self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(
+                self.w, self.postprefs, self.plugin_manager))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
             self.menubar.add_cascade(menu=self.file_menu)
@@ -718,6 +731,53 @@ class AppWindow(object):
 
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
+
+    def _load_all_plugins(self) -> None:
+        internal_to_load_paths: List[pathlib.Path] = [
+            p for p in config.internal_plugin_dir_path.iterdir() if self.plugin_manager.is_valid_plugin_directory(p)
+        ]
+
+        self.plugin_manager.load_plugins(internal_to_load_paths, autoresolve_sys_path=False)
+
+    def setup_plugin_uis(self, frame: tk.Frame) -> None:
+        """
+        Set up UIs for plugins that wish to have UIs on the main page.
+
+        :param frame: the frame under which plugins should create their widgets.
+        """
+        res = self.plugin_manager.fire_event(event.BaseDataEvent(event.PLUGIN_STARTUP_UI_EVENT, frame))
+
+        for plugin_name, results in res.items():
+            # result = cast(Union[None, Tuple[tk.Widget, tk.Widget], tk.Widget, Any], result)
+            if results is None:
+                logger.trace(f'{plugin_name!r} has no startup UI elements')
+                continue
+
+            for result in results:
+                logger.trace(f'{plugin_name} has startup UI elements. adding...')
+                # create separator for plugin line
+                tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)
+                if isinstance(result, tuple) and len(result) == 2:
+                    logger.warning(f'Plugin {plugin_name} uses legacy tuple[Widget, Widget] UI construction')
+                    result = cast(Tuple[tk.Widget, tk.Widget], result)
+                    ui_row = frame.grid_size()[1]
+                    result[0].grid(row=ui_row, column=0, sticky=tk.W)
+                    result[1].grid(row=ui_row, column=1, sticky=tk.EW)
+
+                elif isinstance(result, tk.Widget):
+                    result.grid(columnspan=2, sticky=tk.EW)
+
+                else:
+                    logger.warning(
+                        f'Plugin {plugin_name} returned non-widget {type(result)=} from ui creation handler! Attempting'
+                        ' to use as widget'
+                    )
+                    result = cast(Any, result)
+
+                    try:
+                        result.grid(columnspan=2, sticky=tk.EW)
+                    except Exception:
+                        logger.warning('Failed to use result as widget')
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -1685,7 +1745,7 @@ class AppWindow(object):
         # won't still be running in a manner that might rely on something
         # we'd otherwise have already stopped.
         logger.info('Notifying plugins to stop...')
-        plug.notify_stop()
+        self.plugin_manager.fire_event(plugin.event.BaseEvent(plugin.event.PLUGIN_EDMC_SHUTTING_DOWN))
 
         # Handling of application hotkeys now so the user can't possible cause
         # an issue via triggering one.
@@ -1974,7 +2034,11 @@ sys.path: {sys.path}'''
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
-        if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+        unmigrated_plugins = [
+            p[0] for p in app.plugin_manager.failed_loading.items() if isinstance(p[1], LegacyPluginNeedsMigrating)
+        ]
+
+        if (plugins_not_py3_last + 86400) < int(time()) and len(unmigrated_plugins) > 0:
             # LANG: Popup-text about 'active' plugins without Python 3.x support
             popup_text = _(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "

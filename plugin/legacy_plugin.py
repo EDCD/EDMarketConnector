@@ -19,12 +19,13 @@ if TYPE_CHECKING:
     from plugin.manager import PluginManager
 
 LEGACY_CALLBACK_LUT: Dict[str, str] = {
-    'core.setup_ui': 'plugin_app',
-    'core.setup_preferences_ui': 'plugin_prefs',
-    'core.preferences_closed': 'prefs_changed',
-    'core.journal_entry': 'journal_entry',
-    'core.dashboard_entry': 'dashboard_entry',
-    'core.commander_data': 'cmdr_data',
+    event.PLUGIN_STARTUP_UI_EVENT: 'plugin_app',
+    event.PLUGIN_PREFERENCES_EVENT: 'plugin_prefs',
+    event.PLUGIN_PREFERENCES_CLOSED_EVENT: 'prefs_changed',
+    event.PLUGIN_JOURNAL_ENTRY_EVENT: 'journal_entry',
+    event.PLUGIN_DASHBOARD_ENTRY_EVENT: 'dashboard_entry',
+    event.PLUGIN_CAPI_DATA_EVENT: 'cmdr_data',
+    event.PLUGIN_EDMC_SHUTTING_DOWN: 'plugin_stop',
 
 
     'inara.notify_ship': 'inara_notify_ship',
@@ -35,10 +36,11 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 
 LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
     # All of these callables should accept an event.BaseEvent or a subclass thereof
-    # 'core.setup_ui': 'plugin_app',
+    event.PLUGIN_STARTUP_UI_EVENT: lambda e: (e.data,),
+    event.PLUGIN_PREFERENCES_EVENT: lambda e: (e.notebook, e.commander, e.is_beta),
     # 'core.setup_preferences_ui': 'plugin_prefs',
     # 'core.preferences_closed': 'prefs_changed',
-    'core.journal_entry': lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
+    event.PLUGIN_JOURNAL_ENTRY_EVENT: lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
     # 'core.dashboard_entry': 'dashboard_entry',
     # 'core.commander_data': 'cmdr_data',
 
