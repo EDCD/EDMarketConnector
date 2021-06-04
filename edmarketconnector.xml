@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.0.4</title>
+			<title>Release 5.1.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,52 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.1.0</h2>
+<ul>
+<li>
+<p>Updates to how this application utilises the Inara.cz API.</p>
+<ol>
+<li>The current state of your ShipLockerMaterials (MicroResources for Odyssey
+Suit and handheld Weapons upgrading and engineering) will now be sent.
+Note that we can't reliably track this on the fly, so it will only
+update when we see a full <code>ShipLockerMaterials</code> Journal event, such as
+at login or when you disembark from any vehicle.</li>
+<li>Odyssey Suits and their Loadouts will now be sent.</li>
+<li>When you land on a body surface, be that in your own ship, in a Taxi,
+or in a Dropship.  Depending on the exact scenario a Station might be
+sent along with this.</li>
+</ol>
+</li>
+<li>
+<p>You can now both edit the 'normal' and 'beta' coriolis.io URLs, and
+choose which of them are used.  'Auto' means allowing the application to
+use the normal one when you're running the live game, or the beta version
+if running a beta version of the game.</p>
+</li>
+<li>
+<p>Suit names will now be displayed correctly when we have pulled the data
+from the Frontier CAPI, rather than Journal entries.</p>
+</li>
+<li>
+<p>Many translations updated once more, especially for new strings.  Thanks
+as always to those contributing!</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>Don't assume we have an EDSM Commander Name and/or API key just because
+we know a game Commander name.  This came to light during the
+investigation of
+"<a href="https://github.com/EDCD/EDMarketConnector/issues/1134">EDSM Plugin sent wrong credit balance when switching accounts</a>".
+We're still investigating that bug report.</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<p>There are some new members of the <code>state</code> dictionary passed to
+<code>journal_entry()</code>; Taxi, Dropship, Body and BodyType.  See
+<a href="./PLUGINS.md">PLUGINS.md</a> for the details.</p>
 
 <h2>Release 5.0.4</h2>
 <p>This is a minor bugfix release, ensuring that Odyssey Suit names (and loadout)
@@ -677,11 +723,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.0.4/EDMarketConnector_win_5.0.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.1.0/EDMarketConnector_win_5.1.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.0.4"
-				length="10174464"
+				sparkle:version="5.1.0"
+				length="10194944"
 				type="application/octet-stream"
 			/>
 		</item>
