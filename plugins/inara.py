@@ -605,18 +605,6 @@ def journal_entry(  # noqa: C901, CCR001
                 this.station = None
 
             elif event_name == 'SupercruiseEntry':
-                if this.undocked:
-                    # Staying in system after undocking - send any pending events from in-station action
-                    new_add_event(
-                        'setCommanderTravelLocation',
-                        entry['timestamp'],
-                        {
-                            'starsystemName': system,
-                            'shipType': state['ShipType'],
-                            'shipGameID': state['ShipID'],
-                        }
-                    )
-
                 this.undocked = False
 
             elif event_name == 'SupercruiseExit':
