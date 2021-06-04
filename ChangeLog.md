@@ -17,7 +17,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
-Release 5.0.5
+Release 5.1.0
 ===
 
 * Updates to how this application utilises the Inara.cz API.

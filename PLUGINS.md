@@ -668,7 +668,7 @@ The "language", "gameversion" and "build" values from the "Fileheader" event
 are all now stored in `state[]` fields; "GameLanguage", "GameVersion" and
 "GameBuild".
 
-New in version 5.0.5:
+New in version 5.1.0:
 
 `state` entries added for Taxi, Dropship, Body and BodyType.
 
