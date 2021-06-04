@@ -17,6 +17,47 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.0.5
+===
+
+* Updates to how this application utilises the Inara.cz API.
+  1. The current state of your ShipLockerMaterials (MicroResources for Odyssey
+     Suit and handheld Weapons upgrading and engineering) will now be sent. 
+     Note that we can't reliably track this on the fly, so it will only 
+     update when we see a full `ShipLockerMaterials` Journal event, such as 
+     at login or when you disembark from any vehicle.
+  1. Odyssey Suits and their Loadouts will now be sent.
+  1. When you land on a body surface, be that in your own ship, in a Taxi, 
+     or in a Dropship.  Depending on the exact scenario a Station might be 
+     sent along with this.
+     
+  NB: Artie is investigating if the Inara API is correctly handling 
+  updating your location when you login.  You might find it gets the system 
+  correct, but doesn't update the Station or Body.
+  
+* You can now both edit the 'normal' and 'beta' coriolis.io URLs, and 
+  choose which of them are used.  'Auto' means allowing the application to 
+  use the normal one when you're running the live game, or the beta version 
+  if running a beta version of the game.
+  
+* Suit names will now be displayed correctly when we have pulled the data 
+  from the Frontier CAPI, rather than Journal entries.
+
+Bug Fixes
+---
+
+* Don't assume we have an EDSM Commander Name and/or API key just because 
+  we know a game Commander name.  This came to light during the 
+  investigation of
+  "[EDSM Plugin sent wrong credit balance when switching accounts](https://github.com/EDCD/EDMarketConnector/issues/1134)".
+  We're still investigating that bug report.
+
+Plugin Developers
+---
+
+There are some new members of the `state` dictionary passed to 
+`journal_entry()`.  See [PLUGINS.md](./PLUGINS.md) for the details.
+
 Release 5.0.4
 ===
 
