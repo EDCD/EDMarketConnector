@@ -329,9 +329,17 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
         cmdrs = [cmdr]
         config.set('edsm_cmdrs', cmdrs)
 
-    if cmdr in cmdrs and config.get_list('edsm_usernames') and config.get_list('edsm_apikeys'):
+    if (cmdr in cmdrs and (edsm_usernames := config.get_list('edsm_usernames'))
+            and (edsm_apikeys := config.get_list('edsm_apikeys'))):
         idx = cmdrs.index(cmdr)
-        return (config.get_list('edsm_usernames')[idx], config.get_list('edsm_apikeys')[idx])
+        # The EDSM cmdr and apikey might not exist yet!
+        if idx >= len(edsm_usernames):
+            return None
+
+        if idx >= len(edsm_apikeys):
+            edsm_apikeys[idx] = None
+
+        return (edsm_usernames[idx], edsm_apikeys[idx])
 
     else:
         return None
