@@ -451,15 +451,17 @@ def journal_entry(  # noqa: C901, CCR001
                 # Update location
                 # Might not be available if this event is a 'StartUp' and we're replaying
                 # a log.
-                if system:
-                    new_add_event(
-                        'setCommanderTravelLocation',
-                        entry['timestamp'],
-                        OrderedDict([
-                            ('starsystemName', system),
-                            ('stationName', station),  # Can be None
-                        ])
-                    )
+                # XXX: This interferes with other more specific setCommanderTravelLocation events in the same
+                #      batch.
+                #  if system:
+                #      new_add_event(
+                #          'setCommanderTravelLocation',
+                #          entry['timestamp'],
+                #          OrderedDict([
+                #              ('starsystemName', system),
+                #              ('stationName', station),  # Can be None
+                #          ])
+                #      )
 
                 # Update ship
                 if state['ShipID']:  # Unknown if started in Fighter or SRV
@@ -1511,7 +1513,6 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
-
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
     reply = r.json()
