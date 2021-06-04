@@ -31,10 +31,6 @@ Release 5.1.0
      or in a Dropship.  Depending on the exact scenario a Station might be 
      sent along with this.
      
-  NB: Artie is investigating if the Inara API is correctly handling 
-  updating your location when you login.  You might find it gets the system 
-  correct, but doesn't update the Station or Body.
-  
 * You can now both edit the 'normal' and 'beta' coriolis.io URLs, and 
   choose which of them are used.  'Auto' means allowing the application to 
   use the normal one when you're running the live game, or the beta version 
