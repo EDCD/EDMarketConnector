@@ -277,16 +277,16 @@ Msg:\n{msg}'''
 
         if status_code == 429:  # HTTP UPGRADE REQUIRED
             logger.warning('EDMC is sending schemas that are too old')
-            return _("EDDN Error: EDMC is too old for EDDN. Please update.")
+            return _('EDDN Error: EDMC is too old for EDDN. Please update.')
 
         elif status_code == 400:
             # we a validation check or something else.
             logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
-            return _("EDDN Error: Validation Failed (EDMC Too Old?). See Log")
+            return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
 
         else:
             logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
-            return _("EDDN Error: Returned {STATUS} status code").format(status_code)
+            return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
         """

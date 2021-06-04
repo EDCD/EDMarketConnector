@@ -621,3 +621,12 @@
 
 /* stats.py: Status dialog title; In files: stats.py:375; */
 "Ships" = "Ships";
+
+/* EDDN returned schema too old warning [plugins/eddn.py] */
+"EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN Error: EDMC is too old for EDDN. Please update.";
+
+/* EDDN returned 400 status code [plugins/eddn.py] */
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN Error: Validation Failed (EDMC Too Old?). See Log";
+
+/* EDDN returned unknown HTTP status code [plugins/eddn.py] */
+"EDDN Error: Returned {STATUS} status code" = "EDDN Error: Returned {STATUS} status code";
