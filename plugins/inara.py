@@ -630,14 +630,17 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
             elif event_name == 'ApproachSettlement':
-                to_send = {
-                    'starsystemName':       system,
-                    'stationName':          entry['Name'],
-                    'marketid':             entry['MarketID'],
-                    'starsystemBodyName':   entry['BodyName'],
-                    'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
-                }
-                new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
+                # If you're near a Settlement on login this event is recorded, but
+                # we might not yet have system logged for use.
+                if system:
+                    to_send = {
+                        'starsystemName':       system,
+                        'stationName':          entry['Name'],
+                        'marketid':             entry['MarketID'],
+                        'starsystemBodyName':   entry['BodyName'],
+                        'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
+                    }
+                    new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
             elif event_name == 'FSDJump':
                 this.undocked = False
@@ -1197,7 +1200,7 @@ def journal_entry(  # noqa: C901, CCR001
                 # These were included thus we are landed
                 to_send['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
                 # if we're not Docked, but have these, we're either landed or close enough that it doesn't matter.
-                to_send['starSystemBodyName'] = entry['Body']
+                to_send['starsystemBodyName'] = entry['Body']
 
             new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
@@ -1483,6 +1486,7 @@ def new_worker():
                 ]
             }
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
+            logger.trace(f'Events:\n{json.dumps(data)}\n')
             try_send_data(TARGET_URL, data)
 
         time.sleep(WORKER_WAIT_TIME)
