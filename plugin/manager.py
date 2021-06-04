@@ -16,7 +16,8 @@ from plugin import decorators
 from plugin.base_plugin import BasePlugin
 from plugin.event import BaseEvent
 from plugin.exceptions import (
-    LegacyPluginNeedsMigrating, PluginAlreadyLoadedException, PluginDoesNotExistException, PluginHasNoPluginClassException, PluginLoadingException
+    LegacyPluginNeedsMigrating, PluginAlreadyLoadedException, PluginDoesNotExistException,
+    PluginHasNoPluginClassException, PluginLoadingException
 )
 from plugin.legacy_plugin import MigratedPlugin
 from plugin.plugin_info import PluginInfo
@@ -103,6 +104,7 @@ class PluginManager:
         self.log.info("starting new plugin management engine")
         self.plugins: Dict[str, LoadedPlugin] = {}
         self.failed_loading: Dict[pathlib.Path, Exception] = {}  # path -> reason
+        # TODO: plugins that were skipped because they started with _ or .
         # self._plugins_previously_loaded: Set[str] = set()
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
