@@ -38,6 +38,9 @@ Release 5.1.0
   
 * Suit names will now be displayed correctly when we have pulled the data 
   from the Frontier CAPI, rather than Journal entries.
+  
+* Many translations updated once more, especially for new strings.  Thanks 
+  as always to those contributing!
 
 Bug Fixes
 ---
