@@ -451,15 +451,17 @@ def journal_entry(  # noqa: C901, CCR001
                 # Update location
                 # Might not be available if this event is a 'StartUp' and we're replaying
                 # a log.
-                if system:
-                    new_add_event(
-                        'setCommanderTravelLocation',
-                        entry['timestamp'],
-                        OrderedDict([
-                            ('starsystemName', system),
-                            ('stationName', station),  # Can be None
-                        ])
-                    )
+                # XXX: This interferes with other more specific setCommanderTravelLocation events in the same
+                #      batch.
+                #  if system:
+                #      new_add_event(
+                #          'setCommanderTravelLocation',
+                #          entry['timestamp'],
+                #          OrderedDict([
+                #              ('starsystemName', system),
+                #              ('stationName', station),  # Can be None
+                #          ])
+                #      )
 
                 # Update ship
                 if state['ShipID']:  # Unknown if started in Fighter or SRV
@@ -603,19 +605,30 @@ def journal_entry(  # noqa: C901, CCR001
                 this.station = None
 
             elif event_name == 'SupercruiseEntry':
-                if this.undocked:
-                    # Staying in system after undocking - send any pending events from in-station action
-                    new_add_event(
-                        'setCommanderTravelLocation',
-                        entry['timestamp'],
-                        {
-                            'starsystemName': system,
-                            'shipType': state['ShipType'],
-                            'shipGameID': state['ShipID'],
-                        }
-                    )
-
                 this.undocked = False
+
+            elif event_name == 'SupercruiseExit':
+                to_send = {
+                    'starsystemName':   entry['StarSystem'],
+                }
+
+                if entry['BodyType'] == 'Planet':
+                    to_send['starsystemBodyName'] = entry['Body']
+
+                new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
+
+            elif event_name == 'ApproachSettlement':
+                # If you're near a Settlement on login this event is recorded, but
+                # we might not yet have system logged for use.
+                if system:
+                    to_send = {
+                        'starsystemName':       system,
+                        'stationName':          entry['Name'],
+                        'marketID':             entry['MarketID'],
+                        'starsystemBodyName':   entry['BodyName'],
+                        'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
+                    }
+                    new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
             elif event_name == 'FSDJump':
                 this.undocked = False
@@ -1156,7 +1169,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             new_add_event('updateCommanderSuitLoadout', entry['timestamp'], to_send)
 
-        elif event_name == "Location":
+        elif event_name == 'Location':
             to_send = {
                 'starsystemName': entry['StarSystem'],
                 'starsystemCoords': entry['StarPos'],
@@ -1174,6 +1187,8 @@ def journal_entry(  # noqa: C901, CCR001
             if 'Longitude' in entry and 'Latitude' in entry:
                 # These were included thus we are landed
                 to_send['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
+                # if we're not Docked, but have these, we're either landed or close enough that it doesn't matter.
+                to_send['starsystemBodyName'] = entry['Body']
 
             new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
@@ -1459,6 +1474,7 @@ def new_worker():
                 ]
             }
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
+            logger.trace(f'Events:\n{json.dumps(data)}\n')
             try_send_data(TARGET_URL, data)
 
         time.sleep(WORKER_WAIT_TIME)
@@ -1509,7 +1525,6 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
-
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
     reply = r.json()
