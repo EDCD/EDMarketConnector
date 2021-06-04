@@ -565,15 +565,37 @@ def journal_entry(  # noqa: C901, CCR001
                     this.suppress_docked = False
 
                 else:
+                    to_send = {
+                        'starsystemName': system,
+                        'stationName': station,
+                        'shipType': state['ShipType'],
+                        'shipGameID': state['ShipID'],
+                    }
+
+                    if entry.get('Taxi'):
+                        # we're in a taxi, dont store ShipType or shipGameID
+                        del to_send['shipType']
+                        del to_send['shipGameID']
+
+                        # We were in a taxi. What kind?
+                        if state['Dropship'] is not None and state['Dropship']:
+                            to_send['isTaxiDropship'] = True
+
+                        elif state['Taxi'] is not None and state['Taxi']:
+                            to_send['isTaxiShuttle'] = True
+
+                        else:  # we dont know one way or another. Given we were told it IS a taxi, assume its a shuttle.
+                            to_send['isTaxiShuttle'] = True
+
+                    if 'MarketID' in entry:
+                        to_send['marketID'] = entry['MarketID']
+
+                    # TODO: we _can_ include a Body name here, but I'm not entirely sure how best to go about doing that
+
                     new_add_event(
                         'addCommanderTravelDock',
                         entry['timestamp'],
-                        {
-                            'starsystemName': system,
-                            'stationName': station,
-                            'shipType': state['ShipType'],
-                            'shipGameID': state['ShipID'],
-                        }
+                        to_send
                     )
 
             elif event_name == 'Undocked':
@@ -597,15 +619,29 @@ def journal_entry(  # noqa: C901, CCR001
 
             elif event_name == 'FSDJump':
                 this.undocked = False
+                to_send = {
+                    'starsystemName': entry['StarSystem'],
+                    'starsystemCoords': entry['StarPos'],
+                    'jumpDistance': entry['JumpDist'],
+                    'shipType': state['ShipType'],
+                    'shipGameID': state['ShipID'],
+                }
+
+                if state['Taxi'] is not None and state['Taxi']:
+                    del to_send['shipType']
+                    del to_send['shipGameID']
+
+                    # taxi. What kind?
+                    if state['Dropship'] is not None and state['Dropship']:
+                        to_send['isTaxiDropship'] = True
+
+                    else:
+                        to_send['isTaxiShuttle'] = True
+
                 new_add_event(
                     'addCommanderTravelFSDJump',
                     entry['timestamp'],
-                    {
-                        'starsystemName': entry['StarSystem'],
-                        'jumpDistance': entry['JumpDist'],
-                        'shipType': state['ShipType'],
-                        'shipGameID': state['ShipID'],
-                    }
+                    to_send
                 )
 
                 if entry.get('Factions'):
@@ -619,16 +655,21 @@ def journal_entry(  # noqa: C901, CCR001
                     )
 
             elif event_name == 'CarrierJump':
+                to_send = {
+                    'starsystemName': entry['StarSystem'],
+                    'stationName': entry['StationName'],
+                    'marketID': entry['MarketID'],
+                    'shipType': state['ShipType'],
+                    'shipGameID': state['ShipID'],
+                }
+
+                if 'StarPos' in entry:
+                    to_send['starsystemCoords'] = entry['StarPos']
+
                 new_add_event(
                     'addCommanderTravelCarrierJump',
                     entry['timestamp'],
-                    {
-                        'starsystemName': entry['StarSystem'],
-                        'stationName': entry['StationName'],
-                        'marketID': entry['MarketID'],
-                        'shipType': state['ShipType'],
-                        'shipGameID': state['ShipID'],
-                    }
+                    to_send
                 )
 
                 if entry.get('Factions'):
@@ -975,6 +1016,167 @@ def journal_entry(  # noqa: C901, CCR001
                 }
             )
 
+        # New Odyssey features
+        elif event_name == 'DropshipDeploy':
+            new_add_event(
+                'addCommanderTravelLand',
+                entry['timestamp'],
+                {
+                    'starsystemName': entry['StarSystem'],
+                    'starsystemBodyName': entry['Body'],
+                    'isTaxiDropship': True,
+                }
+            )
+
+        elif event_name == 'Touchdown':
+            # Touchdown has FAR more info available on Odyssey vs Horizons:
+            # Horizons:
+            # {"timestamp":"2021-05-31T09:10:54Z","event":"Touchdown",
+            # "PlayerControlled":true,"Latitude":46.691929,"Longitude":-92.679977}
+            #
+            # Odyssey:
+            # {"timestamp":"2021-05-31T08:48:08Z","event":"Touchdown","PlayerControlled":true,"Taxi":false,
+            # "Multicrew":false,"StarSystem":"Gateway","SystemAddress":2832631665362,"Body":"Saunder's Rock","BodyID":2,
+            # "OnStation":false,"OnPlanet":true,"Latitude":54.79665,"Longitude":-99.498253}
+            #
+            # So we're going to do a lot of checking here and bail out if we dont like the look of ANYTHING here
+
+            to_send_data: Optional[Dict[str, Any]] = {}  # This is a glorified sentinel until lower down.
+            # On Horizons, neither of these exist on TouchDown
+            star_system_name = entry.get('StarSystem', this.system)
+            body_name = entry.get('Body', state['Body'] if state['BodyType'] == 'Planet' else None)
+
+            if star_system_name is None:
+                logger.warning('Refusing to update addCommanderTravelLand as we dont have a StarSystem!')
+                to_send_data = None
+
+            if body_name is None:
+                logger.warning('Refusing to update addCommanderTravelLand as we dont have a Body!')
+                to_send_data = None
+
+            if (op := entry.get('OnPlanet')) is not None and not op:
+                logger.warning('Refusing to update addCommanderTravelLand when OnPlanet is False!')
+                logger.warning(f'{entry=}')
+                to_send_data = None
+
+            if not entry['PlayerControlled']:
+                logger.info("Not updating inara addCommanderTravelLand for autonomous recall landing")
+                to_send_data = None
+
+            if to_send_data is not None:
+                # Above checks passed. Lets build and send this!
+                to_send_data['starsystemName'] = star_system_name  # Required
+                to_send_data['starsystemBodyName'] = body_name     # Required
+
+                # Following are optional
+
+                # lat/long is always there unless its an automated (recall) landing. Thus as we're sure its _not_
+                # we can assume this exists. If it doesn't its a bug anyway.
+                to_send_data['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
+                if state.get('ShipID') is not None:
+                    to_send_data['shipGameID'] = state['ShipID']
+
+                if state.get('ShipType') is not None:
+                    to_send_data['shipType'] = state['ShipType']
+
+                to_send_data['isTaxiShuttle'] = False
+                to_send_data['isTaxiDropShip'] = False
+
+                new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
+
+        elif event_name == 'ShipLockerMaterials':
+            odyssey_plural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
+            # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
+            reset_data = [{'itemType': t} for t in odyssey_plural_microresource_types]
+            set_data = []
+            for typ in odyssey_plural_microresource_types:
+                set_data.extend([
+                    {'itemName': thing['Name'], 'itemCount': thing['Count'], 'itemType': typ} for thing in entry[typ]
+                ])
+
+            new_add_event('resetCommanderInventory', entry['timestamp'], reset_data)
+            new_add_event('setCommanderInventory', entry['timestamp'], set_data)
+
+        elif event_name in ('CreateSuitLoadout', 'SuitLoadout'):
+            # CreateSuitLoadout and SuitLoadout are pretty much the same event:
+            # ╙─╴% cat Journal.* | jq 'select(.event == "SuitLoadout" or .event == "CreateSuitLoadout") | keys' -c \
+            # | uniq
+            #
+            # ["LoadoutID","LoadoutName","Modules","SuitID","SuitMods","SuitName","SuitName_Localised","event",
+            # "timestamp"]
+
+            to_send = {
+                'loadoutGameID':       entry['LoadoutID'],
+                'loadoutName':         entry['LoadoutName'],
+                'suitGameID':          entry['SuitID'],
+                'suitType':            entry['SuitName'],
+                'suitMods':            entry['SuitMods'],
+                'suitLoadout': [
+                    {
+                        'slotName':    x['SlotName'],
+                        'itemName':    x['ModuleName'],
+                        'itemClass':   x['Class'],
+                        'itemGameID':  x['SuitModuleID'],
+                        'engineering': [{'blueprintName': mod} for mod in x['WeaponMods']],
+                    } for x in entry['Modules']
+                ],
+            }
+
+            new_add_event('setCommanderSuitLoadout', entry['timestamp'], to_send)
+
+        elif event_name == 'DeleteSuitLoadout':
+            new_add_event('delCommanderSuitLoadout', entry['timestamp'], {'loadoutGameID': entry['LoadoutID']})
+
+        elif event_name == 'RenameSuitLoadout':
+            to_send = {
+                'loadoutGameID': entry['LoadoutID'],
+                'loadoutName':   entry['LoadoutName'],
+                # may as well...
+                'suitType': entry['SuitName'],
+                'suitGameID': entry['SuitID']
+            }
+            new_add_event('updateCommanderSuitLoadout', entry['timestamp'], {})
+
+        elif event_name == 'LoadoutEquipModule':
+            to_send = {
+                'loadoutGameID': entry['LoadoutID'],
+                'loadoutName': entry['LoadoutName'],
+                'suitType': entry['SuitName'],
+                'suitGameID': entry['SuitID'],
+                'suitLoadout': [
+                    {
+                        'slotName': entry['SlotName'],
+                        'itemName': entry['ModuleName'],
+                        'itemGameID': entry['SuitModuleID'],
+                        'itemClass': entry['Class'],
+                        'engineering': [{'blueprintName': mod} for mod in entry['WeaponMods']],
+                    }
+                ],
+            }
+
+            new_add_event('updateCommanderSuitLoadout', entry['timestamp'], to_send)
+
+        elif event_name == "Location":
+            to_send = {
+                'starsystemName': entry['StarSystem'],
+                'starsystemCoords': entry['StarPos'],
+            }
+
+            if entry['Docked']:
+                to_send['stationName'] = entry['StationName']
+                to_send['marketID'] = entry['MarketID']
+
+            if entry['Docked'] and entry['BodyType'] == 'Planet':
+                # we're Docked, but we're not on a Station, thus we're docked at a planetary base of some kind
+                # and thus, we SHOULD include starsystemBodyName
+                to_send['starsystemBodyName'] = entry['Body']
+
+            if 'Longitude' in entry and 'Latitude' in entry:
+                # These were included thus we are landed
+                to_send['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
+
+            new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
+
         # Community Goals
         if event_name == 'CommunityGoal':
             # Remove any unsent
@@ -1250,7 +1452,7 @@ def new_worker():
                     'appVersion': str(appversion()),
                     'APIkey': creds.api_key,
                     'commanderName': creds.cmdr,
-                    'commanderFrontierID': creds.fid
+                    'commanderFrontierID': creds.fid,
                 },
                 'events': [
                     {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
@@ -1307,6 +1509,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
+
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
     reply = r.json()
