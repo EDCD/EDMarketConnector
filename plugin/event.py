@@ -2,6 +2,14 @@
 import time
 from typing import Any, Dict, Optional
 
+PLUGIN_STARTUP_UI_EVENT = 'core.setup_ui'
+PLUGIN_PREFERENCES_EVENT = 'core.setup_preferences_ui'
+PLUGIN_PREFERENCES_CLOSED_EVENT = 'core.preferences_closed'
+PLUGIN_JOURNAL_ENTRY_EVENT = 'core.journal_entry'
+PLUGIN_DASHBOARD_ENTRY_EVENT = 'core.dashboard_entry'
+PLUGIN_CAPI_DATA_EVENT = 'core.capi_data'
+PLUGIN_EDMC_SHUTTING_DOWN = 'core.shutdown'
+
 
 class BaseEvent:
     """
@@ -34,7 +42,7 @@ class BaseDataEvent(BaseEvent):
 class DictDataEvent(BaseDataEvent):
     """Same as a data event, but promises data is a dict."""
 
-    def __init__(self, name: str, data: dict[Any, Any], event_time: float) -> None:
+    def __init__(self, name: str, data: dict[Any, Any], event_time: float = None) -> None:
         super().__init__(name, data=data, event_time=event_time)
         self.data: dict[Any, Any] = data
 
@@ -48,8 +56,8 @@ class JournalEvent(DictDataEvent):
     """Journal event."""
 
     def __init__(
-        self, name: str, data: Dict[str, Any], event_time: float, cmdr: str, is_beta: bool,
-        system: Optional[str], station: Optional[str], state: Dict[str, Any]
+        self, name: str, data: Dict[str, Any], cmdr: str, is_beta: bool,
+        system: Optional[str], station: Optional[str], state: Dict[str, Any], event_time: float = None
     ) -> None:
 
         self.data: dict[str, Any]  # Override the definition in BaseDataEvent to be more specific

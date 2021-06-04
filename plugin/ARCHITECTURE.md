@@ -99,9 +99,9 @@ all non-special `core` events are as follows:
 Some `core` events are special, and will work directly with your plugin rather than
 being global, they are documented below
 
-| Event Name       | Expected Signature                         | Description        |
-| :--------------- | :----------------------------------------- | ------------------ |
-| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI |
+| Event Name       | Expected Signature                         | Description                                                              |
+| :--------------- | :----------------------------------------- | ------------------------------------------------------------------------ |
+| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI (Note that the old style tuple pair is NOT supported) |
 
 ## TODO
 

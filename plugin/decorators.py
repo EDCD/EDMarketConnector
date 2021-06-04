@@ -34,7 +34,7 @@ _F = TypeVar('_F', bound=Callable[..., Any])
 
 
 def _list_decorate(attr_name: str, attr_content: str, func: _F) -> _F:
-    logger.debug(f'Found function {func!r} to be marked with attr {attr_name!r} and content {attr_content!r}')
+    logger.trace(f'Found function {func!r} to be marked with attr {attr_name!r} and content {attr_content!r}')
     if not hasattr(func, attr_name):
         setattr(func, attr_name, [attr_content])
         return func

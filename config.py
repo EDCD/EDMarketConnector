@@ -875,7 +875,7 @@ class LinuxConfig(AbstractConfig):
 
         self.respath_path = pathlib.Path(__file__).parent
 
-        self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        self.internal_plugin_dir_path = self.respath_path / 'plugins2'
         self.default_journal_dir_path = None  # type: ignore
         self.identifier = f'uk.org.marginal.{appname.lower()}'  # TODO: Unused?
 
