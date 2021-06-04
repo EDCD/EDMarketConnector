@@ -1156,7 +1156,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             new_add_event('updateCommanderSuitLoadout', entry['timestamp'], to_send)
 
-        elif event_name == "Location":
+        elif event_name == 'Location':
             to_send = {
                 'starsystemName': entry['StarSystem'],
                 'starsystemCoords': entry['StarPos'],
@@ -1174,6 +1174,8 @@ def journal_entry(  # noqa: C901, CCR001
             if 'Longitude' in entry and 'Latitude' in entry:
                 # These were included thus we are landed
                 to_send['starsystemBodyCoords'] = [entry['Latitude'], entry['Longitude']]
+                # if we're not Docked, but have these, we're either landed or close enough that it doesn't matter.
+                to_send['starSystemBodyName'] = entry['Body']
 
             new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
