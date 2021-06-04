@@ -883,21 +883,27 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #       said it's `Backpack.json`
                 backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
                 backpack_data = None
-                if backpack_file.exists():
-                    backpack_data = backpack_file.read_bytes()
-                else:
+
+                if not backpack_file.exists():
                     logger.warning(f'Failed to find backpack.json file as it appears not to exist? {backpack_file=}')
+
+                else:
+                    backpack_data = backpack_file.read_bytes()
 
                 parsed = None
 
-                if backpack_data is not None and len(backpack_data) > 0:
-                    try:
-                        parsed = json.loads(backpack_data)
-                    except json.JSONDecodeError:
-                        logger.exception('Unable to parse Backpack.json')
+                if backpack_data is None:
+                    logger.warning('Unable to read backpack data!')
+
+                elif len(backpack_data) == 0:
+                    logger.warning('Backpack.json was empty when we read it!')
 
                 else:
-                    logger.warning('Unable to read backpack data! Either the file was empty or it didn\'t exist!')
+                    try:
+                        parsed = json.loads(backpack_data)
+
+                    except json.JSONDecodeError:
+                        logger.exception('Unable to parse Backpack.json')
 
                 if parsed is not None:
                     entry = parsed  # set entry so that it ends up in plugins with the right data
