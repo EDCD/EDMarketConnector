@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "dlfqks";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "베타";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "자동";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "베타/일반 설정 오버라이딩";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "초기화";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "일반 URL";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "베타 URL";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "함선 피팅을 내보낼 coriolis.io 사이트 URL을 설정하세요. 주소는 반드시 '/import?data='으로 끝나야 합니다";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "잘못된 Coriolis 오버라이딩 모드입니다!";
 /* Language name */
 "!Language" = "한국어(Korean)";
 

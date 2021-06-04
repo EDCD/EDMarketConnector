@@ -19,8 +19,6 @@ import urllib.parse
 import webbrowser
 from builtins import object, range, str
 from email.utils import parsedate
-# TODO: see https://github.com/EDCD/EDMarketConnector/issues/569
-from http.cookiejar import LWPCookieJar  # noqa: F401 - No longer needed but retained in case plugins use it
 from os.path import join
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
 

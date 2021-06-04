@@ -1,13 +1,11 @@
 # Export to Trade Dangerous
 
-from os.path import join
+import time
 from collections import defaultdict
-import codecs
-import numbers
 from operator import itemgetter
+from os.path import join
 from platform import system
 from sys import platform
-import time
 
 from config import applongname, appversion, config
 

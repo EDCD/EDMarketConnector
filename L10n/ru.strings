@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "Стандартный";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "Бета";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "Автоматический";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "Режим переопределения URL";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "Сброс";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "Стандартный URL";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "Бета URL";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Установите URL для импорта сборок кораблей в coriolis.io. URL должен заканчиваться на '/import?data='";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "Некорректный режим переопределения URL для coriolis.io";
 /* Language name */
 "!Language" = "Русский";
 

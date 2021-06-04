@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "Normal";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "Beta";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "Auto";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "Beta/Normal-Auswahl überschreiben";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "Zurücksetzen";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "Normale URL";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "Beta-URL";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Setze die zu nutzende URL für coriolis.io Schiffsausrüstungen. Beachte, dass sie auf '/import?data=' enden muss.";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "Ungültiger Coriolis-Überschreibungsmodus!";
 /* Language name */
 "!Language" = "Deutsch";
 

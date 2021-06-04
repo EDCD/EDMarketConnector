@@ -1,3 +1,29 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "Normal";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "Beta";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "Auto";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "Sobrepor selecção Beta/Normal";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "Redefinir";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "URL Normal";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "URL Beta";
+
+/* Coriolis config title label [plugins/coriolis.py] */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Definir URL a usar com os módulos da nave do coriolis.io. Notar que isto TEM de acabar em  '/import?data='";
+
+/* Coriolis invalid mode warning [plugins/coriolis.py] */
+"Invalid Coriolis override mode!" = "Modo de sobreposição Coriolis inválido!";
 /* Language name */
 "!Language" = "Português (Portugal)";
 

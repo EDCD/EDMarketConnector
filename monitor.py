@@ -160,6 +160,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Suits':              {},
             'SuitLoadoutCurrent': None,
             'SuitLoadouts':       {},
+            'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
+            'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
+            'Body':               None,
+            'BodyType':           None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -261,6 +265,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systemaddress = None
         self.is_beta = False
         self.state['OnFoot'] = False
+        self.state['Body'] = None
+        self.state['BodyType'] = None
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -535,6 +541,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Reputation': {},
                     'Statistics': {},
                     'Role':       None,
+                    'Taxi':       None,
+                    'Dropship':   None,
+                    'Body':       None,
+                    'BodyType':   None,
                 })
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
@@ -668,6 +678,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.station = entry.get('StationName', '')
 
                 self.state['OnFoot'] = False
+                self.state['Taxi'] = entry['Taxi']
 
             elif event_type == 'Disembark':
                 # This event is logged when the player steps out of a ship or SRV
@@ -694,16 +705,25 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.station = None
 
                 self.state['OnFoot'] = True
+                if self.state['Taxi'] is not None and self.state['Taxi'] != entry.get('Taxi', False):
+                    logger.warning('Disembarked from a taxi but we didn\'t know we were in a taxi?')
+
+                self.state['Taxi'] = False
+                self.state['Dropship'] = False
 
             elif event_type == 'DropshipDeploy':
                 # We're definitely on-foot now
                 self.state['OnFoot'] = True
+                self.state['Taxi'] = False
+                self.state['Dropship'] = False
 
             elif event_type == 'Docked':
                 self.station = entry.get('StationName')  # May be None
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
+
+                # No need to set self.state['Taxi'] or Dropship here, if its those, the next event is a Disembark anyway
 
             elif event_type in ('Location', 'FSDJump', 'CarrierJump'):
                 # alpha4 - any changes ?
@@ -715,12 +735,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OnFoot: bool
                 if event_type in ('Location', 'CarrierJump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+                    self.state['Body'] = entry.get('Body')
+                    self.state['BodyType'] = entry.get('BodyType')
 
                     # if event_type == 'Location':
                     #     logger.trace('"Location" event')
 
                 elif event_type == 'FSDJump':
                     self.planet = None
+                    self.state['Body'] = None
+                    self.state['BodyType'] = None
 
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])  # type: ignore
@@ -742,11 +766,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
 
+                self.state['Taxi'] = entry.get('Taxi', None)
+                if not self.state['Taxi']:
+                    self.state['Dropship'] = None
+
             elif event_type == 'ApproachBody':
                 self.planet = entry['Body']
+                self.state['Body'] = entry['Body']
+                self.state['BodyType'] = 'Planet'  # Best guess. Journal says always planet.
 
             elif event_type in ('LeaveBody', 'SupercruiseEntry'):
                 self.planet = None
+                self.state['Body'] = None
+                self.state['BodyType'] = None
 
             elif event_type in ('Rank', 'Promotion'):
                 payload = dict(entry)
@@ -1284,6 +1316,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'BookDropship':
                 self.state['Credits'] -= entry.get('Cost', 0)
+                self.state['Dropship'] = True
                 # Technically we *might* now not be OnFoot.
                 # The problem is that this event is recorded both for signing up for
                 # an on-foot CZ, and when you use the Dropship to return after the
@@ -1297,12 +1330,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'BookTaxi':
                 self.state['Credits'] -= entry.get('Cost', 0)
+                # Dont set taxi state here, as we're not IN a taxi yet. Set it on Embark
 
             elif event_type == 'CancelDropship':
                 self.state['Credits'] += entry.get('Refund', 0)
+                self.state['Dropship'] = False
+                self.state['Taxi'] = False
 
             elif event_type == 'CancelTaxi':
                 self.state['Credits'] += entry.get('Refund', 0)
+                self.state['Taxi'] = False
 
             elif event_type == 'NavRoute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
@@ -1493,6 +1530,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.state['OnFoot'] = False
 
+                self.state['Body'] = None
+                self.state['BodyType'] = None
+
             elif event_type == 'ChangeCrewRole':
                 self.state['Role'] = entry['Role']
 
@@ -1507,6 +1547,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationservices = None
                 self.coordinates = None
                 self.systemaddress = None
+
+                self.state['Body'] = None
+                self.state['BodyType'] = None
                 # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'Friends':
@@ -1587,6 +1630,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'Resurrect':
                 self.state['Credits'] -= entry.get('Cost', 0)
+
+            # HACK (not game related / 2021-06-2): self.planet is moved into a more general self.state['Body'].
+            # This exists to help plugins doing what they SHOULDN'T BE cope. It will be removed at some point.
+            if self.state['Body'] is None or self.state['BodyType'] == 'Planet':
+                self.planet = self.state['Body']
 
             return entry
 
