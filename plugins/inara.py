@@ -619,6 +619,26 @@ def journal_entry(  # noqa: C901, CCR001
 
                 this.undocked = False
 
+            elif event_name == 'SupercruiseExit':
+                to_send = {
+                    'starsystemName':   entry['StarSystem'],
+                }
+
+                if entry['BodyType'] == 'Planet':
+                    to_send['starsystemBodyName'] = entry['Body']
+
+                new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
+
+            elif event_name == 'ApproachSettlement':
+                to_send = {
+                    'starsystemName':       system,
+                    'stationName':          entry['Name'],
+                    'marketid':             entry['MarketID'],
+                    'starsystemBodyName':   entry['BodyName'],
+                    'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
+                }
+                new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
+
             elif event_name == 'FSDJump':
                 this.undocked = False
                 to_send = {
