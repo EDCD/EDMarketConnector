@@ -749,9 +749,8 @@ class AppWindow(object):
 
         for plugin_name, results in res.items():
             # result = cast(Union[None, Tuple[tk.Widget, tk.Widget], tk.Widget, Any], result)
-            if results is None:
+            if len(results):
                 logger.trace(f'{plugin_name!r} has no startup UI elements')
-                continue
 
             for result in results:
                 logger.trace(f'{plugin_name} has startup UI elements. adding...')

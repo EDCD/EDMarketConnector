@@ -431,7 +431,7 @@ class PreferencesDialog(tk.Toplevel):
         plugin_results = self.plugin_manager.fire_event(PluginPreferencesEvent(notebook, monitor.cmdr, monitor.is_beta))
         plugin_results = cast(Dict[str, List[tk.Widget]], plugin_results)
         for plugin_name, results in plugin_results.items():
-            if results is None or len(results) == 0:
+            if len(results) == 0:
                 # Plugin either did something but didn't give us anything back, or doesn't listen to this event
                 continue
 
