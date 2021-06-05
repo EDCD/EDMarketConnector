@@ -263,7 +263,7 @@ if __name__ == '__main__':  # noqa: C901
 # isort: off
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
-    # import update
+    import update
     # from infi.systray import SysTrayIcon
     # isort: on
 
