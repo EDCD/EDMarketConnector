@@ -84,6 +84,9 @@
 /* Folder selection button on OSX. [prefs.py] */
 "Change..." = "Change...";
 
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Check";
+
 /* Menu item. [EDMarketConnector.py] */
 "Check for Updates..." = "Check for Updates...";
 

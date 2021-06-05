@@ -694,7 +694,7 @@ class AppWindow(object):
 
         # (Re-)install log monitoring
         if not monitor.start(self.w):
-            self.status['text'] = f'Error: Check {_("E:D journal file location")}'
+            self.status['text'] = f'Error: {_("Check")} {_("E:D journal file location")}'
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
