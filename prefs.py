@@ -3,6 +3,7 @@
 
 import contextlib
 import logging
+from plugin.exceptions import LegacyPluginNeedsMigrating
 import tkinter as tk
 import webbrowser
 from os.path import exists, expanduser, expandvars, join, normpath
@@ -943,7 +944,8 @@ class PreferencesDialog(tk.Toplevel):
 
         # enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         enabled_plugins = list(self.plugin_manager.plugins.values())
-        if len(enabled_plugins):
+        legacy_plugins = self.plugin_manager.legacy_plugins
+        if len(enabled_plugins) > 0:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW
             )
@@ -965,25 +967,38 @@ class PreferencesDialog(tk.Toplevel):
         ############################################################
         # Show which plugins don't have Python 3.x support
         ############################################################
-        # if len(plug.PLUGINS_not_py3):
-        #     ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-        #         columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
-        #     )
-        #     # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
-        #     nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
 
-        #     for plugin in plug.PLUGINS_not_py3:
-        #         if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
-        #             nb.Label(plugins_frame, text=plugin.name).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
+        legacy_not_py3 = [
+            p for (p, e) in self.plugin_manager.failed_loading.items() if isinstance(e, LegacyPluginNeedsMigrating)
+        ]
+        failed_loading_otherwise = {
+            p: e for (p, e) in self.plugin_manager.failed_loading.items() if p not in legacy_not_py3
+        }
 
-        #     HyperlinkLabel(
-        #         # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
-        #         plugins_frame, text=_('Information on migrating plugins'),
-        #         background=nb.Label().cget('background'),
-        #         url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
-        #         underline=True
-        #     ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
-        # ############################################################
+        if len(failed_loading_otherwise) > 0:
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
+            )
+            ...
+
+        if len(legacy_not_py3) > 0:
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
+            )
+            # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
+            nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
+            for p in legacy_not_py3:
+                nb.Label(plugins_frame, text=f'{p.name} ({p})').grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
+
+            HyperlinkLabel(
+                # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
+                plugins_frame, text=_('Information on migrating plugins'),
+                background=nb.Label().cget('background'),
+                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
+                underline=True
+            ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
+
+        # disabled = [] # TODO
 
         # disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
         # if len(disabled_plugins):
