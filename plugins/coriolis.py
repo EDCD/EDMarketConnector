@@ -80,7 +80,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     )
     cur_row += 1
 
-    nb.Label(conf_frame, text=_('Override Beta/Normal selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
+    nb.Label(conf_frame, text=_('Override Beta/Normal Selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.OptionMenu(
         conf_frame,
         override_textvar,
