@@ -429,6 +429,10 @@ class PluginManager:
 
         return out
 
+    @property
+    def legacy_plugins(self) -> List[MigratedPlugin]:
+        return [p for p in self.plugins if isinstance(p, MigratedPlugin)]
+
     @staticmethod
     def is_valid_plugin_directory(p: pathlib.Path) -> bool:
         """Return whether or not the given path is a valid plugin directory."""

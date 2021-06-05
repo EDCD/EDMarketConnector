@@ -979,6 +979,7 @@ class PreferencesDialog(tk.Toplevel):
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
             )
+            # TODO (A_D) Complete showing failed loads
             ...
 
         if len(legacy_not_py3) > 0:
