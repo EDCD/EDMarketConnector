@@ -7,6 +7,7 @@ import re
 import sys
 import dataclasses
 from typing import Optional
+import io
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -173,7 +174,7 @@ class LangEntry:
         return out
 
 
-def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]):
+def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     """Generate a full en.template from the given data."""
     entries: list[LangEntry] = []
     for path, calls in data.items():
@@ -194,6 +195,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]):
 
         deduped.append(e)
 
+    out = ""
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
@@ -211,9 +213,11 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]):
                 comment += to_append
 
         header = f'{comment.strip()} {files}'.strip()
-        print(f'/* {header} */')
-        print(f'{string} = {string};')
-        print()
+        out += f'/* {header} */\n'
+        out += f'{string} = {string};\n'
+        out += "\n"
+
+    return out
 
 
 if __name__ == '__main__':
