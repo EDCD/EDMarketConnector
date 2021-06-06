@@ -1,11 +1,12 @@
 """Search all given paths recursively for localised string calls."""
-import re
-import sys
 import argparse
-import itertools
 import ast
 import json
 import pathlib
+import re
+import sys
+import dataclasses
+from typing import Optional
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -40,19 +41,63 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
     for n in ast.iter_child_nodes(statement):
         out.extend(find_calls_in_stmt(n))
     if isinstance(statement, ast.Call) and get_func_name(statement.func) == "_":
+
         out.append(statement)
 
     return out
 
 
+COMMENT_RE = re.compile(r'^.*?(#.*)$')
+
+
+def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:
+    out: list[Optional[str]] = []
+    above = call.lineno - 2
+    current = call.lineno - 1
+
+    above_line = lines[above].strip() if len(lines) < above else None
+    current_line = lines[current].strip()
+
+    for line in (above_line, current_line):
+        if line is None or '#' not in line:
+            out.append(None)
+            continue
+
+        match = COMMENT_RE.match(line)
+        if not match:
+            print(line)
+            out.append(None)
+            continue
+
+        comment = match.group(1).strip()
+        if not comment.startswith("# LANG:"):
+            print(f'Unknown comment for {file}:{current} {line}', file=sys.stderr)
+            out.append(None)
+            continue
+
+        out.append(comment.replace("# LANG:", "").strip())
+
+    if out[1] is not None:
+        return out[1]
+    elif out[0] is not None:
+        return out[0]
+
+    return None
+
+
 def scan_file(path: pathlib.Path) -> list[ast.Call]:
     """Scan a file for ast.Calls."""
     data = path.read_text()
+    lines = data.splitlines()
     parsed = ast.parse(data)
     out: list[ast.Call] = []
 
     for statement in parsed.body:
         out.extend(find_calls_in_stmt(statement))
+
+    # see if we can extract any comments
+    for call in out:
+        setattr(call, "comment", extract_comments(call, lines, path))
 
     out.sort(key=lambda c: c.lineno)
     return out
@@ -98,6 +143,79 @@ def parse_template(path) -> set[str]:
     return out
 
 
+@dataclasses.dataclass
+class FileLocation:
+    path: pathlib.Path
+    line_start: int
+    line_start_col: int
+    line_end: Optional[int]
+    line_end_col: Optional[int]
+
+    @staticmethod
+    def from_call(path: pathlib.Path, c: ast.Call) -> 'FileLocation':
+        return FileLocation(path, c.lineno, c.col_offset, c.end_lineno, c.end_col_offset)
+
+
+@dataclasses.dataclass
+class LangEntry:
+    locations: list[FileLocation]
+    string: str
+    comments: list[Optional[str]]
+
+    def files(self) -> str:
+        out = ""
+        for loc in self.locations:
+            start = loc.line_start
+            end = loc.line_end
+            end_str = f':{end}' if end is not None and end != start else ''
+            out += f'{loc.path.name}:{start}{end_str}; '
+
+        return out
+
+
+def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]):
+    """Generate a full en.template from the given data."""
+    entries: list[LangEntry] = []
+    for path, calls in data.items():
+        for c in calls:
+            entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
+
+    deduped: list[LangEntry] = []
+    for e in entries:
+        cont = False
+        for d in deduped:
+            if d.string == e.string:
+                cont = True
+                d.locations.append(e.locations[0])
+                d.comments.extend(e.comments)
+
+        if cont:
+            continue
+
+        deduped.append(e)
+
+    print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
+    for entry in deduped:
+        assert len(entry.comments) == len(entry.locations)
+        comment = ""
+        files = "In files: " + entry.files()
+        string = f'"{entry.string}"'
+
+        for i in range(len(entry.comments)):
+            if entry.comments[i] is None:
+                continue
+
+            loc = entry.locations[i]
+            to_append = f'{loc.path.name}: {entry.comments[i]}; '
+            if to_append not in comment:
+                comment += to_append
+
+        header = f'{comment.strip()} {files}'.strip()
+        print(f'/* {header} */')
+        print(f'{string} = {string};')
+        print()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", help="Directory to search from", default=".")
@@ -137,18 +255,14 @@ if __name__ == '__main__':
                 "start_offset": c.col_offset,
                 "end_line": c.end_lineno,
                 "end_offset": c.end_col_offset,
+                "comment": getattr(c, "comment", None)
             } for (path, calls) in res.items() for c in calls
         ]
 
         print(json.dumps(to_print_data, indent=2))
 
     elif args.lang:
-        for path, calls in res.items():
-            for c in calls:
-                arg = json.dumps(get_arg(c))
-                print(f'/* {path.name}:{c.lineno}({c.col_offset}):{c.end_lineno}({c.end_col_offset}) */')
-                print(f'{arg} = {arg};')
-                print()
+        print(generate_lang_template(res))
 
     else:
         for path, calls in res.items():
