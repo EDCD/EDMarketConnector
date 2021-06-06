@@ -1,4 +1,5 @@
 """Search all given paths recursively for localised string calls."""
+import sys
 import argparse
 import ast
 import json
@@ -20,7 +21,7 @@ def get_func_name(thing: ast.AST) -> str:
 def get_arg(call: ast.Call) -> str:
     """Extract the argument string to the translate function."""
     if len(call.args) > 1:
-        print("??? > 1 args", call.args)
+        print("??? > 1 args", call.args, file=sys.stderr)
 
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
