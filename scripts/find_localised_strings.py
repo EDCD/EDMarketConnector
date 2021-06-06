@@ -128,18 +128,19 @@ if __name__ == '__main__':
             print(f"No longer used: {old}")
 
     elif args.json:
-        to_print = json.dumps({
-            str(path): [{
+        to_print_data = [
+            {
+                "path": str(path),
                 "string": get_arg(c),
                 "reconstructed": ast.unparse(c),
                 "start_line": c.lineno,
                 "start_offset": c.col_offset,
                 "end_line": c.end_lineno,
                 "end_offset": c.end_col_offset,
-            } for c in calls] for (path, calls) in res.items() if len(calls) > 0
-        }, indent=2)
+            } for (path, calls) in res.items() for c in calls
+        ]
 
-        print(to_print)
+        print(json.dumps(to_print_data, indent=2))
 
     elif args.lang:
         for path, calls in res.items():
