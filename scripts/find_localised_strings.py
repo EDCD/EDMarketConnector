@@ -1,6 +1,8 @@
 """Search all given paths recursively for localised string calls."""
+import re
 import sys
 import argparse
+import itertools
 import ast
 import json
 import pathlib
@@ -26,6 +28,8 @@ def get_arg(call: ast.Call) -> str:
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
         return arg.value
+    elif isinstance(arg, ast.Name):
+        return f"VARIABLE! CHECK CODE! {arg.id}"
     else:
         return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
 
@@ -81,6 +85,19 @@ def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] = None) -> dict[
     return out
 
 
+def parse_template(path) -> set[str]:
+    lang_re = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
+    out = set()
+    for line in pathlib.Path(path).read_text().splitlines():
+        match = lang_re.match(line)
+        if not match:
+            continue
+        if match.group(1) != "!Language":
+            out.add(match.group(1))
+
+    return out
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", help="Directory to search from", default=".")
@@ -88,13 +105,29 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
     group.add_argument('--lang', action='store_true', help='lang file outpot')
+    group.add_argument('--compare-lang')
 
     args = parser.parse_args()
 
     directory = pathlib.Path(args.directory)
     res = scan_directory(directory, [pathlib.Path(p) for p in args.ignore])
 
-    if args.json:
+    if args.compare_lang is not None and len(args.compare_lang) > 0:
+        seen = set()
+        template = parse_template(args.compare_lang)
+
+        for file, calls in res.items():
+            for c in calls:
+                arg = get_arg(c)
+                if arg in template:
+                    seen.add(arg)
+                else:
+                    print(f"NEW! {file}:{c.lineno}: {arg!r}")
+
+        for old in set(template) ^ seen:
+            print(f"No longer used: {old}")
+
+    elif args.json:
         to_print = json.dumps({
             str(path): [{
                 "string": get_arg(c),
