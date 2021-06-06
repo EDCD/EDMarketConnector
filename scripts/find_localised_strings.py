@@ -83,7 +83,7 @@ def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] = None) -> dict[
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", help="Directory to search from", default=".")
-    parser.add_argument("--ignore", action='append', help="directories to ignore (globbed)", default=["venv", ".git"])
+    parser.add_argument("--ignore", action='append', help="directories to ignore", default=["venv", ".git"])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
     group.add_argument('--lang', action='store_true', help='lang file outpot')
