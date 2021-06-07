@@ -827,12 +827,13 @@ class PreferencesDialog(tk.Toplevel):
         plugdir.set(config.plugin_dir)
         row = AutoInc(1)
 
-        # Section heading in settings
-        # LANG: Label for
-        nb.Label(plugins_frame, text=_('Plugins folder')+':').grid(padx=self.PADX, sticky=tk.W)
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
         with row as cur_row:
+            # Section heading in settings
+            # LANG: Label for location of third-party plugins folder
+            nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, sticky=tk.W, row=cur_row)
+
             plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row)
 
             nb.Button(
