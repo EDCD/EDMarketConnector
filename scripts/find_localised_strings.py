@@ -273,7 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.git'])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
-    group.add_argument('--lang', action='store_true', help='en.template "strings" output')
+    group.add_argument('--lang', help='en.template "strings" output to specified file, "-" for stdout')
     group.add_argument('--compare-lang', help='en.template file to compare against')
 
     args = parser.parse_args()
@@ -313,7 +313,12 @@ if __name__ == '__main__':
         print(json.dumps(to_print_data, indent=2))
 
     elif args.lang:
-        print(generate_lang_template(res))
+        if args.lang == '-':
+            print(generate_lang_template(res))
+
+        else:
+            with open(args.lang, mode='w+', newline='\n') as langfile:
+                langfile.writelines(generate_lang_template(res))
 
     else:
         for path, calls in res.items():
