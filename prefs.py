@@ -838,6 +838,7 @@ class PreferencesDialog(tk.Toplevel):
 
             nb.Button(
                 plugins_frame,
+                # LANG: Label on button used to open a filesystem folder
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
                 command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
             ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
@@ -845,6 +846,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(
             plugins_frame,
             # Help text in settings
+            # LANG: Tip/label about how to disable plugins
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
         ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
 
@@ -855,6 +857,7 @@ class PreferencesDialog(tk.Toplevel):
             )
             nb.Label(
                 plugins_frame,
+                # LANG: Label on list of enabled plugins
                 text=_('Enabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
@@ -895,6 +898,7 @@ class PreferencesDialog(tk.Toplevel):
             )
             nb.Label(
                 plugins_frame,
+                # LANG: Lable on list of user-disabled plugins
                 text=_('Disabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
@@ -903,6 +907,7 @@ class PreferencesDialog(tk.Toplevel):
                     columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
                 )
 
+        # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
 
     def cmdrchanged(self, event=None):
@@ -1105,7 +1110,7 @@ class PreferencesDialog(tk.Toplevel):
         event.widget.delete(0, tk.END)
         self.hotkey_text.insert(
             0,
-            # No hotkey/shortcut currently defined
+            # LANG: No hotkey/shortcut set
             hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None'))
 
     def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
@@ -1138,7 +1143,8 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn['state'] = tk.NORMAL
 
             else:
-                event.widget.insert(0, _('None'))  # No hotkey/shortcut currently defined
+                # LANG: No hotkey/shortcut set
+                event.widget.insert(0, _('None'))
                 self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
 
