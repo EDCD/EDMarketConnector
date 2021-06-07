@@ -74,6 +74,7 @@ repos:
       language: system
       entry: python scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data --ignore dist.win32
       pass_filenames: false
+      always_run: true
 
 default_language_version:
     python: python3.9
