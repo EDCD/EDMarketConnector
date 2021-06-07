@@ -270,8 +270,8 @@ if __name__ == '__main__':
     parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.git'])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
-    group.add_argument('--lang', action='store_true', help='lang file outpot')
-    group.add_argument('--compare-lang')
+    group.add_argument('--lang', action='store_true', help='en.template "strings" output')
+    group.add_argument('--compare-lang', help='en.template file to compare against')
 
     args = parser.parse_args()
 
