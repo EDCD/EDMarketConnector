@@ -1,11 +1,14 @@
-Introduction
-===
+# Translations in Elite Dangerous Market Connector
+
 Translations are handled on [OneSky](https://oneskyapp.com/), specifically in [this project](https://marginal.oneskyapp.com/collaboration/project/52710).
 
-Adding A New Phrase
-===
-Setting it up in the code
 ---
+
+## Adding A New Phrase
+
+### Setting it up in the code
+
+#### Call `_(...)`
 If you add any new strings that appear in the application UI, e.g. new configuration options, then you should specify them as:
 
 	_('Text that appears in UI')
@@ -16,7 +19,20 @@ If you need to specify something in the text that shouldn't be translated then u
 	_('Some text with a {WORD} not translated').format(WORD='word')
 This way 'word' will always be used literally.
 
-Next you will need to edit `L10n/en.template` to add the phrase:
+#### Add a LANG comment
+
+Sometimes our translators may need some additional information about what a
+translation is used for. You can add that information automatically by using
+`# LANG: your message here` **on the line directly above your usage, or at the
+end of the line in your usage**. If both comments exist, the one on the
+current line is preferred over the one above
+
+```py
+# LANG: this says stuff.
+_('stuff')
+```
+
+#### Edit `L10n/en.template` to add the phrase
 
 	/* <use of this phrase> [<file it was first added in>] */
 	"<text as it appears in the code>" = "<English version of the text>";
@@ -43,8 +59,8 @@ You can even use other translations within a given string, e.g.:
 	/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
-Adding it to the OneSky project
----
+## Adding it to the OneSky project
+
 You will, of course, need admin access to the project.  Jonathan Harris (aka Maringal, aka Otis) still handles this.  Check for this email address in github commits if you need to get in touch.
 
 1. Copy `L10n/en.template` to `en.strings` somewhere.  It needs to be this name for OneSky to accept it as an upload.
@@ -56,8 +72,10 @@ You will, of course, need admin access to the project.  Jonathan Harris (aka Mar
 
 All project admins will get a notification of the new upload.  Now you wait for translators to work on the new/changed phrases.
 
-Updating Translations In The Code
-===
+---
+
+## Updating Translations In The Code
+
 Once you have new/changed translations on OneSky you'll want to update the code to use them.
 
 1. Navigate to the [Translation Overview](https://marginal.oneskyapp.com/admin/project/dashboard/project/52710) then click on "Download Translation" which should bring you to [Download](https://marginal.oneskyapp.com/admin/export/phrases/project/52710).
@@ -69,8 +87,10 @@ Once you have new/changed translations on OneSky you'll want to update the code 
 1. Rename the "en.strings" file to "en.template".
 1. Commit the changes to git.
 
-Adding a New Language
-===
+---
+
+## Adding a New Language
+
 To add a new language to the app:
 
 1. Add it to the OneSkyApp project:

@@ -400,17 +400,10 @@ failure in our setup.
 
 ## Comments
 
-### Add comments to LANG usage
+### LANG comments for translations
 
-Sometimes our translators may need some additional information about what a translation is used for. You can add
-that information automatically by using `# LANG: your message here`
-**on the line directly above your usage, or at the end of the line in your usage**. If both comments exist, the one
-on the current line is preferred over the one above
-
-```py
-# LANG: this says stuff.
-_('stuff')
-```
+When adding translations you *must*
+[add a LANG comment](./docs/Translations.md#add-a-lang-comment).
 
 ### Mark hacks and workarounds with a specific comment
 
