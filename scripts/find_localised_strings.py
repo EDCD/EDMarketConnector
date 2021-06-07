@@ -64,38 +64,36 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     :param file: The path to the file this call node came from
     :return: The first comment that matches the rules, or None
     """
-    out: list[Optional[str]] = []
+    out: Optional[str] = None
     above = call.lineno - 2
     current = call.lineno - 1
 
     above_line = lines[above].strip() if len(lines) >= above else None
     current_line = lines[current].strip()
 
+    bad_comment: Optional[str] = None
     for line in (above_line, current_line):
         if line is None or '#' not in line:
-            out.append(None)
             continue
 
         match = COMMENT_RE.match(line)
         if not match:
             print(line)
-            out.append(None)
             continue
 
         comment = match.group(1).strip()
         if not comment.startswith('# LANG:'):
-            print(f'Unknown comment for {file}:{current} {line}', file=sys.stderr)
-            out.append(None)
+            bad_comment = f'Unknown comment for {file}:{current} {line}'
             continue
 
-        out.append(comment.replace('# LANG:', '').strip())
+        out = comment.replace('# LANG:', '').strip()
+        bad_comment = None
+        break
 
-    if out[1] is not None:
-        return out[1]
-    elif out[0] is not None:
-        return out[0]
+    if bad_comment is not None:
+        print(bad_comment, file=sys.stderr)
 
-    return None
+    return out
 
 
 def scan_file(path: pathlib.Path) -> list[ast.Call]:
