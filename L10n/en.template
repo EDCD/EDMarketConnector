@@ -1,3 +1,6 @@
+/* Language name */
+"!Language" = "English";
+
 /* In files: companion.py:170; */
 "Error: Frontier CAPI didn't respond" = "Error: Frontier CAPI didn't respond";
 
