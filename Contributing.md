@@ -148,7 +148,7 @@ your WIP branch.  If there are any non-trivial conflicts when we merge your Pull
 to rebase your WIP branch on the latest version of the source branch.  Otherwise we'll work out how to best
 merge your changes via comments in the Pull Request.
 
-### Linting
+## Linting
 
 We use flake8 for linting all python source.
 
@@ -158,7 +158,7 @@ your files.
 
 Note that if your PR does not cleanly (or mostly cleanly) pass a linting scan, your PR may be put on hold pending fixes.
 
-### Unit testing
+## Unit testing
 
 Where possible please write unit tests for your PRs, especially in the case of
 bug fixes, having regression tests help ensure that we don't accidentally
@@ -362,11 +362,26 @@ literals.
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
-## Mark hacks and workarounds with a specific comment
+## Comments
+
+### Add comments to LANG usage
+
+Sometimes our translators may need some additional information about what a translation is used for. You can add
+that information automatically by using `# LANG: your message here`
+**on the line directly above your usage, or at the end of the line in your usage**. If both comments exist, the one
+on the current line is preferred over the one above
+
+```py
+# LANG: this says stuff.
+_('stuff')
+```
+
+### Mark hacks and workarounds with a specific comment
 
 We often write hacks or workarounds to make EDMC work on a given version or around a specific bug.
 Please mark all hacks, workarounds, magic with one of the following comments, where applicable:
-```
+
+```py
 # HACK $elite-version-number | $date: $description
 # MAGIC $elite-version-number | $date: $description
 # WORKAROUND $elite-version-number | $date: $description

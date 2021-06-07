@@ -47,117 +47,117 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
     """
     # StatsResults assumes these three things are first
     res = [
-        [_('Cmdr'),    data['commander']['name']],
-        [_('Balance'), str(data['commander'].get('credits', 0))],  # Cmdr stats
-        [_('Loan'),    str(data['commander'].get('debt', 0))],     # Cmdr stats
+        [_('Cmdr'),    data['commander']['name']],                 # LANG: Cmdr stats
+        [_('Balance'), str(data['commander'].get('credits', 0))],  # LANG: Cmdr stats
+        [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
-        (_('Combat'), 'combat'),          # Ranking
-        (_('Trade'), 'trade'),            # Ranking
-        (_('Explorer'), 'explore'),       # Ranking
-        (_('CQC'), 'cqc'),                # Ranking
-        (_('Federation'), 'federation'),  # Ranking
-        (_('Empire'), 'empire'),          # Ranking
-        (_('Powerplay'), 'power'),        # Ranking
-        # ???            , 'crime'),      # Ranking
-        # ???            , 'service'),    # Ranking
+        (_('Combat'), 'combat'),          # LANG: Ranking
+        (_('Trade'), 'trade'),            # LANG: Ranking
+        (_('Explorer'), 'explore'),       # LANG: Ranking
+        (_('CQC'), 'cqc'),                # LANG: Ranking
+        (_('Federation'), 'federation'),  # LANG: Ranking
+        (_('Empire'), 'empire'),          # LANG: Ranking
+        (_('Powerplay'), 'power'),        # LANG: Ranking
+        # ???            , 'crime'),      # LANG: Ranking
+        # ???            , 'service'),    # LANG: Ranking
     ]
 
     RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
         'combat': [
-            _('Harmless'),                # Combat rank
-            _('Mostly Harmless'),         # Combat rank
-            _('Novice'),                  # Combat rank
-            _('Competent'),               # Combat rank
-            _('Expert'),                  # Combat rank
-            _('Master'),                  # Combat rank
-            _('Dangerous'),               # Combat rank
-            _('Deadly'),                  # Combat rank
-            _('Elite'),                   # Top rank
+            _('Harmless'),                # LANG: Combat rank
+            _('Mostly Harmless'),         # LANG: Combat rank
+            _('Novice'),                  # LANG: Combat rank
+            _('Competent'),               # LANG: Combat rank
+            _('Expert'),                  # LANG: Combat rank
+            _('Master'),                  # LANG: Combat rank
+            _('Dangerous'),               # LANG: Combat rank
+            _('Deadly'),                  # LANG: Combat rank
+            _('Elite'),                   # LANG: Top rank
         ],
         'trade': [
-            _('Penniless'),               # Trade rank
-            _('Mostly Penniless'),        # Trade rank
-            _('Peddler'),                 # Trade rank
-            _('Dealer'),                  # Trade rank
-            _('Merchant'),                # Trade rank
-            _('Broker'),                  # Trade rank
-            _('Entrepreneur'),            # Trade rank
-            _('Tycoon'),                  # Trade rank
-            _('Elite')                    # Top rank
+            _('Penniless'),               # LANG: Trade rank
+            _('Mostly Penniless'),        # LANG: Trade rank
+            _('Peddler'),                 # LANG: Trade rank
+            _('Dealer'),                  # LANG: Trade rank
+            _('Merchant'),                # LANG: Trade rank
+            _('Broker'),                  # LANG: Trade rank
+            _('Entrepreneur'),            # LANG: Trade rank
+            _('Tycoon'),                  # LANG: Trade rank
+            _('Elite')                    # LANG: Top rank
         ],
         'explore': [
-            _('Aimless'),                 # Explorer rank
-            _('Mostly Aimless'),          # Explorer rank
-            _('Scout'),                   # Explorer rank
-            _('Surveyor'),                # Explorer rank
-            _('Trailblazer'),             # Explorer rank
-            _('Pathfinder'),              # Explorer rank
-            _('Ranger'),                  # Explorer rank
-            _('Pioneer'),                 # Explorer rank
-            _('Elite')                    # Top rank
+            _('Aimless'),                 # LANG: Explorer rank
+            _('Mostly Aimless'),          # LANG: Explorer rank
+            _('Scout'),                   # LANG: Explorer rank
+            _('Surveyor'),                # LANG: Explorer rank
+            _('Trailblazer'),             # LANG: Explorer rank
+            _('Pathfinder'),              # LANG: Explorer rank
+            _('Ranger'),                  # LANG: Explorer rank
+            _('Pioneer'),                 # LANG: Explorer rank
+            _('Elite')                    # LANG: Top rank
         ],
         'cqc': [
-            _('Helpless'),                # CQC rank
-            _('Mostly Helpless'),         # CQC rank
-            _('Amateur'),                 # CQC rank
-            _('Semi Professional'),       # CQC rank
-            _('Professional'),            # CQC rank
-            _('Champion'),                # CQC rank
-            _('Hero'),                    # CQC rank
-            _('Gladiator'),               # CQC rank
-            _('Elite')                    # Top rank
+            _('Helpless'),                # LANG: CQC rank
+            _('Mostly Helpless'),         # LANG: CQC rank
+            _('Amateur'),                 # LANG: CQC rank
+            _('Semi Professional'),       # LANG: CQC rank
+            _('Professional'),            # LANG: CQC rank
+            _('Champion'),                # LANG: CQC rank
+            _('Hero'),                    # LANG: CQC rank
+            _('Gladiator'),               # LANG: CQC rank
+            _('Elite')                    # LANG: Top rank
         ],
 
         # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
         'federation': [
-            _('None'),                    # No rank
-            _('Recruit'),                 # Federation rank
-            _('Cadet'),                   # Federation rank
-            _('Midshipman'),              # Federation rank
-            _('Petty Officer'),           # Federation rank
-            _('Chief Petty Officer'),     # Federation rank
-            _('Warrant Officer'),         # Federation rank
-            _('Ensign'),                  # Federation rank
-            _('Lieutenant'),              # Federation rank
-            _('Lieutenant Commander'),    # Federation rank
-            _('Post Commander'),          # Federation rank
-            _('Post Captain'),            # Federation rank
-            _('Rear Admiral'),            # Federation rank
-            _('Vice Admiral'),            # Federation rank
-            _('Admiral')                  # Federation rank
+            _('None'),                    # LANG: No rank
+            _('Recruit'),                 # LANG: Federation rank
+            _('Cadet'),                   # LANG: Federation rank
+            _('Midshipman'),              # LANG: Federation rank
+            _('Petty Officer'),           # LANG: Federation rank
+            _('Chief Petty Officer'),     # LANG: Federation rank
+            _('Warrant Officer'),         # LANG: Federation rank
+            _('Ensign'),                  # LANG: Federation rank
+            _('Lieutenant'),              # LANG: Federation rank
+            _('Lieutenant Commander'),    # LANG: Federation rank
+            _('Post Commander'),          # LANG: Federation rank
+            _('Post Captain'),            # LANG: Federation rank
+            _('Rear Admiral'),            # LANG: Federation rank
+            _('Vice Admiral'),            # LANG: Federation rank
+            _('Admiral')                  # LANG: Federation rank
         ],
 
         # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
         'empire': [
-            _('None'),                    # No rank
-            _('Outsider'),                # Empire rank
-            _('Serf'),                    # Empire rank
-            _('Master'),                  # Empire rank
-            _('Squire'),                  # Empire rank
-            _('Knight'),                  # Empire rank
-            _('Lord'),                    # Empire rank
-            _('Baron'),                   # Empire rank
-            _('Viscount'),                # Empire rank
-            _('Count'),                   # Empire rank
-            _('Earl'),                    # Empire rank
-            _('Marquis'),                 # Empire rank
-            _('Duke'),                    # Empire rank
-            _('Prince'),                  # Empire rank
-            _('King')                     # Empire rank
+            _('None'),                    # LANG: No rank
+            _('Outsider'),                # LANG: Empire rank
+            _('Serf'),                    # LANG: Empire rank
+            _('Master'),                  # LANG: Empire rank
+            _('Squire'),                  # LANG: Empire rank
+            _('Knight'),                  # LANG: Empire rank
+            _('Lord'),                    # LANG: Empire rank
+            _('Baron'),                   # LANG: Empire rank
+            _('Viscount'),                # LANG: Empire rank
+            _('Count'),                   # LANG: Empire rank
+            _('Earl'),                    # LANG: Empire rank
+            _('Marquis'),                 # LANG: Empire rank
+            _('Duke'),                    # LANG: Empire rank
+            _('Prince'),                  # LANG: Empire rank
+            _('King')                     # LANG: Empire rank
         ],
 
         # http://elite-dangerous.wikia.com/wiki/Ratings
         'power': [
-            _('None'),                    # No rank
-            _('Rating 1'),                # Power rank
-            _('Rating 2'),                # Power rank
-            _('Rating 3'),                # Power rank
-            _('Rating 4'),                # Power rank
-            _('Rating 5')                 # Power rank
+            _('None'),                    # LANG: No rank
+            _('Rating 1'),                # LANG: Power rank
+            _('Rating 2'),                # LANG: Power rank
+            _('Rating 3'),                # LANG: Power rank
+            _('Rating 4'),                # LANG: Power rank
+            _('Rating 5')                 # LANG: Power rank
         ],
     }
 
@@ -169,7 +169,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             res.append([title, names[rank] if rank < len(names) else f'Rank {rank}'])
 
         else:
-            res.append([title, _('None')])  # No rank
+            res.append([title, _('None')])  # LANG: No rank
 
     return res
 
@@ -291,7 +291,9 @@ class StatsDialog():
             return
 
         if not data.get('commander') or not data['commander'].get('name', '').strip():
-            self.status['text'] = _("Who are you?!")  # Shouldn't happen
+            # Shouldn't happen
+            # LANG: Unknown commander
+            self.status['text'] = _("Who are you?!")
 
         elif (
             not data.get('lastSystem')
@@ -299,10 +301,14 @@ class StatsDialog():
             or not data.get('lastStarport')
             or not data['lastStarport'].get('name', '').strip()
         ):
-            self.status['text'] = _("Where are you?!")  # Shouldn't happen
+            # Shouldn't happen
+            # LANG: Unknown location
+            self.status['text'] = _("Where are you?!")
 
         elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name', '').strip():
-            self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+            # Shouldn't happen
+            # LANG: Unknown ship
+            self.status['text'] = _("What are you flying?!")
 
         else:
             self.status['text'] = ''
@@ -350,14 +356,14 @@ class StatsResults(tk.Toplevel):
             self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
-        notebook.add(page, text=_('Status'))  # Status dialog title
+        notebook.add(page, text=_('Status'))  # LANG: Status dialog title
 
         page = self.addpage(notebook, [
-            _('Ship'),     # Status dialog subtitle
+            _('Ship'),     # LANG: Status dialog subtitle
             '',
-            _('System'),   # Main window
-            _('Station'),  # Status dialog subtitle
-            _('Value'),    # Status dialog subtitle - CR value of ship
+            _('System'),   # LANG: Main window
+            _('Station'),  # LANG: Status dialog subtitle
+            _('Value'),    # LANG: Status dialog subtitle - CR value of ship
         ])
 
         shiplist = ships(data)
@@ -366,7 +372,7 @@ class StatsResults(tk.Toplevel):
             self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))], with_copy=True)
 
         ttk.Frame(page).grid(pady=5)         # bottom spacer
-        notebook.add(page, text=_('Ships'))  # Status dialog title
+        notebook.add(page, text=_('Ships'))  # LANG: Status dialog title
 
         if platform != 'darwin':
             buttonframe = ttk.Frame(frame)
