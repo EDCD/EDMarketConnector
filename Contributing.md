@@ -129,12 +129,12 @@ Remember, you should always be working versus a single issue, even if the work i
 There might be cases where issues aren't duplicates, but your work still addresses more than one.  In that case
 pick one for the naming scheme below, but mention all in commit messages and the Pull Request.
 
-In all cases the branch should be named as per the scheme `<class>/<issue number>-<title>`:
+In all cases the branch should be named as per the scheme `<class>/<issue number>/<title>`:
 
 * `<class>` - We have several classes of WIP branch:
-  * `fix` - For working on bug fixes, e.g. `fix/184-crash-in-startup`
-  * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192-add-thing-to-wotsit`
-  * `feature` - For working on *new* features, e.g. `feature/284-allow-users-to-frob`
+  * `fix` - For working on bug fixes, e.g. `fix/184/crash-in-startup`
+  * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192/add-thing-to-wotsit`
+  * `feature` - For working on *new* features, e.g. `feature/284/allow-users-to-frob`
 
 * `<issue-number>` is for easy reference when citing the issue number in commit messages.  If you're somehow doing
   work that's not versus an issue then don't put the `<issue number>-` part in.
