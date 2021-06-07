@@ -294,6 +294,7 @@ class PreferencesDialog(tk.Toplevel):
             buttonframe.grid(padx=self.PADX, pady=self.PADX, sticky=tk.NSEW)
             buttonframe.columnconfigure(0, weight=1)
             ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
+            # LANG: 'OK' button on Settings/Preferences window
             button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
             button.grid(row=0, column=1, sticky=tk.E)
             button.bind("<Return>", lambda event: self.apply())
@@ -378,6 +379,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get_str('outdir')))
+        # LANG: Label for "where files are located"
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
@@ -394,7 +396,8 @@ class PreferencesDialog(tk.Toplevel):
 
         nb.Frame(output_frame).grid(row=row.get())  # bottom spacer # TODO: does nothing?
 
-        root_notebook.add(output_frame, text=_('Output'))		# Tab heading in settings
+        # LANG: Label for 'Output' Settings tab
+        root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
 
     def __setup_plugin_tabs(self, notebook: Notebook) -> None:
         for plugin in plug.PLUGINS:
@@ -451,9 +454,9 @@ class PreferencesDialog(tk.Toplevel):
             self.hotkey_play = tk.IntVar(value=not config.get_int('hotkey_mute'))
             nb.Label(
                 config_frame,
-                text=_('Keyboard shortcut') if  # Hotkey/Shortcut settings prompt on OSX
+                text=_('Keyboard shortcut') if  # LANG: Hotkey/Shortcut settings prompt on OSX
                 platform == 'darwin' else
-                _('Hotkey')		# Hotkey/Shortcut settings prompt on Windows
+                _('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
             if platform == 'darwin' and not was_accessible_at_launch:
@@ -473,7 +476,7 @@ class PreferencesDialog(tk.Toplevel):
                         foreground='firebrick'
                     ).grid(columnspan=4, padx=self.PADX, sticky=tk.W, row=row.get())
 
-                    # Shortcut settings button on OSX
+                    # LANG: Shortcut settings button on OSX
                     nb.Button(config_frame, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
                         padx=self.PADX, sticky=tk.E, row=row.get()
                     )
@@ -484,6 +487,7 @@ class PreferencesDialog(tk.Toplevel):
                     0,
                     # No hotkey/shortcut currently defined
                     # TODO: display Only shows up on darwin or windows
+                    # LANG: No hotkey/shortcut set
                     hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None')
                 )
 
@@ -530,6 +534,7 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         # Settings prompt for preferred ship loadout, system and station info websites
+        # LANG: Label for preferred shipyard, system and station 'providers'
         nb.Label(config_frame, text=_('Preferred websites')).grid(
             columnspan=4, padx=self.PADX, sticky=tk.W, row=row.get()
         )
@@ -540,6 +545,7 @@ class PreferencesDialog(tk.Toplevel):
                 value=str(shipyard_provider if shipyard_provider in plug.provides('shipyard_url') else 'EDSY')
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
+            # LANG: Label for Shipyard provider selection
             nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
             self.shipyard_button = nb.OptionMenu(
                 config_frame, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
@@ -551,6 +557,7 @@ class PreferencesDialog(tk.Toplevel):
             self.alt_shipyard_open = tk.IntVar(value=config.get_int('use_alt_shipyard_open'))
             self.alt_shipyard_open_btn = nb.Checkbutton(
                 config_frame,
+                # LANG: Label for checkbox to utilise alternative Coriolis URL method
                 text=_('Use alternate URL method'),
                 variable=self.alt_shipyard_open,
                 command=self.alt_shipyard_open_changed,
@@ -628,18 +635,22 @@ class PreferencesDialog(tk.Toplevel):
         # Big spacer
         nb.Label(config_frame).grid(sticky=tk.W, row=row.get())
 
-        notebook.add(config_frame, text=_('Configuration'))  # Tab heading in settings
+        # LANG: Label for 'Configuration' tab in Settings
+        notebook.add(config_frame, text=_('Configuration'))
 
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
         # Appearance theme and language setting
+        # LANG: The system default language choice in Settings > Appearance
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         # self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
+            # LANG: Label for Settings > Appeareance > selection of 'normal' text colour
             _('Normal text'),		# Dark theme color setting
+            # LANG: Label for Settings > Appeareance > selection of 'highlightes' text colour
             _('Highlighted text'),  # Dark theme color setting
         ]
 
@@ -657,21 +668,25 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         # Appearance setting
+        # LANG: Label for Settings > Appearance > Theme selection
         nb.Label(appearance_frame, text=_('Theme')).grid(columnspan=3, padx=self.PADX, sticky=tk.W, row=row.get())
 
         # Appearance theme and language setting
         nb.Radiobutton(
+            # LANG: Label for 'Default' theme radio button
             appearance_frame, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         # Appearance theme setting
         nb.Radiobutton(
+            # LANG: Label for 'Dark' theme radio button
             appearance_frame, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         if platform == 'win32':
             nb.Radiobutton(
                 appearance_frame,
+                # LANG: Label for 'Transparent' theme radio button
                 text=_('Transparent'),  # Appearance theme setting
                 variable=self.theme,
                 value=2,
@@ -801,6 +816,7 @@ class PreferencesDialog(tk.Toplevel):
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
+        # LANG: Label for Settings > Appearance tab
         notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
 
     def __setup_plugin_tab(self, notebook: Notebook) -> None:
@@ -811,15 +827,18 @@ class PreferencesDialog(tk.Toplevel):
         plugdir.set(config.plugin_dir)
         row = AutoInc(1)
 
-        # Section heading in settings
-        nb.Label(plugins_frame, text=_('Plugins folder')+':').grid(padx=self.PADX, sticky=tk.W)
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
         with row as cur_row:
+            # Section heading in settings
+            # LANG: Label for location of third-party plugins folder
+            nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, sticky=tk.W, row=cur_row)
+
             plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row)
 
             nb.Button(
                 plugins_frame,
+                # LANG: Label on button used to open a filesystem folder
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
                 command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
             ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
@@ -827,6 +846,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(
             plugins_frame,
             # Help text in settings
+            # LANG: Tip/label about how to disable plugins
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
         ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
 
@@ -837,6 +857,7 @@ class PreferencesDialog(tk.Toplevel):
             )
             nb.Label(
                 plugins_frame,
+                # LANG: Label on list of enabled plugins
                 text=_('Enabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
@@ -877,6 +898,7 @@ class PreferencesDialog(tk.Toplevel):
             )
             nb.Label(
                 plugins_frame,
+                # LANG: Lable on list of user-disabled plugins
                 text=_('Disabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
@@ -885,6 +907,7 @@ class PreferencesDialog(tk.Toplevel):
                     columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
                 )
 
+        # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
 
     def cmdrchanged(self, event=None):
@@ -1087,7 +1110,7 @@ class PreferencesDialog(tk.Toplevel):
         event.widget.delete(0, tk.END)
         self.hotkey_text.insert(
             0,
-            # No hotkey/shortcut currently defined
+            # LANG: No hotkey/shortcut set
             hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None'))
 
     def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
@@ -1120,7 +1143,8 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn['state'] = tk.NORMAL
 
             else:
-                event.widget.insert(0, _('None'))  # No hotkey/shortcut currently defined
+                # LANG: No hotkey/shortcut set
+                event.widget.insert(0, _('None'))
                 self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
 

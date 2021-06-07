@@ -64,38 +64,39 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     :param file: The path to the file this call node came from
     :return: The first comment that matches the rules, or None
     """
-    out: list[Optional[str]] = []
+    out: Optional[str] = None
     above = call.lineno - 2
     current = call.lineno - 1
 
-    above_line = lines[above].strip() if len(lines) < above else None
+    above_line = lines[above].strip() if len(lines) >= above else None
     current_line = lines[current].strip()
 
+    bad_comment: Optional[str] = None
     for line in (above_line, current_line):
         if line is None or '#' not in line:
-            out.append(None)
             continue
 
         match = COMMENT_RE.match(line)
         if not match:
             print(line)
-            out.append(None)
             continue
 
         comment = match.group(1).strip()
         if not comment.startswith('# LANG:'):
-            print(f'Unknown comment for {file}:{current} {line}', file=sys.stderr)
-            out.append(None)
+            bad_comment = f'Unknown comment for {file}:{current} {line}'
             continue
 
-        out.append(comment.replace('# LANG:', '').strip())
+        out = comment.replace('# LANG:', '').strip()
+        bad_comment = None
+        break
 
-    if out[1] is not None:
-        return out[1]
-    elif out[0] is not None:
-        return out[0]
+    if bad_comment is not None:
+        print(bad_comment, file=sys.stderr)
 
-    return None
+    if out is None:
+        print(f'No comment for {file}:{current} {line}', file=sys.stderr)
+
+    return out
 
 
 def scan_file(path: pathlib.Path) -> list[ast.Call]:
@@ -239,7 +240,10 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
             entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
 
     deduped = dedupe_lang_entries(entries)
-    out = ''
+    out = '''/* Language name */
+"!Language" = "English";
+
+'''
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
@@ -270,8 +274,8 @@ if __name__ == '__main__':
     parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.git'])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
-    group.add_argument('--lang', action='store_true', help='lang file outpot')
-    group.add_argument('--compare-lang')
+    group.add_argument('--lang', help='en.template "strings" output to specified file, "-" for stdout')
+    group.add_argument('--compare-lang', help='en.template file to compare against')
 
     args = parser.parse_args()
 
@@ -310,7 +314,12 @@ if __name__ == '__main__':
         print(json.dumps(to_print_data, indent=2))
 
     elif args.lang:
-        print(generate_lang_template(res))
+        if args.lang == '-':
+            print(generate_lang_template(res))
+
+        else:
+            with open(args.lang, mode='w+', newline='\n') as langfile:
+                langfile.writelines(generate_lang_template(res))
 
     else:
         for path, calls in res.items():

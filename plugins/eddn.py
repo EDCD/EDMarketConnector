@@ -590,7 +590,7 @@ Msg:\n{msg}'''
 
         else:
             # Can't access replay file! Send immediately.
-            self.parent.children['status']['text'] = _('Sending data to EDDN...')
+            self.parent.children['status']['text'] = _('Sending data to EDDN...')  # LANG: Data is being sent to EDDN
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''

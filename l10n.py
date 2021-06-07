@@ -190,6 +190,7 @@ class _Translations:
     def available_names(self) -> Dict[Optional[str], str]:
         """Available language names by code."""
         names: Dict[Optional[str], str] = OrderedDict([
+            # LANG: The system default language choice in Settings > Appearance
             (None, _('Default')),  # Appearance theme and language setting
         ])
         names.update(sorted(
