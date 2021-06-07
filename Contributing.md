@@ -45,6 +45,20 @@ and another for the Pull Request, merging or cherry-picking commits as needed.
 
 ---
 
+## Git commit conventions
+
+* Please use the standard Git convention of a short title in the first line and fuller body text in subsequent lines.
+* Please reference issue numbers using the "hashtag" format #123 in your commit message wherever possible.
+  This lets GitHub create two-way hyperlinks between the issue report and the commit.
+  [Certain text](https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
+  in a PR that fixes an issue can auto-close the issue when the PR is merged.
+  Note the caveats about the extended forms being necessary in some situations.
+* If in doubt, lean towards many small commits. This makes git bisect much more useful.
+* Please try at all costs to avoid a "mixed-up" commit, i.e. one that addresses more than one issue at once.
+  One thing at a time is best.
+
+---
+
 ## Git branch structure and tag conventions
 
 Somewhat based on git-flow, but our particular take on it:
@@ -407,18 +421,6 @@ Please be verbose here, more info about weird choices is always prefered over ma
 
 Additionally, if your hack is over around 5 lines, please include a `# HACK END` or similar comment to indicate the end of the hack.
 
----
-
-## Git commit conventions
-
-* Please use the standard Git convention of a short title in the first line and fuller body text in subsequent lines.
-* Please reference issue numbers using the "hashtag" format #123 in your commit message wherever possible.
-  This lets GitHub create two-way hyperlinks between the issue report and the commit.
-  Certain text in a PR that fixes an issue can auto-close the issue when the PR is merged.
-* If in doubt, lean towards many small commits. This makes git bisect much more useful.
-* Please try at all costs to avoid a "mixed-up" commit, i.e. one that addresses more than one issue at once.
-  One thing at a time is best.
-  
 ---
 
 ## Build process
