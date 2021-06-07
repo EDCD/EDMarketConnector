@@ -7,7 +7,10 @@ vim: textwidth=79 wrapmargin=79
 
 If you are not part of the core development team then you should only be performing work that addresses an open issue.
 
-So, if what you think needs doing isn't currently referred to in an [open issue](https://github.com/EDCD/EDMarketConnector/issues), then you should first [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new/choose) **please use the correct template if applicable**.
+So, if what you think needs doing isn't currently referred to in an
+[open issue](https://github.com/EDCD/EDMarketConnector/issues),
+then you should first [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new/choose).
+**Please use the correct template if applicable**.
 
 ## Check with us first
 
