@@ -1,13 +1,14 @@
 """Search all given paths recursively for localised string calls."""
 import argparse
 import ast
+import dataclasses
 import json
 import pathlib
 import re
 import sys
-import dataclasses
 from typing import Optional
-import io
+
+# spell-checker: words dedupe deduping deduped
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -52,6 +53,17 @@ COMMENT_RE = re.compile(r'^.*?(#.*)$')
 
 
 def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:
+    """
+    Extract comments from source code based on the given call.
+
+    This returns comments on the same line as the call preferentially to comments above.
+    All comments must be prefixed with LANG, ie `# LANG: `
+
+    :param call: The call node to look for comments around.
+    :param lines: The file that the call node came from, as a list of strings where each string is a line.
+    :param file: The path to the file this call node came from
+    :return: The first comment that matches the rules, or None
+    """
     out: list[Optional[str]] = []
     above = call.lineno - 2
     current = call.lineno - 1
@@ -88,7 +100,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
 
 def scan_file(path: pathlib.Path) -> list[ast.Call]:
     """Scan a file for ast.Calls."""
-    data = path.read_text()
+    data = path.read_text(encoding='utf-8')
     lines = data.splitlines()
     parsed = ast.parse(data)
     out: list[ast.Call] = []
@@ -132,9 +144,16 @@ def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] = None) -> dict[
 
 
 def parse_template(path) -> set[str]:
+    """
+    Parse a lang.template file.
+
+    The regexp this uses was extracted from l10n.py.
+
+    :param path: The path to the lang file
+    """
     lang_re = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
     out = set()
-    for line in pathlib.Path(path).read_text().splitlines():
+    for line in pathlib.Path(path).read_text(encoding='utf-8').splitlines():
         match = lang_re.match(line)
         if not match:
             continue
@@ -146,6 +165,8 @@ def parse_template(path) -> set[str]:
 
 @dataclasses.dataclass
 class FileLocation:
+    """FileLocation is the location of a given string in a file."""
+
     path: pathlib.Path
     line_start: int
     line_start_col: int
@@ -154,16 +175,25 @@ class FileLocation:
 
     @staticmethod
     def from_call(path: pathlib.Path, c: ast.Call) -> 'FileLocation':
+        """
+        Create a FileLocation from a Call and Path.
+
+        :param path: Path to the file this FileLocation is in
+        :param c: Call object to extract line information from
+        """
         return FileLocation(path, c.lineno, c.col_offset, c.end_lineno, c.end_col_offset)
 
 
 @dataclasses.dataclass
 class LangEntry:
+    """LangEntry is a single translation that may span multiple files or locations."""
+
     locations: list[FileLocation]
     string: str
     comments: list[Optional[str]]
 
     def files(self) -> str:
+        """Return a string representation of all the files this LangEntry is in, and its location therein."""
         out = ""
         for loc in self.locations:
             start = loc.line_start
@@ -174,13 +204,16 @@ class LangEntry:
         return out
 
 
-def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
-    """Generate a full en.template from the given data."""
-    entries: list[LangEntry] = []
-    for path, calls in data.items():
-        for c in calls:
-            entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
+def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
+    """
+    Deduplicate a list of lang entries.
 
+    This will coalesce LangEntries that have that same string but differing files and comments into a single
+    LangEntry that cotains all comments and FileLocations
+
+    :param entries: The list to deduplicate
+    :return: The deduplicated list
+    """
     deduped: list[LangEntry] = []
     for e in entries:
         cont = False
@@ -195,6 +228,17 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 
         deduped.append(e)
 
+    return deduped
+
+
+def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
+    """Generate a full en.template from the given data."""
+    entries: list[LangEntry] = []
+    for path, calls in data.items():
+        for c in calls:
+            entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
+
+    deduped = dedupe_lang_entries(entries)
     out = ""
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
     for entry in deduped:
