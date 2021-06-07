@@ -94,7 +94,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         print(bad_comment, file=sys.stderr)
 
     if out is None:
-        print(f'No comment for {file}:{current} {line}')
+        print(f'No comment for {file}:{current} {line}', file=sys.stderr)
 
     return out
 
