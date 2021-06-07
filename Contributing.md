@@ -265,12 +265,12 @@ No:
   return
 ```
 
-### Use Type hints
+## Use Type hints
 
 Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,
 both their arguments and return types.
 
-### Use `logging` not `print()`, and definitely not `sys.stdout.write()`
+## Use `logging` not `print()`, and definitely not `sys.stdout.write()`
 
 `EDMarketConnector.py` sets up a `logging.Logger` for this under the
 `appname`, so:
@@ -312,7 +312,7 @@ exception*.  e.g. Logging will know you were in your `get_foo()` function
 but you should still tell it what actually (failed to have) happened
 in there.
 
-### Prefer fstrings to modulo-formatting and .format
+## Prefer fstrings to modulo-formatting and .format
 
 [fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
 than more opaque formatting calls.
@@ -320,12 +320,12 @@ than more opaque formatting calls.
 As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
 literals.
 
-### Docstrings
+## Docstrings
 
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
-### Mark hacks and workarounds with a specific comment
+## Mark hacks and workarounds with a specific comment
 
 We often write hacks or workarounds to make EDMC work on a given version or around a specific bug.
 Please mark all hacks, workarounds, magic with one of the following comments, where applicable:
