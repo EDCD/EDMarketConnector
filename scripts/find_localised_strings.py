@@ -239,9 +239,9 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
             entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
 
     deduped = dedupe_lang_entries(entries)
-    out = '''
-/* Language name */
+    out = '''/* Language name */
 "!Language" = "English";
+
 '''
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
     for entry in deduped:
