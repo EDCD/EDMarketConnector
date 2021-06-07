@@ -142,13 +142,13 @@ In all cases the branch should be named as per the scheme `<class>/<issue number
    succinct for `<title>`, it's just there for easy reference, it doesn't need to be the entire title of
    the appropriate issue.
 
-Which branch you base your work on will depend on which class of WIP it is.  If you're fixing a bug in the latest
+The branch you base your work on will depend on which class of WIP it is.  If you're fixing a bug in the latest
 `stable` then it's best to base your branch on its HEAD.  If it's a fix for a beta release then base off of `beta`'s
 HEAD.  If you're working on a new feature then you'd want to base the work on `develop`'s HEAD.
 
 **Important**: Please *under no circumstance* merge *from* the source branch after you have started work in
 your WIP branch.  If there are any non-trivial conflicts when we merge your Pull Request then we might ask you
-to rebase your WIP branch on the latest version of the source branch.  Otherwise we'll work out how to best
+to *rebase* your WIP branch on the latest version of the source branch.  Otherwise, we'll work out how to best
 merge your changes via comments in the Pull Request.
 
 ## Linting
