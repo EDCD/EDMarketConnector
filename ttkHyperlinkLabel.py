@@ -38,7 +38,8 @@ class HyperlinkLabel(platform == 'darwin' and tk.Label or ttk.Label, object):
         self.bind('<Button-1>', self._click)
 
         self.menu = tk.Menu(None, tearoff=tk.FALSE)
-        self.menu.add_command(label=_('Copy'), command = self.copy)	# As in Copy and Paste
+        # LANG: Label for 'Copy' as in 'Copy and Paste'
+        self.menu.add_command(label=_('Copy'), command = self.copy)  # As in Copy and Paste
         self.bind(platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
 
         self.bind('<Enter>', self._enter)

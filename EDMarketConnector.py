@@ -702,7 +702,7 @@ class AppWindow(object):
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
-        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Main window
+        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Label for commander name in main window
         # LANG: 'Ship' or multi-crew role label in main window, as applicable
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
         self.suit_label['text'] = _('Suit') + ':'  # LANG: Main window
