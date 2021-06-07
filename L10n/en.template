@@ -589,6 +589,9 @@
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "UI Scale Percentage";
 
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:698; */
+"Error: Check E:D journal file location" = "Error: Check E:D journal file location";
+
 /* General 'Unknown', e.g. suit loadout */
 "Unknown" = "Unknown";
 
