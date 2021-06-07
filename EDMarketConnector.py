@@ -703,7 +703,7 @@ class AppWindow(object):
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
         self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Main window
-        # Multicrew role label in main window
+        # LANG: 'Ship' or multi-crew role label in main window, as applicable
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
         self.suit_label['text'] = _('Suit') + ':'  # LANG: Main window
         self.system_label['text'] = _('System') + ':'  # LANG: Main window
@@ -764,7 +764,7 @@ class AppWindow(object):
         self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
-                # Successfully authenticated with the Frontier website
+                # LANG: Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
 
                 if platform == 'darwin':
@@ -795,6 +795,7 @@ class AppWindow(object):
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
+                    # LANG: Player is not docked at a station, when we expect them to be
                     self.status['text'] = _("You're not docked at a station!")
                     return False
 
@@ -862,17 +863,21 @@ class AppWindow(object):
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
+                # LANG: No data was returned for the commander from the Frontier CAPI
                 err = self.status['text'] = _('CAPI: No commander data returned')
 
             elif not data.get('commander', {}).get('name'):
+                # LANG: We didn't have the commander name when we should have
                 err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
                       and not data.get('lastStarport', {}).get('name'))):
+                # LANG: We don't know where the commander is, when we should
                 err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
+                # LANG: We don't know what ship the commander is in, when we should
                 err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
@@ -980,6 +985,7 @@ class AppWindow(object):
             play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
+            # LANG: Time when we last obtained Frontier CAPI data
             self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
 
         if play_sound and play_bad:
@@ -1438,6 +1444,7 @@ class AppWindow(object):
             config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
+        # LANG: The application is shutting down
         self.status['text'] = _('Shutting down...')
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
