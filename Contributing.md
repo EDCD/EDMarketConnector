@@ -380,11 +380,16 @@ In addition to that we utilise one of the user-defined levels as:
 
 ## Use fstrings, not modulo-formatting or .format
 
-[fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
-than more opaque formatting calls.
+[fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6,
+and allow for string interpolation rather than more opaque formatting calls.
 
-As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
-literals.
+As part of our flake8 linting setup we have included a linter that warns when
+you use `%` on string literals.
+
+`.format()` won't throw flake8 errors, **but only because it's still the 
+best way to handle [untranslated words](./docs/Translations.md#call-_)
+in otherwise translated phrases**.  Thus, we allow this, and only this, use of
+`.format()` for strings.
 
 ---
 
