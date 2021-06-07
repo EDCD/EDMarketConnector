@@ -378,7 +378,7 @@ In addition to that we utilise one of the user-defined levels as:
 
 ---
 
-## Prefer fstrings to modulo-formatting and .format
+## Use fstrings, not modulo-formatting or .format
 
 [fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
 than more opaque formatting calls.
