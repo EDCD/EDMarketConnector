@@ -20,19 +20,19 @@ def get_func_name(thing: ast.AST) -> str:
         return get_func_name(thing.value)
 
     else:
-        return ""
+        return ''
 
 
 def get_arg(call: ast.Call) -> str:
     """Extract the argument string to the translate function."""
     if len(call.args) > 1:
-        print("??? > 1 args", call.args, file=sys.stderr)
+        print('??? > 1 args', call.args, file=sys.stderr)
 
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
         return arg.value
     elif isinstance(arg, ast.Name):
-        return f"VARIABLE! CHECK CODE! {arg.id}"
+        return f'VARIABLE! CHECK CODE! {arg.id}'
     else:
         return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
 
@@ -42,7 +42,7 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
     out = []
     for n in ast.iter_child_nodes(statement):
         out.extend(find_calls_in_stmt(n))
-    if isinstance(statement, ast.Call) and get_func_name(statement.func) == "_":
+    if isinstance(statement, ast.Call) and get_func_name(statement.func) == '_':
 
         out.append(statement)
 
@@ -83,12 +83,12 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
             continue
 
         comment = match.group(1).strip()
-        if not comment.startswith("# LANG:"):
+        if not comment.startswith('# LANG:'):
             print(f'Unknown comment for {file}:{current} {line}', file=sys.stderr)
             out.append(None)
             continue
 
-        out.append(comment.replace("# LANG:", "").strip())
+        out.append(comment.replace('# LANG:', '').strip())
 
     if out[1] is not None:
         return out[1]
@@ -110,7 +110,7 @@ def scan_file(path: pathlib.Path) -> list[ast.Call]:
 
     # see if we can extract any comments
     for call in out:
-        setattr(call, "comment", extract_comments(call, lines, path))
+        setattr(call, 'comment', extract_comments(call, lines, path))
 
     out.sort(key=lambda c: c.lineno)
     return out
@@ -157,7 +157,7 @@ def parse_template(path) -> set[str]:
         match = lang_re.match(line)
         if not match:
             continue
-        if match.group(1) != "!Language":
+        if match.group(1) != '!Language':
             out.add(match.group(1))
 
     return out
@@ -194,7 +194,7 @@ class LangEntry:
 
     def files(self) -> str:
         """Return a string representation of all the files this LangEntry is in, and its location therein."""
-        out = ""
+        out = ''
         for loc in self.locations:
             start = loc.line_start
             end = loc.line_end
@@ -239,12 +239,12 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
             entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
 
     deduped = dedupe_lang_entries(entries)
-    out = ""
+    out = ''
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
-        comment = ""
-        files = "In files: " + entry.files()
+        comment = ''
+        files = 'In files: ' + entry.files()
         string = f'"{entry.string}"'
 
         for i in range(len(entry.comments)):
@@ -259,15 +259,15 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
         header = f'{comment.strip()} {files}'.strip()
         out += f'/* {header} */\n'
         out += f'{string} = {string};\n'
-        out += "\n"
+        out += '\n'
 
     return out
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--directory", help="Directory to search from", default=".")
-    parser.add_argument("--ignore", action='append', help="directories to ignore", default=["venv", ".git"])
+    parser.add_argument('--directory', help='Directory to search from', default='.')
+    parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.git'])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
     group.add_argument('--lang', action='store_true', help='lang file outpot')
@@ -288,22 +288,22 @@ if __name__ == '__main__':
                 if arg in template:
                     seen.add(arg)
                 else:
-                    print(f"NEW! {file}:{c.lineno}: {arg!r}")
+                    print(f'NEW! {file}:{c.lineno}: {arg!r}')
 
         for old in set(template) ^ seen:
-            print(f"No longer used: {old}")
+            print(f'No longer used: {old}')
 
     elif args.json:
         to_print_data = [
             {
-                "path": str(path),
-                "string": get_arg(c),
-                "reconstructed": ast.unparse(c),
-                "start_line": c.lineno,
-                "start_offset": c.col_offset,
-                "end_line": c.end_lineno,
-                "end_offset": c.end_col_offset,
-                "comment": getattr(c, "comment", None)
+                'path': str(path),
+                'string': get_arg(c),
+                'reconstructed': ast.unparse(c),
+                'start_line': c.lineno,
+                'start_offset': c.col_offset,
+                'end_line': c.end_lineno,
+                'end_offset': c.end_col_offset,
+                'comment': getattr(c, 'comment', None)
             } for (path, calls) in res.items() for c in calls
         ]
 
@@ -320,7 +320,7 @@ if __name__ == '__main__':
             print(path)
             for c in calls:
                 print(
-                    f"    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t", ast.unparse(c)
+                    f'    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t', ast.unparse(c)
                 )
 
             print()
