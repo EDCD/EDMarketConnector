@@ -265,12 +265,12 @@ No:
   return
 ```
 
-### Use Type hints
+## Use Type hints
 
 Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,
 both their arguments and return types.
 
-### Use `logging` not `print()`, and definitely not `sys.stdout.write()`
+## Use `logging` not `print()`, and definitely not `sys.stdout.write()`
 
 `EDMarketConnector.py` sets up a `logging.Logger` for this under the
 `appname`, so:
@@ -312,7 +312,44 @@ exception*.  e.g. Logging will know you were in your `get_foo()` function
 but you should still tell it what actually (failed to have) happened
 in there.
 
-### Prefer fstrings to modulo-formatting and .format
+### Use the appropriate logging level
+You must ensure necessary information is always in the log files, but 
+not so much that it becomes more difficult to discern important information 
+when diagnosing an issue.
+
+`logging`, and thus our `logger` instances provide functions of the 
+following names:
+
+- `info` - For general messages that don't occur too often outside of startup 
+  and shutdown.
+- `warning` - An error has been detected, but it doesn't impact continuing 
+  functionality.  In particular **use this when logging errors from 
+  external services**.  This would include where we detected a known issue 
+  with Frontier-supplied data.  A currently unknown issue *may* end up 
+  triggering logging at `error` level or above.
+- `error` - An error **in our code** has occurred.  The application might be 
+  able to continue, but we want to make it obvious there's a bug that we 
+  need to fix.
+- `critical` - An error has occurred **in our code** that impacts the 
+  continuation of the current process.
+- `debug` - Information about code flow and data that is occurs too often
+  to be at `info` level.  Keep in mind our *default* logging level is DEBUG,
+  but users can change it for the
+  [plain log file](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#plain-log-file),
+  but the
+  [debug log giles](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
+  are always at least at DEBUG level.
+  
+In addition to that we utilise one of the user-defined levels as:
+
+- `trace` - This is a custom log level intended for debug messages which 
+  occur even more often and would cause too much log output for even 
+  'normal' debug use. 
+  In general only developers will set this log level, but we do supply a
+  command-line argument and `.bat` file for users to enable it.  It cannot be
+  selected from Settings in the UI.
+
+## Prefer fstrings to modulo-formatting and .format
 
 [fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
 than more opaque formatting calls.
@@ -320,12 +357,12 @@ than more opaque formatting calls.
 As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
 literals.
 
-### Docstrings
+## Docstrings
 
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
-### Mark hacks and workarounds with a specific comment
+## Mark hacks and workarounds with a specific comment
 
 We often write hacks or workarounds to make EDMC work on a given version or around a specific bug.
 Please mark all hacks, workarounds, magic with one of the following comments, where applicable:
