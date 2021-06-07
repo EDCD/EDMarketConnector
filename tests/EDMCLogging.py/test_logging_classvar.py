@@ -40,6 +40,6 @@ def test_class_logger(caplog: 'LogCaptureFixture') -> None:
     log_stuff('test3')  # type: ignore # its there
 
     # Dont move these, it relies on the line numbres.
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:37 test' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test2' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:25 test3' in caplog.text
+    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test' in caplog.text
+    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:39 test2' in caplog.text
+    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:26 test3' in caplog.text
