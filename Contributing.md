@@ -393,6 +393,9 @@ literals.
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
+Lack of docstrings, or them not passing some checks, *will* cause a flake8 
+failure in our setup.
+
 ---
 
 ## Comments
