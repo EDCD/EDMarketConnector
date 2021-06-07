@@ -414,7 +414,7 @@ class AppWindow(object):
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
-        # Update button in main window
+        # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
@@ -626,7 +626,7 @@ class AppWindow(object):
             return
 
         if (suit := monitor.state.get('SuitCurrent')) is None:
-            self.suit['text'] = f'<{_("Unknown")}>'
+            self.suit['text'] = f'<{_("Unknown")}>'  # LANG: Unknown suit
             return
 
         suitname = suit['edmcName']
@@ -701,48 +701,49 @@ class AppWindow(object):
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
-        self.cmdr_label['text'] = _('Cmdr') + ':'  # Main window
+        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Main window
         # Multicrew role label in main window
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
-        self.suit_label['text'] = _('Suit') + ':'  # Main window
-        self.system_label['text'] = _('System') + ':'  # Main window
-        self.station_label['text'] = _('Station') + ':'  # Main window
-        self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
+        self.suit_label['text'] = _('Suit') + ':'  # LANG: Main window
+        self.system_label['text'] = _('System') + ':'  # LANG: Main window
+        self.station_label['text'] = _('Station') + ':'  # LANG: Main window
+        self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
         if platform == 'darwin':
-            self.menubar.entryconfigure(1, label=_('File'))  # Menu title
-            self.menubar.entryconfigure(2, label=_('Edit'))  # Menu title
-            self.menubar.entryconfigure(3, label=_('View'))  # Menu title on OSX
-            self.menubar.entryconfigure(4, label=_('Window'))  # Menu title on OSX
-            self.menubar.entryconfigure(5, label=_('Help'))  # Menu title
-            self.system_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))  # App menu entry on OSX
-            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # Menu item
-            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # Menu item
-            self.view_menu.entryconfigure(0, label=_('Status'))  # Menu item
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # Help menu item
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # Help menu item
+            self.menubar.entryconfigure(1, label=_('File'))  # LANG: Menu title on OSX
+            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: Menu title on OSX
+            self.menubar.entryconfigure(3, label=_('View'))  # LANG: Menu title on OSX
+            self.menubar.entryconfigure(4, label=_('Window'))  # LANG: Menu title on OSX
+            self.menubar.entryconfigure(5, label=_('Help'))  # LANG: Menu title on OSX
+            self.system_menu.entryconfigure(0, label=_("About {APP}").format(
+                APP=applongname))  # LANG: App menu entry on OSX
+            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Menu item
+            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: Menu item
+            self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: Menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help menu item
         else:
-            self.menubar.entryconfigure(1, label=_('File'))  # Menu title
-            self.menubar.entryconfigure(2, label=_('Edit'))  # Menu title
-            self.menubar.entryconfigure(3, label=_('Help'))  # Menu title
-            self.theme_file_menu['text'] = _('File')  # Menu title
-            self.theme_edit_menu['text'] = _('Edit')  # Menu title
-            self.theme_help_menu['text'] = _('Help')  # Menu title
+            self.menubar.entryconfigure(1, label=_('File'))  # LANG: Menu title
+            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: Menu title
+            self.menubar.entryconfigure(3, label=_('Help'))  # LANG: Menu title
+            self.theme_file_menu['text'] = _('File')  # LANG: Menu title
+            self.theme_edit_menu['text'] = _('Edit')  # LANG: Menu title
+            self.theme_help_menu['text'] = _('Help')  # LANG: Menu title
 
             # File menu
-            self.file_menu.entryconfigure(0, label=_('Status'))  # Menu item
-            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # Menu item
-            self.file_menu.entryconfigure(2, label=_('Settings'))  # Item in the File menu on Windows
-            self.file_menu.entryconfigure(4, label=_('Exit'))  # Item in the File menu on Windows
+            self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: Menu item
+            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: Menu item
+            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: Item in the File menu on Windows
+            self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: Item in the File menu on Windows
 
             # Help menu
-            self.help_menu.entryconfigure(0, label=_('Documentation'))  # Help menu item
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # Help menu item
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # Help menu item
-            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))  # Menu item
-            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # App menu entry
+            self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help menu item
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help menu item
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help menu item
+            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))  # LANG: Menu item
+            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # LANG: App menu entry
 
         # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # As in Copy and Paste
+        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: As in Copy and Paste
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
@@ -1004,9 +1005,9 @@ class AppWindow(object):
             return {
                 None:         '',
                 'Idle':       '',
-                'FighterCon': _('Fighter'),  # Multicrew role
-                'FireCon':    _('Gunner'),  # Multicrew role
-                'FlightCon':  _('Helm'),  # Multicrew role
+                'FighterCon': _('Fighter'),  # LANG: Multicrew role
+                'FireCon':    _('Gunner'),  # LANG: Multicrew role
+                'FlightCon':  _('Helm'),  # LANG: Multicrew role
             }.get(role, role)
 
         if monitor.thread is None:
@@ -1024,7 +1025,7 @@ class AppWindow(object):
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
                 self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
-                self.ship_label['text'] = _('Role') + ':'  # Multicrew role label in main window
+                self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
@@ -1034,7 +1035,7 @@ class AppWindow(object):
                 else:
                     self.cmdr['text'] = monitor.cmdr
 
-                self.ship_label['text'] = _('Ship') + ':'  # Main window
+                self.ship_label['text'] = _('Ship') + ':'  # LANG: Main window
 
                 # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
@@ -1057,7 +1058,7 @@ class AppWindow(object):
 
             else:
                 self.cmdr['text'] = ''
-                self.ship_label['text'] = _('Ship') + ':'  # Main window
+                self.ship_label['text'] = _('Ship') + ':'  # LANG: Main window
                 self.ship['text'] = ''
 
             if monitor.cmdr and monitor.is_beta:
@@ -1166,7 +1167,7 @@ class AppWindow(object):
         """
         try:
             companion.session.auth_callback()
-            # Successfully authenticated with the Frontier website
+            # LANG: Successfully authenticated with the Frontier website
             self.status['text'] = _('Authentication successful')
             if platform == 'darwin':
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
@@ -1254,7 +1255,7 @@ class AppWindow(object):
             self.w.after(1000, self.cooldown)
 
         else:
-            self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
+            self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
                                                                  monitor.mode and
                                                                  not monitor.state['Captain'] and
@@ -1730,6 +1731,7 @@ sys.path: {sys.path}'''
             )
 
             # Substitute in the other words.
+            # LANG: words for use in python 2 plugin error
             popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'),
                                            DISABLED='.disabled')
             # And now we do need these to be actual \r\n
