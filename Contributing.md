@@ -319,6 +319,8 @@ except Exception as e:  # Try to be more specific
     from EDMarketConnector import logger
 ```
 
+Setting up [logging in plugins](./PLUGINS.md#logging) is slightly different.
+
 We have implemented a `logging.Filter` that adds support for the following
 in `logging.Formatter()` strings:
 
