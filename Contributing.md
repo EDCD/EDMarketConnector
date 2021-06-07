@@ -231,11 +231,13 @@ Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/cont
 
 ## Coding Conventions
 
-### In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
+In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
-### Adhere to the spelling conventions of the libraries and modules used in the project
+Adhere to the spelling conventions of the libraries and modules used in the 
+project.
 
-Yes, this means using 'color' rather than 'colour', and in general will mean US, not British, spellings.
+Yes, this means using 'color' rather than 'colour', and in general will mean
+US, not British, spellings.
 
 ---
 
