@@ -1,6 +1,7 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
+import pathlib
 import queue
 import re
 import threading
@@ -912,43 +913,60 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type in ('BackPack', 'Backpack'):  # WORKAROUND 4.0.0.200: BackPack becomes Backpack
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
-                with open(join(self.currentdir, 'Backpack.json'), 'rb') as backpack:  # type: ignore
+                backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
+                backpack_data = None
+
+                if not backpack_file.exists():
+                    logger.warning(f'Failed to find backpack.json file as it appears not to exist? {backpack_file=}')
+
+                else:
+                    backpack_data = backpack_file.read_bytes()
+
+                parsed = None
+
+                if backpack_data is None:
+                    logger.warning('Unable to read backpack data!')
+
+                elif len(backpack_data) == 0:
+                    logger.warning('Backpack.json was empty when we read it!')
+
+                else:
                     try:
-                        # Preserve property order because why not?
-                        entry = json.load(backpack, object_pairs_hook=OrderedDict)
+                        parsed = json.loads(backpack_data)
 
                     except json.JSONDecodeError:
-                        logger.exception('Failed decoding Backpack.json', exc_info=True)
+                        logger.exception('Unable to parse Backpack.json')
 
-                    else:
-                        # Store in monitor.state
-                        self.state['BackpackJSON'] = entry
+                if parsed is not None:
+                    entry = parsed  # set entry so that it ends up in plugins with the right data
+                    # Store in monitor.state
+                    self.state['BackpackJSON'] = entry
 
-                        # Assume this reflects the current state when written
-                        self.state['BackPack']['Component'] = defaultdict(int)
-                        self.state['BackPack']['Consumable'] = defaultdict(int)
-                        self.state['BackPack']['Item'] = defaultdict(int)
-                        self.state['BackPack']['Data'] = defaultdict(int)
+                    # Assume this reflects the current state when written
+                    self.state['BackPack']['Component'] = defaultdict(int)
+                    self.state['BackPack']['Consumable'] = defaultdict(int)
+                    self.state['BackPack']['Item'] = defaultdict(int)
+                    self.state['BackPack']['Data'] = defaultdict(int)
 
-                        clean_components = self.coalesce_cargo(entry['Components'])
-                        self.state['BackPack']['Component'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
-                        )
+                    clean_components = self.coalesce_cargo(entry['Components'])
+                    self.state['BackPack']['Component'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
+                    )
 
-                        clean_consumables = self.coalesce_cargo(entry['Consumables'])
-                        self.state['BackPack']['Consumable'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
-                        )
+                    clean_consumables = self.coalesce_cargo(entry['Consumables'])
+                    self.state['BackPack']['Consumable'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
+                    )
 
-                        clean_items = self.coalesce_cargo(entry['Items'])
-                        self.state['BackPack']['Item'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
-                        )
+                    clean_items = self.coalesce_cargo(entry['Items'])
+                    self.state['BackPack']['Item'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                    )
 
-                        clean_data = self.coalesce_cargo(entry['Data'])
-                        self.state['BackPack']['Data'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
-                        )
+                    clean_data = self.coalesce_cargo(entry['Data'])
+                    self.state['BackPack']['Data'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
+                    )
 
             elif event_type == 'BackpackChange':
                 # Changes to Odyssey Backpack contents *other* than from a Transfer
