@@ -980,7 +980,7 @@ class AppWindow(object):
             self.login()
 
         except companion.ServerConnectionError as e:
-            logger.debug(f'Exception while contacting server: {e}')
+            logger.warning(f'Exception while contacting server: {e}')
             err = self.status['text'] = str(e)
             play_bad = True
 

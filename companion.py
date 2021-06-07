@@ -542,7 +542,7 @@ class Session(object):
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
-            logger.debug(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
+            logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
             raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
 
         except Exception as e:
