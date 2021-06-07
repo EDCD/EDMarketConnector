@@ -223,6 +223,8 @@ Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/cont
 
 Yes, this means using 'color' rather than 'colour', and in general will mean US, not British, spellings.
 
+---
+
 ## Control flow
 
 Never oneline any control flow (`if`, `else`, `for`), as it makes spotting what happens next difficult.
@@ -268,10 +270,14 @@ No:
   return
 ```
 
+---
+
 ## Use Type hints
 
 Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,
 both their arguments and return types.
+
+---
 
 ## Use `logging` not `print()`, and definitely not `sys.stdout.write()`
 
@@ -352,6 +358,8 @@ In addition to that we utilise one of the user-defined levels as:
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
 
+---
+
 ## Prefer fstrings to modulo-formatting and .format
 
 [fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
@@ -360,10 +368,14 @@ than more opaque formatting calls.
 As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
 literals.
 
+---
+
 ## Docstrings
 
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
+
+---
 
 ## Comments
 
