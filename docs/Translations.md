@@ -13,7 +13,7 @@ If you add any new strings that appear in the application UI, e.g. new configura
 
 If you need to specify something in the text that shouldn't be translated then use the form:
 
-	_('Some text with a {WORD} not translated'.format(WORD='word'))
+	_('Some text with a {WORD} not translated').format(WORD='word')
 This way 'word' will always be used literally.
 
 Next you will need to edit `L10n/en.template` to add the phrase:
