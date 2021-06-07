@@ -7,7 +7,10 @@ vim: textwidth=79 wrapmargin=79
 
 If you are not part of the core development team then you should only be performing work that addresses an open issue.
 
-So, if what you think needs doing isn't currently referred to in an [open issue](https://github.com/EDCD/EDMarketConnector/issues), then you should first [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new/choose) **please use the correct template if applicable**.
+So, if what you think needs doing isn't currently referred to in an
+[open issue](https://github.com/EDCD/EDMarketConnector/issues),
+then you should first [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new/choose).
+**Please use the correct template if applicable**.
 
 ## Check with us first
 
@@ -20,22 +23,39 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 ---
 
-## Version conventions
+## General workflow
 
-Please see [Version Strings](docs/Releasing.md#version-strings)
-for a description of the currently used version strings.
+1. You will need a GitHub account.
+1. Fork the repository on GitHub into your account there (hereafter referred to as 'your fork').
+1. In your local copy of *your* fork create an appropriate WIP branch.
+1. Develop the changes, testing as you go (no we don't have any actual tests yet).
+    1. Be as sure as you can that the code works as you intend and hasn't introduced any other bugs or regressions.
+    1. Test the codebase as a whole against any unit tests that do exist, and add your own as you can.
+    1. Check your code against flake8 periodically.
+1. When you're sure the work is final:
+    1. Push your WIP branch to your fork (you probably should have been doing this as you worked as a form of backup).
+    1. Access the WIP branch on your fork on GitHub and create a Pull Request.  Mention any Issue number(s) that it
+       addresses.
+1. Await feedback in the form of comments on the Pull Request.
 
-Historically a `A.BC` form was used, based on an internal `A.B.C.D` version
-string.  This was changed to simply `A.B.C.D` throughout for `4.0.0.0`,
-`4.0.1.0` and `4.0.2.0`.  It would also continue for any other increment of
-only the 'C' (Patch) component.
+**IMPORTANT**: Once you have created the Pull Request *any changes you make to that WIP branch and push to your fork
+will be reflected in the Pull Request*.  Ensure that *only* the changes for the issue(s) you are addressing are in
+the WIP branch.  Any other work should occur in its own separate WIP branch.  If needs be make one branch to work in
+and another for the Pull Request, merging or cherry-picking commits as needed.
 
-Going forwards we will always use the full [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
-and 'folder style' tag names, e.g. `Release/Major.Minor.Patch`.
+---
 
-Currently the only file that defines the version code-wise is `config.py`.
-`Changelog.md` and `edmarketconnector.xml` are another matter handled as part
-of [the release process](docs/Releasing.md#distribution).
+## Git commit conventions
+
+* Please use the standard Git convention of a short title in the first line and fuller body text in subsequent lines.
+* Please reference issue numbers using the "hashtag" format #123 in your commit message wherever possible.
+  This lets GitHub create two-way hyperlinks between the issue report and the commit.
+  [Certain text](https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
+  in a PR that fixes an issue can auto-close the issue when the PR is merged.
+  Note the caveats about the extended forms being necessary in some situations.
+* If in doubt, lean towards many small commits. This makes git bisect much more useful.
+* Please try at all costs to avoid a "mixed-up" commit, i.e. one that addresses more than one issue at once.
+  One thing at a time is best.
 
 ---
 
@@ -43,15 +63,15 @@ of [the release process](docs/Releasing.md#distribution).
 
 Somewhat based on git-flow, but our particular take on it:
 
-## Branches
+### Branches
 
-### `stable`
+#### `stable`
 
 This will either have `HEAD` pointing to the latest stable release code *or* might have extra code merged in for a
 hotfix that will shortly be in the next stable release. If you want the latest stable release code then use the
 appropriate `Release/A.B.C` tag!
 
-### `beta`
+#### `beta`
 
 If we run any pre-release betas *with actual builds released, not
 just a branch to be run from source*, then this branch will contain that
@@ -61,13 +81,13 @@ to be sure of the code you checkout.
 *If there hasn't yet been a new beta version this could be far behind all
 of: `main`, `develop`, `stable`.*
 
-### `develop`
+#### `develop`
 
 This is the branch where all current development is integrated.  No commits should be made directly
 to this as the work should be done in a separate branch used in a Pull Request before being merged as part of
 resolving that Pull Request.
 
-### `main`
+#### `main`
 
 Yes, we've renamed this from `master`.  See
 "[Using 'main' as the primary branch in Git](https://github.com/EDCD/EDMarketConnector/wiki/Git-Using-Main-Branch)"
@@ -76,11 +96,11 @@ for instructions on ensuring you're cleanly using it in any local clone.
   This branch should contain anything from `develop` that is considered well
     tested and ready for the next `stable` merge.
 
-### `master`
+#### `master`
 
  **This is no longer used.  If the branch is even present then it's no longer updated.  You should be using `main` instead.**
 
-### `releases`
+#### `releases`
 
 Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
@@ -88,14 +108,42 @@ but some care will be necessary to ensure no users are left behind (their client
 then no longer exists).  For the time being this should always be kept in sync with `stable` as each new release is
 made.
 
-## Tags
+### Work in progress conventions
 
-### Stable Releases
+Remember, you should always be working versus a single issue, even if the work is part of a Milestone or Project.
+There might be cases where issues aren't duplicates, but your work still addresses more than one.  In that case
+pick one for the naming scheme below, but mention all in commit messages and the Pull Request.
+
+In all cases the branch should be named as per the scheme `<class>/<issue number>/<title>`:
+
+* `<class>` - We have several classes of WIP branch:
+    * `fix` - For working on bug fixes, e.g. `fix/184/crash-in-startup`
+    * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192/add-thing-to-wotsit`
+    * `feature` - For working on *new* features, e.g. `feature/284/allow-users-to-frob`
+
+* `<issue-number>` is for easy reference when citing the issue number in commit messages.  If you're somehow doing
+  work that's not versus an issue then don't put the `<issue number>-` part in.
+* `<title>` is intended to allow anyone to quickly know what the branch is addressing.  Try to choose something
+  succinct for `<title>`, it's just there for easy reference, it doesn't need to be the entire title of
+  the appropriate issue.
+
+The branch you base your work on will depend on which class of WIP it is.  If you're fixing a bug in the latest
+`stable` then it's best to base your branch on its HEAD.  If it's a fix for a beta release then base off of `beta`'s
+HEAD.  If you're working on a new feature then you'd want to base the work on `develop`'s HEAD.
+
+**Important**: Please *under no circumstance* merge *from* the source branch after you have started work in
+your WIP branch.  If there are any non-trivial conflicts when we merge your Pull Request then we might ask you
+to *rebase* your WIP branch on the latest version of the source branch.  Otherwise, we'll work out how to best
+merge your changes via comments in the Pull Request.
+
+### Tags
+
+#### Stable Releases
 
 All stable releases **MUST** have a tag of the form `Release/Major.Minor.Patch`
 on the commit that was `HEAD` when the installer for it was built.
 
-### Pre-Releases
+#### Pre-Releases
 
 Tags for pre-releases should be of one of two forms, following [Version
  Strings](docs/Releasing.md#version-strings) conventions.
@@ -120,33 +168,24 @@ The Semantic Versioning `+<build metadata>` should never be a part of the tag.
 
 ---
 
-## Work in progress conventions
+## Version conventions
 
-Remember, you should always be working versus a single issue, even if the work is part of a Milestone or Project.
-There might be cases where issues aren't duplicates, but your work still addresses more than one.  In that case
-pick one for the naming scheme below, but mention all in commit messages and the Pull Request.
+Please see [Version Strings](docs/Releasing.md#version-strings)
+for a description of the currently used version strings.
 
-In all cases the branch should be named as per the scheme `<class>/<issue number>-<title>`:
+Historically a `A.BC` form was used, based on an internal `A.B.C.D` version
+string.  This was changed to simply `A.B.C.D` throughout for `4.0.0.0`,
+`4.0.1.0` and `4.0.2.0`.  It would also continue for any other increment of
+only the 'C' (Patch) component.
 
-* `<class>` - We have several classes of WIP branch:
-  * `fix` - For working on bug fixes, e.g. `fix/184-crash-in-startup`
-  * `enhancement` - For enhancing an *existing* feature, e.g. `enhancement/192-add-thing-to-wotsit`
-  * `feature` - For working on *new* features, e.g. `feature/284-allow-users-to-frob`
+Going forwards we will always use the full [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+and 'folder style' tag names, e.g. `Release/Major.Minor.Patch`.
 
-* `<issue-number>` is for easy reference when citing the issue number in commit messages.  If you're somehow doing
-  work that's not versus an issue then don't put the `<issue number>-` part in.
-* `<title>` is intended to allow anyone to quickly know what the branch is addressing.  Try to choose something
-   succinct for `<title>`, it's just there for easy reference, it doesn't need to be the entire title of
-   the appropriate issue.
+Currently the only file that defines the version code-wise is `config.py`.
+`Changelog.md` and `edmarketconnector.xml` are another matter handled as part
+of [the release process](docs/Releasing.md#distribution).
 
-Which branch you base your work on will depend on which class of WIP it is.  If you're fixing a bug in the latest
-`stable` then it's best to base your branch on its HEAD.  If it's a fix for a beta release then base off of `beta`'s
-HEAD.  If you're working on a new feature then you'd want to base the work on `develop`'s HEAD.
-
-**Important**: Please *under no circumstance* merge *from* the source branch after you have started work in
-your WIP branch.  If there are any non-trivial conflicts when we merge your Pull Request then we might ask you
-to rebase your WIP branch on the latest version of the source branch.  Otherwise we'll work out how to best
-merge your changes via comments in the Pull Request.
+---
 
 ## Linting
 
@@ -190,35 +229,17 @@ Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/cont
 
 ---
 
-## General workflow
-
-1. You will need a GitHub account.
-1. Fork the repository on GitHub into your account there (hereafter referred to as 'your fork').
-1. In your local copy of *your* fork create an appropriate WIP branch.
-1. Develop the changes, testing as you go (no we don't have any actual tests yet).
-    1. Be as sure as you can that the code works as you intend and hasn't introduced any other bugs or regressions.
-    1. Test the codebase as a whole against any unit tests that do exist, and add your own as you can.
-    1. Check your code against flake8 periodically.
-1. When you're sure the work is final:
-    1. Push your WIP branch to your fork (you probably should have been doing this as you worked as a form of backup).
-    1. Access the WIP branch on your fork on GitHub and create a Pull Request.  Mention any Issue number(s) that it
-    addresses.
-1. Await feedback in the form of comments on the Pull Request.
-
-**IMPORTANT**: Once you have created the Pull Request *any changes you make to that WIP branch and push to your fork
-will be reflected in the Pull Request*.  Ensure that *only* the changes for the issue(s) you are addressing are in
-the WIP branch.  Any other work should occur in its own separate WIP branch.  If needs be make one branch to work in
-and another for the Pull Request, merging or cherry-picking commits as needed.
-
----
-
 ## Coding Conventions
 
-### In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
+In general, please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
-### Adhere to the spelling conventions of the libraries and modules used in the project
+Adhere to the spelling conventions of the libraries and modules used in the 
+project.
 
-Yes, this means using 'color' rather than 'colour', and in general will mean US, not British, spellings.
+Yes, this means using 'color' rather than 'colour', and in general will mean
+US, not British, spellings.
+
+---
 
 ## Control flow
 
@@ -265,10 +286,14 @@ No:
   return
 ```
 
+---
+
 ## Use Type hints
 
 Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,
 both their arguments and return types.
+
+---
 
 ## Use `logging` not `print()`, and definitely not `sys.stdout.write()`
 
@@ -293,6 +318,8 @@ except Exception as e:  # Try to be more specific
 ```python
     from EDMarketConnector import logger
 ```
+
+Setting up [logging in plugins](./PLUGINS.md#logging) is slightly different.
 
 We have implemented a `logging.Filter` that adds support for the following
 in `logging.Formatter()` strings:
@@ -349,32 +376,39 @@ In addition to that we utilise one of the user-defined levels as:
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
 
-## Prefer fstrings to modulo-formatting and .format
+---
 
-[fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6, and allow for string interpolation rather
-than more opaque formatting calls.
+## Use fstrings, not modulo-formatting or .format
 
-As part of our flake8 linting setup we have included a linter that warns when you use either `%` or `.format` on string
-literals.
+[fstrings](https://www.python.org/dev/peps/pep-0498/) are new in python 3.6,
+and allow for string interpolation rather than more opaque formatting calls.
+
+As part of our flake8 linting setup we have included a linter that warns when
+you use `%` on string literals.
+
+`.format()` won't throw flake8 errors, **but only because it's still the 
+best way to handle [untranslated words](./docs/Translations.md#call-_)
+in otherwise translated phrases**.  Thus, we allow this, and only this, use of
+`.format()` for strings.
+
+---
 
 ## Docstrings
 
 Doc strings are preferred on all new modules, functions, classes, and methods, as they help others understand your code.
 We use the `sphinx` formatting style, which for pycharm users is the default.
 
+Lack of docstrings, or them not passing some checks, *will* cause a flake8 
+failure in our setup.
+
+---
+
 ## Comments
 
-### Add comments to LANG usage
+### LANG comments for translations
 
-Sometimes our translators may need some additional information about what a translation is used for. You can add
-that information automatically by using `# LANG: your message here`
-**on the line directly above your usage, or at the end of the line in your usage**. If both comments exist, the one
-on the current line is preferred over the one above
-
-```py
-# LANG: this says stuff.
-_('stuff')
-```
+When adding translations you *must*
+[add a LANG comment](./docs/Translations.md#add-a-lang-comment).
 
 ### Mark hacks and workarounds with a specific comment
 
@@ -392,18 +426,6 @@ Please be verbose here, more info about weird choices is always prefered over ma
 
 Additionally, if your hack is over around 5 lines, please include a `# HACK END` or similar comment to indicate the end of the hack.
 
----
-
-## Git commit conventions
-
-* Please use the standard Git convention of a short title in the first line and fuller body text in subsequent lines.
-* Please reference issue numbers using the "hashtag" format #123 in your commit message wherever possible.
-  This lets GitHub create two-way hyperlinks between the issue report and the commit.
-  Certain text in a PR that fixes an issue can auto-close the issue when the PR is merged.
-* If in doubt, lean towards many small commits. This makes git bisect much more useful.
-* Please try at all costs to avoid a "mixed-up" commit, i.e. one that addresses more than one issue at once.
-  One thing at a time is best.
-  
 ---
 
 ## Build process
