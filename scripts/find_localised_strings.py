@@ -68,7 +68,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     above = call.lineno - 2
     current = call.lineno - 1
 
-    above_line = lines[above].strip() if len(lines) < above else None
+    above_line = lines[above].strip() if len(lines) >= above else None
     current_line = lines[current].strip()
 
     for line in (above_line, current_line):
