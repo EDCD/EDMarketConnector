@@ -230,6 +230,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.label.grid(columnspan=2, padx=x_padding, sticky=tk.W)
 
+    # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
     this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
     this.apikey = nb.Entry(frame)
