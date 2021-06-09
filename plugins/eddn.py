@@ -212,7 +212,7 @@ Msg:\n{msg}'''
             status['text'] = ''
             return
 
-        localized: str = _('Sending data to EDDN...')
+        localized: str = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
         if len(self.replaylog) == 1:
             status['text'] = localized
 
@@ -260,6 +260,7 @@ Msg:\n{msg}'''
 
             except requests.exceptions.RequestException as e:
                 logger.debug('Failed sending', exc_info=e)
+                # LANG: Error while trying to send data to EDDN
                 status['text'] = _("Error: Can't connect to EDDN")
                 return  # stop sending
 
@@ -277,15 +278,18 @@ Msg:\n{msg}'''
 
         if status_code == 429:  # HTTP UPGRADE REQUIRED
             logger.warning('EDMC is sending schemas that are too old')
+            # LANG: EDDN has banned this version of our client
             return _('EDDN Error: EDMC is too old for EDDN. Please update.')
 
         elif status_code == 400:
             # we a validation check or something else.
             logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
+            # LANG: EDDN returned an error that indicates something about what we sent it was wrong
             return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
 
         else:
             logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
+            # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
             return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
@@ -611,7 +615,8 @@ Msg:\n{msg}'''
 
         else:
             # Can't access replay file! Send immediately.
-            self.parent.children['status']['text'] = _('Sending data to EDDN...')  # LANG: Data is being sent to EDDN
+            # LANG: Status text shown while attempting to send data
+            self.parent.children['status']['text'] = _('Sending data to EDDN...')
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''
@@ -690,6 +695,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
     this.eddn_station_button = nb.Checkbutton(
         eddnframe,
+        # LANG: Enable EDDN support for station data checkbutton label
         text=_('Send station data to the Elite Dangerous Data Network'),
         variable=this.eddn_station,
         command=prefsvarchanged
@@ -700,6 +706,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     # Output setting new in E:D 2.2
     this.eddn_system_button = nb.Checkbutton(
         eddnframe,
+        # LANG: Enable EDDN support for system and other scan data checkbutton label
         text=_('Send system and scan data to the Elite Dangerous Data Network'),
         variable=this.eddn_system,
         command=prefsvarchanged
@@ -710,6 +717,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
+        # LANG: EDDNs delay sending until docked option is on, this message notes that a send was skipped due to this
         text=_('Delay sending until docked'),
         variable=this.eddn_delay
     )
@@ -774,7 +782,7 @@ def journal_entry(  # noqa: C901, CCR001
     """
     if (ks := killswitch.get_disabled("plugins.eddn.journal")).disabled:
         logger.warning(f'EDDN journal handler has been disabled via killswitch: {ks.reason}')
-        plug.show_error(_('EDDN journal handler disabled. See Log.'))
+        plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
         return None
 
     elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event.{entry["event"]}')).disabled:
@@ -896,7 +904,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)
-            return _("Error: Can't connect to EDDN")
+            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)
@@ -931,7 +939,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
-            return _("Error: Can't connect to EDDN")
+            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
@@ -958,7 +966,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
             status = this.parent.children['status']
             old_status = status['text']
             if not old_status:
-                status['text'] = _('Sending data to EDDN...')
+                status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
                 status.update_idletasks()
 
             this.eddn.export_commodities(data, is_beta, this.odyssey)
@@ -970,7 +978,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
 
         except requests.RequestException as e:
             logger.debug('Failed exporting data', exc_info=e)
-            return _("Error: Can't connect to EDDN")
+            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug('Failed exporting data', exc_info=e)
