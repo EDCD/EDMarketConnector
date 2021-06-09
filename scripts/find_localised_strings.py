@@ -71,6 +71,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     above_line = lines[above].strip() if len(lines) >= above else None
     current_line = lines[current].strip()
 
+    line: Optional[str] = None
     bad_comment: Optional[str] = None
     for line in (above_line, current_line):
         if line is None or '#' not in line:
