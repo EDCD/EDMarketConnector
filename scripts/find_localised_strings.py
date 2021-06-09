@@ -84,7 +84,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
 
         comment = match.group(1).strip()
         if not comment.startswith('# LANG:'):
-            bad_comment = f'Unknown comment for {file}:{current} {line}'
+            bad_comment = f'Unknown comment for {file}:{call.lineno} {line}'
             continue
 
         out = comment.replace('# LANG:', '').strip()
@@ -95,7 +95,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         print(bad_comment, file=sys.stderr)
 
     if out is None:
-        print(f'No comment for {file}:{current} {line}', file=sys.stderr)
+        print(f'No comment for {file}:{call.lineno} {line}', file=sys.stderr)
 
     return out
 
