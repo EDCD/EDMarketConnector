@@ -157,6 +157,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'Data':           defaultdict(int),  # Backpack Data
             },
             'BackpackJSON':       None,  # Raw JSON from `Backpack.json` file, if available
+            'ShipLockerJSON':     None,  # Raw JSON from the `ShipLocker.json` file, if available
             'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
