@@ -17,6 +17,63 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.1.1
+===
+
+The big change in this is adjustments to be in line with Journal changes in 
+Elite Dangerous Odyssey 4.0.0.400, released 2021-06-10, with respect to the
+Odyssey materials Inventory.
+
+**This update is mandatory if you want EDMarketConnector to update Inara.cz 
+with your Odyssey inventory.**
+
+* `ShipLockerMaterials` is dead, long live `ShipLocker`.  Along with other 
+  changes to how backpack inventory is handled we should now actually be 
+  able to fully track all Odyssey on-foot materials and consumables without 
+  errors.
+  
+* Inara plugin adjusted to send the new `ShipLocker` inventory to Inara.cz.
+  This is *still* only your *ship* inventory of Odyssey materials, not 
+  anything currently in your backpack whilst on foot.
+  See [this issue](https://github.com/EDCD/EDMarketConnector/issues/1162)
+  for some quotes from Artie (Inara.cz developer) about *not* including 
+  backpack contents in the Inara inventory.  
+
+* Errors related to sending data to EDDN are now more specific to aid in 
+  diagnoising issues.
+
+* Quietened some log output if we encounter connection errors trying to 
+  utilise the Frontier CAPI service.
+  
+Bug Fixes
+---
+
+* Handle where the `Backpack.json` file for a `Backpack` event is a zero length
+  file.  Closes #1138.
+  
+* Fixed case of 'Selection' in 'Override Beta/Normal Selection' text on
+  Settings > Configuration.  This allows translations to work.
+
+Plugin Developers
+---
+* We've updated [Contributing.md](./Contributing.md) including:
+
+  1. Re-ordered the sections to be in a more logcial and helpful order.
+  1. Added a section about choosing an appropriate log level for messages.
+  1. fstrings now mandatory, other than some use of `.format()` with respect to
+  translated strings.
+
+* [docs/Translations.md](./docs/Translations.md) updated about a forthcoming 
+  change to how we can programmatically check that all translation strings 
+  have a proper comment in 'L10n/en.template' to aid translators.
+
+* `state` passed to `journal_entry()` now has `ShipLockerJSON` which contains 
+  the `json.load()`-ed data from the new 'ShipLocker.json' file.  We do 
+  attempt to always load from this file, even when the `ShipLocker` Journal 
+  event itself contains all of the data (which it does on startup, embark and 
+  disembark), so it *should* always be populated when plugins see any event
+  related to Odyssey inventory.
+
 Release 5.1.0
 ===
 
