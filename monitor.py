@@ -843,7 +843,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         # So it's *from* the ship
                         self.state['Cargo'][name] -= c['Count']
 
-            elif event_type == 'ShipLockerMaterials':
+            elif event_type == 'ShipLocker':
+                # As of 4.0.0.400 (2021-06-10)
+                # "ShipLocker" will be a full list written to the journal at startup/boarding/disembarking, and also
+                # written to a separate shiplocker.json file - other updates will just update that file and mention it
+                # has changed with an empty shiplocker event in the main journal.
+
+                if not all([entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')]):
+                    logger.debug('ShipLocker event is an empty one (at least missing one data type')
+                    # So attempt to load data from the most recent file instead
+                    currentdir_path = pathlib.Path(str(self.currentdir))
+                    # Confirmed filename for 4.0.0.400
+                    with open(currentdir_path / 'ShipLocker.json', 'rb') as h:  # type: ignore
+                        entry = json.load(h, object_pairs_hook=OrderedDict)
+                        self.state['ShipLockerJSON'] = entry
+
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
