@@ -1106,21 +1106,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # suit backpack – note this can be written at the same time as other
                 # events like UseConsumable
 
-                # In 4.0.0.100 it is observed that:
-                #
-                #  1. Throw of any grenade type *only* causes a BackpackChange event, no
-                #     accompanying 'UseConsumable'.
-                #  2. Using an Energy Cell causes both UseConsumable and BackpackChange,
-                #     in that order.
-                #  3. Medkit acts the same as Energy Cell.
-                #
-                #  Thus we'll just ignore 'UseConsumable' for now.
-                #  for c in self.state['BackPack']['Consumable']:
-                #      if c == entry['Name']:
-                #          self.state['BackPack']['Consumable'][c] -= 1
-                #          # Paranoia in case we lost track
-                #          if self.state['BackPack']['Consumable'][c] < 0:
-                #              self.state['BackPack']['Consumable'][c] = 0
+                # In 4.0.0.400 we do get this event, but *also* a `BackpackChange` event,
+                # so we ignore this for inventory purposes.
                 pass
 
             # TODO:
