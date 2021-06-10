@@ -863,15 +863,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
                 self.state['Data'] = defaultdict(int)
-                # TODO: Really we need a full BackPackMaterials event at the same time.
-                #       In lieu of that, empty the backpack.  This will explicitly
-                #       be wrong if Cmdr relogs at a Settlement with anything in
-                #       backpack.
-                #       Still no BackPackMaterials at the same time in 4.0.0.31
-                self.state['BackPack']['Component'] = defaultdict(int)
-                self.state['BackPack']['Consumable'] = defaultdict(int)
-                self.state['BackPack']['Item'] = defaultdict(int)
-                self.state['BackPack']['Data'] = defaultdict(int)
+
+                # 4.0.0.400 - No longer zeroing out the BackPack in this event,
+                # as we should now always get either `Backpack` event/file or
+                # `BackpackChange` as needed.
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
