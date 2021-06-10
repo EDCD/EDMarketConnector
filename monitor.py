@@ -1288,8 +1288,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
                 # Suit Loadouts.
-                # alpha4 - credits?  Shouldn't cost any!
-                pass
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'ScanOrganic':
                 # Nothing of interest to our state.
