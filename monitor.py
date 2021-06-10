@@ -853,7 +853,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # written to a separate shiplocker.json file - other updates will just update that file and mention it
                 # has changed with an empty shiplocker event in the main journal.
 
-                if not all([entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')]):
+                if not all(entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')):
                     logger.debug('ShipLocker event is an empty one (at least missing one data type')
                     # So attempt to load data from the most recent file instead
                     currentdir_path = pathlib.Path(str(self.currentdir))

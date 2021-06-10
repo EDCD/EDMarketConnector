@@ -1101,7 +1101,7 @@ def journal_entry(  # noqa: C901, CCR001
         elif event_name == 'ShipLocker':
             # In ED 4.0.0.400 the event is only full sometimes, other times indicating
             # ShipLocker.json was written.
-            if not all([entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')]):
+            if not all(entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')):
                 # So it's an empty event, core EDMC should have stuffed the data
                 # into state['ShipLockerJSON'].
                 entry = state['ShipLockerJSON']
