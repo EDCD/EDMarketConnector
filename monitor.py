@@ -681,6 +681,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['OnFoot'] = False
                 self.state['Taxi'] = entry['Taxi']
 
+                # We can't now have anything in the BackPack, it's all in the
+                # ShipLocker.
+                self.state['BackPack']['Component'] = defaultdict(int)
+                self.state['BackPack']['Consumable'] = defaultdict(int)
+                self.state['BackPack']['Item'] = defaultdict(int)
+                self.state['BackPack']['Data'] = defaultdict(int)
+
             elif event_type == 'Disembark':
                 # This event is logged when the player steps out of a ship or SRV
                 #
