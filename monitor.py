@@ -895,34 +895,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Journal v31 implies this was removed before Odyssey launch
             elif event_type == 'BackPackMaterials':
-                # alpha4 -
-                # Lists the contents of the backpack, eg when disembarking from ship
-
-                # Assume this reflects the current state when written
-                self.state['BackPack']['Component'] = defaultdict(int)
-                self.state['BackPack']['Consumable'] = defaultdict(int)
-                self.state['BackPack']['Item'] = defaultdict(int)
-                self.state['BackPack']['Data'] = defaultdict(int)
-
-                clean_components = self.coalesce_cargo(entry['Components'])
-                self.state['BackPack']['Component'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
-                )
-
-                clean_consumables = self.coalesce_cargo(entry['Consumables'])
-                self.state['BackPack']['Consumable'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
-                )
-
-                clean_items = self.coalesce_cargo(entry['Items'])
-                self.state['BackPack']['Item'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
-                )
-
-                clean_data = self.coalesce_cargo(entry['Data'])
-                self.state['BackPack']['Data'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
-                )
+                # Last seen in a 4.0.0.102 journal file.
+                logger.warning(f'We have a BackPackMaterials event, defunct since > 4.0.0.102 ?:\n{entry}\n')
+                pass
 
             elif event_type in ('BackPack', 'Backpack'):  # WORKAROUND 4.0.0.200: BackPack becomes Backpack
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
