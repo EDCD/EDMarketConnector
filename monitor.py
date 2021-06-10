@@ -855,7 +855,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # has changed with an empty shiplocker event in the main journal.
 
                 if not all(entry.get(t, False) for t in ('Components', 'Consumables', 'Data', 'Items')):
-                    logger.debug('ShipLocker event is an empty one (at least missing one data type')
+                    logger.trace('ShipLocker event is an empty one (missing at least one data type)')
                     # So attempt to load data from the most recent file instead
                     currentdir_path = pathlib.Path(str(self.currentdir))
                     # Confirmed filename for 4.0.0.400
