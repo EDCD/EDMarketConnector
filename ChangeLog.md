@@ -45,6 +45,16 @@ with your Odyssey inventory.**
 * Quietened some log output if we encounter connection errors trying to 
   utilise the Frontier CAPI service.
   
+Translations
+---
+We believe that nothing should be worse in this version compared to 5.1.1, 
+although a small tweak or two might have leaked through.
+
+We'll be fully addressing translations in a near-future release after we've 
+conclude the necessary code level work for the new system.  Nothing should 
+change for those of you helping on OneSky, other than at most the 
+'comments' on each translation.  They should be more useful!
+
 Bug Fixes
 ---
 
