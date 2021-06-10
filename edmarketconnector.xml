@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.1.0</title>
+			<title>Release 5.1.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,86 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.1.1</h2>
+<p>The big change in this is adjustments to be in line with Journal changes in
+Elite Dangerous Odyssey 4.0.0.400, released 2021-06-10, with respect to the
+Odyssey materials Inventory.</p>
+<p><strong>This update is mandatory if you want EDMarketConnector to update Inara.cz
+with your Odyssey inventory.</strong></p>
+<ul>
+<li>
+<p><code>ShipLockerMaterials</code> is dead, long live <code>ShipLocker</code>.  Along with other
+changes to how backpack inventory is handled we should now actually be
+able to fully track all Odyssey on-foot materials and consumables without
+errors.</p>
+</li>
+<li>
+<p>Inara plugin adjusted to send the new <code>ShipLocker</code> inventory to Inara.cz.
+This is <em>still</em> only your <em>ship</em> inventory of Odyssey materials, not
+anything currently in your backpack whilst on foot.
+See <a href="https://github.com/EDCD/EDMarketConnector/issues/1162">this issue</a>
+for some quotes from Artie (Inara.cz developer) about <em>not</em> including
+backpack contents in the Inara inventory.</p>
+</li>
+<li>
+<p>Errors related to sending data to EDDN are now more specific to aid in
+diagnoising issues.</p>
+</li>
+<li>
+<p>Quietened some log output if we encounter connection errors trying to
+utilise the Frontier CAPI service.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-translations" class="anchor" href="#translations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Translations</h2>
+<p>We believe that nothing should be worse in this version compared to 5.1.1,
+although a small tweak or two might have leaked through.</p>
+<p>We'll be fully addressing translations in a near-future release after we've
+conclude the necessary code level work for the new system.  Nothing should
+change for those of you helping on OneSky, other than at most the
+'comments' on each translation.  They should be more useful!</p>
+<p>Pending that work we've specifically chosen <em>not</em> to update any
+translations in this release, so they'll be the same as released in 5.1.0.</p>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>Handle where the <code>Backpack.json</code> file for a <code>Backpack</code> event is a zero length
+file.  Closes #1138.</p>
+</li>
+<li>
+<p>Fixed case of 'Selection' in 'Override Beta/Normal Selection' text on
+Settings &gt; Configuration.  This allows translations to work.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We've updated <a href="./Contributing.md">Contributing.md</a> including:</p>
+<ol>
+<li>Re-ordered the sections to be in a more logcial and helpful order.</li>
+<li>Added a section about choosing an appropriate log level for messages.</li>
+<li>fstrings now mandatory, other than some use of <code>.format()</code> with respect to
+translated strings.</li>
+</ol>
+</li>
+<li>
+<p><a href="./docs/Translations.md">docs/Translations.md</a> updated about a forthcoming
+change to how we can programmatically check that all translation strings
+have a proper comment in 'L10n/en.template' to aid translators.</p>
+</li>
+<li>
+<p><code>state</code> passed to <code>journal_entry()</code> now has <code>ShipLockerJSON</code> which contains
+the <code>json.load()</code>-ed data from the new 'ShipLocker.json' file.  We do
+attempt to always load from this file, even when the <code>ShipLocker</code> Journal
+event itself contains all of the data (which it does on startup, embark and
+disembark), so it <em>should</em> always be populated when plugins see any event
+related to Odyssey inventory.</p>
+</li>
+</ul>
+
 
 <h2>Release 5.1.0</h2>
 <ul>
@@ -723,11 +803,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.1.0/EDMarketConnector_win_5.1.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.1.1/EDMarketConnector_win_5.1.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.1.0"
-				length="10194944"
+				sparkle:version="5.1.1"
+				length="10186752"
 				type="application/octet-stream"
 			/>
 		</item>
