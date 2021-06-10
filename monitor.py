@@ -1016,12 +1016,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack'][c][m] = 0
 
             elif event_type == 'BuyMicroResources':
-                # Buying from a Pioneer Supplies, goes directly to ShipLocker.
-                # One event per Item, not an array.
-                category = self.category(entry['Category'])
-                name = self.canonicalise(entry['Name'])
-                self.state[category][name] += entry['Count']
+                # From 4.0.0.400 we get an empty (see file) `ShipLocker` event,
+                # so we can ignore this for inventory purposes.
 
+                # But do record the credits balance change.
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'SellMicroResources':
