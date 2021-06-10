@@ -55,6 +55,9 @@ conclude the necessary code level work for the new system.  Nothing should
 change for those of you helping on OneSky, other than at most the 
 'comments' on each translation.  They should be more useful!
 
+Pending that work we've specifically chosen *not* to update any 
+translations in this release, so they'll be the same as released in 5.1.0.
+
 Bug Fixes
 ---
 
