@@ -854,14 +854,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # written to a separate shiplocker.json file - other updates will just update that file and mention it
                 # has changed with an empty shiplocker event in the main journal.
 
-                if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
-                    logger.trace('ShipLocker event is an empty one (missing at least one data type)')
-                    # So attempt to load data from the most recent file instead
+                # Always attempt loading of this.
+                # Confirmed filename for 4.0.0.400
+                try:
                     currentdir_path = pathlib.Path(str(self.currentdir))
-                    # Confirmed filename for 4.0.0.400
                     with open(currentdir_path / 'ShipLocker.json', 'rb') as h:  # type: ignore
                         entry = json.load(h, object_pairs_hook=OrderedDict)
                         self.state['ShipLockerJSON'] = entry
+
+                except FileNotFoundError:
+                    logger.warning('ShipLocker event but no ShipLocker.json file')
+                    pass
+
+                except json.JSONDecodeError as e:
+                    logger.warning(f'ShipLocker.json failed to decode:\n{e!r}\n')
+                    pass
+
+                if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
+                    logger.trace('ShipLocker event is an empty one (missing at least one data type)')
 
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
