@@ -1068,17 +1068,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack'][c][m] = 0
 
             elif event_type == 'CollectItems':
-                # alpha4
-                # When picking up items from the ground
-                # Parameters:
-                #     • Name
-                #     • Type
-                #     • OwnerID
-
-                # Handled by BackpackChange
-                # for i in self.state['BackPack'][entry['Type']]:
-                #     if i == entry['Name']:
-                #         self.state['BackPack'][entry['Type']][i] += entry['Count']
+                # 4.0.0.400 (still) has a BackpackChange event as well, so
+                # ignore this for inventory purposes.
                 pass
 
             elif event_type == 'DropItems':
