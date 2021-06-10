@@ -683,10 +683,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 # We can't now have anything in the BackPack, it's all in the
                 # ShipLocker.
-                self.state['BackPack']['Component'] = defaultdict(int)
-                self.state['BackPack']['Consumable'] = defaultdict(int)
-                self.state['BackPack']['Item'] = defaultdict(int)
-                self.state['BackPack']['Data'] = defaultdict(int)
+                self.backpack_set_empty()
 
             elif event_type == 'Disembark':
                 # This event is logged when the player steps out of a ship or SRV
@@ -934,10 +931,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['BackpackJSON'] = entry
 
                     # Assume this reflects the current state when written
-                    self.state['BackPack']['Component'] = defaultdict(int)
-                    self.state['BackPack']['Consumable'] = defaultdict(int)
-                    self.state['BackPack']['Item'] = defaultdict(int)
-                    self.state['BackPack']['Data'] = defaultdict(int)
+                    self.backpack_set_empty()
 
                     clean_components = self.coalesce_cargo(entry['Components'])
                     self.state['BackPack']['Component'].update(
@@ -1587,6 +1581,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def backpack_set_empty(self):
+        """Set the BackPack contents to be empty."""
+        self.state['BackPack']['Component'] = defaultdict(int)
+        self.state['BackPack']['Consumable'] = defaultdict(int)
+        self.state['BackPack']['Item'] = defaultdict(int)
+        self.state['BackPack']['Data'] = defaultdict(int)
 
     def suit_sane_name(self, name: str) -> str:
         """
