@@ -170,6 +170,10 @@ class ServerError(Exception):
             self.args = (_("Error: Frontier CAPI didn't respond"),)
 
 
+class ServerConnectionError(ServerError):
+    """Exception class for CAPI connection errors."""
+
+
 class ServerLagging(Exception):
     """Exception Class for CAPI Server lagging.
 
@@ -536,6 +540,10 @@ class Session(object):
         try:
             logger.trace('Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
+
+        except requests.ConnectionError as e:
+            logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
+            raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)

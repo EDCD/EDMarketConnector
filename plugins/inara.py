@@ -230,6 +230,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.label.grid(columnspan=2, padx=x_padding, sticky=tk.W)
 
+    # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
     this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
     this.apikey = nb.Entry(frame)
@@ -1097,7 +1098,14 @@ def journal_entry(  # noqa: C901, CCR001
 
                 new_add_event('addCommanderTravelLand', entry['timestamp'], to_send_data)
 
-        elif event_name == 'ShipLockerMaterials':
+        elif event_name == 'ShipLocker':
+            # In ED 4.0.0.400 the event is only full sometimes, other times indicating
+            # ShipLocker.json was written.
+            if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
+                # So it's an empty event, core EDMC should have stuffed the data
+                # into state['ShipLockerJSON'].
+                entry = state['ShipLockerJSON']
+
             odyssey_plural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
             # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
             reset_data = [{'itemType': t} for t in odyssey_plural_microresource_types]

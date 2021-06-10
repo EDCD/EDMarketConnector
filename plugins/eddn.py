@@ -255,6 +255,9 @@ Msg:\n{msg}'''
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
 
+            except requests.exceptions.HTTPError as e:
+                status['text'] = self.http_error_to_log(e)
+
             except requests.exceptions.RequestException as e:
                 logger.debug('Failed sending', exc_info=e)
                 status['text'] = _("Error: Can't connect to EDDN")
@@ -266,6 +269,24 @@ Msg:\n{msg}'''
                 return  # stop sending
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
+
+    @staticmethod
+    def http_error_to_log(exception: requests.exceptions.HTTPError) -> str:
+        """Convert an exception from raise_for_status to a log message and displayed error."""
+        status_code = exception.errno
+
+        if status_code == 429:  # HTTP UPGRADE REQUIRED
+            logger.warning('EDMC is sending schemas that are too old')
+            return _('EDDN Error: EDMC is too old for EDDN. Please update.')
+
+        elif status_code == 400:
+            # we a validation check or something else.
+            logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
+            return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
+
+        else:
+            logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
+            return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
         """
@@ -590,7 +611,7 @@ Msg:\n{msg}'''
 
         else:
             # Can't access replay file! Send immediately.
-            self.parent.children['status']['text'] = _('Sending data to EDDN...')
+            self.parent.children['status']['text'] = _('Sending data to EDDN...')  # LANG: Data is being sent to EDDN
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''

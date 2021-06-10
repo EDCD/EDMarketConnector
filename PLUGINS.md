@@ -603,6 +603,7 @@ Content of `state` (updated to the current journal entry):
 | `Data`               |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
 | `BackPack`           |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
 | `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
+| `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                      |
 | `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
 | `Suits`              |          `dict`[1]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
@@ -671,6 +672,11 @@ are all now stored in `state[]` fields; "GameLanguage", "GameVersion" and
 New in version 5.1.0:
 
 `state` entries added for Taxi, Dropship, Body and BodyType.
+
+New in version 5.1.1:
+
+`state` now has a `ShipLockerJSON` member containing the un-changed, loaded,
+JSON from the `ShipLockerJSON.json` file.
 
 ##### Synthetic Events
 

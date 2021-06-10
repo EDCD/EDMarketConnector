@@ -80,7 +80,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     )
     cur_row += 1
 
-    nb.Label(conf_frame, text=_('Override Beta/Normal selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
+    nb.Label(conf_frame, text=_('Override Beta/Normal Selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.OptionMenu(
         conf_frame,
         override_textvar,
@@ -99,9 +99,9 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     beta_url = beta_textvar.get()
     override_mode = override_textvar.get()
     override_mode = {  # Convert to unlocalised names
-        _('Normal'): 'normal',
-        _('Beta'): 'beta',
-        _('Auto'): 'auto',
+        _('Normal'): 'normal',  # LANG: Coriolis normal/beta selection - normal
+        _('Beta'): 'beta',  # LANG: Coriolis normal/beta selection - beta
+        _('Auto'): 'auto',  # LANG: Coriolis normal/beta selection - auto
     }.get(override_mode, override_mode)
 
     if override_mode not in ('beta', 'normal', 'auto'):

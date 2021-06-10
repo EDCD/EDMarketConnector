@@ -1,6 +1,7 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
+import pathlib
 import queue
 import re
 import threading
@@ -156,6 +157,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'Data':           defaultdict(int),  # Backpack Data
             },
             'BackpackJSON':       None,  # Raw JSON from `Backpack.json` file, if available
+            'ShipLockerJSON':     None,  # Raw JSON from the `ShipLocker.json` file, if available
             'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
@@ -680,6 +682,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['OnFoot'] = False
                 self.state['Taxi'] = entry['Taxi']
 
+                # We can't now have anything in the BackPack, it's all in the
+                # ShipLocker.
+                self.backpack_set_empty()
+
             elif event_type == 'Disembark':
                 # This event is logged when the player steps out of a ship or SRV
                 #
@@ -842,21 +848,40 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         # So it's *from* the ship
                         self.state['Cargo'][name] -= c['Count']
 
-            elif event_type == 'ShipLockerMaterials':
+            elif event_type == 'ShipLocker':
+                # As of 4.0.0.400 (2021-06-10)
+                # "ShipLocker" will be a full list written to the journal at startup/boarding/disembarking, and also
+                # written to a separate shiplocker.json file - other updates will just update that file and mention it
+                # has changed with an empty shiplocker event in the main journal.
+
+                # Always attempt loading of this.
+                # Confirmed filename for 4.0.0.400
+                try:
+                    currentdir_path = pathlib.Path(str(self.currentdir))
+                    with open(currentdir_path / 'ShipLocker.json', 'rb') as h:  # type: ignore
+                        entry = json.load(h, object_pairs_hook=OrderedDict)
+                        self.state['ShipLockerJSON'] = entry
+
+                except FileNotFoundError:
+                    logger.warning('ShipLocker event but no ShipLocker.json file')
+                    pass
+
+                except json.JSONDecodeError as e:
+                    logger.warning(f'ShipLocker.json failed to decode:\n{e!r}\n')
+                    pass
+
+                if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
+                    logger.trace('ShipLocker event is an empty one (missing at least one data type)')
+
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
                 self.state['Data'] = defaultdict(int)
-                # TODO: Really we need a full BackPackMaterials event at the same time.
-                #       In lieu of that, empty the backpack.  This will explicitly
-                #       be wrong if Cmdr relogs at a Settlement with anything in
-                #       backpack.
-                #       Still no BackPackMaterials at the same time in 4.0.0.31
-                self.state['BackPack']['Component'] = defaultdict(int)
-                self.state['BackPack']['Consumable'] = defaultdict(int)
-                self.state['BackPack']['Item'] = defaultdict(int)
-                self.state['BackPack']['Data'] = defaultdict(int)
+
+                # 4.0.0.400 - No longer zeroing out the BackPack in this event,
+                # as we should now always get either `Backpack` event/file or
+                # `BackpackChange` as needed.
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
@@ -880,75 +905,64 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Journal v31 implies this was removed before Odyssey launch
             elif event_type == 'BackPackMaterials':
-                # alpha4 -
-                # Lists the contents of the backpack, eg when disembarking from ship
-
-                # Assume this reflects the current state when written
-                self.state['BackPack']['Component'] = defaultdict(int)
-                self.state['BackPack']['Consumable'] = defaultdict(int)
-                self.state['BackPack']['Item'] = defaultdict(int)
-                self.state['BackPack']['Data'] = defaultdict(int)
-
-                clean_components = self.coalesce_cargo(entry['Components'])
-                self.state['BackPack']['Component'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
-                )
-
-                clean_consumables = self.coalesce_cargo(entry['Consumables'])
-                self.state['BackPack']['Consumable'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
-                )
-
-                clean_items = self.coalesce_cargo(entry['Items'])
-                self.state['BackPack']['Item'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
-                )
-
-                clean_data = self.coalesce_cargo(entry['Data'])
-                self.state['BackPack']['Data'].update(
-                    {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
-                )
+                # Last seen in a 4.0.0.102 journal file.
+                logger.warning(f'We have a BackPackMaterials event, defunct since > 4.0.0.102 ?:\n{entry}\n')
+                pass
 
             elif event_type in ('BackPack', 'Backpack'):  # WORKAROUND 4.0.0.200: BackPack becomes Backpack
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
-                with open(join(self.currentdir, 'Backpack.json'), 'rb') as backpack:  # type: ignore
+                backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
+                backpack_data = None
+
+                if not backpack_file.exists():
+                    logger.warning(f'Failed to find backpack.json file as it appears not to exist? {backpack_file=}')
+
+                else:
+                    backpack_data = backpack_file.read_bytes()
+
+                parsed = None
+
+                if backpack_data is None:
+                    logger.warning('Unable to read backpack data!')
+
+                elif len(backpack_data) == 0:
+                    logger.warning('Backpack.json was empty when we read it!')
+
+                else:
                     try:
-                        # Preserve property order because why not?
-                        entry = json.load(backpack, object_pairs_hook=OrderedDict)
+                        parsed = json.loads(backpack_data)
 
                     except json.JSONDecodeError:
-                        logger.exception('Failed decoding Backpack.json', exc_info=True)
+                        logger.exception('Unable to parse Backpack.json')
 
-                    else:
-                        # Store in monitor.state
-                        self.state['BackpackJSON'] = entry
+                if parsed is not None:
+                    entry = parsed  # set entry so that it ends up in plugins with the right data
+                    # Store in monitor.state
+                    self.state['BackpackJSON'] = entry
 
-                        # Assume this reflects the current state when written
-                        self.state['BackPack']['Component'] = defaultdict(int)
-                        self.state['BackPack']['Consumable'] = defaultdict(int)
-                        self.state['BackPack']['Item'] = defaultdict(int)
-                        self.state['BackPack']['Data'] = defaultdict(int)
+                    # Assume this reflects the current state when written
+                    self.backpack_set_empty()
 
-                        clean_components = self.coalesce_cargo(entry['Components'])
-                        self.state['BackPack']['Component'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
-                        )
+                    clean_components = self.coalesce_cargo(entry['Components'])
+                    self.state['BackPack']['Component'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_components}
+                    )
 
-                        clean_consumables = self.coalesce_cargo(entry['Consumables'])
-                        self.state['BackPack']['Consumable'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
-                        )
+                    clean_consumables = self.coalesce_cargo(entry['Consumables'])
+                    self.state['BackPack']['Consumable'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_consumables}
+                    )
 
-                        clean_items = self.coalesce_cargo(entry['Items'])
-                        self.state['BackPack']['Item'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
-                        )
+                    clean_items = self.coalesce_cargo(entry['Items'])
+                    self.state['BackPack']['Item'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_items}
+                    )
 
-                        clean_data = self.coalesce_cargo(entry['Data'])
-                        self.state['BackPack']['Data'].update(
-                            {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
-                        )
+                    clean_data = self.coalesce_cargo(entry['Data'])
+                    self.state['BackPack']['Data'].update(
+                        {self.canonicalise(x['Name']): x['Count'] for x in clean_data}
+                    )
 
             elif event_type == 'BackpackChange':
                 # Changes to Odyssey Backpack contents *other* than from a Transfer
@@ -984,111 +998,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['BackPack'][c][m] = 0
 
             elif event_type == 'BuyMicroResources':
-                # Buying from a Pioneer Supplies, goes directly to ShipLocker.
-                # One event per Item, not an array.
-                category = self.category(entry['Category'])
-                name = self.canonicalise(entry['Name'])
-                self.state[category][name] += entry['Count']
+                # From 4.0.0.400 we get an empty (see file) `ShipLocker` event,
+                # so we can ignore this for inventory purposes.
 
+                # But do record the credits balance change.
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'SellMicroResources':
-                # Selling to a Bar Tender on-foot.
+                # As of 4.0.0.400 we can ignore this as an empty (see file)
+                # `ShipLocker` event is written for the full new inventory.
+
+                # But still record the credits balance change.
                 self.state['Credits'] += entry.get('Price', 0)
-                # One event per whole sale, so it's an array.
-                for mr in entry['MicroResources']:
-                    category = self.category(mr['Category'])
-                    name = self.canonicalise(mr['Name'])
-                    self.state[category][name] -= mr['Count']
 
-            elif event_type == 'TradeMicroResources':
-                # Trading some MicroResources for another at a Bar Tender
-                # 'Offered' is what we traded away
-                for offer in entry['Offered']:
-                    category = self.category(offer['Category'])
-                    name = self.canonicalise(offer['Name'])
-                    self.state[category][name] -= offer['Count']
-
-                # For a single item name received
-                category = self.category(entry['Category'])
-                name = self.canonicalise(entry['Received'])
-                self.state[category][name] += entry['Count']
-
-            elif event_type == 'TransferMicroResources':
-                # Moving Odyssey MicroResources between ShipLocker and BackPack
-                # Backpack dropped as its done in BackpackChange
-                #
-                #  from: 4.0.0.200 -- Locker(Old|New)Count is now a thing.
-                for mr in entry['Transfers']:
-                    category = self.category(mr['Category'])
-                    name = self.canonicalise(mr['Name'])
-
-                    self.state[category][name] = mr['LockerNewCount']
-                    if mr['Direction'] not in ('ToShipLocker', 'ToBackpack'):
-                        logger.warning(f'TransferMicroResources with unexpected Direction {mr["Direction"]=}: {mr=}')
-
-                # Paranoia check to see if anything has gone negative.
-                # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
-                # materials is impossible when used/picked up anyway.
-                for c in self.state['BackPack']:
-                    for m in self.state['BackPack'][c]:
-                        if self.state['BackPack'][c][m] < 0:
-                            self.state['BackPack'][c][m] = 0
-
-            elif event_type == 'CollectItems':
-                # alpha4
-                # When picking up items from the ground
-                # Parameters:
-                #     • Name
-                #     • Type
-                #     • OwnerID
-
-                # Handled by BackpackChange
-                # for i in self.state['BackPack'][entry['Type']]:
-                #     if i == entry['Name']:
-                #         self.state['BackPack'][entry['Type']][i] += entry['Count']
-                pass
-
-            elif event_type == 'DropItems':
-                # alpha4
-                # Parameters:
-                #     • Name
-                #     • Type
-                #     • OwnerID
-                #     • MissionID
-                #     • Count
-
-                # This is handled by BackpackChange.
-                # for i in self.state['BackPack'][entry['Type']]:
-                #     if i == entry['Name']:
-                #         self.state['BackPack'][entry['Type']][i] -= entry['Count']
-                #         # Paranoia in case we lost track
-                #         if self.state['BackPack'][entry['Type']][i] < 0:
-                #             self.state['BackPack'][entry['Type']][i] = 0
-                pass
-
-            elif event_type == 'UseConsumable':
-                # TODO: XXX: From v31 doc
-                #   12.2 BackpackChange
-                # This is written when there is any change to the contents of the
-                # suit backpack – note this can be written at the same time as other
-                # events like UseConsumable
-
-                # In 4.0.0.100 it is observed that:
-                #
-                #  1. Throw of any grenade type *only* causes a BackpackChange event, no
-                #     accompanying 'UseConsumable'.
-                #  2. Using an Energy Cell causes both UseConsumable and BackpackChange,
-                #     in that order.
-                #  3. Medkit acts the same as Energy Cell.
-                #
-                #  Thus we'll just ignore 'UseConsumable' for now.
-                #  for c in self.state['BackPack']['Consumable']:
-                #      if c == entry['Name']:
-                #          self.state['BackPack']['Consumable'][c] -= 1
-                #          # Paranoia in case we lost track
-                #          if self.state['BackPack']['Consumable'][c] < 0:
-                #              self.state['BackPack']['Consumable'][c] = 0
+            elif event_type in ('TradeMicroResources', 'CollectItems', 'DropItems', 'UseConsumable'):
+                # As of 4.0.0.400 we can ignore these as an empty (see file)
+                # `ShipLocker` event and/or a `BackpackChange` is also written.
                 pass
 
             # TODO:
@@ -1303,8 +1228,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'UpgradeWeapon':
                 # We're not actually keeping track of all owned weapons, only those in
                 # Suit Loadouts.
-                # alpha4 - credits?  Shouldn't cost any!
-                pass
+                self.state['Credits'] -= entry.get('Cost', 0)
 
             elif event_type == 'ScanOrganic':
                 # Nothing of interest to our state.
@@ -1631,6 +1555,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'Resurrect':
                 self.state['Credits'] -= entry.get('Cost', 0)
 
+                # There should be a `Backpack` event as you 'come to' in the
+                # new location, so no need to zero out BackPack here.
+
             # HACK (not game related / 2021-06-2): self.planet is moved into a more general self.state['Body'].
             # This exists to help plugins doing what they SHOULDN'T BE cope. It will be removed at some point.
             if self.state['Body'] is None or self.state['BodyType'] == 'Planet':
@@ -1641,6 +1568,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def backpack_set_empty(self):
+        """Set the BackPack contents to be empty."""
+        self.state['BackPack']['Component'] = defaultdict(int)
+        self.state['BackPack']['Consumable'] = defaultdict(int)
+        self.state['BackPack']['Item'] = defaultdict(int)
+        self.state['BackPack']['Data'] = defaultdict(int)
 
     def suit_sane_name(self, name: str) -> str:
         """

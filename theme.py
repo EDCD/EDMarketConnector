@@ -223,6 +223,7 @@ class _Theme(object):
                 'disabledforeground' : '#%02x%02x%02x' % (int(r/384), int(g/384), int(b/384)),
                 'highlight'          : config.get_str('dark_highlight'),
                 # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
+                # LANG: Label for commander name in main window
                 'font'               : (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
                                         tkFont.Font(family='Euro Caps', size=10, weight=tkFont.NORMAL) or
                                         'TkDefaultFont'),

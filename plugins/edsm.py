@@ -213,6 +213,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
+    # LANG: Game Commander name label in EDSM settings
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
     this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
@@ -220,6 +221,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     cur_row += 1
 
+    # LANG: EDSM Commander name label in EDSM settings
     this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
     this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.user = nb.Entry(frame)
@@ -227,6 +229,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     cur_row += 1
 
+    # LANG: EDSM API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
     this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.apikey = nb.Entry(frame)
@@ -253,7 +256,8 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
             this.apikey.insert(0, cred[1])
 
     else:
-        this.cmdr_text['text'] = _('None') 	# No hotkey/shortcut currently defined
+        # LANG: We have no data on the current commander
+        this.cmdr_text['text'] = _('None')
 
     to_set = tk.DISABLED
     if cmdr and not is_beta and this.log.get():

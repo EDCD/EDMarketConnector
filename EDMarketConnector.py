@@ -263,7 +263,7 @@ if __name__ == '__main__':  # noqa: C901
 # isort: off
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
-    # import update
+    import update
     # from infi.systray import SysTrayIcon
     # isort: on
 
@@ -414,7 +414,7 @@ class AppWindow(object):
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
-        # Update button in main window
+        # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
@@ -626,7 +626,7 @@ class AppWindow(object):
             return
 
         if (suit := monitor.state.get('SuitCurrent')) is None:
-            self.suit['text'] = f'<{_("Unknown")}>'
+            self.suit['text'] = f'<{_("Unknown")}>'  # LANG: Unknown suit
             return
 
         suitname = suit['edmcName']
@@ -694,55 +694,57 @@ class AppWindow(object):
 
         # (Re-)install log monitoring
         if not monitor.start(self.w):
-            self.status['text'] = f'Error: Check {_("E:D journal file location")}'
+            # LANG: ED Journal file location appears to be in error
+            self.status['text'] = _('Error: Check E:D journal file location')
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
-        self.cmdr_label['text'] = _('Cmdr') + ':'  # Main window
-        # Multicrew role label in main window
+        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Label for commander name in main window
+        # LANG: 'Ship' or multi-crew role label in main window, as applicable
         self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
-        self.suit_label['text'] = _('Suit') + ':'  # Main window
-        self.system_label['text'] = _('System') + ':'  # Main window
-        self.station_label['text'] = _('Station') + ':'  # Main window
-        self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
+        self.suit_label['text'] = _('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
+        self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
+        self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
+        self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
         if platform == 'darwin':
-            self.menubar.entryconfigure(1, label=_('File'))  # Menu title
-            self.menubar.entryconfigure(2, label=_('Edit'))  # Menu title
-            self.menubar.entryconfigure(3, label=_('View'))  # Menu title on OSX
-            self.menubar.entryconfigure(4, label=_('Window'))  # Menu title on OSX
-            self.menubar.entryconfigure(5, label=_('Help'))  # Menu title
-            self.system_menu.entryconfigure(0, label=_("About {APP}").format(APP=applongname))  # App menu entry on OSX
-            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # Menu item
-            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # Menu item
-            self.view_menu.entryconfigure(0, label=_('Status'))  # Menu item
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # Help menu item
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # Help menu item
+            self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title on OSX
+            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title on OSX
+            self.menubar.entryconfigure(3, label=_('View'))  # LANG: 'View' menu title on OSX
+            self.menubar.entryconfigure(4, label=_('Window'))  # LANG: 'Window' menu title on OSX
+            self.menubar.entryconfigure(5, label=_('Help'))  # LANG: Help' menu title on OSX
+            self.system_menu.entryconfigure(0, label=_("About {APP}").format(
+                APP=applongname))  # LANG: App menu entry on OSX
+            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates
+            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
+            self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help > Release Notes
         else:
-            self.menubar.entryconfigure(1, label=_('File'))  # Menu title
-            self.menubar.entryconfigure(2, label=_('Edit'))  # Menu title
-            self.menubar.entryconfigure(3, label=_('Help'))  # Menu title
-            self.theme_file_menu['text'] = _('File')  # Menu title
-            self.theme_edit_menu['text'] = _('Edit')  # Menu title
-            self.theme_help_menu['text'] = _('Help')  # Menu title
+            self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
+            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
+            self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
+            self.theme_file_menu['text'] = _('File')  # LANG: 'File' menu title
+            self.theme_edit_menu['text'] = _('Edit')  # LANG: 'Edit' menu title
+            self.theme_help_menu['text'] = _('Help')  # LANG: 'Help' menu title
 
             # File menu
-            self.file_menu.entryconfigure(0, label=_('Status'))  # Menu item
-            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # Menu item
-            self.file_menu.entryconfigure(2, label=_('Settings'))  # Item in the File menu on Windows
-            self.file_menu.entryconfigure(4, label=_('Exit'))  # Item in the File menu on Windows
+            self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
+            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
+            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings (Windows)
+            self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
 
             # Help menu
-            self.help_menu.entryconfigure(0, label=_('Documentation'))  # Help menu item
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # Help menu item
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # Help menu item
-            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))  # Menu item
-            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # App menu entry
+            self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
+            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
+            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help > Release Notes
+            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
+            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
 
         # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # As in Copy and Paste
+        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: As in Copy and Paste
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
@@ -762,7 +764,7 @@ class AppWindow(object):
         self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
-                # Successfully authenticated with the Frontier website
+                # LANG: Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
 
                 if platform == 'darwin':
@@ -793,6 +795,7 @@ class AppWindow(object):
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
+                    # LANG: Player is not docked at a station, when we expect them to be
                     self.status['text'] = _("You're not docked at a station!")
                     return False
 
@@ -860,17 +863,21 @@ class AppWindow(object):
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
+                # LANG: No data was returned for the commander from the Frontier CAPI
                 err = self.status['text'] = _('CAPI: No commander data returned')
 
             elif not data.get('commander', {}).get('name'):
+                # LANG: We didn't have the commander name when we should have
                 err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
             elif (not data.get('lastSystem', {}).get('name')
                   or (data['commander'].get('docked')
                       and not data.get('lastStarport', {}).get('name'))):
+                # LANG: We don't know where the commander is, when we should
                 err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
             elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
+                # LANG: We don't know what ship the commander is in, when we should
                 err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
@@ -972,12 +979,18 @@ class AppWindow(object):
             companion.session.invalidate()
             self.login()
 
+        except companion.ServerConnectionError as e:
+            logger.warning(f'Exception while contacting server: {e}')
+            err = self.status['text'] = str(e)
+            play_bad = True
+
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
             err = self.status['text'] = str(e)
             play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
+            # LANG: Time when we last obtained Frontier CAPI data
             self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
 
         if play_sound and play_bad:
@@ -1004,9 +1017,9 @@ class AppWindow(object):
             return {
                 None:         '',
                 'Idle':       '',
-                'FighterCon': _('Fighter'),  # Multicrew role
-                'FireCon':    _('Gunner'),  # Multicrew role
-                'FlightCon':  _('Helm'),  # Multicrew role
+                'FighterCon': _('Fighter'),  # LANG: Multicrew role
+                'FireCon':    _('Gunner'),  # LANG: Multicrew role
+                'FlightCon':  _('Helm'),  # LANG: Multicrew role
             }.get(role, role)
 
         if monitor.thread is None:
@@ -1024,7 +1037,7 @@ class AppWindow(object):
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
                 self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
-                self.ship_label['text'] = _('Role') + ':'  # Multicrew role label in main window
+                self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
@@ -1034,7 +1047,7 @@ class AppWindow(object):
                 else:
                     self.cmdr['text'] = monitor.cmdr
 
-                self.ship_label['text'] = _('Ship') + ':'  # Main window
+                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
 
                 # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
@@ -1057,7 +1070,7 @@ class AppWindow(object):
 
             else:
                 self.cmdr['text'] = ''
-                self.ship_label['text'] = _('Ship') + ':'  # Main window
+                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
                 self.ship['text'] = ''
 
             if monitor.cmdr and monitor.is_beta:
@@ -1166,7 +1179,7 @@ class AppWindow(object):
         """
         try:
             companion.session.auth_callback()
-            # Successfully authenticated with the Frontier website
+            # LANG: Successfully authenticated with the Frontier website
             self.status['text'] = _('Authentication successful')
             if platform == 'darwin':
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
@@ -1254,7 +1267,7 @@ class AppWindow(object):
             self.w.after(1000, self.cooldown)
 
         else:
-            self.button['text'] = self.theme_button['text'] = _('Update')  # Update button in main window
+            self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
                                                                  monitor.mode and
                                                                  not monitor.state['Captain'] and
@@ -1436,6 +1449,7 @@ class AppWindow(object):
             config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
+        # LANG: The application is shutting down
         self.status['text'] = _('Shutting down...')
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
@@ -1721,18 +1735,16 @@ sys.path: {sys.path}'''
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
-            # Yes, this is horribly hacky so as to be sure we match the key
-            # that we told Translators to use.
-            popup_text = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the " \
-                         "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an " \
-                         "updated version available, else alert the developer that they need to update the code for " \
-                         "Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on " \
-                         "the end of the name."
-            popup_text = popup_text.replace('\n', '\\n')
-            popup_text = popup_text.replace('\r', '\\r')
-            # Now the string should match, so try translation
-            popup_text = _(popup_text)
-            # And substitute in the other words.
+            popup_text = _(
+                "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
+                "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
+                "updated version available, else alert the developer that they need to update the code for "
+                r"Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on "
+                "the end of the name."
+            )
+
+            # Substitute in the other words.
+            # LANG: 'Plugins' tab / 'File' menu / 'File' > 'Settings'
             popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'),
                                            DISABLED='.disabled')
             # And now we do need these to be actual \r\n
