@@ -1571,6 +1571,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'Resurrect':
                 self.state['Credits'] -= entry.get('Cost', 0)
 
+                # There should be a `Backpack` event as you 'come to' in the
+                # new location, so no need to zero out BackPack here.
+
             # HACK (not game related / 2021-06-2): self.planet is moved into a more general self.state['Body'].
             # This exists to help plugins doing what they SHOULDN'T BE cope. It will be removed at some point.
             if self.state['Body'] is None or self.state['BodyType'] == 'Planet':
