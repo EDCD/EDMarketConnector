@@ -1010,25 +1010,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 pass
 
             elif event_type == 'TransferMicroResources':
-                # Moving Odyssey MicroResources between ShipLocker and BackPack
-                # Backpack dropped as its done in BackpackChange
-                #
-                #  from: 4.0.0.200 -- Locker(Old|New)Count is now a thing.
-                for mr in entry['Transfers']:
-                    category = self.category(mr['Category'])
-                    name = self.canonicalise(mr['Name'])
-
-                    self.state[category][name] = mr['LockerNewCount']
-                    if mr['Direction'] not in ('ToShipLocker', 'ToBackpack'):
-                        logger.warning(f'TransferMicroResources with unexpected Direction {mr["Direction"]=}: {mr=}')
-
-                # Paranoia check to see if anything has gone negative.
-                # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
-                # materials is impossible when used/picked up anyway.
-                for c in self.state['BackPack']:
-                    for m in self.state['BackPack'][c]:
-                        if self.state['BackPack'][c][m] < 0:
-                            self.state['BackPack'][c][m] = 0
+                # Defunct in 4.0.0.400 ?  Not seen in testing, and we get a
+                # new empty/file `ShipLocker` event, along with a
+                # `BackpackChange` event per item type transferred.
+                pass
 
             elif event_type == 'CollectItems':
                 # 4.0.0.400 (still) has a BackpackChange event as well, so
