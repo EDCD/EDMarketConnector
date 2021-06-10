@@ -1000,36 +1000,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # But still record the credits balance change.
                 self.state['Credits'] += entry.get('Price', 0)
 
-            elif event_type == 'TradeMicroResources':
-                # As of 4.0.0.400 we can ignore this as an empty (see file)
-                # `ShipLocker` event is written for the full new inventory.
-                pass
-
-            elif event_type == 'TransferMicroResources':
-                # Defunct in 4.0.0.400 ?  Not seen in testing, and we get a
-                # new empty/file `ShipLocker` event, along with a
-                # `BackpackChange` event per item type transferred.
-                pass
-
-            elif event_type == 'CollectItems':
-                # 4.0.0.400 (still) has a BackpackChange event as well, so
-                # ignore this for inventory purposes.
-                pass
-
-            elif event_type == 'DropItems':
-                # 4.0.0.400 (still) has a BackpackChange event as well, so
-                # ignore this for inventory purposes.
-                pass
-
-            elif event_type == 'UseConsumable':
-                # TODO: XXX: From v31 doc
-                #   12.2 BackpackChange
-                # This is written when there is any change to the contents of the
-                # suit backpack – note this can be written at the same time as other
-                # events like UseConsumable
-
-                # In 4.0.0.400 we do get this event, but *also* a `BackpackChange` event,
-                # so we ignore this for inventory purposes.
+            elif event_type in ('TradeMicroResources', 'CollectItems', 'DropItems', 'UseConsumable'):
+                # As of 4.0.0.400 we can ignore these as an empty (see file)
+                # `ShipLocker` event and/or a `BackpackChange` is also written.
                 pass
 
             # TODO:
