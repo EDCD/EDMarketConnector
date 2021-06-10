@@ -1032,17 +1032,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state[category][name] -= mr['Count']
 
             elif event_type == 'TradeMicroResources':
-                # Trading some MicroResources for another at a Bar Tender
-                # 'Offered' is what we traded away
-                for offer in entry['Offered']:
-                    category = self.category(offer['Category'])
-                    name = self.canonicalise(offer['Name'])
-                    self.state[category][name] -= offer['Count']
-
-                # For a single item name received
-                category = self.category(entry['Category'])
-                name = self.canonicalise(entry['Received'])
-                self.state[category][name] += entry['Count']
+                # As of 4.0.0.400 we can ignore this as an empty (see file)
+                # `ShipLocker` event is written for the full new inventory.
+                pass
 
             elif event_type == 'TransferMicroResources':
                 # Moving Odyssey MicroResources between ShipLocker and BackPack
