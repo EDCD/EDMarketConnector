@@ -526,7 +526,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def query(self, endpoint: str) -> CAPIData:
+    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001
         """Perform a query against the specified CAPI endpoint."""
         logger.trace(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
@@ -581,7 +581,7 @@ class Session(object):
                 raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
-                logger.debug('Maybe our token expired.')
+                logger.debug('Initial query failed, but login() just worked, trying again...')
                 self.retrying = True
                 return self.query(endpoint)
 
