@@ -410,15 +410,27 @@ class Auth(object):
         raise CredentialsError(f'{_("Error")}: {error!r}')
 
     @staticmethod
-    def invalidate(cmdr: str) -> None:
+    def invalidate(cmdr: Optional[str]) -> None:
         """Invalidate Refresh Token for specified Commander."""
-        logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
-        cmdrs = config.get_list('cmdrs', default=[])
-        idx = cmdrs.index(cmdr)
-        tokens = config.get_list('fdev_apikeys', default=[])
-        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
-        tokens[idx] = ''
-        config.set('fdev_apikeys', tokens)
+        to_set = None
+        if cmdr is None:
+            logger.info('Frontier CAPI Auth: Invalidating ALL tokens!')
+            cmdrs = config.get_list('cmdrs', default=[])
+            to_set = [''] * len(cmdrs)
+
+        else:
+            logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
+            cmdrs = config.get_list('cmdrs', default=[])
+            idx = cmdrs.index(cmdr)
+            to_set = config.get_list('fdev_apikeys', default=[])
+            to_set = to_set + [''] * (len(cmdrs) - len(to_set))
+            to_set[idx] = ''
+
+        if to_set is None:
+            logger.error('REFUSING TO SET NONE AS TOKENS!')
+            raise ValueError('Unexpected None for tokens while resetting')
+
+        config.set('fdev_apikeys', to_set)
         config.save()  # Save settings now for use by command-line app
 
     # noinspection PyMethodMayBeStatic

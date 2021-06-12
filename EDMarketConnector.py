@@ -82,6 +82,12 @@ if __name__ == '__main__':  # noqa: C901
         action='store_true'
     )
 
+    parser.add_argument(
+        '--forget-frontier-auth',
+        help='resets all authentication tokens',
+        action='store_true'
+    )
+
     parser.add_argument('--suppress-dupe-process-popup',
                         help='Suppress the popup from when the application detects another instance already running',
                         action='store_true'
@@ -1674,6 +1680,11 @@ sys.path: {sys.path}'''
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
+
+    # Do this after locale silliness, just in case
+    if args.forget_frontier_auth:
+        logger.info("Dropping all fdev tokens as --forget-frontier-auth was passed")
+        companion.Auth.invalidate(None)
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
