@@ -49,7 +49,17 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
     return out
 
 
-COMMENT_RE = re.compile(r'^.*?(#.*)$')
+"""
+Regular expressions for finding comments.
+
+COMMENT_SAME_LINE_RE is for an in-line comment on the end of code.
+COMMENT_OWN_LINE_RE is for a comment on its own line.
+
+The difference is necessary in order to tell if a 'above' LANG comment is for
+its own line (SAME_LINE), or meant to be for this following line (OWN_LINE).
+"""
+COMMENT_SAME_LINE_RE = re.compile(r'^.*?(#.*)$')
+COMMENT_OWN_LINE_RE = re.compile(r'^\s*?(#.*)$')
 
 
 def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:  # noqa: CCR001
@@ -75,7 +85,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
 
     bad_comment: Optional[str] = None
     if above_line is not None:
-        match = COMMENT_RE.match(above_line)
+        match = COMMENT_OWN_LINE_RE.match(above_line)
         if match:
             above_comment = match.group(1).strip()
             if not above_comment.startswith('# LANG:') and not out:
@@ -86,7 +96,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
                 above_comment = above_comment.replace('# LANG:', '').strip()
 
     if current_line is not None:
-        match = COMMENT_RE.match(current_line)
+        match = COMMENT_SAME_LINE_RE.match(current_line)
         if match:
             current_comment = match.group(1).strip()
             if not current_comment.startswith('# LANG:') and not out:
@@ -100,9 +110,6 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         out = current_comment
 
     elif above_comment is not None:
-        # TODO: Is this comment actually for the line it is on, i.e. also
-        #       contains a _(...) call ?  If so, then the comment is *not*
-        #       for **this** line.
         out = above_comment
 
     elif bad_comment is not None:
