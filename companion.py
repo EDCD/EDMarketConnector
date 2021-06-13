@@ -176,7 +176,8 @@ class ServerConnectionError(ServerError):
 
 
 class ServerLagging(Exception):
-    """Exception Class for CAPI Server lagging.
+    """
+    Exception Class for CAPI Server lagging.
 
     Raised when Companion API server is returning old data, e.g. when the
     servers are too busy.
@@ -187,6 +188,22 @@ class ServerLagging(Exception):
         if not args:
             # LANG: Frontier CAPI data doesn't agree with latest Journal game location
             self.args = (_('Error: Frontier server is lagging'),)
+
+
+class NoMonitorStation(Exception):
+    """
+    Exception Class for being docked, but not knowing where in monitor.
+
+    Raised when CAPI says we're docked but we forgot where we were at an EDO
+    Settlement, Disembarked, re-Embarked and then user hit 'Update'.
+    As of 4.0.0.401 both Disembark and Embark say `"Onstation": false`.
+    """
+
+    def __init__(self, *args) -> None:
+        self.args = args
+        if not args:
+            # LANG: Commander is docked at an EDO settlement, got out and back in, we forgot the station
+            self.args = (_("Docked but unknown station: EDO Settlement?"),)
 
 
 class CredentialsError(Exception):
@@ -409,7 +426,7 @@ class Auth(object):
     @staticmethod
     def invalidate(cmdr: Optional[str]) -> None:
         """Invalidate Refresh Token for specified Commander."""
-        to_set = None
+        to_set: Optional[list] = None
         if cmdr is None:
             logger.info('Frontier CAPI Auth: Invalidating ALL tokens!')
             cmdrs = config.get_list('cmdrs', default=[])
@@ -671,6 +688,8 @@ class Session(object):
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
             if last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id']):
+                logger.warning(f"{last_starport_name!r} != {marketdata['name']!r}"
+                               f" or {last_starport_id!r} != {int(marketdata['id'])!r}")
                 raise ServerLagging()
 
             else:
@@ -679,6 +698,8 @@ class Session(object):
         if services.get('outfitting') or services.get('shipyard'):
             shipdata = self.query(URL_SHIPYARD)
             if last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id']):
+                logger.warning(f"{last_starport_name!r} != {shipdata['name']!r} or "
+                               f"{last_starport_id!r} != {int(shipdata['id'])!r}")
                 raise ServerLagging()
 
             else:
