@@ -202,6 +202,7 @@ class JournalLock:
 
             self.parent = parent
             self.callback = callback
+            # LANG: Title text on popup when Journal directory already locked
             self.title(_('Journal directory already locked'))
 
             # remove decoration
@@ -218,13 +219,16 @@ class JournalLock:
             frame.grid(sticky=tk.NSEW)
 
             self.blurb = tk.Label(frame)
+            # LANG: Text for when newly selected Journal directory is already locked
             self.blurb['text'] = _("The new Journal Directory location is already locked.{CR}"
                                    "You can either attempt to resolve this and then Retry, or choose to Ignore this.")
             self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
 
+            # LANG: Generic 'Retry' button label
             self.retry_button = ttk.Button(frame, text=_('Retry'), command=self.retry)
             self.retry_button.grid(row=2, column=0, sticky=tk.EW)
 
+            # LANG: Generic 'Ignore' button label
             self.ignore_button = ttk.Button(frame, text=_('Ignore'), command=self.ignore)
             self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
             self.protocol("WM_DELETE_WINDOW", self._destroy)
