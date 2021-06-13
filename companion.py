@@ -195,6 +195,7 @@ class CredentialsError(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Generic "something went wrong with Frontier Auth" error
             self.args = (_('Error: Invalid Credentials'),)
 
 
@@ -210,6 +211,7 @@ class CmdrError(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Frontier CAPI authorisation not for currently game-active commander
             self.args = (_('Error: Wrong Cmdr'),)
 
 
@@ -320,6 +322,7 @@ class Auth(object):
                 (data[k] for k in ('error_description', 'error', 'message') if k in data),
                 '<unknown error>'
             )
+            # LANG: Generic error prefix - following text is from Frontier auth service
             raise CredentialsError(f'{_("Error")}: {error!r}')
 
         r = None
@@ -358,15 +361,18 @@ class Auth(object):
 
                 if (usr := data_decode.get('usr')) is None:
                     logger.error('No "usr" in /decode data')
+                    # LANG: Frontier auth, no 'usr' section in returned data
                     raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 if (customer_id := usr.get('customer_id')) is None:
                     logger.error('No "usr"->"customer_id" in /decode data')
+                    # LANG: Frontier auth, no 'customer_id' in 'usr' section in returned data
                     raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 # All 'FID' seen in Journals so far have been 'F<id>'
                 # Frontier, Steam and Epic
                 if f'F{customer_id}' != monitor.state.get('FID'):
+                    # LANG: Frontier auth customer_id doesn't match game session FID
                     raise CredentialsError(_("Error: customer_id doesn't match!"))
 
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
@@ -388,6 +394,7 @@ class Auth(object):
             if r:
                 self.dump(r)
 
+            # LANG: Failed to get Access Token from Frontier Auth service
             raise CredentialsError(_('Error: unable to get token')) from e
 
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
@@ -396,6 +403,7 @@ class Auth(object):
             (data[k] for k in ('error_description', 'error', 'message') if k in data),
             '<unknown error>'
         )
+        # LANG: Generic error prefix - following text is from Frontier auth service
         raise CredentialsError(f'{_("Error")}: {error!r}')
 
     @staticmethod
@@ -536,6 +544,7 @@ class Session(object):
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)
+            # LANG: Frontier CAPI data retrieval failed
             raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
@@ -551,6 +560,7 @@ class Session(object):
             # Server error. Typically 500 "Internal Server Error" if server is down
             logger.debug('500 status back from CAPI')
             self.dump(r)
+            # LANG: Frontier CAPI data retrieval failed with 5XX code
             raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
 
         try:
