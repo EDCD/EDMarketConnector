@@ -722,8 +722,10 @@ class AppWindow(object):
             self.menubar.entryconfigure(3, label=_('View'))  # LANG: 'View' menu title on OSX
             self.menubar.entryconfigure(4, label=_('Window'))  # LANG: 'Window' menu title on OSX
             self.menubar.entryconfigure(5, label=_('Help'))  # LANG: Help' menu title on OSX
-            self.system_menu.entryconfigure(0, label=_("About {APP}").format(
-                APP=applongname))  # LANG: App menu entry on OSX
+            self.system_menu.entryconfigure(
+                0,
+                label=_("About {APP}").format(APP=applongname)  # LANG: App menu entry on OSX
+            )
             self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
             self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
