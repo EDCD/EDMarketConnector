@@ -167,6 +167,7 @@ class ServerError(Exception):
         # Raised when cannot contact the Companion API server
         self.args = args
         if not args:
+            # LANG: Frontier CAPI didn't respond
             self.args = (_("Error: Frontier CAPI didn't respond"),)
 
 
@@ -184,20 +185,8 @@ class ServerLagging(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Frontier CAPI data doesn't agree with latest Journal location
             self.args = (_('Error: Frontier server is lagging'),)
-
-
-class SKUError(Exception):
-    """Exception Class for CAPI SKU error.
-
-    Raised when the Companion API server thinks that the user has not
-    purchased E:D i.e. doesn't have the correct 'SKU'.
-    """
-
-    def __init__(self, *args) -> None:
-        self.args = args
-        if not args:
-            self.args = (_('Error: Frontier server SKU problem'),)
 
 
 class CredentialsError(Exception):
@@ -526,7 +515,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def query(self, endpoint: str) -> CAPIData:
+    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001
         """Perform a query against the specified CAPI endpoint."""
         logger.trace(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
