@@ -1765,9 +1765,12 @@ sys.path: {sys.path}'''
             )
 
             # Substitute in the other words.
-            # LANG: 'Plugins' tab / 'File' menu / 'File' > 'Settings'
-            popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'),
-                                           DISABLED='.disabled')
+            popup_text = popup_text.format(
+                PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
+                FILE=_('File'),  # LANG: 'File' menu
+                SETTINGS=_('Settings'),  # LANG: 'Settings' entry on 'File' menu
+                DISABLED='.disabled'
+            )
             # And now we do need these to be actual \r\n
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
