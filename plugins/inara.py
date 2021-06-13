@@ -213,7 +213,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbutton to enable INARA API Usage
+        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
         variable=this.log,
         command=prefsvarchanged
     )
@@ -225,7 +225,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=_('Inara credentials'),  # LANG: INARA API keys link ( goes to https://inara.cz/settings-api )
+        text=_('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
         background=nb.Label().cget('background'),
         url='https://inara.cz/settings-api',
         underline=True

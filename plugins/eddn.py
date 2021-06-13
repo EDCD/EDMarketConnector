@@ -695,7 +695,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
     this.eddn_station_button = nb.Checkbutton(
         eddnframe,
-        # LANG: Enable EDDN support for station data checkbutton label
+        # LANG: Enable EDDN support for station data checkbox label
         text=_('Send station data to the Elite Dangerous Data Network'),
         variable=this.eddn_station,
         command=prefsvarchanged
@@ -706,7 +706,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     # Output setting new in E:D 2.2
     this.eddn_system_button = nb.Checkbutton(
         eddnframe,
-        # LANG: Enable EDDN support for system and other scan data checkbutton label
+        # LANG: Enable EDDN support for system and other scan data checkbox label
         text=_('Send system and scan data to the Elite Dangerous Data Network'),
         variable=this.eddn_system,
         command=prefsvarchanged
@@ -717,7 +717,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
-        # LANG: EDDNs delay sending until docked option is on, this message notes that a send was skipped due to this
+        # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
         text=_('Delay sending until docked'),
         variable=this.eddn_delay
     )

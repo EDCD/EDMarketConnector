@@ -250,7 +250,7 @@ class PreferencesDialog(tk.Toplevel):
             self.title(_('Preferences'))
 
         else:
-            # LANG: File > Settings menu entry for not-macOS
+            # LANG: File > Settings (macOS)
             self.title(_('Settings'))
 
         if parent.winfo_viewable():

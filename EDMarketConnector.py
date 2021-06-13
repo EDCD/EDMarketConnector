@@ -726,7 +726,7 @@ class AppWindow(object):
                 0,
                 label=_("About {APP}").format(APP=applongname)  # LANG: App menu entry on OSX
             )
-            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates
+            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates...
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
             self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
             self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
@@ -742,7 +742,7 @@ class AppWindow(object):
             # File menu
             self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
             self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings (Windows)
+            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
             self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
 
             # Help menu
@@ -753,7 +753,7 @@ class AppWindow(object):
             self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
 
         # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: As in Copy and Paste
+        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
@@ -813,7 +813,7 @@ class AppWindow(object):
             elif (config.get_int('output') & config.OUT_MKT_EDDN) \
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
-                    # LANG: Status - Either no station market or modules data from Frontier CAPI
+                    # LANG: Status - Either no market or no modules data for station from Frontier CAPI
                     self.status['text'] = _("Station doesn't have anything!")
 
             elif not data['lastStarport'].get('commodities'):
@@ -1324,7 +1324,7 @@ class AppWindow(object):
             tk.Toplevel.__init__(self, parent)
 
             self.parent = parent
-            # LANG: Help>About - 'About app' label
+            # LANG: Help > About App
             self.title(_('About {APP}').format(APP=applongname))
 
             if parent.winfo_viewable():
@@ -1358,7 +1358,7 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
-            # LANG: Help>About - Label on URL for release notes
+            # LANG: Help > Release Notes
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
                                                  f'{appversion_nobuild()}',
@@ -1770,7 +1770,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.format(
                 PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
                 FILE=_('File'),  # LANG: 'File' menu
-                SETTINGS=_('Settings'),  # LANG: 'Settings' entry on 'File' menu
+                SETTINGS=_('Settings'),  # LANG: File > Settings
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
