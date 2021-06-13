@@ -671,6 +671,8 @@ class Session(object):
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
             if last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id']):
+                logger.warning(f"{last_starport_name!r} != {marketdata['name']!r}"
+                               f" or {last_starport_id!r} != {int(marketdata['id'])!r}")
                 raise ServerLagging()
 
             else:
@@ -679,6 +681,8 @@ class Session(object):
         if services.get('outfitting') or services.get('shipyard'):
             shipdata = self.query(URL_SHIPYARD)
             if last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id']):
+                logger.warning(f"{last_starport_name!r} != {shipdata['name']!r} or "
+                               f"{last_starport_id!r} != {int(shipdata['id'])!r}")
                 raise ServerLagging()
 
             else:

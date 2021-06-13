@@ -899,14 +899,19 @@ class AppWindow(object):
 
             elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
                 # auto update is only when just docked
+                logger.warning(f"{auto_update!r} and not {monitor.state['OnFoot']!r} and "
+                               f"not {data['commander'].get('docked')!r}")
                 raise companion.ServerLagging()
 
             elif data['lastSystem']['name'] != monitor.system:
                 # CAPI system must match last journal one
+                logger.warning(f"{data['lastSystem']['name']!r} != {monitor.system!r}")
                 raise companion.ServerLagging()
 
             elif data['lastStarport']['name'] != monitor.station:
                 if monitor.state['OnFoot'] and monitor.station:
+                    logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                   f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
                     raise companion.ServerLagging()
 
                 else:
@@ -916,16 +921,22 @@ class AppWindow(object):
 
                     if last_station != monitor.station:
                         # CAPI lastStarport must match
+                        logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                       f"{last_station!r} != {monitor.station!r}")
                         raise companion.ServerLagging()
 
                 self.holdofftime = querytime + companion.holdoff
 
             elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['id']!r} != {monitor.state['ShipID']!r}")
                 raise companion.ServerLagging()
 
             elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
                 # CAPI ship type must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['name'].lower()!r} != {monitor.state['ShipType']!r}")
                 raise companion.ServerLagging()
 
             else:
