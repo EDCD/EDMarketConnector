@@ -24,6 +24,9 @@
 
 /* Coriolis invalid mode warning [plugins/coriolis.py] */
 "Invalid Coriolis override mode!" = "Некорректный режим переопределения URL для coriolis.io";
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Проверка";
+
 /* Language name */
 "!Language" = "Русский";
 

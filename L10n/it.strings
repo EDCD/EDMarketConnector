@@ -1,5 +1,32 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "Normale";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "Beta";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "Auto";
+
+/* Coriolis override label [plugins/coriolis.py] */
+"Override Beta/Normal Selection" = "Sovrascrivi selezione Beta/Normale";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "Reimposta";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "URL normale";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "URL Beta";
+
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Controlla";
+
 /* Language name */
 "!Language" = "Italiano";
+
+/* Message next to 'UI Transparency' slider  [prefs.py] */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 stà per completamente opaco.{CR}Finestra è aggiornata in tempo reale";
 
 /* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Default{CR}Riavvio Richiesto per{CR}applicare i cambiamenti!";
@@ -121,6 +148,9 @@
 /* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
 "E:D journal file location" = "locazione del file E:D journal";
 
+/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
+"EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Guarda il Log.";
+
 /* Empire rank. [stats.py] */
 "Earl" = "Earl";
 
@@ -147,6 +177,9 @@
 
 /* Trade rank. [stats.py] */
 "Entrepreneur" = "Entrepreneur";
+
+/* [companion.py] */
+"Error" = "Errore";
 
 /* [eddn.py] */
 "Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
@@ -203,6 +236,9 @@
 /* Section heading in settings. [prefs.py] */
 "File location" = "Percorso del file";
 
+/* Server errors from Frontier CAPI server [companion.py] */
+"Frontier CAPI server error" = "Errore nel server Frontier CAPI";
+
 /* CQC rank. [stats.py] */
 "Gladiator" = "Gladiator";
 
@@ -235,6 +271,9 @@
 
 /* Section heading in settings. [inara.py] */
 "Inara credentials" = "Credenziali per Inara";
+
+/* When Inara support has been killswitched [plugins/inara.py] */
+"Inara disabled. See Log." = "Inara disabilitato. Vedi il Log.";
 
 /* Settings>Plugins>Information on migrating plugins [prefs.py] */
 "Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
@@ -275,6 +314,9 @@
 /* Empire rank. [stats.py] */
 "Lord" = "Lord";
 
+/* Label for 'UI Transparency' option in [prefs.py] */
+"Main window transparency" = "Trasparenza della finestra principale";
+
 /* [prefs.py] */
 "Market data in CSV format file" = "Market data in formato CSV";
 
@@ -292,6 +334,9 @@
 
 /* Federation rank. [stats.py] */
 "Midshipman" = "Midshipman";
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Riduci a icona nel Vassoio di sistema";
 
 /* Explorer rank. [stats.py] */
 "Mostly Aimless" = "Mostly Aimless";
@@ -361,6 +406,9 @@
 
 /* Section heading in settings. [prefs.py] */
 "Plugins folder" = "Cartella dei plugins";
+
+/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
+"Plugins Without Python 3.x Support:" = "Plugin senza il supporto a Python 3.x :";
 
 /* Federation rank. [stats.py] */
 "Post Captain" = "Post Captain";
@@ -482,6 +530,9 @@
 /* Menu item. [EDMarketConnector.py] */
 "Status" = "Status";
 
+/* 'Suit' label in main UI' [EDMarketConnector.py] */
+"Suit" = "Tuta";
+
 /* Explorer rank. [stats.py] */
 "Surveyor" = "Surveyor";
 
@@ -511,6 +562,9 @@
 
 /* Label for 'UI Scaling' option [prefs.py] */
 "UI Scale Percentage" = "Percentuale zoom della UI";
+
+/* General 'Unknown', e.g. suit loadout */
+"Unknown" = "Sconosciuto";
 
 /* Update button in main window. [EDMarketConnector.py] */
 "Update" = "Recupera";

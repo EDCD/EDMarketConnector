@@ -24,6 +24,9 @@
 
 /* Coriolis invalid mode warning [plugins/coriolis.py] */
 "Invalid Coriolis override mode!" = "¡Modo sobrescritura de Coriolis Inválido!";
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Comprobar";
+
 /* Language name */
 "!Language" = "Español";
 

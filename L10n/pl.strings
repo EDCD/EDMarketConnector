@@ -1,3 +1,24 @@
+/* Coriolis override modes [plugins/coriolis.py] */
+"Normal" = "Normalny";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Beta" = "Beta";
+
+/* Coriolis override modes [plugins/coriolis.py] */
+"Auto" = "Auto";
+
+/* Coriolis reset buttons [plugins/coriolis.py] */
+"Reset" = "Reset";
+
+/* Coriolis Normal URL label [plugins/coriolis.py] */
+"Normal URL" = "URL normalnej wersji";
+
+/* Coriolis Beta URL label [plugins/coriolis.py] */
+"Beta URL" = "URL wersji Beta";
+
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Sprawdź";
+
 /* Language name */
 "!Language" = "Polski";
 

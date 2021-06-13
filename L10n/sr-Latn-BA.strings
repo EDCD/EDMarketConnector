@@ -24,6 +24,9 @@
 
 /* Coriolis invalid mode warning [plugins/coriolis.py] */
 "Invalid Coriolis override mode!" = "Neispravan Coriolis režim rada!";
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Provjera";
+
 /* Language name */
 "!Language" = "Srpski (Latinica, Bosna i Hercegovina)";
 
