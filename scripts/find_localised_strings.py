@@ -52,7 +52,7 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
 COMMENT_RE = re.compile(r'^.*?(#.*)$')
 
 
-def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:
+def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:  # noqa: CCR001
     """
     Extract comments from source code based on the given call.
 
@@ -69,33 +69,44 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     current = call.lineno - 1
 
     above_line = lines[above].strip() if len(lines) >= above else None
+    above_comment: Optional[str] = None
     current_line = lines[current].strip()
+    current_comment: Optional[str] = None
 
-    line: Optional[str] = None
     bad_comment: Optional[str] = None
-    for line in (above_line, current_line):
-        if line is None or '#' not in line:
-            continue
+    if above_line is not None:
+        match = COMMENT_RE.match(above_line)
+        if match:
+            above_comment = match.group(1).strip()
+            if not above_comment.startswith('# LANG:') and not out:
+                bad_comment = f'Unknown comment for {file}:{call.lineno} {above_line}'
+                above_comment = None
 
-        match = COMMENT_RE.match(line)
-        if not match:
-            print(line)
-            continue
+            else:
+                above_comment = above_comment.replace('# LANG:', '').strip()
 
-        comment = match.group(1).strip()
-        if not comment.startswith('# LANG:'):
-            bad_comment = f'Unknown comment for {file}:{call.lineno} {line}'
-            continue
+    if current_line is not None:
+        match = COMMENT_RE.match(current_line)
+        if match:
+            current_comment = match.group(1).strip()
+            if not current_comment.startswith('# LANG:') and not out:
+                bad_comment = f'Unknown comment for {file}:{call.lineno} {current_line}'
+                current_comment = None
 
-        out = comment.replace('# LANG:', '').strip()
-        bad_comment = None
-        break
+            else:
+                current_comment = current_comment.replace('# LANG:', '').strip()
 
-    if bad_comment is not None:
+    if current_comment is not None:
+        out = current_comment
+
+    elif above_comment is not None:
+        out = above_comment
+
+    elif bad_comment is not None:
         print(bad_comment, file=sys.stderr)
 
     if out is None:
-        print(f'No comment for {file}:{call.lineno} {line}', file=sys.stderr)
+        print(f'No comment for {file}:{call.lineno} {current_line}', file=sys.stderr)
 
     return out
 
