@@ -194,6 +194,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
+        # LANG: Settings>EDSM - Label on checkbox for 'send data'
         frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
     )
 
@@ -203,6 +204,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
+        # LANG: Settings>EDSM - Label on header/URL to EDSM API key page
         text=_('Elite Dangerous Star Map credentials'),
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
@@ -352,6 +354,7 @@ def journal_entry(
     """Journal Entry hook."""
     if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
         logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+        # LANG: EDSM plugin - Journal handling disabled by killswitch
         plug.show_error(_('EDSM Handler disabled. See Log.'))
         return
 
@@ -633,6 +636,7 @@ def worker() -> None:
 
                     if msg_num // 100 == 2:
                         logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
+                        # LANG: EDSM Plugin - Error message from EDSM API
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
 
                     else:
@@ -669,6 +673,7 @@ def worker() -> None:
                 retrying += 1
 
         else:
+            # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if closing:
@@ -731,10 +736,12 @@ def edsm_notify_system(reply: Mapping[str, Any]) -> None:
     """Update the image next to the system link."""
     if not reply:
         this.system_link['image'] = this._IMG_ERROR
+        # LANG: EDSM Plugin - Error connecting to EDSM API
         plug.show_error(_("Error: Can't connect to EDSM"))
 
     elif reply['msgnum'] // 100 not in (1, 4):
         this.system_link['image'] = this._IMG_ERROR
+        # LANG: EDSM Plugin - Error message from EDSM API
         plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
 
     elif reply.get('systemCreated'):

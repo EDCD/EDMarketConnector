@@ -245,7 +245,13 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent = parent
         self.callback = callback
-        self.title(_('Preferences') if platform == 'darwin' else _('Settings'))
+        if platform == 'darwin':
+            # LANG: File > Preferences menu entry for macOS
+            self.title(_('Preferences'))
+
+        else:
+            # LANG: File > Settings menu entry for not-macOS
+            self.title(_('Settings'))
 
         if parent.winfo_viewable():
             self.transient(parent)
@@ -336,13 +342,14 @@ class PreferencesDialog(tk.Toplevel):
 
         row = AutoInc(start=1)
 
+        # LANG: Settings > Output - choosing what data to save to files
         self.out_label = nb.Label(output_frame, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=self.PADX, sticky=tk.W, row=row.get())
 
         self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in CSV format file'),
+            text=_('Market data in CSV format file'),  # LANG: Settings > Output option
             variable=self.out_csv,
             command=self.outvarchanged
         )
@@ -351,7 +358,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in Trade Dangerous format file'),
+            text=_('Market data in Trade Dangerous format file'),  # LANG: Settings > Output option
             variable=self.out_td,
             command=self.outvarchanged
         )
@@ -361,7 +368,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_ship_button = nb.Checkbutton(
             output_frame,
-            text=_('Ship loadout'),
+            text=_('Ship loadout'),  # LANG: Settings > Output option
             variable=self.out_ship,
             command=self.outvarchanged
         )
@@ -371,7 +378,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_auto_button = nb.Checkbutton(
             output_frame,
-            text=_('Automatically update on docking'),
+            text=_('Automatically update on docking'),  # LANG: Settings > Output option
             variable=self.out_auto,
             command=self.outvarchanged
         )
@@ -379,7 +386,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get_str('outdir')))
-        # LANG: Label for "where files are located"
+        # LANG: Settings > Output - Label for "where files are located"
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
@@ -387,16 +394,25 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry = nb.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
+        if platform == 'darwin':
+            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
+
+        else:
+            text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
+
         self.outbutton = nb.Button(
             output_frame,
-            text=(_('Change...') if platform == 'darwin' else _('Browse...')),
+            text=text,
+            # Technically this is different from the label in Settings > Output, as *this* is used
+            # as the title of the popup folder selection window.
+            # LANG: Settings > Output - Label for "where files are located"
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
         self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=row.get())
 
         nb.Frame(output_frame).grid(row=row.get())  # bottom spacer # TODO: does nothing?
 
-        # LANG: Label for 'Output' Settings tab
+        # LANG: Label for 'Output' Settings/Preferences tab
         root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
 
     def __setup_plugin_tabs(self, notebook: Notebook) -> None:
@@ -419,17 +435,25 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir.set(logdir)
         self.logdir_entry = nb.Entry(config_frame, takefocus=False)
 
-        # Location of the new Journal file in E:D 2.2
+        # Location of the Journal files
         nb.Label(
             config_frame,
+            # LANG: Settings > Configuration - Label for Journal files location
             text=_('E:D journal file location')+':'
         ).grid(columnspan=4, padx=self.PADX, sticky=tk.W, row=row.get())
 
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
+        if platform == 'darwin':
+            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
+
+        else:
+            text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
+
         self.logbutton = nb.Button(
             config_frame,
-            text=(_('Change...') if platform == 'darwin' else _('Browse...')),
+            text=text,
+            # LANG: Settings > Configuration - Label for Journal files location
             command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir)
         )
         self.logbutton.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
@@ -438,6 +462,7 @@ class PreferencesDialog(tk.Toplevel):
             # Appearance theme and language setting
             nb.Button(
                 config_frame,
+                # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
                 text=_('Default'),
                 command=self.logdir_reset,
                 state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
@@ -464,6 +489,7 @@ class PreferencesDialog(tk.Toplevel):
                     # Shortcut settings prompt on OSX
                     nb.Label(
                         config_frame,
+                        # LANG: macOS Preferences > Configuration - restart the app message
                         text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
                         foreground='firebrick'
                     ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
@@ -472,6 +498,7 @@ class PreferencesDialog(tk.Toplevel):
                     # Shortcut settings prompt on OSX
                     nb.Label(
                         config_frame,
+                        # LANG: macOS - Configuration - need to grant the app permission for keyboard shortcuts
                         text=_('{APP} needs permission to use shortcuts').format(APP=applongname),
                         foreground='firebrick'
                     ).grid(columnspan=4, padx=self.PADX, sticky=tk.W, row=row.get())
@@ -498,6 +525,7 @@ class PreferencesDialog(tk.Toplevel):
                 # Hotkey/Shortcut setting
                 self.hotkey_only_btn = nb.Checkbutton(
                     config_frame,
+                    # LANG: Configuration - Act on hotkey only when ED is in foreground
                     text=_('Only when Elite: Dangerous is the active app'),
                     variable=self.hotkey_only,
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
@@ -508,6 +536,7 @@ class PreferencesDialog(tk.Toplevel):
                 # Hotkey/Shortcut setting
                 self.hotkey_play_btn = nb.Checkbutton(
                     config_frame,
+                    # LANG: Configuration - play sound when hotkey used
                     text=_('Play sound'),
                     variable=self.hotkey_play,
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
@@ -522,6 +551,7 @@ class PreferencesDialog(tk.Toplevel):
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.get_int('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
             config_frame,
+            # LANG: Configuration - disable checks for app updates when in-game
             text=_('Disable Automatic Application Updates Check when in-game'),
             variable=self.disable_autoappupdatecheckingame,
             command=self.disable_autoappupdatecheckingame_changed
@@ -571,6 +601,7 @@ class PreferencesDialog(tk.Toplevel):
                 value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
             )
 
+            # LANG: Configuration - Label for selection of 'System' provider website
             nb.Label(config_frame, text=_('System')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
             self.system_button = nb.OptionMenu(
                 config_frame,
@@ -588,6 +619,7 @@ class PreferencesDialog(tk.Toplevel):
                 value=str(station_provider if station_provider in plug.provides('station_url') else 'eddb')
             )
 
+            # LANG: Configuration - Label for selection of 'Station' provider website
             nb.Label(config_frame, text=_('Station')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
             self.station_button = nb.OptionMenu(
                 config_frame,
@@ -608,6 +640,7 @@ class PreferencesDialog(tk.Toplevel):
             # Set the current loglevel
             nb.Label(
                 config_frame,
+                # LANG: Configuration - Label for selection of Log Level
                 text=_('Log Level')
             ).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
 
@@ -659,6 +692,7 @@ class PreferencesDialog(tk.Toplevel):
         appearance_frame = nb.Frame(notebook)
         appearance_frame.columnconfigure(2, weight=1)
         with row as cur_row:
+            # LANG: Appearance - Label for selection of application display language
             nb.Label(appearance_frame, text=_('Language')).grid(padx=self.PADX, sticky=tk.W, row=cur_row)
             self.lang_button = nb.OptionMenu(appearance_frame, self.lang, self.lang.get(), *self.languages.values())
             self.lang_button.grid(column=1, columnspan=2, padx=self.PADX, sticky=tk.W, row=cur_row)
@@ -700,6 +734,7 @@ class PreferencesDialog(tk.Toplevel):
             # Main window
             self.theme_button_0 = nb.ColoredButton(
                 appearance_frame,
+                # LANG: Appearance - Example 'Normal' text
                 text=_('Station'),
                 background='grey4',
                 command=lambda: self.themecolorbrowse(0)
@@ -731,6 +766,7 @@ class PreferencesDialog(tk.Toplevel):
             columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
         )
         with row as cur_row:
+            # LANG: Appearance - Label for selection of UI scaling
             nb.Label(appearance_frame, text=_('UI Scale Percentage')).grid(
                 padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row
             )
@@ -751,6 +787,7 @@ class PreferencesDialog(tk.Toplevel):
             self.uiscale_bar.grid(column=1, sticky=tk.W, row=cur_row)
             self.ui_scaling_defaultis = nb.Label(
                 appearance_frame,
+                # LANG: Appearance - Help/hint text for UI scaling selection
                 text=_('100 means Default{CR}Restart Required for{CR}changes to take effect!')
             ).grid(column=3, padx=self.PADX, pady=2*self.PADY, sticky=tk.E, row=cur_row)
 
@@ -760,6 +797,7 @@ class PreferencesDialog(tk.Toplevel):
         )
 
         with row as cur_row:
+            # LANG: Appearance - Label for selection of main window transparency
             nb.Label(appearance_frame, text=_("Main window transparency")).grid(
                 padx=self.PADX, pady=self.PADY*2, sticky=tk.W, row=cur_row
             )
@@ -779,6 +817,7 @@ class PreferencesDialog(tk.Toplevel):
 
             nb.Label(
                 appearance_frame,
+                # LANG: Appearance - Help/hint text for Main window transparency selection
                 text=_(
                     "100 means fully opaque.{CR}"
                     "Window is updated in real time"
@@ -800,6 +839,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.ontop_button = nb.Checkbutton(
             appearance_frame,
+            # LANG: Appearance - Label for checkbox to select if application always on top
             text=_('Always on top'),
             variable=self.always_ontop,
             command=self.themevarchanged
@@ -877,6 +917,7 @@ class PreferencesDialog(tk.Toplevel):
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
             )
+            # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
             nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
 
             for plugin in plug.PLUGINS_not_py3:
@@ -884,9 +925,10 @@ class PreferencesDialog(tk.Toplevel):
                     nb.Label(plugins_frame, text=plugin.name).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
 
             HyperlinkLabel(
+                # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
                 plugins_frame, text=_('Information on migrating plugins'),
                 background=nb.Label().cget('background'),
-                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
+                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
                 underline=True
             ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
         ############################################################

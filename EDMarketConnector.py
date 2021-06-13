@@ -503,6 +503,7 @@ class AppWindow(object):
                 self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 self.system_menu.add_separator()
+                # LANG: Appearance - Label for checkbox to select if application always on top
                 self.system_menu.add_checkbutton(label=_('Always on top'),
                                                  variable=self.always_ontop,
                                                  command=self.ontop_changed)  # Appearance setting
@@ -755,6 +756,7 @@ class AppWindow(object):
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
         if not self.status['text']:
+            # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
@@ -809,10 +811,12 @@ class AppWindow(object):
             elif (config.get_int('output') & config.OUT_MKT_EDDN) \
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
+                    # LANG: Status - Either no station market or modules data from Frontier CAPI
                     self.status['text'] = _("Station doesn't have anything!")
 
             elif not data['lastStarport'].get('commodities'):
                 if not self.status['text']:
+                    # LANG: Status - No station market data from Frontier CAPI
                     self.status['text'] = _("Station doesn't have a market!")
 
             elif config.get_int('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
@@ -857,6 +861,7 @@ class AppWindow(object):
             elif play_sound:
                 hotkeymgr.play_good()
 
+            # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
@@ -1269,7 +1274,7 @@ class AppWindow(object):
         if time() < self.holdofftime:
             # Update button in main window
             self.button['text'] = self.theme_button['text'] \
-                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))
+                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))  # LANG: Cooldown on 'Update' button
             self.w.after(1000, self.cooldown)
 
         else:
@@ -1317,6 +1322,7 @@ class AppWindow(object):
             tk.Toplevel.__init__(self, parent)
 
             self.parent = parent
+            # LANG: Help>About - 'About app' label
             self.title(_('About {APP}').format(APP=applongname))
 
             if parent.winfo_viewable():
@@ -1350,6 +1356,7 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
+            # LANG: Help>About - Label on URL for release notes
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
                                                  f'{appversion_nobuild()}',
@@ -1375,6 +1382,7 @@ class AppWindow(object):
             # OK button to close the window
             ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
+            # LANG: Generic 'OK' button label
             button = ttk.Button(frame, text=_('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
             button.bind("<Return>", lambda event: self.apply())
@@ -1395,6 +1403,7 @@ class AppWindow(object):
 
     def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
         """Save newly acquired CAPI data in the configured file."""
+        # LANG: Status - Attempting to retrieve data from Frontier CAPI to save to file
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
 
@@ -1746,6 +1755,7 @@ sys.path: {sys.path}'''
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+            # LANG: Popup-text about 'active' plugins without Python 3.x support
             popup_text = _(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
                 "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
@@ -1763,6 +1773,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.replace('\\r', '\r')
 
             tk.messagebox.showinfo(
+                # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
                 _('EDMC: Plugins Without Python 3.x Support'),
                 popup_text
             )

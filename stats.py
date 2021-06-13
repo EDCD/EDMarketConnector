@@ -35,7 +35,7 @@ if platform == 'win32':
         GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
 
     except Exception:  # Not supported under Wine 4.0
-        CalculatePopupWindowPosition = None
+        CalculatePopupWindowPosition = None  # type: ignore
 
 
 def status(data: Dict[str, Any]) -> List[List[str]]:
@@ -275,6 +275,7 @@ class StatsDialog():
         if not monitor.cmdr:
             return
 
+        # LANG: Fetching data from Frontier CAPI in order to display on File > Status
         self.status['text'] = _('Fetching data...')
         self.parent.update_idletasks()
 

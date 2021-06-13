@@ -212,7 +212,10 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
-        frame, text=_('Send flight log and Cmdr status to Inara'), variable=this.log, command=prefsvarchanged
+        frame,
+        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbutton to enable INARA API Usage
+        variable=this.log,
+        command=prefsvarchanged
     )
 
     this.log_button.grid(columnspan=2, padx=x_button_padding, pady=(5, 0), sticky=tk.W)
@@ -222,7 +225,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=_('Inara credentials'),
+        text=_('Inara credentials'),  # LANG: INARA API keys link ( goes to https://inara.cz/settings-api )
         background=nb.Label().cget('background'),
         url='https://inara.cz/settings-api',
         underline=True
@@ -329,7 +332,7 @@ def journal_entry(  # noqa: C901, CCR001
     """
     if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
         logger.warning(f'Inara support has been disabled via killswitch: {ks.reason}')
-        plug.show_error(_('Inara disabled. See Log.'))
+        plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
         return ''
 
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
@@ -1542,6 +1545,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
         # Log fatal errors
         logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
         logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+        # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
         plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
 
     else:
@@ -1554,6 +1558,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
                     logger.debug(f'JSON data:\n{json.dumps(data_event)}')
 
                 if reply_event['eventStatus'] // 100 != 2:
+                    # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
                     plug.show_error(_('Error: Inara {MSG}').format(
                         MSG=f'{data_event["eventName"]},'
                             f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'
