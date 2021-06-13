@@ -245,7 +245,13 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent = parent
         self.callback = callback
-        self.title(_('Preferences') if platform == 'darwin' else _('Settings'))
+        if platform == 'darwin':
+            # LANG: File > Preferences menu entry for macOS
+            self.title(_('Preferences'))
+
+        else:
+            # LANG: File > Settings menu entry for not-macOS
+            self.title(_('Settings'))
 
         if parent.winfo_viewable():
             self.transient(parent)
@@ -336,13 +342,14 @@ class PreferencesDialog(tk.Toplevel):
 
         row = AutoInc(start=1)
 
+        # LANG: Settings > Output - choosing what data to save to files
         self.out_label = nb.Label(output_frame, text=_('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=self.PADX, sticky=tk.W, row=row.get())
 
         self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in CSV format file'),
+            text=_('Market data in CSV format file'),  # LANG: Settings > Output option
             variable=self.out_csv,
             command=self.outvarchanged
         )
@@ -351,7 +358,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in Trade Dangerous format file'),
+            text=_('Market data in Trade Dangerous format file'),  # LANG: Settings > Output option
             variable=self.out_td,
             command=self.outvarchanged
         )
@@ -361,7 +368,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_ship_button = nb.Checkbutton(
             output_frame,
-            text=_('Ship loadout'),
+            text=_('Ship loadout'),  # LANG: Settings > Output option
             variable=self.out_ship,
             command=self.outvarchanged
         )
@@ -371,7 +378,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_auto_button = nb.Checkbutton(
             output_frame,
-            text=_('Automatically update on docking'),
+            text=_('Automatically update on docking'),  # LANG: Settings > Output option
             variable=self.out_auto,
             command=self.outvarchanged
         )
@@ -379,7 +386,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get_str('outdir')))
-        # LANG: Label for "where files are located"
+        # LANG: Settings > Output - Label for "where files are located"
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
@@ -387,9 +394,15 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry = nb.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
+        if platform == 'darwin':
+            text = (_('Change...'))  # LANG: macOS Preferences > Output - files location selection button
+
+        else:
+            text = (_('Browse...'))  # LANG: NOT-macOS Settings > Output - files location selection button
+
         self.outbutton = nb.Button(
             output_frame,
-            text=(_('Change...') if platform == 'darwin' else _('Browse...')),
+            text=text,
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
         self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=row.get())
