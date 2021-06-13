@@ -88,7 +88,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         match = COMMENT_OWN_LINE_RE.match(above_line)
         if match:
             above_comment = match.group(1).strip()
-            if not above_comment.startswith('# LANG:') and not out:
+            if not above_comment.startswith('# LANG:'):
                 bad_comment = f'Unknown comment for {file}:{call.lineno} {above_line}'
                 above_comment = None
 
@@ -99,7 +99,7 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         match = COMMENT_SAME_LINE_RE.match(current_line)
         if match:
             current_comment = match.group(1).strip()
-            if not current_comment.startswith('# LANG:') and not out:
+            if not current_comment.startswith('# LANG:'):
                 bad_comment = f'Unknown comment for {file}:{call.lineno} {current_line}'
                 current_comment = None
 
