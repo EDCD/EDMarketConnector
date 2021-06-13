@@ -919,6 +919,14 @@ class AppWindow(object):
                     if data['commander']['docked']:
                         last_station = data['lastStarport']['name']
 
+                    if monitor.station is None:
+                        # Likely (re-)Embarked on ship docked at an EDO settlement.
+                        # Both Disembark and Embark have `"Onstation": false` in Journal.
+                        # So there's nothing to tell us which settlement we're (still,
+                        # or now, if we came here in Apex and then recalled ship) docked at.
+                        logger.debug("monitor.station is None - so EDO settlement?")
+                        raise companion.NoMonitorStation()
+
                     if last_station != monitor.station:
                         # CAPI lastStarport must match
                         logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
