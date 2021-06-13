@@ -100,6 +100,9 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
         out = current_comment
 
     elif above_comment is not None:
+        # TODO: Is this comment actually for the line it is on, i.e. also
+        #       contains a _(...) call ?  If so, then the comment is *not*
+        #       for **this** line.
         out = above_comment
 
     elif bad_comment is not None:
