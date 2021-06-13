@@ -185,7 +185,7 @@ class ServerLagging(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
-            # LANG: Frontier CAPI data doesn't agree with latest Journal location
+            # LANG: Frontier CAPI data doesn't agree with latest Journal game location
             self.args = (_('Error: Frontier server is lagging'),)
 
 
