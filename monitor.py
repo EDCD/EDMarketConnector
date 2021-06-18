@@ -808,8 +808,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 payload = OrderedDict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
-                # XXX: We need to recase these to match
-                self.state[event_type] = payload
+                # NB: We need the original casing for these keys
+                self.state[entry['event']] = payload
 
             elif event_type == 'engineerprogress':
                 # Sanity check - at least once the 'Engineer' (name) was missing from this in early
