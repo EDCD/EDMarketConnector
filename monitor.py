@@ -808,6 +808,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 payload = OrderedDict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
+                # XXX: We need to recase these to match
                 self.state[event_type] = payload
 
             elif event_type == 'engineerprogress':
@@ -1020,7 +1021,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # `ShipLocker` event and/or a `BackpackChange` is also written.
                 pass
 
-            # TODO:
             # <https://forums.frontier.co.uk/threads/575010/>
             # also there's one additional journal event that was missed out from
             # this version of the docs: "SuitLoadout": # when starting on foot, or
@@ -1030,7 +1030,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if not self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid):
                     logger.error(f"Event was: {entry}")
 
-            elif event_type == 'SwitchSuitLoadout':
+            elif event_type == 'switchsuitloadout':
                 # 4.0.0.101
                 #
                 # { "timestamp":"2021-05-21T10:39:43Z", "event":"SwitchSuitLoadout",
@@ -1048,7 +1048,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
                     logger.error(f"Event was: {entry}")
 
-            elif event_type == 'CreateSuitLoadout':
+            elif event_type == 'createsuitloadout':
                 # 4.0.0.101
                 #
                 # { "timestamp":"2021-05-21T11:13:15Z", "event":"CreateSuitLoadout", "SuitID":1700216165682989,
@@ -1364,7 +1364,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 state_category[received['Material']] += received['Quantity']
 
             elif event_type == 'EngineerCraft' or (
-                event_type == 'EngineerLegacyConvert' and not entry.get('IsPreview')
+                event_type == 'engineerlegacyconvert' and not entry.get('IsPreview')
             ):
 
                 for category in ('Raw', 'Manufactured', 'Encoded'):
