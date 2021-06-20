@@ -570,3 +570,7 @@ edmc_suit_symbol_localised = {
         'utilitysuit':     'Traje Maverick',
     },
 }
+
+# Local webserver for debugging. See implementation in debug_webserver.py
+DEBUG_WEBSERVER_HOST = '127.0.0.1'
+DEBUG_WEBSERVER_PORT = 9090

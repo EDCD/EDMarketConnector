@@ -16,11 +16,12 @@ from typing import TextIO, Tuple
 
 import requests
 
+import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appversion_nobuild, config
+from config import applongname, appversion_nobuild, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from myNotebook import Frame
@@ -86,10 +87,15 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
 class EDDN:
     """EDDN Data export."""
-
-    # SERVER = 'http://localhost:8081'	# testing
+    DEBUG = 'eddn' in debug_senders
     SERVER = 'https://eddn.edcd.io:4430'
+    if DEBUG:
+        SERVER = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}'
+
     UPLOAD = f'{SERVER}/upload/'
+    if DEBUG:
+        UPLOAD = f'{SERVER}/eddn'
+
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
