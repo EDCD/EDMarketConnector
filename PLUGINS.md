@@ -1055,7 +1055,7 @@ If said string exists, `DEBUG_WEBSERVER_HOST` and `DEBUG_WEBSERVER_PORT` in
 `edmc_data` will contain the host and port for the currently running local webserver. Simply redirect your requests
 there, and your requests will be logged to disk. For organisation, rewrite your request path to simply be `/pluginname`.
 
-logs exist in `$TEMP/EDMarketConnector/http_debug/$path.log`. If somehow you manage to cause a directory traversal, your
+Logs exist in `$TEMP/EDMarketConnector/http_debug/$path.log`. If somehow you manage to cause a directory traversal, your
 data will not be saved to disk at all. You will see this in EDMCs log.
 
 The simplest way to go about adding support is:

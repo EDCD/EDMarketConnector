@@ -536,7 +536,7 @@ if 'edsm' in debug_senders:
 # Worker thread
 
 
-def worker() -> None:
+def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     """
     Handle uploading events to EDSM API.
 

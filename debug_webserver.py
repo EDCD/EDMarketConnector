@@ -47,6 +47,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         self.send_response_only(200, "OK")
         if response is not None:
             self.send_header('Content-Length', str(len(response)))
+
         self.end_headers()  # This is needed because send_response_only DOESN'T ACTUALLY SEND THE RESPONSE </rant>
         if response is not None:
             self.wfile.write(response.encode())
@@ -63,7 +64,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         target_file = output_data_path / (safe_file_name(target_path) + '.log')
         if target_file.parent != output_data_path:
             logger.warning(f"REFUSING TO WRITE FILE THAT ISN'T IN THE RIGHT PLACE! {target_file=}")
-            logger.warn(f'DATA FOLLOWS\n{data}')
+            logger.warning(f'DATA FOLLOWS\n{data}')
             return
 
         with output_lock, target_file.open('a') as f:
