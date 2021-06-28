@@ -289,6 +289,7 @@ class PreferencesDialog(tk.Toplevel):
         self.__setup_output_tab(notebook)
         self.__setup_plugin_tabs(notebook)
         self.__setup_config_tab(notebook)
+        self.__setup_privacy_tab(notebook)
         self.__setup_appearance_tab(notebook)
         self.__setup_plugin_tab(notebook)
 
@@ -670,6 +671,25 @@ class PreferencesDialog(tk.Toplevel):
 
         # LANG: Label for 'Configuration' tab in Settings
         notebook.add(config_frame, text=_('Configuration'))
+
+    def __setup_privacy_tab(self, notebook: Notebook) -> None:
+        frame = nb.Frame(notebook)
+        self.hide_multicrew_captian = tk.BooleanVar(value=config.get_bool('hide_multicrew_captian', default=False))
+        self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
+        row = AutoInc()
+
+        nb.Label(frame, text=_('Main UI privacy options')).grid(
+            row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
+        )
+
+        nb.Checkbutton(
+            frame, text=_('Hide private group name in UI'),  variable=self.hide_private_group
+        ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
+        nb.Checkbutton(
+            frame, text=_('Hide multi-crew captian name'), variable=self.hide_multicrew_captian
+        ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
+
+        notebook.add(frame, text=_('Privacy'))
 
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
@@ -1233,6 +1253,10 @@ class PreferencesDialog(tk.Toplevel):
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above
         Translations.install(config.get_str('language', default=None))  # type: ignore # This sets self in weird ways.
+
+        # Privacy options
+        config.set('hide_private_group', self.hide_private_group.get())
+        config.set('hide_multicrew_captian', self.hide_multicrew_captian.get())
 
         config.set('ui_scale', self.ui_scale.get())
         config.set('ui_transparency', self.transparency.get())

@@ -1095,7 +1095,7 @@ class AppWindow(object):
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
-                if monitor.group and not config.get_bool("hide_group", default=False):
+                if monitor.group and not config.get_bool("hide_private_group", default=False):
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
 
                 else:
