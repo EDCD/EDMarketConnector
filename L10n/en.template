@@ -630,3 +630,15 @@
 
 /* stats.py: Status dialog title; In files: stats.py:376; */
 "Ships" = "Ships";
+
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:682; */
+"Main UI privacy options" = "Main UI privacy options";
+
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:687; */
+"Hide private group name in UI" = "Hide private group name in UI";
+
+/* prefs.py: Hide multicrew captian name from main UI checkbox; In files: prefs.py:691; */
+"Hide multi-crew captian name" = "Hide multi-crew captian name";
+
+/* prefs.py: Preferences privacy tab title; In files: prefs.py:695; */
+"Privacy" = "Privacy";

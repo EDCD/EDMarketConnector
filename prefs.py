@@ -678,18 +678,21 @@ class PreferencesDialog(tk.Toplevel):
         self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
         row = AutoInc()
 
+        # LANG: UI elements privacy section header in privacy tab of preferences
         nb.Label(frame, text=_('Main UI privacy options')).grid(
             row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
         )
 
         nb.Checkbutton(
-            frame, text=_('Hide private group name in UI'),  variable=self.hide_private_group
+            frame, text=_('Hide private group name in UI'),  # LANG: Hide private group owner name from UI checkbox
+            variable=self.hide_private_group
         ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
         nb.Checkbutton(
-            frame, text=_('Hide multi-crew captian name'), variable=self.hide_multicrew_captian
+            frame, text=_('Hide multi-crew captian name'),  # LANG: Hide multicrew captian name from main UI checkbox
+            variable=self.hide_multicrew_captian
         ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
 
-        notebook.add(frame, text=_('Privacy'))
+        notebook.add(frame, text=_('Privacy'))  # LANG: Preferences privacy tab title
 
     def __setup_appearance_tab(self, notebook: Notebook) -> None:
         self.languages = Translations.available_names()
