@@ -1118,6 +1118,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'edmcName':  self.suit_sane_name(loc_name),
                     'id':        None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
+                    'mods':      entry['SuitMods'],  # Suits can (rarely) be bought with modules installed
                     'slots':     [],
                 }
 
@@ -1183,6 +1184,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             'id':             None,
                             'weaponrackId':   entry['SuitModuleID'],
                             'locDescription': '',
+                            'class':          entry['Class'],
+                            'mods':           entry['WeaponMods']
                         }
 
                     except KeyError:
@@ -1657,6 +1660,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'locName':  suitname,
                 'suitId':   entry['SuitID'],
                 'name':     entry['SuitName'],
+                'mods':     entry['SuitMods']
             }
 
         suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
@@ -2105,6 +2109,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'weaponrackId':   loadout_slots[s]['SuitModuleID'],
                 'locName':        loadout_slots[s].get('ModuleName_Localised', loadout_slots[s]['ModuleName']),
                 'locDescription': '',
+                'class':          loadout_slots[s]['Class'],
+                'mods':           loadout_slots[s]['WeaponMods'],
             }
 
         return slots
