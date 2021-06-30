@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 import util_ships
 from config import config
-from dashboard import dashboard
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
