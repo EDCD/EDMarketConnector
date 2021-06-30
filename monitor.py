@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 import util_ships
 from config import config
+from dashboard import dashboard
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
@@ -517,6 +518,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = True  # First event in 3.0
 
             elif event_type == 'loadgame':
+                # Odyssey Release Update 5
+                self.state['GameLanguage'] = entry.get('language', self.state['GameLanguage'])
+                self.state['GameVersion'] = entry.get('gameversion', self.state['GameVersion'])
+                self.state['GameBuild'] = entry.get('build', self.state['GameBuild'])
+                self.version = self.state['GameVersion']  # Update this just in case things above changed.
+                self.is_beta = any(v in str(self.version).lower() for v in ('alpha', 'beta'))
+
                 # alpha4
                 # Odyssey: bool
                 self.cmdr = entry['Commander']
