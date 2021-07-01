@@ -1109,7 +1109,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'id':        None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
                     'mods':      entry['SuitMods'],  # Suits can (rarely) be bought with modules installed
-                    'slots':     [],
                 }
 
                 # update credits
@@ -1682,7 +1681,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
         suit['id'] = suit.get('id')  # Not available in 4.0.0.100 journal event
-        suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
         # Ensure the suit is in self.state['Suits']
         self.state['Suits'][f"{suitid}"] = suit
 
