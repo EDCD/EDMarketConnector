@@ -182,9 +182,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if journal_dir == '' or journal_dir is None:
             journal_dir = config.default_journal_dir
 
-        # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
-        # When that is refactored, remove the magic comment
-        logdir = expanduser(journal_dir)  # type: ignore # config is weird
+        logdir = expanduser(journal_dir)
 
         if not logdir or not isdir(logdir):
             logger.error(f'Journal Directory is invalid: "{logdir}"')
@@ -201,11 +199,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Do this before setting up the observer in case the journal directory has gone away
         try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
             logfiles = sorted(
-                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),  # type: ignore # config is weird
+                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                 key=lambda x: x.split('.')[1:]
             )
 
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore # config is weird
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
 
         except Exception:
             logger.exception('Failed to find latest logfile')
@@ -492,8 +490,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             event_type = entry['event'].lower()
             if event_type == 'fileheader':
                 self.live = False
-                self.version = entry['gameversion']
-                self.is_beta = any(v in entry['gameversion'].lower() for v in ('alpha', 'beta'))
 
                 self.cmdr = None
                 self.mode = None
@@ -508,21 +504,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = None
                 self.__init_state()
-                # In self.state as well, as that's what plugins get
-                self.state['GameLanguage'] = entry['language']
-                self.state['GameVersion'] = entry['gameversion']
-                self.state['GameBuild'] = entry['build']
+
+                # Do this AFTER __init_state() lest our nice new state entries be None
+                self.populate_version_info(entry)
 
             elif event_type == 'commander':
                 self.live = True  # First event in 3.0
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5
-                self.state['GameLanguage'] = entry.get('language', self.state['GameLanguage'])
-                self.state['GameVersion'] = entry.get('gameversion', self.state['GameVersion'])
-                self.state['GameBuild'] = entry.get('build', self.state['GameBuild'])
-                self.version = self.state['GameVersion']  # Update this just in case things above changed.
-                self.is_beta = any(v in str(self.version).lower() for v in ('alpha', 'beta'))
+                self.populate_version_info(entry, suppress=True)
 
                 # alpha4
                 # Odyssey: bool
@@ -1582,6 +1573,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except Exception as ex:
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
+
+    def populate_version_info(self, entry: MutableMapping[str, str], suppress: bool = False):
+        """
+        Update game version information stored locally.
+
+        :param entry: Either a Fileheader or LoadGame event
+        """
+        try:
+            self.state['GameLanguage'] = entry['language']
+            self.state['GameVersion'] = entry['gameversion']
+            self.state['GameBuild'] = entry['build']
+            self.version = self.state['GameVersion']
+            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))
+        except KeyError:
+            if not suppress:
+                raise
 
     def backpack_set_empty(self):
         """Set the BackPack contents to be empty."""
