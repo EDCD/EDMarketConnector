@@ -912,7 +912,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 logger.warning(f'We have a BackPackMaterials event, defunct since > 4.0.0.102 ?:\n{entry}\n')
                 pass
 
-            elif event_type == 'backpack':
+            elif event_type in ('backpack', 'resupply'):
+                # as of v4.0.0.600, a `resupply` event is dropped when resupplying your suit at your ship.
+                # This event writes the same data as a backpack event. It will also be followed by a ShipLocker
+                # but that follows normal behaviour in its handler.
+
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
                 backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
