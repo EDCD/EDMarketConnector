@@ -341,6 +341,8 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
+        # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
+        return ''
 
     this.on_foot = state['OnFoot']
     event_name: str = entry['event']
