@@ -21,9 +21,9 @@ The `kill_switches` array contains kill switch objects. Each contains the follow
 
 Each entry in `kills` contains a `reason` and `additional_data` field. `reason` is self explanatory, however
 additional_data can contain various things. They are outlaid below:
-|            Key |    Type     | Description                                                           |
-| -------------: | :---------: | :-------------------------------------------------------------------- |
-| `redact_field` | `List[str]` | A list of fields in the matching event to be redacted, if they exist. |
+|             Key |    Type     | Description                                                          |
+| --------------: | :---------: | :------------------------------------------------------------------- |
+| `delete_fields` | `List[str]` | A list of fields in the matching event to be removed, if they exist. |
 
 An example follows:
 
@@ -60,12 +60,13 @@ The version of the JSON file will be automatically upgraded if possible by the c
 ## Currently supported killswitch strings
 
 The current recognised (to EDMC and its internal plugins) killswitch strings are as follows:
-| Kill Switch                                            | Description                                                                                  |
-| :----------------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `plugins.eddn.send`                                    | Disables all use of the send method on EDDN (effectively disables EDDN updates)              |
-| `plugins.(eddn\|inara\|edsm\|eddb).journal`            | Disables all journal processing for EDDN/EDSM/INARA                                          |
-| `plugins.(edsm\|inara).worker`                         | Disables the EDSM/INARA worker thread (effectively disables updates) (does not close thread) |
-| `plugins.(eddn\|inara\|edsm).journal.event.$eventname` | Specific events to disable processing for                                                    |
+| Kill Switch                                            | Description                                                                                                                                    |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugins.eddn.send`                                    | Disables all use of the send method on EDDN (effectively disables EDDN updates)                                                                |
+| `plugins.(eddn\|inara\|edsm\|eddb).journal`            | Disables all journal processing for EDDN/EDSM/INARA                                                                                            |
+| `plugins.(edsm\|inara).worker`                         | Disables the EDSM/INARA worker thread (effectively disables updates) (does not close thread)                                                   |
+| `plugins.(edsm\|inara).worker.$eventname`              | Disables the EDSM/INARA worker for the given eventname, OR if delete_fields exists, removes the fields from the event                          |
+| `plugins.(eddn\|inara\|edsm).journal.event.$eventname` | Specific events to disable processing for. OR, if delete_fields exists as additional_data, the fields listed will be removed before processing |
 
 ## File location
 
