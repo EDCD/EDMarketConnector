@@ -571,8 +571,9 @@ edmc_suit_symbol_localised = {
     },
 }
 
-# 4.0.0.600 Update 5 introduced duplicates of `fileheader` keys into `LoadGame`,
-# but the GameLanguage in the latter has doubled up the `\`, so cater for either.
+# WORKAROUND 2021-07-03 | 4.0.0.600 Update 5: duplicates of `fileheader` keys in `LoadGame`,
+# but the GameLanguage in the latter has doubled up the `\`, so cater for either here.
+# This is only run once when this file is imported by something, no runtime cost or repeated expansions will occur
 for lang, new_lang in map(lambda k: (k, k.replace('\\', r'\\')), list(edmc_suit_symbol_localised.keys())):
     edmc_suit_symbol_localised[new_lang] = edmc_suit_symbol_localised[lang]
 
