@@ -571,6 +571,11 @@ edmc_suit_symbol_localised = {
     },
 }
 
+# 4.0.0.600 Update 5 introduced duplicates of `fileheader` keys into `LoadGame`,
+# but the GameLanguage in the latter has doubled up the `\`, so cater for either.
+for lang, new_lang in map(lambda k: (k, k.replace('\\', r'\\')), list(edmc_suit_symbol_localised.keys())):
+    edmc_suit_symbol_localised[new_lang] = edmc_suit_symbol_localised[lang]
+
 # Local webserver for debugging. See implementation in debug_webserver.py
 DEBUG_WEBSERVER_HOST = '127.0.0.1'
 DEBUG_WEBSERVER_PORT = 9090

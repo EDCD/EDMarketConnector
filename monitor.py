@@ -513,7 +513,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
-                # self.populate_version_info(entry, suppress=True)
+                self.populate_version_info(entry, suppress=True)
 
                 # alpha4
                 # Odyssey: bool
