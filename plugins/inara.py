@@ -341,8 +341,13 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
         logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
-        # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
-        return ''
+        if ks.kill is None or 'delete_fields' not in ks.kill.additional_data:
+            # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
+            return ''
+
+        elif 'delete_fields' in ks.kill.additional_data:
+            for field in ks.kill.additional_data['delete_fields']:
+                entry.pop(field, None)
 
     this.on_foot = state['OnFoot']
     event_name: str = entry['event']
@@ -1461,6 +1466,25 @@ def new_add_event(
         this.events[key].append(Event(name, timestamp, data))
 
 
+def clean_event_list(event_list: List[Event]) -> list[Event]:
+    """Check for killswitched events and remove or modify them as requested."""
+    out = []
+
+    for e in event_list:
+        ks = killswitch.get_disabled(f'plugins.inara.worker.{e.name}')
+        if not ks.disabled:
+            out.append(e)
+
+        if ks.kill is not None and 'delete_fields' in ks.kill.additional_data:
+            # its disabled, but... we have
+            for field in ks.kill.additional_data['delete_fields']:
+                cast(Dict[str, Any], e.data).pop(field, None)
+
+            out.append(e)
+
+    return out
+
+
 def new_worker():
     """
     Handle sending events to the Inara API.
@@ -1475,6 +1499,7 @@ def new_worker():
             continue
 
         for creds, event_list in events.items():
+            event_list = clean_event_list(event_list)
             if not event_list:
                 continue
 
