@@ -573,6 +573,8 @@ edmc_suit_symbol_localised = {
 
 # WORKAROUND 2021-07-03 | 4.0.0.600 Update 5: duplicates of `fileheader` keys in `LoadGame`,
 # but the GameLanguage in the latter has doubled up the `\`, so cater for either here.
+# This is sourced from what the game is passed by the launcher, caveat emptor. It was mentioned that / is also
+# an option
 # This is only run once when this file is imported by something, no runtime cost or repeated expansions will occur
 __keys = list(edmc_suit_symbol_localised.keys())
 for lang in __keys:
