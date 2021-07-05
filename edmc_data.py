@@ -574,8 +574,14 @@ edmc_suit_symbol_localised = {
 # WORKAROUND 2021-07-03 | 4.0.0.600 Update 5: duplicates of `fileheader` keys in `LoadGame`,
 # but the GameLanguage in the latter has doubled up the `\`, so cater for either here.
 # This is only run once when this file is imported by something, no runtime cost or repeated expansions will occur
-for lang, new_lang in map(lambda k: (k, k.replace('\\', r'\\')), list(edmc_suit_symbol_localised.keys())):
+__keys = list(edmc_suit_symbol_localised.keys())
+for lang in __keys:
+    new_lang = lang.replace('\\', r'\\')
+    new_lang_2 = lang.replace('\\', '/')
+
     edmc_suit_symbol_localised[new_lang] = edmc_suit_symbol_localised[lang]
+    edmc_suit_symbol_localised[new_lang_2] = edmc_suit_symbol_localised[lang]
+
 
 # Local webserver for debugging. See implementation in debug_webserver.py
 DEBUG_WEBSERVER_HOST = '127.0.0.1'
