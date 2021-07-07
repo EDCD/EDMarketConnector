@@ -1,8 +1,10 @@
 """Fetch kill switches from EDMC Repo."""
 from __future__ import annotations
-from copy import deepcopy
 
-from typing import Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, TypedDict, Union, cast
+from copy import deepcopy
+from typing import (
+    Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, TypedDict, Union, cast
+)
 
 import requests
 import semantic_version
@@ -72,16 +74,18 @@ def _apply(target: Union[MutableMapping, MutableSequence], key: str, to_set: Any
             target[key] = to_set
 
     elif isinstance(target, MutableSequence):
-        if (idx := _get_int(key)) is not None:
-            if delete:
-                if len(target) > idx:
-                    target.pop(idx)
+        if (idx := _get_int(key)) is None:
+            raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
 
-            elif len(target) == idx:
-                target.append(to_set)
+        if delete:
+            if len(target) > idx:
+                target.pop(idx)
 
-            else:
-                target[idx] = to_set  # this can raise, that's fine
+        elif len(target) == idx:
+            target.append(to_set)
+
+        else:
+            target[idx] = to_set  # this can raise, that's fine
 
     else:
         raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
