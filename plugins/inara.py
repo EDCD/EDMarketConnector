@@ -1,5 +1,6 @@
 """Inara Sync."""
 
+import copy
 import json
 import threading
 import time
@@ -9,7 +10,8 @@ from operator import itemgetter
 from threading import Lock, Thread
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, Union, cast
+from typing import Sequence, Tuple, Union, cast
+from dataclasses import dataclass
 
 import requests
 
@@ -47,7 +49,8 @@ class Credentials(NamedTuple):
 EVENT_DATA = Union[Mapping[str, Any], Sequence[Mapping[str, Any]]]
 
 
-class Event(NamedTuple):
+@dataclass
+class Event:
     """Event represents an event for the Inara API."""
 
     name: str
@@ -334,21 +337,21 @@ def journal_entry(  # noqa: C901, CCR001
 
     :return: str - empty if no error, else error string.
     """
-    if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
-        logger.warning(f'Inara support has been disabled via killswitch: {ks.reason}')
+    should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
+    if should_return:
         plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
+        logger.trace('returning due to killswitch match')
         return ''
 
-    elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
-        logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
-        if ks.kill is None or 'delete_fields' not in ks.kill.additional_data:
-            # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
-            return ''
+    should_return, new_entry = killswitch.check_killswitch(
+        f'plugins.inara.journal.event.{entry["event"]}', entry, logger
+    )
+    if should_return:
+        logger.trace('returning due to killswitch match')
+        # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
+        return ''
 
-        elif 'delete_fields' in ks.kill.additional_data:
-            for field in ks.kill.additional_data['delete_fields']:
-                entry.pop(field, None)
-
+    entry = new_entry  # type: ignore # Im done trying to teach mypy how to generic. Its the same thing, I promise.
     this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
@@ -1466,21 +1469,17 @@ def new_add_event(
         this.events[key].append(Event(name, timestamp, data))
 
 
-def clean_event_list(event_list: List[Event]) -> list[Event]:
+def clean_event_list(event_list: List[Event]) -> List[Event]:
     """Check for killswitched events and remove or modify them as requested."""
     out = []
 
     for e in event_list:
-        ks = killswitch.get_disabled(f'plugins.inara.worker.{e.name}')
-        if not ks.disabled:
-            out.append(e)
+        bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{e.name}', e.data, logger)
+        if bad:
+            continue
 
-        if ks.kill is not None and 'delete_fields' in ks.kill.additional_data:
-            # its disabled, but... we have
-            for field in ks.kill.additional_data['delete_fields']:
-                cast(Dict[str, Any], e.data).pop(field, None)
-
-            out.append(e)
+        e.data = new_event
+        out.append(e)
 
     return out
 
@@ -1515,6 +1514,7 @@ def new_worker():
                     {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
                 ]
             }
+
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
             logger.trace_if('plugin.inara.events', f'Events:\n{json.dumps(data)}\n')
 
