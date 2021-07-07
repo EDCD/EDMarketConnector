@@ -1,11 +1,11 @@
 """Fetch kill switches from EDMC Repo."""
 from __future__ import annotations
-from os import kill
-from typing import Any, Dict, List, NamedTuple, Optional, TypedDict, Union, cast
+from copy import deepcopy
+
+from typing import Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, TypedDict, Union, cast
 
 import requests
 import semantic_version
-from copy import deepcopy
 from semantic_version.base import Version
 
 import config
@@ -13,18 +13,120 @@ import EDMCLogging
 
 logger = EDMCLogging.get_main_logger()
 
-DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
+OLD_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
+DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches_v2.json'
 CURRENT_KILLSWITCH_VERSION = 2
 
 _current_version: semantic_version.Version = config.appversion_nobuild()
 
 
 class SingleKill(NamedTuple):
-    """A single KillSwitch. Possibly with additional data."""
+    """A single KillSwitch. Possibly with additional rules."""
 
     match: str
     reason: str
-    additional_data: Dict[str, Any]
+    redact_fields: Optional[List[str]]
+    delete_fields: Optional[List[str]]
+    set_fields: Optional[Dict[str, Any]]
+
+    @property
+    def has_rules(self) -> bool:
+        """Return whether or not this SingleKill can apply rules to a dict to make it safe to use."""
+        return any(x is not None for x in (self.redact_fields, self.delete_fields, self.set_fields))
+
+    def apply_rules(self, target: Dict[str, Any]):
+        """
+        Apply the rules this SingleKill instance has to make some data okay to send.
+
+        Note that this MODIFIES DATA IN PLACE.
+
+        :param target: data to apply a rule to
+        """
+        # fields that contain . might be going deeper into the dict. check here FIRST to see if they exist at the top
+        # level, if not, then work our way down
+
+        for key in (self.redact_fields if self.redact_fields is not None else []):
+            _deep_apply(target, key, "REDACTED")
+
+        for key in (self.delete_fields if self.delete_fields is not None else []):
+            _deep_apply(target, key, delete=True)
+
+        for key, value in (self.set_fields if self .set_fields is not None else {}).items():
+            _deep_apply(target, key, value)
+
+
+def _apply(target: Union[MutableMapping, MutableSequence], key: str, to_set: Any = None, delete: bool = False):
+    """
+    Set or delete the given target key on the given target.
+
+    :param target: The thing to set data on
+    :param key: the key or index to set the data to
+    :param to_set: the data to set, if any, defaults to None
+    :param delete: whether or not to delete the key or index, defaults to False
+    :raises ValueError: when an unexpected target type is passed
+    """
+    if isinstance(target, MutableMapping):
+        if delete:
+            target.pop(key, None)
+        else:
+            target[key] = to_set
+
+    elif isinstance(target, MutableSequence):
+        if (idx := _get_int(key)) is not None:
+            if delete:
+                if len(target) > idx:
+                    target.pop(idx)
+
+            elif len(target) == idx:
+                target.append(to_set)
+
+            else:
+                target[idx] = to_set  # this can raise, that's fine
+
+    else:
+        raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
+
+
+def _deep_apply(target: dict[str, Any], path: str, to_set=None, delete=False):
+    """
+    Set the given path to the given value, if it exists.
+
+    if the path has dots (ascii period -- '.'), it will be successively split if possible for deeper indices into
+    target
+
+    :param target: the dict to modify
+    :param to_set: the data to set, defaults to None
+    :param delete: whether or not to delete the key rather than set it
+    """
+    current: Union[MutableMapping, MutableSequence] = target
+    key: str = ""
+    while '.' in path:
+        if path in current:
+            # it exists on this level, dont go further
+            break
+
+        key, _, path = path.partition('.')
+
+        if isinstance(current, Mapping):
+            current = current[key]
+
+        elif isinstance(current, Sequence):
+            if (target_idx := _get_int(key)) is not None:
+                current = current[target_idx]
+            else:
+                raise ValueError(f'Cannot index sequence with non-int key {key!r}')
+
+        else:
+            raise ValueError(f'Dont know how to index a {type(current)} ({current!r})')
+
+    _apply(current, path, to_set, delete)
+
+
+def _get_int(s: str) -> Optional[int]:
+    try:
+        return int(s)
+    except ValueError:
+        return None
 
 
 class KillSwitches(NamedTuple):
@@ -40,7 +142,11 @@ class KillSwitches(NamedTuple):
 
         for match, ks_data in data['kills'].items():
             ks[match] = SingleKill(
-                match=match, reason=ks_data['reason'], additional_data=ks_data.get('additional_data', {})
+                match=match,
+                reason=ks_data['reason'],
+                redact_fields=ks_data.get('redact_fields'),
+                set_fields=ks_data.get('set_fields'),
+                delete_fields=ks_data.get('delete_fields')
             )
 
         return KillSwitches(version=semantic_version.SimpleSpec(data['version']), kills=ks)
@@ -52,7 +158,7 @@ class DisabledResult(NamedTuple):
     disabled: bool
     kill: Optional[SingleKill]
 
-    @ property
+    @property
     def reason(self) -> str:
         """Reason provided for why this killswitch exists."""
         return self.kill.reason if self.kill is not None else ""
@@ -106,9 +212,14 @@ class KillSwitchSet:
         return f'KillSwitchSet(kill_switches={self.kill_switches!r})'
 
 
-class SingleKillSwitchJSON(TypedDict):  # noqa: D101
+class BaseSingleKillSwitch(TypedDict):  # noqa: D101
     reason: str
-    additional_data: Dict[str, Any]
+
+
+class SingleKillSwitchJSON(BaseSingleKillSwitch, total=False):  # noqa: D101
+    redact_fields: list[str]    # set fields to "REDACTED"
+    delete_fields: list[str]    # remove fields entirely
+    set_fields: dict[str, Any]  # set fields to given data
 
 
 class KillSwitchSetJSON(TypedDict):  # noqa: D101
@@ -137,7 +248,7 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchJSO
         logger.warning(f"Failed to get kill switches, data was invalid: {e}")
         return None
 
-    except (requests.exceptions.BaseHTTPError, requests.exceptions.ConnectionError) as e:
+    except (requests.exceptions.BaseHTTPError, requests.exceptions.ConnectionError) as e:  # type: ignore
         logger.warning(f"unable to connect to {target!r}: {e}")
         return None
 
@@ -164,13 +275,12 @@ def _upgrade_kill_switch_dict(data: KillSwitchJSONFile) -> KillSwitchJSONFile:
         logger.info('Got an old version killswitch file (v1) upgrading!')
         to_return: KillSwitchJSONFile = deepcopy(data)
         data_v1 = cast(_KillSwitchJSONFileV1, data)
-        # reveal_type(to_return['kill_switches'])
 
         to_return['kill_switches'] = [
             cast(KillSwitchSetJSON, {  # I need to cheat here a touch. It is this I promise
                 'version': d['version'],
                 'kills': {
-                    match: {'reason': reason, 'additional_data': {}} for match, reason in d['kills'].items()
+                    match: {'reason': reason} for match, reason in d['kills'].items()
                 }
             })
             for d in data_v1['kill_switches']
@@ -180,7 +290,7 @@ def _upgrade_kill_switch_dict(data: KillSwitchJSONFile) -> KillSwitchJSONFile:
 
         return to_return
 
-    return data
+    raise ValueError(f'Unknown Killswitch version {data["version"]}')
 
 
 def parse_kill_switches(data: KillSwitchJSONFile) -> List[KillSwitches]:
@@ -212,7 +322,7 @@ def parse_kill_switches(data: KillSwitchJSONFile) -> List[KillSwitches]:
     return out
 
 
-def get_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchSet]:
+def get_kill_switches(target=DEFAULT_KILLSWITCH_URL, fallback: Optional[str] = None) -> Optional[KillSwitchSet]:
     """
     Get a kill switch set object.
 
@@ -220,8 +330,13 @@ def get_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchSet]:
     :return: the KillSwitchSet for the URL, or None if there was an error
     """
     if (data := fetch_kill_switches(target)) is None:
-        logger.warning('could not get killswitches')
-        return None
+        if fallback is not None:
+            logger.warning('could not get killswitches, trying fallback')
+            data = fetch_kill_switches(fallback)
+
+        if data is None:
+            logger.warning('Could not get killswitches.')
+            return None
 
     return KillSwitchSet(parse_kill_switches(data))
 
@@ -235,13 +350,13 @@ def setup_main_list():
 
     Plugins should NOT call this EVER.
     """
-    if (data := fetch_kill_switches()) is None:
+    if (data := get_kill_switches(DEFAULT_KILLSWITCH_URL, OLD_KILLSWITCH_URL)) is None:
         logger.warning("Unable to fetch kill switches. Setting global set to an empty set")
         return
 
     global active
-    active = KillSwitchSet(parse_kill_switches(data))
-    logger.trace('Active Killswitches:')
+    active = data
+    logger.trace(f'{len(active.kill_switches)} Active Killswitches:')
     for v in active.kill_switches:
         logger.trace(v)
 

@@ -6,24 +6,27 @@ EDMarketConnector implements a Kill Switch system that allows us to disable feat
 
 Killswitches are stored in a JSON file that is queried by EDMC on startup. The format is as follows:
 
-|             Key |   Type   | Description                                                   |
-| --------------: | :------: | :------------------------------------------------------------ |
-|       `version` |  `int`   | the version of the Kill Switch JSON file, always 1            |
-|  `last_updated` | `string` | When last the kill switches were updated (for human use only) |
-| `kill_switches` | `array`  | The kill switches this file contains (expanded below)         |
+|             Key |   Type   | Description                                                                                  |
+| --------------: | :------: | :------------------------------------------------------------------------------------------- |
+|       `version` |  `int`   | the version of the Kill Switch JSON file, always 2, 1 exists and will be upgraded if needed. |
+|  `last_updated` | `string` | When last the kill switches were updated (for human use only)                                |
+| `kill_switches` | `array`  | The kill switches this file contains (expanded below)                                        |
 
 The `kill_switches` array contains kill switch objects. Each contains the following fields:
 
-|       Key |            Type             | Description                                                                  |
-| --------: | :-------------------------: | :--------------------------------------------------------------------------- |
-| `version` |       `version spec`        | The version of EDMC these kill switches apply to (Must be valid semver spec) |
-|   `kills` | `Dict[str, Dict[str, Any]]` | The different keys to disable, and the reason for the disable                |
+|       Key |          Type          | Description                                                                  |
+| --------: | :--------------------: | :--------------------------------------------------------------------------- |
+| `version` |     `version spec`     | The version of EDMC these kill switches apply to (Must be valid semver spec) |
+|   `kills` | `Dict[str, Dict[...]]` | The various keys disabled -> definition of the killswitch behaviour          |
 
-Each entry in `kills` contains a `reason` and `additional_data` field. `reason` is self explanatory, however
-additional_data can contain various things. They are outlaid below:
-|             Key |    Type     | Description                                                          |
-| --------------: | :---------: | :------------------------------------------------------------------- |
-| `delete_fields` | `List[str]` | A list of fields in the matching event to be removed, if they exist. |
+Each entry in `kills` must contain at least a `reason` field describing why the killswitch was added. EDMC will show
+this to the user (for internal killswitches, anyway).
+| Key (* = required) |       Type       | Description                                                                                   |
+| -----------------: | :--------------: | :-------------------------------------------------------------------------------------------- |
+|          `reason`* |      `str`       | The reason that this killswitch was added                                                     |
+|    `delete_fields` |   `List[str]`    | A list of fields in the matching event to be removed, if they exist.                          |
+|       `set_fields` | `Dict[str, Any]` | A map of key -> contents to update (or overwrite) existing data with                          |
+|    `redact_fields` |   `List[str]`    | A list of fields to redact. This is equivalent to setting the fields to the string "REDACTED" |
 
 An example follows:
 
@@ -37,7 +40,12 @@ An example follows:
             "kills": {
                 "plugins.eddn.send": {
                     "reason": "some reason",
-                    "additional_data": {}
+                    "delete_fields": ["world_domination_plans"],
+                    "set_fields": {
+                        "bad_bases_for_systems_of_government": ["Strange women lying in ponds distributing swords"],
+                        "ruler_map": {"emperor": "scimitar"}
+                    },
+                    "redact_fields": ["relation_to_thargoids"]
                 }
             }
         }
@@ -59,6 +67,7 @@ The version of the JSON file will be automatically upgraded if possible by the c
 
 ## Currently supported killswitch strings
 
+ <!-- TODO: update this with new behaviour for various fields -->
 The current recognised (to EDMC and its internal plugins) killswitch strings are as follows:
 | Kill Switch                                            | Description                                                                                                                                    |
 | :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
