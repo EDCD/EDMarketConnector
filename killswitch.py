@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import (
-    Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, TypedDict, Union, cast
+    Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, Tuple, TypedDict,
+    TypeVar, Union, cast
 )
 
 import requests
@@ -18,7 +19,7 @@ logger = EDMCLogging.get_main_logger()
 OLD_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
 DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches_v2.json'
 CURRENT_KILLSWITCH_VERSION = 2
-
+UPDATABLE_DATA = Union[Mapping, Sequence]
 _current_version: semantic_version.Version = config.appversion_nobuild()
 
 
@@ -36,7 +37,7 @@ class SingleKill(NamedTuple):
         """Return whether or not this SingleKill can apply rules to a dict to make it safe to use."""
         return any(x is not None for x in (self.redact_fields, self.delete_fields, self.set_fields))
 
-    def apply_rules(self, target: Dict[str, Any]):
+    def apply_rules(self, target: UPDATABLE_DATA) -> UPDATABLE_DATA:
         """
         Apply the rules this SingleKill instance has to make some data okay to send.
 
@@ -56,8 +57,10 @@ class SingleKill(NamedTuple):
         for key, value in (self.set_fields if self .set_fields is not None else {}).items():
             _deep_apply(target, key, value)
 
+        return target
 
-def _apply(target: Union[MutableMapping, MutableSequence], key: str, to_set: Any = None, delete: bool = False):
+
+def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = False):
     """
     Set or delete the given target key on the given target.
 
@@ -74,7 +77,8 @@ def _apply(target: Union[MutableMapping, MutableSequence], key: str, to_set: Any
             target[key] = to_set
 
     elif isinstance(target, MutableSequence):
-        if (idx := _get_int(key)) is None:
+        idx = _get_int(key)
+        if idx is None:
             raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
 
         if delete:
@@ -91,7 +95,7 @@ def _apply(target: Union[MutableMapping, MutableSequence], key: str, to_set: Any
         raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
 
 
-def _deep_apply(target: dict[str, Any], path: str, to_set=None, delete=False):
+def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):
     """
     Set the given path to the given value, if it exists.
 
@@ -102,7 +106,7 @@ def _deep_apply(target: dict[str, Any], path: str, to_set=None, delete=False):
     :param to_set: the data to set, defaults to None
     :param delete: whether or not to delete the key rather than set it
     """
-    current: Union[MutableMapping, MutableSequence] = target
+    current = target
     key: str = ""
     while '.' in path:
         if path in current:
@@ -112,10 +116,11 @@ def _deep_apply(target: dict[str, Any], path: str, to_set=None, delete=False):
         key, _, path = path.partition('.')
 
         if isinstance(current, Mapping):
-            current = current[key]
+            current = current[key]  # type: ignore # I really dont know at this point what you want from me mypy.
 
         elif isinstance(current, Sequence):
-            if (target_idx := _get_int(key)) is not None:
+            target_idx = _get_int(key)  # mypy is broken. doesn't like := here.
+            if target_idx is not None:
                 current = current[target_idx]
             else:
                 raise ValueError(f'Cannot index sequence with non-int key {key!r}')
@@ -206,6 +211,34 @@ class KillSwitchSet:
         :return: the matching kill switches
         """
         return [k for k in self.kill_switches if version in k.version]
+
+    def check_killswitch(self, name: str, data: UPDATABLE_DATA, log=logger) -> Tuple[bool, UPDATABLE_DATA]:
+        """
+        Check whether or not a killswitch is enabled. If it is, apply rules if any.
+
+        :param name: The killswitch to check
+        :param data: The data to modify if needed
+        :return: A bool indicating if the caller should return, and either the original data or a *COPY* that has
+                 been modified by rules
+        """
+        res = self.get_disabled(name)
+        if not res.disabled:
+            return False, data
+
+        log.info(f'Killswitch {name} is enabled. Checking if rules exist to make use safe')
+        if res.kill is None or not res.kill.has_rules:
+            logger.info('No rules exist. Stopping processing')
+            return True, data
+
+        try:
+            new_data = res.kill.apply_rules(deepcopy(data))
+
+        except Exception as e:
+            log.exception(f'Exception occurred while attempting to apply rules! bailing out! {e=}')
+            return True, data
+
+        log.info('Rules applied successfully, allowing execution to continue')
+        return False, new_data
 
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
@@ -372,6 +405,11 @@ def get_disabled(id: str, *, version: semantic_version.Version = _current_versio
     See KillSwitchSet#is_disabled for more information
     """
     return active.get_disabled(id, version=version)
+
+
+def check_killswitch(name: str, data: UPDATABLE_DATA, log=logger) -> Tuple[bool, UPDATABLE_DATA]:
+    """Query the global KillSwitchSet#check_killswitch method."""
+    return active.check_killswitch(name, data, log)
 
 
 def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> bool:
