@@ -1667,10 +1667,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             suit = {
                 'edmcName': edmc_suitname,
                 'locName':  suitname,
-                'suitId':   entry['SuitID'],
-                'name':     entry['SuitName'],
-                'mods':     entry['SuitMods']
             }
+
+        # Overwrite with latest data, just in case, as this can be from CAPI which may or may not have had
+        # all the data we wanted
+        suit['suitId'] = entry['SuitID']
+        suit['name'] = entry['SuitName']
+        suit['mods'] = entry['SuitMods']
 
         suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Make the new loadout, in the CAPI format
