@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import (
-    Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, Tuple, TypedDict,
-    TypeVar, Union, cast
+    TYPE_CHECKING, Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, Tuple,
+    TypedDict, Union, cast
 )
 
 import requests
@@ -172,6 +172,16 @@ class DisabledResult(NamedTuple):
         """Reason provided for why this killswitch exists."""
         return self.kill.reason if self.kill is not None else ""
 
+    def has_kill(self) -> bool:
+        """Return whether or not this DisabledResult has a Kill associated with it."""
+        return self.kill is not None
+
+    def has_rules(self) -> bool:
+        """Return whether or not the kill on this Result contains rules."""
+        # HACK: 2021-07-09 # Python/mypy/pyright does not support type guards like this yet. self.kill will always
+        # be non-None at the point it is evaluated
+        return self.has_kill() and self.kill.has_rules  # type: ignore
+
 
 class KillSwitchSet:
     """Queryable set of kill switches."""
@@ -226,9 +236,12 @@ class KillSwitchSet:
             return False, data
 
         log.info(f'Killswitch {name} is enabled. Checking if rules exist to make use safe')
-        if res.kill is None or not res.kill.has_rules:
+        if not res.has_rules():
             logger.info('No rules exist. Stopping processing')
             return True, data
+
+        if TYPE_CHECKING:  # pyright, mypy, please -_-
+            assert res.kill is not None
 
         try:
             new_data = res.kill.apply_rules(deepcopy(data))
