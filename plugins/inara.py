@@ -343,14 +343,14 @@ def journal_entry(  # noqa: C901, CCR001
         return ''
 
     should_return, new_entry = killswitch.check_killswitch(
-        f'plugins.inara.journal.event.{entry["event"]}', entry, logger
+        f'plugins.inara.journal.event.{entry["event"]}', new_entry, logger
     )
     if should_return:
         logger.trace('returning due to killswitch match')
         # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
         return ''
 
-    entry = new_entry  # type: ignore # Im done trying to teach mypy how to generic. Its the same thing, I promise.
+    entry = cast(Dict[str, Any], new_entry)
     this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
