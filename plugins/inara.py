@@ -1,17 +1,16 @@
 """Inara Sync."""
 
-import copy
 import json
 import threading
 import time
 import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
+from dataclasses import dataclass
 from operator import itemgetter
 from threading import Lock, Thread
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, Tuple, Union, cast
-from dataclasses import dataclass
+from typing import Sequence, Union, cast
 
 import requests
 
