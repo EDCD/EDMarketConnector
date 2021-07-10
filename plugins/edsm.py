@@ -15,7 +15,7 @@ import tkinter as tk
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, cast, Set, Tuple, Union
 
 import requests
 
@@ -395,15 +395,19 @@ def journal_entry(  # noqa: C901, CCR001
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
 ) -> None:
     """Journal Entry hook."""
-    if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
-        logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+    should_return, new_entry = killswitch.check_killswitch('plugins.edsm.journal', entry, logger)
+    if should_return:
         # LANG: EDSM plugin - Journal handling disabled by killswitch
         plug.show_error(_('EDSM Handler disabled. See Log.'))
         return
 
-    elif (ks := killswitch.get_disabled(f'plugins.edsm.journal.event.{entry["event"]}')).disabled:
-        logger.warning(f'Handling of event {entry["event"]} has been disabled via killswitch: {ks.reason}')
+    should_return, new_entry = killswitch.check_killswitch(
+        f'plugins.edsm.journal.event.{entry["event"]}', data=new_entry, log=logger
+    )
+
+    if should_return:
         return
+    entry = cast(MutableMapping[str, Any], new_entry)
 
     this.on_foot = state['OnFoot']
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
@@ -640,17 +644,33 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
 
         retrying = 0
         while retrying < 3:
-            if (res := killswitch.get_disabled("plugins.edsm.worker")).disabled:
-                logger.warning(
-                    f'EDSM worker has been disabled via kill switch. Not uploading data. ({res.reason})'
-                )
+            should_skip, new_item = killswitch.check_killswitch(
+                'plugins.edsm.worker', item if item is not None else {}, logger
+            )
+
+            if should_skip:
                 break
+
+            if item is not None:
+                item = cast(Tuple[str, Mapping[str, Any]], new_item)
+
             try:
                 if item and entry['event'] not in this.discarded_events:
                     logger.trace_if(
                         CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
 
                     pending.append(entry)
+
+                # drop events if required by killswitch
+                new_pending = []
+                for e in pending:
+                    skip, new = killswitch.check_killswitch(f'plugin.edsm.worker.{e["event"]}', e, logger)
+                    if skip:
+                        continue
+
+                    new_pending.append(cast(Mapping[str, Any], new))
+
+                pending = new_pending
 
                 if pending and should_send(pending, entry['event']):
                     logger.trace_if(CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): should_send() said True')
