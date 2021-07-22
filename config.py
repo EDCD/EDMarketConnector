@@ -34,6 +34,7 @@ appcmdname = 'EDMC'
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
 _static_appversion = '5.1.2-beta0'
+_cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
@@ -138,6 +139,10 @@ def appversion() -> semantic_version.Version:
 
     :return: The augmented app version.
     """
+    global _cached_version
+    if _cached_version is not None:
+        return _cached_version
+
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
@@ -150,7 +155,8 @@ def appversion() -> semantic_version.Version:
         if shorthash is None:
             shorthash = 'UNKNOWN'
 
-    return semantic_version.Version(f'{_static_appversion}+{shorthash}')
+    _cached_version = semantic_version.Version(f'{_static_appversion}+{shorthash}')
+    return _cached_version
 
 
 def appversion_nobuild() -> semantic_version.Version:
