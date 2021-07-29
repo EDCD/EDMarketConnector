@@ -45,7 +45,7 @@ Plugin Developers
 
 * Various suit data, i.e. class and mods, is now stored from relevant
   Journal events, rather than only being available from CAPI data.  In
-  general we now consider the Journal to be the canonical source of suit
+  general, we now consider the Journal to be the canonical source of suit
   data, with CAPI only as a backup.
 
 * Backpack contents should now track correctly if using the 'Resupply' option
