@@ -603,7 +603,7 @@ Content of `state` (updated to the current journal entry):
 | `Data`               |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
 | `BackPack`           |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
 | `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
-| `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                      |
+| `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
 | `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
 | `Suits`              |          `dict`[1]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
@@ -1042,6 +1042,39 @@ then you will need to repeat the [Copy](#copy-the-module-files-into-your-plugin-
 step for the extra module(s) until it works.
 
 ---
+
+## Debug HTTP POST requests
+
+You can debug your http post requests using the builtin debug webserver.
+
+To add support for said debug webserver to your plugin, you need to check `config.debug_senders` (`list[str]`) for
+some indicator string for your plugin. `debug_senders` is generated from args to `--debug-sender` on the invocation
+command line.
+
+If said string exists, `DEBUG_WEBSERVER_HOST` and `DEBUG_WEBSERVER_PORT` in
+`edmc_data` will contain the host and port for the currently running local webserver. Simply redirect your requests
+there, and your requests will be logged to disk. For organisation, rewrite your request path to simply be `/pluginname`.
+
+Logs exist in `$TEMP/EDMarketConnector/http_debug/$path.log`. If somehow you manage to cause a directory traversal, your
+data will not be saved to disk at all. You will see this in EDMCs log.
+
+The simplest way to go about adding support is:
+
+```py
+from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
+from config import debug_senders
+
+TARGET_URL = "https://host.tld/path/to/api/magic"
+if 'my_plugin' in debug_senders:
+    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/my_plugin'
+
+# Code that uses TARGET_URL to post info from your plugin below.
+
+```
+
+For returned data, you can modify `debug_webserver.DEFAULT_RESPONSES` (`dict[str, Union[Callable[[str], str]], str])`
+with either a function that accepts a single string (the raw post data) and returns a single string
+(the response to send), or with a string if your required response is simple.
 
 ## Disable a plugin
 

@@ -22,7 +22,8 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config
+from config import applongname, appversion, config, debug_senders
+from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -194,6 +195,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
+        # LANG: Settings>EDSM - Label on checkbox for 'send data'
         frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
     )
 
@@ -203,6 +205,7 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
+        # LANG: Settings>EDSM - Label on header/URL to EDSM API key page
         text=_('Elite Dangerous Star Map credentials'),
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
@@ -352,6 +355,7 @@ def journal_entry(
     """Journal Entry hook."""
     if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
         logger.warning(f'EDSM Journal handler disabled via killswitch: {ks.reason}')
+        # LANG: EDSM plugin - Journal handling disabled by killswitch
         plug.show_error(_('EDSM Handler disabled. See Log.'))
         return
 
@@ -525,8 +529,14 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> None:
         this.system_link.update_idletasks()
 
 
+TARGET_URL = 'https://www.edsm.net/api-journal-v1'
+if 'edsm' in debug_senders:
+    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
+
 # Worker thread
-def worker() -> None:
+
+
+def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     """
     Handle uploading events to EDSM API.
 
@@ -620,9 +630,10 @@ def worker() -> None:
 
                     #     logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
 
-                    r = this.session.post('https://www.edsm.net/api-journal-v1', data=data, timeout=_TIMEOUT)
+                    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
                     # logger.trace(f'API response content: {r.content}')
                     r.raise_for_status()
+
                     reply = r.json()
                     msg_num = reply['msgnum']
                     msg = reply['msg']
@@ -633,6 +644,7 @@ def worker() -> None:
 
                     if msg_num // 100 == 2:
                         logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
+                        # LANG: EDSM Plugin - Error message from EDSM API
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
 
                     else:
@@ -669,6 +681,7 @@ def worker() -> None:
                 retrying += 1
 
         else:
+            # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if closing:
@@ -731,10 +744,12 @@ def edsm_notify_system(reply: Mapping[str, Any]) -> None:
     """Update the image next to the system link."""
     if not reply:
         this.system_link['image'] = this._IMG_ERROR
+        # LANG: EDSM Plugin - Error connecting to EDSM API
         plug.show_error(_("Error: Can't connect to EDSM"))
 
     elif reply['msgnum'] // 100 not in (1, 4):
         this.system_link['image'] = this._IMG_ERROR
+        # LANG: EDSM Plugin - Error message from EDSM API
         plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
 
     elif reply.get('systemCreated'):

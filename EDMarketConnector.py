@@ -82,10 +82,22 @@ if __name__ == '__main__':  # noqa: C901
         action='store_true'
     )
 
+    parser.add_argument(
+        '--forget-frontier-auth',
+        help='resets all authentication tokens',
+        action='store_true'
+    )
+
     parser.add_argument('--suppress-dupe-process-popup',
                         help='Suppress the popup from when the application detects another instance already running',
                         action='store_true'
                         )
+
+    parser.add_argument(
+        '--debug-sender',
+        help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
+        action='append',
+    )
 
     auth_options = parser.add_mutually_exclusive_group(required=False)
     auth_options.add_argument('--force-localserver-for-auth',
@@ -122,6 +134,17 @@ if __name__ == '__main__':  # noqa: C901
             print("--force-edmc-protocol is only valid on Windows")
             parser.print_help()
             exit(1)
+
+    if args.debug_sender and len(args.debug_sender) > 0:
+        import config as conf_module
+        import debug_webserver
+        from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
+
+        conf_module.debug_senders = [x.casefold() for x in args.debug_sender]  # duplicate the list just in case
+        for d in conf_module.debug_senders:
+            logger.info(f'marked {d} for debug')
+
+        debug_webserver.run_listener(DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT)
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
@@ -497,6 +520,7 @@ class AppWindow(object):
                 self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
                 self.system_menu.add_separator()
+                # LANG: Appearance - Label for checkbox to select if application always on top
                 self.system_menu.add_checkbutton(label=_('Always on top'),
                                                  variable=self.always_ontop,
                                                  command=self.ontop_changed)  # Appearance setting
@@ -715,9 +739,11 @@ class AppWindow(object):
             self.menubar.entryconfigure(3, label=_('View'))  # LANG: 'View' menu title on OSX
             self.menubar.entryconfigure(4, label=_('Window'))  # LANG: 'Window' menu title on OSX
             self.menubar.entryconfigure(5, label=_('Help'))  # LANG: Help' menu title on OSX
-            self.system_menu.entryconfigure(0, label=_("About {APP}").format(
-                APP=applongname))  # LANG: App menu entry on OSX
-            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates
+            self.system_menu.entryconfigure(
+                0,
+                label=_("About {APP}").format(APP=applongname)  # LANG: App menu entry on OSX
+            )
+            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates...
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
             self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
             self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
@@ -733,7 +759,7 @@ class AppWindow(object):
             # File menu
             self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
             self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings (Windows)
+            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
             self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
 
             # Help menu
@@ -744,11 +770,12 @@ class AppWindow(object):
             self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
 
         # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: As in Copy and Paste
+        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
         if not self.status['text']:
+            # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
@@ -803,10 +830,12 @@ class AppWindow(object):
             elif (config.get_int('output') & config.OUT_MKT_EDDN) \
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
+                    # LANG: Status - Either no market or no modules data for station from Frontier CAPI
                     self.status['text'] = _("Station doesn't have anything!")
 
             elif not data['lastStarport'].get('commodities'):
                 if not self.status['text']:
+                    # LANG: Status - No station market data from Frontier CAPI
                     self.status['text'] = _("Station doesn't have a market!")
 
             elif config.get_int('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
@@ -851,6 +880,7 @@ class AppWindow(object):
             elif play_sound:
                 hotkeymgr.play_good()
 
+            # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = _('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
@@ -886,14 +916,19 @@ class AppWindow(object):
 
             elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
                 # auto update is only when just docked
+                logger.warning(f"{auto_update!r} and not {monitor.state['OnFoot']!r} and "
+                               f"not {data['commander'].get('docked')!r}")
                 raise companion.ServerLagging()
 
             elif data['lastSystem']['name'] != monitor.system:
                 # CAPI system must match last journal one
+                logger.warning(f"{data['lastSystem']['name']!r} != {monitor.system!r}")
                 raise companion.ServerLagging()
 
             elif data['lastStarport']['name'] != monitor.station:
                 if monitor.state['OnFoot'] and monitor.station:
+                    logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                   f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
                     raise companion.ServerLagging()
 
                 else:
@@ -901,18 +936,32 @@ class AppWindow(object):
                     if data['commander']['docked']:
                         last_station = data['lastStarport']['name']
 
+                    if monitor.station is None:
+                        # Likely (re-)Embarked on ship docked at an EDO settlement.
+                        # Both Disembark and Embark have `"Onstation": false` in Journal.
+                        # So there's nothing to tell us which settlement we're (still,
+                        # or now, if we came here in Apex and then recalled ship) docked at.
+                        logger.debug("monitor.station is None - so EDO settlement?")
+                        raise companion.NoMonitorStation()
+
                     if last_station != monitor.station:
                         # CAPI lastStarport must match
+                        logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                       f"{last_station!r} != {monitor.station!r}")
                         raise companion.ServerLagging()
 
                 self.holdofftime = querytime + companion.holdoff
 
             elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['id']!r} != {monitor.state['ShipID']!r}")
                 raise companion.ServerLagging()
 
             elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
                 # CAPI ship type must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['name'].lower()!r} != {monitor.state['ShipType']!r}")
                 raise companion.ServerLagging()
 
             else:
@@ -1263,7 +1312,7 @@ class AppWindow(object):
         if time() < self.holdofftime:
             # Update button in main window
             self.button['text'] = self.theme_button['text'] \
-                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))
+                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))  # LANG: Cooldown on 'Update' button
             self.w.after(1000, self.cooldown)
 
         else:
@@ -1311,6 +1360,7 @@ class AppWindow(object):
             tk.Toplevel.__init__(self, parent)
 
             self.parent = parent
+            # LANG: Help > About App
             self.title(_('About {APP}').format(APP=applongname))
 
             if parent.winfo_viewable():
@@ -1344,6 +1394,7 @@ class AppWindow(object):
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
+            # LANG: Help > Release Notes
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
                                                  f'{appversion_nobuild()}',
@@ -1369,6 +1420,7 @@ class AppWindow(object):
             # OK button to close the window
             ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
+            # LANG: Generic 'OK' button label
             button = ttk.Button(frame, text=_('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
             button.bind("<Return>", lambda event: self.apply())
@@ -1389,6 +1441,7 @@ class AppWindow(object):
 
     def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
         """Save newly acquired CAPI data in the configured file."""
+        # LANG: Status - Attempting to retrieve data from Frontier CAPI to save to file
         self.status['text'] = _('Fetching data...')
         self.w.update_idletasks()
 
@@ -1675,6 +1728,11 @@ sys.path: {sys.path}'''
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
 
+    # Do this after locale silliness, just in case
+    if args.forget_frontier_auth:
+        logger.info("Dropping all fdev tokens as --forget-frontier-auth was passed")
+        companion.Auth.invalidate(None)
+
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
     # test_logging()
@@ -1735,6 +1793,7 @@ sys.path: {sys.path}'''
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+            # LANG: Popup-text about 'active' plugins without Python 3.x support
             popup_text = _(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
                 "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
@@ -1744,14 +1803,18 @@ sys.path: {sys.path}'''
             )
 
             # Substitute in the other words.
-            # LANG: 'Plugins' tab / 'File' menu / 'File' > 'Settings'
-            popup_text = popup_text.format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'),
-                                           DISABLED='.disabled')
+            popup_text = popup_text.format(
+                PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
+                FILE=_('File'),  # LANG: 'File' menu
+                SETTINGS=_('Settings'),  # LANG: File > Settings
+                DISABLED='.disabled'
+            )
             # And now we do need these to be actual \r\n
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
 
             tk.messagebox.showinfo(
+                # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
                 _('EDMC: Plugins Without Python 3.x Support'),
                 popup_text
             )

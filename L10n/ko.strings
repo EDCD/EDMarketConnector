@@ -1,629 +1,646 @@
-/* Coriolis override modes [plugins/coriolis.py] */
-"Normal" = "dlfqks";
-
-/* Coriolis override modes [plugins/coriolis.py] */
-"Beta" = "베타";
-
-/* Coriolis override modes [plugins/coriolis.py] */
-"Auto" = "자동";
-
-/* Coriolis override label [plugins/coriolis.py] */
-"Override Beta/Normal Selection" = "베타/일반 설정 오버라이딩";
-
-/* Coriolis reset buttons [plugins/coriolis.py] */
-"Reset" = "초기화";
-
-/* Coriolis Normal URL label [plugins/coriolis.py] */
-"Normal URL" = "일반 URL";
-
-/* Coriolis Beta URL label [plugins/coriolis.py] */
-"Beta URL" = "베타 URL";
-
-/* Coriolis config title label [plugins/coriolis.py] */
-"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "함선 피팅을 내보낼 coriolis.io 사이트 URL을 설정하세요. 주소는 반드시 '/import?data='으로 끝나야 합니다";
-
-/* Coriolis invalid mode warning [plugins/coriolis.py] */
-"Invalid Coriolis override mode!" = "잘못된 Coriolis 오버라이딩 모드입니다!";
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "확인";
 /* Language name */
 "!Language" = "한국어(Korean)";
 
-/* Message next to 'UI Transparency' slider  [prefs.py] */
-"100 means fully opaque.{CR}Window is updated in real time" = "100은 완전히 불투명함을 의미합니다.{CR}창은 실시간으로 업데이트됨";
-
-/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
-"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100은 '기본 설정'을 의미하며{CR}변경사항 적용을 위해{CR}재시작이 요구됩니다!";
-
-/* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "{APP} 정보";
-
-/* Federation rank. [stats.py] */
-"Admiral" = "Admiral";
-
-/* Explorer rank. [stats.py] */
-"Aimless" = "Aimless";
-
-/* Appearance setting. [EDMarketConnector.py] */
-"Always on top" = "항상 위에 보이기";
-
-/* CQC rank. [stats.py] */
-"Amateur" = "Amateur";
-
-/* EDSM setting. [edsm.py] */
-"API Key" = "API 키";
-
-/* Tab heading in settings. [prefs.py] */
-"Appearance" = "스타일";
-
-/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "인증 성공";
-
-/* Output setting. [prefs.py] */
-"Automatically update on docking" = "도킹시 자동으로 서버에 정보 업데이트하기";
-
-/* Cmdr stats. [stats.py] */
-"Balance" = "잔고";
-
-/* Empire rank. [stats.py] */
-"Baron" = "Baron";
-
-/* Trade rank. [stats.py] */
-"Broker" = "Broker";
-
-/* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "찾아보기...";
-
-/* Federation rank. [stats.py] */
-"Cadet" = "Cadet";
-
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: 커맨더 정보가 반환되지 않음";
-
-/* CQC rank. [stats.py] */
-"Champion" = "Champion";
-
-/* Folder selection button on OSX. [prefs.py] */
-"Change..." = "바꾸기...";
-
-/* Menu item. [EDMarketConnector.py] */
-"Check for Updates..." = "업데이트 확인하기...";
-
-/* Federation rank. [stats.py] */
-"Chief Petty Officer" = "Chief Petty Officer";
-
-/* Main window. [EDMarketConnector.py] */
-"Cmdr" = "커맨더";
-
-/* Ranking. [stats.py] */
-"Combat" = "Combat";
-
-/* EDSM setting. [edsm.py] */
-"Commander Name" = "커맨더 이름";
-
-/* Combat rank. [stats.py] */
-"Competent" = "Competent";
-
-/* Tab heading in settings. [prefs.py] */
-"Configuration" = "환경 설정";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "쿨다운 {SS}s";
-
-/* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "복사";
-
-/* Empire rank. [stats.py] */
-"Count" = "Count";
-
-/* Ranking. [stats.py] */
-"CQC" = "CQC";
-
-/* Combat rank. [stats.py] */
-"Dangerous" = "Dangerous";
-
-/* Appearance theme setting. [prefs.py] */
-"Dark" = "어둡게";
-
-/* Combat rank. [stats.py] */
-"Deadly" = "Deadly";
-
-/* Trade rank. [stats.py] */
-"Dealer" = "Dealer";
-
-/* Appearance theme and language setting. [l10n.py] */
-"Default" = "기본값";
-
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "도킹시까지 서버에 정보 전송을 미루기";
-
-/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "게임이 실행중일 때 프로그램 업데이트 확인하지 않기";
-
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "비활성 플러그인";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Documentation" = "문서 자료";
-
-/* Empire rank. [stats.py] */
-"Duke" = "Duke";
-
-/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "E:D 저널(journal) 파일 위치";
-
-/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
-"EDDB Journal processing disabled. See Log." = "EDDB 저널 처리 비활성화됨. 로그 참고 바람.";
-
-/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
-"EDDN journal handler disabled. See Log." = "EDDN 저널 처리 비활성화됨. 로그 참고 바람.";
-
-/* When EDSM functionality has been killswitched [plugins/edsm.py] */
-"EDSM Handler disabled. See Log." = "EDSM Handler 비활성화됨. 로그 참고 바람.";
-
-/* Empire rank. [stats.py] */
-"Earl" = "Earl";
-
-/* Menu title. [EDMarketConnector.py] */
-"Edit" = "편집";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Python 3.x을 지원하지 않는 플러그인";
-
-/* Top rank. [stats.py] */
-"Elite" = "Elite";
-
-/* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 계정";
-
-/* Ranking. [stats.py] */
-"Empire" = "Empire";
-
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "활성 플러그인";
-
-/* Federation rank. [stats.py] */
-"Ensign" = "Ensign";
-
-/* Trade rank. [stats.py] */
-"Entrepreneur" = "Entrepreneur";
-
-/* [companion.py] */
-"Error" = "오류";
-
-/* [eddn.py] */
-"Error: Can't connect to EDDN" = "오류: EDDN에 연결할 수 없음";
-
-/* [edsm.py] */
-"Error: Can't connect to EDSM" = "오류: EDSM에 연결할 수 없음";
-
-/* [inara.py] */
-"Error: Can't connect to Inara" = "오류: Inara에 연결할 수 없음";
-
-/* [companion.py] */
-"Error: Couldn't check token customer_id" = "오류: customer_id 토큰을 확인할 수 없었음";
-
-/* [companion.py] */
-"Error: customer_id doesn't match!" = "오류: customer_id가 일치하지 않습니다!";
-
-/* [edsm.py] */
-"Error: EDSM {MSG}" = "오류: EDSM {MSG}";
-
-
-/* Raised when cannot contact the Companion API server. [companion.py] */
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:171; */
 "Error: Frontier CAPI didn't respond" = "오류: Frontier CAPI가 응답이 없음";
+
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "오류: Frontier 서버 CAPI 연결 불가";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
 "Error: Frontier server is lagging" = "오류: Frontier 서버 응답이 지연되고 있음";
+
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:205; */
+"Docked but unknown station: EDO Settlement?" = "도킹되었지만 알 수 없는 정거장임: 엘리트: 데인저러스 오디세이의 지상 기지입니까? (의역이니 확인 바람)";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
+"Error: Invalid Credentials" = "오류: 잘못된 자격 증명";
+
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:230; */
+"Error: Wrong Cmdr" = "오류: 잘못된 커맨더";
+
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:341; companion.py:422; */
+"Error" = "오류";
+
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "오류: Inara에 연결할 수 없음";
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:380; companion.py:385; */
+"Error: Couldn't check token customer_id" = "오류: customer_id 토큰을 확인할 수 없었음";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:391; */
+"Error: customer_id doesn't match!" = "오류: customer_id가 일치하지 않습니다!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:413; */
+"Error: unable to get token" = "오류: 토큰을 받지 못함";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:575; */
+"Frontier CAPI query failure" = "Frontier CAPI 쿼리 실패";
+
+/* companion.py: Frontier CAPI data retrieval failed with 5XX code; In files: companion.py:591; */
+"Frontier CAPI server error" = "Frontier CAPI 서버 에러";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
+"Update" = "새로 고침";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
+"Always on top" = "항상 위에 보이기";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:636; */
+"Unknown" = "알 수 없음";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:705; */
+"Error: Check E:D journal file location" = "에러: 엘리트:데인저러스 journal file 위치를 확인해 주십시요";
+
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
+"Cmdr" = "커맨더";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
+"Role" = "Role";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
+"Ship" = "함선";
+
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:715; */
+"Suit" = "슈트";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
+"System" = "성계";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
+"Station" = "스테이션";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
+"File" = "파일";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
+"Edit" = "편집";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
+"View" = "보기";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
+"Window" = "창";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
+"Help" = "도움말";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
+"About {APP}" = "{APP} 정보";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
+"Check for Updates..." = "업데이트 확인하기...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
+"Save Raw Data..." = "Raw 데이터 저장하기...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
+"Status" = "상태";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
+"Privacy Policy" = "개인정보처리방침";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
+"Release Notes" = "릴리즈 노트";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
+"Settings" = "설정";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
+"Exit" = "종료";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
+"Documentation" = "문서 자료";
+
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
+"Copy" = "복사";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
+"Logging in..." = "로그인하는 중...";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
+"Authentication successful" = "인증 성공";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
+"You're not docked at a station!" = "스테이션에 도킹되어 있지 않습니다!";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
+"Station doesn't have anything!" = "스테이션에 아무것도 없습니다!";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
+"Station doesn't have a market!" = "스테이션에 마켓이 없습니다!";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
+"Fetching data..." = "데이터 가져오는 중...";
+
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:880; */
+"CAPI: No commander data returned" = "CAPI: 커맨더 정보가 반환되지 않음";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
+"Who are you?!" = "당신은 누구시죠?!";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
+"Where are you?!" = "어디 계신거죠?!";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
+"What are you flying?!" = "지금 어떤 함선을 몰고 계신 건가요?!";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
+"Last updated at %H:%M:%S" = "마지막 업데이트: %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
+"Fighter" = "Fighter";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
+"Gunner" = "Gunner";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
+"Helm" = "Helm";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
+"cooldown {SS}s" = "쿨다운 {SS}s";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
+"OK" = "OK";
+
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1489; */
+"Shutting down..." = "종료하는 중...";
+
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1780:1786; */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "활성화된 플러그인 중 1개 이상이 Python 3.x를 지원하지 않습니다. '{FILE}' > '{SETTINGS}' 에서 '{PLUGINS}' 탭에 들어가 활성화되어있는 플러그인 목록을 확인하십시오. 플러그인들 중 새 버전이 나온 것이 있는지도 확인해보시고, 만약 3.x를 지원하지도, 새 버전도 없다면 해당 플러그인의 개발자에게 코드를 수정하기를 문의하십시오.\n\n플러그인을 비활성화하려면 '{DISABLED}'를 폴더명 뒤에 추가하면 됩니다.";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
+"Plugins" = "플러그인";
+
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:1801; */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Python 3.x을 지원하지 않는 플러그인";
+
+/* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
+"Journal directory already locked" = "저널 디렉터리가 이미 잠김";
+
+/* journal_lock.py: Text for when newly selected Journal directory is already locked; In files: journal_lock.py:223:224; */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "새 저널 디렉토리(Journal Directory)가 이미 잠겨있습니다.{CR}문제 해결을 시도하고 재시도하거나, 무시하는 방법이 있습니다.";
+
+/* journal_lock.py: Generic 'Retry' button label; In files: journal_lock.py:228; */
+"Retry" = "재시도";
+
+/* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:232; */
+"Ignore" = "무시하기";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
+"Default" = "기본값";
+
+/* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:52; coriolis.py:55; coriolis.py:101; coriolis.py:117; coriolis.py:123; */
+"Auto" = "자동";
+
+/* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:53; coriolis.py:99; coriolis.py:115; */
+"Normal" = "일반";
+
+/* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:54; coriolis.py:100; coriolis.py:116; */
+"Beta" = "베타";
+
+/* coriolis.py: Settings>Coriolis: Help/hint for changing coriolis URLs; In files: coriolis.py:69:71; */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "함선 피팅을 내보낼 coriolis.io 사이트 URL을 설정하세요. 주소는 반드시 '/import?data='으로 끝나야 합니다";
+
+/* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:75; */
+"Normal URL" = "일반 URL";
+
+/* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:78; coriolis.py:87; */
+"Reset" = "초기화";
+
+/* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:84; */
+"Beta URL" = "베타 URL";
+
+/* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:94; */
+"Override Beta/Normal Selection" = "베타/일반 설정 오버라이딩";
+
+/* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:134; */
+"Invalid Coriolis override mode!" = "잘못된 Coriolis 오버라이딩 모드입니다!";
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
+"EDDB Journal processing disabled. See Log." = "EDDB 저널 처리 비활성화됨. 로그 참고 바람.";
+
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+"Sending data to EDDN..." = "EDDN에 정보 전송하는 중...";
+
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+"Error: Can't connect to EDDN" = "오류: EDDN에 연결할 수 없음";
+
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:282; */
+"EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN 오류: EDMC 가 구버전 입니다. 업데이트 해주세요";
+
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:288; */
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN 오류: 검증 실패 (EDMC 가 구버전입니까?). 로그 참고 바람";
+
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:293; */
+"EDDN Error: Returned {STATUS} status code" = "EDDN 오류: 상태 코드 {STATUS}가 반환됨";
+
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+"Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 스테이션 정보 전송하기";
+
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
+"Send system and scan data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 시스템 및 스캔 정보 전송하기";
+
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
+"Delay sending until docked" = "도킹시까지 서버에 정보 전송을 미루기";
+
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:785; */
+"EDDN journal handler disabled. See Log." = "EDDN 저널 처리 비활성화됨. 로그 참고 바람.";
+
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:198; */
+"Send flight log and Cmdr status to EDSM" = "EDSM에 flight 로그와  커맨더 상태 정보 전송하기";
+
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 계정";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+"Commander Name" = "커맨더 이름";
+
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+"API Key" = "API 키";
+
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+"None" = "없음";
+
+/* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:358; */
+"EDSM Handler disabled. See Log." = "EDSM Handler 비활성화됨. 로그 참고 바람.";
+
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+"Error: EDSM {MSG}" = "오류: EDSM {MSG}";
+
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+"Error: Can't connect to EDSM" = "오류: EDSM에 연결할 수 없음";
+
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:216; */
+"Send flight log and Cmdr status to Inara" = "Inara에 flight 로그와  커맨더 상태 정보 전송하기";
+
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:228; */
+"Inara credentials" = "Inara 계정 정보";
+
+/* inara.py: INARA support disabled via killswitch; In files: inara.py:335; */
+"Inara disabled. See Log." = "Inara 비활성화됨. 로그 참고 바람.";
+
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "오류: Frontier 서버 SKU 문제 발생";
-
-/* [inara.py] */
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1549; inara.py:1562; */
 "Error: Inara {MSG}" = "오류: Inara {MSG}";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "오류: 잘못된 자격 증명";
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+"Preferences" = "설정";
 
-/* [companion.py] */
-"Error: unable to get token" = "오류: 토큰을 받지 못함";
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+"Please choose what data to save" = "어느 데이터를 저장할 지 선택해주세요";
 
-/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "오류: 잘못된 Cmdr";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "종료";
-
-/* Combat rank. [stats.py] */
-"Expert" = "Expert";
-
-/* Ranking. [stats.py] */
-"Explorer" = "Explorer";
-
-/* Ranking. [stats.py] */
-"Federation" = "Federation";
-
-/* [EDMarketConnector.py] */
-"Fetching data..." = "데이터 가져오는 중...";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Fighter";
-
-/* Menu title. [EDMarketConnector.py] */
-"File" = "파일";
-
-/* Section heading in settings. [prefs.py] */
-"File location" = "파일 위치";
-
-/* Failures to access Frontier CAPI endpoints [companion.py] */
-"Frontier CAPI query failure" = "Frontier CAPI 쿼리 실패";
-
-/* Server errors from Frontier CAPI server [companion.py] */
-"Frontier CAPI server error" = "Frontier CAPI 서버 에러";
-
-/* CQC rank. [stats.py] */
-"Gladiator" = "Gladiator";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Gunner";
-
-/* Combat rank. [stats.py] */
-"Harmless" = "Harmless";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Helm";
-
-/* Menu title. [EDMarketConnector.py] */
-"Help" = "도움말";
-
-/* CQC rank. [stats.py] */
-"Helpless" = "Helpless";
-
-/* CQC rank. [stats.py] */
-"Hero" = "Hero";
-
-/* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "강조된 텍스트";
-
-/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "단축키";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Ignore" = "무시하기";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inara 계정 정보";
-
-/* When Inara support has been killswitched [plugins/inara.py] */
-"Inara disabled. See Log." = "Inara 비활성화됨. 로그 참고 바람.";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "플러그인 위치 변경에 대한 정보";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Journal directory already locked" = "저널 디렉터리가 이미 잠김";
-
-/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
-"Keyboard shortcut" = "단축키 설정";
-
-/* Empire rank. [stats.py] */
-"King" = "King";
-
-/* Empire rank. [stats.py] */
-"Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "언어";
-
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "마지막 업데이트: %H:%M:%S";
-
-/* Federation rank. [stats.py] */
-"Lieutenant" = "Lieutenant";
-
-/* Federation rank. [stats.py] */
-"Lieutenant Commander" = "Lieutenant Commander";
-
-/* Cmdr stats. [stats.py] */
-"Loan" = "대출";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "로깅 수준";
-
-/* [EDMarketConnector.py] */
-"Logging in..." = "로그인하는 중...";
-
-/* Empire rank. [stats.py] */
-"Lord" = "Lord";
-
-/* Label for 'UI Transparency' option in [prefs.py] */
-"Main window transparency" = "메인 창 투명도";
-
-/* [prefs.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:352; */
 "Market data in CSV format file" = "CSV 형식 파일의 마켓 정보";
 
-/* [prefs.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:361; */
 "Market data in Trade Dangerous format file" = "Trade Dangerous 형식 파일의 마켓 정보";
 
-/* Empire rank. [stats.py] */
-"Marquis" = "Marquis";
+/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+"Ship loadout" = "함선 피팅";
 
-/* Combat rank. [stats.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+"Automatically update on docking" = "도킹시 자동으로 서버에 정보 업데이트하기";
+
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+"File location" = "파일 위치";
+
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+"Change..." = "바꾸기...";
+
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+"Browse..." = "찾아보기...";
+
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+"Output" = "출력";
+
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+"E:D journal file location" = "E:D 저널(journal) 파일 위치";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+"Keyboard shortcut" = "단축키 설정";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+"Hotkey" = "단축키";
+
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+"Re-start {APP} to use shortcuts" = "단축키를 사용하려면 {APP}을(를) 다시 시작하십시오";
+
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+"{APP} needs permission to use shortcuts" = "단축기 사용을 위해선 {APP}이 권한 허용을 필요로 합니다";
+
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+"Open System Preferences" = "시스템 설정 열기";
+
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+"Only when Elite: Dangerous is the active app" = "Elite: Dangerous가 활성 창 상태일때만";
+
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+"Play sound" = "소리 재생하기";
+
+/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:555; */
+"Disable Automatic Application Updates Check when in-game" = "게임이 실행중일 때 프로그램 업데이트 확인하지 않기";
+
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:568; */
+"Preferred websites" = "선호하는 사이트";
+
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
+"Shipyard" = "쉽야드";
+
+/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:591; */
+"Use alternate URL method" = "다른 URL 형식 사용하기";
+
+/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:644; */
+"Log Level" = "로깅 수준";
+
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+"Configuration" = "환경 설정";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+"Normal text" = "일반 텍스트";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+"Highlighted text" = "강조된 텍스트";
+
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+"Language" = "언어";
+
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+"Theme" = "테마";
+
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+"Dark" = "어둡게";
+
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+"Transparent" = "투명하게";
+
+/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:770; */
+"UI Scale Percentage" = "UI 스케일 백분율";
+
+/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:791; */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100은 '기본 설정'을 의미하며{CR}변경사항 적용을 위해{CR}재시작이 요구됩니다!";
+
+/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:801; */
+"Main window transparency" = "메인 창 투명도";
+
+/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:821:824; */
+"100 means fully opaque.{CR}Window is updated in real time" = "100은 완전히 불투명함을 의미합니다.{CR}창은 실시간으로 업데이트됨";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+"Appearance" = "스타일";
+
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+"Plugins folder" = "플러그인 폴더";
+
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+"Open" = "열기";
+
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:890; */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "팁: 플러그인을 비활성화하려면{CR} '{EXT}'를 폴더명 뒤에 추가하면 됨";
+
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+"Enabled Plugins" = "활성 플러그인";
+
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:921; */
+"Plugins Without Python 3.x Support:" = "Python 3.x을 지원하지 않는 플러그인:";
+
+/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:929; */
+"Information on migrating plugins" = "플러그인 위치 변경에 대한 정보";
+
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+"Disabled Plugins" = "비활성 플러그인";
+
+/* stats.py: Cmdr stats; In files: stats.py:51; */
+"Balance" = "잔고";
+
+/* stats.py: Cmdr stats; In files: stats.py:52; */
+"Loan" = "대출";
+
+/* stats.py: Ranking; In files: stats.py:57; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:58; */
+"Trade" = "Trade";
+
+/* stats.py: Ranking; In files: stats.py:59; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:60; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:61; */
+"Federation" = "Federation";
+
+/* stats.py: Ranking; In files: stats.py:62; */
+"Empire" = "Empire";
+
+/* stats.py: Ranking; In files: stats.py:63; */
+"Powerplay" = "Powerplay";
+
+/* stats.py: Combat rank; In files: stats.py:71; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:72; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:73; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:74; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:75; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
 "Master" = "Master";
 
-/* Trade rank. [stats.py] */
+/* stats.py: Combat rank; In files: stats.py:77; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:78; */
+"Deadly" = "Deadly";
+
+/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+"Elite" = "Elite";
+
+/* stats.py: Trade rank; In files: stats.py:82; */
+"Penniless" = "Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:83; */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:84; */
+"Peddler" = "Peddler";
+
+/* stats.py: Trade rank; In files: stats.py:85; */
+"Dealer" = "Dealer";
+
+/* stats.py: Trade rank; In files: stats.py:86; */
 "Merchant" = "Merchant";
 
-/* Federation rank. [stats.py] */
-"Midshipman" = "Midshipman";
+/* stats.py: Trade rank; In files: stats.py:87; */
+"Broker" = "Broker";
+
+/* stats.py: Trade rank; In files: stats.py:88; */
+"Entrepreneur" = "Entrepreneur";
+
+/* stats.py: Trade rank; In files: stats.py:89; */
+"Tycoon" = "Tycoon";
+
+/* stats.py: Explorer rank; In files: stats.py:93; */
+"Aimless" = "Aimless";
+
 
 /* Appearance setting. [EDMarketConnector.py] */
 "Minimize to system tray" = "시스템 트레이로 최소화";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:94; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* Combat rank. [stats.py] */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* CQC rank. [stats.py] */
-"Mostly Helpless" = "Mostly Helpless";
-
-/* Trade rank. [stats.py] */
-"Mostly Penniless" = "Mostly Penniless";
-
-/* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "없음";
-
-/* Dark theme color setting. [prefs.py] */
-"Normal text" = "일반 텍스트";
-
-/* Combat rank. [stats.py] */
-"Novice" = "Novice";
-
-/* [prefs.py] */
-"OK" = "OK";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "활성화된 플러그인 중 1개 이상이 Python 3.x를 지원하지 않습니다. '{FILE}' > '{SETTINGS}' 에서 '{PLUGINS}' 탭에 들어가 활성화되어있는 플러그인 목록을 확인하십시오. 플러그인들 중 새 버전이 나온 것이 있는지도 확인해보시고, 만약 3.x를 지원하지도, 새 버전도 없다면 해당 플러그인의 개발자에게 코드를 수정하기를 문의하십시오.\n\n플러그인을 비활성화하려면 '{DISABLED}'를 폴더명 뒤에 추가하면 됩니다.";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Elite: Dangerous가 활성 창 상태일때만";
-
-/* Button that opens a folder in Explorer/Finder. [prefs.py] */
-"Open" = "열기";
-
-/* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "시스템 설정 열기";
-
-/* Tab heading in settings. [prefs.py] */
-"Output" = "출력";
-
-/* Empire rank. [stats.py] */
-"Outsider" = "Outsider";
-
-/* Explorer rank. [stats.py] */
-"Pathfinder" = "Pathfinder";
-
-/* Trade rank. [stats.py] */
-"Peddler" = "Peddler";
-
-/* Trade rank. [stats.py] */
-"Penniless" = "Penniless";
-
-/* Federation rank. [stats.py] */
-"Petty Officer" = "Petty Officer";
-
-/* Explorer rank. [stats.py] */
-"Pioneer" = "Pioneer";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "소리 재생하기";
-
-/* [prefs.py] */
-"Please choose what data to save" = "어느 데이터를 저장할 지 선택해주세요";
-
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "플러그인";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "플러그인 폴더";
-
-/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support:" = "Python 3.x을 지원하지 않는 플러그인:";
-
-/* Federation rank. [stats.py] */
-"Post Captain" = "Post Captain";
-
-/* Federation rank. [stats.py] */
-"Post Commander" = "Post Commander";
-
-/* Ranking. [stats.py] */
-"Powerplay" = "Powerplay";
-
-/* [prefs.py] */
-"Preferences" = "설정";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "선호하는 사이트";
-
-/* Empire rank. [stats.py] */
-"Prince" = "Prince";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "개인정보처리방침";
-
-/* CQC rank. [stats.py] */
-"Professional" = "Professional";
-
-/* Explorer rank. [stats.py] */
-"Ranger" = "Ranger";
-
-/* Power rank. [stats.py] */
-"Rating 1" = "Rating 1";
-
-/* Power rank. [stats.py] */
-"Rating 2" = "Rating 2";
-
-/* Power rank. [stats.py] */
-"Rating 3" = "Rating 3";
-
-/* Power rank. [stats.py] */
-"Rating 4" = "Rating 4";
-
-/* Power rank. [stats.py] */
-"Rating 5" = "Rating 5";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "단축키를 사용하려면 {APP}을(를) 다시 시작하십시오";
-
-/* Federation rank. [stats.py] */
-"Rear Admiral" = "Rear Admiral";
-
-/* Federation rank. [stats.py] */
-"Recruit" = "Recruit";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "릴리즈 노트";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Retry" = "재시도";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Role";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Raw 데이터 저장하기...";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:95; */
 "Scout" = "Scout";
 
-/* CQC rank. [stats.py] */
-"Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "EDSM에 flight 로그와  커맨더 상태 정보 전송하기";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Inara에 flight 로그와  커맨더 상태 정보 전송하기";
-
-/* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 스테이션 정보 전송하기";
-
-/* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 시스템 및 스캔 정보 전송하기";
-
-/* [eddn.py] */
-"Sending data to EDDN..." = "EDDN에 정보 전송하는 중...";
-
-/* Empire rank. [stats.py] */
-"Serf" = "Serf";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "설정";
-
-/* Main window. [EDMarketConnector.py] */
-"Ship" = "함선";
-
-/* Output setting. [prefs.py] */
-"Ship loadout" = "함선 피팅";
-
-/* Status dialog title. [stats.py] */
-"Ships" = "함선(들)";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "쉽야드";
-
-/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
-"Shutting down..." = "종료하는 중...";
-
-/* Empire rank. [stats.py] */
-"Squire" = "Squire";
-
-/* Main window. [EDMarketConnector.py] */
-"Station" = "스테이션";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "스테이션에 마켓이 없습니다!";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "스테이션에 아무것도 없습니다!";
-
-/* Menu item. [EDMarketConnector.py] */
-"Status" = "상태";
-
-/* 'Suit' label in main UI' [EDMarketConnector.py] */
-"Suit" = "슈트";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:96; */
 "Surveyor" = "Surveyor";
 
-/* Main window. [EDMarketConnector.py] */
-"System" = "성계";
-
-/* Changed journal update_lock failed [monitor.py] */
-"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "새 저널 디렉토리(Journal Directory)가 이미 잠겨있습니다.{CR}문제 해결을 시도하고 재시도하거나, 무시하는 방법이 있습니다.";
-
-/* Appearance setting. [prefs.py] */
-"Theme" = "테마";
-
-/* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "팁: 플러그인을 비활성화하려면{CR} '{EXT}'를 폴더명 뒤에 추가하면 됨";
-
-/* Ranking. [stats.py] */
-"Trade" = "Trade";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:97; */
 "Trailblazer" = "Trailblazer";
 
-/* Appearance theme setting. [prefs.py] */
-"Transparent" = "투명하게";
+/* stats.py: Explorer rank; In files: stats.py:98; */
+"Pathfinder" = "Pathfinder";
 
-/* Trade rank. [stats.py] */
-"Tycoon" = "Tycoon";
+/* stats.py: Explorer rank; In files: stats.py:99; */
+"Ranger" = "Ranger";
 
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "UI 스케일 백분율";
+/* stats.py: Explorer rank; In files: stats.py:100; */
+"Pioneer" = "Pioneer";
 
-/* General 'Unknown', e.g. suit loadout */
-"Unknown" = "알 수 없음";
+/* stats.py: CQC rank; In files: stats.py:104; */
+"Helpless" = "Helpless";
 
-/* Update button in main window. [EDMarketConnector.py] */
-"Update" = "새로 고침";
+/* stats.py: CQC rank; In files: stats.py:105; */
+"Mostly Helpless" = "Mostly Helpless";
 
-/* Option to use alternate URL method on shipyard links [prefs.py] */
-"Use alternate URL method" = "다른 URL 형식 사용하기";
+/* stats.py: CQC rank; In files: stats.py:106; */
+"Amateur" = "Amateur";
 
-/* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "가치";
+/* stats.py: CQC rank; In files: stats.py:107; */
+"Semi Professional" = "Semi Professional";
 
-/* Federation rank. [stats.py] */
-"Vice Admiral" = "Vice Admiral";
+/* stats.py: CQC rank; In files: stats.py:108; */
+"Professional" = "Professional";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "보기";
+/* stats.py: CQC rank; In files: stats.py:109; */
+"Champion" = "Champion";
 
-/* Empire rank. [stats.py] */
-"Viscount" = "Viscount";
+/* stats.py: CQC rank; In files: stats.py:110; */
+"Hero" = "Hero";
 
-/* Federation rank. [stats.py] */
+/* stats.py: CQC rank; In files: stats.py:111; */
+"Gladiator" = "Gladiator";
+
+/* stats.py: Federation rank; In files: stats.py:118; */
+"Recruit" = "Recruit";
+
+/* stats.py: Federation rank; In files: stats.py:119; */
+"Cadet" = "Cadet";
+
+/* stats.py: Federation rank; In files: stats.py:120; */
+"Midshipman" = "Midshipman";
+
+/* stats.py: Federation rank; In files: stats.py:121; */
+"Petty Officer" = "Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:122; */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:123; */
 "Warrant Officer" = "Warrant Officer";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "지금 어떤 함선을 몰고 계신 건가요?!";
+/* stats.py: Federation rank; In files: stats.py:124; */
+"Ensign" = "Ensign";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "어디 계신거죠?!";
+/* stats.py: Federation rank; In files: stats.py:125; */
+"Lieutenant" = "Lieutenant";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "당신은 누구시죠?!";
+/* stats.py: Federation rank; In files: stats.py:126; */
+"Lieutenant Commander" = "Lieutenant Commander";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "창";
+/* stats.py: Federation rank; In files: stats.py:127; */
+"Post Commander" = "Post Commander";
 
-/* [EDMarketConnector.py] */
-"You're not docked at a station!" = "스테이션에 도킹되어 있지 않습니다!";
+/* stats.py: Federation rank; In files: stats.py:128; */
+"Post Captain" = "Post Captain";
 
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "단축기 사용을 위해선 {APP}이 권한 허용을 필요로 합니다";
+/* stats.py: Federation rank; In files: stats.py:129; */
+"Rear Admiral" = "Rear Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:130; */
+"Vice Admiral" = "Vice Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:131; */
+"Admiral" = "Admiral";
+
+/* stats.py: Empire rank; In files: stats.py:137; */
+"Outsider" = "Outsider";
+
+/* stats.py: Empire rank; In files: stats.py:138; */
+"Serf" = "Serf";
+
+/* stats.py: Empire rank; In files: stats.py:140; */
+"Squire" = "Squire";
+
+/* stats.py: Empire rank; In files: stats.py:141; */
+"Knight" = "Knight";
+
+/* stats.py: Empire rank; In files: stats.py:142; */
+"Lord" = "Lord";
+
+/* stats.py: Empire rank; In files: stats.py:143; */
+"Baron" = "Baron";
+
+/* stats.py: Empire rank; In files: stats.py:144; */
+"Viscount" = "Viscount";
+
+/* stats.py: Empire rank; In files: stats.py:145; */
+"Count" = "Count";
+
+/* stats.py: Empire rank; In files: stats.py:146; */
+"Earl" = "Earl";
+
+/* stats.py: Empire rank; In files: stats.py:147; */
+"Marquis" = "Marquis";
+
+/* stats.py: Empire rank; In files: stats.py:148; */
+"Duke" = "Duke";
+
+/* stats.py: Empire rank; In files: stats.py:149; */
+"Prince" = "Prince";
+
+/* stats.py: Empire rank; In files: stats.py:150; */
+"King" = "King";
+
+/* stats.py: Power rank; In files: stats.py:156; */
+"Rating 1" = "Rating 1";
+
+/* stats.py: Power rank; In files: stats.py:157; */
+"Rating 2" = "Rating 2";
+
+/* stats.py: Power rank; In files: stats.py:158; */
+"Rating 3" = "Rating 3";
+
+/* stats.py: Power rank; In files: stats.py:159; */
+"Rating 4" = "Rating 4";
+
+/* stats.py: Power rank; In files: stats.py:160; */
+"Rating 5" = "Rating 5";
+
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+"Value" = "가치";
+
+/* stats.py: Status dialog title; In files: stats.py:376; */
+"Ships" = "함선(들)";

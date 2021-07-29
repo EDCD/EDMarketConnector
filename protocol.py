@@ -50,7 +50,7 @@ class GenericProtocolHandler:
 
         logger.trace(f'Payload: {self.lastpayload}')
         if not config.shutting_down:
-            logger.debug('event_generate("<<CompanionAuthEvent>>"')
+            logger.debug('event_generate("<<CompanionAuthEvent>>")')
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 

@@ -1,603 +1,602 @@
 /* Language name */
 "!Language" = "Suomi";
 
-/* Message next to 'UI Transparency' slider  [prefs.py] */
-"100 means fully opaque.{CR}Window is updated in real time" = "100 tarkoittaa täysin peittävää.{CR}Ikkuna päivittyy reaaliajassa.";
-
-/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
-"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 tarkoittaa oletusta{CR}Muutosten käyttöönotto{CR}edellyttää uudelleenkäynnistystä!";
-
-/* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Ohjelmasta {APP}";
-
-/* Federation rank. [stats.py] */
-"Admiral" = "Admiral";
-
-/* Explorer rank. [stats.py] */
-"Aimless" = "Aimless";
-
-/* Appearance setting. [EDMarketConnector.py] */
-"Always on top" = "Aina päällimmäisenä";
-
-/* CQC rank. [stats.py] */
-"Amateur" = "Amateur";
-
-/* EDSM setting. [edsm.py] */
-"API Key" = "API avain";
-
-/* Tab heading in settings. [prefs.py] */
-"Appearance" = "Ulkoasu";
-
-/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "Todennus onnistui";
-
-/* Output setting. [prefs.py] */
-"Automatically update on docking" = "Päivitä automaattisesti telakoituessa";
-
-/* Cmdr stats. [stats.py] */
-"Balance" = "Saldo";
-
-/* Empire rank. [stats.py] */
-"Baron" = "Baron";
-
-/* Trade rank. [stats.py] */
-"Broker" = "Broker";
-
-/* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Selaa...";
-
-/* Federation rank. [stats.py] */
-"Cadet" = "Cadet";
-
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: tietoja ei löytynyt";
-
-/* CQC rank. [stats.py] */
-"Champion" = "Champion";
-
-/* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Muuta...";
-
-/* Menu item. [EDMarketConnector.py] */
-"Check for Updates..." = "Tarkista päivitykset...";
-
-/* Federation rank. [stats.py] */
-"Chief Petty Officer" = "Chief Petty Officer";
-
-/* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Cmdr";
-
-/* Ranking. [stats.py] */
-"Combat" = "Taistelija -ranking";
-
-/* EDSM setting. [edsm.py] */
-"Commander Name" = "Komentajanimi";
-
-/* Combat rank. [stats.py] */
-"Competent" = "Competent";
-
-/* Tab heading in settings. [prefs.py] */
-"Configuration" = "Valinnat";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "Jäähtymisaika {SS}s";
-
-/* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Kopioi";
-
-/* Empire rank. [stats.py] */
-"Count" = "Count";
-
-/* Ranking. [stats.py] */
-"CQC" = "CQC -ranking";
-
-/* Combat rank. [stats.py] */
-"Dangerous" = "Dangerous";
-
-/* Appearance theme setting. [prefs.py] */
-"Dark" = "Tumma";
-
-/* Combat rank. [stats.py] */
-"Deadly" = "Deadly";
-
-/* Trade rank. [stats.py] */
-"Dealer" = "Dealer";
-
-/* Appearance theme and language setting. [l10n.py] */
-"Default" = "Oletus";
-
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
-
-/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "Estä automaattiset päivitystarkastukset pelaamisen aikana";
-
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Estetyt liitännäiset";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Documentation" = "Dokumentaatio";
-
-/* Empire rank. [stats.py] */
-"Duke" = "Duke";
-
-/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "E:D lokikirjan tiedostosijainti";
-
-/* When EDDB functionality has been killswitched. [plugins/eddb.py] */
-"EDDB Journal processing disabled. See Log." = "EDDB lokikirjan käsittely ei käytössä. Katso lokitiedot.";
-
-/* When EDDN journal handling has been killswitched [plugins/eddn.py] */
-"EDDN journal handler disabled. See Log." = "EDDB lokikirjan käsittelijä ei käytössä. Katso lokitiedot.";
-
-/* When EDSM functionality has been killswitched [plugins/edsm.py] */
-"EDSM Handler disabled. See Log." = "ESDM käsittelijä ei käytössä. Katso lokitiedot.";
-
-/* Empire rank. [stats.py] */
-"Earl" = "Earl";
-
-/* Menu title. [EDMarketConnector.py] */
-"Edit" = "Muokkaa";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Lisäosat ilman Python 3.x -tukea";
-
-/* Top rank. [stats.py] */
-"Elite" = "Elite";
-
-/* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
-
-/* Ranking. [stats.py] */
-"Empire" = "Imperiumin sotilasarvosi";
-
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Käytössä olevat liitännäiset";
-
-/* Federation rank. [stats.py] */
-"Ensign" = "Ensign";
-
-/* Trade rank. [stats.py] */
-"Entrepreneur" = "Entrepreneur";
-
-/* [companion.py] */
-"Error" = "Virhe";
-
-/* [eddn.py] */
-"Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
-
-/* [edsm.py] */
-"Error: Can't connect to EDSM" = "Virhe: ei saatu yhteyttä EDSM:ään";
-
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
-
-/* [companion.py] */
-"Error: Couldn't check token customer_id" = "Virhe: Ei kyetty tarkastamaan polettia customer_id";
-
-/* [companion.py] */
-"Error: customer_id doesn't match!" = "Virhe: customer_id ei löydy vastaavuutta!";
-
-/* [edsm.py] */
-"Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
-
-
-/* Raised when cannot contact the Companion API server. [companion.py] */
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:171; */
 "Error: Frontier CAPI didn't respond" = "Virhe: Frontier CAPI ei vastaa.";
+
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Virhe: Frontierin palvelin ei vastaa";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
 "Error: Frontier server is lagging" = "Virhe: Frontierin palvelin vastaa vanhoilla tiedoilla";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
+"Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
+
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:230; */
+"Error: Wrong Cmdr" = "Virhe: väärä komentaja";
+
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:341; companion.py:422; */
+"Error" = "Virhe";
+
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Virhe: Ei yhteyttä Inaraan";
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:380; companion.py:385; */
+"Error: Couldn't check token customer_id" = "Virhe: Ei kyetty tarkastamaan polettia customer_id";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:391; */
+"Error: customer_id doesn't match!" = "Virhe: customer_id ei löydy vastaavuutta!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:413; */
+"Error: unable to get token" = "Virhe: ei kyetty saamaan polettia";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:575; */
+"Frontier CAPI query failure" = "Frontier CAPI kyselyvirhe.";
+
+/* companion.py: Frontier CAPI data retrieval failed with 5XX code; In files: companion.py:591; */
+"Frontier CAPI server error" = "Frontier CAPI palvelinvirhe.";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
+"Update" = "Päivitä";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
+"Always on top" = "Aina päällimmäisenä";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:636; */
+"Unknown" = "Tuntematon";
+
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
+"Cmdr" = "Cmdr";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
+"Role" = "Rooli";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
+"Ship" = "Alus";
+
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:715; */
+"Suit" = "Asuste";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
+"System" = "Järjestelmä";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
+"Station" = "Asema";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
+"File" = "Tiedosto";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
+"Edit" = "Muokkaa";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
+"View" = "Näytä";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
+"Window" = "Ikkuna";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
+"Help" = "Apua";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
+"About {APP}" = "Ohjelmasta {APP}";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
+"Check for Updates..." = "Tarkista päivitykset...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
+"Save Raw Data..." = "Tallenna raakadata...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
+"Status" = "Tila";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
+"Privacy Policy" = "Tietosuojakäytäntö";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
+"Release Notes" = "Julkaisutiedot";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
+"Settings" = "Valinnat";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
+"Exit" = "Lopeta";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
+"Documentation" = "Dokumentaatio";
+
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
+"Copy" = "Kopioi";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
+"Logging in..." = "Kirjaudutaan...";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
+"Authentication successful" = "Todennus onnistui";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
+"You're not docked at a station!" = "Et ole telakoituneena asemalle!";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
+"Station doesn't have anything!" = "Asemalla ei ole mitään!";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
+"Station doesn't have a market!" = "Asemalla ei ole kaupankäyntiä!";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
+"Fetching data..." = "Noudetaan tietoja...";
+
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:880; */
+"CAPI: No commander data returned" = "CAPI: tietoja ei löytynyt";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
+"Who are you?!" = "Kuka olet?!";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
+"Where are you?!" = "Missä olet?!";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
+"What are you flying?!" = "Mitä alusta lennät?!";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
+"Last updated at %H:%M:%S" = "Päivitetty viimeksi %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
+"Fighter" = "Hävittäjä";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
+"Gunner" = "Aseiden käyttäjä";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
+"Helm" = "Pilotti";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
+"cooldown {SS}s" = "Jäähtymisaika {SS}s";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
+"OK" = "OK";
+
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1489; */
+"Shutting down..." = "Sulkeutuu...";
+
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1780:1786; */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Yksi tai useampi käyttämistäsi lisäosista ei sisällä vielä Pyhton 3.x -tukea. Tarkista tiedoston '{FILE}' > '{SETTINGS}' välilehti '{PLUGINS}' lisäosista, onko niistä uudempaa versiota saatavilla; muussa tapauksessa ota yhteyttä sen kehittäjään ja kerro, että sen lähdekoodi on päivitettävä Python 3.x -tasolle.\n\nVoit estää lisäosan toiminnan nimeämällä sen hakemiston siten, että se päättyy tekstiin '{DISABLED}'.";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
+"Plugins" = "Lisäosat";
+
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:1801; */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Lisäosat ilman Python 3.x -tukea";
+
+/* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
+"Journal directory already locked" = "Journal -hakemisto on jo lukittu";
+
+/* journal_lock.py: Text for when newly selected Journal directory is already locked; In files: journal_lock.py:223:224; */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Uusi Journal -hakemisto on jo lukittu.{CR}Voit joko yrittää ratkaista tämän ja yrittää uudelleen, tai jättää asian huomiotta.";
+
+/* journal_lock.py: Generic 'Retry' button label; In files: journal_lock.py:228; */
+"Retry" = "Yritä uudelleen";
+
+/* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:232; */
+"Ignore" = "Älä huomioi";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
+"Default" = "Oletus";
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
+"EDDB Journal processing disabled. See Log." = "EDDB lokikirjan käsittely ei käytössä. Katso lokitiedot.";
+
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+"Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
+
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+"Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
+
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+"Send station data to the Elite Dangerous Data Network" = "Lähetä asematiedot Elite Dangerous Data Network -palveluun";
+
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
+"Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja skannaustiedot Elite Dangerous Data Network -palveluun";
+
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
+"Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
+
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:785; */
+"EDDN journal handler disabled. See Log." = "EDDB lokikirjan käsittelijä ei käytössä. Katso lokitiedot.";
+
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:198; */
+"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
+
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+"Commander Name" = "Komentajanimi";
+
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+"API Key" = "API avain";
+
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+"None" = "Ei määritelty";
+
+/* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:358; */
+"EDSM Handler disabled. See Log." = "ESDM käsittelijä ei käytössä. Katso lokitiedot.";
+
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+"Error: EDSM {MSG}" = "Virhe: EDSM {MSG}";
+
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+"Error: Can't connect to EDSM" = "Virhe: ei saatu yhteyttä EDSM:ään";
+
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:216; */
+"Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
+
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:228; */
+"Inara credentials" = "Inaran kirjautuminen";
+
+/* inara.py: INARA support disabled via killswitch; In files: inara.py:335; */
+"Inara disabled. See Log." = "Inara ei käytössä. Katso lokitiedot.";
+
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Virhe: Frontier -palvelimen SKU-ongelma";
-
-/* [inara.py] */
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1549; inara.py:1562; */
 "Error: Inara {MSG}" = "Inaran virhe: {MSG}";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+"Preferences" = "Valinnat";
 
-/* [companion.py] */
-"Error: unable to get token" = "Virhe: ei kyetty saamaan polettia";
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+"Please choose what data to save" = "Valitse mitkä tiedot tallennetaan";
 
-/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Virhe: väärä komentaja";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Lopeta";
-
-/* Combat rank. [stats.py] */
-"Expert" = "Expert";
-
-/* Ranking. [stats.py] */
-"Explorer" = "Tutkimusmatkailija -ranking";
-
-/* Ranking. [stats.py] */
-"Federation" = "Federaation sotilasarvosi";
-
-/* [EDMarketConnector.py] */
-"Fetching data..." = "Noudetaan tietoja...";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Hävittäjä";
-
-/* Menu title. [EDMarketConnector.py] */
-"File" = "Tiedosto";
-
-/* Section heading in settings. [prefs.py] */
-"File location" = "Tiedostosijainti";
-
-/* Failures to access Frontier CAPI endpoints [companion.py] */
-"Frontier CAPI query failure" = "Frontier CAPI kyselyvirhe.";
-
-/* Server errors from Frontier CAPI server [companion.py] */
-"Frontier CAPI server error" = "Frontier CAPI palvelinvirhe.";
-
-/* CQC rank. [stats.py] */
-"Gladiator" = "Gladiator";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Aseiden käyttäjä";
-
-/* Combat rank. [stats.py] */
-"Harmless" = "Harmless";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Pilotti";
-
-/* Menu title. [EDMarketConnector.py] */
-"Help" = "Apua";
-
-/* CQC rank. [stats.py] */
-"Helpless" = "Helpless";
-
-/* CQC rank. [stats.py] */
-"Hero" = "Hero";
-
-/* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Korostettu teksti";
-
-/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Pikanäppäin";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Ignore" = "Älä huomioi";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Inaran kirjautuminen";
-
-/* When Inara support has been killswitched [plugins/inara.py] */
-"Inara disabled. See Log." = "Inara ei käytössä. Katso lokitiedot.";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Tietoja lisäosien siirrosta";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Journal directory already locked" = "Journal -hakemisto on jo lukittu";
-
-/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
-"Keyboard shortcut" = "Näppäimistöoikopolku";
-
-/* Empire rank. [stats.py] */
-"King" = "King";
-
-/* Empire rank. [stats.py] */
-"Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Kieli";
-
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "Päivitetty viimeksi %H:%M:%S";
-
-/* Federation rank. [stats.py] */
-"Lieutenant" = "Lieutenant";
-
-/* Federation rank. [stats.py] */
-"Lieutenant Commander" = "Lieutenant Commander";
-
-/* Cmdr stats. [stats.py] */
-"Loan" = "Lainaa jäljellä";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Lokin syvyys";
-
-/* [EDMarketConnector.py] */
-"Logging in..." = "Kirjaudutaan...";
-
-/* Empire rank. [stats.py] */
-"Lord" = "Lord";
-
-/* Label for 'UI Transparency' option in [prefs.py] */
-"Main window transparency" = "Pääikkunan läpinäkyvyys";
-
-/* [prefs.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:352; */
 "Market data in CSV format file" = "Markkinadata CSV -formaatissa";
 
-/* [prefs.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:361; */
 "Market data in Trade Dangerous format file" = "Markkinadata Trade Dangerous -formaatissa";
 
-/* Empire rank. [stats.py] */
-"Marquis" = "Marquis";
+/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+"Ship loadout" = "Aluksen konfiguraatio";
 
-/* Combat rank. [stats.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+"Automatically update on docking" = "Päivitä automaattisesti telakoituessa";
+
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+"File location" = "Tiedostosijainti";
+
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+"Change..." = "Muuta...";
+
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+"Browse..." = "Selaa...";
+
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+"Output" = "Tallennus";
+
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+"E:D journal file location" = "E:D lokikirjan tiedostosijainti";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+"Keyboard shortcut" = "Näppäimistöoikopolku";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+"Hotkey" = "Pikanäppäin";
+
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+"Re-start {APP} to use shortcuts" = "Käynnistä {APP} uudelleen käyttääksesi pikanäppäimiä";
+
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+"{APP} needs permission to use shortcuts" = "{APP} tarvitsee lupasi pikakuvakkeiden käyttämiseen";
+
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+"Open System Preferences" = "Avaa järjestelmän asetukset";
+
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+"Only when Elite: Dangerous is the active app" = "Vain jos Elite:Dangerous on käynnissä";
+
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+"Play sound" = "Toista ääni";
+
+/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:555; */
+"Disable Automatic Application Updates Check when in-game" = "Estä automaattiset päivitystarkastukset pelaamisen aikana";
+
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:568; */
+"Preferred websites" = "Ensisijaiset sivustot";
+
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
+"Shipyard" = "Telakka";
+
+/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:591; */
+"Use alternate URL method" = "Käytä vaihtoehtoista URL-metodia";
+
+/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:644; */
+"Log Level" = "Lokin syvyys";
+
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+"Configuration" = "Valinnat";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+"Normal text" = "Normaali teksti";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+"Highlighted text" = "Korostettu teksti";
+
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+"Language" = "Kieli";
+
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+"Theme" = "Teema";
+
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+"Dark" = "Tumma";
+
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+"Transparent" = "Läpinäkyvä";
+
+/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:770; */
+"UI Scale Percentage" = "Käyttöliittymän skaalausprosentti";
+
+/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:791; */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 tarkoittaa oletusta{CR}Muutosten käyttöönotto{CR}edellyttää uudelleenkäynnistystä!";
+
+/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:801; */
+"Main window transparency" = "Pääikkunan läpinäkyvyys";
+
+/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:821:824; */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 tarkoittaa täysin peittävää.{CR}Ikkuna päivittyy reaaliajassa.";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+"Appearance" = "Ulkoasu";
+
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+"Plugins folder" = "Lisäosien hakemistosijainti";
+
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+"Open" = "Avaa";
+
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:890; */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";
+
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+"Enabled Plugins" = "Käytössä olevat liitännäiset";
+
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:921; */
+"Plugins Without Python 3.x Support:" = "Lisäosat, joissa ei ole Python 3.x -tukea:";
+
+/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:929; */
+"Information on migrating plugins" = "Tietoja lisäosien siirrosta";
+
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+"Disabled Plugins" = "Estetyt liitännäiset";
+
+/* stats.py: Cmdr stats; In files: stats.py:51; */
+"Balance" = "Saldo";
+
+/* stats.py: Cmdr stats; In files: stats.py:52; */
+"Loan" = "Lainaa jäljellä";
+
+/* stats.py: Ranking; In files: stats.py:57; */
+"Combat" = "Taistelija -ranking";
+
+/* stats.py: Ranking; In files: stats.py:58; */
+"Trade" = "Kaupankäynti -ranking";
+
+/* stats.py: Ranking; In files: stats.py:59; */
+"Explorer" = "Tutkimusmatkailija -ranking";
+
+/* stats.py: Ranking; In files: stats.py:60; */
+"CQC" = "CQC -ranking";
+
+/* stats.py: Ranking; In files: stats.py:61; */
+"Federation" = "Federaation sotilasarvosi";
+
+/* stats.py: Ranking; In files: stats.py:62; */
+"Empire" = "Imperiumin sotilasarvosi";
+
+/* stats.py: Ranking; In files: stats.py:63; */
+"Powerplay" = "Valtapeli -ranking";
+
+/* stats.py: Combat rank; In files: stats.py:71; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:72; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:73; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:74; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:75; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
 "Master" = "Master";
 
-/* Trade rank. [stats.py] */
+/* stats.py: Combat rank; In files: stats.py:77; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:78; */
+"Deadly" = "Deadly";
+
+/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+"Elite" = "Elite";
+
+/* stats.py: Trade rank; In files: stats.py:82; */
+"Penniless" = "Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:83; */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:84; */
+"Peddler" = "Peddler";
+
+/* stats.py: Trade rank; In files: stats.py:85; */
+"Dealer" = "Dealer";
+
+/* stats.py: Trade rank; In files: stats.py:86; */
 "Merchant" = "Merchant";
 
-/* Federation rank. [stats.py] */
-"Midshipman" = "Midshipman";
+/* stats.py: Trade rank; In files: stats.py:87; */
+"Broker" = "Broker";
+
+/* stats.py: Trade rank; In files: stats.py:88; */
+"Entrepreneur" = "Entrepreneur";
+
+/* stats.py: Trade rank; In files: stats.py:89; */
+"Tycoon" = "Tycoon";
+
+/* stats.py: Explorer rank; In files: stats.py:93; */
+"Aimless" = "Aimless";
+
 
 /* Appearance setting. [EDMarketConnector.py] */
 "Minimize to system tray" = "Pienennä tehtäväpalkkiin";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:94; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* Combat rank. [stats.py] */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* CQC rank. [stats.py] */
-"Mostly Helpless" = "Mostly Helpless";
-
-/* Trade rank. [stats.py] */
-"Mostly Penniless" = "Mostly Penniless";
-
-/* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Ei määritelty";
-
-/* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normaali teksti";
-
-/* Combat rank. [stats.py] */
-"Novice" = "Novice";
-
-/* [prefs.py] */
-"OK" = "OK";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Yksi tai useampi käyttämistäsi lisäosista ei sisällä vielä Pyhton 3.x -tukea. Tarkista tiedoston '{FILE}' > '{SETTINGS}' välilehti '{PLUGINS}' lisäosista, onko niistä uudempaa versiota saatavilla; muussa tapauksessa ota yhteyttä sen kehittäjään ja kerro, että sen lähdekoodi on päivitettävä Python 3.x -tasolle.\n\nVoit estää lisäosan toiminnan nimeämällä sen hakemiston siten, että se päättyy tekstiin '{DISABLED}'.";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Vain jos Elite:Dangerous on käynnissä";
-
-/* Button that opens a folder in Explorer/Finder. [prefs.py] */
-"Open" = "Avaa";
-
-/* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Avaa järjestelmän asetukset";
-
-/* Tab heading in settings. [prefs.py] */
-"Output" = "Tallennus";
-
-/* Empire rank. [stats.py] */
-"Outsider" = "Outsider";
-
-/* Explorer rank. [stats.py] */
-"Pathfinder" = "Pathfinder";
-
-/* Trade rank. [stats.py] */
-"Peddler" = "Peddler";
-
-/* Trade rank. [stats.py] */
-"Penniless" = "Penniless";
-
-/* Federation rank. [stats.py] */
-"Petty Officer" = "Petty Officer";
-
-/* Explorer rank. [stats.py] */
-"Pioneer" = "Pioneer";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Toista ääni";
-
-/* [prefs.py] */
-"Please choose what data to save" = "Valitse mitkä tiedot tallennetaan";
-
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "Lisäosat";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Lisäosien hakemistosijainti";
-
-/* Settings>Plugins>Plugins without Python 3.x support [prefs.py] */
-"Plugins Without Python 3.x Support:" = "Lisäosat, joissa ei ole Python 3.x -tukea:";
-
-/* Federation rank. [stats.py] */
-"Post Captain" = "Post Captain";
-
-/* Federation rank. [stats.py] */
-"Post Commander" = "Post Commander";
-
-/* Ranking. [stats.py] */
-"Powerplay" = "Valtapeli -ranking";
-
-/* [prefs.py] */
-"Preferences" = "Valinnat";
-
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Ensisijaiset sivustot";
-
-/* Empire rank. [stats.py] */
-"Prince" = "Prince";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "Tietosuojakäytäntö";
-
-/* CQC rank. [stats.py] */
-"Professional" = "Professional";
-
-/* Explorer rank. [stats.py] */
-"Ranger" = "Ranger";
-
-/* Power rank. [stats.py] */
-"Rating 1" = "Luokitus 1";
-
-/* Power rank. [stats.py] */
-"Rating 2" = "Luokitus 2";
-
-/* Power rank. [stats.py] */
-"Rating 3" = "Luokitus 3";
-
-/* Power rank. [stats.py] */
-"Rating 4" = "Luokitus 4";
-
-/* Power rank. [stats.py] */
-"Rating 5" = "Luokitus 5";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Käynnistä {APP} uudelleen käyttääksesi pikanäppäimiä";
-
-/* Federation rank. [stats.py] */
-"Rear Admiral" = "Rear Admiral";
-
-/* Federation rank. [stats.py] */
-"Recruit" = "Recruit";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Julkaisutiedot";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Retry" = "Yritä uudelleen";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Rooli";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Tallenna raakadata...";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:95; */
 "Scout" = "Scout";
 
-/* CQC rank. [stats.py] */
-"Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
-
-/* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Lähetä asematiedot Elite Dangerous Data Network -palveluun";
-
-/* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Lähetä järjestelmä- ja skannaustiedot Elite Dangerous Data Network -palveluun";
-
-/* [eddn.py] */
-"Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
-
-/* Empire rank. [stats.py] */
-"Serf" = "Serf";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Valinnat";
-
-/* Main window. [EDMarketConnector.py] */
-"Ship" = "Alus";
-
-/* Output setting. [prefs.py] */
-"Ship loadout" = "Aluksen konfiguraatio";
-
-/* Status dialog title. [stats.py] */
-"Ships" = "Alukset";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Telakka";
-
-/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
-"Shutting down..." = "Sulkeutuu...";
-
-/* Empire rank. [stats.py] */
-"Squire" = "Squire";
-
-/* Main window. [EDMarketConnector.py] */
-"Station" = "Asema";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "Asemalla ei ole kaupankäyntiä!";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "Asemalla ei ole mitään!";
-
-/* Menu item. [EDMarketConnector.py] */
-"Status" = "Tila";
-
-/* 'Suit' label in main UI' [EDMarketConnector.py] */
-"Suit" = "Asuste";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:96; */
 "Surveyor" = "Surveyor";
 
-/* Main window. [EDMarketConnector.py] */
-"System" = "Järjestelmä";
-
-/* Changed journal update_lock failed [monitor.py] */
-"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Uusi Journal -hakemisto on jo lukittu.{CR}Voit joko yrittää ratkaista tämän ja yrittää uudelleen, tai jättää asian huomiotta.";
-
-/* Appearance setting. [prefs.py] */
-"Theme" = "Teema";
-
-/* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Vihje: Voit poistaa lisäosan käytöstä{CR}lisäämällä '{EXT}' sen hakemistonimeen";
-
-/* Ranking. [stats.py] */
-"Trade" = "Kaupankäynti -ranking";
-
-/* Explorer rank. [stats.py] */
+/* stats.py: Explorer rank; In files: stats.py:97; */
 "Trailblazer" = "Trailblazer";
 
-/* Appearance theme setting. [prefs.py] */
-"Transparent" = "Läpinäkyvä";
+/* stats.py: Explorer rank; In files: stats.py:98; */
+"Pathfinder" = "Pathfinder";
 
-/* Trade rank. [stats.py] */
-"Tycoon" = "Tycoon";
+/* stats.py: Explorer rank; In files: stats.py:99; */
+"Ranger" = "Ranger";
 
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "Käyttöliittymän skaalausprosentti";
+/* stats.py: Explorer rank; In files: stats.py:100; */
+"Pioneer" = "Pioneer";
 
-/* General 'Unknown', e.g. suit loadout */
-"Unknown" = "Tuntematon";
+/* stats.py: CQC rank; In files: stats.py:104; */
+"Helpless" = "Helpless";
 
-/* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Päivitä";
+/* stats.py: CQC rank; In files: stats.py:105; */
+"Mostly Helpless" = "Mostly Helpless";
 
-/* Option to use alternate URL method on shipyard links [prefs.py] */
-"Use alternate URL method" = "Käytä vaihtoehtoista URL-metodia";
+/* stats.py: CQC rank; In files: stats.py:106; */
+"Amateur" = "Amateur";
 
-/* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "Arvo";
+/* stats.py: CQC rank; In files: stats.py:107; */
+"Semi Professional" = "Semi Professional";
 
-/* Federation rank. [stats.py] */
-"Vice Admiral" = "Vice Admiral";
+/* stats.py: CQC rank; In files: stats.py:108; */
+"Professional" = "Professional";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Näytä";
+/* stats.py: CQC rank; In files: stats.py:109; */
+"Champion" = "Champion";
 
-/* Empire rank. [stats.py] */
-"Viscount" = "Viscount";
+/* stats.py: CQC rank; In files: stats.py:110; */
+"Hero" = "Hero";
 
-/* Federation rank. [stats.py] */
+/* stats.py: CQC rank; In files: stats.py:111; */
+"Gladiator" = "Gladiator";
+
+/* stats.py: Federation rank; In files: stats.py:118; */
+"Recruit" = "Recruit";
+
+/* stats.py: Federation rank; In files: stats.py:119; */
+"Cadet" = "Cadet";
+
+/* stats.py: Federation rank; In files: stats.py:120; */
+"Midshipman" = "Midshipman";
+
+/* stats.py: Federation rank; In files: stats.py:121; */
+"Petty Officer" = "Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:122; */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:123; */
 "Warrant Officer" = "Warrant Officer";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Mitä alusta lennät?!";
+/* stats.py: Federation rank; In files: stats.py:124; */
+"Ensign" = "Ensign";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Missä olet?!";
+/* stats.py: Federation rank; In files: stats.py:125; */
+"Lieutenant" = "Lieutenant";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Kuka olet?!";
+/* stats.py: Federation rank; In files: stats.py:126; */
+"Lieutenant Commander" = "Lieutenant Commander";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Ikkuna";
+/* stats.py: Federation rank; In files: stats.py:127; */
+"Post Commander" = "Post Commander";
 
-/* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Et ole telakoituneena asemalle!";
+/* stats.py: Federation rank; In files: stats.py:128; */
+"Post Captain" = "Post Captain";
 
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} tarvitsee lupasi pikakuvakkeiden käyttämiseen";
+/* stats.py: Federation rank; In files: stats.py:129; */
+"Rear Admiral" = "Rear Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:130; */
+"Vice Admiral" = "Vice Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:131; */
+"Admiral" = "Admiral";
+
+/* stats.py: Empire rank; In files: stats.py:137; */
+"Outsider" = "Outsider";
+
+/* stats.py: Empire rank; In files: stats.py:138; */
+"Serf" = "Serf";
+
+/* stats.py: Empire rank; In files: stats.py:140; */
+"Squire" = "Squire";
+
+/* stats.py: Empire rank; In files: stats.py:141; */
+"Knight" = "Knight";
+
+/* stats.py: Empire rank; In files: stats.py:142; */
+"Lord" = "Lord";
+
+/* stats.py: Empire rank; In files: stats.py:143; */
+"Baron" = "Baron";
+
+/* stats.py: Empire rank; In files: stats.py:144; */
+"Viscount" = "Viscount";
+
+/* stats.py: Empire rank; In files: stats.py:145; */
+"Count" = "Count";
+
+/* stats.py: Empire rank; In files: stats.py:146; */
+"Earl" = "Earl";
+
+/* stats.py: Empire rank; In files: stats.py:147; */
+"Marquis" = "Marquis";
+
+/* stats.py: Empire rank; In files: stats.py:148; */
+"Duke" = "Duke";
+
+/* stats.py: Empire rank; In files: stats.py:149; */
+"Prince" = "Prince";
+
+/* stats.py: Empire rank; In files: stats.py:150; */
+"King" = "King";
+
+/* stats.py: Power rank; In files: stats.py:156; */
+"Rating 1" = "Luokitus 1";
+
+/* stats.py: Power rank; In files: stats.py:157; */
+"Rating 2" = "Luokitus 2";
+
+/* stats.py: Power rank; In files: stats.py:158; */
+"Rating 3" = "Luokitus 3";
+
+/* stats.py: Power rank; In files: stats.py:159; */
+"Rating 4" = "Luokitus 4";
+
+/* stats.py: Power rank; In files: stats.py:160; */
+"Rating 5" = "Luokitus 5";
+
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+"Value" = "Arvo";
+
+/* stats.py: Status dialog title; In files: stats.py:376; */
+"Ships" = "Alukset";

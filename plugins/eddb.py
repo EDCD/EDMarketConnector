@@ -96,6 +96,7 @@ def prefs_changed(cmdr, is_beta):
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     if (ks := killswitch.get_disabled('plugins.eddb.journal')).disabled:
         logger.warning(f'Journal processing for EDDB has been disabled: {ks.reason}')
+        # LANG: Journal Processing disabled due to an active killswitch
         plug.show_error(_('EDDB Journal processing disabled. See Log.'))
         return
 

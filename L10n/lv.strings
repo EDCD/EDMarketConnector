@@ -1,483 +1,482 @@
 /* Language name */
 "!Language" = "Latviešu";
 
-/* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Par {APP}";
-
-/* Federation rank. [stats.py] */
-"Admiral" = "Admiral";
-
-/* Explorer rank. [stats.py] */
-"Aimless" = "Aimless";
-
-/* Appearance setting. [EDMarketConnector.py] */
-"Always on top" = "Vienmēr virspusē";
-
-/* CQC rank. [stats.py] */
-"Amateur" = "Amateur";
-
-/* EDSM setting. [edsm.py] */
-"API Key" = "API atslēga";
-
-/* Tab heading in settings. [prefs.py] */
-"Appearance" = "Izskats";
-
-/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "Autentifikācija sekmīga";
-
-/* Output setting. [prefs.py] */
-"Automatically update on docking" = "Automtiski atjaunoties nosēžoties.";
-
-/* Cmdr stats. [stats.py] */
-"Balance" = "Bilance";
-
-/* Empire rank. [stats.py] */
-"Baron" = "Baron";
-
-/* Trade rank. [stats.py] */
-"Broker" = "Broker";
-
-/* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Pārlūkot...";
-
-/* Federation rank. [stats.py] */
-"Cadet" = "Cadet";
-
-/* CQC rank. [stats.py] */
-"Champion" = "Champion";
-
-/* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Mainīt...";
-
-/* Menu item. [EDMarketConnector.py] */
-"Check for Updates..." = "Pārbaudīt atjauninājumus...";
-
-/* Federation rank. [stats.py] */
-"Chief Petty Officer" = "Chief Petty Officer";
-
-/* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Cmdr";
-
-/* Ranking. [stats.py] */
-"Combat" = "Combat";
-
-/* EDSM setting. [edsm.py] */
-"Commander Name" = "Komandiera vārds";
-
-/* Combat rank. [stats.py] */
-"Competent" = "Competent";
-
-/* Tab heading in settings. [prefs.py] */
-"Configuration" = "Konfigurācija";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "Atskaite {SS}";
-
-/* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Kopēt";
-
-/* Empire rank. [stats.py] */
-"Count" = "Count";
-
-/* Ranking. [stats.py] */
-"CQC" = "CQC";
-
-/* Combat rank. [stats.py] */
-"Dangerous" = "Dangerous";
-
-/* Appearance theme setting. [prefs.py] */
-"Dark" = "Tumša";
-
-/* Combat rank. [stats.py] */
-"Deadly" = "Deadly";
-
-/* Trade rank. [stats.py] */
-"Dealer" = "Dealer";
-
-/* Appearance theme and language setting. [l10n.py] */
-"Default" = "Noklusējuma";
-
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
-
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Atspējoti Spraudņi";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Documentation" = "Dokumentācija";
-
-/* Empire rank. [stats.py] */
-"Duke" = "Duke";
-
-/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "E:D žurnāla faila atrašanās vieta";
-
-/* Empire rank. [stats.py] */
-"Earl" = "Earl";
-
-/* Menu title. [EDMarketConnector.py] */
-"Edit" = "Labot";
-
-/* Top rank. [stats.py] */
-"Elite" = "Elite";
-
-/* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous zvaigžņu kartes informācija";
-
-/* Ranking. [stats.py] */
-"Empire" = "Empire";
-
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Iespējoti Spraudņi";
-
-/* Federation rank. [stats.py] */
-"Ensign" = "Ensign";
-
-/* Trade rank. [stats.py] */
-"Entrepreneur" = "Entrepreneur";
-
-/* [eddn.py] */
-"Error: Can't connect to EDDN" = "Kļūda: Nevar savienoties ar EDDN";
-
-/* [edsm.py] */
-"Error: Can't connect to EDSM" = "Kļūda: Nevar savienoties ar EDSM";
-
-/* [edsm.py] */
-"Error: EDSM {MSG}" = "Kļūda: EDSM {MSG}";
-
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Kļūda: Frontier serveris nav aktīvs";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
 "Error: Frontier server is lagging" = "Kļūda: Frontier serveris aizkavējas";
 
-/* [companion.py] */
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
 "Error: Invalid Credentials" = "Kļūda: Nederīga lietotāja informācija";
 
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Iziet";
-
-/* Combat rank. [stats.py] */
-"Expert" = "Expert";
-
-/* Ranking. [stats.py] */
-"Explorer" = "Explorer";
-
-/* Ranking. [stats.py] */
-"Federation" = "Federation";
-
-/* [EDMarketConnector.py] */
-"Fetching data..." = "Iegūst datus...";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Cīnītājs";
-
-/* Menu title. [EDMarketConnector.py] */
-"File" = "Fails";
-
-/* Section heading in settings. [prefs.py] */
-"File location" = "Faila atrašanās vieta";
-
-/* CQC rank. [stats.py] */
-"Gladiator" = "Gladiators";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Ložmetējnieks";
-
-/* Combat rank. [stats.py] */
-"Harmless" = "Nekaitīgs";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Stūre";
-
-/* Menu title. [EDMarketConnector.py] */
-"Help" = "Palīdzība";
-
-/* CQC rank. [stats.py] */
-"Helpless" = "Bezpalīdzīgs";
-
-/* CQC rank. [stats.py] */
-"Hero" = "Varonis";
-
-/* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Izceltais teksts";
-
-/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Ātrais taustiņš";
-
-/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
-"Keyboard shortcut" = "Ātrais taustiņš";
-
-/* Empire rank. [stats.py] */
-"King" = "Karalis";
-
-/* Empire rank. [stats.py] */
-"Knight" = "Bruņinieks";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Valoda";
-
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "Pēdējo reizi atjaunināts %H:%M:%S";
-
-/* Federation rank. [stats.py] */
-"Lieutenant" = "Leitnants";
-
-/* Federation rank. [stats.py] */
-"Lieutenant Commander" = "Lieutenant Commander";
-
-/* Cmdr stats. [stats.py] */
-"Loan" = "Aizdevums";
-
-/* [EDMarketConnector.py] */
-"Logging in..." = "Autorizējas...";
-
-/* Empire rank. [stats.py] */
-"Lord" = "Lord";
-
-/* [prefs.py] */
-"Market data in CSV format file" = "Tirgus dati CSV formātā";
-
-/* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Tirgus dati Trade Dangerous formātā";
-
-/* Empire rank. [stats.py] */
-"Marquis" = "Marquis";
-
-/* Combat rank. [stats.py] */
-"Master" = "Master";
-
-/* Trade rank. [stats.py] */
-"Merchant" = "Merchant";
-
-/* Federation rank. [stats.py] */
-"Midshipman" = "Midshipman";
-
-/* Explorer rank. [stats.py] */
-"Mostly Aimless" = "Mostly Aimless";
-
-/* Combat rank. [stats.py] */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* CQC rank. [stats.py] */
-"Mostly Helpless" = "Mostly Helpless";
-
-/* Trade rank. [stats.py] */
-"Mostly Penniless" = "Mostly Penniless";
-
-/* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Neviens";
-
-/* Dark theme color setting. [prefs.py] */
-"Normal text" = "Normālais teksts";
-
-/* Combat rank. [stats.py] */
-"Novice" = "Novice";
-
-/* [prefs.py] */
-"OK" = "Labi";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Tikai kad Elite: Dangerous ir aktīvā aplikācija";
-
-/* Button that opens a folder in Explorer/Finder. [prefs.py] */
-"Open" = "Atvērt";
-
-/* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Atvērt sistēmas iestatījumus";
-
-/* Tab heading in settings. [prefs.py] */
-"Output" = "Izvade";
-
-/* Empire rank. [stats.py] */
-"Outsider" = "Outsider";
-
-/* Explorer rank. [stats.py] */
-"Pathfinder" = "Pathfinder";
-
-/* Trade rank. [stats.py] */
-"Peddler" = "Peddler";
-
-/* Trade rank. [stats.py] */
-"Penniless" = "Penniless";
-
-/* Federation rank. [stats.py] */
-"Petty Officer" = "Petty Officer";
-
-/* Explorer rank. [stats.py] */
-"Pioneer" = "Pioneer";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Atskaņot skaņu";
-
-/* [prefs.py] */
-"Please choose what data to save" = "Lūdzu izvēlaties kādus datus saglabāt";
-
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "Spraudņi";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Spraudņu mape";
-
-/* Federation rank. [stats.py] */
-"Post Captain" = "Post Captain";
-
-/* Federation rank. [stats.py] */
-"Post Commander" = "Post Commander";
-
-/* Ranking. [stats.py] */
-"Powerplay" = "Powerplay";
-
-/* [prefs.py] */
-"Preferences" = "Iestatījumi";
-
-/* Empire rank. [stats.py] */
-"Prince" = "Prince";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "Privātuma politika";
-
-/* CQC rank. [stats.py] */
-"Professional" = "Professional";
-
-/* Explorer rank. [stats.py] */
-"Ranger" = "Ranger";
-
-/* Power rank. [stats.py] */
-"Rating 1" = "Rating 1";
-
-/* Power rank. [stats.py] */
-"Rating 2" = "Rating 2";
-
-/* Power rank. [stats.py] */
-"Rating 3" = "Rating 3";
-
-/* Power rank. [stats.py] */
-"Rating 4" = "Rating 4";
-
-/* Power rank. [stats.py] */
-"Rating 5" = "Rating 5";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Restartējiet {APP} lai izmantotu īssceļus";
-
-/* Federation rank. [stats.py] */
-"Rear Admiral" = "Rear Admiral";
-
-/* Federation rank. [stats.py] */
-"Recruit" = "Recruit";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Informācija par laidienu";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Loma";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Saglabāt sākotnējos datus...";
-
-/* Explorer rank. [stats.py] */
-"Scout" = "Scout";
-
-/* CQC rank. [stats.py] */
-"Semi Professional" = "Semi Professional";
-
-/* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
-
-/* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
-
-/* [eddn.py] */
-"Sending data to EDDN..." = "Sūta datus uz EDDN...";
-
-/* Empire rank. [stats.py] */
-"Serf" = "Serf";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Iestatījumi";
-
-/* Main window. [EDMarketConnector.py] */
-"Ship" = "Kuģis";
-
-/* Output setting. [prefs.py] */
-"Ship loadout" = "Kuģa loadout";
-
-/* Status dialog title. [stats.py] */
-"Ships" = "Kuģi";
-
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
-"Shipyard" = "Kuģu būvētava";
-
-/* Empire rank. [stats.py] */
-"Squire" = "Squire";
-
-/* Main window. [EDMarketConnector.py] */
-"Station" = "Stacija";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "Stacijā nav tirgus!";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "Stacijā nekā nav!";
-
-/* Menu item. [EDMarketConnector.py] */
-"Status" = "Statuss";
-
-/* Explorer rank. [stats.py] */
-"Surveyor" = "Surveyor";
-
-/* Main window. [EDMarketConnector.py] */
-"System" = "Sistēma";
-
-/* Appearance setting. [prefs.py] */
-"Theme" = "Dizains";
-
-/* Ranking. [stats.py] */
-"Trade" = "Trade";
-
-/* Explorer rank. [stats.py] */
-"Trailblazer" = "Trailblazer";
-
-/* Appearance theme setting. [prefs.py] */
-"Transparent" = "Caurspīdīga";
-
-/* Trade rank. [stats.py] */
-"Tycoon" = "Tycoon";
-
-/* Update button in main window. [EDMarketConnector.py] */
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
 "Update" = "Atjaunināt";
 
-/* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "Vērtība";
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
+"Always on top" = "Vienmēr virspusē";
 
-/* Federation rank. [stats.py] */
-"Vice Admiral" = "Vice Admiral";
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
+"Cmdr" = "Cmdr";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
+"Role" = "Loma";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
+"Ship" = "Kuģis";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
+"System" = "Sistēma";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
+"Station" = "Stacija";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
+"File" = "Fails";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
+"Edit" = "Labot";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
 "View" = "Skats";
 
-/* Empire rank. [stats.py] */
-"Viscount" = "Viscount";
-
-/* Federation rank. [stats.py] */
-"Warrant Officer" = "Warrant Officer";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Ar ko tu lido?";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Kur tu esi?";
-
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Kas tu esi?";
-
-/* Menu title on OSX. [EDMarketConnector.py] */
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
 "Window" = "Logs";
 
-/* [EDMarketConnector.py] */
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
+"Help" = "Palīdzība";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
+"About {APP}" = "Par {APP}";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
+"Check for Updates..." = "Pārbaudīt atjauninājumus...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
+"Save Raw Data..." = "Saglabāt sākotnējos datus...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
+"Status" = "Statuss";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
+"Privacy Policy" = "Privātuma politika";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
+"Release Notes" = "Informācija par laidienu";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
+"Settings" = "Iestatījumi";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
+"Exit" = "Iziet";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
+"Documentation" = "Dokumentācija";
+
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
+"Copy" = "Kopēt";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
+"Logging in..." = "Autorizējas...";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
+"Authentication successful" = "Autentifikācija sekmīga";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
 "You're not docked at a station!" = "Jūs neesat stacijā!";
 
-/* Shortcut settings prompt on OSX. [prefs.py] */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
+"Station doesn't have anything!" = "Stacijā nekā nav!";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
+"Station doesn't have a market!" = "Stacijā nav tirgus!";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
+"Fetching data..." = "Iegūst datus...";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
+"Who are you?!" = "Kas tu esi?";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
+"Where are you?!" = "Kur tu esi?";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
+"What are you flying?!" = "Ar ko tu lido?";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
+"Last updated at %H:%M:%S" = "Pēdējo reizi atjaunināts %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
+"Fighter" = "Cīnītājs";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
+"Gunner" = "Ložmetējnieks";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
+"Helm" = "Stūre";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
+"cooldown {SS}s" = "Atskaite {SS}";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
+"OK" = "Labi";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
+"Plugins" = "Spraudņi";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
+"Default" = "Noklusējuma";
+
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+"Sending data to EDDN..." = "Sūta datus uz EDDN...";
+
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+"Error: Can't connect to EDDN" = "Kļūda: Nevar savienoties ar EDDN";
+
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+"Send station data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
+
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
+"Send system and scan data to the Elite Dangerous Data Network" = "Sūtīt stacijas datus uz Elite Dangerous Data Network";
+
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
+"Delay sending until docked" = "Aizkavēt sūtīšanu līdz nosēšanai";
+
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+"Elite Dangerous Star Map credentials" = "Elite Dangerous zvaigžņu kartes informācija";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+"Commander Name" = "Komandiera vārds";
+
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+"API Key" = "API atslēga";
+
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+"None" = "Neviens";
+
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+"Error: EDSM {MSG}" = "Kļūda: EDSM {MSG}";
+
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+"Error: Can't connect to EDSM" = "Kļūda: Nevar savienoties ar EDSM";
+
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+"Preferences" = "Iestatījumi";
+
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+"Please choose what data to save" = "Lūdzu izvēlaties kādus datus saglabāt";
+
+/* prefs.py: Settings > Output option; In files: prefs.py:352; */
+"Market data in CSV format file" = "Tirgus dati CSV formātā";
+
+/* prefs.py: Settings > Output option; In files: prefs.py:361; */
+"Market data in Trade Dangerous format file" = "Tirgus dati Trade Dangerous formātā";
+
+/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+"Ship loadout" = "Kuģa loadout";
+
+/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+"Automatically update on docking" = "Automtiski atjaunoties nosēžoties.";
+
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+"File location" = "Faila atrašanās vieta";
+
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+"Change..." = "Mainīt...";
+
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+"Browse..." = "Pārlūkot...";
+
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+"Output" = "Izvade";
+
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+"E:D journal file location" = "E:D žurnāla faila atrašanās vieta";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+"Keyboard shortcut" = "Ātrais taustiņš";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+"Hotkey" = "Ātrais taustiņš";
+
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+"Re-start {APP} to use shortcuts" = "Restartējiet {APP} lai izmantotu īssceļus";
+
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
 "{APP} needs permission to use shortcuts" = "{APP} vajag atļaujas lai izmantotu īssceļus";
+
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+"Open System Preferences" = "Atvērt sistēmas iestatījumus";
+
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+"Only when Elite: Dangerous is the active app" = "Tikai kad Elite: Dangerous ir aktīvā aplikācija";
+
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+"Play sound" = "Atskaņot skaņu";
+
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
+"Shipyard" = "Kuģu būvētava";
+
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+"Configuration" = "Konfigurācija";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+"Normal text" = "Normālais teksts";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+"Highlighted text" = "Izceltais teksts";
+
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+"Language" = "Valoda";
+
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+"Theme" = "Dizains";
+
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+"Dark" = "Tumša";
+
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+"Transparent" = "Caurspīdīga";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+"Appearance" = "Izskats";
+
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+"Plugins folder" = "Spraudņu mape";
+
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+"Open" = "Atvērt";
+
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+"Enabled Plugins" = "Iespējoti Spraudņi";
+
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+"Disabled Plugins" = "Atspējoti Spraudņi";
+
+/* stats.py: Cmdr stats; In files: stats.py:51; */
+"Balance" = "Bilance";
+
+/* stats.py: Cmdr stats; In files: stats.py:52; */
+"Loan" = "Aizdevums";
+
+/* stats.py: Ranking; In files: stats.py:57; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:58; */
+"Trade" = "Trade";
+
+/* stats.py: Ranking; In files: stats.py:59; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:60; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:61; */
+"Federation" = "Federation";
+
+/* stats.py: Ranking; In files: stats.py:62; */
+"Empire" = "Empire";
+
+/* stats.py: Ranking; In files: stats.py:63; */
+"Powerplay" = "Powerplay";
+
+/* stats.py: Combat rank; In files: stats.py:71; */
+"Harmless" = "Nekaitīgs";
+
+/* stats.py: Combat rank; In files: stats.py:72; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:73; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:74; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:75; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
+"Master" = "Master";
+
+/* stats.py: Combat rank; In files: stats.py:77; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:78; */
+"Deadly" = "Deadly";
+
+/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+"Elite" = "Elite";
+
+/* stats.py: Trade rank; In files: stats.py:82; */
+"Penniless" = "Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:83; */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:84; */
+"Peddler" = "Peddler";
+
+/* stats.py: Trade rank; In files: stats.py:85; */
+"Dealer" = "Dealer";
+
+/* stats.py: Trade rank; In files: stats.py:86; */
+"Merchant" = "Merchant";
+
+/* stats.py: Trade rank; In files: stats.py:87; */
+"Broker" = "Broker";
+
+/* stats.py: Trade rank; In files: stats.py:88; */
+"Entrepreneur" = "Entrepreneur";
+
+/* stats.py: Trade rank; In files: stats.py:89; */
+"Tycoon" = "Tycoon";
+
+/* stats.py: Explorer rank; In files: stats.py:93; */
+"Aimless" = "Aimless";
+
+/* stats.py: Explorer rank; In files: stats.py:94; */
+"Mostly Aimless" = "Mostly Aimless";
+
+/* stats.py: Explorer rank; In files: stats.py:95; */
+"Scout" = "Scout";
+
+/* stats.py: Explorer rank; In files: stats.py:96; */
+"Surveyor" = "Surveyor";
+
+/* stats.py: Explorer rank; In files: stats.py:97; */
+"Trailblazer" = "Trailblazer";
+
+/* stats.py: Explorer rank; In files: stats.py:98; */
+"Pathfinder" = "Pathfinder";
+
+/* stats.py: Explorer rank; In files: stats.py:99; */
+"Ranger" = "Ranger";
+
+/* stats.py: Explorer rank; In files: stats.py:100; */
+"Pioneer" = "Pioneer";
+
+/* stats.py: CQC rank; In files: stats.py:104; */
+"Helpless" = "Bezpalīdzīgs";
+
+/* stats.py: CQC rank; In files: stats.py:105; */
+"Mostly Helpless" = "Mostly Helpless";
+
+/* stats.py: CQC rank; In files: stats.py:106; */
+"Amateur" = "Amateur";
+
+/* stats.py: CQC rank; In files: stats.py:107; */
+"Semi Professional" = "Semi Professional";
+
+/* stats.py: CQC rank; In files: stats.py:108; */
+"Professional" = "Professional";
+
+/* stats.py: CQC rank; In files: stats.py:109; */
+"Champion" = "Champion";
+
+/* stats.py: CQC rank; In files: stats.py:110; */
+"Hero" = "Varonis";
+
+/* stats.py: CQC rank; In files: stats.py:111; */
+"Gladiator" = "Gladiators";
+
+/* stats.py: Federation rank; In files: stats.py:118; */
+"Recruit" = "Recruit";
+
+/* stats.py: Federation rank; In files: stats.py:119; */
+"Cadet" = "Cadet";
+
+/* stats.py: Federation rank; In files: stats.py:120; */
+"Midshipman" = "Midshipman";
+
+/* stats.py: Federation rank; In files: stats.py:121; */
+"Petty Officer" = "Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:122; */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:123; */
+"Warrant Officer" = "Warrant Officer";
+
+/* stats.py: Federation rank; In files: stats.py:124; */
+"Ensign" = "Ensign";
+
+/* stats.py: Federation rank; In files: stats.py:125; */
+"Lieutenant" = "Leitnants";
+
+/* stats.py: Federation rank; In files: stats.py:126; */
+"Lieutenant Commander" = "Lieutenant Commander";
+
+/* stats.py: Federation rank; In files: stats.py:127; */
+"Post Commander" = "Post Commander";
+
+/* stats.py: Federation rank; In files: stats.py:128; */
+"Post Captain" = "Post Captain";
+
+/* stats.py: Federation rank; In files: stats.py:129; */
+"Rear Admiral" = "Rear Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:130; */
+"Vice Admiral" = "Vice Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:131; */
+"Admiral" = "Admiral";
+
+/* stats.py: Empire rank; In files: stats.py:137; */
+"Outsider" = "Outsider";
+
+/* stats.py: Empire rank; In files: stats.py:138; */
+"Serf" = "Serf";
+
+/* stats.py: Empire rank; In files: stats.py:140; */
+"Squire" = "Squire";
+
+/* stats.py: Empire rank; In files: stats.py:141; */
+"Knight" = "Bruņinieks";
+
+/* stats.py: Empire rank; In files: stats.py:142; */
+"Lord" = "Lord";
+
+/* stats.py: Empire rank; In files: stats.py:143; */
+"Baron" = "Baron";
+
+/* stats.py: Empire rank; In files: stats.py:144; */
+"Viscount" = "Viscount";
+
+/* stats.py: Empire rank; In files: stats.py:145; */
+"Count" = "Count";
+
+/* stats.py: Empire rank; In files: stats.py:146; */
+"Earl" = "Earl";
+
+/* stats.py: Empire rank; In files: stats.py:147; */
+"Marquis" = "Marquis";
+
+/* stats.py: Empire rank; In files: stats.py:148; */
+"Duke" = "Duke";
+
+/* stats.py: Empire rank; In files: stats.py:149; */
+"Prince" = "Prince";
+
+/* stats.py: Empire rank; In files: stats.py:150; */
+"King" = "Karalis";
+
+/* stats.py: Power rank; In files: stats.py:156; */
+"Rating 1" = "Rating 1";
+
+/* stats.py: Power rank; In files: stats.py:157; */
+"Rating 2" = "Rating 2";
+
+/* stats.py: Power rank; In files: stats.py:158; */
+"Rating 3" = "Rating 3";
+
+/* stats.py: Power rank; In files: stats.py:159; */
+"Rating 4" = "Rating 4";
+
+/* stats.py: Power rank; In files: stats.py:160; */
+"Rating 5" = "Rating 5";
+
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+"Value" = "Vērtība";
+
+/* stats.py: Status dialog title; In files: stats.py:376; */
+"Ships" = "Kuģi";
