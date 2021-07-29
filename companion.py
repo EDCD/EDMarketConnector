@@ -167,6 +167,7 @@ class ServerError(Exception):
         # Raised when cannot contact the Companion API server
         self.args = args
         if not args:
+            # LANG: Frontier CAPI didn't respond
             self.args = (_("Error: Frontier CAPI didn't respond"),)
 
 
@@ -175,7 +176,8 @@ class ServerConnectionError(ServerError):
 
 
 class ServerLagging(Exception):
-    """Exception Class for CAPI Server lagging.
+    """
+    Exception Class for CAPI Server lagging.
 
     Raised when Companion API server is returning old data, e.g. when the
     servers are too busy.
@@ -184,20 +186,24 @@ class ServerLagging(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Frontier CAPI data doesn't agree with latest Journal game location
             self.args = (_('Error: Frontier server is lagging'),)
 
 
-class SKUError(Exception):
-    """Exception Class for CAPI SKU error.
+class NoMonitorStation(Exception):
+    """
+    Exception Class for being docked, but not knowing where in monitor.
 
-    Raised when the Companion API server thinks that the user has not
-    purchased E:D i.e. doesn't have the correct 'SKU'.
+    Raised when CAPI says we're docked but we forgot where we were at an EDO
+    Settlement, Disembarked, re-Embarked and then user hit 'Update'.
+    As of 4.0.0.401 both Disembark and Embark say `"Onstation": false`.
     """
 
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
-            self.args = (_('Error: Frontier server SKU problem'),)
+            # LANG: Commander is docked at an EDO settlement, got out and back in, we forgot the station
+            self.args = (_("Docked but unknown station: EDO Settlement?"),)
 
 
 class CredentialsError(Exception):
@@ -206,6 +212,7 @@ class CredentialsError(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Generic "something went wrong with Frontier Auth" error
             self.args = (_('Error: Invalid Credentials'),)
 
 
@@ -221,6 +228,7 @@ class CmdrError(Exception):
     def __init__(self, *args) -> None:
         self.args = args
         if not args:
+            # LANG: Frontier CAPI authorisation not for currently game-active commander
             self.args = (_('Error: Wrong Cmdr'),)
 
 
@@ -331,6 +339,7 @@ class Auth(object):
                 (data[k] for k in ('error_description', 'error', 'message') if k in data),
                 '<unknown error>'
             )
+            # LANG: Generic error prefix - following text is from Frontier auth service
             raise CredentialsError(f'{_("Error")}: {error!r}')
 
         r = None
@@ -369,15 +378,18 @@ class Auth(object):
 
                 if (usr := data_decode.get('usr')) is None:
                     logger.error('No "usr" in /decode data')
+                    # LANG: Frontier auth, no 'usr' section in returned data
                     raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 if (customer_id := usr.get('customer_id')) is None:
                     logger.error('No "usr"->"customer_id" in /decode data')
+                    # LANG: Frontier auth, no 'customer_id' in 'usr' section in returned data
                     raise CredentialsError(_("Error: Couldn't check token customer_id"))
 
                 # All 'FID' seen in Journals so far have been 'F<id>'
                 # Frontier, Steam and Epic
                 if f'F{customer_id}' != monitor.state.get('FID'):
+                    # LANG: Frontier auth customer_id doesn't match game session FID
                     raise CredentialsError(_("Error: customer_id doesn't match!"))
 
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
@@ -399,6 +411,7 @@ class Auth(object):
             if r:
                 self.dump(r)
 
+            # LANG: Failed to get Access Token from Frontier Auth service
             raise CredentialsError(_('Error: unable to get token')) from e
 
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
@@ -407,18 +420,31 @@ class Auth(object):
             (data[k] for k in ('error_description', 'error', 'message') if k in data),
             '<unknown error>'
         )
+        # LANG: Generic error prefix - following text is from Frontier auth service
         raise CredentialsError(f'{_("Error")}: {error!r}')
 
     @staticmethod
-    def invalidate(cmdr: str) -> None:
+    def invalidate(cmdr: Optional[str]) -> None:
         """Invalidate Refresh Token for specified Commander."""
-        logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
-        cmdrs = config.get_list('cmdrs', default=[])
-        idx = cmdrs.index(cmdr)
-        tokens = config.get_list('fdev_apikeys', default=[])
-        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
-        tokens[idx] = ''
-        config.set('fdev_apikeys', tokens)
+        to_set: Optional[list] = None
+        if cmdr is None:
+            logger.info('Frontier CAPI Auth: Invalidating ALL tokens!')
+            cmdrs = config.get_list('cmdrs', default=[])
+            to_set = [''] * len(cmdrs)
+
+        else:
+            logger.info(f'Frontier CAPI Auth: Invalidated token for "{cmdr}"')
+            cmdrs = config.get_list('cmdrs', default=[])
+            idx = cmdrs.index(cmdr)
+            to_set = config.get_list('fdev_apikeys', default=[])
+            to_set = to_set + [''] * (len(cmdrs) - len(to_set))
+            to_set[idx] = ''
+
+        if to_set is None:
+            logger.error('REFUSING TO SET NONE AS TOKENS!')
+            raise ValueError('Unexpected None for tokens while resetting')
+
+        config.set('fdev_apikeys', to_set)
         config.save()  # Save settings now for use by command-line app
 
     # noinspection PyMethodMayBeStatic
@@ -526,7 +552,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def query(self, endpoint: str) -> CAPIData:
+    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001
         """Perform a query against the specified CAPI endpoint."""
         logger.trace(f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
@@ -547,6 +573,7 @@ class Session(object):
 
         except Exception as e:
             logger.debug('Attempting GET', exc_info=e)
+            # LANG: Frontier CAPI data retrieval failed
             raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
 
         if r.url.startswith(SERVER_AUTH):
@@ -562,6 +589,7 @@ class Session(object):
             # Server error. Typically 500 "Internal Server Error" if server is down
             logger.debug('500 status back from CAPI')
             self.dump(r)
+            # LANG: Frontier CAPI data retrieval failed with 5XX code
             raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
 
         try:
@@ -581,7 +609,7 @@ class Session(object):
                 raise CredentialsError('query failed after refresh') from e
 
             elif self.login():		# Maybe our token expired. Re-authorize in any case
-                logger.debug('Maybe our token expired.')
+                logger.debug('Initial query failed, but login() just worked, trying again...')
                 self.retrying = True
                 return self.query(endpoint)
 
@@ -660,6 +688,8 @@ class Session(object):
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
             if last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id']):
+                logger.warning(f"{last_starport_name!r} != {marketdata['name']!r}"
+                               f" or {last_starport_id!r} != {int(marketdata['id'])!r}")
                 raise ServerLagging()
 
             else:
@@ -668,6 +698,8 @@ class Session(object):
         if services.get('outfitting') or services.get('shipyard'):
             shipdata = self.query(URL_SHIPYARD)
             if last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id']):
+                logger.warning(f"{last_starport_name!r} != {shipdata['name']!r} or "
+                               f"{last_starport_id!r} != {int(shipdata['id'])!r}")
                 raise ServerLagging()
 
             else:

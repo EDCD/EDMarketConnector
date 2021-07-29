@@ -388,10 +388,6 @@ sys.path: {sys.path}'''
         logger.error('Frontier CAPI Server returned an error')
         sys.exit(EXIT_SERVER)
 
-    except companion.SKUError:
-        logger.error('Frontier CAPI Server SKU problem')
-        sys.exit(EXIT_SERVER)
-
     except companion.CredentialsError:
         logger.error('Frontier CAPI Server: Invalid Credentials')
         sys.exit(EXIT_CREDENTIALS)

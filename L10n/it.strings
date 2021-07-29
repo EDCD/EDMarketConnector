@@ -1,552 +1,604 @@
+/* Generic 'Check', as in 'Check E:D journal file location' [EDMarketConnector.py] */
+"Check" = "Controlla";
 /* Language name */
 "!Language" = "Italiano";
-
-/* Text describing that value '100' means 'default', and changes require a restart [prefs.py] */
-"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Default{CR}Riavvio Richiesto per{CR}applicare i cambiamenti!";
-
-/* App menu entry on OSX. [EDMarketConnector.py] */
-"About {APP}" = "Informazioni su {APP}";
-
-/* Federation rank. [stats.py] */
-"Admiral" = "Admiral";
-
-/* Explorer rank. [stats.py] */
-"Aimless" = "Aimless";
-
-/* Appearance setting. [EDMarketConnector.py] */
-"Always on top" = "Sempre in primo piano";
-
-/* CQC rank. [stats.py] */
-"Amateur" = "Amateur";
-
-/* EDSM setting. [edsm.py] */
-"API Key" = "API Key";
-
-/* Tab heading in settings. [prefs.py] */
-"Appearance" = "Aspetto";
-
-/* Successfully authenticated with the Frontier website. [EDMarketConnector.py] */
-"Authentication successful" = "Autenticazione riuscita";
-
-/* Output setting. [prefs.py] */
-"Automatically update on docking" = "Auto-aggiornamento all'ormeggio";
-
-/* Cmdr stats. [stats.py] */
-"Balance" = "Saldo";
-
-/* Empire rank. [stats.py] */
-"Baron" = "Baron";
-
-/* Trade rank. [stats.py] */
-"Broker" = "Broker";
-
-/* Folder selection button on Windows. [prefs.py] */
-"Browse..." = "Sfoglia...";
-
-/* Federation rank. [stats.py] */
-"Cadet" = "Cadet";
-
-/* No 'commander' data in CAPI [EDMarketConnector.py] */
-"CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
-
-/* CQC rank. [stats.py] */
-"Champion" = "Champion";
-
-/* Folder selection button on OSX. [prefs.py] */
-"Change..." = "Cambia...";
-
-/* Menu item. [EDMarketConnector.py] */
-"Check for Updates..." = "Controlla aggiornamenti...";
-
-/* Federation rank. [stats.py] */
-"Chief Petty Officer" = "Chief Petty Officer";
-
-/* Main window. [EDMarketConnector.py] */
-"Cmdr" = "Cmdr";
-
-/* Ranking. [stats.py] */
-"Combat" = "Combat";
-
-/* EDSM setting. [edsm.py] */
-"Commander Name" = "Nome Commandante";
-
-/* Combat rank. [stats.py] */
-"Competent" = "Competent";
-
-/* Tab heading in settings. [prefs.py] */
-"Configuration" = "Configurazione";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"cooldown {SS}s" = "disponibile tra {SS} secondi";
-
-/* As in Copy and Paste. [EDMarketConnector.py] */
-"Copy" = "Copia";
-
-/* Empire rank. [stats.py] */
-"Count" = "Count";
-
-/* Ranking. [stats.py] */
-"CQC" = "CQC";
-
-/* Combat rank. [stats.py] */
-"Dangerous" = "Dangerous";
-
-/* Appearance theme setting. [prefs.py] */
-"Dark" = "Scuro";
-
-/* Combat rank. [stats.py] */
-"Deadly" = "Deadly";
-
-/* Trade rank. [stats.py] */
-"Dealer" = "Dealer";
-
-/* Appearance theme and language setting. [l10n.py] */
-"Default" = "Predefinito";
-
-/* Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2. [eddn.py] */
-"Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
-
-/* Option to disabled Automatic Check For Updates whilst in-game [prefs.py] */
-"Disable Automatic Application Updates Check when in-game" = "Disabilita gli aggiornamenti automatici quando sei in-game";
-
-/* List of plugins in settings. [prefs.py] */
-"Disabled Plugins" = "Plugin disabilitati";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Documentation" = "Documentazione";
-
-/* Empire rank. [stats.py] */
-"Duke" = "Duke";
-
-/* Location of the new Journal file in E:D 2.2. [EDMarketConnector.py] */
-"E:D journal file location" = "locazione del file E:D journal";
-
-/* Empire rank. [stats.py] */
-"Earl" = "Earl";
-
-/* Menu title. [EDMarketConnector.py] */
-"Edit" = "Appunti";
-
-/* Popup title: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins senza Supporto Python 3.x";
-
-/* Top rank. [stats.py] */
-"Elite" = "Elite";
-
-/* Section heading in settings. [edsm.py] */
-"Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
-
-/* Ranking. [stats.py] */
-"Empire" = "Impero";
-
-/* List of plugins in settings. [prefs.py] */
-"Enabled Plugins" = "Plugin abilitati";
-
-/* Federation rank. [stats.py] */
-"Ensign" = "Ensign";
-
-/* Trade rank. [stats.py] */
-"Entrepreneur" = "Entrepreneur";
-
-/* [eddn.py] */
-"Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
-
-/* [edsm.py] */
-"Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
-
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Errore: Non riesco a connettermi a Inara";
-
-/* [edsm.py] */
-"Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
 
 
 /* OLD: Raised when cannot contact the Companion API server. [companion.py] */
 "Error: Frontier server is down" = "Errore: Il Server Frontier è offline";
-
-/* Raised when Companion API server is returning old data, e.g. when the servers are too busy. [companion.py] */
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
 "Error: Frontier server is lagging" = "Errore: il server Frontier sta laggando";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
+"Error: Invalid Credentials" = "Errore: Credenziali non valide";
+
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:230; */
+"Error: Wrong Cmdr" = "Errore: Cmdr sbagliato";
+
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:341; companion.py:422; */
+"Error" = "Errore";
+
+
+/* [inara.py] */
+"Error: Can't connect to Inara" = "Errore: Non riesco a connettermi a Inara";
+/* companion.py: Frontier CAPI data retrieval failed with 5XX code; In files: companion.py:591; */
+"Frontier CAPI server error" = "Errore nel server Frontier CAPI";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
+"Update" = "Recupera";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
+"Always on top" = "Sempre in primo piano";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:636; */
+"Unknown" = "Sconosciuto";
+
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
+"Cmdr" = "Cmdr";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
+"Role" = "Ruolo";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
+"Ship" = "Nave";
+
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:715; */
+"Suit" = "Tuta";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
+"System" = "Sistema";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
+"Station" = "Stazione";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
+"File" = "File";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
+"Edit" = "Appunti";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
+"View" = "Vista";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
+"Window" = "Finestra";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
+"Help" = "Guida";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
+"About {APP}" = "Informazioni su {APP}";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
+"Check for Updates..." = "Controlla aggiornamenti...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
+"Save Raw Data..." = "Salva i Dati Grezzi...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
+"Status" = "Status";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
+"Privacy Policy" = "Informativa sulla privacy";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
+"Release Notes" = "Note di rilascio";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
+"Settings" = "Impostazioni";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
+"Exit" = "Esci";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
+"Documentation" = "Documentazione";
+
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
+"Copy" = "Copia";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
+"Logging in..." = "Mi sto loggando...";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
+"Authentication successful" = "Autenticazione riuscita";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
+"You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
+"Station doesn't have anything!" = "La Stazione non ha niente !";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
+"Station doesn't have a market!" = "La Stazione non ha un Market !";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
+"Fetching data..." = "Sto raccogliendo i dati...";
+
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:880; */
+"CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
+"Who are you?!" = "Chi sei ?!";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
+"Where are you?!" = "Dove sei finito ?!";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
+"What are you flying?!" = "Stai volando ?!";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
+"Last updated at %H:%M:%S" = "Ultimo aggiornamento alle %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
+"Fighter" = "Cacciatore";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
+"Gunner" = "Artigliere";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
+"Helm" = "Timoniere";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
+"cooldown {SS}s" = "disponibile tra {SS} secondi";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
+"OK" = "OK";
+
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1489; */
+"Shutting down..." = "Spegnimento...";
+
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1780:1786; */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x. Per favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
+"Plugins" = "Plugins";
+
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:1801; */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins senza Supporto Python 3.x";
+
+/* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
+"Journal directory already locked" = "cartella Journal già bloccata";
+
+/* journal_lock.py: Text for when newly selected Journal directory is already locked; In files: journal_lock.py:223:224; */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "La nuova cartella dove risiede il Journal è già bloccata.{CR}Puoi provare a risolvere Riprovando, oppure scegliere di ignorare la cosa.";
+
+/* journal_lock.py: Generic 'Retry' button label; In files: journal_lock.py:228; */
+"Retry" = "Riprova";
+
+/* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:232; */
+"Ignore" = "Ignora";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
+"Default" = "Predefinito";
+
+/* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:52; coriolis.py:55; coriolis.py:101; coriolis.py:117; coriolis.py:123; */
+"Auto" = "Auto";
+
+/* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:53; coriolis.py:99; coriolis.py:115; */
+"Normal" = "Normale";
+
+/* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:54; coriolis.py:100; coriolis.py:116; */
+"Beta" = "Beta";
+
+/* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:75; */
+"Normal URL" = "URL normale";
+
+/* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:78; coriolis.py:87; */
+"Reset" = "Reimposta";
+
+/* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:84; */
+"Beta URL" = "URL Beta";
+
+/* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:94; */
+"Override Beta/Normal Selection" = "Sovrascrivi selezione Beta/Normale";
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
+"EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Guarda il Log.";
+
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+"Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
+
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+"Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
+
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+"Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
+
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
+"Send system and scan data to the Elite Dangerous Data Network" = "Manda il sistema e i dati scansionati a EDDN";
+
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
+"Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
+
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:198; */
+"Send flight log and Cmdr status to EDSM" = "Manda il flight log e lo stato Cmdr a EDSM";
+
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+"Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+"Commander Name" = "Nome Commandante";
+
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+"API Key" = "API Key";
+
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+"None" = "Nessuna";
+
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+"Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
+
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+"Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
+
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:216; */
+"Send flight log and Cmdr status to Inara" = "Manda il flight log e lo stato Cmdr a Inara";
+
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:228; */
+"Inara credentials" = "Credenziali per Inara";
+
+/* inara.py: INARA support disabled via killswitch; In files: inara.py:335; */
+"Inara disabled. See Log." = "Inara disabilitato. Vedi il Log.";
+
 
 /* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
 "Error: Frontier server SKU problem" = "Errore: il server Frontier ha un problema SKU";
-
-/* [inara.py] */
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1549; inara.py:1562; */
 "Error: Inara {MSG}" = "Errore: Inara {MSG}";
 
-/* [companion.py] */
-"Error: Invalid Credentials" = "Errore: Credenziali non valide";
-
-/* Raised when the user has multiple accounts and the username/password setting is not for the account they're currently playing OR the user has reset their Cmdr and the Companion API server is still returning data for the old Cmdr. [companion.py] */
-"Error: Wrong Cmdr" = "Errore: Cmdr sbagliato";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Exit" = "Esci";
-
-/* Combat rank. [stats.py] */
-"Expert" = "Expert";
-
-/* Ranking. [stats.py] */
-"Explorer" = "Explorer";
-
-/* Ranking. [stats.py] */
-"Federation" = "Federazione";
-
-/* [EDMarketConnector.py] */
-"Fetching data..." = "Sto raccogliendo i dati...";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Fighter" = "Cacciatore";
-
-/* Menu title. [EDMarketConnector.py] */
-"File" = "File";
-
-/* Section heading in settings. [prefs.py] */
-"File location" = "Percorso del file";
-
-/* CQC rank. [stats.py] */
-"Gladiator" = "Gladiator";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Gunner" = "Artigliere";
-
-/* Combat rank. [stats.py] */
-"Harmless" = "Harmless";
-
-/* Multicrew role. [EDMarketConnector.py] */
-"Helm" = "Timoniere";
-
-/* Menu title. [EDMarketConnector.py] */
-"Help" = "Guida";
-
-/* CQC rank. [stats.py] */
-"Helpless" = "Helpless";
-
-/* CQC rank. [stats.py] */
-"Hero" = "Hero";
-
-/* Dark theme color setting. [prefs.py] */
-"Highlighted text" = "Testo evidenziato";
-
-/* Hotkey/Shortcut settings prompt on Windows. [prefs.py] */
-"Hotkey" = "Hotkey";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Ignore" = "Ignora";
-
-/* Section heading in settings. [inara.py] */
-"Inara credentials" = "Credenziali per Inara";
-
-/* Settings>Plugins>Information on migrating plugins [prefs.py] */
-"Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Journal directory already locked" = "cartella Journal già bloccata";
-
-/* Hotkey/Shortcut settings prompt on OSX. [prefs.py] */
-"Keyboard shortcut" = "Scorciatoia di tastiera";
-
-/* Empire rank. [stats.py] */
-"King" = "King";
-
-/* Empire rank. [stats.py] */
-"Knight" = "Knight";
-
-/* Appearance setting prompt. [prefs.py] */
-"Language" = "Lingua";
-
-/* [EDMarketConnector.py] - Leave '%H:%M:%S' as-is */
-"Last updated at %H:%M:%S" = "Ultimo aggiornamento alle %H:%M:%S";
-
-/* Federation rank. [stats.py] */
-"Lieutenant" = "Lieutenant";
-
-/* Federation rank. [stats.py] */
-"Lieutenant Commander" = "Lieutenant Commander";
-
-/* Cmdr stats. [stats.py] */
-"Loan" = "Prestito";
-
-/* Label for user configured level of logging [prefs.py] */
-"Log Level" = "Livello di Log";
-
-/* [EDMarketConnector.py] */
-"Logging in..." = "Mi sto loggando...";
-
-/* Empire rank. [stats.py] */
-"Lord" = "Lord";
-
-/* [prefs.py] */
-"Market data in CSV format file" = "Market data in formato CSV";
-
-/* [prefs.py] */
-"Market data in Trade Dangerous format file" = "Market data in formato Trade Dangerous";
-
-/* Empire rank. [stats.py] */
-"Marquis" = "Marquis";
-
-/* Combat rank. [stats.py] */
-"Master" = "Master";
-
-/* Trade rank. [stats.py] */
-"Merchant" = "Merchant";
-
-/* Federation rank. [stats.py] */
-"Midshipman" = "Midshipman";
-
-/* Explorer rank. [stats.py] */
-"Mostly Aimless" = "Mostly Aimless";
-
-/* Combat rank. [stats.py] */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* CQC rank. [stats.py] */
-"Mostly Helpless" = "Mostly Helpless";
-
-/* Trade rank. [stats.py] */
-"Mostly Penniless" = "Mostly Penniless";
-
-/* No hotkey/shortcut currently defined. [prefs.py] */
-"None" = "Nessuna";
-
-/* Dark theme color setting. [prefs.py] */
-"Normal text" = "Testo normale";
-
-/* Combat rank. [stats.py] */
-"Novice" = "Novice";
-
-/* [prefs.py] */
-"OK" = "OK";
-
-/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x. Per favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è in primo piano";
-
-/* Button that opens a folder in Explorer/Finder. [prefs.py] */
-"Open" = "Apri";
-
-/* Shortcut settings button on OSX. [prefs.py] */
-"Open System Preferences" = "Apri Preferenze di Sistema";
-
-/* Tab heading in settings. [prefs.py] */
-"Output" = "Output";
-
-/* Empire rank. [stats.py] */
-"Outsider" = "Outsider";
-
-/* Explorer rank. [stats.py] */
-"Pathfinder" = "Pathfinder";
-
-/* Trade rank. [stats.py] */
-"Peddler" = "Peddler";
-
-/* Trade rank. [stats.py] */
-"Penniless" = "Penniless";
-
-/* Federation rank. [stats.py] */
-"Petty Officer" = "Petty Officer";
-
-/* Explorer rank. [stats.py] */
-"Pioneer" = "Pioneer";
-
-/* Hotkey/Shortcut setting. [prefs.py] */
-"Play sound" = "Notifica sonora";
-
-/* [prefs.py] */
-"Please choose what data to save" = "Si prega di scegliere che dati salvare";
-
-/* Tab heading in settings. [prefs.py] */
-"Plugins" = "Plugins";
-
-/* Section heading in settings. [prefs.py] */
-"Plugins folder" = "Cartella dei plugins";
-
-/* Federation rank. [stats.py] */
-"Post Captain" = "Post Captain";
-
-/* Federation rank. [stats.py] */
-"Post Commander" = "Post Commander";
-
-/* Ranking. [stats.py] */
-"Powerplay" = "Powerplay";
-
-/* [prefs.py] */
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
 "Preferences" = "Preferenze";
 
-/* Settings prompt for preferred ship loadout, system and station info websites. [prefs.py] */
-"Preferred websites" = "Sito web preferito";
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+"Please choose what data to save" = "Si prega di scegliere che dati salvare";
 
-/* Empire rank. [stats.py] */
-"Prince" = "Prince";
+/* prefs.py: Settings > Output option; In files: prefs.py:352; */
+"Market data in CSV format file" = "Market data in formato CSV";
 
-/* Help menu item. [EDMarketConnector.py] */
-"Privacy Policy" = "Informativa sulla privacy";
+/* prefs.py: Settings > Output option; In files: prefs.py:361; */
+"Market data in Trade Dangerous format file" = "Market data in formato Trade Dangerous";
 
-/* CQC rank. [stats.py] */
-"Professional" = "Professional";
-
-/* Explorer rank. [stats.py] */
-"Ranger" = "Ranger";
-
-/* Power rank. [stats.py] */
-"Rating 1" = "Rating 1";
-
-/* Power rank. [stats.py] */
-"Rating 2" = "Rating 2";
-
-/* Power rank. [stats.py] */
-"Rating 3" = "Rating 3";
-
-/* Power rank. [stats.py] */
-"Rating 4" = "Rating 4";
-
-/* Power rank. [stats.py] */
-"Rating 5" = "Rating 5";
-
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
-
-/* Federation rank. [stats.py] */
-"Rear Admiral" = "Rear Admiral";
-
-/* Federation rank. [stats.py] */
-"Recruit" = "Recruit";
-
-/* Help menu item. [EDMarketConnector.py] */
-"Release Notes" = "Note di rilascio";
-
-/* Changed journal update_lock failed [monitor.py] */
-"Retry" = "Riprova";
-
-/* Multicrew role label in main window. [EDMarketConnector.py] */
-"Role" = "Ruolo";
-
-/* Menu item. [EDMarketConnector.py] */
-"Save Raw Data..." = "Salva i Dati Grezzi...";
-
-/* Explorer rank. [stats.py] */
-"Scout" = "Scout";
-
-/* CQC rank. [stats.py] */
-"Semi Professional" = "Semi Professional";
-
-/* [edsm.py] */
-"Send flight log and Cmdr status to EDSM" = "Manda il flight log e lo stato Cmdr a EDSM";
-
-/* [inara.py] */
-"Send flight log and Cmdr status to Inara" = "Manda il flight log e lo stato Cmdr a Inara";
-
-/* Output setting. [eddn.py] */
-"Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
-
-/* Output setting new in E:D 2.2. [eddn.py] */
-"Send system and scan data to the Elite Dangerous Data Network" = "Manda il sistema e i dati scansionati a EDDN";
-
-/* [eddn.py] */
-"Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
-
-/* Empire rank. [stats.py] */
-"Serf" = "Serf";
-
-/* Item in the File menu on Windows. [EDMarketConnector.py] */
-"Settings" = "Impostazioni";
-
-/* Main window. [EDMarketConnector.py] */
-"Ship" = "Nave";
-
-/* Output setting. [prefs.py] */
+/* prefs.py: Settings > Output option; In files: prefs.py:371; */
 "Ship loadout" = "Equipaggiamento della nave";
 
-/* Status dialog title. [stats.py] */
-"Ships" = "Navi";
+/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+"Automatically update on docking" = "Auto-aggiornamento all'ormeggio";
 
-/* Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis. [prefs.py] */
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+"File location" = "Percorso del file";
+
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+"Change..." = "Cambia...";
+
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+"Browse..." = "Sfoglia...";
+
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+"Output" = "Output";
+
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+"E:D journal file location" = "locazione del file E:D journal";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+"Keyboard shortcut" = "Scorciatoia di tastiera";
+
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+"Hotkey" = "Hotkey";
+
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+"Re-start {APP} to use shortcuts" = "Riavvia {APP} per usare le scorciatoie";
+
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+"{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
+
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+"Open System Preferences" = "Apri Preferenze di Sistema";
+
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+"Only when Elite: Dangerous is the active app" = "Solo quando “Elite: Dangerous” è in primo piano";
+
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+"Play sound" = "Notifica sonora";
+
+/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:555; */
+"Disable Automatic Application Updates Check when in-game" = "Disabilita gli aggiornamenti automatici quando sei in-game";
+
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:568; */
+"Preferred websites" = "Sito web preferito";
+
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
 "Shipyard" = "Spazioporto";
 
-/* Status line text that appears when process exit sequence starts [EDMarketConnector.py] */
-"Shutting down..." = "Spegnimento...";
-
-/* Empire rank. [stats.py] */
-"Squire" = "Squire";
-
-/* Main window. [EDMarketConnector.py] */
-"Station" = "Stazione";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have a market!" = "La Stazione non ha un Market !";
-
-/* [EDMarketConnector.py] */
-"Station doesn't have anything!" = "La Stazione non ha niente !";
-
-/* Menu item. [EDMarketConnector.py] */
-"Status" = "Status";
-
-/* Explorer rank. [stats.py] */
-"Surveyor" = "Surveyor";
-
-/* Main window. [EDMarketConnector.py] */
-"System" = "Sistema";
-
-/* Changed journal update_lock failed [monitor.py] */
-"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "La nuova cartella dove risiede il Journal è già bloccata.{CR}Puoi provare a risolvere Riprovando, oppure scegliere di ignorare la cosa.";
-
-/* Appearance setting. [prefs.py] */
-"Theme" = "Tema";
-
-/* Help text in settings. [prefs.py] */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
-
-/* Ranking. [stats.py] */
-"Trade" = "Trade";
-
-/* Explorer rank. [stats.py] */
-"Trailblazer" = "Trailblazer";
-
-/* Appearance theme setting. [prefs.py] */
-"Transparent" = "Trasparente";
-
-/* Trade rank. [stats.py] */
-"Tycoon" = "Tycoon";
-
-/* Label for 'UI Scaling' option [prefs.py] */
-"UI Scale Percentage" = "Percentuale zoom della UI";
-
-/* Update button in main window. [EDMarketConnector.py] */
-"Update" = "Recupera";
-
-/* Option to use alternate URL method on shipyard links [prefs.py] */
+/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:591; */
 "Use alternate URL method" = "Usare metodo URL alternativo";
 
-/* Status dialog subtitle - CR value of ship. [stats.py] */
-"Value" = "Valore";
+/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:644; */
+"Log Level" = "Livello di Log";
 
-/* Federation rank. [stats.py] */
-"Vice Admiral" = "Vice Admiral";
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+"Configuration" = "Configurazione";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"View" = "Vista";
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+"Normal text" = "Testo normale";
 
-/* Empire rank. [stats.py] */
-"Viscount" = "Viscount";
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+"Highlighted text" = "Testo evidenziato";
 
-/* Federation rank. [stats.py] */
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+"Language" = "Lingua";
+
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+"Theme" = "Tema";
+
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+"Dark" = "Scuro";
+
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+"Transparent" = "Trasparente";
+
+/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:770; */
+"UI Scale Percentage" = "Percentuale zoom della UI";
+
+/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:791; */
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 significa Default{CR}Riavvio Richiesto per{CR}applicare i cambiamenti!";
+
+/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:801; */
+"Main window transparency" = "Trasparenza della finestra principale";
+
+/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:821:824; */
+"100 means fully opaque.{CR}Window is updated in real time" = "100 stà per completamente opaco.{CR}Finestra è aggiornata in tempo reale";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+"Appearance" = "Aspetto";
+
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+"Plugins folder" = "Cartella dei plugins";
+
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+"Open" = "Apri";
+
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:890; */
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
+
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+"Enabled Plugins" = "Plugin abilitati";
+
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:921; */
+"Plugins Without Python 3.x Support:" = "Plugin senza il supporto a Python 3.x :";
+
+/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:929; */
+"Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
+
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+"Disabled Plugins" = "Plugin disabilitati";
+
+/* stats.py: Cmdr stats; In files: stats.py:51; */
+"Balance" = "Saldo";
+
+/* stats.py: Cmdr stats; In files: stats.py:52; */
+"Loan" = "Prestito";
+
+/* stats.py: Ranking; In files: stats.py:57; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:58; */
+"Trade" = "Trade";
+
+/* stats.py: Ranking; In files: stats.py:59; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:60; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:61; */
+"Federation" = "Federazione";
+
+/* stats.py: Ranking; In files: stats.py:62; */
+"Empire" = "Impero";
+
+/* stats.py: Ranking; In files: stats.py:63; */
+"Powerplay" = "Powerplay";
+
+/* stats.py: Combat rank; In files: stats.py:71; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:72; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:73; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:74; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:75; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
+"Master" = "Master";
+
+/* stats.py: Combat rank; In files: stats.py:77; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:78; */
+"Deadly" = "Deadly";
+
+/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+"Elite" = "Elite";
+
+/* stats.py: Trade rank; In files: stats.py:82; */
+"Penniless" = "Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:83; */
+"Mostly Penniless" = "Mostly Penniless";
+
+/* stats.py: Trade rank; In files: stats.py:84; */
+"Peddler" = "Peddler";
+
+/* stats.py: Trade rank; In files: stats.py:85; */
+"Dealer" = "Dealer";
+
+/* stats.py: Trade rank; In files: stats.py:86; */
+"Merchant" = "Merchant";
+
+/* stats.py: Trade rank; In files: stats.py:87; */
+"Broker" = "Broker";
+
+/* stats.py: Trade rank; In files: stats.py:88; */
+"Entrepreneur" = "Entrepreneur";
+
+/* stats.py: Trade rank; In files: stats.py:89; */
+"Tycoon" = "Tycoon";
+
+/* stats.py: Explorer rank; In files: stats.py:93; */
+"Aimless" = "Aimless";
+
+
+/* Appearance setting. [EDMarketConnector.py] */
+"Minimize to system tray" = "Riduci a icona nel Vassoio di sistema";
+/* stats.py: Explorer rank; In files: stats.py:94; */
+"Mostly Aimless" = "Mostly Aimless";
+
+/* stats.py: Explorer rank; In files: stats.py:95; */
+"Scout" = "Scout";
+
+/* stats.py: Explorer rank; In files: stats.py:96; */
+"Surveyor" = "Surveyor";
+
+/* stats.py: Explorer rank; In files: stats.py:97; */
+"Trailblazer" = "Trailblazer";
+
+/* stats.py: Explorer rank; In files: stats.py:98; */
+"Pathfinder" = "Pathfinder";
+
+/* stats.py: Explorer rank; In files: stats.py:99; */
+"Ranger" = "Ranger";
+
+/* stats.py: Explorer rank; In files: stats.py:100; */
+"Pioneer" = "Pioneer";
+
+/* stats.py: CQC rank; In files: stats.py:104; */
+"Helpless" = "Helpless";
+
+/* stats.py: CQC rank; In files: stats.py:105; */
+"Mostly Helpless" = "Mostly Helpless";
+
+/* stats.py: CQC rank; In files: stats.py:106; */
+"Amateur" = "Amateur";
+
+/* stats.py: CQC rank; In files: stats.py:107; */
+"Semi Professional" = "Semi Professional";
+
+/* stats.py: CQC rank; In files: stats.py:108; */
+"Professional" = "Professional";
+
+/* stats.py: CQC rank; In files: stats.py:109; */
+"Champion" = "Champion";
+
+/* stats.py: CQC rank; In files: stats.py:110; */
+"Hero" = "Hero";
+
+/* stats.py: CQC rank; In files: stats.py:111; */
+"Gladiator" = "Gladiator";
+
+/* stats.py: Federation rank; In files: stats.py:118; */
+"Recruit" = "Recruit";
+
+/* stats.py: Federation rank; In files: stats.py:119; */
+"Cadet" = "Cadet";
+
+/* stats.py: Federation rank; In files: stats.py:120; */
+"Midshipman" = "Midshipman";
+
+/* stats.py: Federation rank; In files: stats.py:121; */
+"Petty Officer" = "Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:122; */
+"Chief Petty Officer" = "Chief Petty Officer";
+
+/* stats.py: Federation rank; In files: stats.py:123; */
 "Warrant Officer" = "Warrant Officer";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"What are you flying?!" = "Stai volando ?!";
+/* stats.py: Federation rank; In files: stats.py:124; */
+"Ensign" = "Ensign";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Where are you?!" = "Dove sei finito ?!";
+/* stats.py: Federation rank; In files: stats.py:125; */
+"Lieutenant" = "Lieutenant";
 
-/* Shouldn't happen. [EDMarketConnector.py] */
-"Who are you?!" = "Chi sei ?!";
+/* stats.py: Federation rank; In files: stats.py:126; */
+"Lieutenant Commander" = "Lieutenant Commander";
 
-/* Menu title on OSX. [EDMarketConnector.py] */
-"Window" = "Finestra";
+/* stats.py: Federation rank; In files: stats.py:127; */
+"Post Commander" = "Post Commander";
 
-/* [EDMarketConnector.py] */
-"You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
+/* stats.py: Federation rank; In files: stats.py:128; */
+"Post Captain" = "Post Captain";
 
-/* Shortcut settings prompt on OSX. [prefs.py] */
-"{APP} needs permission to use shortcuts" = "{APP} ha bisogno dei permessi per usare le scorciatoie";
+/* stats.py: Federation rank; In files: stats.py:129; */
+"Rear Admiral" = "Rear Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:130; */
+"Vice Admiral" = "Vice Admiral";
+
+/* stats.py: Federation rank; In files: stats.py:131; */
+"Admiral" = "Admiral";
+
+/* stats.py: Empire rank; In files: stats.py:137; */
+"Outsider" = "Outsider";
+
+/* stats.py: Empire rank; In files: stats.py:138; */
+"Serf" = "Serf";
+
+/* stats.py: Empire rank; In files: stats.py:140; */
+"Squire" = "Squire";
+
+/* stats.py: Empire rank; In files: stats.py:141; */
+"Knight" = "Knight";
+
+/* stats.py: Empire rank; In files: stats.py:142; */
+"Lord" = "Lord";
+
+/* stats.py: Empire rank; In files: stats.py:143; */
+"Baron" = "Baron";
+
+/* stats.py: Empire rank; In files: stats.py:144; */
+"Viscount" = "Viscount";
+
+/* stats.py: Empire rank; In files: stats.py:145; */
+"Count" = "Count";
+
+/* stats.py: Empire rank; In files: stats.py:146; */
+"Earl" = "Earl";
+
+/* stats.py: Empire rank; In files: stats.py:147; */
+"Marquis" = "Marquis";
+
+/* stats.py: Empire rank; In files: stats.py:148; */
+"Duke" = "Duke";
+
+/* stats.py: Empire rank; In files: stats.py:149; */
+"Prince" = "Prince";
+
+/* stats.py: Empire rank; In files: stats.py:150; */
+"King" = "King";
+
+/* stats.py: Power rank; In files: stats.py:156; */
+"Rating 1" = "Rating 1";
+
+/* stats.py: Power rank; In files: stats.py:157; */
+"Rating 2" = "Rating 2";
+
+/* stats.py: Power rank; In files: stats.py:158; */
+"Rating 3" = "Rating 3";
+
+/* stats.py: Power rank; In files: stats.py:159; */
+"Rating 4" = "Rating 4";
+
+/* stats.py: Power rank; In files: stats.py:160; */
+"Rating 5" = "Rating 5";
+
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+"Value" = "Valore";
+
+/* stats.py: Status dialog title; In files: stats.py:376; */
+"Ships" = "Navi";
