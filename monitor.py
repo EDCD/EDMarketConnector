@@ -182,9 +182,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if journal_dir == '' or journal_dir is None:
             journal_dir = config.default_journal_dir
 
-        # TODO(A_D): this is ignored for type checking due to all the different types config.get returns
-        # When that is refactored, remove the magic comment
-        logdir = expanduser(journal_dir)  # type: ignore # config is weird
+        logdir = expanduser(journal_dir)
 
         if not logdir or not isdir(logdir):
             logger.error(f'Journal Directory is invalid: "{logdir}"')
@@ -201,11 +199,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Do this before setting up the observer in case the journal directory has gone away
         try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
             logfiles = sorted(
-                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),  # type: ignore # config is weird
+                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
                 key=lambda x: x.split('.')[1:]
             )
 
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore # config is weird
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
 
         except Exception:
             logger.exception('Failed to find latest logfile')
@@ -492,8 +490,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             event_type = entry['event'].lower()
             if event_type == 'fileheader':
                 self.live = False
-                self.version = entry['gameversion']
-                self.is_beta = any(v in entry['gameversion'].lower() for v in ('alpha', 'beta'))
 
                 self.cmdr = None
                 self.mode = None
@@ -508,15 +504,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = None
                 self.__init_state()
-                # In self.state as well, as that's what plugins get
-                self.state['GameLanguage'] = entry['language']
-                self.state['GameVersion'] = entry['gameversion']
-                self.state['GameBuild'] = entry['build']
+
+                # Do this AFTER __init_state() lest our nice new state entries be None
+                self.populate_version_info(entry)
 
             elif event_type == 'commander':
                 self.live = True  # First event in 3.0
 
             elif event_type == 'loadgame':
+                # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
+                self.populate_version_info(entry, suppress=True)
+
                 # alpha4
                 # Odyssey: bool
                 self.cmdr = entry['Commander']
@@ -914,7 +912,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 logger.warning(f'We have a BackPackMaterials event, defunct since > 4.0.0.102 ?:\n{entry}\n')
                 pass
 
-            elif event_type == 'backpack':
+            elif event_type in ('backpack', 'resupply'):
+                # as of v4.0.0.600, a `resupply` event is dropped when resupplying your suit at your ship.
+                # This event writes the same data as a backpack event. It will also be followed by a ShipLocker
+                # but that follows normal behaviour in its handler.
+
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
                 backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
@@ -1110,7 +1112,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'edmcName':  self.suit_sane_name(loc_name),
                     'id':        None,  # Is this an FDev ID for suit type ?
                     'suitId':    entry['SuitID'],
-                    'slots':     [],
+                    'mods':      entry['SuitMods'],  # Suits can (rarely) be bought with modules installed
                 }
 
                 # update credits
@@ -1175,6 +1177,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             'id':             None,
                             'weaponrackId':   entry['SuitModuleID'],
                             'locDescription': '',
+                            'class':          entry['Class'],
+                            'mods':           entry['WeaponMods']
                         }
 
                     except KeyError:
@@ -1573,6 +1577,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
             return {'event': None}
 
+    def populate_version_info(self, entry: MutableMapping[str, str], suppress: bool = False):
+        """
+        Update game version information stored locally.
+
+        :param entry: Either a Fileheader or LoadGame event
+        """
+        try:
+            self.state['GameLanguage'] = entry['language']
+            self.state['GameVersion'] = entry['gameversion']
+            self.state['GameBuild'] = entry['build']
+            self.version = self.state['GameVersion']
+            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))
+        except KeyError:
+            if not suppress:
+                raise
+
     def backpack_set_empty(self):
         """Set the BackPack contents to be empty."""
         self.state['BackPack']['Component'] = defaultdict(int)
@@ -1647,9 +1667,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             suit = {
                 'edmcName': edmc_suitname,
                 'locName':  suitname,
-                'suitId':   entry['SuitID'],
-                'name':     entry['SuitName'],
             }
+
+        # Overwrite with latest data, just in case, as this can be from CAPI which may or may not have had
+        # all the data we wanted
+        suit['suitId'] = entry['SuitID']
+        suit['name'] = entry['SuitName']
+        suit['mods'] = entry['SuitMods']
 
         suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Make the new loadout, in the CAPI format
@@ -1664,7 +1688,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
         suit['id'] = suit.get('id')  # Not available in 4.0.0.100 journal event
-        suit['slots'] = new_loadout['slots']  # 'slots', not 'Modules', to match CAPI
         # Ensure the suit is in self.state['Suits']
         self.state['Suits'][f"{suitid}"] = suit
 
@@ -2097,6 +2120,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 'weaponrackId':   loadout_slots[s]['SuitModuleID'],
                 'locName':        loadout_slots[s].get('ModuleName_Localised', loadout_slots[s]['ModuleName']),
                 'locDescription': '',
+                'class':          loadout_slots[s]['Class'],
+                'mods':           loadout_slots[s]['WeaponMods'],
             }
 
         return slots
