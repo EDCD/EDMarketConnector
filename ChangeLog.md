@@ -1,7 +1,7 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-* We now test against, and package with, Python 3.9.5.
+* We now test against, and package with, Python 3.9.6.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -16,6 +16,45 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+Release 5.1.2
+===
+
+* A Journal event change in EDO Update 6 will have caused some translated
+  suit names to not be properly mapped to their sane versions.  This change
+  has now been addressed and suit names should always come out as intended in
+  the EDMarketConnector.exe UI.
+
+* There is a new command-line argument to cause all Frontier Authorisation to
+  be forgotten:  `EDMarketConnector.exe --forget-frontier-auth`.
+ 
+* Situations where Frontier CAPI data doesn't agree on the location we have
+  tracked from Journal events will now log more useful information.
+
+Bug Fixes
+---
+
+* The code should now be robust against the case of any Journal event name
+  changing.
+
+Plugin Developers
+---
+
+* We now store `GameLanguage`, `GameVersion` and `GameBuild` in the `state`
+  passed to `journal_entry()` from the `LoadGame` event.
+
+* Various suit data, i.e. class and mods, is now stored from relevant
+  Journal events, rather than only being available from CAPI data.  In
+  general we now consider the Journal to be the canonical source of suit
+  data, with CAPI only as a backup.
+
+* Backpack contents should now track correctly if using the 'Resupply' option
+  available on the ship boarding menu.
+
+* We now cache the main application version when first determined, so
+  that subsequent references to `config.appversion()` won't cause extra log
+  spam (which was possible when, e.g. having a git command but using non-git
+  source).
 
 Release 5.1.1
 ===
