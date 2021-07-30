@@ -36,14 +36,14 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.1.1</title>
+			<title>Release 5.1.2</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <ul>
 <li>
-<p>We now test against, and package with, Python 3.9.5.</p>
+<p>We now test against, and package with, Python 3.9.6.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.<br>
 This is due to
 <a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.9.x itself not supporting Windows 7</a>.
@@ -55,6 +55,54 @@ Python 3.7 series.</p>
 <p>Developers can check the contents of the <code>.python-version</code> file
 in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
+</li>
+</ul>
+
+<h2>Release 5.1.2</h2>
+<ul>
+<li>
+<p>A Journal event change in EDO Update 6 will have caused some translated
+suit names to not be properly mapped to their sane versions.  This change
+has now been addressed and suit names should always come out as intended in
+the EDMarketConnector.exe UI.</p>
+</li>
+<li>
+<p>There is a new command-line argument to cause all Frontier Authorisation to
+be forgotten:  <code>EDMarketConnector.exe --forget-frontier-auth</code>.</p>
+</li>
+<li>
+<p>Situations where Frontier CAPI data doesn't agree on the location we have
+tracked from Journal events will now log more useful information.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>The code should now be robust against the case of any Journal event name
+changing.</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We now store <code>GameLanguage</code>, <code>GameVersion</code> and <code>GameBuild</code> in the <code>state</code>
+passed to <code>journal_entry()</code> from the <code>LoadGame</code> event.</p>
+</li>
+<li>
+<p>Various suit data, i.e. class and mods, is now stored from relevant
+Journal events, rather than only being available from CAPI data.  In
+general we now consider the Journal to be the canonical source of suit
+data, with CAPI only as a backup.</p>
+</li>
+<li>
+<p>Backpack contents should now track correctly if using the 'Resupply' option
+available on the ship boarding menu.</p>
+</li>
+<li>
+<p>We now cache the main application version when first determined, so
+that subsequent references to <code>config.appversion()</code> won't cause extra log
+spam (which was possible when, e.g. having a git command but using non-git
+source).</p>
 </li>
 </ul>
 
@@ -803,11 +851,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.1.1/EDMarketConnector_win_5.1.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.1.2/EDMarketConnector_win_5.1.2.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.1.1"
-				length="10186752"
+				sparkle:version="5.1.2"
+				length="10170368"
 				type="application/octet-stream"
 			/>
 		</item>
