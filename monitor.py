@@ -1,6 +1,7 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
+from monitor_state_dict import MonitorStateDict
 import pathlib
 import queue
 import re
@@ -115,13 +116,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     def __init_state(self) -> None:
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
-        self.state: Dict = {
+        self.state: MonitorStateDict = {
             'GameLanguage':       None,  # From `Fileheader
             'GameVersion':        None,  # From `Fileheader
             'GameBuild':          None,  # From `Fileheader
             'Captain':            None,  # On a crew
             'Cargo':              defaultdict(int),
-            'Credits':            None,
+            'Credits': -1,
             'FID':                None,  # Frontier Cmdr ID
             'Horizons':           None,  # Does this user have Horizons?
             'Odyssey':            False,  # Have we detected we're running under Odyssey?
@@ -541,23 +542,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
-                self.state.update({
-                    'Captain':    None,
-                    'Credits':    entry['Credits'],
-                    'FID':        entry.get('FID'),   # From 3.3
-                    'Horizons':   entry['Horizons'],  # From 3.0
-                    'Odyssey':    entry.get('Odyssey', False),  # From 4.0 Odyssey
-                    'Loan':       entry['Loan'],
-                    'Engineers':  {},
-                    'Rank':       {},
-                    'Reputation': {},
-                    'Statistics': {},
-                    'Role':       None,
-                    'Taxi':       None,
-                    'Dropship':   None,
-                    'Body':       None,
-                    'BodyType':   None,
-                })
+
+                # Cant use update() without the entire thing, do stuff manually here
+                self.state['Captain'] = None
+                self.state['Credits'] = entry['Credits']
+                self.state['FID'] = entry.get('FID')   # From 3.3
+                self.state['Horizons'] = entry['Horizons']  # From 3.0
+                self.state['Odyssey'] = entry.get('Odyssey', False)  # From 4.0 Odyssey
+                self.state['Loan'] = entry['Loan']
+                self.state['Engineers'] = {}
+                self.state['Rank'] = {}
+                self.state['Reputation'] = {}
+                self.state['Statistics'] = {}
+                self.state['Role'] = None
+                self.state['Taxi'] = None
+                self.state['Dropship'] = None
+                self.state['Body'] = None
+                self.state['BodyType'] = None
+
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
 
@@ -631,6 +633,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Modules'][module['Slot']] = module
 
             elif event_type == 'modulebuy':
+
                 self.state['Modules'][entry['Slot']] = {
                     'Slot':     entry['Slot'],
                     'Item':     self.canonicalise(entry['BuyItem']),
@@ -847,7 +850,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
-                        entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+                        entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
                 clean = self.coalesce_cargo(entry['Inventory'])
