@@ -47,6 +47,7 @@ jobs:
     name: Release new version
     runs-on: ubuntu-latest
     needs: test
+    if: "${{ github.event_name != 'workflow_dispatch' }}"
 
     steps:
       - name: Download binary
