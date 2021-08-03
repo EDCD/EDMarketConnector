@@ -64,6 +64,7 @@ jobs:
         with:
           token: "${{secrets.GITHUB_TOKEN}}"
           draft: true
+          prerelease: true
           files: |
             ./EDMarketConnector_win*.msi
             ./hashes.sum
