@@ -159,7 +159,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             },
             'BackpackJSON':       {},  # Raw JSON from `Backpack.json` file, if available
             'ShipLockerJSON':     {},  # Raw JSON from the `ShipLocker.json` file, if available
-            'SuitCurrent':        None,
+            'SuitCurrent':        {},
             'Suits':              {},
             'SuitLoadoutCurrent': None,
             'SuitLoadouts':       {},
