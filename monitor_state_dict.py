@@ -5,17 +5,19 @@ This is essentially a stopgap while OOP state is worked on.
 """
 from __future__ import annotations
 
-from typing import MutableMapping, TYPE_CHECKING, Any, DefaultDict, Dict, List, Literal, Optional, Set, Tuple, TypedDict
+from typing import (
+    TYPE_CHECKING, Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict
+)
 
 
 class MonitorStateDict(TypedDict):
     """Top level state dictionary for monitor.py."""
 
     # Game related
-    GameLanguage:           Optional[str]               # From `Fileheader`
-    GameVersion:            Optional[str]               # From `Fileheader`
-    GameBuild:              Optional[str]               # From `Fileheader`
-    Horizons:               Optional[bool]                        # Does the player have Horizons?
+    GameLanguage:           str               # From `Fileheader`
+    GameVersion:            str               # From `Fileheader`
+    GameBuild:              str               # From `Fileheader`
+    Horizons:               bool                        # Does the player have Horizons?
     Odyssey:                bool                        # Have we detected Odyssey?
 
     # Multi-crew
@@ -24,10 +26,10 @@ class MonitorStateDict(TypedDict):
     Role:                   Optional[Literal['Idle', 'FireCon', 'FighterCon']]  # Role in crew
 
     # Cmdr state
-    FID:                    Optional[str]               # Frontier CMDR ID
+    FID:                    str               # Frontier CMDR ID
     Friends:                Set[str]                    # Online Friends
     Credits:                int
-    Loan:                   Optional[int]
+    Loan:                   int
     Engineers:              Dict[Any, Any]              # TODO
     Rank:                   Dict[Any, Any]              # TODO
     Reputation:             Dict[Any, Any]              # TODO
@@ -40,25 +42,26 @@ class MonitorStateDict(TypedDict):
 
     # Ship
     ShipID:                 Optional[str]
-    ShipIdent:              Optional[str]
+    ShipIdent:              str
     ShipName:               Optional[str]
     ShipType:               Optional[str]
 
-    HullValue:              Optional[int]
-    ModulesValue:           Optional[int]
-    Rebuy:                  Optional[int]
-    Modules:                Optional[Dict[Any, Any]]    # TODO
+    HullValue:              int
+    ModulesValue:           int
+    Rebuy:                  int
+    Modules:                Dict[Any, Any]    # TODO
+    ModuleInfo:             MutableMapping[Any, Any]              # From the game, freeform
 
     # Cargo (yes technically its on the cmdr not the ship but this makes more sense.)
-    CargoJSON:              Optional[MutableMapping[str, Any]]    # Raw data from the last cargo.json read
+    CargoJSON:              MutableMapping[str, Any]    # Raw data from the last cargo.json read
     Cargo:                  DefaultDict[str, int]
 
     # Navigation
-    Route:                  Optional[NavRoute]         # Last route plotted
-    Body:                   Optional[str]
-    BodyType:               Optional[str]
-    Taxi:                   Optional[bool]
-    Dropship:               Optional[bool]
+    NavRoute:               NavRouteDict         # Last route plotted
+    Body:                   str
+    BodyType:               str
+    Taxi:                   bool
+    Dropship:               bool
 
     # Odyssey
     OnFoot:                 bool
@@ -67,13 +70,13 @@ class MonitorStateDict(TypedDict):
     Consumable:             DefaultDict[str, int]
     Data:                   DefaultDict[str, int]
     BackPack:               OdysseyBackpack
-    BackpackJSON:           Optional[MutableMapping[str, Any]]              # Direct from Game
-    ShipLockerJSON:         Optional[MutableMapping[str, Any]]              # Direct from Game
+    BackpackJSON:           MutableMapping[str, Any]              # Direct from Game
+    ShipLockerJSON:         MutableMapping[str, Any]              # Direct from Game
 
     SuitCurrent:            Optional[int]               # TODO: int?
     Suits:                  Dict[Any, Any]              # TODO: With additional class
-    SuitLoadoutCurrent:     Optional[int]               # TODO: int?
-    SuitLoadouts:           Optional[Dict]              # TODO: class?
+    SuitLoadoutCurrent:     Optional[SuitLoadoutDict]               # TODO: int?
+    SuitLoadouts:           Dict[int, SuitLoadoutDict]              # TODO: class?
 
 
 class OdysseyBackpack(TypedDict):
@@ -85,20 +88,27 @@ class OdysseyBackpack(TypedDict):
     Data:                   DefaultDict[str, int]
 
 
-class NavRoute(TypedDict):
+class NavRouteDict(TypedDict):
     """Description of navroute.json at time of writing."""
 
-    timestamp: str
-    route: List[NavRouteEntry]
+    timestamp:  str
+    route:      List[NavRouteEntry]
 
 
 class NavRouteEntry(TypedDict):
     """Single NavRoute entry."""
 
-    StarSystem: str
-    SystemAddress: int
-    StarPos: Tuple[float, float, float]
-    StarClass: str
+    StarSystem:         str
+    SystemAddress:      int
+    StarPos:            Tuple[float, float, float]
+    StarClass:          str
+
+
+class SuitLoadoutDict(TypedDict):
+    loadoutSlotId:  int
+    suit:           Any
+    name:           str
+    slots:          Dict[Any, Any]
 
 
 if TYPE_CHECKING:
