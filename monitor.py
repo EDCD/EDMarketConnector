@@ -1682,7 +1682,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Check if this looks like a suit we already have stored, so as
         # to avoid 'bad' Journal localised names.
-        suit = self.state['Suits'].get(f"{suitid}", None)
+        suit = self.state['Suits'].get(suitid, None)
         if suit is None:
             # Initial suit containing just the data that is then embedded in
             # the loadout
@@ -1732,17 +1732,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
         :return: True if we could do this, False if not.
         """
-        str_suitid = f"{suitid}"
-        str_suitloadoutid = f"{suitloadout_slotid}"
-
-        if (self.state['Suits'].get(str_suitid, False)
-                and self.state['SuitLoadouts'].get(str_suitloadoutid, False)):  # type: ignore # pyright issues...
-            self.state['SuitCurrent'] = self.state['Suits'][str_suitid]
+        if suitid in self.state['Suits'] and suitloadout_slotid in self.state['SuitLoadouts']:
+            self.state['SuitCurrent'] = self.state['Suits'][suitid]
             self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][suitloadout_slotid]
             return True
 
         logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suitid=}, "
-                     f"{str_suitloadoutid=}")
+                     f"{suitloadout_slotid=}")
+
         return False
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
