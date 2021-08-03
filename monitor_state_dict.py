@@ -73,9 +73,9 @@ class MonitorStateDict(TypedDict):
     BackpackJSON:           MutableMapping[str, Any]              # Direct from Game
     ShipLockerJSON:         MutableMapping[str, Any]              # Direct from Game
 
-    SuitCurrent:            Optional[int]               # TODO: int?
-    Suits:                  Dict[Any, Any]              # TODO: With additional class
-    SuitLoadoutCurrent:     Optional[SuitLoadoutDict]               # TODO: int?
+    SuitCurrent:            Dict[str, Any]
+    Suits:                  Dict[int, Any]                          # TODO: With additional class
+    SuitLoadoutCurrent:     Optional[SuitLoadoutDict]
     SuitLoadouts:           Dict[int, SuitLoadoutDict]              # TODO: class?
 
 
