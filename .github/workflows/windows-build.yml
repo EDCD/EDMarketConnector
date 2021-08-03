@@ -60,9 +60,9 @@ jobs:
         run: sha256sum EDMarketConnector_win*.msi > ./hashes.sum
 
       - name: Create Draft Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: "softprops/action-gh-release@v1"
         with:
-          repo_token: "${{secrets.GITHUB_TOKEN}}"
+          token: "${{secrets.GITHUB_TOKEN}}"
           draft: true
           files: |
             ./EDMarketConnector_win*.msi
