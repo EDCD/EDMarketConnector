@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING, Any, BinaryIO, List, MutableMapping, Optional,
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
 
+# spell-checker: words loadoutid slotid fdev fid relog onfoot fsdjump cheaty suitid fauto sauto intimidator navroute
+# spell-checker: words quitacrew joinacrew sellshiponrebuy npccrewpaidwage
+
 if TYPE_CHECKING:
     import tkinter
 
@@ -682,7 +685,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # This event is logged when a player (on foot) gets into a ship or SRV
                 # Parameters:
                 #     • SRV: true if getting into SRV, false if getting into a ship
-                #     • Taxi: true when boarding a taxi transposrt ship
+                #     • Taxi: true when boarding a taxi transport ship
                 #     • Multicrew: true when boarding another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
@@ -710,7 +713,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #
                 # Parameters:
                 #     • SRV: true if getting out of SRV, false if getting out of a ship
-                #     • Taxi: true when getting out of a taxi transposrt ship
+                #     • Taxi: true when getting out of a taxi transport ship
                 #     • Multicrew: true when getting out of another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
