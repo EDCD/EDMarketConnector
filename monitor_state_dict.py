@@ -30,9 +30,12 @@ class MonitorStateDict(TypedDict):
     Friends:                Set[str]                    # Online Friends
     Credits:                int
     Loan:                   int
-    Engineers:              Dict[Any, Any]              # TODO
-    Rank:                   Dict[Any, Any]              # TODO
-    Reputation:             Dict[Any, Any]              # TODO
+
+    # (A_D) One day I will change this to be a NamedTuple. But for now it will suffice to state that:
+    # (Rank, RankProgress) | Literal['Known', 'Invited' (or any other of the possible states that ISNT a rank number)]
+    Engineers:              Dict[str, Union[str, Tuple[int, int]]]
+    Rank:                   Dict[str, Tuple[int, int]]  # (RankMajor, RankProgress)
+    Reputation:             Dict[str, float]            # Superpower -> level
     Statistics:             Dict[Any, Any]              # This is very freeform.
 
     # Engineering Materials
