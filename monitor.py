@@ -140,10 +140,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Statistics':         {},
             'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
             'Friends':            set(),  # Online friends
-            'ShipID':             None,
+            'ShipID': -1,
             'ShipIdent':          '',
-            'ShipName':           None,
-            'ShipType':           None,
+            'ShipName':           '',
+            'ShipType':           '',
             'HullValue':          0,
             'ModulesValue':       0,
             'Rebuy':              0,
@@ -171,7 +171,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Dropship':           False,  # Best effort as to whether or not the above taxi is a dropship.
             'Body':               '',
             'BodyType':           '',
-            'ModuleInfo':        {},
+            'ModuleInfo':         {},
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -580,13 +580,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if 'UserShipId' in entry:  # Only present when changing the ship's ident
                     self.state['ShipIdent'] = entry['UserShipId']
 
-                self.state['ShipName'] = entry.get('UserShipName')
+                self.state['ShipName'] = entry.get('UserShipName', '')
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
 
             elif event_type == 'shipyardbuy':
-                self.state['ShipID'] = None
+                self.state['ShipID'] = -1
                 self.state['ShipIdent'] = ''
-                self.state['ShipName'] = None
+                self.state['ShipName'] = ''
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
                 self.state['HullValue'] = 0
                 self.state['ModulesValue'] = 0
@@ -598,7 +598,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'shipyardswap':
                 self.state['ShipID'] = entry['ShipID']
                 self.state['ShipIdent'] = ''
-                self.state['ShipName'] = None
+                self.state['ShipName'] = ''
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
                 self.state['HullValue'] = 0
                 self.state['ModulesValue'] = 0

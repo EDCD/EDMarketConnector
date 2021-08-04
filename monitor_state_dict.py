@@ -5,9 +5,7 @@ This is essentially a stopgap while OOP state is worked on.
 """
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING, Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict, Union
-)
+from typing import Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict, Union
 
 
 class MonitorStateDict(TypedDict):
@@ -44,10 +42,10 @@ class MonitorStateDict(TypedDict):
     Manufactured:           DefaultDict[str, int]
 
     # Ship
-    ShipID:                 Optional[str]
+    ShipID:                 int
     ShipIdent:              str
-    ShipName:               Optional[str]
-    ShipType:               Optional[str]
+    ShipName:               str
+    ShipType:               str
 
     HullValue:              int
     ModulesValue:           int
@@ -79,7 +77,7 @@ class MonitorStateDict(TypedDict):
     SuitCurrent:            Dict[str, Any]
     Suits:                  Dict[int, Any]                          # TODO: With additional class
     SuitLoadoutCurrent:     Optional[SuitLoadoutDict]
-    SuitLoadouts:           Dict[int, SuitLoadoutDict]              # TODO: class?
+    SuitLoadouts:           Dict[int, SuitLoadoutDict]
 
 
 class OdysseyBackpack(TypedDict):
@@ -152,14 +150,14 @@ class _ModulesOptionals(TypedDict, total=False):
 
 
 class _ModulesWeaponsOptionals(TypedDict, total=False):
-    """Optional fields modules *may* have if they are weapons"""
+    """Optional fields modules *may* have if they are weapons."""
 
     AmmoInClip: int
     AmmoInHopper: int
 
 
 class ModuleDict(_ModulesOptionals, _ModulesWeaponsOptionals):
-    """Dictionary containing module information"""
+    """Dictionary containing module information."""
 
     Item: str
     Slot: str
