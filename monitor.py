@@ -12,7 +12,7 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, List, MutableMapping, Optional, cast
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
 
