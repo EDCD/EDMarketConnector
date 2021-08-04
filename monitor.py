@@ -126,7 +126,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'GameBuild':          '',  # From `Fileheader
             'Captain':            None,  # On a crew
             'Cargo':              defaultdict(int),
-            'Credits': -1,
+            'Credits':            0-1,  # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
             'FID':                '',  # Frontier Cmdr ID
             'Horizons':           False,  # Does this user have Horizons?
             'Odyssey':            False,  # Have we detected we're running under Odyssey?
@@ -140,7 +140,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Statistics':         {},
             'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
             'Friends':            set(),  # Online friends
-            'ShipID': -1,
+            'ShipID':             0-1,  # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
             'ShipIdent':          '',
             'ShipName':           '',
             'ShipType':           '',
