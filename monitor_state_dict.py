@@ -6,7 +6,7 @@ This is essentially a stopgap while OOP state is worked on.
 from __future__ import annotations
 
 from typing import (
-    TYPE_CHECKING, Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict
+    TYPE_CHECKING, Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict, Union
 )
 
 
@@ -52,7 +52,7 @@ class MonitorStateDict(TypedDict):
     HullValue:              int
     ModulesValue:           int
     Rebuy:                  int
-    Modules:                Dict[Any, Any]    # TODO
+    Modules:                Dict[str, ModuleDict]
     ModuleInfo:             MutableMapping[Any, Any]              # From the game, freeform
 
     # Cargo (yes technically its on the cmdr not the ship but this makes more sense.)
@@ -108,16 +108,58 @@ class NavRouteEntry(TypedDict):
 
 
 class SuitLoadoutDict(TypedDict):
+    """Single suit loadout."""
     loadoutSlotId:  int
     suit:           Any
     name:           str
     slots:          Dict[Any, Any]
 
 
-if TYPE_CHECKING:
-    test: MonitorStateDict = {}  # type: ignore
+class _ModuleEngineeringModifiers(TypedDict):
+    Label: str
+    Value: float
+    OriginalValue: float
+    LessIsGood: int
 
-    test['GameLanguage']
-    test['Role'] = 'FighterCon'
 
-    ...
+class _ModuleExperimentalEffects(TypedDict, total=False):
+    """Experimental effects an engineered module *MAY* have."""
+
+    ExperimentalEffect: str
+    ExperimentalEffect_Localised: str
+
+
+class ModuleEngineering(_ModuleExperimentalEffects):
+    """Engineering modifiers for a module."""
+
+    Engineer: str
+    EngineerID: int
+    BlueprintName: str
+    BlueprintID: int
+    Level: int
+    Quality: int
+    Modifiers: List[_ModuleEngineeringModifiers]
+
+
+class _ModulesOptionals(TypedDict, total=False):
+    """Optional fields a module may have."""
+
+    On: bool
+    Priority: int
+    Health: float
+    Value: int
+    Engineering: ModuleEngineering
+
+
+class _ModulesWeaponsOptionals(TypedDict, total=False):
+    """Optional fields modules *may* have if they are weapons"""
+
+    AmmoInClip: int
+    AmmoInHopper: int
+
+
+class ModuleDict(_ModulesOptionals, _ModulesWeaponsOptionals):
+    """Dictionary containing module information"""
+
+    Item: str
+    Slot: str

@@ -1,7 +1,6 @@
 """Monitor for new Journal files and contents of latest."""
 
 import json
-from monitor_state_dict import MonitorStateDict, NavRouteDict, SuitLoadoutDict
 import pathlib
 import queue
 import re
@@ -12,9 +11,11 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, List, MutableMapping, Optional, cast
+from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, Literal, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Tuple
+from typing import Tuple, Union, cast
+
+from monitor_state_dict import ModuleDict, ModuleEngineering, MonitorStateDict, NavRouteDict, SuitLoadoutDict
 
 # spell-checker: words loadoutid slotid fdev fid relog onfoot fsdjump cheaty suitid fauto sauto intimidator navroute
 # spell-checker: words quitacrew joinacrew sellshiponrebuy npccrewpaidwage
@@ -637,8 +638,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Modules'][module['Slot']] = module
 
             elif event_type == 'modulebuy':
-
-                self.state['Modules'][entry['Slot']] = {
+                new_module: ModuleDict = {
                     'Slot':     entry['Slot'],
                     'Item':     self.canonicalise(entry['BuyItem']),
                     'On':       True,
@@ -646,6 +646,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Health':   1.0,
                     'Value':    entry['BuyPrice'],
                 }
+                self.state['Modules'][entry['Slot']] = new_module
 
                 self.state['Credits'] -= entry.get('BuyPrice', 0)
 
@@ -836,10 +837,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.event_valid_engineerprogress(entry):
                     engineers = self.state['Engineers']
                     if 'Engineers' in entry:  # Startup summary
-                        self.state['Engineers'] = {
+                        to_set: Dict[str, Union[str, Tuple[int, int]]] = {
                             e['Engineer']: ((e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'])
                             for e in entry['Engineers']
                         }
+                        self.state['Engineers'] = to_set
 
                     else:  # Promotion
                         engineer = entry['Engineer']
@@ -1408,7 +1410,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 module = self.state['Modules'][entry['Slot']]
                 assert(module['Item'] == self.canonicalise(entry['Module']))
-                module['Engineering'] = {
+                to_set_me: ModuleEngineering = {
                     'Engineer':      entry['Engineer'],
                     'EngineerID':    entry['EngineerID'],
                     'BlueprintName': entry['BlueprintName'],
@@ -1417,6 +1419,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Quality':       entry['Quality'],
                     'Modifiers':     entry['Modifiers'],
                 }
+
+                module['Engineering'] = to_set_me
 
                 if 'ExperimentalEffect' in entry:
                     module['Engineering']['ExperimentalEffect'] = entry['ExperimentalEffect']
@@ -1580,8 +1584,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'carrierbanktransfer':
-                if (newbal := entry.get('PlayerBalance')):
-                    self.state['Credits'] = newbal
+                if (new_bal := entry.get('PlayerBalance')):
+                    self.state['Credits'] = new_bal
 
             elif event_type == 'carrierdecommission':
                 # v30 doc says nothing about citing the refund amount
