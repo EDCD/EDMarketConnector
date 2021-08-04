@@ -11,7 +11,7 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
 
@@ -326,9 +326,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug(f'Starting on logfile "{self.logfile}"')
         # Seek to the end of the latest log file
+        log_pos = -1  # make this bound, but with something that should go bang if its misused
         logfile = self.logfile
         if logfile:
-            loghandle = open(logfile, 'rb', 0)  # unbuffered
+            loghandle: BinaryIO = open(logfile, 'rb', 0)  # unbuffered
             if platform == 'darwin':
                 fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
@@ -404,7 +405,33 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     logger.exception('Failed to find latest logfile')
                     newlogfile = None
 
+            if logfile:
+                loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
+                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
+                for line in loghandle:
+                    # Paranoia check to see if we're shutting down
+                    if threading.current_thread() != self.thread:
+                        logger.info("We're not meant to be running, exiting...")
+                        return  # Terminate
+
+                    if b'"event":"Continue"' in line:
+                        for _ in range(10):
+                            logger.trace("****")
+                        logger.trace('Found a Continue event, its being added to the list, we will finish this file up'
+                                     ' and then continue with the next')
+
+                    self.event_queue.put(line)
+
+                if not self.event_queue.empty():
+                    if not config.shutting_down:
+                        # logger.trace('Sending <<JournalEvent>>')
+                        self.root.event_generate('<<JournalEvent>>', when="tail")
+
+                log_pos = loghandle.tell()
+
             if logfile != newlogfile:
+                for _ in range(10):
+                    logger.trace("****")
                 logger.info(f'New Journal File. Was "{logfile}", now "{newlogfile}"')
                 logfile = newlogfile
                 if loghandle:
@@ -416,27 +443,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
                     log_pos = 0
-
-            if logfile:
-                loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
-                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
-                for line in loghandle:
-                    # Paranoia check to see if we're shutting down
-                    if threading.current_thread() != self.thread:
-                        logger.info("We're not meant to be running, exiting...")
-                        return  # Terminate
-
-                    # if b'"event":"Location"' in line:
-                    #     logger.trace('Found "Location" event, adding to event_queue')
-
-                    self.event_queue.put(line)
-
-                if not self.event_queue.empty():
-                    if not config.shutting_down:
-                        # logger.trace('Sending <<JournalEvent>>')
-                        self.root.event_generate('<<JournalEvent>>', when="tail")
-
-                log_pos = loghandle.tell()
 
             sleep(self._POLL)
 
@@ -510,6 +516,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'commander':
                 self.live = True  # First event in 3.0
+                self.cmdr = entry['Name']
+                self.state['FID'] = entry['FID']
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
