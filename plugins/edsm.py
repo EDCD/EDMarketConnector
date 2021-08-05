@@ -746,6 +746,12 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
 
+        if entry['event'].lower() == 'shutdown':
+            # Game shutdown so we MUST not hang on to pending
+            pending = []
+            if 'edsm-cmdr-events' in trace_on:
+                logger.trace('Blanked pending because of shutdown event')
+
         if closing:
             logger.debug('closing, so returning.')
             return
