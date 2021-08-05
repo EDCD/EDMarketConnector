@@ -43,6 +43,8 @@ class This:
     """Holds module globals."""
 
     def __init__(self):
+        self.shutting_down = False  # Plugin is shutting down.
+
         self.session: requests.Session = requests.Session()
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
         self.discarded_events: Set[str] = []  # List discarded events from EDSM
@@ -198,7 +200,8 @@ def plugin_stop() -> None:
     """Stop this plugin."""
     logger.debug('Signalling queue to close...')
     # Signal thread to close and wait for it
-    this.queue.put(None)
+    this.shutting_down = True
+    this.queue.put(None)  # Still necessary to get `this.queue.get()` to unblock
     this.thread.join()  # type: ignore
     this.thread = None
     this.session.close()
@@ -610,6 +613,10 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     entry: Mapping[str, Any] = {}
 
     while not this.discarded_events:
+        if this.shutting_down:
+            logger.debug(f'returning from discarded_events loop due to {this.shutting_down=}')
+            return
+
         get_discarded_events_list()
         if this.discarded_events:
             break
@@ -618,16 +625,20 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
 
     logger.debug('Got "events to discard" list, commencing queue consumption...')
     while True:
+        if this.shutting_down:
+            logger.debug(f'{this.shutting_down=}, so setting closing = True')
+            closing = True
+
         item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
             (cmdr, entry) = item
+            if 'edsm-cmdr-events' in trace_on:
+                logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
 
         else:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
-
-        if 'edsm-cmdr-events' in trace_on:
-            logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
+            entry = {'event': 'ShutDown'}  # Dummy to allow for `entry['event']` below
 
         retrying = 0
         while retrying < 3:
