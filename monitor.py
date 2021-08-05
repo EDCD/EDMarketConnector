@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     import tkinter
 
 import util_ships
-from config import config
+from config import config, trace_on
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
@@ -518,6 +518,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = True  # First event in 3.0
                 self.cmdr = entry['Name']
                 self.state['FID'] = entry['FID']
+                if 'startup' in trace_on:
+                    logger.trace(f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
@@ -558,6 +560,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 })
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
+
+                if 'startup' in trace_on:
+                    logger.trace(f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'newcommander':
                 self.cmdr = entry['Name']

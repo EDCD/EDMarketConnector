@@ -41,6 +41,9 @@ update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: List[str] = []
+# TRACE logging code that should actually be used.  Means not spamming it
+# *all* if only interested in some things.
+trace_on: List[str] = []
 
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
