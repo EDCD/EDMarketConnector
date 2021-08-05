@@ -14,6 +14,7 @@ import threading
 import tkinter as tk
 from queue import Queue
 from threading import Thread
+from time import sleep
 from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union
 
 import requests
@@ -35,6 +36,7 @@ logger = get_main_logger()
 
 EDSM_POLL = 0.1
 _TIMEOUT = 20
+DISCARDED_EVENTS_SLEEP = 10
 
 
 class This:
@@ -43,7 +45,7 @@ class This:
     def __init__(self):
         self.session: requests.Session = requests.Session()
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
-        self.discardedEvents: Set[str] = []  # List discarded events from EDSM
+        self.discarded_events: Set[str] = []  # List discarded events from EDSM
         self.lastlookup: requests.Response  # Result of last system lookup
 
         # Game state
@@ -574,12 +576,30 @@ TARGET_URL = 'https://www.edsm.net/api-journal-v1'
 if 'edsm' in debug_senders:
     TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
 
-# Worker thread
+
+def get_discarded_events_list() -> None:
+    """Retrieve the list of to-discard events from EDSM."""
+    try:
+        r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
+        r.raise_for_status()
+        this.discarded_events = set(r.json())
+
+        this.discarded_events.discard('Docked')  # should_send() assumes that we send 'Docked' events
+        if not this.discarded_events:
+            logger.warning(
+                'Unexpected empty discarded events list from EDSM: '
+                f'{type(this.discarded_events)} -- {this.discarded_events}'
+            )
+
+    except Exception as e:
+        logger.warning('Exception whilst trying to set this.discarded_events:', exc_info=e)
 
 
 def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     """
     Handle uploading events to EDSM API.
+
+    Target function of a thread.
 
     Processes `this.queue` until the queued item is None.
     """
@@ -589,6 +609,14 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     cmdr: str = ""
     entry: Mapping[str, Any] = {}
 
+    while not this.discarded_events:
+        get_discarded_events_list()
+        if this.discarded_events:
+            break
+
+        sleep(DISCARDED_EVENTS_SLEEP)
+
+    logger.debug('Got "events to discard" list, commencing queue consumption...')
     while True:
         item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
@@ -609,30 +637,13 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 )
                 break
             try:
-                if item and entry['event'] not in this.discardedEvents:  # TODO: Technically entry can be unbound here.
+                if item and entry['event'] not in this.discarded_events:
                     if 'edsm-cmdr-events' in trace_on:
-                        logger.trace(f'({cmdr=}, {entry["event"]=}): not in discardedEvents, appending to pending')
+                        logger.trace(f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
 
                     pending.append(entry)
 
-                # Get list of events to discard
-                if not this.discardedEvents:
-                    r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
-                    r.raise_for_status()
-                    this.discardedEvents = set(r.json())
-
-                    this.discardedEvents.discard('Docked')  # should_send() assumes that we send 'Docked' events
-                    if not this.discardedEvents:
-                        logger.error(
-                            'Unexpected empty discarded events list from EDSM. Bailing out of send: '
-                            f'{type(this.discardedEvents)} -- {this.discardedEvents}'
-                        )
-                        continue
-
-                    # Filter out unwanted events
-                    pending = list(filter(lambda x: x['event'] not in this.discardedEvents, pending))
-
-                if should_send(pending):
+                if should_send(pending, entry['event']):
                     if 'edsm-cmdr-events' in trace_on:
                         logger.trace(f'({cmdr=}, {entry["event"]=}): should_send() said True')
                         pendings = [f"{p}\n" for p in pending]
@@ -736,11 +747,11 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
 
-        if entry['event'].lower() == 'shutdown':
-            # Game shutdown so we MUST not hang on to pending
+        if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
+            # Game shutdown or new login so we MUST not hang on to pending
             pending = []
             if 'edsm-cmdr-events' in trace_on:
-                logger.trace('Blanked pending because of shutdown event')
+                logger.trace(f'Blanked pending because of event: {entry["event"]}')
 
         if closing:
             logger.debug('closing, so returning.')
@@ -749,7 +760,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     logger.debug('Done.')
 
 
-def should_send(entries: List[Mapping[str, Any]]) -> bool:  # noqa: CCR001
+def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: CCR001
     """
     Whether or not any of the given entries should be sent to EDSM.
 
@@ -757,9 +768,9 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:  # noqa: CCR001
     :return: bool indicating whether or not to send said entries
     """
     # We MUST flush pending on logout, in case new login is a different Commander
-    if any(e for e in entries if e['event'] == 'Shutdown'):
+    if event.lower() in ('shutdown', 'fileheader'):
         if 'edsm-cmdr-events' in trace_on:
-            logger.trace('True because Shutdown')
+            logger.trace(f'True because {event=}')
 
         return True
 
@@ -807,7 +818,7 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:  # noqa: CCR001
                 logger.trace(f'{entry["event"]=}, {this.newgame_docked=}')
 
     if 'edsm-cmdr-events' in trace_on:
-        logger.trace(f'False as default: {entry["event"]=}, {this.newgame_docked=}')
+        logger.trace(f'False as default: {this.newgame_docked=}')
 
     return False
 
