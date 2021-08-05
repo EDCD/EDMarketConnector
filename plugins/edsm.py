@@ -760,6 +760,13 @@ def should_send(entries: List[Mapping[str, Any]]) -> bool:  # noqa: CCR001
     :param entries: The entries to check
     :return: bool indicating whether or not to send said entries
     """
+    # We MUST flush pending on logout, in case new login is a different Commander
+    if any(e for e in entries if e['event'] == 'Shutdown'):
+        if 'edsm-cmdr-events' in trace_on:
+            logger.trace('True because Shutdown')
+
+        return True
+
     # batch up burst of Scan events after NavBeaconScan
     if this.navbeaconscan:
         if entries and entries[-1]['event'] == 'Scan':
