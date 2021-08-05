@@ -609,13 +609,6 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 )
                 break
             try:
-                if TYPE_CHECKING:
-                    # Tell the type checker that these two are bound.
-                    # TODO: While this works because of the item check below, these names are still technically unbound
-                    # TODO: in some cases, therefore this should be refactored.
-                    cmdr = ""
-                    entry = {}
-
                 if item and entry['event'] not in this.discardedEvents:  # TODO: Technically entry can be unbound here.
                     if 'edsm-cmdr-events' in trace_on:
                         logger.trace(f'({cmdr=}, {entry["event"]=}): not in discardedEvents, appending to pending')
