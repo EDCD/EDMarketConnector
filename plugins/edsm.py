@@ -10,11 +10,11 @@
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
 import json
-import sys
+import threading
 import tkinter as tk
 from queue import Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union
 
 import requests
 
@@ -37,26 +37,54 @@ EDSM_POLL = 0.1
 _TIMEOUT = 20
 
 
-this: Any = sys.modules[__name__]  # For holding module globals
-this.session: requests.Session = requests.Session()
-this.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
-this.discardedEvents: List[str] = []  # List discarded events from EDSM
-this.lastlookup: bool = False		# whether the last lookup succeeded
+class This:
+    """Holds module globals."""
 
-# Game state
-this.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
-this.coordinates: Optional[Tuple[int, int, int]] = None
-this.newgame: bool = False  # starting up - batch initial burst of events
-this.newgame_docked: bool = False  # starting up while docked
-this.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-this.system_link: tk.Tk = None
-this.system: tk.Tk = None
-this.system_address: Optional[int] = None  # Frontier SystemAddress
-this.system_population: Optional[int] = None
-this.station_link: tk.Tk = None
-this.station: Optional[str] = None
-this.station_marketid: Optional[int] = None  # Frontier MarketID
-this.on_foot = False
+    def __init__(self):
+        self.session: requests.Session = requests.Session()
+        self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
+        self.discardedEvents: Set[str] = []  # List discarded events from EDSM
+        self.lastlookup: requests.Response  # Result of last system lookup
+
+        # Game state
+        self.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
+        self.coordinates: Optional[Tuple[int, int, int]] = None
+        self.newgame: bool = False  # starting up - batch initial burst of events
+        self.newgame_docked: bool = False  # starting up while docked
+        self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
+        self.system_link: tk.Widget = None
+        self.system: tk.Tk = None
+        self.system_address: Optional[int] = None  # Frontier SystemAddress
+        self.system_population: Optional[int] = None
+        self.station_link: tk.Widget = None
+        self.station: Optional[str] = None
+        self.station_marketid: Optional[int] = None  # Frontier MarketID
+        self.on_foot = False
+
+        self._IMG_KNOWN = None
+        self._IMG_UNKNOWN = None
+        self._IMG_NEW = None
+        self._IMG_ERROR = None
+
+        self.thread: Optional[threading.Thread] = None
+
+        self.log = None
+        self.log_button = None
+
+        self.label = None
+
+        self.cmdr_label = None
+        self.cmdr_text = None
+
+        self.user_label = None
+        self.user = None
+
+        self.apikey_label = None
+        self.apikey = None
+
+
+this = This()
+
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 __cleanup = str.maketrans({' ': None, '\n': None})
 IMG_KNOWN_B64 = """
@@ -169,7 +197,7 @@ def plugin_stop() -> None:
     logger.debug('Signalling queue to close...')
     # Signal thread to close and wait for it
     this.queue.put(None)
-    this.thread.join()
+    this.thread.join()  # type: ignore
     this.thread = None
     this.session.close()
     # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
@@ -421,7 +449,7 @@ def journal_entry(  # noqa: C901, CCR001
                 to_set = ''
 
         this.station_link['text'] = to_set
-        this.station_link['url'] = station_url(this.system, str(this.station))
+        this.station_link['url'] = station_url(str(this.system), str(this.station))
         this.station_link.update_idletasks()
 
     # Update display of 'EDSM Status' image
@@ -702,9 +730,9 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                                 if not config.shutting_down:
                                     this.system_link.event_generate('<<EDSMStatus>>', when="tail")
 
-                            if r['msgnum'] // 100 != 1:
-                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n{r["msg"]}\n'
-                                               f'{json.dumps(e, separators = (",", ": "))}')
+                            if r['msgnum'] // 100 != 1:  # type: ignore
+                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'  # type: ignore
+                                               f'{r["msg"]}\n{json.dumps(e, separators = (",", ": "))}')
 
                         pending = []
 
