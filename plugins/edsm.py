@@ -488,11 +488,8 @@ def journal_entry(  # noqa: C901, CCR001
         if state['BackpackJSON']:
             entry = state['BackpackJSON']
 
-    # Send interesting events to EDSM
-    if (
-        config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr) and
-        entry['event'] not in this.discardedEvents
-    ):
+    # Queue all events to send to EDSM.  worker() will take care of dropping EDSM discarded events
+    if config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr):
         # Introduce transient states into the event
         transient = {
             '_systemName': system,
