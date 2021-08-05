@@ -376,6 +376,22 @@ In addition to that we utilise one of the user-defined levels as:
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
 
+  As well as just using bare `logger.trace(...)` you can also gate it to only
+  log if asked to at invocation time by utilising the `--trace-on ...` 
+  command-line argument.  e.g.
+ `EDMarketConnector.py --trace --trace-on edsm-cmdr-events`.  Note how you
+  still need to include `--trace`. The code to check and log would be like:
+
+    ```python
+    from config import trace_on
+  
+    if 'edsm-cmdr-events' in trace_on:
+        logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
+  ```
+  
+  This way you can set up TRACE logging that won't spam just because of 
+  `--trace` being used.
+
 ---
 
 ## Use fstrings, not modulo-formatting or .format
