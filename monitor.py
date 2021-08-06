@@ -1014,9 +1014,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     for c in entry[changes]:
                         category = self.category(c['Type'])
                         name = self.canonicalise(c['Name'])
-                        if TYPE_CHECKING:
-                            # Cheaty "its fine I promise" for TypedDict
-                            category = cast(Literal['Component', 'Data', 'Consumable', 'Item'], category)
+                        # Cheaty "its fine I promise" for TypedDict
+                        category = cast(Literal['Component', 'Data', 'Consumable', 'Item'], category)
 
                         if changes == 'Removed':
                             self.state['BackPack'][category][name] -= c['Count']
@@ -1407,6 +1406,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 for category in ('Raw', 'Manufactured', 'Encoded'):
                     category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
+
                     for x in entry.get('Ingredients', []):
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
