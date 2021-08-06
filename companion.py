@@ -11,6 +11,7 @@ import collections
 import csv
 import hashlib
 import json
+from monitor_state_dict import SuitDict, SuitLoadoutDict
 import numbers
 import os
 import random
@@ -388,7 +389,7 @@ class Auth(object):
 
                 # All 'FID' seen in Journals so far have been 'F<id>'
                 # Frontier, Steam and Epic
-                if f'F{customer_id}' != monitor.state.get('FID'):
+                if f'F{customer_id}' != monitor.state['FID']:
                     # LANG: Frontier auth customer_id doesn't match game session FID
                     raise CredentialsError(_("Error: customer_id doesn't match!"))
 
@@ -713,28 +714,37 @@ class Session(object):
 
         :param data: CAPI data to extra suit data from.
         """
+        current_suit: Optional[SuitDict]
         if (current_suit := data.get('suit')) is None:
             # Probably no Odyssey on the account, so point attempting more.
             return
 
         monitor.state['SuitCurrent'] = current_suit
         # It's easier to always have this in the 'sparse array' dict form
-        suits = data.get('suits')
+        suits: Optional[Union[List[SuitDict], Dict[int, SuitDict]]] = data.get('suits')
         if isinstance(suits, list):
             monitor.state['Suits'] = dict(enumerate(suits))
 
-        else:
+        elif isinstance(suits, dict):
             monitor.state['Suits'] = suits
+        else:
+            # If it was neither, it didn't exist, so ... dont muck with it, as something is either broken or
+            # we didn't see a bunch of info.
+            pass
 
         # We need to be setting our edmcName for all suits
-        loc_name = monitor.state['SuitCurrent'].get('locName', monitor.state['SuitCurrent']['name'])
-        monitor.state['SuitCurrent']['edmcName'] = monitor.suit_sane_name(loc_name)
+        if (current_suit := monitor.state['SuitCurrent']) is not None:
+            loc_name = current_suit['locName'] if current_suit['locName'] else current_suit['name']
+            current_suit['edmcName'] = monitor.suit_sane_name(loc_name)
+
         for s in monitor.state['Suits']:
             loc_name = monitor.state['Suits'][s].get('locName', monitor.state['Suits'][s]['name'])
             monitor.state['Suits'][s]['edmcName'] = monitor.suit_sane_name(loc_name)
 
+        suit_loadouts: Optional[Union[List[SuitLoadoutDict], Dict[int, SuitLoadoutDict]]]
         if (suit_loadouts := data.get('loadouts')) is None:
             logger.warning('CAPI data had "suit" but no (suit) "loadouts"')
+            return
 
         monitor.state['SuitLoadoutCurrent'] = data.get('loadout')
         # It's easier to always have this in the 'sparse array' dict form
