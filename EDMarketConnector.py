@@ -1076,6 +1076,7 @@ class AppWindow(object):
             """
             return {
                 None:         '',
+                '':           '',
                 'Idle':       '',
                 'FighterCon': _('Fighter'),  # LANG: Multicrew role
                 'FireCon':    _('Gunner'),  # LANG: Multicrew role
