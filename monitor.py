@@ -552,7 +552,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
 
                 # Cant use update() without the entire thing, do stuff manually here
-                self.state['Captain'] = None
+                self.state['Captain'] = ''
                 self.state['Credits'] = entry['Credits']
                 self.state['FID'] = entry.get('FID', '')   # From 3.3
                 self.state['Horizons'] = entry['Horizons']  # From 3.0
@@ -562,7 +562,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Rank'] = {}
                 self.state['Reputation'] = {}
                 self.state['Statistics'] = {}
-                self.state['Role'] = None
+                self.state['Role'] = ''
                 self.state['Taxi'] = False
                 self.state['Dropship'] = False
                 self.state['Body'] = ''
@@ -1509,8 +1509,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Role'] = entry['Role']
 
             elif event_type == 'quitacrew':
-                self.state['Captain'] = None
-                self.state['Role'] = None
+                self.state['Captain'] = ''
+                self.state['Role'] = ''
                 self.planet = None
                 self.system = None
                 self.station = None
