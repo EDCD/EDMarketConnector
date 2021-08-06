@@ -15,7 +15,9 @@ from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, Literal, MutableMap
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union, cast
 
-from monitor_state_dict import ModuleDict, ModuleEngineering, MonitorStateDict, NavRouteDict, SuitLoadoutDict
+from monitor_state_dict import (
+    ModuleDict, ModuleEngineering, MonitorStateDict, NavRouteDict, OdysseyWeapon, SuitDict, SuitLoadoutDict
+)
 
 # spell-checker: words loadoutid slotid fdev fid relog onfoot fsdjump cheaty suitid fauto sauto intimidator navroute
 # spell-checker: words quitacrew joinacrew sellshiponrebuy npccrewpaidwage
@@ -163,7 +165,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             },
             'BackpackJSON':       {},  # Raw JSON from `Backpack.json` file, if available
             'ShipLockerJSON':     {},  # Raw JSON from the `ShipLocker.json` file, if available
-            'SuitCurrent':        {},
+            'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
             'SuitLoadouts':       {},
@@ -389,7 +391,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
-        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
+        # Note: Uses undocumented attribute
+        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # type: ignore
 
         logger.debug('Entering loop...')
         while True:
@@ -1131,7 +1134,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
                 loc_name = entry.get('Name_Localised', entry['Name'])
-                self.state['Suits'][entry['SuitID']] = {
+                to_set_suit: SuitDict = {
                     'name':      entry['Name'],
                     'locName':   loc_name,
                     'edmcName':  self.suit_sane_name(loc_name),
@@ -1139,6 +1142,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'suitId':    entry['SuitID'],
                     'mods':      entry['SuitMods'],  # Suits can (rarely) be bought with modules installed
                 }
+                self.state['Suits'][entry['SuitID']] = to_set_suit
 
                 # update credits
                 if price := entry.get('Price') is None:
@@ -1196,15 +1200,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.state['SuitLoadouts']:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                     try:
-                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
+                        w_to_set: OdysseyWeapon = {
                             'name':           entry['ModuleName'],
                             'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
                             'id':             None,
                             'weaponrackId':   entry['SuitModuleID'],
                             'locDescription': '',
                             'class':          entry['Class'],
-                            'mods':           entry['WeaponMods']
+                            'mods':           entry['WeaponMods'],
                         }
+
+                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = w_to_set
 
                     except KeyError:
                         logger.error(f"LoadoutEquipModule: {entry}")
@@ -1689,7 +1695,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Check if this looks like a suit we already have stored, so as
         # to avoid 'bad' Journal localised names.
-        suit = self.state['Suits'].get(suitid, None)
+        suit: Optional[SuitDict] = self.state['Suits'].get(suitid, None)
         if suit is None:
             # Initial suit containing just the data that is then embedded in
             # the loadout
@@ -1699,8 +1705,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             suitname = entry.get('SuitName_Localised', entry['SuitName'])
             edmc_suitname = self.suit_sane_name(suitname)
             suit = {
-                'edmcName': edmc_suitname,
-                'locName':  suitname,
+                'edmcName':     edmc_suitname,
+                'locName':      suitname,
+                'suitId':       0-1,
+                'id':           None,
+                'name':         entry['SuitName'],
+                'mods':         entry['SuitMods']
             }
 
         # Overwrite with latest data, just in case, as this can be from CAPI which may or may not have had

@@ -5,36 +5,36 @@ This is essentially a stopgap while OOP state is worked on.
 """
 from __future__ import annotations
 
-from typing import Any, DefaultDict, Dict, List, Literal, MutableMapping, Optional, Set, Tuple, TypedDict, Union
+from typing import Any, DefaultDict, Dict, List, MutableMapping, Optional, Set, Tuple, TypedDict, Union
 
 
 class MonitorStateDict(TypedDict):
     """Top level state dictionary for monitor.py."""
 
     # Game related
-    GameLanguage:           str               # From `Fileheader`
-    GameVersion:            str               # From `Fileheader`
-    GameBuild:              str               # From `Fileheader`
-    Horizons:               bool                        # Does the player have Horizons?
-    Odyssey:                bool                        # Have we detected Odyssey?
+    GameLanguage:           str                             # From `Fileheader`
+    GameVersion:            str                             # From `Fileheader`
+    GameBuild:              str                             # From `Fileheader`
+    Horizons:               bool                            # Does the player have Horizons?
+    Odyssey:                bool                            # Have we detected Odyssey?
 
     # Multi-crew
 
-    Captain:                Optional[str]               # If on a crew, the captian's name
-    Role:                   Optional[Literal['Idle', 'FireCon', 'FighterCon']]  # Role in crew
+    Captain:                Optional[str]                   # If on a crew, the captian's name
+    Role:                   Optional[str]                   # Role in crew
 
     # Cmdr state
-    FID:                    str               # Frontier CMDR ID
-    Friends:                Set[str]                    # Online Friends
+    FID:                    str                             # Frontier CMDR ID
+    Friends:                Set[str]                        # Online Friends
     Credits:                int
     Loan:                   int
 
     # (A_D) One day I will change this to be a NamedTuple. But for now it will suffice to state that:
     # (Rank, RankProgress) | Literal['Known', 'Invited' (or any other of the possible states that ISNT a rank number)]
     Engineers:              Dict[str, Union[str, Tuple[int, int]]]
-    Rank:                   Dict[str, Tuple[int, int]]  # (RankMajor, RankProgress)
-    Reputation:             Dict[str, float]            # Superpower -> level
-    Statistics:             Dict[Any, Any]              # This is very freeform.
+    Rank:                   Dict[str, Tuple[int, int]]      # (RankMajor, RankProgress)
+    Reputation:             Dict[str, float]                # Superpower -> level
+    Statistics:             Dict[Any, Any]                  # This is very freeform.
 
     # Engineering Materials
     Raw:                    DefaultDict[str, int]
@@ -51,14 +51,14 @@ class MonitorStateDict(TypedDict):
     ModulesValue:           int
     Rebuy:                  int
     Modules:                Dict[str, ModuleDict]
-    ModuleInfo:             MutableMapping[Any, Any]              # From the game, freeform
+    ModuleInfo:             MutableMapping[Any, Any]        # From the game, freeform
 
     # Cargo (yes technically its on the cmdr not the ship but this makes more sense.)
-    CargoJSON:              MutableMapping[str, Any]    # Raw data from the last cargo.json read
+    CargoJSON:              MutableMapping[str, Any]        # Raw data from the last cargo.json read
     Cargo:                  DefaultDict[str, int]
 
     # Navigation
-    NavRoute:               NavRouteDict         # Last route plotted
+    NavRoute:               NavRouteDict                    # Last route plotted
     Body:                   str
     BodyType:               str
     Taxi:                   bool
@@ -71,11 +71,11 @@ class MonitorStateDict(TypedDict):
     Consumable:             DefaultDict[str, int]
     Data:                   DefaultDict[str, int]
     BackPack:               OdysseyBackpack
-    BackpackJSON:           MutableMapping[str, Any]              # Direct from Game
-    ShipLockerJSON:         MutableMapping[str, Any]              # Direct from Game
+    BackpackJSON:           MutableMapping[str, Any]        # Direct from Game
+    ShipLockerJSON:         MutableMapping[str, Any]        # Direct from Game
 
-    SuitCurrent:            Dict[str, Any]
-    Suits:                  Dict[int, Any]                          # TODO: With additional class
+    SuitCurrent:            Optional[SuitDict]
+    Suits:                  Dict[int, SuitDict]
     SuitLoadoutCurrent:     Optional[SuitLoadoutDict]
     SuitLoadouts:           Dict[int, SuitLoadoutDict]
 
@@ -107,10 +107,37 @@ class NavRouteEntry(TypedDict):
 
 class SuitLoadoutDict(TypedDict):
     """Single suit loadout."""
-    loadoutSlotId:  int
-    suit:           Any
+
+    loadoutSlotId:  int  # noqa: N815
+    suit:           SuitDict
     name:           str
-    slots:          Dict[Any, Any]
+    slots:          Dict[str, OdysseyWeapon]
+
+
+class SuitDict(TypedDict):
+    """Dict representing a single suit."""
+
+    name: str
+    locName: str    # noqa: N815
+    edmcName: str   # noqa: N815
+    id: Any         # ??? some sort of ID, not listed as to where or what
+    suitId: int     # noqa: N815
+    mods: List[str]
+
+
+_OdysseyWeaponClassField = TypedDict('_OdysseyWeaponClassField', {'class': int})
+
+
+class OdysseyWeapon(_OdysseyWeaponClassField):
+    """Suit Weapon for an odyssey suit loadout"""
+
+    name: str
+    locName: str  # noqa: N815
+    id: Any
+    weaponrackId: int  # noqa: N815
+    locDescription: str  # noqa: N815
+    # class: int Oh this'll be fun. -- See the definition of the TypedDict this inherits from
+    mods: List[str]
 
 
 class _ModuleEngineeringModifiers(TypedDict):
