@@ -123,15 +123,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
         self.state: MonitorStateDict = {
-            'GameLanguage':       '',  # From `Fileheader
-            'GameVersion':        '',  # From `Fileheader
-            'GameBuild':          '',  # From `Fileheader
-            'Captain':            None,  # On a crew
+            'GameLanguage':       '',                   # From `Fileheader
+            'GameVersion':        '',                   # From `Fileheader
+            'GameBuild':          '',                   # From `Fileheader
+            'Captain':            '',                   # On a crew
             'Cargo':              defaultdict(int),
-            'Credits':            0-1,  # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
-            'FID':                '',  # Frontier Cmdr ID
-            'Horizons':           False,  # Does this user have Horizons?
-            'Odyssey':            False,  # Have we detected we're running under Odyssey?
+            'Credits':            0,                    # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
+            'FID':                '',                   # Frontier Cmdr ID
+            'Horizons':           False,                # Does this user have Horizons?
+            'Odyssey':            False,                # Have we detected we're running under Odyssey?
             'Loan':               0,
             'Raw':                defaultdict(int),
             'Manufactured':       defaultdict(int),
@@ -140,9 +140,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Rank':               {},
             'Reputation':         {},
             'Statistics':         {},
-            'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends':            set(),  # Online friends
-            'ShipID':             0-1,  # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
+            'Role':               '',                   # Crew role - None, Idle, FireCon, FighterCon
+            'Friends':            set(),                # Online friends
+            'ShipID':             0-1,                  # HACK: https://github.com/PyCQA/pycodestyle/issues/1008
             'ShipIdent':          '',
             'ShipName':           '',
             'ShipType':           '',
@@ -150,21 +150,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'ModulesValue':       0,
             'Rebuy':              0,
             'Modules':            {},
-            'CargoJSON':          {},  # The raw data from the last time cargo.json was read
+            'CargoJSON':          {},                   # The raw data from the last time cargo.json was read
             'NavRoute':           NavRouteDict(timestamp='', route=[]),  # Last plotted route from Route.json file
-            'OnFoot':             False,  # Whether we think you're on-foot
-            'Component':          defaultdict(int),      # Odyssey Components in Ship Locker
-            'Item':               defaultdict(int),      # Odyssey Items in Ship Locker
-            'Consumable':         defaultdict(int),      # Odyssey Consumables in Ship Locker
-            'Data':               defaultdict(int),      # Odyssey Data in Ship Locker
-            'BackPack':     {                      # Odyssey BackPack contents
-                'Component':      defaultdict(int),    # BackPack Components
-                'Consumable':     defaultdict(int),    # BackPack Consumables
-                'Item':           defaultdict(int),    # BackPack Items
-                'Data':           defaultdict(int),  # Backpack Data
+            'OnFoot':             False,                    # Whether we think you're on-foot
+            'Component':          defaultdict(int),         # Odyssey Components in Ship Locker
+            'Item':               defaultdict(int),         # Odyssey Items in Ship Locker
+            'Consumable':         defaultdict(int),         # Odyssey Consumables in Ship Locker
+            'Data':               defaultdict(int),         # Odyssey Data in Ship Locker
+            'BackPack':     {                               # Odyssey BackPack contents
+                'Component':      defaultdict(int),             # BackPack Components
+                'Consumable':     defaultdict(int),             # BackPack Consumables
+                'Item':           defaultdict(int),             # BackPack Items
+                'Data':           defaultdict(int),             # Backpack Data
             },
-            'BackpackJSON':       {},  # Raw JSON from `Backpack.json` file, if available
-            'ShipLockerJSON':     {},  # Raw JSON from the `ShipLocker.json` file, if available
+            'BackpackJSON':       {},                    # Raw JSON from `Backpack.json` file, if available
+            'ShipLockerJSON':     {},                    # Raw JSON from the `ShipLocker.json` file, if available
             'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
