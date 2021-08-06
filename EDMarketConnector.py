@@ -126,8 +126,6 @@ if __name__ == '__main__':  # noqa: C901
     if args.trace:
         logger.setLevel(logging.TRACE)
         edmclogger.set_channels_loglevel(logging.TRACE)
-    else:
-        edmclogger.set_channels_loglevel(logging.DEBUG)
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
