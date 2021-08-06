@@ -33,6 +33,7 @@ import killswitch
 import plug
 from companion import CAPIData
 from config import config
+from monitor_state_dict import MonitorStateDict
 
 if TYPE_CHECKING:
     from tkinter import Tk
@@ -93,7 +94,7 @@ def prefs_changed(cmdr, is_beta):
     pass
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state):
+def journal_entry(cmdr, is_beta, system, station, entry, state: MonitorStateDict):
     if (ks := killswitch.get_disabled('plugins.eddb.journal')).disabled:
         logger.warning(f'Journal processing for EDDB has been disabled: {ks.reason}')
         # LANG: Journal Processing disabled due to an active killswitch

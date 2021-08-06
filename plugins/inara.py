@@ -1,6 +1,7 @@
 """Inara Sync."""
 
 import json
+from monitor_state_dict import MonitorStateDict
 import threading
 import time
 import tkinter as tk
@@ -327,7 +328,7 @@ def credentials(cmdr: Optional[str]) -> Optional[str]:
 
 
 def journal_entry(  # noqa: C901, CCR001
-    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
+    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: MonitorStateDict
 ) -> str:
     """
     Journal entry hook.
@@ -443,7 +444,7 @@ def journal_entry(  # noqa: C901, CCR001
                 if state['Engineers']:  # Not populated < 3.3
                     to_send_list: List[Mapping[str, Any]] = []
                     for k, v in state['Engineers'].items():
-                        e = {'engineerName': k}
+                        e: Dict[str, Any] = {'engineerName': k}
                         if isinstance(v, tuple):
                             e['rankValue'] = v[0]
 
@@ -726,9 +727,9 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('setCommanderInventoryMaterials', entry['timestamp'],  materials)
                 this.materials = materials
 
-        except Exception as e:
-            logger.debug('Adding events', exc_info=e)
-            return str(e)
+        except Exception as ex:
+            logger.debug('Adding events', exc_info=ex)
+            return str(ex)
 
         # Send credits and stats to Inara on startup only - otherwise may be out of date
         if event_name == 'LoadGame':
@@ -1113,7 +1114,7 @@ def journal_entry(  # noqa: C901, CCR001
             if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
                 # So it's an empty event, core EDMC should have stuffed the data
                 # into state['ShipLockerJSON'].
-                entry = state['ShipLockerJSON']
+                entry = dict(state['ShipLockerJSON'])
 
             odyssey_plural_microresource_types = ('Items', 'Components', 'Data', 'Consumables')
             # we're getting new data here. so reset it on inara's side just to be sure that we set everything right
@@ -1361,7 +1362,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
             this.lastcredits = int(data['commander']['credits'])
 
 
-def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
+def make_loadout(state: Mapping[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 

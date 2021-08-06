@@ -26,6 +26,7 @@ from companion import CAPIData
 from config import applongname, appversion, config, debug_senders, trace_on
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
+from monitor_state_dict import MonitorStateDict
 from ttkHyperlinkLabel import HyperlinkLabel
 
 if TYPE_CHECKING:
@@ -393,7 +394,7 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
 
 
 def journal_entry(  # noqa: C901, CCR001
-    cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
+    cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: MonitorStateDict
 ) -> None:
     """Journal Entry hook."""
     if (ks := killswitch.get_disabled('plugins.edsm.journal')).disabled:
