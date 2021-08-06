@@ -20,8 +20,8 @@ class MonitorStateDict(TypedDict):
 
     # Multi-crew
 
-    Captain:                Optional[str]                   # If on a crew, the captian's name
-    Role:                   Optional[str]                   # Role in crew
+    Captain:                str                   # If on a crew, the captian's name
+    Role:                   str                   # Role in crew
 
     # Cmdr state
     FID:                    str                             # Frontier CMDR ID
