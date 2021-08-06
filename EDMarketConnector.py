@@ -660,13 +660,13 @@ class AppWindow(object):
             self.suit['text'] = ''
             return
 
-        if (suit := monitor.state.get('SuitCurrent')) is None:
+        if (suit := monitor.state['SuitCurrent']) is None:
             self.suit['text'] = f'<{_("Unknown")}>'  # LANG: Unknown suit
             return
 
         suitname = suit['edmcName']
 
-        if (suitloadout := monitor.state.get('SuitLoadoutCurrent')) is None:
+        if (suitloadout := monitor.state['SuitLoadoutCurrent']) is None:
             self.suit['text'] = ''
             return
 
@@ -739,7 +739,7 @@ class AppWindow(object):
         """Set main window labels, e.g. after language change."""
         self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Label for commander name in main window
         # LANG: 'Ship' or multi-crew role label in main window, as applicable
-        self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
+        self.ship_label['text'] = (_('Role') if monitor.state['Captain'] else _('Ship')) + ':'  # Main window
         self.suit_label['text'] = _('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
         self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
@@ -991,7 +991,7 @@ class AppWindow(object):
                 if monitor.state['Modules']:
                     self.ship.configure(state=True)
 
-                if monitor.state.get('SuitCurrent') is not None:
+                if monitor.state['SuitCurrent'] is not None:
                     if (loadout := data.get('loadout')) is not None:
                         if (suit := loadout.get('suit')) is not None:
                             if (suitname := suit.get('edmcName')) is not None:
