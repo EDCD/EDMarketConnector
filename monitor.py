@@ -391,7 +391,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
-        # Note: Uses undocumented attribute
+        # HACK: Uses undocumented attribute
         emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # type: ignore
 
         logger.debug('Entering loop...')
