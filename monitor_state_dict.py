@@ -20,8 +20,8 @@ class MonitorStateDict(TypedDict):
 
     # Multi-crew
 
-    Captain:                str                   # If on a crew, the captian's name
-    Role:                   str                   # Role in crew
+    Captain:                str                             # If on a crew, the captian's name
+    Role:                   str                             # Role in crew
 
     # Cmdr state
     FID:                    str                             # Frontier CMDR ID
@@ -129,7 +129,7 @@ _OdysseyWeaponClassField = TypedDict('_OdysseyWeaponClassField', {'class': int})
 
 
 class OdysseyWeapon(_OdysseyWeaponClassField):
-    """Suit Weapon for an odyssey suit loadout"""
+    """Suit Weapon for an odyssey suit loadout."""
 
     name: str
     locName: str  # noqa: N815
@@ -141,6 +141,7 @@ class OdysseyWeapon(_OdysseyWeaponClassField):
 
 
 class _ModuleEngineeringModifiers(TypedDict):
+    """Engineering modifiers for (ship) modules."""
     Label: str
     Value: float
     OriginalValue: float
@@ -148,7 +149,7 @@ class _ModuleEngineeringModifiers(TypedDict):
 
 
 class _ModuleExperimentalEffects(TypedDict, total=False):
-    """Experimental effects an engineered module *MAY* have."""
+    """Experimental effects an engineered (ship) module *MAY* have."""
 
     ExperimentalEffect: str
     ExperimentalEffect_Localised: str
@@ -167,7 +168,7 @@ class ModuleEngineering(_ModuleExperimentalEffects):
 
 
 class _ModulesOptionals(TypedDict, total=False):
-    """Optional fields a module may have."""
+    """Optional fields a (ship) module may have."""
 
     On: bool
     Priority: int
@@ -177,7 +178,7 @@ class _ModulesOptionals(TypedDict, total=False):
 
 
 class _ModulesWeaponsOptionals(TypedDict, total=False):
-    """Optional fields modules *may* have if they are weapons."""
+    """Optional fields (ship) modules *may* have if they are weapons."""
 
     AmmoInClip: int
     AmmoInHopper: int
