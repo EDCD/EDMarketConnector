@@ -734,7 +734,7 @@ class Session(object):
 
         # We need to be setting our edmcName for all suits
         if (current_suit := monitor.state['SuitCurrent']) is not None:
-            loc_name = current_suit['locName'] if current_suit['locName'] else current_suit['name']
+            loc_name = current_suit['locName'] if current_suit.get('locName') else current_suit['name']
             current_suit['edmcName'] = monitor.suit_sane_name(loc_name)
 
         for s in monitor.state['Suits']:
