@@ -1096,12 +1096,17 @@ class AppWindow(object):
             # Update main window
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
-                self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
+                if not config.get_bool('hide_multicrew_captain', default=False):
+                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
+
+                else:
+                    self.cmdr['text'] = f'{monitor.cmdr}'
+
                 self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
-                if monitor.group:
+                if monitor.group and not config.get_bool("hide_private_group", default=False):
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
 
                 else:
