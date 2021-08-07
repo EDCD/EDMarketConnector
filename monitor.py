@@ -203,7 +203,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 key=lambda x: x.split('.')[1:]
             )
 
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
 
         except Exception:
             logger.exception('Failed to find latest logfile')
@@ -872,9 +872,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 # Always attempt loading of this.
                 # Confirmed filename for 4.0.0.400
+                currentdir_path = pathlib.Path(str(self.currentdir))
+                shiplocker_filename = currentdir_path / 'ShipLocker.json'
                 try:
-                    currentdir_path = pathlib.Path(str(self.currentdir))
-                    with open(currentdir_path / 'ShipLocker.json', 'rb') as h:  # type: ignore
+                    with open(shiplocker_filename, 'rb') as h:  # type: ignore
                         entry = json.load(h, object_pairs_hook=OrderedDict)
                         self.state['ShipLockerJSON'] = entry
 
@@ -1601,7 +1602,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['GameVersion'] = entry['gameversion']
             self.state['GameBuild'] = entry['build']
             self.version = self.state['GameVersion']
-            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))
+            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:
             if not suppress:
                 raise
