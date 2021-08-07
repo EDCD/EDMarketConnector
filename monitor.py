@@ -203,7 +203,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 key=lambda x: x.split('.')[1:]
             )
 
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None
+            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
 
         except Exception:
             logger.exception('Failed to find latest logfile')
@@ -866,38 +866,48 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'shiplocker':
                 # As of 4.0.0.400 (2021-06-10)
-                # "ShipLocker" will be a full list written to the journal at startup/boarding/disembarking, and also
+                # "ShipLocker" will be a full list written to the journal at startup/boarding, and also
                 # written to a separate shiplocker.json file - other updates will just update that file and mention it
                 # has changed with an empty shiplocker event in the main journal.
 
-                # Always attempt loading of this.
-                # Confirmed filename for 4.0.0.400
-                try:
-                    currentdir_path = pathlib.Path(str(self.currentdir))
-                    with open(currentdir_path / 'ShipLocker.json', 'rb') as h:  # type: ignore
-                        entry = json.load(h, object_pairs_hook=OrderedDict)
-                        self.state['ShipLockerJSON'] = entry
+                # Always attempt loading of this, but if it fails we'll hope this was
+                # a startup/boarding version and thus `entry` contains
+                # the data anyway.
+                currentdir_path = pathlib.Path(str(self.currentdir))
+                shiplocker_filename = currentdir_path / 'ShipLocker.json'
+                shiplocker_max_attempts = 5
+                shiplocker_fail_sleep = 0.01
+                attempts = 0
+                while attempts < shiplocker_max_attempts:
+                    attempts += 1
+                    try:
+                        with open(shiplocker_filename, 'rb') as h:  # type: ignore
+                            entry = json.load(h, object_pairs_hook=OrderedDict)
+                            self.state['ShipLockerJSON'] = entry
+                            break
 
-                except FileNotFoundError:
-                    logger.warning('ShipLocker event but no ShipLocker.json file')
-                    pass
+                    except FileNotFoundError:
+                        logger.warning('ShipLocker event but no ShipLocker.json file')
+                        sleep(shiplocker_fail_sleep)
+                        pass
 
-                except json.JSONDecodeError as e:
-                    logger.warning(f'ShipLocker.json failed to decode:\n{e!r}\n')
-                    pass
+                    except json.JSONDecodeError as e:
+                        logger.warning(f'ShipLocker.json failed to decode:\n{e!r}\n')
+                        sleep(shiplocker_fail_sleep)
+                        pass
+
+                else:
+                    logger.warning(f'Failed to load & decode shiplocker after {shiplocker_max_attempts} tries. '
+                                   'Giving up.')
 
                 if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
-                    logger.trace('ShipLocker event is an empty one (missing at least one data type)')
+                    logger.warning('ShipLocker event is missing at least one category')
 
                 # This event has the current totals, so drop any current data
                 self.state['Component'] = defaultdict(int)
                 self.state['Consumable'] = defaultdict(int)
                 self.state['Item'] = defaultdict(int)
                 self.state['Data'] = defaultdict(int)
-
-                # 4.0.0.400 - No longer zeroing out the BackPack in this event,
-                # as we should now always get either `Backpack` event/file or
-                # `BackpackChange` as needed.
 
                 clean_components = self.coalesce_cargo(entry['Components'])
                 self.state['Component'].update(
@@ -1601,7 +1611,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['GameVersion'] = entry['gameversion']
             self.state['GameBuild'] = entry['build']
             self.version = self.state['GameVersion']
-            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))
+            self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:
             if not suppress:
                 raise
