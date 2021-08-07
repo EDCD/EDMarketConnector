@@ -94,7 +94,7 @@ def prefs_changed(cmdr, is_beta):
     pass
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state: MonitorStateDict):
+def journal_entry(cmdr, is_beta, system, station, entry, state: MonitorStateDict):  # noqa: CCR001 D103
     if (ks := killswitch.get_disabled('plugins.eddb.journal')).disabled:
         logger.warning(f'Journal processing for EDDB has been disabled: {ks.reason}')
         # LANG: Journal Processing disabled due to an active killswitch

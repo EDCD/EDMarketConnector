@@ -1,7 +1,6 @@
 """Inara Sync."""
 
 import json
-from monitor_state_dict import MonitorStateDict
 import threading
 import time
 import tkinter as tk
@@ -22,6 +21,7 @@ import timeout_session
 from companion import CAPIData
 from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
+from monitor_state_dict import MonitorStateDict
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
