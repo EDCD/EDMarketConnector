@@ -11,7 +11,6 @@ import collections
 import csv
 import hashlib
 import json
-from monitor_state_dict import SuitDict, SuitLoadoutDict
 import numbers
 import os
 import random
@@ -29,6 +28,7 @@ from config import appname, appversion, config
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
+from monitor_state_dict import SuitDict, SuitLoadoutDict
 from protocol import protocolhandler
 
 logger = get_main_logger()
