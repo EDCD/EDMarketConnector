@@ -437,7 +437,7 @@ class Auth(object):
             cmdrs = config.get_list('cmdrs', default=[])
             idx = cmdrs.index(cmdr)
             to_set = config.get_list('fdev_apikeys', default=[])
-            to_set = to_set + [''] * (len(cmdrs) - len(to_set))
+            to_set = to_set + [''] * (len(cmdrs) - len(to_set))  # type: ignore
             to_set[idx] = ''
 
         if to_set is None:
@@ -670,7 +670,8 @@ class Session(object):
             logger.warning("No lastStarport name!")
             return data
 
-        # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706 -- strip "+" chars off star port names returned by the CAPI
+        # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
+        # -- strip "+" chars off star port names returned by the CAPI
         last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
 
         services = last_starport.get('services', {})
