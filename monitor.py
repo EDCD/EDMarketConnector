@@ -896,6 +896,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         sleep(shiplocker_fail_sleep)
                         pass
 
+                else:
+                    logger.warning(f'Failed to load & decode shiplocker after {shiplocker_max_attempts} tries. '
+                                   'Giving up.')
+
                 if not all(t in entry for t in ('Components', 'Consumables', 'Data', 'Items')):
                     logger.warning('ShipLocker event is missing at least one category')
 
