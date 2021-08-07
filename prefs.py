@@ -674,7 +674,7 @@ class PreferencesDialog(tk.Toplevel):
 
     def __setup_privacy_tab(self, notebook: Notebook) -> None:
         frame = nb.Frame(notebook)
-        self.hide_multicrew_captian = tk.BooleanVar(value=config.get_bool('hide_multicrew_captian', default=False))
+        self.hide_multicrew_captain = tk.BooleanVar(value=config.get_bool('hide_multicrew_captain', default=False))
         self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
         row = AutoInc()
 
@@ -688,8 +688,8 @@ class PreferencesDialog(tk.Toplevel):
             variable=self.hide_private_group
         ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
         nb.Checkbutton(
-            frame, text=_('Hide multi-crew captian name'),  # LANG: Hide multicrew captian name from main UI checkbox
-            variable=self.hide_multicrew_captian
+            frame, text=_('Hide multi-crew captain name'),  # LANG: Hide multicrew captain name from main UI checkbox
+            variable=self.hide_multicrew_captain
         ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
 
         notebook.add(frame, text=_('Privacy'))  # LANG: Preferences privacy tab title
@@ -1259,7 +1259,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # Privacy options
         config.set('hide_private_group', self.hide_private_group.get())
-        config.set('hide_multicrew_captian', self.hide_multicrew_captian.get())
+        config.set('hide_multicrew_captain', self.hide_multicrew_captain.get())
 
         config.set('ui_scale', self.ui_scale.get())
         config.set('ui_transparency', self.transparency.get())

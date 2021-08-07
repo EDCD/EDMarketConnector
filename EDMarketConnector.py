@@ -1085,7 +1085,7 @@ class AppWindow(object):
             # Update main window
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
-                if not config.get_bool('hide_multicrew_captian', default=False):
+                if not config.get_bool('hide_multicrew_captain', default=False):
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
 
                 else:
