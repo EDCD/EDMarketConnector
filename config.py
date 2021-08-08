@@ -588,7 +588,7 @@ class WinConfig(AbstractConfig):
 
         Implements :meth:`AbstractConfig.get_bool`.
         """
-        res = self.get_int(key)
+        res = self.get_int(key, default=default)  # type: ignore
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
