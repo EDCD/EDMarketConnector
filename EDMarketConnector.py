@@ -99,6 +99,12 @@ if __name__ == '__main__':  # noqa: C901
         action='append',
     )
 
+    parser.add_argument(
+        '--trace-on',
+        help='Mark the selected trace logging as active.',
+        action='append',
+    )
+
     auth_options = parser.add_mutually_exclusive_group(required=False)
     auth_options.add_argument('--force-localserver-for-auth',
                               help='Force EDMC to use a localhost webserver for Frontier Auth callback',
@@ -120,8 +126,6 @@ if __name__ == '__main__':  # noqa: C901
     if args.trace:
         logger.setLevel(logging.TRACE)
         edmclogger.set_channels_loglevel(logging.TRACE)
-    else:
-        edmclogger.set_channels_loglevel(logging.DEBUG)
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
@@ -145,6 +149,13 @@ if __name__ == '__main__':  # noqa: C901
             logger.info(f'marked {d} for debug')
 
         debug_webserver.run_listener(DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT)
+
+    if args.trace_on and len(args.trace_on) > 0:
+        import config as conf_module
+
+        conf_module.trace_on = [x.casefold() for x in args.trace_on]  # duplicate the list just in case
+        for d in conf_module.trace_on:
+            logger.info(f'marked {d} for TRACE')
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
@@ -1085,12 +1096,17 @@ class AppWindow(object):
             # Update main window
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
-                self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
+                if not config.get_bool('hide_multicrew_captain', default=False):
+                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
+
+                else:
+                    self.cmdr['text'] = f'{monitor.cmdr}'
+
                 self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
-                if monitor.group:
+                if monitor.group and not config.get_bool("hide_private_group", default=False):
                     self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
 
                 else:

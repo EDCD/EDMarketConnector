@@ -33,7 +33,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.1.2'
+_static_appversion = '5.1.3'
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
@@ -41,6 +41,9 @@ update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: List[str] = []
+# TRACE logging code that should actually be used.  Means not spamming it
+# *all* if only interested in some things.
+trace_on: List[str] = []
 
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
@@ -585,7 +588,7 @@ class WinConfig(AbstractConfig):
 
         Implements :meth:`AbstractConfig.get_bool`.
         """
-        res = self.get_int(key)
+        res = self.get_int(key, default=default)  # type: ignore
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 

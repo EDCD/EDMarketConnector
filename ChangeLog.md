@@ -17,6 +17,53 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
 
+Release 5.1.3
+===
+
+* Attempt to flush any pending EDSM API data when a Journal `Shutdown` or 
+  `Fileheader` event is seen.  After this, the data is dropped.  This ensures
+  that, if the user next logs in to a different commander, the data isn't then
+  sent to the wrong EDSM account.
+
+* Ensure a previous Journal file is fully read/drained before starting 
+  processing of a new one.  In particular, this ensures properly seeing the end
+  of a continued Journal file when opening the continuation file.
+
+* New config options, in a new `Privacy` tab, to hide the current Private 
+  Group, or captain of a ship you're multi-crewing on.  These usually appear
+  on the `Commander` line of the main UI, appended after your commander name,
+  with a `/` between.
+
+* EDO dockable settlement names with `+` characters appended will no longer 
+  cause 'server lagging' reports.
+  
+* Don't force DEBUG level logging to the
+  [plain log file](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#plain-log-file)
+  if `--trace` isn't used to force TRACE level logging.  This means logging
+  *to the plain log file* will once more respect the user-set Log Level, as in
+  the Configuration tab of Settings.
+
+  As its name implies, the [debug log file](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
+  will always contain at least DEBUG level logging, or TRACE if forced.
+
+(Plugin) Developers
+---
+
+* New EDMarketConnector option `--trace-on ...` to control if certain TRACE
+  level logging is used or not.  This helps keep the noise down whilst being
+  able to have users activate choice bits of logging to help track down bugs.
+
+  See [Contributing.md](Contributing.md#use-the-appropriate-logging-level) for
+  details.
+
+* Loading of `ShipLocker.json` content is now tried up to 5 times, 10ms apart,
+  if there is a file loading, or JSON decoding, failure.  This should 
+  hopefully result in the data being loaded correctly if a race condition with
+  the game client actually writing to and closing the file is encountered.
+
+* `config.get_bool('some_str', default=SomeDefault)` will now actually honour
+  that specified default.
+
 Release 5.1.2
 ===
 
