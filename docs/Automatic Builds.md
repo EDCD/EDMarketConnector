@@ -26,3 +26,12 @@ When the workflow is (successfully) completed, it will upload the msi file it bu
 Within the `Built Files` zip file is the installer msi
 
 **Please ensure you test the built msi before creating a release.**
+
+## Automatic release creation
+
+Github Actions can automatically create a release after finishing a build (as mentioned above). To make this happen,
+simply push a tag to the repo with the format `v1.2.3` where 1.2.3 is the semver for the version (Note that this is
+**DISTINCT** from the normal `Release/1.2.3` format for release tags).
+
+Once the push is completed, a build will start, and once that is complete, a draft release will be created. Edit the
+release as needed and publish it. **Note that you should still test the built msi before publishing the release**

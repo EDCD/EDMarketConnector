@@ -225,7 +225,39 @@ Adding `--trace` to a `pytest` invocation causes it to drop into a
 [`pdb`](https://docs.python.org/3/library/pdb.html) prompt for each test,
 handy if you want to step through the testing code to be sure of anything.
 
-Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/contents.html).
+Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/contents.html). 
+
+---
+## Debugging network sends
+
+Rather than risk sending bad data to a remote service, even if only through
+repeatedly sending the same data you can cause such code to instead send 
+through a local web server and thence to a log file.
+
+1. This utilises the `--debug-sender ...` command-line argument.  The argument
+  to this is free-form, so there's nothing to edit in EDMarketConnector.py 
+  in order to support a new target for this.
+2. The debug web server is set up globally in EDMarketConnector.py.
+3. In code where you want to utilise this you will need at least something 
+  like this (taken from some plugins/edsm.py code):
+
+```python
+from config import debug_senders
+from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
+
+TARGET_URL = 'https://www.edsm.net/api-journal-v1'
+if 'edsm' in debug_senders:
+    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
+
+...
+    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
+```
+
+   Be sure to set a URL path in the `TARGET_URL` that denotes where the data
+   would normally be sent to.
+4. The output will go into a file in `%TEMP%\EDMarketConnector\http_debug` 
+  whose name is based on the path component of the URL.  In the code example 
+  above it will come out as `edsm.log` due to how `TARGET_URL` is set.
 
 ---
 
@@ -375,6 +407,22 @@ In addition to that we utilise one of the user-defined levels as:
   In general only developers will set this log level, but we do supply a
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
+
+  As well as just using bare `logger.trace(...)` you can also gate it to only
+  log if asked to at invocation time by utilising the `--trace-on ...` 
+  command-line argument.  e.g.
+ `EDMarketConnector.py --trace --trace-on edsm-cmdr-events`.  Note how you
+  still need to include `--trace`. The code to check and log would be like:
+
+    ```python
+    from config import trace_on
+  
+    if 'edsm-cmdr-events' in trace_on:
+        logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
+  ```
+  
+  This way you can set up TRACE logging that won't spam just because of 
+  `--trace` being used.
 
 ---
 

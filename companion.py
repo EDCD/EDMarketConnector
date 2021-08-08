@@ -437,7 +437,7 @@ class Auth(object):
             cmdrs = config.get_list('cmdrs', default=[])
             idx = cmdrs.index(cmdr)
             to_set = config.get_list('fdev_apikeys', default=[])
-            to_set = to_set + [''] * (len(cmdrs) - len(to_set))
+            to_set = to_set + [''] * (len(cmdrs) - len(to_set))  # type: ignore
             to_set[idx] = ''
 
         if to_set is None:
@@ -670,6 +670,10 @@ class Session(object):
             logger.warning("No lastStarport name!")
             return data
 
+        # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
+        # -- strip "+" chars off star port names returned by the CAPI
+        last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
+
         services = last_starport.get('services', {})
         if not isinstance(services, dict):
             # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
@@ -687,23 +691,24 @@ class Session(object):
 
         if services.get('commodities'):
             marketdata = self.query(URL_MARKET)
-            if last_starport_name != marketdata['name'] or last_starport_id != int(marketdata['id']):
-                logger.warning(f"{last_starport_name!r} != {marketdata['name']!r}"
-                               f" or {last_starport_id!r} != {int(marketdata['id'])!r}")
+            if last_starport_id != int(marketdata['id']):
+                logger.warning(f"{last_starport_id!r} != {int(marketdata['id'])!r}")
                 raise ServerLagging()
 
             else:
+                marketdata['name'] = last_starport_name
                 data['lastStarport'].update(marketdata)
 
         if services.get('outfitting') or services.get('shipyard'):
             shipdata = self.query(URL_SHIPYARD)
-            if last_starport_name != shipdata['name'] or last_starport_id != int(shipdata['id']):
-                logger.warning(f"{last_starport_name!r} != {shipdata['name']!r} or "
-                               f"{last_starport_id!r} != {int(shipdata['id'])!r}")
+            if last_starport_id != int(shipdata['id']):
+                logger.warning(f"{last_starport_id!r} != {int(shipdata['id'])!r}")
                 raise ServerLagging()
 
             else:
+                shipdata['name'] = last_starport_name
                 data['lastStarport'].update(shipdata)
+# WORKAROUND END
 
         return data
 

@@ -3,7 +3,7 @@ name: Build EDMC for Windows
 on:
   push:
     tags:
-      - "v*"
+      - "Release/*"
   workflow_dispatch:
 
 jobs:
@@ -42,3 +42,29 @@ jobs:
         with:
           name: Built files
           path: EDMarketConnector_win*.msi
+
+  release:
+    name: Release new version
+    runs-on: ubuntu-latest
+    needs: test
+    if: "${{ github.event_name != 'workflow_dispatch' }}"
+
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v2
+        with:
+          name: Built files
+          path: ./
+          
+      - name: Hash files
+        run: sha256sum EDMarketConnector_win*.msi > ./hashes.sum
+
+      - name: Create Draft Release
+        uses: "softprops/action-gh-release@v1"
+        with:
+          token: "${{secrets.GITHUB_TOKEN}}"
+          draft: true
+          prerelease: true
+          files: |
+            ./EDMarketConnector_win*.msi
+            ./hashes.sum
