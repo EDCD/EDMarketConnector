@@ -3,7 +3,7 @@ name: Build EDMC for Windows
 on:
   push:
     tags:
-      - "v*"
+      - "Release/*"
   workflow_dispatch:
 
 jobs:
