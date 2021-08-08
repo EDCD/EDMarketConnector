@@ -1,0 +1,44 @@
+"""Test the apply functions used by killswitch to modify data."""
+import copy
+from typing import Any, Optional
+
+import pytest
+
+import killswitch
+from killswitch import UPDATABLE_DATA
+
+
+@pytest.mark.parametrize(
+    ("source", "key", "action", "to_set", "result"),
+    [
+        (["this", "is", "a", "test"], "1", "delete", None, ["this", "a", "test"]),
+        (["this", "is", "a", "test"], "1", "", None, ["this", None, "a", "test"]),
+        ({"now": "with", "a": "dict"}, "now", "delete", None, {"a": "dict"}),
+        ({"now": "with", "a": "dict"}, "now", "", None, {"now": None, "a": "dict"}),
+    ]
+)
+def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:
+    """Test that a single level apply works as expected."""
+    cpy = copy.deepcopy(source)
+    killswitch._apply(target=cpy, key=key, to_set=to_set, delete=action == "delete")
+
+    assert cpy == result
+
+
+def test_apply_keyerror() -> None:
+    """_apply should fail when passed something that isn't a Sequence or MutableMapping."""
+    with pytest.raises(ValueError, match=r'Dont know how to'):
+        killswitch._apply(set(), "0", None, False)  # type: ignore # Its intentional that its broken
+        killswitch._apply(None, "", None)  # type: ignore # Its intentional that its broken
+
+
+@pytest.mark.parametrize(
+    ("input", "expected"),
+    [
+        ("1", 1), ("1337", 1337), ("no.", None), ("0x10", None), ("010", 10),
+        (False, 0), (str((1 << 63)-1), (1 << 63)-1), (True, 1), (str(1 << 1337), 1 << 1337)
+    ]
+)
+def test_get_int(input: str, expected: Optional[int]) -> None:
+    """Check that _get_int doesn't throw when handed bad data."""
+    assert expected == killswitch._get_int(input)
