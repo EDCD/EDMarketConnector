@@ -21,12 +21,12 @@ Release 5.1.3
 ===
 
 * Attempt to flush any pending EDSM API data when a Journal `Shutdown` or 
-  `Fileheader` event is seen.  After this the data is dropped.  This ensures
+  `Fileheader` event is seen.  After this, the data is dropped.  This ensures
   that, if the user next logs in to a different commander, the data isn't then
   sent to the wrong EDSM account.
 
 * Ensure a previous Journal file is fully read/drained before starting 
-  processing of a new one.  In particular this ensures properly seeing the end
+  processing of a new one.  In particular, this ensures properly seeing the end
   of a continued Journal file when opening the continuation file.
 
 * New config options, in a new `Privacy` tab, to hide the current Private 
