@@ -687,7 +687,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                                     f'"Location" event in pending passed should_send(),timestamp: {p["timestamp"]}'
                                 )
 
-                    creds = credentials(cmdr)  # TODO: possibly unbound
+                    creds = credentials(cmdr)
                     if creds is None:
                         raise ValueError("Unexpected lack of credentials")
 
