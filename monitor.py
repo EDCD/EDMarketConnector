@@ -494,6 +494,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
 
             event_type = entry['event'].lower()
+            # logger.debug(f'Monitor event: {entry["event"]}')
             if event_type == 'fileheader':
                 self.live = False
 
@@ -529,7 +530,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
-                self.mode = entry.get('GameMode')
+                if not entry.get('Ship'):  # TODO: Test with loading to CQC right from main game
+                    logger.debug(f'loadgame to cqc: {entry}')
+                    self.mode = 'CQC'
+                else:
+                    self.mode = entry.get('GameMode')
                 self.group = entry.get('Group')
                 self.planet = None
                 self.system = None

@@ -872,7 +872,8 @@ class AppWindow(object):
         play_bad = False
         err: Optional[str] = None
 
-        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system:
+        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system or \
+                monitor.mode == 'CQC':
             return  # In CQC or on crew - do nothing
 
         if companion.session.state == companion.Session.STATE_AUTH:
@@ -1171,6 +1172,15 @@ class AppWindow(object):
                     config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
+            if monitor.mode == 'CQC':
+                err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
+                if err:
+                    self.status['text'] = err
+                    if not config.get_int('hotkey_mute'):
+                        hotkeymgr.play_bad()
+
+                return  # in CQC
+
             if not entry['event'] or not monitor.mode:
                 # logger.trace('Startup or in CQC, returning')
                 return  # Startup or in CQC
@@ -1335,6 +1345,7 @@ class AppWindow(object):
             self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
                                                                  monitor.mode and
+                                                                 # and monitor.mode == 'CQC' and
                                                                  not monitor.state['Captain'] and
                                                                  monitor.system and
                                                                  tk.NORMAL or tk.DISABLED)

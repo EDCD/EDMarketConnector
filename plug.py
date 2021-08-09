@@ -312,6 +312,29 @@ def notify_newdata(data, is_beta):
     return error
 
 
+def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
+    """
+    Send a journal entry to each plugin.
+    :param cmdr: The Cmdr name, or None if not yet known
+    :param entry: The journal entry as a dictionary
+    :param state: A dictionary containing info about the Cmdr, current ship and cargo
+    :param is_beta: whether the player is in a Beta universe.
+    :returns: Error message from the first plugin that returns one (if any)
+    """
+
+    error = None
+    for plugin in PLUGINS:
+        journal_entry = plugin._get_func('journal_entry_cqc')
+        if journal_entry:
+            try:
+                # Pass a copy of the journal entry in case the callee modifies it
+                newerror = journal_entry(cmdr, is_beta, dict(entry), dict(state))
+                error = error or newerror
+            except Exception as e:
+                logger.exception(f'Plugin "{plugin.name}" failed')
+    return error
+
+
 def show_error(err):
     """
     Display an error message in the status line of the main window.
