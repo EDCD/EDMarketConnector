@@ -1,6 +1,14 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
+Copyrights
+===
+Please see the [docs/Licenses](docs/Licenses/) directory for copies of any
+licenses for software we use with EDMarketConnector, either at runtime, or to
+produce the Windows executables and installer.
+
+---
+
 * We now test against, and package with, Python 3.9.6.
 
   **As a consequence of this we no longer support Windows 7.  
@@ -16,6 +24,8 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
 
 Release 5.1.3
 ===
