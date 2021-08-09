@@ -1,0 +1,1 @@
+<html><body>You are being <a href="https://raw.githubusercontent.com/urllib3/urllib3/main/LICENSE.txt">redirected</a>.</body></html>
