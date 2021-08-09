@@ -1,0 +1,1 @@
+<html><body>You are being <a href="https://raw.githubusercontent.com/py2exe/py2exe/master/LICENSE.txt">redirected</a>.</body></html>
