@@ -1,0 +1,6 @@
+The files source/MemoryModule.c and source/MemoryModule.h are licensed
+under the Mozilla Public License Version 2.0, see
+MPL2-License.txt.
+
+All other files are licensed under the MIT/X11 License,
+see MIT-License.txt.
