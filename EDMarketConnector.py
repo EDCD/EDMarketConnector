@@ -1172,7 +1172,7 @@ class AppWindow(object):
                     config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
-            if monitor.mode == 'CQC':
+            if monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
                 if err:
                     self.status['text'] = err
