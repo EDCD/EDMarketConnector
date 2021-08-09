@@ -531,7 +531,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 if not entry.get('Ship') and not entry.get('GameMode') or entry.get('GameMode').lower() == 'CQC':
-                    logger.debug(f'loadgame to cqc: {entry}')
+                    logger.trace(f'loadgame to cqc: {entry}')
                     self.mode = 'CQC'
                 else:
                     self.mode = entry.get('GameMode')
