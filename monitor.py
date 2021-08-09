@@ -530,7 +530,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
-                if not entry.get('Ship'):  # TODO: Test with loading to CQC right from main game
+                if not entry.get('Ship') and not entry.get('GameMode'):
                     logger.debug(f'loadgame to cqc: {entry}')
                     self.mode = 'CQC'
                 else:

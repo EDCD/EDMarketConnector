@@ -1345,7 +1345,7 @@ class AppWindow(object):
             self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
                                                                  monitor.mode and
-                                                                 # and monitor.mode == 'CQC' and
+                                                                 monitor.mode == 'CQC' and
                                                                  not monitor.state['Captain'] and
                                                                  monitor.system and
                                                                  tk.NORMAL or tk.DISABLED)
