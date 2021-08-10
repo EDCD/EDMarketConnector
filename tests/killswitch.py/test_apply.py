@@ -56,3 +56,23 @@ def test_apply_no_error() -> None:
 def test_get_int(input: str, expected: Optional[int]) -> None:
     """Check that _get_int doesn't throw when handed bad data."""
     assert expected == killswitch._get_int(input)
+
+
+@pytest.mark.parametrize(
+    ("source", "key", "action", "to_set", "result"),
+    [
+        (["this", "is", "a", "test"], "1", "delete", None, ["this", "a", "test"]),
+        (["this", "is", "a", "test"], "1", "", None, ["this", None, "a", "test"]),
+        ({"now": "with", "a": "dict"}, "now", "delete", None, {"a": "dict"}),
+        ({"now": "with", "a": "dict"}, "now", "", None, {"now": None, "a": "dict"}),
+        ({"depth": {"is": "important"}}, "depth.is", "", "nonexistent", {"depth": {"is": "nonexistent"}}),
+        ([{"test": ["stuff"]}], "0.test.0", "", "things", [{"test": ["things"]}]),
+        (({"test": {"with": ["a", "tuple"]}},), "0.test.with.0", "delete", "", ({"test": {"with": ["tuple"]}},)),
+        ({"test": ["with a", {"set", "of", "stuff"}]}, "test.1", "delete", "", {"test": ["with a"]})
+    ],
+)
+def test_deep_get(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:
+    """Test _deep_get behaves as expected."""
+    cpy = copy.deepcopy(source)
+    killswitch._deep_apply(target=cpy, path=key, to_set=to_set, delete=action == "delete")
+    assert cpy == result
