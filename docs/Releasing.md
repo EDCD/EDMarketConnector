@@ -305,9 +305,9 @@ installer file prior to making the release live.
 Once that is done then for manually built installers:
 
 1. Add a git tag for the release, which you'll refer to when actually creating
-  the release:
-      1. This should be named `Release/A.B.C`, e.g. `Release/4.0.2.` as per
-      the version string.
+    the release:
+        1. This should be named `Release/A.B.C`, e.g. `Release/4.0.2.` as per
+        the version string.
 
     **Do NOT add this tag until you're sure you're ready.  Pushing a tag to 
     GitHub that matches the pattern `Release/*` (double-check this in
@@ -316,8 +316,16 @@ Once that is done then for manually built installers:
 
     Yes, this does mean you should really just be using this auto-build setup
     when creating an installer for release to users.  You'll at least need to
-    edit the draft release that it creates, i.e. swap out its `.msi` for the
-    one that you built.  But, **again, you should just be using the auto-build
+    edit the draft release that it creates:
+
+      1. Swap out its `.msi` for the one that you built.
+      2. Create a matching `hashes.sum` file for your `.msi` file:
+   
+             sha256sum EDMarketConnector_win*.msi > ./hashes.sum
+      
+          and replace the one in the draft release with this.
+    
+    But, **again, you should just be using the auto-build
     mechanism**.
 
 3. Now push the release-specific branch to GitHub.
