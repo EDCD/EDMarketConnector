@@ -494,7 +494,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
 
             event_type = entry['event'].lower()
-            # logger.debug(f'Monitor event: {entry["event"]}')
             if event_type == 'fileheader':
                 self.live = False
 
