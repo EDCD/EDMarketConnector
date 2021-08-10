@@ -1,12 +1,36 @@
 # Introduction
 
-Instead of building manually as laid out by [Releasing](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md), you can build the EDMC installer using GitHub actions.
+Instead of building manually as laid out by
+[Releasing](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md),
+you can build the EDMarketConnector installer using GitHub actions.
 
 ## Initiating a workflow run
 
-Starting a workflow run is done from the Actions tab at the top of the main GitHub UI
+### Automatically on tag push
+Once you are sure you have a branch all ready for release as a new version you
+should be adding a `Release/<semantic version>` tag at that HEAD.  Pushing 
+such a tag to GitHub will cause the
+[the GitHub Windows Build Action file](../.github/workflows/windows-build.yml)
+to build an installer and create a draft release, with the pre-release box
+pre-ticked.  This ensures you don't accidentally create a new non-pre 
+release which will always become the target of the `latest` shortcut on GitHub.
 
-NB: The branch you want to build must have the workflow file (`.github/workflows/windows-build.yml`), and the version of the file in that branch is the version that will be used for the build (e.g. for different python versions)
+You can monitor such an auto-build from the Actions tab on GitHub.  If it 
+completes successfully then check the Releases tab on GitHub for the draft 
+that was created.
+
+See [Releasing.md#Distribution](./Releasing.md#distribution) for details on
+how to fully publish an automatic release so that running EDMarketConnector.exe
+clients pick it up as an update.
+
+### Manually
+Starting a workflow run is done from the Actions tab at the top of the main
+GitHub UI
+
+NB: The branch you want to build must have the workflow file
+(`.github/workflows/windows-build.yml`), and the version of the file in that
+branch is the version that will be used for the build (e.g. for different
+python versions)
 
 1. Select the Actions tab at the top of the main GitHub interface
 2. Select the `Build EDMC for Windows` workflow on the left
@@ -16,7 +40,8 @@ NB: The branch you want to build must have the workflow file (`.github/workflows
 
 ## Downloading built installer files
 
-When the workflow is (successfully) completed, it will upload the msi file it built as a "Workflow Artifact". You can find the artifacts as follows:
+When the workflow is (successfully) completed, it will upload the msi file it
+built as a "Workflow Artifact". You can find the artifacts as follows:
 
 1. Select `All workflows` on the left
 2. Select the `Build EDMC for Windows` action
@@ -26,12 +51,3 @@ When the workflow is (successfully) completed, it will upload the msi file it bu
 Within the `Built Files` zip file is the installer msi
 
 **Please ensure you test the built msi before creating a release.**
-
-## Automatic release creation
-
-Github Actions can automatically create a release after finishing a build (as mentioned above). To make this happen,
-simply push a tag to the repo with the format `v1.2.3` where 1.2.3 is the semver for the version (Note that this is
-**DISTINCT** from the normal `Release/1.2.3` format for release tags).
-
-Once the push is completed, a build will start, and once that is complete, a draft release will be created. Edit the
-release as needed and publish it. **Note that you should still test the built msi before publishing the release**

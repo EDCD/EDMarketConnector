@@ -1,6 +1,15 @@
 # Introduction
 
-This document aims to enable anyone to quickly get up to speed on how to:
+Builds can, **and must in normal operation** be run automatically from GitHub 
+Actions. For more information on that process
+see [Automatic Builds](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Automatic%20Builds.md).
+This allows us to state that the files we distribute never touched anything 
+but GitHub servers before a user downloaded them, which means no 
+possibility of malware on a developer's machine infecting the resulting files.
+
+Obviously you might still need to run a manual build on your own hardware 
+in order to test changes and/or diagnose build issues.  As such
+this document aims to enable anyone to quickly get up to speed on how to:
 
 1. Build a Windows .exe for the application
 1. Package that .exe into an .msi file for distribution
@@ -10,7 +19,6 @@ This document aims to enable anyone to quickly get up to speed on how to:
 Note that for Windows only a 32-bit application is supported at this time.
 This is principally due to the Windows Registry handling in config.py.
 
-Builds can be run automatically from GitHub Actions. For more information on that process, see [Automatic Builds](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Automatic%20Builds.md).
 
 # Environment
 
@@ -96,16 +104,16 @@ that.
 1. Application names, version and URL of the file with latest release
  information. These are all in the `config.py` file.  See the
  `from config import ...` lines in setup.py.
-	1. `appname`: The short appname, e.g. 'EDMarketConnector'
-	1. `applongname`: The long appname, e.g. 'E:D Market Connector'
-	1. `appcmdname`: The CLI appname, e.g. 'EDMC'
-	1. `appversion`: The current version, e.g. `4.0.2`.  **You MUST make
-	 this something like `4.0.2+<myversion>` to differentiate it from
+    1. `appname`: The short appname, e.g. 'EDMarketConnector'
+    2. `applongname`: The long appname, e.g. 'E:D Market Connector'
+    3. `appcmdname`: The CLI appname, e.g. 'EDMC'
+    4. `_static_appversion`: The current version, e.g. `4.0.2`.  **You MUST
+     make this something like `4.0.2+<myversion>` to differentiate it from
 	 upstream.**  Whatever is in this field is what will be reported if
 	 sending messages to EDDN, or any of the third-party website APIs.
 	 This is utilising the 'build metadata' part of a Semantic version.
-	1. `copyright`: The Copyright string.
-	1. `update_feed`: The URL where the application looks for current latest
+    5. `copyright`: The Copyright string.
+    6. `update_feed`: The URL where the application looks for current latest
 	 version information.  This URL should be hosting a renamed (so the full
 	 URL doesn't change over application versions) version of the
 	 appcast_win_<version>.xml file.  The original upstream value is
@@ -214,19 +222,6 @@ a `stable` release, as well as any social media posts you make.
 	update this first.
 	1. To be sure you include all the changes look at the git log since the
 	prior appropriate (pre-)release.
-	1. **Only if making a `stable` release.** Update `edmarketconnector.xml` to
-	 add this changelog text to the correct section(s).
-	    1. Use the following to generate HTML from the MarkDown (`pip
-	     install grip` first if you need to):
-	   
-    	        grip ChangeLog.md --export ChangeLog.html
-    	1. If there's still a Mac OS section scroll down past it to the Windows
-    	section.
-		1. You'll need to change the `<title>` and `<description>` texts to
-		reflect the latest version and the additional changelog.
-		1. Update the `url` and `sparkle:version` elements of the `<enclosure>`
-		section.  **NB: Yes, sparkle:version should be the Semantic Version
-		string, not the Windows A.B.C.D form.**
 	1. As you're working in a version-specific branch, `release-4.0.2`, you
 	can safely commit these changes and push to GitHub.
      **Do not merge the branch with `releases` until the GitHub release is in place.**
@@ -304,61 +299,100 @@ The git commit for this should end up being the release tag as below.
 
 # Distribution
 
-Once you have tested the new .msi file:
+Whether you built it manually or automatically you **MUST** test the `.msi` 
+installer file prior to making the release live.
+
+Once that is done then for manually built installers:
 
 1. Add a git tag for the release, which you'll refer to when actually creating
-the release:
-	1. This should be named `Release/A.B.C`, e.g. `Release/4.0.2.` as per
-	the version string.
+    the release:
+        1. This should be named `Release/A.B.C`, e.g. `Release/4.0.2.` as per
+        the version string.
 
-1. Now push the release-specific branch to GitHub.
-	1. Check which of your remotes is for github with `git remotes -v`. It
-	should really be `origin` and the following assumes that.
-	1. `git push --set-upstream --tags origin release-4.0.2`
+    **Do NOT add this tag until you're sure you're ready.  Pushing a tag to 
+    GitHub that matches the pattern `Release/*` (double-check this in
+    [the GitHub Windows Build Action file](../.github/workflows/windows-build.yml))
+    will cause an auto-build and creation of a draft release.**
 
-1. Merge the release-specific branch into the appropriate `stable` or `beta`
+    Yes, this does mean you should really just be using this auto-build setup
+    when creating an installer for release to users.  You'll at least need to
+    edit the draft release that it creates:
+
+      1. Swap out its `.msi` for the one that you built.
+      2. Create a matching `hashes.sum` file for your `.msi` file:
+   
+             sha256sum EDMarketConnector_win*.msi > ./hashes.sum
+      
+          and replace the one in the draft release with this.
+    
+    But, **again, you should just be using the auto-build
+    mechanism**.
+
+3. Now push the release-specific branch to GitHub.
+    1. Check which of your remotes is for github with `git remotes -v`. It
+    should really be `origin` and the following assumes that.
+    1. `git push --set-upstream --tags origin release-4.0.2`
+
+4. Merge the release-specific branch into the appropriate `stable` or `beta`
 branch.  You can either do this locally and push the changes, or do it on
 GitHub.  You'll want to reference `stable` or `beta` in the next step, *not
 the release-4.0.2 branch, as it's temporary.*
 
-1. Craft a [new github Release](https://github.com/EDCD/EDMarketConnector/releases/new),
+5. **You should no longer need to manually create a release, due to 
+    auto-building of any release tag, but you'll probably still need to edit
+    in the ChangeLog, so...**
+
+    Craft a [new github Release](https://github.com/EDCD/EDMarketConnector/releases/new),
     1. Use the new tag so as to reference the correct commit, along with the
     appropriate `stable` or `beta` branch as the 'Target'.
-    1. Use the changelog text you already prepared to fill in the 'Release
+    2. Use the changelog text you already prepared to fill in the 'Release
     title' and description.
-    1. Attach the `EDMarketConnector_win_<version>.msi` file for Windows (the
+    3. Attach the `EDMarketConnector_win_<version>.msi` file for Windows (the
     Source Code files are added by github based on the release tag).
-    1. **If you are making a `beta` or otherwise pre-release you MUST tick the
+    4. **If you are making a `beta` or otherwise pre-release you MUST tick the
     `[ ] This is a pre-release` box.**  Not doing so will cause this release
-    to be point to by the 'latest' URL.
+    to be pointed to by the 'latest' URL.
+    5. We always create a discussion for any new release, so tick the
+      `Create a discussion for this release ` box, and check it's targeted at
+      the `Announcement` category.
 
-1. **Check that the URL for the release that you specified in
-`edmarketconnector.xml` actually matches where github has placed the `EDMarketConnector_win_<version>.msi`
-file.**  If, for instance, you fail to *update* this URL then upon running the
-'new' installer it will silently fail, because you made people try to install
-the old version over the old version.
+Once the release is created, then **only if making a `stable` release**
+update `edmarketconnector.xml` **in the `releases` branch only** to add this
+changelog text to the correct section(s):
+1. `git checkout releases`
+2. `git merge stable` - You should have merged the new release branch 
+   into `stable` above.
+3. Use the following to generate HTML from the MarkDown (`pip
+  install grip` first if you need to):
 
-    Fix it if needs be and make a new commit.  It's only in the `edmarketconnector.xml`
-    file so no need to redo the build.  As this file is only important in the
-    `releases` branch you also don't need to redo the GitHub release, i.e.
-    the release tag doesn't need updating to point to this new commit.
+       grip --export ChangeLog.md
+4. Open `edmarketconnector.xml` in your editor.
+5. If there's still a Mac OS section croll down past it to the Windows
+  section.
+6. You'll need to change the `<title>` and `<description>` texts to
+  reflect the latest version and the additional changelog.
+7. Update the `url` and `sparkle:version` elements of the `<enclosure>`
+  section.
+    1. The `url` needs to match what GitHub created in the Release for the
+        `.msi` file. Check it!
 
-1. **Now merge the new release branch into `releases`.**
-This is the final step that fully publishes the release for running
-EDMC instances to pick up on 'Check for Updates'.  The WinSparkle check for
-updates specifically targets
+        If, for instance, you fail to *update* this URL then upon running the 'new'
+        installer it will silently fail, because you made people try to install
+        the old version over the old version.
+    3. Yes, `sparkle:version` should be the Semantic Version string,
+       not the Windows A.B.C.D form.
+8. `git push origin`
 
-    `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
-    
-    as per `config.py` `update_feed`.
-	1. `git checkout releases`
-	1. `git merge release-4.0.2`
-	1. `git push origin`
-	
-	(Or merge on GitHub).
-	
-	NB: It can take some time for GitHub to show the changed
-    edmarketconnector.xml contents to all users.
+   This is the final step that fully publishes the release for running
+   EDMC instances to pick up on 'Check for Updates'.  The WinSparkle check for
+   updates specifically targets:
+
+       `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
+
+   as per `config.py` `update_feed`.
+
+   NB: It can take some time for GitHub to show the changed
+   edmarketconnector.xml contents to all users.
 
 **You should now update [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618)
 to reflect anything now fixed in latest release.**
@@ -367,11 +401,12 @@ to reflect anything now fixed in latest release.**
 
 If you are making a pre-release then:
 
-1. **DO NOT** Edit edmarketconnector.xml at all.  No, not even if you think you
- won't accidentally merge it into `releases`. Just don't change it at all.
-1. **DO NOT** merge into `releases`.
-1. **DO NOT** merge into `stable`.
-1. *Do* merge the code into `beta` after you have made a 'pre-release' on
+1. **DO NOT** Edit `edmarketconnector.xml` at all.  No, not even if you 
+  think you won't accidentally merge it into `releases`. Just don't change it
+   at all.
+3. **DO NOT** merge into `releases`.
+4. **DO NOT** merge into `stable`.
+5. *Do* merge the code into `beta` after you have made a 'pre-release' on
  GitHub.
 
 # Changing Python version
