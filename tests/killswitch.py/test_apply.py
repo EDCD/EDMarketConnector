@@ -72,7 +72,10 @@ def test_get_int(input: str, expected: Optional[int]) -> None:
         ({'depth': {'is': 'important'}}, 'depth.is', '', 'nonexistent', {'depth': {'is': 'nonexistent'}}),
         ([{'test': ['stuff']}], '0.test.0', '', 'things', [{'test': ['things']}]),
         (({'test': {'with': ['a', 'tuple']}},), '0.test.with.0', 'delete', '', ({'test': {'with': ['tuple']}},)),
-        ({'test': ['with a', {'set', 'of', 'stuff'}]}, 'test.1', 'delete', '', {'test': ['with a']})
+        ({'test': ['with a', {'set', 'of', 'stuff'}]}, 'test.1', 'delete', '', {'test': ['with a']}),
+        ({'keys.can.have.': 'dots!'}, 'keys.can.have.', '', '.s!', {'keys.can.have.': '.s!'}),
+        ({'multilevel.keys': {'with.dots': False}}, 'multilevel.keys.with.dots',
+         '', True, {'multilevel.keys': {'with.dots': True}})
     ],
 )
 def test_deep_get(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:

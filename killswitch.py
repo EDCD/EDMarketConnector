@@ -113,7 +113,25 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):
             # it exists on this level, dont go further
             break
 
-        key, _, path = path.partition('.')
+        elif isinstance(current, Mapping) and any('.' in k and path.startswith(k) for k in current.keys()):
+            # there is a dotted key in here that can be used for this
+            # if theres a dotted key in here (must be a mapping), use that if we can
+
+            keys = current.keys()
+            for k in filter(lambda x: '.' in x, keys):
+                if path.startswith(k):
+                    key = k
+                    path = path.removeprefix(k)
+                    # we assume that the `.` here is for "accessing" the next key.
+                    if path[0] == '.':
+                        path = path[1:]
+
+                if len(path) == 0:
+                    path = key
+                    break
+
+        else:
+            key, _, path = path.partition('.')
 
         if isinstance(current, Mapping):
             current = current[key]  # type: ignore # I really dont know at this point what you want from me mypy.
