@@ -1,6 +1,7 @@
 """
 Plugin hooks for EDMC - Ian Norton, Jonathan Harris
 """
+import copy
 import importlib
 import logging
 import operator
@@ -328,7 +329,7 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
         if cqc_callback is not None and callable(cqc_callback):
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                newerror = cqc_callback(cmdr, is_beta, dict(entry), dict(state))
+                newerror = cqc_callback(cmdr, is_beta, copy.deepcopy(entry), copy.deepcopy(state))
                 error = error or newerror
 
             except Exception:
