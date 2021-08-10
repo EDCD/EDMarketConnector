@@ -28,9 +28,9 @@ class SingleKill(NamedTuple):
 
     match: str
     reason: str
-    redact_fields: Optional[List[str]]
-    delete_fields: Optional[List[str]]
-    set_fields: Optional[Dict[str, Any]]
+    redact_fields: Optional[List[str]] = None
+    delete_fields: Optional[List[str]] = None
+    set_fields: Optional[Dict[str, Any]] = None
 
     @property
     def has_rules(self) -> bool:
