@@ -324,11 +324,11 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
 
     error = None
     for plugin in PLUGINS:
-        journal_entry = plugin._get_func('journal_entry_cqc')
-        if journal_entry is not None and callable(journal_entry):
+        cqc_callback = plugin._get_func('journal_entry_cqc')
+        if cqc_callback is not None and callable(cqc_callback):
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                newerror = journal_entry(cmdr, is_beta, dict(entry), dict(state))
+                newerror = cqc_callback(cmdr, is_beta, dict(entry), dict(state))
                 error = error or newerror
 
             except Exception:
