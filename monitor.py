@@ -533,6 +533,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if not entry.get('Ship') and not entry.get('GameMode') or entry.get('GameMode').lower() == 'CQC':
                     logger.trace(f'loadgame to cqc: {entry}')
                     self.mode = 'CQC'
+
                 else:
                     self.mode = entry.get('GameMode')
                 self.group = entry.get('Group')

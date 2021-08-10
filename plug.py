@@ -330,8 +330,10 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
                 # Pass a copy of the journal entry in case the callee modifies it
                 newerror = journal_entry(cmdr, is_beta, dict(entry), dict(state))
                 error = error or newerror
+
             except Exception as e:
                 logger.exception(f'Plugin "{plugin.name}" failed')
+
     return error
 
 

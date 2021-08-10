@@ -872,8 +872,10 @@ class AppWindow(object):
         play_bad = False
         err: Optional[str] = None
 
-        if not monitor.cmdr or not monitor.mode or monitor.state['Captain'] or not monitor.system or \
-                monitor.mode == 'CQC':
+        if (
+                not monitor.cmdr or not monitor.mode or monitor.state['Captain']
+                or not monitor.system or monitor.mode == 'CQC'
+        ):
             return  # In CQC or on crew - do nothing
 
         if companion.session.state == companion.Session.STATE_AUTH:
