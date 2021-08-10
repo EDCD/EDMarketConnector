@@ -331,7 +331,7 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
                 newerror = journal_entry(cmdr, is_beta, dict(entry), dict(state))
                 error = error or newerror
 
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
     return error
