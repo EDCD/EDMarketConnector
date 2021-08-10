@@ -25,11 +25,25 @@ def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, resul
     assert cpy == result
 
 
-def test_apply_keyerror() -> None:
+def test_apply_errors() -> None:
     """_apply should fail when passed something that isn't a Sequence or MutableMapping."""
     with pytest.raises(ValueError, match=r'Dont know how to'):
         killswitch._apply(set(), "0", None, False)  # type: ignore # Its intentional that its broken
         killswitch._apply(None, "", None)  # type: ignore # Its intentional that its broken
+
+
+def test_apply_no_error() -> None:
+    """
+    _apply should not raise when deleting keys that dont exist, nor should it raise on setting keys that dont exist.
+
+    The only exception here is for lists. if a list is malformed to what a killswitch expects, it SHOULD explode,
+    thus causing the killswitch to fail and eat the entire message.
+    """
+    killswitch._apply([], "0", None, True)
+    killswitch._apply({}, "0", None, True)
+    killswitch._apply({}, "this doesn't exist", None, True)
+    with pytest.raises(IndexError):
+        killswitch._apply([], "1", "bang?")
 
 
 @pytest.mark.parametrize(
