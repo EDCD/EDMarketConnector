@@ -333,7 +333,7 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
                 error = error or newerror
 
             except Exception:
-                logger.exception(f'Plugin "{plugin.name}" failed')
+                logger.exception(f'Plugin "{plugin.name}" failed while handling CQC mode journal entry')
 
     return error
 
