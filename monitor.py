@@ -536,6 +536,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.mode = entry.get('GameMode')
+
                 self.group = entry.get('Group')
                 self.planet = None
                 self.system = None
