@@ -15,7 +15,7 @@ import tkinter as tk
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, cast, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
 
 import requests
 
