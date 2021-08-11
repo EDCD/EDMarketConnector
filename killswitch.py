@@ -95,7 +95,7 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
         raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
 
 
-def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):
+def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  # noqa: CCR001 # Recursive silliness.
     """
     Set the given path to the given value, if it exists.
 
