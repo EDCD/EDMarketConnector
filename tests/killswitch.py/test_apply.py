@@ -15,7 +15,10 @@ from killswitch import UPDATABLE_DATA
         (['this', 'is', 'a', 'test'], '1', '', None, ['this', None, 'a', 'test']),
         ({'now': 'with', 'a': 'dict'}, 'now', 'delete', None, {'a': 'dict'}),
         ({'now': 'with', 'a': 'dict'}, 'now', '', None, {'now': None, 'a': 'dict'}),
-        (['test append'], '1', '', 'yay', ['test append', 'yay'])
+        (['test append'], '1', '', 'yay', ['test append', 'yay']),
+        (['test neg del'], '-1', 'delete', None, []),
+        (['test neg del'], '-1337', 'delete', None, ['test neg del']),
+        (['test neg del'], '-2', 'delete', None, ['test neg del']),
     ]
 )
 def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:

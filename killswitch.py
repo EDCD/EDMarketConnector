@@ -81,8 +81,9 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
         if idx is None:
             raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
 
-        if delete:
-            if len(target) > idx:
+        if delete and len(target) > 0:
+            length = len(target)
+            if (idx > 0 and length > idx) or idx >= -length:
                 target.pop(idx)
 
         elif len(target) == idx:
