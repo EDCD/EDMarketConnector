@@ -244,7 +244,9 @@ class KillSwitchSet:
         """
         return [k for k in self.kill_switches if version in k.version]
 
-    def check_killswitch(self, name: str, data: UPDATABLE_DATA, log=logger, version=_current_version) -> Tuple[bool, UPDATABLE_DATA]:
+    def check_killswitch(
+        self, name: str, data: UPDATABLE_DATA, log=logger, version=_current_version
+    ) -> Tuple[bool, UPDATABLE_DATA]:
         """
         Check whether or not a killswitch is enabled. If it is, apply rules if any.
 
