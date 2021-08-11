@@ -19,6 +19,7 @@ from killswitch import UPDATABLE_DATA
         (['test neg del'], '-1', 'delete', None, []),
         (['test neg del'], '-1337', 'delete', None, ['test neg del']),
         (['test neg del'], '-2', 'delete', None, ['test neg del']),
+        (['test too high del'], '30', 'delete', None, ['test too high del']),
     ]
 )
 def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:
