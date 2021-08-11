@@ -215,6 +215,10 @@ class KillSwitchSet:
         :param version: The version to check killswitches for, defaults to the current EDMC version
         :return: a namedtuple indicating status and reason, if any
         """
+
+        if isinstance(version, str):
+            version = semantic_version.Version.coerce(version)
+
         for ks in self.kill_switches:
             if version not in ks.version:
                 continue
@@ -240,7 +244,7 @@ class KillSwitchSet:
         """
         return [k for k in self.kill_switches if version in k.version]
 
-    def check_killswitch(self, name: str, data: UPDATABLE_DATA, log=logger) -> Tuple[bool, UPDATABLE_DATA]:
+    def check_killswitch(self, name: str, data: UPDATABLE_DATA, log=logger, version=_current_version) -> Tuple[bool, UPDATABLE_DATA]:
         """
         Check whether or not a killswitch is enabled. If it is, apply rules if any.
 
@@ -249,7 +253,7 @@ class KillSwitchSet:
         :return: A bool indicating if the caller should return, and either the original data or a *COPY* that has
                  been modified by rules
         """
-        res = self.get_disabled(name)
+        res = self.get_disabled(name, version=version)
         if not res.disabled:
             return False, data
 
