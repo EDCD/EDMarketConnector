@@ -235,7 +235,7 @@ the .exe and .msi because ChangeLog.md is bundled with the install.
 If anything in this new release addresses a bug that causes, e.g. bad data
 to be sent over EDDN, then you should add an appropriate entry to the
 killswitches.json file *in the `releases` branch*.  That file **must only ever
-be commited to the `releases` branch!!!**  See [docs/Killswitches.md](Killswitches.md).
+be committed to the `releases` branch!!!**  See [docs/Killswitches.md](Killswitches.md).
 
 # Packaging & Installer Generation
 
