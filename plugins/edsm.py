@@ -638,7 +638,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         else:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
-            entry = {'event': 'ShutDown'}  # Dummy to allow for `entry['event']` below
+            entry = {'event': 'ShutDown'}  # Dummy to allow for `uentry['event']` belowt
 
         retrying = 0
         while retrying < 3:
@@ -776,6 +776,7 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
     Whether or not any of the given entries should be sent to EDSM.
 
     :param entries: The entries to check
+    :param event: The latest event being processed
     :return: bool indicating whether or not to send said entries
     """
     # We MUST flush pending on logout, in case new login is a different Commander
