@@ -415,9 +415,9 @@ In addition to that we utilise one of the user-defined levels as:
   still need to include `--trace`. The code to check and log would be like:
 
     ```python
-    from config import trace_on
+    import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
   
-    if 'edsm-cmdr-events' in trace_on:
+    if 'edsm-cmdr-events' in conf_module.trace_on:
         logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
   ```
   
