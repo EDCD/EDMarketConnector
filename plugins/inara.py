@@ -22,6 +22,7 @@ from companion import CAPIData
 from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
+import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
 
 logger = get_main_logger()
 
@@ -1491,7 +1492,9 @@ def new_worker():
                 ]
             }
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
-            logger.trace(f'Events:\n{json.dumps(data)}\n')
+            if 'inara-events' in conf_module.trace_on:
+                logger.trace(f'Events:\n{json.dumps(data)}\n')
+
             try_send_data(TARGET_URL, data)
 
         time.sleep(WORKER_WAIT_TIME)
