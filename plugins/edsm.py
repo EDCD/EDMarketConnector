@@ -38,6 +38,10 @@ EDSM_POLL = 0.1
 _TIMEOUT = 20
 DISCARDED_EVENTS_SLEEP = 10
 
+# trace-if events
+CMDR_EVENTS = 'edsm-cmdr-events'
+LOCATION_EVENTS = 'edsm-locations'
+
 
 class This:
     """Holds module globals."""
@@ -360,8 +364,7 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     :param cmdr: The commander to get credentials for
     :return: The credentials, or None
     """
-    if 'edsm-cmdr-events' in trace_on:
-        logger.trace(f'{cmdr=}')
+    logger.trace_if(CMDR_EVENTS, f'{cmdr=}')
 
     # Credentials for cmdr
     if not cmdr:
@@ -380,15 +383,12 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
         if idx >= len(edsm_usernames) or idx >= len(edsm_apikeys):
             return None
 
-        if 'edsm-cmdr-events' in trace_on:
-            logger.trace(f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
+        logger.trace_if(CMDR_EVENTS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
 
         return (edsm_usernames[idx], edsm_apikeys[idx])
 
     else:
-        if 'edsm-cmdr-events' in trace_on:
-            logger.trace(f'{cmdr=}: returning None')
-
+        logger.trace_if(CMDR_EVENTS, f'{cmdr=}: returning None')
         return None
 
 
@@ -515,8 +515,7 @@ def journal_entry(  # noqa: C901, CCR001
                 'Encoded':      [{'Name': k, 'Count': v} for k, v in state['Encoded'].items()],
             }
             materials.update(transient)
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'"LoadGame" event, queueing Materials: {cmdr=}')
+            logger.trace_if(CMDR_EVENTS, f'"LoadGame" event, queueing Materials: {cmdr=}')
 
             this.queue.put((cmdr, materials))
 
@@ -524,8 +523,7 @@ def journal_entry(  # noqa: C901, CCR001
         #     logger.trace(f'''{entry["event"]}
 # Queueing: {entry!r}'''
 #                          )
-        if 'edsm-cmdr-events' in trace_on:
-            logger.trace(f'"{entry["event"]=}" event, queueing: {cmdr=}')
+        logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
 
         this.queue.put((cmdr, entry))
 
@@ -632,8 +630,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
         if item:
             (cmdr, entry) = item
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
+            logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {entry["event"]=})')
 
         else:
             logger.debug('Empty queue message, setting closing = True')
@@ -649,34 +646,30 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 break
             try:
                 if item and entry['event'] not in this.discarded_events:
-                    if 'edsm-cmdr-events' in trace_on:
-                        logger.trace(f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
+                    logger.trace_if(
+                        CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
 
                     pending.append(entry)
 
                 if pending and should_send(pending, entry['event']):
-                    if 'edsm-cmdr-events' in trace_on:
-                        logger.trace(f'({cmdr=}, {entry["event"]=}): should_send() said True')
-                        pendings = [f"{p}\n" for p in pending]
-                        logger.trace(f'pending contains:\n{pendings}')
+                    logger.trace_if(CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): should_send() said True')
+                    logger.trace_if(CMDR_EVENTS, f'pending contains:\n{chr(0x0A).join(str(p) for p in pending)}')
 
-                    if 'edsm-locations' in trace_on and \
-                            any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.trace("pending has at least one of "
-                                     "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
-                                     " and it passed should_send()")
+                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                        logger.trace_if(LOCATION_EVENTS, "pending has at least one of "
+                                        "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                                        " and it passed should_send()")
                         for p in pending:
                             if p['event'] in ('Location'):
-                                logger.trace('"Location" event in pending passed should_send(), '
-                                             f'timestamp: {p["timestamp"]}')
+                                logger.trace_if(LOCATION_EVENTS, '"Location" event in pending passed should_send(), '
+                                                f'timestamp: {p["timestamp"]}')
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
                     if creds is None:
                         raise ValueError("Unexpected lack of credentials")
 
                     username, apikey = creds
-                    if 'edsm-cmdr-events' in trace_on:
-                        logger.trace(f'({cmdr=}, {entry["event"]=}): Using {username=} from credentials()')
+                    logger.trace_if(CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): Using {username=} from credentials()')
 
                     data = {
                         'commanderName': username.encode('utf-8'),
@@ -686,23 +679,26 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
-                    if 'edsm-locations' in trace_on and \
-                            any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
+                    if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
-                        logger.trace(
-                            "pending has at least one of "
-                            "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
+                        logger.trace_if(
+                            LOCATION_EVENTS,
+                            "pending has at least one of ('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                             " Attempting API call with the following events:"
                         )
 
                         for p in pending:
-                            logger.trace(f"Event: {p!r}")
+                            logger.trace_if(LOCATION_EVENTS, f"Event: {p!r}")
                             if p['event'] in ('Location'):
-                                logger.trace('Attempting API call for "Location" event with timestamp: '
-                                             f'{p["timestamp"]}')
+                                logger.trace_if(
+                                    LOCATION_EVENTS,
+                                    f'Attempting API call for "Location" event with timestamp: {p["timestamp"]}'
+                                )
 
-                        logger.trace(f'Overall POST data (elided) is:\n{data_elided}')
+                        logger.trace_if(
+                            LOCATION_EVENTS, f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
+                        )
 
                     r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
                     # logger.trace(f'API response content: {r.content}')
@@ -761,8 +757,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
             # Game shutdown or new login so we MUST not hang on to pending
             pending = []
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'Blanked pending because of event: {entry["event"]}')
+            logger.trace_if(CMDR_EVENTS, f'Blanked pending because of event: {entry["event"]}')
 
         if closing:
             logger.debug('closing, so returning.')
@@ -781,8 +776,7 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
     """
     # We MUST flush pending on logout, in case new login is a different Commander
     if event.lower() in ('shutdown', 'fileheader'):
-        if 'edsm-cmdr-events' in trace_on:
-            logger.trace(f'True because {event=}')
+        logger.trace_if(CMDR_EVENTS, f'True because {event=}')
 
         return True
 
@@ -791,8 +785,7 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
         if entries and entries[-1]['event'] == 'Scan':
             this.navbeaconscan -= 1
             if this.navbeaconscan:
-                if 'edsm-cmdr-events' in trace_on:
-                    logger.trace(f'False because {this.navbeaconscan=}')
+                logger.trace_if(CMDR_EVENTS, f'False because {this.navbeaconscan=}')
 
                 return False
 
@@ -808,8 +801,7 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
             # Cargo is the last event on startup, unless starting when docked in which case Docked is the last event
             this.newgame = False
             this.newgame_docked = False
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'True because {entry["event"]=}')
+            logger.trace_if(CMDR_EVENTS, f'True because {entry["event"]=}')
 
             return True
 
@@ -820,17 +812,14 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
                 'CommunityGoal',  # Spammed periodically
                 'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
                 'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'):  # "
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'True because {entry["event"]=}')
+            logger.trace_if(CMDR_EVENTS, f'True because {entry["event"]=}')
 
             return True
 
         else:
-            if 'edsm-cmdr-events' in trace_on:
-                logger.trace(f'{entry["event"]=}, {this.newgame_docked=}')
+            logger.trace_if(CMDR_EVENTS, f'{entry["event"]=}, {this.newgame_docked=}')
 
-    if 'edsm-cmdr-events' in trace_on:
-        logger.trace(f'False as default: {this.newgame_docked=}')
+    logger.trace_if(CMDR_EVENTS, f'False as default: {this.newgame_docked=}')
 
     return False
 

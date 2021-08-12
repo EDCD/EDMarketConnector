@@ -25,6 +25,7 @@ from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
+STARTUP = 'startup'
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -519,8 +520,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = True  # First event in 3.0
                 self.cmdr = entry['Name']
                 self.state['FID'] = entry['FID']
-                if 'startup' in conf_module.trace_on:
-                    logger.trace(f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
+                logger.trace_if(STARTUP, f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
@@ -531,9 +531,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
                 if not entry.get('Ship') and not entry.get('GameMode') or entry.get('GameMode', '').lower() == 'cqc':
-                    if 'cqc-loadgame-events' in conf_module.trace_on:
-                        logger.trace(f'loadgame to cqc: {entry}')
-
+                    logger.trace_if('cqc-loadgame-events', f'loadgame to cqc: {entry}')
                     self.mode = 'CQC'
 
                 else:
@@ -570,8 +568,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
 
-                if 'startup' in conf_module.trace_on:
-                    logger.trace(f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
+                logger.trace_if(STARTUP, f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'newcommander':
                 self.cmdr = entry['Name']
