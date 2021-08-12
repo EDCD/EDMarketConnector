@@ -13,6 +13,7 @@ from typing import Sequence, Union, cast
 
 import requests
 
+import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
 import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
@@ -22,7 +23,6 @@ from companion import CAPIData
 from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
-import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
 
 logger = get_main_logger()
 
