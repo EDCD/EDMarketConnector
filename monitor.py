@@ -18,7 +18,6 @@ from typing import Tuple
 if TYPE_CHECKING:
     import tkinter
 
-import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
 import util_ships
 from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
