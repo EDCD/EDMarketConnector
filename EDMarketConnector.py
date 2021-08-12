@@ -77,6 +77,12 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        "--trace-all",
+        help="Disable trace-on functionality",
+        action='store_true'
+    )
+
+    parser.add_argument(
         '--reset-ui',
         help='reset UI theme and transparency to defaults',
         action='store_true'
@@ -123,9 +129,16 @@ if __name__ == '__main__':  # noqa: C901
 
     args = parser.parse_args()
 
+    level_to_set: Optional[int] = None
     if args.trace:
-        logger.setLevel(logging.TRACE)
-        edmclogger.set_channels_loglevel(logging.TRACE)
+        level_to_set = logging.TRACE  # type: ignore # it exists
+
+    elif args.trace_all:
+        level_to_set = logging.TRACE_ALL  # type: ignore # it exists
+
+    if level_to_set is not None:
+        logger.setLevel(level_to_set)
+        edmclogger.set_channels_loglevel(level_to_set)
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
