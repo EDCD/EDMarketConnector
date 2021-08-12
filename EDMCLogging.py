@@ -48,6 +48,7 @@ from threading import get_native_id as thread_native_id
 from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
 
+import config as config_mod
 from config import appcmdname, appname, config
 
 # TODO: Tests:
@@ -77,14 +78,32 @@ _default_loglevel = logging.DEBUG
 
 # Define a TRACE level
 LEVEL_TRACE = 5
+LEVEL_TRACE_ALL = 3
 logging.addLevelName(LEVEL_TRACE, "TRACE")
+logging.addLevelName(LEVEL_TRACE_ALL, "TRACE_ALL")
 logging.TRACE = LEVEL_TRACE  # type: ignore
+logging.TRACE_ALL = LEVEL_TRACE_ALL  # type: ignore
 logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type: ignore
     logging.TRACE,  # type: ignore
     message,
     args,
     **kwargs
 )
+
+
+def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
+    if condition not in config_mod.trace_on:
+        self._log(logging.TRACE_ALL, message, args, **kwargs)  # type: ignore # we added it
+
+    else:
+        # its in there, it gets to end up in regular TRACE
+        self._log(logging.TRACE, message, args, **kwargs)  # type: ignore # we added it
+
+
+logging.Logger.trace_if = _trace_if  # type: ignore
+
+# we cant hide this from `from xxx` imports and I'd really rather no-one other than `logging` had access to it
+del _trace_if
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -97,6 +116,13 @@ if TYPE_CHECKING:
         def trace(self, message, *args, **kwargs) -> None:
             """Fake trace method."""
             return self._log(LEVEL_TRACE, message, args, **kwargs)
+
+        def trace_if(self, condition: str, message, *args, **kwargs) -> None:
+            """Fake trace if method, traces only if condition exists in trace_on."""
+            if condition in config_mod.trace_on:
+                return self._log(LEVEL_TRACE, message, *args, **kwargs)
+            else:
+                return self._log(LEVEL_TRACE_ALL, message, *args, **kwargs)
 
 
 class Logger:
@@ -492,7 +518,7 @@ class EDMCContextFilter(logging.Filter):
         return module_name
 
 
-def get_main_logger() -> 'LoggerMixin':
+def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
     """Return the correct logger for how the program is being run."""
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
