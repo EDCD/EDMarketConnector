@@ -78,7 +78,7 @@ if __name__ == '__main__':  # noqa: C901
 
     parser.add_argument(
         "--trace-all",
-        help="Disable trace-on functionality",
+        help="Disable trace-on functionality (show any and all trace messages, regardless of trace-on gates)",
         action='store_true'
     )
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':  # noqa: C901
 
     parser.add_argument(
         '--trace-on',
-        help='Mark the selected trace logging as active.',
+        help='Mark the selected trace logging as active. * or all will ensure that every possible trace log appears (in the same way as --trace-all)',
         action='append',
     )
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':  # noqa: C901
     if args.trace:
         level_to_set = logging.TRACE  # type: ignore # it exists
 
-    elif args.trace_all:
+    if args.trace_all or '*' in args.trace_on or 'all' in args.trace_on:
         level_to_set = logging.TRACE_ALL  # type: ignore # it exists
 
     if level_to_set is not None:
