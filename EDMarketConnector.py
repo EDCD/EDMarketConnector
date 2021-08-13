@@ -130,10 +130,10 @@ if __name__ == '__main__':  # noqa: C901
     args = parser.parse_args()
 
     level_to_set: Optional[int] = None
-    if args.trace:
+    if args.trace or args.trace_on:
         level_to_set = logging.TRACE  # type: ignore # it exists
 
-    if args.trace_all or '*' in args.trace_on or 'all' in args.trace_on:
+    if args.trace_all or (args.trace_on and ('*' in args.trace_on or 'all' in args.trace_on)):
         level_to_set = logging.TRACE_ALL  # type: ignore # it exists
 
     if level_to_set is not None:
