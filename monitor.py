@@ -24,7 +24,7 @@ from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
-STARTUP = 'startup'
+STARTUP = 'journal.startup'
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
