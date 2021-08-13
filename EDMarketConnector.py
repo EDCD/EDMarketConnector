@@ -127,7 +127,17 @@ if __name__ == '__main__':  # noqa: C901
                         nargs='*'
                         )
 
+    parser.add_argument(
+        '--capi-pretend-down',
+        help='Force to raise ServerError on any CAPI query',
+        action='store_true')
+
     args = parser.parse_args()
+
+    if args.capi_pretend_down:
+        import config as conf_module
+        logger.info('Pretending CAPI is down')
+        conf_module.capi_pretend_down = True
 
     level_to_set: Optional[int] = None
     if args.trace or args.trace_on:

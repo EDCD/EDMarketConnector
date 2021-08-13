@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 import requests
 
 from config import appname, appversion, config
+import config as conf_module
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
@@ -276,6 +277,9 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
+                if conf_module.capi_pretend_down:
+                    raise ServerError(_('Pretending CAPI is down'))
+
                 r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
@@ -359,6 +363,9 @@ class Auth(object):
             # requests_log = logging.getLogger("requests.packages.urllib3")
             # requests_log.setLevel(logging.DEBUG)
             # requests_log.propagate = True
+
+            if conf_module.capi_pretend_down:
+                raise ServerError(_('Pretending CAPI is down'))
 
             r = self.session.post(SERVER_AUTH + URL_TOKEN, data=request_data, timeout=auth_timeout)
             data_token = r.json()
@@ -565,6 +572,9 @@ class Session(object):
 
         try:
             logger.trace('Trying...')
+            if conf_module.capi_pretend_down:
+                raise ServerError('Pretending CAPI is down')
+
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
