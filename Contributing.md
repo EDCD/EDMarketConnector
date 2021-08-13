@@ -408,28 +408,26 @@ In addition to that we utilise one of the user-defined levels as:
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
 
-  As well as just using bare `logger.trace(...)` you can also gate it to only
-  log if asked to at invocation time by utilising the `--trace-on ...`
-  command-line argument.  e.g.
- `EDMarketConnector.py --trace --trace-on edsm-cmdr-events`.  Note how you
-  still need to include `--trace`.
+  **Do not use a bare `logger.trace(...)` call** unless you're 100% certain 
+  it's only temporary **and will be removed before any code merge**.  In 
+  that case you would utilise `EDMarketConnector.py --trace` to see the output.
 
-  `--trace-on` stores its arguments in `config.trace_on`.
-  To make use of `--trace-on`, you can either check `config.trace_on` yourself:
-  
-    ```python
-      import config
-      if 'my-trace-rule' in config.trace_on:
-        logger.trace('my log message')
-    ```
-
-  or you can use the helper method provided on `logger`:
+  Instead, you should gate any TRACE logging using the `trace_if()` helper 
+  method provided on `logger`:
 
     ```python
       logger.trace_if('my-trace-rule', 'my-log-message')
     ```
+
+  This would then be triggered by running EDMarketConnector with the 
+  appropriate command-line arguments:
+
+      EDMarketConnector.py --trace-on my-trace-rule
   
-  This way you can set up TRACE logging that won't spam just because `--trace` is used.
+  Note that you do **not** also need to specify `--trace`, that's implied.
+  
+  This way you can set up TRACE logging that won't spam just because `--trace`
+  is used.
 
 ---
 

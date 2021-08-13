@@ -77,8 +77,14 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        '--trace-on',
+        help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
+        action='append',
+    )
+
+    parser.add_argument(
         "--trace-all",
-        help="Disable trace-on functionality (show any and all trace messages, regardless of trace-on gates)",
+        help='Force trace level logging, with all possible --trace-on values active.',
         action='store_true'
     )
 
@@ -105,12 +111,6 @@ if __name__ == '__main__':  # noqa: C901
         action='append',
     )
 
-    parser.add_argument(
-        '--trace-on',
-        help='Mark the selected trace logging as active. * or all will ensure that every possible trace log appears (in the same way as --trace-all)',
-        action='append',
-    )
-
     auth_options = parser.add_mutually_exclusive_group(required=False)
     auth_options.add_argument('--force-localserver-for-auth',
                               help='Force EDMC to use a localhost webserver for Frontier Auth callback',
@@ -130,11 +130,13 @@ if __name__ == '__main__':  # noqa: C901
     args = parser.parse_args()
 
     level_to_set: Optional[int] = None
-    if args.trace:
+    if args.trace or args.trace_on:
         level_to_set = logging.TRACE  # type: ignore # it exists
+        logger.info('Setting TRACE level debugging due to either --trace or a --trace-on')
 
-    if args.trace_all or '*' in args.trace_on or 'all' in args.trace_on:
+    if args.trace_all or (args.trace_on and ('*' in args.trace_on or 'all' in args.trace_on)):
         level_to_set = logging.TRACE_ALL  # type: ignore # it exists
+        logger.info('Setting TRACE_ALL level debugging due to either --trace-all or a --trace-on *|all')
 
     if level_to_set is not None:
         logger.setLevel(level_to_set)
