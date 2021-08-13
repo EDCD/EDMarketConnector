@@ -84,7 +84,7 @@ if __name__ == '__main__':  # noqa: C901
 
     parser.add_argument(
         "--trace-all",
-        help="Disable trace-on functionality (show any and all trace messages, regardless of trace-on gates)",
+        help='Force trace level logging, with all possible --trace-on values active.',
         action='store_true'
     )
 
