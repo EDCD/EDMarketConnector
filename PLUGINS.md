@@ -743,7 +743,7 @@ Examples of this are:
 ---
 
 ### Journal entry CQC
-New in version 5.1.3+
+New in version 5.2.0
 ```python
 def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> None:
     if entry['event'] == 'Location':
