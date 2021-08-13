@@ -42,12 +42,12 @@ import os
 import pathlib
 import tempfile
 from contextlib import suppress
+from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
 from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
-from fnmatch import fnmatch
 
 import config as config_mod
 from config import appcmdname, appname, config
