@@ -130,6 +130,7 @@ Insert this at the top-level of your load.py file (so not inside
 
 ```python
 import logging
+import os
 
 from config import appname
 
@@ -323,9 +324,9 @@ should treat it as a variable.
 **Do NOT use**:
 
 ```python
-   from config import shutting_down
+   from config import config
 
-    if shutting_down():
+    if config.shutting_down:
        # During shutdown
 ```
 
@@ -398,7 +399,6 @@ as in the code below.
 
 ```python
 import tkinter as tk
-from tkinter import ttk
 import myNotebook as nb
 from config import config
 from typing import Optional
@@ -468,7 +468,7 @@ def plugin_app(parent: tk.Frame) -> Tuple[tk.Label, tk.Label]:
     global status
     label = tk.Label(parent, text="Status:")  # By default widgets inherit the current theme's colors
     status = tk.Label(parent, text="", foreground="yellow")  # Override theme's foreground color
-    return (label, status)
+    return label, status
 
 # later on your event functions can update the contents of these widgets
 def some_other_function() -> None:
@@ -493,7 +493,7 @@ You can dynamically add and remove widgets on the main window by returning a
 of that frame.
 
 ```python
-from typing import Option
+from typing import Optional
 import tkinter as tk
 
 from theme import theme
@@ -803,8 +803,6 @@ before returning from this function.
 ### Player Dashboard
 
 ```python
-import plug
-
 def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]):
     is_deployed = entry['Flags'] & edmc_data.FlagsHardpointsDeployed
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
@@ -916,9 +914,7 @@ def inara_notify_ship(event_data):
     `event_data` holds the response to an addCommanderShip or setCommanderShip event https://inara.cz/inara-api-docs/#event-11
     """
     if event_data.get('shipInaraID'):
-        logger.info(
-            f'Now in Inara ship {event_data['shipInaraID'],} at {event_data['shipInaraURL']}
-        )
+        logger.info(f'Now in Inara ship {event_data["shipInaraID"],} at {event_data["shipInaraURL"]}')
 ```
 
 If the player has chosen to "Send flight log and Cmdr status to Inara" this
