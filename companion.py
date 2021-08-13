@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 
 import requests
 
-from config import appname, appversion, config
 import config as conf_module
+from config import appname, appversion, config
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
