@@ -416,13 +416,18 @@ In addition to that we utilise one of the user-defined levels as:
   method provided on `logger`:
 
     ```python
-      logger.trace_if('my-trace-rule', 'my-log-message')
+      logger.trace_if('journal.event.scan', 'my-log-message')
     ```
 
+  The string used to identify this tracing should be related to the 
+  **function of the code**, not the particular file, or class, that it is in.
+  This is so that the same string can be used to trace code that spans more 
+  than one file, class, or other scope.
+  
   This would then be triggered by running EDMarketConnector with the 
   appropriate command-line arguments:
 
-      EDMarketConnector.py --trace-on my-trace-rule
+      EDMarketConnector.py --trace-on journal.event.scan
   
   Note that you do **not** also need to specify `--trace`, that's implied.
   

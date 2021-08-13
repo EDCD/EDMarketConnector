@@ -184,7 +184,7 @@ if __name__ == '__main__':  # noqa: C901
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground existing window."""
-        logger.trace('Begin...')
+        logger.trace_if('frontier-auth.windows', 'Begin...')
 
         if platform == 'win32':
 
@@ -1118,7 +1118,7 @@ class AppWindow(object):
             entry = monitor.get_entry()
             if not entry:
                 # This is expected due to some monitor.py code that appends `None`
-                # logger.trace('No entry from monitor.get_entry()')
+                logger.trace_if('journal.queue', 'No entry from monitor.get_entry()')
                 return
 
             # Update main window
@@ -1209,7 +1209,7 @@ class AppWindow(object):
                 return  # in CQC
 
             if not entry['event'] or not monitor.mode:
-                # logger.trace('Startup, returning')
+                logger.trace_if('journal.queue', 'Startup, returning')
                 return  # Startup
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
@@ -1838,7 +1838,7 @@ sys.path: {sys.path}'''
         ui_scale = 100
         config.set('ui_scale', ui_scale)
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
-    logger.trace(f'Default tk scaling = {theme.default_ui_scale}')
+    logger.trace_if('tk', f'Default tk scaling = {theme.default_ui_scale}')
     theme.startup_ui_scale = ui_scale
     root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
     app = AppWindow(root)
