@@ -191,6 +191,12 @@ exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
 sys.path: {sys.path}'''
                      )
+        if args.trace_on and len(args.trace_on) > 0:
+            import config as conf_module
+
+            conf_module.trace_on = [x.casefold() for x in args.trace_on]  # duplicate the list just in case
+            for d in conf_module.trace_on:
+                logger.info(f'marked {d} for TRACE')
 
         log_locale('Initial Locale')
 
