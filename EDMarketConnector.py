@@ -132,9 +132,11 @@ if __name__ == '__main__':  # noqa: C901
     level_to_set: Optional[int] = None
     if args.trace or args.trace_on:
         level_to_set = logging.TRACE  # type: ignore # it exists
+        logger.info('Setting TRACE level debugging due to either --trace or a --trace-on')
 
     if args.trace_all or (args.trace_on and ('*' in args.trace_on or 'all' in args.trace_on)):
         level_to_set = logging.TRACE_ALL  # type: ignore # it exists
+        logger.info('Setting TRACE_ALL level debugging due to either --trace-all or a --trace-on *|all')
 
     if level_to_set is not None:
         logger.setLevel(level_to_set)
