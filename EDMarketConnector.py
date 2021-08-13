@@ -77,6 +77,12 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        '--trace-on',
+        help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
+        action='append',
+    )
+
+    parser.add_argument(
         "--trace-all",
         help="Disable trace-on functionality (show any and all trace messages, regardless of trace-on gates)",
         action='store_true'
@@ -102,12 +108,6 @@ if __name__ == '__main__':  # noqa: C901
     parser.add_argument(
         '--debug-sender',
         help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
-        action='append',
-    )
-
-    parser.add_argument(
-        '--trace-on',
-        help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
         action='append',
     )
 
