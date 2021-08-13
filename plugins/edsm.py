@@ -39,7 +39,7 @@ _TIMEOUT = 20
 DISCARDED_EVENTS_SLEEP = 10
 
 # trace-if events
-CMDR_EVENTS = 'edsm-cmdr-events'
+CMDR_EVENTS = 'plugin.edsm.cmdr-events'
 
 
 class This:
