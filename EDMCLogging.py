@@ -47,6 +47,7 @@ from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
 from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
+from fnmatch import fnmatch
 
 import config as config_mod
 from config import appcmdname, appname, config
@@ -92,12 +93,11 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
-    if condition not in config_mod.trace_on:
-        self._log(logging.TRACE_ALL, message, args, **kwargs)  # type: ignore # we added it
-
-    else:
-        # its in there, it gets to end up in regular TRACE
+    if any(fnmatch(condition, p) for p in config_mod.trace_on):
         self._log(logging.TRACE, message, args, **kwargs)  # type: ignore # we added it
+        return
+
+    self._log(logging.TRACE_ALL, message, args, **kwargs)  # type: ignore # we added it
 
 
 logging.Logger.trace_if = _trace_if  # type: ignore
@@ -114,15 +114,16 @@ if TYPE_CHECKING:
         """LoggerMixin is a fake class that tells type checkers that trace exists on a given type."""
 
         def trace(self, message, *args, **kwargs) -> None:
-            """Fake trace method."""
-            return self._log(LEVEL_TRACE, message, args, **kwargs)
+            """See implementation above."""
+            ...
 
         def trace_if(self, condition: str, message, *args, **kwargs) -> None:
-            """Fake trace if method, traces only if condition exists in trace_on."""
-            if condition in config_mod.trace_on:
-                return self._log(LEVEL_TRACE, message, *args, **kwargs)
-            else:
-                return self._log(LEVEL_TRACE_ALL, message, *args, **kwargs)
+            """
+            Fake trace if method, traces only if condition exists in trace_on.
+
+            See implementation above.
+            """
+            ...
 
 
 class Logger:
