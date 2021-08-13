@@ -87,6 +87,7 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
 class EDDN:
     """EDDN Data export."""
+
     DEBUG = 'eddn' in debug_senders
     SERVER = 'https://eddn.edcd.io:4430'
     if DEBUG:
@@ -193,7 +194,7 @@ class EDDN:
                     and msg['message']['commodities'] == []
                     and r.text == "FAIL: [<ValidationError: '[] is too short'>]"
             ):
-                logger.trace("EDDN is still objecting to empty commodities data")
+                logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
             logger.debug(
