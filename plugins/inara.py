@@ -1491,7 +1491,8 @@ def new_worker():
                 ]
             }
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
-            logger.trace(f'Events:\n{json.dumps(data)}\n')
+            logger.trace_if('plugin.inara.events', f'Events:\n{json.dumps(data)}\n')
+
             try_send_data(TARGET_URL, data)
 
         time.sleep(WORKER_WAIT_TIME)
