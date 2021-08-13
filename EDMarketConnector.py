@@ -107,7 +107,7 @@ if __name__ == '__main__':  # noqa: C901
 
     parser.add_argument(
         '--trace-on',
-        help='Mark the selected trace logging as active. * or all will ensure that every possible trace log appears (in the same way as --trace-all)',
+        help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
         action='append',
     )
 
