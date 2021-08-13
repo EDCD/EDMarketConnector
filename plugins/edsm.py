@@ -40,7 +40,6 @@ DISCARDED_EVENTS_SLEEP = 10
 
 # trace-if events
 CMDR_EVENTS = 'edsm-cmdr-events'
-LOCATION_EVENTS = 'edsm-locations'
 
 
 class This:
@@ -407,14 +406,15 @@ def journal_entry(  # noqa: C901, CCR001
         return
 
     this.on_foot = state['OnFoot']
-    # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-    #     logger.trace(f'''{entry["event"]}
-# Commander: {cmdr}
-# System: {system}
-# Station: {station}
-# state: {state!r}
-# entry: {entry!r}'''
-#                      )
+    if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+        logger.trace_if(
+            'journal.locations', f'''{entry["event"]}
+Commander: {cmdr}
+System: {system}
+Station: {station}
+state: {state!r}
+entry: {entry!r}'''
+        )
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
@@ -519,10 +519,11 @@ def journal_entry(  # noqa: C901, CCR001
 
             this.queue.put((cmdr, materials))
 
-        # if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
-        #     logger.trace(f'''{entry["event"]}
-# Queueing: {entry!r}'''
-#                          )
+        if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
+            logger.trace_if(
+                'journal.locations', f'''{entry["event"]}
+Queueing: {entry!r}'''
+            )
         logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
 
         this.queue.put((cmdr, entry))
@@ -656,13 +657,15 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                     logger.trace_if(CMDR_EVENTS, f'pending contains:\n{chr(0x0A).join(str(p) for p in pending)}')
 
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
-                        logger.trace_if(LOCATION_EVENTS, "pending has at least one of "
+                        logger.trace_if('journal.locations', "pending has at least one of "
                                         "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                                         " and it passed should_send()")
                         for p in pending:
                             if p['event'] in ('Location'):
-                                logger.trace_if(LOCATION_EVENTS, '"Location" event in pending passed should_send(), '
-                                                f'timestamp: {p["timestamp"]}')
+                                logger.trace_if(
+                                    'journal.locations',
+                                    f'"Location" event in pending passed should_send(),timestamp: {p["timestamp"]}'
+                                )
 
                     creds = credentials(cmdr)  # TODO: possibly unbound
                     if creds is None:
@@ -683,25 +686,25 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
                         logger.trace_if(
-                            LOCATION_EVENTS,
+                            'journal.locations',
                             "pending has at least one of ('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                             " Attempting API call with the following events:"
                         )
 
                         for p in pending:
-                            logger.trace_if(LOCATION_EVENTS, f"Event: {p!r}")
+                            logger.trace_if('journal.locations', f"Event: {p!r}")
                             if p['event'] in ('Location'):
                                 logger.trace_if(
-                                    LOCATION_EVENTS,
+                                    'journal.locations',
                                     f'Attempting API call for "Location" event with timestamp: {p["timestamp"]}'
                                 )
 
                         logger.trace_if(
-                            LOCATION_EVENTS, f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
+                            'journal.locations', f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
                         )
 
                     r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
-                    # logger.trace(f'API response content: {r.content}')
+                    logger.trace_if('plugin.edsm.api', f'API response content: {r.content!r}')
                     r.raise_for_status()
 
                     reply = r.json()
@@ -720,11 +723,11 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                     else:
 
                         if msg_num // 100 == 1:
-                            #     logger.trace('Overall OK')
+                            logger.trace_if('plugin.edsm.api', 'Overall OK')
                             pass
 
                         elif msg_num // 100 == 5:
-                            #     logger.trace('Event(s) not currently processed, but saved for later')
+                            logger.trace_if('plugin.edsm.api', 'Event(s) not currently processed, but saved for later')
                             pass
 
                         else:
