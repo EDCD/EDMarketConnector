@@ -13,7 +13,6 @@ from typing import Sequence, Union, cast
 
 import requests
 
-import config as conf_module  # Necessary to see the same config.trace_on as elsewhere
 import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
@@ -1492,8 +1491,7 @@ def new_worker():
                 ]
             }
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
-            if 'inara-events' in conf_module.trace_on:
-                logger.trace(f'Events:\n{json.dumps(data)}\n')
+            logger.trace_if('plugin.inara.events', f'Events:\n{json.dumps(data)}\n')
 
             try_send_data(TARGET_URL, data)
 
