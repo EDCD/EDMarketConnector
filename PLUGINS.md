@@ -678,6 +678,8 @@ New in version 5.1.1:
 `state` now has a `ShipLockerJSON` member containing the un-changed, loaded,
 JSON from the `ShipLockerJSON.json` file.
 
+___
+
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMC is started while the game is already
@@ -702,6 +704,8 @@ between the two scenarios.
 
 This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
+
+---
 
 ##### Augmented Events
 
@@ -740,9 +744,7 @@ Examples of this are:
    
 ---
 
----
-
-### Journal entry CQC
+### Journal entry in CQC
 New in version 5.2.0
 ```python
 def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> None:
@@ -758,7 +760,8 @@ def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Di
         logger.info(f'Loaded to CQC map {cqc_map}')
 ```
 
-This gets called when EDMC sees a new entry in the game's journal and we are currently in CQC.
+This is called for new journal entries, instead of `journal_entry()`, when the
+player is in Arena (CQC).
 
 | Parameter |       Type       | Description                                                            |
 | :-------- | :--------------: | :--------------------------------------------------------------------- |
@@ -767,9 +770,10 @@ This gets called when EDMC sees a new entry in the game's journal and we are cur
 | `entry`   | `Dict[str, Any]` | The journal event                                                      |
 | `state`   | `Dict[str, Any]` | More info about the commander, their ship, and their cargo (see below) |
 
-Content of `state` same as for [`journal_entry`](#journal-entry).
+The content of `state` will be the same as for [`journal_entry`](#journal-entry),
+so check there for documentation.
 
-___
+---
 
 ### Shutdown
 
