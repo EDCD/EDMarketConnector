@@ -554,7 +554,7 @@ class Session(object):
 
     def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001
         """Perform a query against the specified CAPI endpoint."""
-        logger.trace(f'Performing query for endpoint "{endpoint}"')
+        logger.trace_if('capi-query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
                 return self.query(endpoint)
@@ -564,7 +564,7 @@ class Session(object):
             raise CredentialsError('cannot make a query when unauthorized')
 
         try:
-            logger.trace('Trying...')
+            logger.trace_if('capi-query', 'Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
@@ -620,7 +620,6 @@ class Session(object):
 
         self.retrying = False
         if 'timestamp' not in data:
-            # logger.trace('timestamp not in data, adding from response headers')
             data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
         # Update Odyssey Suit data
