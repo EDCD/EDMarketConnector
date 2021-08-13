@@ -56,7 +56,7 @@ class JournalLock:
     def open_journal_dir_lockfile(self) -> bool:
         """Open journal_dir lockfile ready for locking."""
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
-        logger.trace(f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
             self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
@@ -95,7 +95,7 @@ class JournalLock:
         :return: LockResult - See the class Enum definition
         """
         if platform == 'win32':
-            logger.trace('win32, using msvcrt')
+            logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
 
@@ -108,7 +108,7 @@ class JournalLock:
                 return JournalLockResult.ALREADY_LOCKED
 
         else:  # pytest coverage only sees this on !win32
-            logger.trace('NOT win32, using fcntl')
+            logger.trace_if('journal-lock', 'NOT win32, using fcntl')
             try:
                 import fcntl
 
@@ -128,7 +128,7 @@ class JournalLock:
         self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
         self.journal_dir_lockfile.flush()
 
-        logger.trace('Done')
+        logger.trace_if('journal-lock', 'Done')
         self.locked = True
 
         return JournalLockResult.LOCKED
@@ -144,7 +144,7 @@ class JournalLock:
 
         unlocked = False
         if platform == 'win32':
-            logger.trace('win32, using msvcrt')
+            logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
 
@@ -161,7 +161,7 @@ class JournalLock:
                 unlocked = True
 
         else:  # pytest coverage only sees this on !win32
-            logger.trace('NOT win32, using fcntl')
+            logger.trace_if('journal-lock', 'NOT win32, using fcntl')
             try:
                 import fcntl
 
@@ -235,19 +235,19 @@ class JournalLock:
 
         def retry(self) -> None:
             """Handle user electing to Retry obtaining the lock."""
-            logger.trace('User selected: Retry')
+            logger.trace_if('journal-lock_if', 'User selected: Retry')
             self.destroy()
             self.callback(True, self.parent)
 
         def ignore(self) -> None:
             """Handle user electing to Ignore failure to obtain the lock."""
-            logger.trace('User selected: Ignore')
+            logger.trace_if('journal-lock', 'User selected: Ignore')
             self.destroy()
             self.callback(False, self.parent)
 
         def _destroy(self) -> None:
             """Destroy the Retry/Ignore popup."""
-            logger.trace('User force-closed popup, treating as Ignore')
+            logger.trace_if('journal-lock', 'User force-closed popup, treating as Ignore')
             self.ignore()
 
     def update_lock(self, parent: tk.Tk) -> None:
@@ -277,7 +277,7 @@ class JournalLock:
         :param retry: - does the user want to retry?  Comes from the dialogue choice.
         :param parent: - The parent tkinter window.
         """
-        logger.trace(f'We should retry: {retry}')
+        logger.trace_if('journal-lock', f'We should retry: {retry}')
 
         if not retry:
             return
