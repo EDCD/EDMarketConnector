@@ -519,9 +519,9 @@ See [Avoiding potential pitfalls](#avoiding-potential-pitfalls).
 
 ### Events
 
-Once you have created your plugin and EDMC has loaded it there are three other
+Once you have created your plugin and EDMC has loaded it there are four other
 functions you can define to be notified by EDMC when something happens:
-`journal_entry()`, `dashboard_entry()` and `cmdr_data()`.
+`journal_entry()`, `journal_entry_cqc()`, `dashboard_entry()` and `cmdr_data()`.
 
 Your events all get called on the main Tkinter loop so be sure not to block for
 very long or the app will appear to freeze. If you have a long running
@@ -697,6 +697,9 @@ react to either in your plugin code then either compare in a case insensitive
 manner or check for both.  The difference in case allows you to differentiate
 between the two scenarios.
 
+**NB: Any of these events are passing to `journal_entry_cqc` rather than to 
+`journal_entry` if player has loaded into Arena (CQC).** 
+
 This event is not sent when EDMC is running on a different
 machine so you should not *rely* on receiving this event.
 
@@ -736,6 +739,37 @@ Examples of this are:
    stay consistent with the Journal event name.
    
 ---
+
+---
+
+### Journal entry CQC
+New in version 5.2.0
+```python
+def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> None:
+    if entry['event'] == 'Location':
+        # We loaded to CQC match, lets detect map!
+        cqc_maps = {  # dict to map systems names to CQC maps, ref: https://forums.frontier.co.uk/threads/cqc-systems.234394/
+        'Bleae Aewsy GA-Y d1-14': 'Asteria Point',
+        'Eta Cephei':             'Cluster Compound',
+        'Theta Ursae Majoris':    'Elevate',
+        'Boepp SU-E d12-818':     'Ice Field',
+            }
+        cqc_map = cqc_maps.get(entry['StarSystem'])
+        logger.info(f'Loaded to CQC map {cqc_map}')
+```
+
+This gets called when EDMC sees a new entry in the game's journal and we are currently in CQC.
+
+| Parameter |       Type       | Description                                                            |
+| :-------- | :--------------: | :--------------------------------------------------------------------- |
+| `cmdr`    |      `str`       | Current commander name                                                 |
+| `is_beta` |      `bool`      | Is the game currently in beta                                          |
+| `entry`   | `Dict[str, Any]` | The journal event                                                      |
+| `state`   | `Dict[str, Any]` | More info about the commander, their ship, and their cargo (see below) |
+
+Content of `state` same as for [`journal_entry`](#journal-entry).
+
+___
 
 ### Shutdown
 
