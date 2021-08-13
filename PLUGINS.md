@@ -748,7 +748,7 @@ New in version 5.1.3+
 def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> None:
     if entry['event'] == 'Location':
         # We loaded to CQC match, lets detect map!
-        cqc_maps = {  # dict to map systems names to CQC maps
+        cqc_maps = {  # dict to map systems names to CQC maps, ref: https://forums.frontier.co.uk/threads/cqc-systems.234394/
         'Bleae Aewsy GA-Y d1-14': 'Asteria Point',
         'Eta Cephei':             'Cluster Compound',
         'Theta Ursae Majoris':    'Elevate',
