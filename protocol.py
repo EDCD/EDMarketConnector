@@ -48,7 +48,7 @@ class GenericProtocolHandler:
         """Generate an auth event."""
         self.lastpayload = url
 
-        logger.trace(f'Payload: {self.lastpayload}')
+        logger.trace_if('frontier-auth', f'Payload: {self.lastpayload}')
         if not config.shutting_down:
             logger.debug('event_generate("<<CompanionAuthEvent>>")')
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
@@ -298,7 +298,7 @@ elif (config.auth_force_edmc_protocol
             msg = MSG()
             # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
             while GetMessageW(byref(msg), None, 0, 0) != 0:
-                logger.trace(f'DDE message of type: {msg.message}')
+                logger.trace_if('frontier-auth.windows', f'DDE message of type: {msg.message}')
                 if msg.message == WM_DDE_EXECUTE:
                     # GlobalLock does some sort of "please dont move this?"
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
@@ -306,7 +306,7 @@ elif (config.auth_force_edmc_protocol
                     GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
 
                     if args.lower().startswith('open("') and args.endswith('")'):
-                        logger.trace(f'args are: {args}')
+                        logger.trace_if('frontier-auth.windows', f'args are: {args}')
                         url = urllib.parse.unquote(args[6:-2]).strip()
                         if url.startswith(self.redirect):
                             logger.debug(f'Message starts with {self.redirect}')
@@ -384,7 +384,7 @@ else:  # Linux / Run from source
 
         def parse(self) -> bool:
             """Parse a request."""
-            logger.trace(f'Got message on path: {self.path}')
+            logger.trace_if('frontier-auth.http', f'Got message on path: {self.path}')
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
