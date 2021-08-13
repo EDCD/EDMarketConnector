@@ -123,10 +123,25 @@ def main():  # noqa: C901, CCR001
                                     help='Set the logging loglevel to one of: '
                                          'CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE',
                                     )
-        group_loglevel.add_argument('--trace',
-                                    help='Set the Debug logging loglevel to TRACE',
-                                    action='store_true',
-                                    )
+
+        parser.add_argument(
+            '--trace',
+            help='Set the Debug logging loglevel to TRACE',
+            action='store_true',
+        )
+
+        parser.add_argument(
+            '--trace-on',
+            help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
+            action='append',
+        )
+
+        parser.add_argument(
+            "--trace-all",
+            help='Force trace level logging, with all possible --trace-on values active.',
+            action='store_true'
+        )
+
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -150,8 +165,18 @@ def main():  # noqa: C901, CCR001
 
             return
 
-        if args.trace:
-            edmclogger.set_channels_loglevel(logging.TRACE)
+        level_to_set: Optional[int] = None
+        if args.trace or args.trace_on:
+            level_to_set = logging.TRACE  # type: ignore # it exists
+            logger.info('Setting TRACE level debugging due to either --trace or a --trace-on')
+
+        if args.trace_all or (args.trace_on and ('*' in args.trace_on or 'all' in args.trace_on)):
+            level_to_set = logging.TRACE_ALL  # type: ignore # it exists
+            logger.info('Setting TRACE_ALL level debugging due to either --trace-all or a --trace-on *|all')
+
+        if level_to_set is not None:
+            logger.setLevel(level_to_set)
+            edmclogger.set_channels_loglevel(level_to_set)
 
         elif args.loglevel:
             if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'):
@@ -188,15 +213,15 @@ sys.path: {sys.path}'''
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                logdir = config.get_str('journaldir', default=config.default_journal_dir)
-                if not logdir:
-                    logdir = config.default_journal_dir
+                monitor.currentdir = config.get_str('journaldir', default=config.default_journal_dir)
+                if not monitor.currentdir:
+                    monitor.currentdir = config.default_journal_dir
 
-                logger.debug(f'logdir = "{logdir}"')
-                logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
+                logger.debug(f'logdir = "{monitor.currentdir}"')
+                logfiles = sorted((x for x in os.listdir(monitor.currentdir) if JOURNAL_RE.search(x)),
                                   key=lambda x: x.split('.')[1:])
 
-                logfile = join(logdir, logfiles[-1])
+                logfile = join(monitor.currentdir, logfiles[-1])
 
                 logger.debug(f'Using logfile "{logfile}"')
                 with open(logfile, 'r', encoding='utf-8') as loghandle:
