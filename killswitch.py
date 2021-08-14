@@ -45,7 +45,6 @@ class SingleKill(NamedTuple):
 
         :param target: data to apply a rule to
         """
-
         for key, value in (self.set_fields if self .set_fields is not None else {}).items():
             _deep_apply(target, key, value)
 
@@ -98,8 +97,8 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
     """
     Set the given path to the given value, if it exists.
 
-    if the path has dots (ascii period -- '.'), it will be successively split if possible for deeper indices into
-    target
+    if the path has dots (ascii period -- '.'), it will be successively split
+    if possible for deeper indices into target
 
     :param target: the dict to modify
     :param to_set: the data to set, defaults to None
@@ -211,7 +210,8 @@ class KillSwitchSet:
         Return whether or not the given feature ID is disabled by a killswitch for the given version.
 
         :param id: The feature ID to check
-        :param version: The version to check killswitches for, defaults to the current EDMC version
+        :param version: The version to check killswitches for, defaults to the
+                        current EDMC version
         :return: a namedtuple indicating status and reason, if any
         """
 
@@ -251,8 +251,8 @@ class KillSwitchSet:
 
         :param name: The killswitch to check
         :param data: The data to modify if needed
-        :return: A bool indicating if the caller should return, and either the original data or a *COPY* that has
-                 been modified by rules
+        :return: A bool indicating if the caller should return, and either the
+                 original data or a *COPY* that has been modified by rules
         """
         res = self.get_disabled(name, version=version)
         if not res.disabled:
