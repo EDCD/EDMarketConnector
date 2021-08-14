@@ -1,4 +1,5 @@
 """Tests of killswitch behaviour."""
+import copy
 from typing import Optional
 
 import pytest
@@ -47,3 +48,28 @@ def test_killswitch(
         return  # we didn't expect any result
 
     assert res == result
+
+
+@pytest.mark.parametrize(
+    ('kill_dict', 'input', 'result'),
+    [
+        ({'set_fields': {'test': None}}, {}, {'test': None}),
+        ({'set_fields': {'test': None}, 'delete_fields': ['test']}, {}, {}),
+        ({'set_fields': {'test': None}, 'redact_fields': ['test']}, {}, {'test': 'REDACTED'}),
+        ({'set_fields': {'test': None}, 'redact_fields': ['test'], 'delete_fields': ['test']}, {}, {}),
+
+    ],
+)
+def test_operator_precedence(
+    kill_dict: killswitch.SingleKillSwitchJSON, input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA
+) -> None:
+    """Ensure that operators are being applied in the correct order."""
+    kill = killswitch.SingleKill(
+        "", "", kill_dict.get('redact_fields'), kill_dict.get('delete_fields'), kill_dict.get('set_fields')
+    )
+
+    cpy = copy.deepcopy(input)
+
+    kill.apply_rules(cpy)
+
+    assert cpy == result

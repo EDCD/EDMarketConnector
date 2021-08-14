@@ -45,17 +45,15 @@ class SingleKill(NamedTuple):
 
         :param target: data to apply a rule to
         """
-        # fields that contain . might be going deeper into the dict. check here FIRST to see if they exist at the top
-        # level, if not, then work our way down
+
+        for key, value in (self.set_fields if self .set_fields is not None else {}).items():
+            _deep_apply(target, key, value)
 
         for key in (self.redact_fields if self.redact_fields is not None else []):
             _deep_apply(target, key, "REDACTED")
 
         for key in (self.delete_fields if self.delete_fields is not None else []):
             _deep_apply(target, key, delete=True)
-
-        for key, value in (self.set_fields if self .set_fields is not None else {}).items():
-            _deep_apply(target, key, value)
 
         return target
 

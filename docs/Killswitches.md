@@ -25,9 +25,12 @@ this to the user (for internal killswitches, anyway).
 | Key (* = required) |       Type       | Description                                                                                   |
 | -----------------: | :--------------: | :-------------------------------------------------------------------------------------------- |
 |          `reason`* |      `str`       | The reason that this killswitch was added                                                     |
-|    `delete_fields` |   `List[str]`    | A list of fields in the matching event to be removed, if they exist.                          |
 |       `set_fields` | `Dict[str, Any]` | A map of key -> contents to update (or overwrite) existing data with                          |
 |    `redact_fields` |   `List[str]`    | A list of fields to redact. This is equivalent to setting the fields to the string "REDACTED" |
+|    `delete_fields` |   `List[str]`    | A list of fields in the matching event to be removed, if they exist.                          |
+
+The order listed above is the precedence for actions. i.e. All set fields are set, then all redact fields are redacted
+then all delete fields are deleted.
 
 An example follows:
 
