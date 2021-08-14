@@ -48,7 +48,9 @@ An example follows:
                     },
                     "redact_fields": ["relation_to_thargoids"]
                 },
-                "plugins.some_plugin.some_thing": {}
+                "plugins.some_plugin.some_thing": {
+                    "reason": "Some thing is disabled pending investigation of NMLA relations."
+                }
             }
         }
     ]
