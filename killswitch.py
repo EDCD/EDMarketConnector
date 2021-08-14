@@ -1,10 +1,11 @@
 """Fetch kill switches from EDMC Repo."""
 from __future__ import annotations
 
+import threading
 from copy import deepcopy
 from typing import (
-    TYPE_CHECKING, Any, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence, Tuple,
-    TypedDict, Union, cast
+    TYPE_CHECKING, Any, Callable, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence,
+    Tuple, TypedDict, Union, cast
 )
 
 import requests
@@ -412,6 +413,22 @@ def get_kill_switches(target=DEFAULT_KILLSWITCH_URL, fallback: Optional[str] = N
             return None
 
     return KillSwitchSet(parse_kill_switches(data))
+
+
+def get_kill_switches_thread(
+    target, callback: Callable[[Optional[KillSwitchSet]], None], fallback: Optional[str] = None,
+) -> None:
+    """
+    Threaded version of get_kill_switches. Request is performed off thread, and callback is called when it is available.
+
+    :param target: Target killswitch file
+    :param callback: The callback to pass the newly created KillSwitchSet
+    :param fallback: Fallback killswitch file, if any, defaults to None
+    """
+    def make_request():
+        callback(get_kill_switches(target, fallback=fallback))
+
+    threading.Thread(target=make_request, daemon=True).start()
 
 
 active: KillSwitchSet = KillSwitchSet([])

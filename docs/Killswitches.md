@@ -76,8 +76,15 @@ Plugins may use the killswitch system simply by hosting their own version of the
 using `killswitch.get_kill_switches(target='https://example.com/myplugin_killswitches.json')`. The returned object can
 be used to query the kill switch set, see the docstrings for more information on specifying versions.
 
-The version of the JSON file will be automatically upgraded if possible by the code KillSwitch code. No behaviour changes will occur--Any killswitches defined in older
- versions will simply become unconditional kills in the new version.
+A helper method `killswitch.get_kill_switch_thread` is provided to allow for simple nonblocking requests for
+KillSwitches. It starts a new thread, performs the HTTP request, and sends the results to the given callback.
+
+**Note that your callback is invoked off-thread. Take precaution for locking if required, and do _NOT_ use tkinter**
+**methods**
+
+The version of the JSON file will be automatically upgraded if possible by the code KillSwitch code.
+No behaviour changes will occur--Any killswitches defined in older versions will simply become unconditional kills in
+the new version.
 
 ## Currently supported killswitch strings
 
