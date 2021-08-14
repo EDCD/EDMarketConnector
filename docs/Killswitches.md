@@ -14,10 +14,10 @@ Killswitches are stored in a JSON file that is queried by EDMC on startup. The f
 
 The `kill_switches` array contains kill switch objects. Each contains the following fields:
 
-|       Key |          Type          | Description                                                                  |
-| --------: | :--------------------: | :--------------------------------------------------------------------------- |
-| `version` |     `version spec`     | The version of EDMC these kill switches apply to (Must be valid semver spec) |
-|   `kills` | `Dict[str, Dict[...]]` | The various keys disabled -> definition of the killswitch behaviour          |
+|       Key |             Type              | Description                                                                  |
+| --------: | :---------------------------: | :--------------------------------------------------------------------------- |
+| `version` | `version spec (see Versions)` | The version of EDMC these kill switches apply to (Must be valid semver spec) |
+|   `kills` |    `Dict[str, Dict[...]]`     | The various keys disabled -> definition of the killswitch behaviour          |
 
 Each entry in `kills` must contain at least a `reason` field describing why the killswitch was added. EDMC will show
 this to the user (for internal killswitches, anyway).
@@ -66,7 +66,9 @@ An example follows:
 
 ### Versions
 
-Versions are checked using contains checks on `semantic_version.SimpleSpec` instances.
+Versions are checked using contains checks on `semantic_version.SimpleSpec` instances. SimpleSpec supports both specific
+versions (`1.2.3`), non-specific ranges (`1.0` will match `1.0.1` and `1.0.5` etc), wildcards (`1.2.*`),
+and ranges (`<1.0.0`, `>=2.0.0`)
 
 ## Plugin support
 
