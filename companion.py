@@ -591,10 +591,6 @@ class Session(object):
     ######################################################################
     # CAPI queries
     ######################################################################
-    def capi_query_enqueue(self, endpoint: str) -> None:
-        """Request the worker thread perform a given endpoint query."""
-        ...
-
     def capi_query_worker(self, ):
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
@@ -630,6 +626,7 @@ class Session(object):
             raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
         try:
+            self.capi_query_queue.put(endpoint)
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
