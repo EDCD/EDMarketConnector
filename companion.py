@@ -621,6 +621,10 @@ class Session(object):
             try:
                 r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
+                self.capi_response_queue.put(
+                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError())
+                )
+                continue
                 data = CAPIData(r.json(), endpoint)  # May also fail here if token expired since response is empty
 
             except requests.ConnectionError as e:
@@ -630,6 +634,28 @@ class Session(object):
                 )
                 continue
                 # raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
+
+            except (requests.HTTPError, ValueError) as e:
+                logger.exception('Frontier CAPI Auth: GET ')
+                self.dump(r)
+                self.close()
+
+                if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
+                    logger.error('Frontier CAPI Auth: query failed after refresh')
+                    self.invalidate()
+                    self.retrying = False
+                    self.login()
+                    raise CredentialsError('query failed after refresh') from e
+
+                elif self.login():  # Maybe our token expired. Re-authorize in any case
+                    logger.debug('Initial query failed, but login() just worked, trying again...')
+                    self.retrying = True
+                    return self.query(endpoint)
+
+                else:
+                    self.retrying = False
+                    logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
+                    raise CredentialsError('HTTP error or invalid JSON') from e
 
             except Exception as e:
                 logger.debug('Attempting GET', exc_info=e)
@@ -643,7 +669,7 @@ class Session(object):
             if r.url.startswith(SERVER_AUTH):
                 logger.info('Redirected back to Auth Server')
                 self.capi_response_queue.put(
-                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError()
+                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError())
                 )
                 continue
 
@@ -653,6 +679,14 @@ class Session(object):
                 self.dump(r)
                 # LANG: Frontier CAPI data retrieval failed with 5XX code
                 raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
+
+            self.retrying = False
+
+            if endpoint == URL_QUERY and 'commander' not in data:
+                logger.error('No commander in returned data')
+
+            if 'timestamp' not in data:
+                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
             self.capi_response_queue.put(
                 data
@@ -664,7 +698,7 @@ class Session(object):
         """Ask the CAPI query thread to finish."""
         self.capi_query_queue.put(None)
 
-    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
+    def query(self, endpoint: str) -> None:
         """Perform a query against the specified CAPI endpoint."""
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
@@ -680,48 +714,10 @@ class Session(object):
             raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
         self.capi_query_queue.put(endpoint)
-        try:
-            ...
 
-        except (requests.HTTPError, ValueError) as e:
-            logger.exception('Frontier CAPI Auth: GET ')
-            self.dump(r)
-            self.close()
-
-            if self.retrying:		# Refresh just succeeded but this query failed! Force full re-authentication
-                logger.error('Frontier CAPI Auth: query failed after refresh')
-                self.invalidate()
-                self.retrying = False
-                self.login()
-                raise CredentialsError('query failed after refresh') from e
-
-            elif self.login():		# Maybe our token expired. Re-authorize in any case
-                logger.debug('Initial query failed, but login() just worked, trying again...')
-                self.retrying = True
-                return self.query(endpoint)
-
-            else:
-                self.retrying = False
-                logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
-                raise CredentialsError('HTTP error or invalid JSON') from e
-
-        self.retrying = False
-        if 'timestamp' not in data:
-            data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
-
-        # Update Odyssey Suit data
-        if endpoint == URL_QUERY:
-            self.suit_update(data)
-
-        return data
-
-    def profile(self) -> CAPIData:
+    def profile(self):
         """Perform general CAPI /profile endpoint query."""
-        data = self.query(URL_QUERY)
-        if 'commander' not in data:
-            logger.error('No commander in returned data')
-
-        return data
+        self.query(URL_QUERY)
 
     def station(self) -> CAPIData:  # noqa: CCR001
         """
@@ -735,10 +731,7 @@ class Session(object):
 
         :return: Possibly augmented CAPI data.
         """
-        data = self.query(URL_QUERY)
-        if 'commander' not in data:
-            logger.error('No commander in returned data')
-            return data
+        self.query(URL_QUERY)
 
         if not data['commander'].get('docked') and not monitor.state['OnFoot']:
             return data

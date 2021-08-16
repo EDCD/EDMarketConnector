@@ -934,7 +934,7 @@ class AppWindow(object):
             self.w.update_idletasks()
 
         querytime = int(time())
-        data = companion.session.station()
+        companion.session.station()
         config.set('querytime', querytime)
 
 
@@ -1116,6 +1116,9 @@ class AppWindow(object):
 
         if play_sound and play_bad:
             hotkeymgr.play_bad()
+
+        # Update Odyssey Suit data
+        companion.suit_update(data)
 
         self.update_suit_text()
         self.suit_show_if_set()
