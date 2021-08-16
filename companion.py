@@ -476,6 +476,9 @@ class Session(object):
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
+    ######################################################################
+    # Frontier Authorization
+    ######################################################################
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
@@ -553,6 +556,29 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
 
+    def close(self) -> None:
+        """Close Frontier authorization session."""
+        self.state = Session.STATE_INIT
+        if self.session:
+            try:
+                self.session.close()
+
+            except Exception as e:
+                logger.debug('Frontier Auth: closing', exc_info=e)
+
+        self.session = None
+
+    def invalidate(self) -> None:
+        """Invalidate Frontier authorization credentials."""
+        logger.debug('Forcing a full re-authentication')
+        # Force a full re-authentication
+        self.close()
+        Auth.invalidate(self.credentials['cmdr'])  # type: ignore
+    ######################################################################
+
+    ######################################################################
+    # CAPI queries
+    ######################################################################
     def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
         """Perform a query against the specified CAPI endpoint."""
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
@@ -714,7 +740,11 @@ class Session(object):
 # WORKAROUND END
 
         return data
+    ######################################################################
 
+    ######################################################################
+    # Utility functions
+    ######################################################################
     def suit_update(self, data: CAPIData) -> None:
         """
         Update monitor.state suit data.
@@ -752,25 +782,6 @@ class Session(object):
         else:
             monitor.state['SuitLoadouts'] = suit_loadouts
 
-    def close(self) -> None:
-        """Close CAPI authorization session."""
-        self.state = Session.STATE_INIT
-        if self.session:
-            try:
-                self.session.close()
-
-            except Exception as e:
-                logger.debug('Frontier CAPI Auth: closing', exc_info=e)
-
-        self.session = None
-
-    def invalidate(self) -> None:
-        """Invalidate oAuth2 credentials."""
-        logger.debug('Forcing a full re-authentication')
-        # Force a full re-authentication
-        self.close()
-        Auth.invalidate(self.credentials['cmdr'])  # type: ignore
-
     # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
         """Log, as error, status of requests.Response from CAPI request."""
@@ -802,8 +813,12 @@ class Session(object):
                                    indent=2,
                                    sort_keys=True,
                                    separators=(',', ': ')).encode('utf-8'))
+    ######################################################################
 
 
+######################################################################
+# Non-class utility functions
+######################################################################
 def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully simplified
     """
     Fix up commodity names to English & miscellaneous anomalies fixes.
@@ -940,6 +955,7 @@ def index_possibly_sparse_list(data: Union[Mapping[str, V], List[V]], key: int) 
 
     else:
         raise ValueError(f'Unexpected data type {type(data)}')
+######################################################################
 
 
 # singleton
