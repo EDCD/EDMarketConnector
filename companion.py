@@ -21,6 +21,7 @@ import webbrowser
 from builtins import object, range, str
 from email.utils import parsedate
 from os.path import join
+from queue import Queue
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
 
 import requests
@@ -478,6 +479,7 @@ class Session(object):
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
         logger.info('Starting CAPI queries thread...')
+        self.capi_query_queue: Queue = Queue()
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
             daemon=True,
@@ -596,10 +598,21 @@ class Session(object):
     def capi_query_worker(self, ):
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
+
         while True:
+            query: Optional[str] = self.capi_query_queue.get()
+            if not query:
+                logger.info('Empty queue message, exiting...')
+                break
+
+            logger.trace_if('capi.worker', f'Processing query: {query}')
             time.sleep(1)
 
         logger.info('CAPI worker thread DONE')
+
+    def capi_query_close_worker(self) -> None:
+        """Ask the CAPI query thread to finish."""
+        self.capi_query_queue.put(None)
 
     def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
         """Perform a query against the specified CAPI endpoint."""

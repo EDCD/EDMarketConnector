@@ -1577,6 +1577,10 @@ class AppWindow(object):
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the CAPI query thread
+        logger.info('Closing CAPI query thread...')
+        companion.session.capi_query_close_worker()
+
         # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
