@@ -15,6 +15,7 @@ import numbers
 import os
 import random
 import threading
+import tkinter as tk
 import time
 import urllib.parse
 import webbrowser
@@ -465,6 +466,13 @@ class Auth(object):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
+class CAPIFailedRequest():
+    """CAPI failed query error class."""
+
+    def __init__(self, message, exception=None):
+        self.message = message
+        self.exception = exception
+
 class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
@@ -477,8 +485,10 @@ class Session(object):
         self.session: Optional[requests.Session] = None
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
+        self.tk_master: Optional[tk.Tk] = None
 
         logger.info('Starting CAPI queries thread...')
+        self.capi_response_queue: Queue
         self.capi_query_queue: Queue = Queue()
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
@@ -487,6 +497,12 @@ class Session(object):
         )
         self.capi_query_thread.start()
         logger.info('Done')
+
+    def set_capi_response_queue(self, capi_response_queue: Queue) -> None:
+        self.capi_response_queue = capi_response_queue
+
+    def set_tk_master(self, master: tk.Tk) -> None:
+        self.tk_master = master
 
     ######################################################################
     # Frontier Authorization
@@ -591,18 +607,61 @@ class Session(object):
     ######################################################################
     # CAPI queries
     ######################################################################
-    def capi_query_worker(self, ):
+    def capi_query_worker(self):
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
 
         while True:
-            query: Optional[str] = self.capi_query_queue.get()
-            if not query:
+            endpoint: Optional[str] = self.capi_query_queue.get()
+            if not endpoint:
                 logger.info('Empty queue message, exiting...')
                 break
 
-            logger.trace_if('capi.worker', f'Processing query: {query}')
-            time.sleep(1)
+            logger.trace_if('capi.worker', f'Processing query: {endpoint}')
+            # XXX
+            self.capi_response_queue.put(
+                CAPIFailedRequest(f'Unable to connect to endpoint {endpoint}')
+            )
+            self.tk_master.event_generate('<<CAPIResponse>>')
+            continue
+            # XXX
+            try:
+                r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
+                r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
+                data = CAPIData(r.json(), endpoint)  # May also fail here if token expired since response is empty
+
+            except requests.ConnectionError as e:
+                logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
+                self.capi_response_queue.put(
+                    CAPIFailedRequest(f'Unable to connect to endpoint {endpoint}', exception=e)
+                )
+                continue
+                # raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
+
+            except Exception as e:
+                logger.debug('Attempting GET', exc_info=e)
+                # LANG: Frontier CAPI data retrieval failed
+                # raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
+                self.capi_response_queue.put(
+                    CAPIFailedRequest(f'Frontier CAPI query failure: {endpoint}', exception=e)
+                )
+                continue
+
+            if r.url.startswith(SERVER_AUTH):
+                logger.info('Redirected back to Auth Server')
+                # Redirected back to Auth server - force full re-authentication
+                self.dump(r)
+                self.invalidate()
+                self.retrying = False
+                self.login()
+                raise CredentialsError()
+
+            elif 500 <= r.status_code < 600:
+                # Server error. Typically 500 "Internal Server Error" if server is down
+                logger.debug('500 status back from CAPI')
+                self.dump(r)
+                # LANG: Frontier CAPI data retrieval failed with 5XX code
+                raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
 
         logger.info('CAPI worker thread DONE')
 
@@ -625,38 +684,9 @@ class Session(object):
         if conf_module.capi_pretend_down:
             raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
+        self.capi_query_queue.put(endpoint)
         try:
-            self.capi_query_queue.put(endpoint)
-            r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
-
-        except requests.ConnectionError as e:
-            logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
-            raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
-
-        except Exception as e:
-            logger.debug('Attempting GET', exc_info=e)
-            # LANG: Frontier CAPI data retrieval failed
-            raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
-
-        if r.url.startswith(SERVER_AUTH):
-            logger.info('Redirected back to Auth Server')
-            # Redirected back to Auth server - force full re-authentication
-            self.dump(r)
-            self.invalidate()
-            self.retrying = False
-            self.login()
-            raise CredentialsError()
-
-        elif 500 <= r.status_code < 600:
-            # Server error. Typically 500 "Internal Server Error" if server is down
-            logger.debug('500 status back from CAPI')
-            self.dump(r)
-            # LANG: Frontier CAPI data retrieval failed with 5XX code
-            raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
-
-        try:
-            r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
-            data = CAPIData(r.json(), endpoint)  # May also fail here if token expired since response is empty
+            ...
 
         except (requests.HTTPError, ValueError) as e:
             logger.exception('Frontier CAPI Auth: GET ')
