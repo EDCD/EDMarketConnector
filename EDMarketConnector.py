@@ -648,7 +648,8 @@ class AppWindow(object):
         self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
         self.w.bind('<Return>', self.getandsend)
         self.w.bind('<KP_Enter>', self.getandsend)
-        self.w.bind_all('<<Invoke>>', self.getandsend)  # Hotkey monitoring
+        self.w.bind_all('<<Invoke>>', self.getandsend)  # Ask for CAPI queries to be performed
+        self.w.bind_all('<<CAPIResponse>>', self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
@@ -1088,6 +1089,10 @@ class AppWindow(object):
         self.update_suit_text()
         self.suit_show_if_set()
         self.cooldown()
+
+    def capi_handle_response(self, event=None):
+        """Handle the resulting data from a CAPI query."""
+        ...
 
     def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
