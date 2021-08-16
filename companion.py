@@ -564,11 +564,11 @@ class Session(object):
             logger.error('cannot make a query when unauthorized')
             raise CredentialsError('cannot make a query when unauthorized')
 
-        try:
-            logger.trace_if('capi.query', 'Trying...')
-            if conf_module.capi_pretend_down:
-                raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
+        logger.trace_if('capi.query', 'Trying...')
+        if conf_module.capi_pretend_down:
+            raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
+        try:
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
