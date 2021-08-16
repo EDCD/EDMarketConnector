@@ -942,164 +942,166 @@ class AppWindow(object):
         """Handle the resulting data from a CAPI query."""
         try:
             data = self.capi_response_queue.get(block=False)
-
-        except queue.Empty:
-            logger.error('There was no response in the queue!')
-            # TODO: Set status text
-            return
-
-        else:
             if isinstance(data, companion.CAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {data.message}')
-                raise data.exception
+                if data.exception:
+                    raise data.exception
 
-        # Validation
-        if 'commander' not in data:
-            # This can happen with EGS Auth if no commander created yet
-            # LANG: No data was returned for the commander from the Frontier CAPI
-            err = self.status['text'] = _('CAPI: No commander data returned')
+                else:
+                    raise ValueError(data.message)
 
-        elif not data.get('commander', {}).get('name'):
-            # LANG: We didn't have the commander name when we should have
-            err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
+            # Validation
+            if 'commander' not in data:
+                # This can happen with EGS Auth if no commander created yet
+                # LANG: No data was returned for the commander from the Frontier CAPI
+                err = self.status['text'] = _('CAPI: No commander data returned')
 
-        elif (not data.get('lastSystem', {}).get('name')
-              or (data['commander'].get('docked')
-                  and not data.get('lastStarport', {}).get('name'))):
-            # LANG: We don't know where the commander is, when we should
-            err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
+            elif not data.get('commander', {}).get('name'):
+                # LANG: We didn't have the commander name when we should have
+                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
-        elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
-            # LANG: We don't know what ship the commander is in, when we should
-            err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+            elif (not data.get('lastSystem', {}).get('name')
+                  or (data['commander'].get('docked')
+                      and not data.get('lastStarport', {}).get('name'))):
+                # LANG: We don't know where the commander is, when we should
+                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
-        elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
-            # Companion API Commander doesn't match Journal
-            raise companion.CmdrError()
+            elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
+                # LANG: We don't know what ship the commander is in, when we should
+                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
-        elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
-            # auto update is only when just docked
-            logger.warning(f"{auto_update!r} and not {monitor.state['OnFoot']!r} and "
-                           f"not {data['commander'].get('docked')!r}")
-            raise companion.ServerLagging()
+            elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
+                # Companion API Commander doesn't match Journal
+                raise companion.CmdrError()
 
-        elif data['lastSystem']['name'] != monitor.system:
-            # CAPI system must match last journal one
-            logger.warning(f"{data['lastSystem']['name']!r} != {monitor.system!r}")
-            raise companion.ServerLagging()
+            elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
+                # auto update is only when just docked
+                logger.warning(f"{auto_update!r} and not {monitor.state['OnFoot']!r} and "
+                               f"not {data['commander'].get('docked')!r}")
+                raise companion.ServerLagging()
 
-        elif data['lastStarport']['name'] != monitor.station:
-            if monitor.state['OnFoot'] and monitor.station:
-                logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
-                               f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
+            elif data['lastSystem']['name'] != monitor.system:
+                # CAPI system must match last journal one
+                logger.warning(f"{data['lastSystem']['name']!r} != {monitor.system!r}")
+                raise companion.ServerLagging()
+
+            elif data['lastStarport']['name'] != monitor.station:
+                if monitor.state['OnFoot'] and monitor.station:
+                    logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                   f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
+                    raise companion.ServerLagging()
+
+                else:
+                    last_station = None
+                    if data['commander']['docked']:
+                        last_station = data['lastStarport']['name']
+
+                    if monitor.station is None:
+                        # Likely (re-)Embarked on ship docked at an EDO settlement.
+                        # Both Disembark and Embark have `"Onstation": false` in Journal.
+                        # So there's nothing to tell us which settlement we're (still,
+                        # or now, if we came here in Apex and then recalled ship) docked at.
+                        logger.debug("monitor.station is None - so EDO settlement?")
+                        raise companion.NoMonitorStation()
+
+                    if last_station != monitor.station:
+                        # CAPI lastStarport must match
+                        logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                                       f"{last_station!r} != {monitor.station!r}")
+                        raise companion.ServerLagging()
+
+                self.holdofftime = querytime + companion.holdoff
+
+            elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
+                # CAPI ship must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['id']!r} != {monitor.state['ShipID']!r}")
+                raise companion.ServerLagging()
+
+            elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
+                # CAPI ship type must match
+                logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                               f"{data['ship']['name'].lower()!r} != {monitor.state['ShipType']!r}")
                 raise companion.ServerLagging()
 
             else:
-                last_station = None
-                if data['commander']['docked']:
-                    last_station = data['lastStarport']['name']
+                if __debug__:  # Recording
+                    companion.session.dump_capi_data(data)
 
-                if monitor.station is None:
-                    # Likely (re-)Embarked on ship docked at an EDO settlement.
-                    # Both Disembark and Embark have `"Onstation": false` in Journal.
-                    # So there's nothing to tell us which settlement we're (still,
-                    # or now, if we came here in Apex and then recalled ship) docked at.
-                    logger.debug("monitor.station is None - so EDO settlement?")
-                    raise companion.NoMonitorStation()
+                if not monitor.state['ShipType']:  # Started game in SRV or fighter
+                    self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
+                    monitor.state['ShipID'] = data['ship']['id']
+                    monitor.state['ShipType'] = data['ship']['name'].lower()
 
-                if last_station != monitor.station:
-                    # CAPI lastStarport must match
-                    logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
-                                   f"{last_station!r} != {monitor.station!r}")
-                    raise companion.ServerLagging()
+                    if not monitor.state['Modules']:
+                        self.ship.configure(state=tk.DISABLED)
 
-            self.holdofftime = querytime + companion.holdoff
+                # We might have disabled this in the conditional above.
+                if monitor.state['Modules']:
+                    self.ship.configure(state=True)
 
-        elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
-            # CAPI ship must match
-            logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                           f"{data['ship']['id']!r} != {monitor.state['ShipID']!r}")
-            raise companion.ServerLagging()
+                if monitor.state.get('SuitCurrent') is not None:
+                    if (loadout := data.get('loadout')) is not None:
+                        if (suit := loadout.get('suit')) is not None:
+                            if (suitname := suit.get('edmcName')) is not None:
+                                # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
+                                loadout_name = index_possibly_sparse_list(
+                                    data['loadouts'], loadout['loadoutSlotId']
+                                )['name']
 
-        elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
-            # CAPI ship type must match
-            logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                           f"{data['ship']['name'].lower()!r} != {monitor.state['ShipType']!r}")
-            raise companion.ServerLagging()
+                                self.suit['text'] = f'{suitname} ({loadout_name})'
 
-        else:
-            if __debug__:  # Recording
-                companion.session.dump_capi_data(data)
+                self.suit_show_if_set()
 
-            if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
-                monitor.state['ShipID'] = data['ship']['id']
-                monitor.state['ShipType'] = data['ship']['name'].lower()
+                if data['commander'].get('credits') is not None:
+                    monitor.state['Credits'] = data['commander']['credits']
+                    monitor.state['Loan'] = data['commander'].get('debt', 0)
 
-                if not monitor.state['Modules']:
-                    self.ship.configure(state=tk.DISABLED)
+                # stuff we can do when not docked
+                err = plug.notify_newdata(data, monitor.is_beta)
+                self.status['text'] = err and err or ''
+                if err:
+                    play_bad = True
 
-            # We might have disabled this in the conditional above.
-            if monitor.state['Modules']:
-                self.ship.configure(state=True)
+                # Export market data
+                if not self.export_market_data(data):
+                    err = 'Error: Exporting Market data'
+                    play_bad = True
 
-            if monitor.state.get('SuitCurrent') is not None:
-                if (loadout := data.get('loadout')) is not None:
-                    if (suit := loadout.get('suit')) is not None:
-                        if (suitname := suit.get('edmcName')) is not None:
-                            # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
-                            loadout_name = index_possibly_sparse_list(
-                                data['loadouts'], loadout['loadoutSlotId']
-                            )['name']
+                self.holdofftime = querytime + companion.holdoff
 
-                            self.suit['text'] = f'{suitname} ({loadout_name})'
+        except queue.Empty:
+                logger.error('There was no response in the queue!')
+                # TODO: Set status text
+                return
 
-            self.suit_show_if_set()
-
-            if data['commander'].get('credits') is not None:
-                monitor.state['Credits'] = data['commander']['credits']
-                monitor.state['Loan'] = data['commander'].get('debt', 0)
-
-            # stuff we can do when not docked
-            err = plug.notify_newdata(data, monitor.is_beta)
-            self.status['text'] = err and err or ''
-            if err:
+        # Companion API problem
+        except companion.ServerLagging as e:
+            err = str(e)
+            if retrying:
+                self.status['text'] = err
                 play_bad = True
 
-            # Export market data
-            if not self.export_market_data(data):
-                err = 'Error: Exporting Market data'
-                play_bad = True
+            else:
+                # Retry once if Companion server is unresponsive
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
+                return  # early exit to avoid starting cooldown count
 
-            self.holdofftime = querytime + companion.holdoff
+        except companion.CmdrError as e:  # Companion API return doesn't match Journal
+            err = self.status['text'] = str(e)
+            play_bad = True
+            companion.session.invalidate()
+            self.login()
 
-#        # Companion API problem
-#        except companion.ServerLagging as e:
-#            err = str(e)
-#            if retrying:
-#                self.status['text'] = err
-#                play_bad = True
-#
-#            else:
-#                # Retry once if Companion server is unresponsive
-#                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
-#                return  # early exit to avoid starting cooldown count
-#
-#        except companion.CmdrError as e:  # Companion API return doesn't match Journal
-#            err = self.status['text'] = str(e)
-#            play_bad = True
-#            companion.session.invalidate()
-#            self.login()
-#
-#        except companion.ServerConnectionError as e:
-#            logger.warning(f'Exception while contacting server: {e}')
-#            err = self.status['text'] = str(e)
-#            play_bad = True
-#
-#        except Exception as e:  # Including CredentialsError, ServerError
-#            logger.debug('"other" exception', exc_info=e)
-#            err = self.status['text'] = str(e)
-#            play_bad = True
+        except companion.ServerConnectionError as e:
+            logger.warning(f'Exception while contacting server: {e}')
+            err = self.status['text'] = str(e)
+            play_bad = True
+
+        except Exception as e:  # Including CredentialsError, ServerError
+            logger.debug('"other" exception', exc_info=e)
+            err = self.status['text'] = str(e)
+            play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
