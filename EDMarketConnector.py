@@ -754,7 +754,7 @@ class AppWindow(object):
         journal_lock.update_lock(self.w)
 
         # (Re-)install log monitoring
-        if not monitor.start_frontier_auth(self.w):
+        if not monitor.start(self.w):
             # LANG: ED Journal file location appears to be in error
             self.status['text'] = _('Error: Check E:D journal file location')
 
