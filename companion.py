@@ -642,12 +642,10 @@ class Session(object):
 
             if r.url.startswith(SERVER_AUTH):
                 logger.info('Redirected back to Auth Server')
-                # Redirected back to Auth server - force full re-authentication
-                self.dump(r)
-                self.invalidate()
-                self.retrying = False
-                self.login()
-                raise CredentialsError()
+                self.capi_response_queue.put(
+                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError()
+                )
+                continue
 
             elif 500 <= r.status_code < 600:
                 # Server error. Typically 500 "Internal Server Error" if server is down
@@ -655,6 +653,10 @@ class Session(object):
                 self.dump(r)
                 # LANG: Frontier CAPI data retrieval failed with 5XX code
                 raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
+
+            self.capi_response_queue.put(
+                data
+            )
 
         logger.info('CAPI worker thread DONE')
 

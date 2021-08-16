@@ -1075,6 +1075,13 @@ class AppWindow(object):
                 # TODO: Set status text
                 return
 
+        except companion.CredentialsError:
+            # Redirected back to Auth server - force full re-authentication
+            companion.session.dump(r)
+            companion.session.invalidate()
+            companion.session.retrying = False
+            companion.session.login()
+
         # Companion API problem
         except companion.ServerLagging as e:
             err = str(e)
