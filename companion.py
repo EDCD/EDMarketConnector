@@ -476,6 +476,14 @@ class Session(object):
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
+    def start_frontier_auth(self, access_token: str) -> None:
+        """Start an oAuth2 session."""
+        logger.debug('Starting session')
+        self.session = requests.Session()
+        self.session.headers['Authorization'] = f'Bearer {access_token}'
+        self.session.headers['User-Agent'] = USER_AGENT
+        self.state = Session.STATE_OK
+
     def login(self, cmdr: str = None, is_beta: Union[None, bool] = None) -> bool:
         """
         Attempt oAuth2 login.
@@ -544,14 +552,6 @@ class Session(object):
             self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
-
-    def start_frontier_auth(self, access_token: str) -> None:
-        """Start an oAuth2 session."""
-        logger.debug('Starting session')
-        self.session = requests.Session()
-        self.session.headers['Authorization'] = f'Bearer {access_token}'
-        self.session.headers['User-Agent'] = USER_AGENT
-        self.state = Session.STATE_OK
 
     def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
         """Perform a query against the specified CAPI endpoint."""
