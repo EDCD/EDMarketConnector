@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 
 import requests
 
+import config as conf_module
 from config import appname, appversion, config
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
@@ -563,8 +564,11 @@ class Session(object):
             logger.error('cannot make a query when unauthorized')
             raise CredentialsError('cannot make a query when unauthorized')
 
+        logger.trace_if('capi.query', 'Trying...')
+        if conf_module.capi_pretend_down:
+            raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
+
         try:
-            logger.trace_if('capi.query', 'Trying...')
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
         except requests.ConnectionError as e:
