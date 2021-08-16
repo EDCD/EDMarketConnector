@@ -567,7 +567,7 @@ class Session(object):
         try:
             logger.trace_if('capi.query', 'Trying...')
             if conf_module.capi_pretend_down:
-                raise ServerError(f'Pretending CAPI is down for {endpoint} endpoint')
+                raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
             r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
 
