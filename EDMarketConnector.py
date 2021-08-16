@@ -926,11 +926,14 @@ class AppWindow(object):
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
-        try:
-            querytime = int(time())
-            data = companion.session.station()
-            config.set('querytime', querytime)
+        querytime = int(time())
+        data = companion.session.station()
+        config.set('querytime', querytime)
 
+
+    def capi_handle_response(self, event=None):
+        """Handle the resulting data from a CAPI query."""
+        data = ...
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
@@ -1051,33 +1054,33 @@ class AppWindow(object):
 
                 self.holdofftime = querytime + companion.holdoff
 
-        # Companion API problem
-        except companion.ServerLagging as e:
-            err = str(e)
-            if retrying:
-                self.status['text'] = err
-                play_bad = True
-
-            else:
-                # Retry once if Companion server is unresponsive
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
-                return  # early exit to avoid starting cooldown count
-
-        except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            err = self.status['text'] = str(e)
-            play_bad = True
-            companion.session.invalidate()
-            self.login()
-
-        except companion.ServerConnectionError as e:
-            logger.warning(f'Exception while contacting server: {e}')
-            err = self.status['text'] = str(e)
-            play_bad = True
-
-        except Exception as e:  # Including CredentialsError, ServerError
-            logger.debug('"other" exception', exc_info=e)
-            err = self.status['text'] = str(e)
-            play_bad = True
+#        # Companion API problem
+#        except companion.ServerLagging as e:
+#            err = str(e)
+#            if retrying:
+#                self.status['text'] = err
+#                play_bad = True
+#
+#            else:
+#                # Retry once if Companion server is unresponsive
+#                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
+#                return  # early exit to avoid starting cooldown count
+#
+#        except companion.CmdrError as e:  # Companion API return doesn't match Journal
+#            err = self.status['text'] = str(e)
+#            play_bad = True
+#            companion.session.invalidate()
+#            self.login()
+#
+#        except companion.ServerConnectionError as e:
+#            logger.warning(f'Exception while contacting server: {e}')
+#            err = self.status['text'] = str(e)
+#            play_bad = True
+#
+#        except Exception as e:  # Including CredentialsError, ServerError
+#            logger.debug('"other" exception', exc_info=e)
+#            err = self.status['text'] = str(e)
+#            play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
@@ -1089,10 +1092,6 @@ class AppWindow(object):
         self.update_suit_text()
         self.suit_show_if_set()
         self.cooldown()
-
-    def capi_handle_response(self, event=None):
-        """Handle the resulting data from a CAPI query."""
-        ...
 
     def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
