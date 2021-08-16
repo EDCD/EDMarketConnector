@@ -464,7 +464,7 @@ class Auth(object):
 
 
 class Session(object):
-    """Methods for handling an oAuth2 session."""
+    """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
 
@@ -553,7 +553,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001
+    def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
         """Perform a query against the specified CAPI endpoint."""
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
