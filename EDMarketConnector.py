@@ -130,7 +130,8 @@ if __name__ == '__main__':  # noqa: C901
     parser.add_argument(
         '--capi-pretend-down',
         help='Force to raise ServerError on any CAPI query',
-        action='store_true')
+        action='store_true'
+    )
 
     args = parser.parse_args()
 
