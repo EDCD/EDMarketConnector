@@ -14,6 +14,7 @@ import json
 import numbers
 import os
 import random
+import threading
 import time
 import urllib.parse
 import webbrowser
@@ -476,6 +477,15 @@ class Session(object):
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
 
+        logger.info('Starting CAPI queries thread...')
+        self.capi_query_thread = threading.Thread(
+            target=self.capi_query_worker,
+            daemon=True,
+            name='CAPI worker'
+        )
+        self.capi_query_thread.start()
+        logger.info('Done')
+
     ######################################################################
     # Frontier Authorization
     ######################################################################
@@ -579,6 +589,18 @@ class Session(object):
     ######################################################################
     # CAPI queries
     ######################################################################
+    def capi_query_enqueue(self, endpoint: str) -> None:
+        """Request the worker thread perform a given endpoint query."""
+        ...
+
+    def capi_query_worker(self, ):
+        """Worker thread that performs actual CAPI queries."""
+        logger.info('CAPI worker thread starting')
+        while True:
+            time.sleep(1)
+
+        logger.info('CAPI worker thread DONE')
+
     def query(self, endpoint: str) -> CAPIData:  # noqa: CCR001, C901
         """Perform a query against the specified CAPI endpoint."""
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
