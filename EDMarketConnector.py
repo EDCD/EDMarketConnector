@@ -485,8 +485,8 @@ class AppWindow(object):
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
                                  {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
-        self.button.bind('<Button-1>', self.getandsend)
-        theme.button_bind(self.theme_button, self.getandsend)
+        self.button.bind('<Button-1>', self.capi_request_data)
+        theme.button_bind(self.theme_button, self.capi_request_data)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
@@ -646,9 +646,9 @@ class AppWindow(object):
         self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
         self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
         self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
-        self.w.bind('<Return>', self.getandsend)
-        self.w.bind('<KP_Enter>', self.getandsend)
-        self.w.bind_all('<<Invoke>>', self.getandsend)  # Ask for CAPI queries to be performed
+        self.w.bind('<Return>', self.capi_request_data)
+        self.w.bind('<KP_Enter>', self.capi_request_data)
+        self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
         self.w.bind_all('<<CAPIResponse>>', self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
@@ -887,7 +887,7 @@ class AppWindow(object):
 
         return True
 
-    def getandsend(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
+    def capi_request_data(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -1060,7 +1060,7 @@ class AppWindow(object):
 
             else:
                 # Retry once if Companion server is unresponsive
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.getandsend(event, True))
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
@@ -1269,7 +1269,7 @@ class AppWindow(object):
                         auto_update = True
 
             if auto_update:
-                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+                self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
