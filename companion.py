@@ -618,13 +618,6 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {endpoint}')
-            # XXX
-            self.capi_response_queue.put(
-                CAPIFailedRequest(f'Unable to connect to endpoint {endpoint}')
-            )
-            self.tk_master.event_generate('<<CAPIResponse>>')
-            continue
-            # XXX
             try:
                 r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
