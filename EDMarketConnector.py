@@ -394,6 +394,9 @@ class AppWindow(object):
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
+        # companion needs to be able to send <<CAPIResponse>> events
+        companion.session.set_tk_master(self.w)
+
         self.prefsdialog = None
 
         # if platform == 'win32':
