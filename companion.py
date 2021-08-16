@@ -516,7 +516,7 @@ class Session(object):
         if access_token:
             logger.debug('We have an access_token')
             self.auth = None
-            self.start(access_token)
+            self.start_frontier_auth(access_token)
             return True
 
         else:
@@ -536,7 +536,7 @@ class Session(object):
 
         try:
             logger.debug('Trying authorize with payload from handler')
-            self.start(self.auth.authorize(protocolhandler.lastpayload))  # type: ignore
+            self.start_frontier_auth(self.auth.authorize(protocolhandler.lastpayload))  # type: ignore
             self.auth = None
 
         except Exception:
@@ -545,7 +545,7 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
 
-    def start(self, access_token: str) -> None:
+    def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
         self.session = requests.Session()
