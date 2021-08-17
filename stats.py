@@ -275,6 +275,7 @@ class StatsDialog():
         if not monitor.cmdr:
             return
 
+        # TODO: This needs to use cached data
         # LANG: Fetching data from Frontier CAPI in order to display on File > Status
         self.status['text'] = _('Fetching data...')
         self.parent.update_idletasks()
