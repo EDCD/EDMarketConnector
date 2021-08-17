@@ -51,15 +51,6 @@ holdoff = 60  # be nice
 timeout = 10  # requests timeout
 auth_timeout = 30  # timeout for initial auth
 
-# Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
-# Athanasius' Frontier account
-# Obtain from https://auth.frontierstore.net/client/signup
-CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
-SERVER_AUTH = 'https://auth.frontierstore.net'
-URL_AUTH = '/auth'
-URL_TOKEN = '/token'
-URL_DECODE = '/decode'
-
 USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
@@ -239,6 +230,11 @@ class CmdrError(Exception):
 class Auth(object):
     """Handles authentication with the Frontier CAPI service via oAuth2."""
 
+    # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
+    # Athanasius' Frontier account
+    # Obtain from https://auth.frontierstore.net/client/signup
+    CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
+
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
         self.session = requests.Session()
@@ -274,7 +270,7 @@ class Auth(object):
             logger.debug('We have a refresh token for that idx')
             data = {
                 'grant_type':   'refresh_token',
-                'client_id':     CLIENT_ID,
+                'client_id':     self.CLIENT_ID,
                 'refresh_token': tokens[idx],
             }
 
@@ -313,7 +309,7 @@ class Auth(object):
             f'{SERVER_AUTH}{URL_AUTH}?response_type=code'
             f'&audience=frontier,steam,epic'
             f'&scope=auth capi'
-            f'&client_id={CLIENT_ID}'
+            f'&client_id={self.CLIENT_ID}'
             f'&code_challenge={challenge}'
             f'&code_challenge_method=S256'
             f'&state={self.state}'
@@ -351,7 +347,7 @@ class Auth(object):
             logger.debug('Got code, posting it back...')
             request_data = {
                 'grant_type': 'authorization_code',
-                'client_id': CLIENT_ID,
+                'client_id': self.CLIENT_ID,
                 'code_verifier': self.verifier,
                 'code': data['code'][0],
                 'redirect_uri': protocolhandler.redirect,
@@ -477,6 +473,10 @@ class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
+    SERVER_AUTH = 'https://auth.frontierstore.net'
+    URL_AUTH = '/auth'
+    URL_TOKEN = '/token'
+    URL_DECODE = '/decode'
 
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
@@ -521,8 +521,8 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
-        if not CLIENT_ID:
-            logger.error('CLIENT_ID is None')
+        if not self.CLIENT_ID:
+            logger.error('self.CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
 
         # TODO: WTF is the intent behind this logic ?
