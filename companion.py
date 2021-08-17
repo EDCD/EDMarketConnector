@@ -279,7 +279,11 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
-                r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN, data=data, timeout=auth_timeout)
+                r = self.session.post(
+                    FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
+                    data=data,
+                    timeout=auth_timeout
+                )
                 if r.status_code == requests.codes.ok:
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
@@ -363,7 +367,11 @@ class Auth(object):
             # requests_log.setLevel(logging.DEBUG)
             # requests_log.propagate = True
 
-            r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN, data=request_data, timeout=auth_timeout)
+            r = self.session.post(
+                FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
+                data=request_data,
+                timeout=auth_timeout
+            )
             data_token = r.json()
             if r.status_code == requests.codes.ok:
                 # Now we need to /decode the token to check the customer_id against FID
@@ -472,6 +480,7 @@ class CAPIFailedRequest():
         self.message = message
         self.exception = exception
 
+
 class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
@@ -505,9 +514,11 @@ class Session(object):
         logger.info('Done')
 
     def set_capi_response_queue(self, capi_response_queue: Queue) -> None:
+        """Set a reference to the CAPI response data queue."""
         self.capi_response_queue = capi_response_queue
 
     def set_tk_master(self, master: tk.Tk) -> None:
+        """Set a reference to main UI Tk root window."""
         self.tk_master = master
 
     ######################################################################
@@ -613,7 +624,7 @@ class Session(object):
     ######################################################################
     # CAPI queries
     ######################################################################
-    def capi_query_worker(self):
+    def capi_query_worker(self):  # noqa: C901, CCR001
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
 
@@ -629,7 +640,8 @@ class Session(object):
             try:
                 r = self.session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
-                capi_data = CAPIData(r.json(), capi_endpoint)  # May also fail here if token expired since response is empty
+                # May also fail here if token expired since response is empty
+                capi_data = CAPIData(r.json(), capi_endpoint)
 
             except requests.ConnectionError as e:
                 logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {capi_endpoint})')
@@ -681,11 +693,13 @@ class Session(object):
                 logger.error('No commander in returned data')
 
             if 'timestamp' not in capi_data:
-                capi_data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
+                capi_data['timestamp'] = time.strftime(
+                    '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])
+                )  # type: ignore
 
             return capi_data
 
-        def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:
+        def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
             """
             Perform all 'station' queries for the caller.
 
