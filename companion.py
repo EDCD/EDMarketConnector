@@ -237,6 +237,8 @@ class Auth(object):
     # Obtain from https://auth.frontierstore.net/client/signup
     CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
 
+    FRONTIER_AUTH_PATH = '/auth'
+
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
         self.session = requests.Session()
@@ -308,7 +310,7 @@ class Auth(object):
         logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
-            f'{FRONTIER_AUTH_SERVER}{URL_AUTH}?response_type=code'
+            f'{FRONTIER_AUTH_SERVER}{self.FRONTIER_AUTH_PATH}?response_type=code'
             f'&audience=frontier,steam,epic'
             f'&scope=auth capi'
             f'&client_id={self.CLIENT_ID}'
@@ -475,7 +477,6 @@ class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
-    URL_AUTH = '/auth'
     URL_TOKEN = '/token'
     URL_DECODE = '/decode'
 
