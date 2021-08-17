@@ -697,6 +697,8 @@ class Session(object):
                     '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])  # type: ignore
                 )
 
+            # TODO: Store a copy of this if it was /profile, e.g. for use by
+            #       stats.py
             return capi_data
 
         def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
