@@ -239,6 +239,7 @@ class Auth(object):
 
     FRONTIER_PATH_AUTH = '/auth'
     FRONTIER_PATH_TOKEN = '/token'
+    FRONTIER_PATH_DECODE = '/decode'
 
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
@@ -370,7 +371,7 @@ class Auth(object):
             if r.status_code == requests.codes.ok:
                 # Now we need to /decode the token to check the customer_id against FID
                 r = self.session.get(
-                    FRONTIER_AUTH_SERVER + URL_DECODE,
+                    FRONTIER_AUTH_SERVER + self.FRONTIER_PATH_DECODE,
                     headers={
                         'Authorization': f'Bearer {data_token.get("access_token", "")}',
                         'Content-Type': 'application/json',
@@ -478,7 +479,6 @@ class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
-    URL_DECODE = '/decode'
 
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
