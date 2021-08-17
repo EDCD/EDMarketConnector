@@ -94,12 +94,15 @@ The current recognised (to EDMC and its internal plugins) killswitch strings are
 | :------------------------------------------- | :---------------------: | :---------------------------------------------------------------------------------------- |
 | `plugins.eddn.send`                          |          eddn           | Disables all use of the send method on EDDN (effectively disables EDDN updates)           |
 | `plugins.<plugin>.journal`                   | eddn, inara, edsm, eddb | Disables all journal processing for the plugin                                            |
-| `plugins.<plugin>.worker`                    |       edsm, inara       | Disables the plugins worker thread (effectively disables updates) (does not close thread) |
+| `plugins.<plugin>.worker`                    |      edsm, *inara       | Disables the plugins worker thread (effectively disables updates) (does not close thread) |
 | `plugins.<plugin>.worker.<eventname>`        |       edsm, inara       | Disables the plugin worker for the given eventname                                        |
 | `plugins.<plugin>.journal.event.<eventname>` |    eddn, inara, edsm    | Specific events to disable processing for.                                                |
 
 Killswitches marked with `*` do **not** support modification of their values via set/redact/delete. And as such any match
 will simply stop processing.
+
+For `plugin.inara.worker`, events are checked individually later by the eventname version. Use that to modify individual
+inara events
 
 ## File location
 
