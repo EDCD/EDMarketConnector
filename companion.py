@@ -694,8 +694,8 @@ class Session(object):
 
             if 'timestamp' not in capi_data:
                 capi_data['timestamp'] = time.strftime(
-                    '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])
-                )  # type: ignore
+                    '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])  # type: ignore
+                )
 
             return capi_data
 
@@ -850,7 +850,8 @@ class Session(object):
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
-                return self.query(endpoint)
+                self.query(endpoint, querytime, play_sound=play_sound, auto_update=auto_update)
+                return
 
         elif self.state == Session.STATE_AUTH:
             logger.error('cannot make a query when unauthorized')
@@ -864,18 +865,23 @@ class Session(object):
             (endpoint, querytime, play_sound, auto_update)
         )
 
-    def profile(self):
-        """Perform general CAPI /profile endpoint query."""
-        self.query(self.FRONTIER_CAPI_PATH_PROFILE)
+    def profile(self, querytime: int = int(time.time()), play_sound: bool = False, auto_update: bool = False) -> None:
+        """
+        Perform general CAPI /profile endpoint query.
 
-    def station(self, querytime: int, play_sound: bool = False, auto_update: bool = False) -> CAPIData:
+        :param querytime: When this query was initiated.
+        :param play_sound: Whether the app should play a sound on error.
+        :param auto_update: Whether this request was triggered automatically.
+        """
+        self.query(self.FRONTIER_CAPI_PATH_PROFILE, querytime=querytime, play_sound=play_sound, auto_update=auto_update)
+
+    def station(self, querytime: int, play_sound: bool = False, auto_update: bool = False) -> None:
         """
         Perform CAPI quer(y|ies) for station data.
 
         :param querytime: When this query was initiated.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
-        :return: Possibly augmented CAPI data.
         """
         # Ask the thread worker to perform all three queries
         self.capi_query_queue.put(
