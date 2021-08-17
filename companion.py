@@ -15,8 +15,8 @@ import numbers
 import os
 import random
 import threading
-import tkinter as tk
 import time
+import tkinter as tk
 import urllib.parse
 import webbrowser
 from builtins import object, range, str
