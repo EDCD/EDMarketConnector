@@ -92,7 +92,7 @@ The current recognised (to EDMC and its internal plugins) killswitch strings are
 
 | Kill Switch                                  |    Supported Plugins    | Description                                                                               |
 | :------------------------------------------- | :---------------------: | :---------------------------------------------------------------------------------------- |
-| *`plugins.eddn.send`                         |          eddn           | Disables all use of the send method on EDDN (effectively disables EDDN updates)           |
+| `plugins.eddn.send`                          |          eddn           | Disables all use of the send method on EDDN (effectively disables EDDN updates)           |
 | `plugins.<plugin>.journal`                   | eddn, inara, edsm, eddb | Disables all journal processing for the plugin                                            |
 | `plugins.<plugin>.worker`                    |       edsm, inara       | Disables the plugins worker thread (effectively disables updates) (does not close thread) |
 | `plugins.<plugin>.worker.<eventname>`        |       edsm, inara       | Disables the plugin worker for the given eventname                                        |
