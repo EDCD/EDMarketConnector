@@ -57,8 +57,6 @@ USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
-URL_QUERY = '/profile'
-URL_MARKET = '/market'
 URL_SHIPYARD = '/shipyard'
 
 commodity_map: Dict = {}
@@ -480,6 +478,9 @@ class Session(object):
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
 
+    FRONTIER_CAPI_PATH_PROFILE = '/profile'
+    FRONTIER_CAPI_PATH_MARKET = '/market'
+
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.server: Optional[str] = None
@@ -684,7 +685,7 @@ class Session(object):
 
             self.retrying = False
 
-            if endpoint == URL_QUERY and 'commander' not in data:
+            if endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in data:
                 logger.error('No commander in returned data')
 
             if 'timestamp' not in data:
@@ -719,7 +720,7 @@ class Session(object):
 
     def profile(self):
         """Perform general CAPI /profile endpoint query."""
-        self.query(URL_QUERY)
+        self.query(self.FRONTIER_CAPI_PATH_PROFILE)
 
     def station(self) -> CAPIData:  # noqa: CCR001
         """
@@ -733,7 +734,7 @@ class Session(object):
 
         :return: Possibly augmented CAPI data.
         """
-        self.query(URL_QUERY)
+        self.query(self.FRONTIER_CAPI_PATH_PROFILE)
 
         if not data['commander'].get('docked') and not monitor.state['OnFoot']:
             return data
@@ -771,7 +772,7 @@ class Session(object):
         last_starport_id = int(last_starport.get('id'))
 
         if services.get('commodities'):
-            marketdata = self.query(URL_MARKET)
+            marketdata = self.query(self.FRONTIER_CAPI_PATH_MARKET)
             if last_starport_id != int(marketdata['id']):
                 logger.warning(f"{last_starport_id!r} != {int(marketdata['id'])!r}")
                 raise ServerLagging()
