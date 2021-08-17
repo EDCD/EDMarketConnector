@@ -277,6 +277,25 @@ class KillSwitchSet:
         log.info('Rules applied successfully, allowing execution to continue')
         return False, new_data
 
+    def check_multiple_killswitches(self, data: UPDATABLE_DATA, *names: str, log=logger, version=_current_version):
+        """
+        Check multiple killswitches in order.
+
+        Note that the names are applied in the order passed, and that the first true
+        return from check_killswitch causes this to return
+
+        :param data: the data to update
+        :param log: the logger to use, defaults to the standard EDMC main logger
+        :return: A tuple of bool and updated data, where the bool is true when the caller _should_ halt processing
+        """
+        for name in names:
+            should_return, data = self.check_killswitch(name=name, data=data, log=log, version=version)
+
+            if should_return:
+                return True, data
+
+        return False, data
+
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
         return f'KillSwitchSet: {str(self.kill_switches)}'
@@ -463,6 +482,11 @@ def get_disabled(id: str, *, version: semantic_version.Version = _current_versio
 def check_killswitch(name: str, data: UPDATABLE_DATA, log=logger) -> Tuple[bool, UPDATABLE_DATA]:
     """Query the global KillSwitchSet#check_killswitch method."""
     return active.check_killswitch(name, data, log)
+
+
+def check_multiple_killswitches(data: UPDATABLE_DATA, *names: str, log=logger) -> tuple[bool, UPDATABLE_DATA]:
+    """Query the global KillSwitchSet#check_multiple method."""
+    return active.check_multiple_killswitches(data, *names, log=log)
 
 
 def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> bool:

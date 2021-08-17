@@ -73,3 +73,21 @@ def test_operator_precedence(
     kill.apply_rules(cpy)
 
     assert cpy == result
+
+
+@pytest.mark.parametrize(
+    ('names', 'input', 'result', 'expected_return'),
+    [
+        (['no-actions', 'delete-action'], {'a': 1}, {'a': 1}, True),
+        # this is true because delete-action keyerrors, thus causing failsafe
+        (['delete-action'], {'a': 1}, {'a': 1}, True),
+        (['delete-action'], {'a': 1, 'b': {'c': 2}}, {'b': {}}, False),
+    ]
+)
+def test_check_multiple(
+    names: list[str], input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA, expected_return: bool
+) -> None:
+    """Check that order is correct when checking multiple killswitches."""
+    should_return, data = TEST_SET.check_multiple_killswitches(input, *names, version='1.0.0')
+    assert should_return == expected_return
+    assert data == result
