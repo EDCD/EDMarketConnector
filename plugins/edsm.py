@@ -407,7 +407,8 @@ def journal_entry(  # noqa: C901, CCR001
 
     if should_return:
         return
-    entry = cast(MutableMapping[str, Any], new_entry)
+    
+    entry = new_entry
 
     this.on_foot = state['OnFoot']
     if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
