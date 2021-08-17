@@ -57,7 +57,6 @@ USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
-URL_SHIPYARD = '/shipyard'
 
 commodity_map: Dict = {}
 
@@ -80,7 +79,7 @@ class CAPIData(UserDict):
         if source_endpoint is None:
             return
 
-        if source_endpoint == URL_SHIPYARD and self.data.get('lastStarport'):
+        if source_endpoint == self.FRONTIER_CAPI_PATH_SHIPYARD and self.data.get('lastStarport'):
             # All the other endpoints may or may not have a lastStarport, but definitely wont have valid data
             # for this check, which means it'll just make noise for no reason while we're working on other things
             self.check_modules_ships()
@@ -480,6 +479,7 @@ class Session(object):
 
     FRONTIER_CAPI_PATH_PROFILE = '/profile'
     FRONTIER_CAPI_PATH_MARKET = '/market'
+    FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
 
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
@@ -782,7 +782,7 @@ class Session(object):
                 data['lastStarport'].update(marketdata)
 
         if services.get('outfitting') or services.get('shipyard'):
-            shipdata = self.query(URL_SHIPYARD)
+            shipdata = self.query(self.FRONTIER_CAPI_PATH_SHIPYARD)
             if last_starport_id != int(shipdata['id']):
                 logger.warning(f"{last_starport_id!r} != {int(shipdata['id'])!r}")
                 raise ServerLagging()
