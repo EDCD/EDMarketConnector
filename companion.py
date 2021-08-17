@@ -47,8 +47,8 @@ else:
 # Define custom type for the dicts that hold CAPI data
 # CAPIData = NewType('CAPIData', Dict)
 
-holdoff = 60  # be nice
-timeout = 10  # requests timeout
+capi_query_cooldown = 60  # be nice
+capi_default_timeout = 10  # requests timeout
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
@@ -79,7 +79,7 @@ class CAPIData(UserDict):
         if source_endpoint is None:
             return
 
-        if source_endpoint == self.FRONTIER_CAPI_PATH_SHIPYARD and self.data.get('lastStarport'):
+        if source_endpoint == Session.FRONTIER_CAPI_PATH_SHIPYARD and self.data.get('lastStarport'):
             # All the other endpoints may or may not have a lastStarport, but definitely wont have valid data
             # for this check, which means it'll just make noise for no reason while we're working on other things
             self.check_modules_ships()
@@ -527,7 +527,7 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
-        if not self.CLIENT_ID:
+        if not Auth.CLIENT_ID:
             logger.error('self.CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
 
@@ -617,88 +617,23 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
 
-        while True:
-            endpoint: Optional[str] = self.capi_query_queue.get()
-            if not endpoint:
-                logger.info('Empty queue message, exiting...')
-                break
+        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:
+            """
+            Perform a *single* CAPI endpoint query within the thread worker.
 
-            logger.trace_if('capi.worker', f'Processing query: {endpoint}')
-            self.query(self.FRONTIER_CAPI_PATH_PROFILE)
-
-            if not data['commander'].get('docked') and not monitor.state['OnFoot']:
-                return data
-
-            # Sanity checks in case data isn't as we expect, and maybe 'docked' flag
-            # is also lagging.
-            if (last_starport := data.get('lastStarport')) is None:
-                logger.error("No lastStarport in data!")
-                return data
-
-            if ((last_starport_name := last_starport.get('name')) is None
-                    or last_starport_name == ''):
-                # This could well be valid if you've been out exploring for a long
-                # time.
-                logger.warning("No lastStarport name!")
-                return data
-
-            # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
-            # -- strip "+" chars off star port names returned by the CAPI
-            last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
-
-            services = last_starport.get('services', {})
-            if not isinstance(services, dict):
-                # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
-                # this be an empty list when you've jumped to another system
-                # and not yet docked.  As opposed to no services key at all
-                # or an empty dict.
-                logger.error(f'services is "{type(services)}", not dict !')
-                if __debug__:
-                    self.dump_capi_data(data)
-
-                # Set an empty dict so as to not have to retest below.
-                services = {}
-
-            last_starport_id = int(last_starport.get('id'))
-
-            if services.get('commodities'):
-                marketdata = self.query(self.FRONTIER_CAPI_PATH_MARKET)
-                if last_starport_id != int(marketdata['id']):
-                    logger.warning(f"{last_starport_id!r} != {int(marketdata['id'])!r}")
-                    raise ServerLagging()
-
-                else:
-                    marketdata['name'] = last_starport_name
-                    data['lastStarport'].update(marketdata)
-
-            if services.get('outfitting') or services.get('shipyard'):
-                shipdata = self.query(self.FRONTIER_CAPI_PATH_SHIPYARD)
-                if last_starport_id != int(shipdata['id']):
-                    logger.warning(f"{last_starport_id!r} != {int(shipdata['id'])!r}")
-                    raise ServerLagging()
-
-                else:
-                    shipdata['name'] = last_starport_name
-                    data['lastStarport'].update(shipdata)
-            # WORKAROUND END
-
-            return data
+            :param capi_endpoint: An actual Frontier CAPI endpoint to query.
+            :param timeout: requests query timeout to use.
+            :return: The resulting CAPI data, of type CAPIData.
+            """
+            capi_data: CAPIData
             try:
-                r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
+                r = self.session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
-                self.capi_response_queue.put(
-                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError())
-                )
-                continue
-                data = CAPIData(r.json(), endpoint)  # May also fail here if token expired since response is empty
+                capi_data = CAPIData(r.json(), capi_endpoint)  # May also fail here if token expired since response is empty
 
             except requests.ConnectionError as e:
-                logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {endpoint})')
-                self.capi_response_queue.put(
-                    CAPIFailedRequest(f'Unable to connect to endpoint {endpoint}', exception=e)
-                )
-                continue
-                # raise ServerConnectionError(f'Unable to connect to endpoint {endpoint}') from e
+                logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {capi_endpoint})')
+                raise ServerConnectionError(f'Unable to connect to endpoint: {capi_endpoint}') from e
 
             except (requests.HTTPError, ValueError) as e:
                 logger.exception('Frontier CAPI Auth: GET ')
@@ -712,10 +647,12 @@ class Session(object):
                     self.login()
                     raise CredentialsError('query failed after refresh') from e
 
+                # TODO: Better to return error and have upstream re-try auth ?
                 elif self.login():  # Maybe our token expired. Re-authorize in any case
                     logger.debug('Initial query failed, but login() just worked, trying again...')
                     self.retrying = True
-                    return self.query(endpoint)
+                    # TODO: This, or raise (custom?) exception for upstream to do it?
+                    return capi_single_query(capi_endpoint)
 
                 else:
                     self.retrying = False
@@ -725,18 +662,11 @@ class Session(object):
             except Exception as e:
                 logger.debug('Attempting GET', exc_info=e)
                 # LANG: Frontier CAPI data retrieval failed
-                # raise ServerError(f'{_("Frontier CAPI query failure")}: {endpoint}') from e
-                self.capi_response_queue.put(
-                    CAPIFailedRequest(f'Frontier CAPI query failure: {endpoint}', exception=e)
-                )
-                continue
+                raise ServerError(f'{_("Frontier CAPI query failure")}: {capi_endpoint}') from e
 
             if r.url.startswith(FRONTIER_AUTH_SERVER):
                 logger.info('Redirected back to Auth Server')
-                self.capi_response_queue.put(
-                    CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError())
-                )
-                continue
+                raise CredentialsError('Redirected back to Auth Server')
 
             elif 500 <= r.status_code < 600:
                 # Server error. Typically 500 "Internal Server Error" if server is down
@@ -747,15 +677,145 @@ class Session(object):
 
             self.retrying = False
 
-            if endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in data:
+            if capi_endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in capi_data:
                 logger.error('No commander in returned data')
 
-            if 'timestamp' not in data:
-                data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
+            if 'timestamp' not in capi_data:
+                capi_data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))  # type: ignore
 
-            self.capi_response_queue.put(
-                data
-            )
+            return capi_data
+
+        def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:
+            """
+            Perform all 'station' queries for the caller.
+
+            A /profile query is performed to check that we are docked (or on foot)
+            and the station name and marketid match the prior Docked event.
+            If they do match, and the services list says they're present, also
+            retrieve CAPI market and/or shipyard/outfitting data and merge into
+            the /profile data.
+
+            :param timeout: requests timeout to use.
+            :return: CAPIData instance with what we retrieved.
+            """
+            station_data = capi_single_query(self.FRONTIER_CAPI_PATH_PROFILE, timeout=timeout)
+
+            if not station_data['commander'].get('docked') and not monitor.state['OnFoot']:
+                return station_data
+
+            # Sanity checks in case data isn't as we expect, and maybe 'docked' flag
+            # is also lagging.
+            if (last_starport := station_data.get('lastStarport')) is None:
+                logger.error("No lastStarport in data!")
+                return station_data
+
+            if ((last_starport_name := last_starport.get('name')) is None
+                    or last_starport_name == ''):
+                # This could well be valid if you've been out exploring for a long
+                # time.
+                logger.warning("No lastStarport name!")
+                return station_data
+
+            # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
+            # -- strip "+" chars off star port names returned by the CAPI
+            last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
+
+            services = last_starport.get('services', {})
+            if not isinstance(services, dict):
+                # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
+                # this be an empty list when you've jumped to another system
+                # and not yet docked.  As opposed to no services key at all
+                # or an empty dict.
+                logger.error(f'services is "{type(services)}", not dict !')
+                # TODO: Change this to be dependent on its own CL arg
+                if __debug__:
+                    self.dump_capi_data(station_data)
+
+                # Set an empty dict so as to not have to retest below.
+                services = {}
+
+            last_starport_id = int(last_starport.get('id'))
+
+            if services.get('commodities'):
+                market_data = capi_single_query(self.FRONTIER_CAPI_PATH_MARKET, timeout=timeout)
+                if last_starport_id != int(market_data['id']):
+                    logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
+                    raise ServerLagging()
+
+                else:
+                    market_data['name'] = last_starport_name
+                    station_data['lastStarport'].update(market_data)
+
+            if services.get('outfitting') or services.get('shipyard'):
+                shipyard_data = capi_single_query(self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
+                if last_starport_id != int(shipyard_data['id']):
+                    logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
+                    raise ServerLagging()
+
+                else:
+                    shipyard_data['name'] = last_starport_name
+                    station_data['lastStarport'].update(shipyard_data)
+            # WORKAROUND END
+
+            return station_data
+
+        while True:
+            endpoint: Optional[str]
+            querytime: int
+            play_sound: bool
+            auto_update: bool
+            endpoint, querytime, play_sound, auto_update = self.capi_query_queue.get()
+            if not endpoint:
+                logger.info('Empty queue message, exiting...')
+                break
+
+            logger.trace_if('capi.worker', f'Processing query: {endpoint}')
+            data: CAPIData
+            if endpoint == self._CAPI_PATH_STATION:
+                try:
+                    data = capi_station_queries()
+
+                except Exception as e:
+                    self.capi_response_queue.put(
+                        (
+                            CAPIFailedRequest(
+                                message=e.args,
+                                exception=e
+                            ),
+                            querytime,
+                            play_sound,
+                            auto_update
+                        )
+                    )
+
+                else:
+                    self.capi_response_queue.put(
+                        (data, querytime, play_sound, auto_update)
+                    )
+
+            else:
+                try:
+                    data = capi_single_query(self.FRONTIER_CAPI_PATH_PROFILE)
+
+                except Exception as e:
+                    self.capi_response_queue.put(
+                        (
+                            CAPIFailedRequest(
+                                message=e.args,
+                                exception=e
+                            ),
+                            querytime,
+                            play_sound,
+                            auto_update
+                        )
+                    )
+
+                else:
+                    self.capi_response_queue.put(
+                        (data, querytime, play_sound, auto_update)
+                    )
+
+            self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
 
@@ -763,8 +823,16 @@ class Session(object):
         """Ask the CAPI query thread to finish."""
         self.capi_query_queue.put(None)
 
-    def query(self, endpoint: str) -> None:
-        """Perform a query against the specified CAPI endpoint."""
+    def query(self, endpoint: str, querytime: int, play_sound: bool = False, auto_update: bool = False) -> None:
+        """
+        Perform a query against the specified CAPI endpoint.
+
+        :param querytime: When this query was initiated.
+        :param play_sound: Whether the app should play a sound on error.
+        :param endpoint: The CAPI endpoint to query, might be a pseudo-value.
+        :param auto_update: Whether this request was triggered automatically.
+        :return:
+        """
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
@@ -778,26 +846,27 @@ class Session(object):
         if conf_module.capi_pretend_down:
             raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
-        self.capi_query_queue.put(endpoint)
+        self.capi_query_queue.put(
+            (endpoint, querytime, play_sound, auto_update)
+        )
 
     def profile(self):
         """Perform general CAPI /profile endpoint query."""
         self.query(self.FRONTIER_CAPI_PATH_PROFILE)
 
-    def station(self) -> CAPIData:  # noqa: CCR001
+    def station(self, querytime: int, play_sound: bool = False, auto_update: bool = False) -> CAPIData:
         """
         Perform CAPI quer(y|ies) for station data.
 
-        A /profile query is performed to check that we are docked (or on foot)
-        and the station name and marketid match the prior Docked event.
-        If they do match, and the services list says they're present, also
-        retrieve CAPI market and/or shipyard/outfitting data and merge into
-        the /profile data.
-
+        :param querytime: When this query was initiated.
+        :param play_sound: Whether the app should play a sound on error.
+        :param auto_update: Whether this request was triggered automatically.
         :return: Possibly augmented CAPI data.
         """
         # Ask the thread worker to perform all three queries
-        self.capi_query_queue.put(_CAPI_PATH_STATION)
+        self.capi_query_queue.put(
+            (self._CAPI_PATH_STATION, querytime, play_sound, auto_update)
+        )
     ######################################################################
 
     ######################################################################

@@ -18,7 +18,7 @@ from os.path import dirname, join
 from queue import Queue
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -385,7 +385,7 @@ class AppWindow(object):
 
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
-        self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
+        self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
         self.capi_response_queue: Queue = Queue()
         companion.session.set_capi_response_queue(self.capi_response_queue)
 
@@ -894,7 +894,7 @@ class AppWindow(object):
 
         return True
 
-    def capi_request_data(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
+    def capi_request_data(self, event=None, retrying: bool = False):
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -903,23 +903,23 @@ class AppWindow(object):
         """
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
-        play_bad = False
-        err: Optional[str] = None
 
         if (
                 not monitor.cmdr or not monitor.mode or monitor.state['Captain']
                 or not monitor.system or monitor.mode == 'CQC'
         ):
+            logger.trace_if('capi.worker', 'CQC detected, aborting query')
             return  # In CQC or on crew - do nothing
 
         if companion.session.state == companion.Session.STATE_AUTH:
+            logger.trace_if('capi.worker', 'Auth in progress? Aborting query')
             # Attempt another Auth
             self.login()
             return
 
         if not retrying:
-            if time() < self.holdofftime:  # Was invoked by key while in cooldown
-                if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
+            if time() < self.capi_query_holdoff_time:  # Was invoked by key while in cooldown
+                if play_sound and (self.capi_query_holdoff_time - time()) < companion.capi_query_cooldown * 0.75:
                     self.status['text'] = ''
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
 
@@ -934,14 +934,23 @@ class AppWindow(object):
             self.w.update_idletasks()
 
         querytime = int(time())
-        companion.session.station()
+        logger.trace_if('capi.worker', 'Requesting full station data')
+        companion.session.station(querytime=querytime, play_sound=play_sound)
         config.set('querytime', querytime)
 
 
     def capi_handle_response(self, event=None):
         """Handle the resulting data from a CAPI query."""
+        play_bad = False
+        err: Optional[str] = None
+
+        data: Union[companion.CAPIData, companion.CAPIFailedRequest]
+        querytime: int
+        play_sound: bool
+        auto_update: bool
         try:
-            data = self.capi_response_queue.get(block=False)
+            logger.trace_if('capi.worker', 'Pulling answer off queue')
+            data, querytime, play_sound, auto_update = self.capi_response_queue.get(block=False)
             if isinstance(data, companion.CAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {data.message}')
                 if data.exception:
@@ -950,6 +959,7 @@ class AppWindow(object):
                 else:
                     raise ValueError(data.message)
 
+            logger.trace_if('capi.worker', 'Answer is not a Failure')
             # Validation
             if 'commander' not in data:
                 # This can happen with EGS Auth if no commander created yet
@@ -972,6 +982,7 @@ class AppWindow(object):
 
             elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
+                logger.trace_if('capi.worker', 'Raising CmdrError()')
                 raise companion.CmdrError()
 
             elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
@@ -1010,7 +1021,7 @@ class AppWindow(object):
                                        f"{last_station!r} != {monitor.station!r}")
                         raise companion.ServerLagging()
 
-                self.holdofftime = querytime + companion.holdoff
+                self.capi_query_holdoff_time = querytime + companion.capi_query_cooldown
 
             elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
@@ -1025,6 +1036,7 @@ class AppWindow(object):
                 raise companion.ServerLagging()
 
             else:
+                # TODO: Change to depend on its own CL arg
                 if __debug__:  # Recording
                     companion.session.dump_capi_data(data)
 
@@ -1068,7 +1080,7 @@ class AppWindow(object):
                     err = 'Error: Exporting Market data'
                     play_bad = True
 
-                self.holdofftime = querytime + companion.holdoff
+                self.capi_query_holdoff_time = querytime + companion.capi_query_cooldown
 
         except queue.Empty:
                 logger.error('There was no response in the queue!')
@@ -1118,7 +1130,7 @@ class AppWindow(object):
             hotkeymgr.play_bad()
 
         # Update Odyssey Suit data
-        companion.suit_update(data)
+        companion.session.suit_update(data)
 
         self.update_suit_text()
         self.suit_show_if_set()
@@ -1398,10 +1410,10 @@ class AppWindow(object):
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
-        if time() < self.holdofftime:
+        if time() < self.capi_query_holdoff_time:
             # Update button in main window
             self.button['text'] = self.theme_button['text'] \
-                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))  # LANG: Cooldown on 'Update' button
+                = _('cooldown {SS}s').format(SS=int(self.capi_query_holdoff_time - time()))  # LANG: Cooldown on 'Update' button
             self.w.after(1000, self.cooldown)
 
         else:
