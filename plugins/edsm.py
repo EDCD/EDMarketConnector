@@ -685,6 +685,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
+                        data_elided['message'] = data_elided['message'].decode('utf-8')
+                        data_elided['commanderName'] = data_elided['commanderName'].decode('utf-8')
                         logger.trace_if(
                             'journal.locations',
                             "pending has at least one of ('CarrierJump', 'FSDJump', 'Location', 'Docked')"
