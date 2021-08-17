@@ -480,6 +480,9 @@ class Session(object):
     FRONTIER_CAPI_PATH_PROFILE = '/profile'
     FRONTIER_CAPI_PATH_MARKET = '/market'
     FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
+    # This is a dummy value, to signal to Session.capi_query_worker that we
+    # the 'station' triplet of queries.
+    _CAPI_PATH_STATION = '_edmc_station'
 
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
@@ -621,6 +624,65 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {endpoint}')
+            self.query(self.FRONTIER_CAPI_PATH_PROFILE)
+
+            if not data['commander'].get('docked') and not monitor.state['OnFoot']:
+                return data
+
+            # Sanity checks in case data isn't as we expect, and maybe 'docked' flag
+            # is also lagging.
+            if (last_starport := data.get('lastStarport')) is None:
+                logger.error("No lastStarport in data!")
+                return data
+
+            if ((last_starport_name := last_starport.get('name')) is None
+                    or last_starport_name == ''):
+                # This could well be valid if you've been out exploring for a long
+                # time.
+                logger.warning("No lastStarport name!")
+                return data
+
+            # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
+            # -- strip "+" chars off star port names returned by the CAPI
+            last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
+
+            services = last_starport.get('services', {})
+            if not isinstance(services, dict):
+                # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
+                # this be an empty list when you've jumped to another system
+                # and not yet docked.  As opposed to no services key at all
+                # or an empty dict.
+                logger.error(f'services is "{type(services)}", not dict !')
+                if __debug__:
+                    self.dump_capi_data(data)
+
+                # Set an empty dict so as to not have to retest below.
+                services = {}
+
+            last_starport_id = int(last_starport.get('id'))
+
+            if services.get('commodities'):
+                marketdata = self.query(self.FRONTIER_CAPI_PATH_MARKET)
+                if last_starport_id != int(marketdata['id']):
+                    logger.warning(f"{last_starport_id!r} != {int(marketdata['id'])!r}")
+                    raise ServerLagging()
+
+                else:
+                    marketdata['name'] = last_starport_name
+                    data['lastStarport'].update(marketdata)
+
+            if services.get('outfitting') or services.get('shipyard'):
+                shipdata = self.query(self.FRONTIER_CAPI_PATH_SHIPYARD)
+                if last_starport_id != int(shipdata['id']):
+                    logger.warning(f"{last_starport_id!r} != {int(shipdata['id'])!r}")
+                    raise ServerLagging()
+
+                else:
+                    shipdata['name'] = last_starport_name
+                    data['lastStarport'].update(shipdata)
+            # WORKAROUND END
+
+            return data
             try:
                 r = self.session.get(self.server + endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
@@ -734,65 +796,8 @@ class Session(object):
 
         :return: Possibly augmented CAPI data.
         """
-        self.query(self.FRONTIER_CAPI_PATH_PROFILE)
-
-        if not data['commander'].get('docked') and not monitor.state['OnFoot']:
-            return data
-
-        # Sanity checks in case data isn't as we expect, and maybe 'docked' flag
-        # is also lagging.
-        if (last_starport := data.get('lastStarport')) is None:
-            logger.error("No lastStarport in data!")
-            return data
-
-        if ((last_starport_name := last_starport.get('name')) is None
-                or last_starport_name == ''):
-            # This could well be valid if you've been out exploring for a long
-            # time.
-            logger.warning("No lastStarport name!")
-            return data
-
-        # WORKAROUND: n/a | 06-08-2021: Issue 1198 and https://issues.frontierstore.net/issue-detail/40706
-        # -- strip "+" chars off star port names returned by the CAPI
-        last_starport_name = last_starport["name"] = last_starport_name.rstrip(" +")
-
-        services = last_starport.get('services', {})
-        if not isinstance(services, dict):
-            # Odyssey Alpha Phase 3 4.0.0.20 has been observed having
-            # this be an empty list when you've jumped to another system
-            # and not yet docked.  As opposed to no services key at all
-            # or an empty dict.
-            logger.error(f'services is "{type(services)}", not dict !')
-            if __debug__:
-                self.dump_capi_data(data)
-
-            # Set an empty dict so as to not have to retest below.
-            services = {}
-
-        last_starport_id = int(last_starport.get('id'))
-
-        if services.get('commodities'):
-            marketdata = self.query(self.FRONTIER_CAPI_PATH_MARKET)
-            if last_starport_id != int(marketdata['id']):
-                logger.warning(f"{last_starport_id!r} != {int(marketdata['id'])!r}")
-                raise ServerLagging()
-
-            else:
-                marketdata['name'] = last_starport_name
-                data['lastStarport'].update(marketdata)
-
-        if services.get('outfitting') or services.get('shipyard'):
-            shipdata = self.query(self.FRONTIER_CAPI_PATH_SHIPYARD)
-            if last_starport_id != int(shipdata['id']):
-                logger.warning(f"{last_starport_id!r} != {int(shipdata['id'])!r}")
-                raise ServerLagging()
-
-            else:
-                shipdata['name'] = last_starport_name
-                data['lastStarport'].update(shipdata)
-# WORKAROUND END
-
-        return data
+        # Ask the thread worker to perform all three queries
+        self.capi_query_queue.put(_CAPI_PATH_STATION)
     ######################################################################
 
     ######################################################################
