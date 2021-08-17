@@ -51,6 +51,8 @@ holdoff = 60  # be nice
 timeout = 10  # requests timeout
 auth_timeout = 30  # timeout for initial auth
 
+# Used by both class Auth and Session
+FRONTIER_AUTH_SERVER = 'https://auth.frontierstore.net'
 USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
@@ -276,7 +278,7 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
-                r = self.session.post(SERVER_AUTH + URL_TOKEN, data=data, timeout=auth_timeout)
+                r = self.session.post(FRONTIER_AUTH_SERVER + URL_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
@@ -306,7 +308,7 @@ class Auth(object):
         logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
-            f'{SERVER_AUTH}{URL_AUTH}?response_type=code'
+            f'{FRONTIER_AUTH_SERVER}{URL_AUTH}?response_type=code'
             f'&audience=frontier,steam,epic'
             f'&scope=auth capi'
             f'&client_id={self.CLIENT_ID}'
@@ -360,12 +362,12 @@ class Auth(object):
             # requests_log.setLevel(logging.DEBUG)
             # requests_log.propagate = True
 
-            r = self.session.post(SERVER_AUTH + URL_TOKEN, data=request_data, timeout=auth_timeout)
+            r = self.session.post(FRONTIER_AUTH_SERVER + URL_TOKEN, data=request_data, timeout=auth_timeout)
             data_token = r.json()
             if r.status_code == requests.codes.ok:
                 # Now we need to /decode the token to check the customer_id against FID
                 r = self.session.get(
-                    SERVER_AUTH + URL_DECODE,
+                    FRONTIER_AUTH_SERVER + URL_DECODE,
                     headers={
                         'Authorization': f'Bearer {data_token.get("access_token", "")}',
                         'Content-Type': 'application/json',
@@ -473,7 +475,6 @@ class Session(object):
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
-    SERVER_AUTH = 'https://auth.frontierstore.net'
     URL_AUTH = '/auth'
     URL_TOKEN = '/token'
     URL_DECODE = '/decode'
@@ -666,7 +667,7 @@ class Session(object):
                 )
                 continue
 
-            if r.url.startswith(SERVER_AUTH):
+            if r.url.startswith(FRONTIER_AUTH_SERVER):
                 logger.info('Redirected back to Auth Server')
                 self.capi_response_queue.put(
                     CAPIFailedRequest(f'Redirected back to Auth Server', exception=CredentialsError())
