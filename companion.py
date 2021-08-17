@@ -237,9 +237,9 @@ class Auth(object):
     # Obtain from https://auth.frontierstore.net/client/signup
     CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
 
-    FRONTIER_PATH_AUTH = '/auth'
-    FRONTIER_PATH_TOKEN = '/token'
-    FRONTIER_PATH_DECODE = '/decode'
+    FRONTIER_AUTH_PATH_AUTH = '/auth'
+    FRONTIER_AUTH_PATH_TOKEN = '/token'
+    FRONTIER_AUTH_PATH_DECODE = '/decode'
 
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
@@ -282,7 +282,7 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
-                r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_PATH_TOKEN, data=data, timeout=auth_timeout)
+                r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN, data=data, timeout=auth_timeout)
                 if r.status_code == requests.codes.ok:
                     data = r.json()
                     tokens[idx] = data.get('refresh_token', '')
@@ -312,7 +312,7 @@ class Auth(object):
         logger.info(f'Trying auth from scratch for Commander "{self.cmdr}"')
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
         webbrowser.open(
-            f'{FRONTIER_AUTH_SERVER}{self.FRONTIER_PATH_AUTH}?response_type=code'
+            f'{FRONTIER_AUTH_SERVER}{self.FRONTIER_AUTH_PATH_AUTH}?response_type=code'
             f'&audience=frontier,steam,epic'
             f'&scope=auth capi'
             f'&client_id={self.CLIENT_ID}'
@@ -366,12 +366,12 @@ class Auth(object):
             # requests_log.setLevel(logging.DEBUG)
             # requests_log.propagate = True
 
-            r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_PATH_TOKEN, data=request_data, timeout=auth_timeout)
+            r = self.session.post(FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN, data=request_data, timeout=auth_timeout)
             data_token = r.json()
             if r.status_code == requests.codes.ok:
                 # Now we need to /decode the token to check the customer_id against FID
                 r = self.session.get(
-                    FRONTIER_AUTH_SERVER + self.FRONTIER_PATH_DECODE,
+                    FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_DECODE,
                     headers={
                         'Authorization': f'Bearer {data_token.get("access_token", "")}',
                         'Content-Type': 'application/json',
