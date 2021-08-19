@@ -245,6 +245,9 @@ to be sent over EDDN, then you should add an appropriate entry to the
 killswitches.json file *in the `releases` branch*.  That file **must only ever
 be committed to the `releases` branch!!!**  See [docs/Killswitches.md](Killswitches.md).
 
+Killswitch files can and should be verified using the `killswitch_test.py`
+script in the `scripts` directory
+
 # Packaging & Installer Generation
 
 You'll want to do the .exe and .msi generation in a `cmd.exe` window, not e.g.
