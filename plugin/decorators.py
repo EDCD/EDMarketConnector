@@ -1,10 +1,31 @@
 """Decorators for marking plugins and callbacks."""
 
 
-from typing import Any, Callable, Type, TypeVar
+import functools
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
 
 from EDMCLogging import get_main_logger
 from plugin.base_plugin import BasePlugin
+
+if TYPE_CHECKING:
+    import tkinter as tk
+
+    from plugin.event import JournalEvent
+
+    _UI_SETUP_FUNC = TypeVar(
+        '_UI_SETUP_FUNC', bound=Union[
+            Callable[[Any, tk.Frame], Optional[tk.Widget]],
+            Callable[[tk.Frame], Optional[tk.Widget]],
+        ]
+    )
+
+    _JOURNAL_FUNC = TypeVar(
+        '_JOURNAL_FUNC',
+        bound=Union[
+            Callable[[JournalEvent], None],
+            Callable[[Any, JournalEvent], None]
+        ]
+    )
 
 logger = get_main_logger()
 
@@ -49,6 +70,20 @@ def _list_decorate(attr_name: str, attr_content: str, func: _F) -> _F:
     res.append(attr_content)
     setattr(func, attr_name, res)
     return func
+
+
+# these are overloads to make typing "normal" edmc hooks easier. they are not special, they can be ignored.
+# these names should be up to date with those in event.py -- Unfortunately those constants cannot be used here.
+@overload
+def hook(name: Literal['core.setup_ui']) -> Callable[[_UI_SETUP_FUNC], _UI_SETUP_FUNC]: ...
+
+
+@overload
+def hook(name: Literal['core.journal_event']) -> Callable[[_JOURNAL_FUNC], _JOURNAL_FUNC]: ...
+
+
+@overload
+def hook(name: str) -> Callable[['_F'], _F]: ...
 
 
 def hook(name: str) -> Callable[['_F'], _F]:
