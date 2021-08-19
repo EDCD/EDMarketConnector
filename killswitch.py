@@ -217,7 +217,6 @@ class KillSwitchSet:
                         current EDMC version
         :return: a namedtuple indicating status and reason, if any
         """
-
         if isinstance(version, str):
             version = semantic_version.Version.coerce(version)
 
@@ -254,7 +253,7 @@ class KillSwitchSet:
 
         :param name: The killswitch to check
         :param data: The data to modify if needed
-        :return: A bool indicating if the caller should return, and either the
+        :return: A two tuple consisting of: A bool indicating if the caller should return, and either the
                  original data or a *COPY* that has been modified by rules
         """
         res = self.get_disabled(name, version=version)
@@ -288,7 +287,7 @@ class KillSwitchSet:
 
         :param data: the data to update
         :param log: the logger to use, defaults to the standard EDMC main logger
-        :return: A tuple of bool and updated data, where the bool is true when the caller _should_ halt processing
+        :return: A two tuple of bool and updated data, where the bool is true when the caller _should_ halt processing
         """
         for name in names:
             should_return, data = self.check_killswitch(name=name, data=data, log=log, version=version)
