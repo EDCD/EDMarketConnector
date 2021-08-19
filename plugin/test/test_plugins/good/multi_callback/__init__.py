@@ -3,7 +3,7 @@ import semantic_version
 
 from plugin.base_plugin import BasePlugin
 from plugin.decorators import edmc_plugin, hook
-from plugin.event import BaseEvent
+from plugin.event import BaseEvent, JournalEvent
 from plugin.plugin_info import PluginInfo
 
 
@@ -23,7 +23,7 @@ class GoodPlugin(BasePlugin):
 
     @hook('core.journal_event')
     @hook('uncore.not_journal_event')
-    def multiple_things(self, e: BaseEvent):
+    def multiple_things(self, e: JournalEvent):
         """Multiple hooks on one method."""
         self.called.append(e)
 
