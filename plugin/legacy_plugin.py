@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import pathlib
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import semantic_version
 
@@ -15,8 +15,17 @@ from plugin.exceptions import LegacyPluginHasNoStart3, LegacyPluginNeedsMigratin
 from plugin.plugin_info import PluginInfo
 
 if TYPE_CHECKING:
+    import tkinter as tk  # see implementation of STARTUP_UI_EVENT below
+
     from EDMCLogging import LoggerMixin
     from plugin.manager import PluginManager
+
+    _LEGACY_UI_FUNC = Callable[
+        [tk.Frame], Union[
+            Tuple[tk.Widget, tk.Widget],
+            tk.Widget,
+        ]
+    ]
 
 LEGACY_CALLBACK_LUT: Dict[str, str] = {
     event.PLUGIN_STARTUP_UI_EVENT: 'plugin_app',
@@ -155,6 +164,37 @@ class MigratedPlugin(BasePlugin):
 
         setattr(wrapper, "original_func", f)
         return wrapper
+
+    @decorators.hook(event.PLUGIN_STARTUP_UI_EVENT)
+    def ui_wrapper(self, frame: tk.Frame) -> Optional[tk.Widget]:
+        """Wrap the legacy UI system with the new system that always expects a single widget."""
+        import tkinter as tk  # Importing this here to make most subclasses of this not HAVE to have this sitting here
+        if (f := getattr(self.module, 'plugin_app')) is None:
+            return None
+        out_frame = tk.Frame(frame)
+        f = cast(_LEGACY_UI_FUNC, f)
+        res = f(out_frame)
+
+        if isinstance(res, tk.Widget):
+            return out_frame
+
+        elif (
+            isinstance(res, tuple)
+            and len(res) == 2
+            and isinstance(res[0], tk.Widget)
+            and isinstance(res[1], tk.Widget)
+        ):
+            # Its expected that these used out_frame above as their master, thus we simply need to grid them here
+            # before sending our frame (in a frame, because why not) upwards to the UI
+            res[0].grid(column=0, row=0)
+            res[1].grid(column=1, row=0)
+
+            return out_frame
+
+        self.log.warning(
+            f'plugin_app returned something unexpected: {type(res)=}, {res=}! Assuming its unsafe and bailing on its UI'
+        )
+        return None
 
     def unload(self) -> None:
         """Legacy plugins do not support unloading."""
