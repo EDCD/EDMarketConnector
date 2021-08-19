@@ -473,6 +473,16 @@ class Auth(object):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
+class CAPIRequest():
+    """Encapsulates a request for CAPI data."""
+    ...
+
+
+class CAPIResponse():
+    """Encapsulates a response from CAPI quer(y|ies)."""
+    ...
+
+
 class CAPIFailedRequest():
     """CAPI failed query error class."""
 
@@ -656,6 +666,8 @@ class Session(object):
                     logger.error('Frontier CAPI Auth: query failed after refresh')
                     self.invalidate()
                     self.retrying = False
+                    # TODO: This must NOT happen here, we need to signal back to the requesting
+                    #       code that it needs to sort out auth.
                     self.login()
                     raise CredentialsError('query failed after refresh') from e
 
