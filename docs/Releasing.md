@@ -79,7 +79,7 @@ version strings.
      a wider audience to test forthcoming changes.
     1. `-rc<serial>`, i.e. `-rc1`.  This is used when testing has shown this
      code should be ready for full release, but you want even wider testing.
-     
+
     In both these cases simply increment `<serial>` for each new release.  *Do*
     start from `1` again when beginning `-rc` releases.
 
@@ -88,6 +88,7 @@ version strings.
 
 There are some things that you should always change before running your own
 version of EDMC
+
 1. The Frontier CAPI client ID.  This is hardcoded in companion.py, but can be
  overridden by setting a CLIENT_ID environment variable.
 
@@ -118,21 +119,22 @@ that.
      URL doesn't change over application versions) version of the
      appcast_win_<version>.xml file.  The original upstream value is
      `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
-       
 
-1. Location of release files.  This needs to be cited correctly in the
+2. Location of release files.  This needs to be cited correctly in the
    `edmarketconnector.xml` file, which is what the application queries to
    see if there is a newer version.
    Look for the `url="...` line in the `<enclosure ...` that is like:
 
-       <enclosure
-            url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
-            sparkle:os="windows"
-            sparkle:installerArguments="/passive LAUNCH=yes"
-            sparkle:version="4.2.3"
-            length="11382784"
-            type="application/octet-stream"
-       />
+    ```xml
+    <enclosure
+        url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/4.2.3/EDMarketConnector_win_4.2.3.msi"
+        sparkle:os="windows"
+        sparkle:installerArguments="/passive LAUNCH=yes"
+        sparkle:version="4.2.3"
+        length="11382784"
+        type="application/octet-stream"
+    />
+    ```
 
 
 ## Adding a new file
@@ -151,28 +153,33 @@ You will *also* need to add the file to the `EDMarketConnector.wxs` file so
 that it's actually included in the installer.
 
 1. Location the the appropriate part of the:
+
     ```xml
     <Directory Id="ProgramFilesFolder">
    ```
    section and add a new sub-section:
+
    ```xml
    <Component Id="<valid_component_id>" Guid=""*">
         <File KeyPath="yes" Source="SourceDir\\<file name>" />
    </Component>
    ```
-   
+
    Note that you only need `Id="<valid_component_id>"` if the filename itself
    is not a valid Id, e.g. because it contains spaces.
-   
+
    If the new file is in a new sub-directory then you'll need to add that as
    well.  See the `L10n` example.
-   
-1. Now find the:
+
+2. Now find the:
+
     ```xml
    <Feature Id='Complete' Level='1'> 
    ```
+
    section and add an appropriate line to it.  Remember to use either the
    specific Id you set above or the filename (without directory) for this:
+
    ```xml
    <ComponentRef Id="<valid_component_id>" />
    ```
@@ -205,7 +212,7 @@ release, using a name like `release-4.0.2`.  Do not use the tag
     1. `git checkout stable` # Or whichever other branch is appropriate.
     1. `git pull origin` # Ensures local branch is up to date.
     1. `git checkout -b release-4.0.2`
-    
+
 1. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
 cherry-picking commits.  See [Contributing Guidelines](../Contributing.md)
@@ -245,36 +252,44 @@ a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 
 Assuming the correct python.exe is associated with .py files then simply run:
 
-        setup.py py2exe
+```batch
+setup.py py2exe
+```
 
 else you might need this, which assumes correct python.exe is in your PATH:
 
-        python.exe setup.py py2exe
-    
+```batch
+python.exe setup.py py2exe
+```
+
 else you'll have to specify the path to python.exe, e.g.:
 
-        "C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
+```batch
+"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
+```
 
 Output will be something like (`...` denoting parts elided for brevity):
 
-        running py2exe
-        ...
-        Building 'dist.win32\EDMC.exe'.
-        Building 'dist.win32\EDMarketConnector.exe'.
-        Building shared code archive 'dist.win32\library.zip'.
-        ...
-        Windows Installer XML Toolset Compiler version 3.11.1.2318
-        Copyright (c) .NET Foundation and contributors. All rights reserved.
-        ...
-        Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 1029, Database codepage = 0
-        MsiTran V 5.0
-        Copyright (c) Microsoft Corporation. All Rights Reserved
-        ...
-        DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 0, Database codepage = 0
-        MsiTran V 5.0
-        Copyright (c) Microsoft Corporation. All Rights Reserved
+```plaintext
+running py2exe
+...
+Building 'dist.win32\EDMC.exe'.
+Building 'dist.win32\EDMarketConnector.exe'.
+Building shared code archive 'dist.win32\library.zip'.
+...
+Windows Installer XML Toolset Compiler version 3.11.1.2318
+Copyright (c) .NET Foundation and contributors. All rights reserved.
+...
+Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 1029, Database codepage = 0
+MsiTran V 5.0
+Copyright (c) Microsoft Corporation. All Rights Reserved
+...
+DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 0, Database codepage = 0
+MsiTran V 5.0
+Copyright (c) Microsoft Corporation. All Rights Reserved
 
-        Done
+Done
+```
 
 **Do check the output** for things like not properly specifying extra files
 to be included in the install.  If they're not picked up by current rules in
@@ -354,7 +369,7 @@ the release-4.0.2 branch, as it's temporary.*
     `[ ] This is a pre-release` box.**  Not doing so will cause this release
     to be pointed to by the 'latest' URL.
     5. We always create a discussion for any new release, so tick the
-      `Create a discussion for this release ` box, and check it's targeted at
+      `Create a discussion for this release` box, and check it's targeted at
       the `Announcement` category.
 
 Once the release is created, then **only if making a `stable` release**
@@ -365,8 +380,8 @@ changelog text to the correct section(s):
    into `stable` above.
 3. Use the following to generate HTML from the MarkDown (`pip
   install grip` first if you need to):
+    `grip --export ChangeLog.md`
 
-       grip --export ChangeLog.md
 4. Open `edmarketconnector.xml` in your editor.
 5. If there's still a Mac OS section croll down past it to the Windows
   section.
@@ -380,7 +395,7 @@ changelog text to the correct section(s):
         If, for instance, you fail to *update* this URL then upon running the 'new'
         installer it will silently fail, because you made people try to install
         the old version over the old version.
-    3. Yes, `sparkle:version` should be the Semantic Version string,
+    2. Yes, `sparkle:version` should be the Semantic Version string,
        not the Windows A.B.C.D form.
 8. `git push origin`
 
@@ -388,7 +403,7 @@ changelog text to the correct section(s):
    EDMC instances to pick up on 'Check for Updates'.  The WinSparkle check for
    updates specifically targets:
 
-       `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
+    `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
 
    as per `config.py` `update_feed`.
 
@@ -405,9 +420,9 @@ If you are making a pre-release then:
 1. **DO NOT** Edit `edmarketconnector.xml` at all.  No, not even if you 
   think you won't accidentally merge it into `releases`. Just don't change it
    at all.
-3. **DO NOT** merge into `releases`.
-4. **DO NOT** merge into `stable`.
-5. *Do* merge the code into `beta` after you have made a 'pre-release' on
+1. **DO NOT** merge into `releases`.
+1. **DO NOT** merge into `stable`.
+1. *Do* merge the code into `beta` after you have made a 'pre-release' on
  GitHub.
 
 # Changing Python version
@@ -420,11 +435,11 @@ When changing the Python version (Major.Minor.Patch) used:
 
    1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
    based build use the correct version.
-   
+
 1. Major or Minor level changes:
 
     1. `setup.py` will need its version check updating.
-    1. `EDMarketConnector.wxs` will need updating to reference the correct
+    2. `EDMarketConnector.wxs` will need updating to reference the correct
        pythonXX.dll file.
-    1. `.pre-commit-config.yaml` will need the `default_language_version`
+    3. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.
