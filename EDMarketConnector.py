@@ -6,9 +6,6 @@ import argparse
 import html
 import locale
 import pathlib
-import queue
-from plugin.exceptions import LegacyPluginNeedsMigrating
-from plugin import event
 import re
 import sys
 # import threading
@@ -18,7 +15,7 @@ from os import chdir, environ
 from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import Any, List, TYPE_CHECKING, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Tuple, cast
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -377,6 +374,8 @@ from tkinter import ttk
 
 import commodity
 import plug
+import plugin
+import plugin.event
 import prefs
 import protocol
 import stats
@@ -387,11 +386,11 @@ from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
+from plugin.exceptions import LegacyPluginNeedsMigrating
+from plugin.manager import PluginManager
+from protocol import protocolhandler
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
-from plugin.manager import PluginManager
-import plugin
-import plugin.event
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -738,6 +737,7 @@ class AppWindow(object):
         ]
 
         self.plugin_manager.load_plugins(internal_to_load_paths, autoresolve_sys_path=False)
+        # TODO: Load non-internal plugins
 
     def setup_plugin_uis(self, frame: tk.Frame) -> None:
         """
@@ -748,35 +748,22 @@ class AppWindow(object):
         res = self.plugin_manager.fire_event(event.BaseDataEvent(event.PLUGIN_STARTUP_UI_EVENT, frame))
 
         for plugin_name, results in res.items():
+            results = cast(List[Optional[tk.Widget]], results)
+
             # result = cast(Union[None, Tuple[tk.Widget, tk.Widget], tk.Widget, Any], result)
-            if len(results):
+            if len(results) == 0:
                 logger.trace(f'{plugin_name!r} has no startup UI elements')
+                continue
 
-            for result in results:
-                logger.trace(f'{plugin_name} has startup UI elements. adding...')
-                # create separator for plugin line
-                tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)
-                if isinstance(result, tuple) and len(result) == 2:
-                    logger.warning(f'Plugin {plugin_name} uses legacy tuple[Widget, Widget] UI construction')
-                    result = cast(Tuple[tk.Widget, tk.Widget], result)
-                    ui_row = frame.grid_size()[1]
-                    result[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    result[1].grid(row=ui_row, column=1, sticky=tk.EW)
+            # Separator for plugin line
+            tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)
+            logger.trace(
+                f'{plugin_name} has {f"{len(results)} " if len(results) > 1 else ""}startup UI elements. adding...'
+            )
 
-                elif isinstance(result, tk.Widget):
-                    result.grid(columnspan=2, sticky=tk.EW)
-
-                else:
-                    logger.warning(
-                        f'Plugin {plugin_name} returned non-widget {type(result)=} from ui creation handler! Attempting'
-                        ' to use as widget'
-                    )
-                    result = cast(Any, result)
-
-                    try:
-                        result.grid(columnspan=2, sticky=tk.EW)
-                    except Exception:
-                        logger.warning('Failed to use result as widget')
+            # WORKAROUND 19-08-2021 | mypy workaround -- filter() does not correctly re-type to FilterObj[tk.Widget]
+            for result in cast(List[tk.Widget], filter(lambda r: r is not None, results)):
+                result.grid(columnspan=2, sticky=tk.EW)
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
