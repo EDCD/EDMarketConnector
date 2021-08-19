@@ -11,9 +11,16 @@ from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
 from time import gmtime, localtime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, Literal, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import Tuple
+from typing import Tuple, Union, cast
+
+from monitor_state_dict import (
+    ModuleDict, ModuleEngineering, MonitorStateDict, NavRouteDict, OdysseyWeapon, SuitDict, SuitLoadoutDict
+)
+
+# spell-checker: words loadoutid slotid fdev fid relog onfoot fsdjump cheaty suitid fauto sauto intimidator navroute
+# spell-checker: words quitacrew joinacrew sellshiponrebuy npccrewpaidwage
 
 if TYPE_CHECKING:
     import tkinter
@@ -116,17 +123,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     def __init_state(self) -> None:
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
-        self.state: Dict = {
-            'GameLanguage':       None,  # From `Fileheader
-            'GameVersion':        None,  # From `Fileheader
-            'GameBuild':          None,  # From `Fileheader
-            'Captain':            None,  # On a crew
+        self.state: MonitorStateDict = {
+            'GameLanguage':       '',                   # From `Fileheader
+            'GameVersion':        '',                   # From `Fileheader
+            'GameBuild':          '',                   # From `Fileheader
+            'Captain':            '',                   # On a crew
             'Cargo':              defaultdict(int),
-            'Credits':            None,
-            'FID':                None,  # Frontier Cmdr ID
-            'Horizons':           None,  # Does this user have Horizons?
-            'Odyssey':            False,  # Have we detected we're running under Odyssey?
-            'Loan':               None,
+            'Credits':            0,
+            'FID':                '',                   # Frontier Cmdr ID
+            'Horizons':           False,                # Does this user have Horizons?
+            'Odyssey':            False,                # Have we detected we're running under Odyssey?
+            'Loan':               0,
             'Raw':                defaultdict(int),
             'Manufactured':       defaultdict(int),
             'Encoded':            defaultdict(int),
@@ -134,39 +141,40 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Rank':               {},
             'Reputation':         {},
             'Statistics':         {},
-            'Role':               None,  # Crew role - None, Idle, FireCon, FighterCon
-            'Friends':            set(),  # Online friends
-            'ShipID':             None,
-            'ShipIdent':          None,
-            'ShipName':           None,
-            'ShipType':           None,
-            'HullValue':          None,
-            'ModulesValue':       None,
-            'Rebuy':              None,
-            'Modules':            None,
-            'CargoJSON':          None,  # The raw data from the last time cargo.json was read
-            'Route':              None,  # Last plotted route from Route.json file
-            'OnFoot':             False,  # Whether we think you're on-foot
-            'Component':          defaultdict(int),      # Odyssey Components in Ship Locker
-            'Item':               defaultdict(int),      # Odyssey Items in Ship Locker
-            'Consumable':         defaultdict(int),      # Odyssey Consumables in Ship Locker
-            'Data':               defaultdict(int),      # Odyssey Data in Ship Locker
-            'BackPack':     {                      # Odyssey BackPack contents
-                'Component':      defaultdict(int),    # BackPack Components
-                'Consumable':     defaultdict(int),    # BackPack Consumables
-                'Item':           defaultdict(int),    # BackPack Items
-                'Data':           defaultdict(int),  # Backpack Data
+            'Role':               '',                   # Crew role - None, Idle, FireCon, FighterCon
+            'Friends':            set(),                # Online friends
+            'ShipID':             0-1,                  # WORKAROUND: https://github.com/PyCQA/pycodestyle/issues/1008
+            'ShipIdent':          '',
+            'ShipName':           '',
+            'ShipType':           '',
+            'HullValue':          0,
+            'ModulesValue':       0,
+            'Rebuy':              0,
+            'Modules':            {},
+            'CargoJSON':          {},                   # The raw data from the last time cargo.json was read
+            'NavRoute':           NavRouteDict(timestamp='', route=[]),  # Last plotted route from Route.json file
+            'OnFoot':             False,                    # Whether we think you're on-foot
+            'Component':          defaultdict(int),         # Odyssey Components in Ship Locker
+            'Item':               defaultdict(int),         # Odyssey Items in Ship Locker
+            'Consumable':         defaultdict(int),         # Odyssey Consumables in Ship Locker
+            'Data':               defaultdict(int),         # Odyssey Data in Ship Locker
+            'BackPack':     {                               # Odyssey BackPack contents
+                'Component':      defaultdict(int),             # BackPack Components
+                'Consumable':     defaultdict(int),             # BackPack Consumables
+                'Item':           defaultdict(int),             # BackPack Items
+                'Data':           defaultdict(int),             # Backpack Data
             },
-            'BackpackJSON':       None,  # Raw JSON from `Backpack.json` file, if available
-            'ShipLockerJSON':     None,  # Raw JSON from the `ShipLocker.json` file, if available
+            'BackpackJSON':       {},                    # Raw JSON from `Backpack.json` file, if available
+            'ShipLockerJSON':     {},                    # Raw JSON from the `ShipLocker.json` file, if available
             'SuitCurrent':        None,
             'Suits':              {},
             'SuitLoadoutCurrent': None,
             'SuitLoadouts':       {},
-            'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
-            'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
-            'Body':               None,
-            'BodyType':           None,
+            'Taxi':               False,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
+            'Dropship':           False,  # Best effort as to whether or not the above taxi is a dropship.
+            'Body':               '',
+            'BodyType':           '',
+            'ModuleInfo':         {},
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -266,8 +274,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systemaddress = None
         self.is_beta = False
         self.state['OnFoot'] = False
-        self.state['Body'] = None
-        self.state['BodyType'] = None
+        self.state['Body'] = ''
+        self.state['BodyType'] = ''
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -384,7 +392,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
-        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
+        # HACK: Uses undocumented attribute
+        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # type: ignore
 
         logger.debug('Entering loop...')
         while True:
@@ -547,23 +556,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
-                self.state.update({
-                    'Captain':    None,
-                    'Credits':    entry['Credits'],
-                    'FID':        entry.get('FID'),   # From 3.3
-                    'Horizons':   entry['Horizons'],  # From 3.0
-                    'Odyssey':    entry.get('Odyssey', False),  # From 4.0 Odyssey
-                    'Loan':       entry['Loan'],
-                    'Engineers':  {},
-                    'Rank':       {},
-                    'Reputation': {},
-                    'Statistics': {},
-                    'Role':       None,
-                    'Taxi':       None,
-                    'Dropship':   None,
-                    'Body':       None,
-                    'BodyType':   None,
-                })
+
+                # Cant use update() without the entire thing, do stuff manually here
+                self.state['Captain'] = ''
+                self.state['Credits'] = entry['Credits']
+                self.state['FID'] = entry.get('FID', '')   # From 3.3
+                self.state['Horizons'] = entry['Horizons']  # From 3.0
+                self.state['Odyssey'] = entry.get('Odyssey', False)  # From 4.0 Odyssey
+                self.state['Loan'] = entry['Loan']
+                self.state['Engineers'] = {}
+                self.state['Rank'] = {}
+                self.state['Reputation'] = {}
+                self.state['Statistics'] = {}
+                self.state['Role'] = ''
+                self.state['Taxi'] = False
+                self.state['Dropship'] = False
+                self.state['Body'] = ''
+                self.state['BodyType'] = ''
+
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
 
@@ -578,30 +588,30 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if 'UserShipId' in entry:  # Only present when changing the ship's ident
                     self.state['ShipIdent'] = entry['UserShipId']
 
-                self.state['ShipName'] = entry.get('UserShipName')
+                self.state['ShipName'] = entry.get('UserShipName', '')
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
 
             elif event_type == 'shipyardbuy':
-                self.state['ShipID'] = None
-                self.state['ShipIdent'] = None
-                self.state['ShipName'] = None
+                self.state['ShipID'] = -1
+                self.state['ShipIdent'] = ''
+                self.state['ShipName'] = ''
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['HullValue'] = None
-                self.state['ModulesValue'] = None
-                self.state['Rebuy'] = None
-                self.state['Modules'] = None
+                self.state['HullValue'] = 0
+                self.state['ModulesValue'] = 0
+                self.state['Rebuy'] = 0
+                self.state['Modules'] = {}
 
                 self.state['Credits'] -= entry.get('ShipPrice', 0)
 
             elif event_type == 'shipyardswap':
                 self.state['ShipID'] = entry['ShipID']
-                self.state['ShipIdent'] = None
-                self.state['ShipName'] = None
+                self.state['ShipIdent'] = ''
+                self.state['ShipName'] = ''
                 self.state['ShipType'] = self.canonicalise(entry['ShipType'])
-                self.state['HullValue'] = None
-                self.state['ModulesValue'] = None
-                self.state['Rebuy'] = None
-                self.state['Modules'] = None
+                self.state['HullValue'] = 0
+                self.state['ModulesValue'] = 0
+                self.state['Rebuy'] = 0
+                self.state['Modules'] = {}
 
             elif (
                 event_type == 'loadout' and
@@ -619,9 +629,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['ShipName'] = entry['ShipName']
 
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
-                self.state['HullValue'] = entry.get('HullValue')  # not present on exiting Outfitting
-                self.state['ModulesValue'] = entry.get('ModulesValue')  # not present on exiting Outfitting
-                self.state['Rebuy'] = entry.get('Rebuy')
+                self.state['HullValue'] = entry.get('HullValue', 0)  # not present on exiting Outfitting
+                self.state['ModulesValue'] = entry.get('ModulesValue', 0)  # not present on exiting Outfitting
+                self.state['Rebuy'] = entry.get('Rebuy', 0)
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
                 for module in entry['Modules']:
@@ -636,7 +646,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Modules'][module['Slot']] = module
 
             elif event_type == 'modulebuy':
-                self.state['Modules'][entry['Slot']] = {
+                new_module: ModuleDict = {
                     'Slot':     entry['Slot'],
                     'Item':     self.canonicalise(entry['BuyItem']),
                     'On':       True,
@@ -644,6 +654,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Health':   1.0,
                     'Value':    entry['BuyPrice'],
                 }
+                self.state['Modules'][entry['Slot']] = new_module
 
                 self.state['Credits'] -= entry.get('BuyPrice', 0)
 
@@ -683,7 +694,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # This event is logged when a player (on foot) gets into a ship or SRV
                 # Parameters:
                 #     • SRV: true if getting into SRV, false if getting into a ship
-                #     • Taxi: true when boarding a taxi transposrt ship
+                #     • Taxi: true when boarding a taxi transport ship
                 #     • Multicrew: true when boarding another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
@@ -711,7 +722,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #
                 # Parameters:
                 #     • SRV: true if getting out of SRV, false if getting out of a ship
-                #     • Taxi: true when getting out of a taxi transposrt ship
+                #     • Taxi: true when getting out of a taxi transport ship
                 #     • Multicrew: true when getting out of another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
@@ -761,16 +772,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • OnFoot: bool
                 if event_type in ('location', 'carrierjump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
-                    self.state['Body'] = entry.get('Body')
-                    self.state['BodyType'] = entry.get('BodyType')
+                    self.state['Body'] = entry.get('Body', '')
+                    self.state['BodyType'] = entry.get('BodyType', '')
 
                     if event_type == 'location':
                         logger.trace_if('journal.locations', '"Location" event')
 
                 elif event_type == 'fsdjump':
                     self.planet = None
-                    self.state['Body'] = None
-                    self.state['BodyType'] = None
+                    self.state['Body'] = ''
+                    self.state['BodyType'] = ''
 
                 if 'StarPos' in entry:
                     self.coordinates = tuple(entry['StarPos'])  # type: ignore
@@ -792,9 +803,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
 
-                self.state['Taxi'] = entry.get('Taxi', None)
+                self.state['Taxi'] = entry.get('Taxi', False)
                 if not self.state['Taxi']:
-                    self.state['Dropship'] = None
+                    self.state['Dropship'] = False
 
             elif event_type == 'approachbody':
                 self.planet = entry['Body']
@@ -803,8 +814,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type in ('leavebody', 'supercruiseentry'):
                 self.planet = None
-                self.state['Body'] = None
-                self.state['BodyType'] = None
+                self.state['Body'] = ''
+                self.state['BodyType'] = ''
 
             elif event_type in ('rank', 'promotion'):
                 payload = dict(entry)
@@ -825,7 +836,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 payload.pop('event')
                 payload.pop('timestamp')
                 # NB: We need the original casing for these keys
-                self.state[entry['event']] = payload
+                self.state[entry['event']] = payload  # type: ignore # Non-literal, but the options are ensured above
 
             elif event_type == 'engineerprogress':
                 # Sanity check - at least once the 'Engineer' (name) was missing from this in early
@@ -834,10 +845,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.event_valid_engineerprogress(entry):
                     engineers = self.state['Engineers']
                     if 'Engineers' in entry:  # Startup summary
-                        self.state['Engineers'] = {
+                        to_set: Dict[str, Union[str, Tuple[int, int]]] = {
                             e['Engineer']: ((e['Rank'], e.get('RankProgress', 0)) if 'Rank' in e else e['Progress'])
                             for e in entry['Engineers']
                         }
+                        self.state['Engineers'] = to_set
 
                     else:  # Promotion
                         engineer = entry['Engineer']
@@ -852,7 +864,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
-                        entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+                        entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
                 clean = self.coalesce_cargo(entry['Inventory'])
@@ -1017,6 +1029,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     for c in entry[changes]:
                         category = self.category(c['Type'])
                         name = self.canonicalise(c['Name'])
+                        # Cheaty "its fine I promise" for TypedDict
+                        category = cast(Literal['Component', 'Data', 'Consumable', 'Item'], category)
 
                         if changes == 'Removed':
                             self.state['BackPack'][category][name] -= c['Count']
@@ -1028,9 +1042,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
                 # materials is impossible when used/picked up anyway.
                 for c in self.state['BackPack']:
-                    for m in self.state['BackPack'][c]:
-                        if self.state['BackPack'][c][m] < 0:
-                            self.state['BackPack'][c][m] = 0
+                    for m in self.state['BackPack'][c]:  # type: ignore # c and m are dynamic but "safe"
+                        if self.state['BackPack'][c][m] < 0:  # type: ignore # c and m are dynamic but "safe"
+                            self.state['BackPack'][c][m] = 0  # type: ignore # c and m are dynamic but "safe"
 
             elif event_type == 'buymicroresources':
                 # From 4.0.0.400 we get an empty (see file) `ShipLocker` event,
@@ -1104,7 +1118,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.state['SuitLoadouts']:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                     try:
-                        self.state['SuitLoadouts'].pop(f'{loadout_id}')
+                        self.state['SuitLoadouts'].pop(loadout_id)
 
                     except KeyError:
                         # This should no longer happen, as we're now handling CreateSuitLoadout properly
@@ -1134,7 +1148,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
                 loc_name = entry.get('Name_Localised', entry['Name'])
-                self.state['Suits'][entry['SuitID']] = {
+                to_set_suit: SuitDict = {
                     'name':      entry['Name'],
                     'locName':   loc_name,
                     'edmcName':  self.suit_sane_name(loc_name),
@@ -1142,6 +1156,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'suitId':    entry['SuitID'],
                     'mods':      entry['SuitMods'],  # Suits can (rarely) be bought with modules installed
                 }
+                self.state['Suits'][entry['SuitID']] = to_set_suit
 
                 # update credits
                 if price := entry.get('Price') is None:
@@ -1199,15 +1214,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.state['SuitLoadouts']:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
                     try:
-                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = {
+                        w_to_set: OdysseyWeapon = {
                             'name':           entry['ModuleName'],
                             'locName':        entry.get('ModuleName_Localised', entry['ModuleName']),
                             'id':             None,
                             'weaponrackId':   entry['SuitModuleID'],
                             'locDescription': '',
                             'class':          entry['Class'],
-                            'mods':           entry['WeaponMods']
+                            'mods':           entry['WeaponMods'],
                         }
+
+                        self.state['SuitLoadouts'][loadout_id]['slots'][entry['SlotName']] = w_to_set
 
                     except KeyError:
                         logger.error(f"LoadoutEquipModule: {entry}")
@@ -1305,24 +1322,25 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
                     try:
-                        entry = json.load(rf)
+                        nv_entry: NavRouteDict = json.load(rf)
 
                     except json.JSONDecodeError:
                         logger.exception('Failed decoding NavRoute.json', exc_info=True)
 
                     else:
-                        self.state['NavRoute'] = entry
+                        self.state['NavRoute'] = nv_entry
+                        entry = cast(dict, nv_entry)
 
             elif event_type == 'moduleinfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
                     try:
-                        entry = json.load(mf)
+                        m_entry = json.load(mf)
 
                     except json.JSONDecodeError:
                         logger.exception('Failed decoding ModulesInfo.json', exc_info=True)
 
                     else:
-                        self.state['ModuleInfo'] = entry
+                        self.state['ModuleInfo'] = m_entry
 
             elif event_type in ('collectcargo', 'marketbuy', 'buydrones', 'miningrefined'):
                 commodity = self.canonicalise(entry['Type'])
@@ -1357,6 +1375,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'materials':
                 for category in ('Raw', 'Manufactured', 'Encoded'):
+                    category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
                     self.state[category] = defaultdict(int)
                     self.state[category].update({
                         self.canonicalise(x['Name']): x['Count'] for x in entry.get(category, [])
@@ -1364,17 +1383,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'materialcollected':
                 material = self.canonicalise(entry['Name'])
-                self.state[entry['Category']][material] += entry['Count']
+                self.state[entry['Category']][material] += entry['Count']  # type: ignore
 
             elif event_type in ('materialdiscarded', 'scientificresearch'):
                 material = self.canonicalise(entry['Name'])
-                state_category = self.state[entry['Category']]
+                state_category = self.state[entry['Category']]  # type: ignore
                 state_category[material] -= entry['Count']
                 if state_category[material] <= 0:
                     state_category.pop(material)
 
             elif event_type == 'synthesis':
                 for category in ('Raw', 'Manufactured', 'Encoded'):
+                    category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
                     for x in entry['Materials']:
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
@@ -1384,7 +1404,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'materialtrade':
                 category = self.category(entry['Paid']['Category'])
-                state_category = self.state[category]
+                state_category = self.state[category]  # type: ignore
                 paid = entry['Paid']
                 received = entry['Received']
 
@@ -1400,6 +1420,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             ):
 
                 for category in ('Raw', 'Manufactured', 'Encoded'):
+                    category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
+
                     for x in entry.get('Ingredients', []):
                         material = self.canonicalise(x['Name'])
                         if material in self.state[category]:
@@ -1409,7 +1431,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 module = self.state['Modules'][entry['Slot']]
                 assert(module['Item'] == self.canonicalise(entry['Module']))
-                module['Engineering'] = {
+                to_set_me: ModuleEngineering = {
                     'Engineer':      entry['Engineer'],
                     'EngineerID':    entry['EngineerID'],
                     'BlueprintName': entry['BlueprintName'],
@@ -1418,6 +1440,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Quality':       entry['Quality'],
                     'Modifiers':     entry['Modifiers'],
                 }
+
+                module['Engineering'] = to_set_me
 
                 if 'ExperimentalEffect' in entry:
                     module['Engineering']['ExperimentalEffect'] = entry['ExperimentalEffect']
@@ -1438,7 +1462,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     if 'Category' in reward:  # Category not present in E:D 3.0
                         category = self.category(reward['Category'])
                         material = self.canonicalise(reward['Name'])
-                        self.state[category][material] += reward.get('Count', 1)
+                        self.state[category][material] += reward.get('Count', 1)  # type: ignore
 
             elif event_type == 'engineercontribution':
                 commodity = self.canonicalise(entry.get('Commodity'))
@@ -1450,6 +1474,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 material = self.canonicalise(entry.get('Material'))
                 if material:
                     for category in ('Raw', 'Manufactured', 'Encoded'):
+                        category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
                         if material in self.state[category]:
                             self.state[category][material] -= entry['Quantity']
                             if self.state[category][material] <= 0:
@@ -1458,6 +1483,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'technologybroker':
                 for thing in entry.get('Ingredients', []):  # 3.01
                     for category in ('Cargo', 'Raw', 'Manufactured', 'Encoded'):
+                        category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
                         item = self.canonicalise(thing['Name'])
                         if item in self.state[category]:
                             self.state[category][item] -= thing['Count']
@@ -1473,6 +1499,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for thing in entry.get('Materials', []):  # 3.02
                     material = self.canonicalise(thing['Name'])
                     category = thing['Category']
+                    category = cast(Literal['Raw', 'Manufactured', 'Encoded'], category)
                     self.state[category][material] -= thing['Count']
                     if self.state[category][material] <= 0:
                         self.state[category].pop(material)
@@ -1490,15 +1517,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systemaddress = None
                 self.state['OnFoot'] = False
 
-                self.state['Body'] = None
-                self.state['BodyType'] = None
+                self.state['Body'] = ''
+                self.state['BodyType'] = ''
 
             elif event_type == 'changecrewrole':
                 self.state['Role'] = entry['Role']
 
             elif event_type == 'quitacrew':
-                self.state['Captain'] = None
-                self.state['Role'] = None
+                self.state['Captain'] = ''
+                self.state['Role'] = ''
                 self.planet = None
                 self.system = None
                 self.station = None
@@ -1508,8 +1535,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.coordinates = None
                 self.systemaddress = None
 
-                self.state['Body'] = None
-                self.state['BodyType'] = None
+                self.state['Body'] = ''
+                self.state['BodyType'] = ''
                 # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'friends':
@@ -1578,8 +1605,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'carrierbanktransfer':
-                if (newbal := entry.get('PlayerBalance')):
-                    self.state['Credits'] = newbal
+                if (new_bal := entry.get('PlayerBalance')):
+                    self.state['Credits'] = new_bal
 
             elif event_type == 'carrierdecommission':
                 # v30 doc says nothing about citing the refund amount
@@ -1683,7 +1710,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Check if this looks like a suit we already have stored, so as
         # to avoid 'bad' Journal localised names.
-        suit = self.state['Suits'].get(f"{suitid}", None)
+        suit: Optional[SuitDict] = self.state['Suits'].get(suitid, None)
         if suit is None:
             # Initial suit containing just the data that is then embedded in
             # the loadout
@@ -1693,8 +1720,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             suitname = entry.get('SuitName_Localised', entry['SuitName'])
             edmc_suitname = self.suit_sane_name(suitname)
             suit = {
-                'edmcName': edmc_suitname,
-                'locName':  suitname,
+                'edmcName':     edmc_suitname,
+                'locName':      suitname,
+                'suitId':       0-1,                    # WORKAROUND: https://github.com/PyCQA/pycodestyle/issues/1008
+                'id':           None,
+                'name':         entry['SuitName'],
+                'mods':         entry['SuitMods']
             }
 
         # Overwrite with latest data, just in case, as this can be from CAPI which may or may not have had
@@ -1705,19 +1736,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry['LoadoutID'])
         # Make the new loadout, in the CAPI format
-        new_loadout = {
+        new_loadout: SuitLoadoutDict = {
             'loadoutSlotId': suitloadout_slotid,
             'suit':          suit,
             'name':          entry['LoadoutName'],
             'slots':         self.suit_loadout_slots_array_to_dict(entry['Modules']),
         }
+
         # Assign this loadout into our state
-        self.state['SuitLoadouts'][f"{suitloadout_slotid}"] = new_loadout
+        self.state['SuitLoadouts'][suitloadout_slotid] = new_loadout
 
         # Now add in the extra fields for new_suit to be a 'full' Suit structure
         suit['id'] = suit.get('id')  # Not available in 4.0.0.100 journal event
         # Ensure the suit is in self.state['Suits']
-        self.state['Suits'][f"{suitid}"] = suit
+        self.state['Suits'][suitid] = suit
 
         return suitid, suitloadout_slotid
 
@@ -1732,17 +1764,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
         :return: True if we could do this, False if not.
         """
-        str_suitid = f"{suitid}"
-        str_suitloadoutid = f"{suitloadout_slotid}"
-
-        if (self.state['Suits'].get(str_suitid, False)
-                and self.state['SuitLoadouts'].get(str_suitloadoutid, False)):
-            self.state['SuitCurrent'] = self.state['Suits'][str_suitid]
-            self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][str_suitloadoutid]
+        if suitid in self.state['Suits'] and suitloadout_slotid in self.state['SuitLoadouts']:
+            self.state['SuitCurrent'] = self.state['Suits'][suitid]
+            self.state['SuitLoadoutCurrent'] = self.state['SuitLoadouts'][suitloadout_slotid]
             return True
 
         logger.error(f"Tried to set a suit and suitloadout where we didn't know about both: {suitid=}, "
-                     f"{str_suitloadoutid=}")
+                     f"{suitloadout_slotid=}")
+
         return False
 
     # TODO: *This* will need refactoring and a proper validation infrastructure

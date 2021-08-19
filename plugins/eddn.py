@@ -24,6 +24,7 @@ from companion import CAPIData, category_map
 from config import applongname, appversion_nobuild, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
+from monitor_state_dict import MonitorStateDict
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -774,7 +775,7 @@ def journal_entry(  # noqa: C901, CCR001
         system: str,
         station: str,
         entry: MutableMapping[str, Any],
-        state: Mapping[str, Any]
+        state: MonitorStateDict
 ) -> Optional[str]:
     """
     Process a new Journal entry.
