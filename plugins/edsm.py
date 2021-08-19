@@ -407,7 +407,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     if should_return:
         return
-    
+
     entry = new_entry
 
     this.on_foot = state['OnFoot']
@@ -646,14 +646,16 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         retrying = 0
         while retrying < 3:
             should_skip, new_item = killswitch.check_killswitch(
-                'plugins.edsm.worker', item if item is not None else {}, logger
+                'plugins.edsm.worker',
+                item if item is not None else cast(Tuple[str, Mapping[str, Any]], ("", {})),
+                logger
             )
 
             if should_skip:
                 break
 
             if item is not None:
-                item = cast(Tuple[str, Mapping[str, Any]], new_item)
+                item = new_item
 
             try:
                 if item and entry['event'] not in this.discarded_events:
@@ -669,7 +671,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                     if skip:
                         continue
 
-                    new_pending.append(cast(Mapping[str, Any], new))
+                    new_pending.append(new)
 
                 pending = new_pending
 
