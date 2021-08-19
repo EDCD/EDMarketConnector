@@ -1015,12 +1015,6 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td_button['state'] = tk.NORMAL
         self.out_ship_button['state'] = tk.NORMAL
 
-        local = any((self.out_td.get(), self.out_csv.get(), self.out_ship.get()))
-        self.out_auto_button['state'] = tk.NORMAL if local and logvalid else tk.DISABLED
-        self.outdir_label['state'] = tk.NORMAL if local else tk.DISABLED
-        self.outbutton['state'] = tk.NORMAL if local else tk.DISABLED
-        self.outdir_entry['state'] = tk.NORMAL if local else tk.DISABLED
-
     def filebrowse(self, title, pathvar):
         """
         Open a directory selection dialog.
