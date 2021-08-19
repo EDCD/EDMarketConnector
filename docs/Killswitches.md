@@ -70,6 +70,11 @@ An example follows:
 - `plugins.some_plugin.some_thing` will never be allowed to continue
   (as all fields are blank)
 
+### Testing
+
+Killswitch files can be tested using the script in `scripts/killswitch_test.py`.
+Providing a file as an argument or `-` for stdin will output the behaviour of
+the provided file, including indicating typos, if applicable.
 
 ### Versions
 
