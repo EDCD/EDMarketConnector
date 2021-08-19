@@ -49,14 +49,14 @@ You will need several pieces of software installed, or the files from their
  `requirements-dev.txt`.
 
 1. You'll now need to 'pip install' several python modules.
-	1. Ensure you have `pip` installed. If needs be see
-	 [Installing pip](https://pip.pypa.io/en/stable/installing/)
-	1. The easiest way is to utilise the `requirements-dev.txt` file:
-	 `python -m pip install --user -r requirements-dev.txt`. This will install
-	 all dependencies plus anything required for development.
-	1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
-	 and ensure the modules listed there are installed as per the version
-	 requirements.
+    1. Ensure you have `pip` installed. If needs be see
+     [Installing pip](https://pip.pypa.io/en/stable/installing/)
+    1. The easiest way is to utilise the `requirements-dev.txt` file:
+     `python -m pip install --user -r requirements-dev.txt`. This will install
+     all dependencies plus anything required for development.
+    1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
+     and ensure the modules listed there are installed as per the version
+     requirements.
 
 If you are using different versions of any of these tools then please ensure
 that the paths where they're installed match the associated lines in
@@ -109,16 +109,17 @@ that.
     3. `appcmdname`: The CLI appname, e.g. 'EDMC'
     4. `_static_appversion`: The current version, e.g. `4.0.2`.  **You MUST
      make this something like `4.0.2+<myversion>` to differentiate it from
-	 upstream.**  Whatever is in this field is what will be reported if
-	 sending messages to EDDN, or any of the third-party website APIs.
-	 This is utilising the 'build metadata' part of a Semantic version.
+     upstream.**  Whatever is in this field is what will be reported if
+     sending messages to EDDN, or any of the third-party website APIs.
+     This is utilising the 'build metadata' part of a Semantic version.
     5. `copyright`: The Copyright string.
     6. `update_feed`: The URL where the application looks for current latest
-	 version information.  This URL should be hosting a renamed (so the full
-	 URL doesn't change over application versions) version of the
-	 appcast_win_<version>.xml file.  The original upstream value is
-	 `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
+     version information.  This URL should be hosting a renamed (so the full
+     URL doesn't change over application versions) version of the
+     appcast_win_<version>.xml file.  The original upstream value is
+     `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
        
+
 1. Location of release files.  This needs to be cited correctly in the
    `edmarketconnector.xml` file, which is what the application queries to
    see if there is a newer version.
@@ -201,10 +202,10 @@ which branch (stable or beta) you'll be ultimately updating.
 1. So as to make backing out any mistakes easier create a new branch for this
 release, using a name like `release-4.0.2`.  Do not use the tag
 `Release/4.0.2` form, that could cause confusion.
-	1. `git checkout stable` # Or whichever other branch is appropriate.
-	1. `git pull origin` # Ensures local branch is up to date.
-	1. `git checkout -b release-4.0.2`
-	
+    1. `git checkout stable` # Or whichever other branch is appropriate.
+    1. `git pull origin` # Ensures local branch is up to date.
+    1. `git checkout -b release-4.0.2`
+    
 1. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
 cherry-picking commits.  See [Contributing Guidelines](../Contributing.md)
@@ -218,12 +219,12 @@ commit for this change.**
 1. Prepare a changelog text for the release.  You'll need this both for the
 GitHub release and the contents of the `edmarketconnector.xml` file if making
 a `stable` release, as well as any social media posts you make.
-	1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
-	update this first.
-	1. To be sure you include all the changes look at the git log since the
-	prior appropriate (pre-)release.
-	1. As you're working in a version-specific branch, `release-4.0.2`, you
-	can safely commit these changes and push to GitHub.
+    1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
+    update this first.
+    1. To be sure you include all the changes look at the git log since the
+    prior appropriate (pre-)release.
+    1. As you're working in a version-specific branch, `release-4.0.2`, you
+    can safely commit these changes and push to GitHub.
      **Do not merge the branch with `releases` until the GitHub release is in place.**
 
 If you're wondering, you needed to get the changelog prepared before building
@@ -244,36 +245,36 @@ a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 
 Assuming the correct python.exe is associated with .py files then simply run:
 
-		setup.py py2exe
+        setup.py py2exe
 
 else you might need this, which assumes correct python.exe is in your PATH:
 
-		python.exe setup.py py2exe
-	
+        python.exe setup.py py2exe
+    
 else you'll have to specify the path to python.exe, e.g.:
 
-		"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
+        "C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
 
 Output will be something like (`...` denoting parts elided for brevity):
 
-		running py2exe
-		...
-		Building 'dist.win32\EDMC.exe'.
-		Building 'dist.win32\EDMarketConnector.exe'.
-		Building shared code archive 'dist.win32\library.zip'.
-		...
-		Windows Installer XML Toolset Compiler version 3.11.1.2318
-		Copyright (c) .NET Foundation and contributors. All rights reserved.
-		...
-		Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 1029, Database codepage = 0
-		MsiTran V 5.0
-		Copyright (c) Microsoft Corporation. All Rights Reserved
-		...
-		DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 0, Database codepage = 0
-		MsiTran V 5.0
-		Copyright (c) Microsoft Corporation. All Rights Reserved
+        running py2exe
+        ...
+        Building 'dist.win32\EDMC.exe'.
+        Building 'dist.win32\EDMarketConnector.exe'.
+        Building shared code archive 'dist.win32\library.zip'.
+        ...
+        Windows Installer XML Toolset Compiler version 3.11.1.2318
+        Copyright (c) .NET Foundation and contributors. All rights reserved.
+        ...
+        Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 1029, Database codepage = 0
+        MsiTran V 5.0
+        Copyright (c) Microsoft Corporation. All Rights Reserved
+        ...
+        DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 0, Database codepage = 0
+        MsiTran V 5.0
+        Copyright (c) Microsoft Corporation. All Rights Reserved
 
-		Done
+        Done
 
 **Do check the output** for things like not properly specifying extra files
 to be included in the install.  If they're not picked up by current rules in
@@ -322,9 +323,9 @@ Once that is done then for manually built installers:
       2. Create a matching `hashes.sum` file for your `.msi` file:
    
              sha256sum EDMarketConnector_win*.msi > ./hashes.sum
-      
+
           and replace the one in the draft release with this.
-    
+
     But, **again, you should just be using the auto-build
     mechanism**.
 
