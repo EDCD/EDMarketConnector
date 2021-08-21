@@ -3,7 +3,6 @@
 
 import contextlib
 import logging
-from plugin.exceptions import LegacyPluginNeedsMigrating
 import tkinter as tk
 import webbrowser
 from os.path import exists, expanduser, expandvars, join, normpath
@@ -11,7 +10,7 @@ from sys import platform
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import Dict, List, TYPE_CHECKING, Any, Callable, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union, cast
 
 import myNotebook as nb  # noqa: N813
 from config import applongname, appversion_nobuild, config
@@ -20,10 +19,11 @@ from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from myNotebook import Notebook
+from plugin import event
+from plugin.exceptions import LegacyPluginNeedsMigrating
+from plugin.manager import PluginManager
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
-from plugin.manager import PluginManager
-from plugin import event
 
 logger = get_main_logger()
 
@@ -956,13 +956,17 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
+                text = ""
                 if plugin.info.name == plugin.plugin.path.name:
-                    label = nb.Label(plugins_frame, text=plugin.info.name)
+                    text = plugin.info.name
 
                 else:
-                    label = nb.Label(plugins_frame, text=f'{plugin.plugin.path} ({plugin.info.name})')
+                    text = f'{plugin.plugin.path} ({plugin.info.name})'
 
-                label.grid(columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
+                if plugin in legacy_plugins:
+                    text += ' (legacy)'
+
+                nb.Label(plugins_frame, text=text).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
 
         ############################################################
         # Show which plugins don't have Python 3.x support
@@ -971,16 +975,26 @@ class PreferencesDialog(tk.Toplevel):
         legacy_not_py3 = [
             p for (p, e) in self.plugin_manager.failed_loading.items() if isinstance(e, LegacyPluginNeedsMigrating)
         ]
+
         failed_loading_otherwise = {
             p: e for (p, e) in self.plugin_manager.failed_loading.items() if p not in legacy_not_py3
         }
 
         if len(failed_loading_otherwise) > 0:
+            # Show plugins that errored on load somehow
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
             )
-            # TODO (A_D) Complete showing failed loads
-            ...
+            # LANG: Plugins - Label shown as header when there are plugins that failed to load correctly
+            nb.Label(plugins_frame, text=_('Plugins that failed to load')+':')
+            for p, e in failed_loading_otherwise.items():
+                r = row.get()
+                nb.Label(plugins_frame, text=f'{p}:').grid(
+                    columnspan=1, column=0, padx=self.PADX*2, row=r, sticky=tk.W
+                )
+                nb.Label(plugins_frame, text=str(e)).grid(
+                    columnspan=1, column=1, padx=self.PADX*2, row=r, sticky=tk.E
+                )
 
         if len(legacy_not_py3) > 0:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
@@ -989,7 +1003,8 @@ class PreferencesDialog(tk.Toplevel):
             # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
             nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
             for p in legacy_not_py3:
-                nb.Label(plugins_frame, text=f'{p.name} ({p})').grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
+                nb.Label(plugins_frame, text=f'{p.name} ({p})').grid(
+                    columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
 
             HyperlinkLabel(
                 # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
