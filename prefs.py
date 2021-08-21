@@ -41,14 +41,22 @@ if TYPE_CHECKING:
 # May be imported by plugins
 
 
-class PluginPreferencesEvent(event.BaseEvent):
+class BasePreferencesEvent(event.BaseEvent):
+    """Base event for preferences events."""
+
+    def __init__(self, name: str, commander: Optional[str], is_beta: bool, event_time: Optional[float] = None) -> None:
+        super().__init__(name, event_time=event_time)
+
+        self.commander = commander
+        self.is_beta = is_beta
+
+
+class PreferencesEvent(BasePreferencesEvent):
     """Event to carry required data to set up plugin preferences."""
 
     def __init__(self, notebook: nb.Notebook, commander: Optional[str], is_beta: bool) -> None:
-        super().__init__(event.PLUGIN_PREFERENCES_EVENT, event_time=None)
+        super().__init__(event.EDMCPluginEvents.PREFERENCES, commander=commander, is_beta=is_beta)
         self.notebook = notebook
-        self.commander = commander
-        self.is_beta = is_beta
 
 
 class PrefsVersion:
@@ -429,7 +437,7 @@ class PreferencesDialog(tk.Toplevel):
         root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
 
     def __setup_plugin_tabs(self, notebook: Notebook) -> None:
-        plugin_results = self.plugin_manager.fire_event(PluginPreferencesEvent(notebook, monitor.cmdr, monitor.is_beta))
+        plugin_results = self.plugin_manager.fire_event(PreferencesEvent(notebook, monitor.cmdr, monitor.is_beta))
         plugin_results = cast(Dict[str, List[tk.Widget]], plugin_results)
         for plugin_name, results in plugin_results.items():
             if len(results) == 0:
@@ -1035,7 +1043,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
 
-    def cmdrchanged(self, event=None):
+    def cmdrchanged(self):
         """
         Notify plugins of cmdr change.
 
@@ -1044,7 +1052,9 @@ class PreferencesDialog(tk.Toplevel):
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
             if self.cmdr is not False:		# Don't notify on first run
-                plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
+                self.plugin_manager.fire_event(BasePreferencesEvent(
+                    event.EDMCPluginEvents.PREFERNCES_CMDR_CHANGED, commander=monitor.commander, is_beta=monitor.is_beta
+                ))
 
             self.cmdr = monitor.cmdr
             self.is_beta = monitor.is_beta
