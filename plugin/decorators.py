@@ -1,31 +1,11 @@
 """Decorators for marking plugins and callbacks."""
+from __future__ import annotations
 
-
-import functools
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Optional, Type, TypeVar, Union, overload
 
 from EDMCLogging import get_main_logger
 from plugin.base_plugin import BasePlugin
 
-if TYPE_CHECKING:
-    import tkinter as tk
-
-    from plugin.event import JournalEvent
-
-    _UI_SETUP_FUNC = TypeVar(
-        '_UI_SETUP_FUNC', bound=Union[
-            Callable[[Any, tk.Frame], Optional[tk.Widget]],
-            Callable[[tk.Frame], Optional[tk.Widget]],
-        ]
-    )
-
-    _JOURNAL_FUNC = TypeVar(
-        '_JOURNAL_FUNC',
-        bound=Union[
-            Callable[[JournalEvent], None],
-            Callable[[Any, JournalEvent], None]
-        ]
-    )
 
 logger = get_main_logger()
 
@@ -74,8 +54,32 @@ def _list_decorate(attr_name: str, attr_content: str, func: _F) -> _F:
 
 # these are overloads to make typing "normal" edmc hooks easier. they are not special, they can be ignored.
 # these names should be up to date with those in event.py -- Unfortunately those constants cannot be used here.
+
+if TYPE_CHECKING:
+    # I would put all this in a stub file but it seems mypy continues to vex me.
+    import tkinter as tk
+
+    from plugin.event import JournalEvent
+    from prefs import BasePreferencesEvent
+
+    _UI_SETUP = Union[
+        Callable[[Any, tk.Frame], Optional[tk.Widget]],
+        Callable[[tk.Frame], Optional[tk.Widget]],
+    ]
+
+    _JOURNAL_FUNC = Union[
+        Callable[[JournalEvent], None],
+        Callable[[Any, JournalEvent], None]
+    ]
+
+    _PLUGIN_PREFS_FUNC = TypeVar('_PLUGIN_PREFS_FUNC', bound=Union[
+        Callable[[BasePreferencesEvent], None],
+        Callable[[Any, BasePreferencesEvent], None],
+    ])
+
+
 @overload
-def hook(name: Literal['core.setup_ui']) -> Callable[[_UI_SETUP_FUNC], _UI_SETUP_FUNC]: ...
+def hook(name: Literal['core.setup_ui']) -> Callable[[_UI_SETUP], _UI_SETUP]: ...
 
 
 @overload
@@ -83,10 +87,10 @@ def hook(name: Literal['core.journal_event']) -> Callable[[_JOURNAL_FUNC], _JOUR
 
 
 @overload
-def hook(name: str) -> Callable[['_F'], _F]: ...
+def hook(name: str) -> Callable[[_F], _F]: ...
 
 
-def hook(name: str) -> Callable[['_F'], _F]:
+def hook(name: str):  # return type explicitly left to be inferred, because magic is magic.
     """
     Create event callback.
 

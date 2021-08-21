@@ -28,13 +28,13 @@ if TYPE_CHECKING:
     ]
 
 LEGACY_CALLBACK_LUT: Dict[str, str] = {
-    event.PLUGIN_STARTUP_UI_EVENT: 'plugin_app',
-    event.PLUGIN_PREFERENCES_EVENT: 'plugin_prefs',
-    event.PLUGIN_PREFERENCES_CLOSED_EVENT: 'prefs_changed',
-    event.PLUGIN_JOURNAL_ENTRY_EVENT: 'journal_entry',
-    event.PLUGIN_DASHBOARD_ENTRY_EVENT: 'dashboard_entry',
-    event.PLUGIN_CAPI_DATA_EVENT: 'cmdr_data',
-    event.PLUGIN_EDMC_SHUTTING_DOWN: 'plugin_stop',
+    event.EDMCPluginEvents.STARTUP_UI: 'plugin_app',
+    event.EDMCPluginEvents.PREFERENCES: 'plugin_prefs',
+    event.EDMCPluginEvents.PREFERENCES_CLOSED: 'prefs_changed',
+    event.EDMCPluginEvents.JOURNAL_ENTRY: 'journal_entry',
+    event.EDMCPluginEvents.DASHBOARD_ENTRY: 'dashboard_entry',
+    event.EDMCPluginEvents.CAPI_DATA: 'cmdr_data',
+    event.EDMCPluginEvents.EDMC_SHUTTING_DOWN: 'plugin_stop',
 
 
     'inara.notify_ship': 'inara_notify_ship',
@@ -45,11 +45,11 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 
 LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
     # All of these callables should accept an event.BaseEvent or a subclass thereof
-    event.PLUGIN_STARTUP_UI_EVENT: lambda e: (e.data,),
-    event.PLUGIN_PREFERENCES_EVENT: lambda e: (e.notebook, e.commander, e.is_beta),
+    event.EDMCPluginEvents.STARTUP_UI: lambda e: (e.data,),
+    event.EDMCPluginEvents.PREFERENCES: lambda e: (e.notebook, e.commander, e.is_beta),
     # 'core.setup_preferences_ui': 'plugin_prefs',
     # 'core.preferences_closed': 'prefs_changed',
-    event.PLUGIN_JOURNAL_ENTRY_EVENT: lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
+    event.EDMCPluginEvents.JOURNAL_ENTRY: lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
     # 'core.dashboard_entry': 'dashboard_entry',
     # 'core.commander_data': 'cmdr_data',
 
@@ -165,7 +165,7 @@ class MigratedPlugin(BasePlugin):
         setattr(wrapper, "original_func", f)
         return wrapper
 
-    @decorators.hook(event.PLUGIN_STARTUP_UI_EVENT)
+    @decorators.hook(event.EDMCPluginEvents.STARTUP_UI)
     def ui_wrapper(self, frame: tk.Frame) -> Optional[tk.Widget]:
         """Wrap the legacy UI system with the new system that always expects a single widget."""
         import tkinter as tk  # Importing this here to make most subclasses of this not HAVE to have this sitting here
