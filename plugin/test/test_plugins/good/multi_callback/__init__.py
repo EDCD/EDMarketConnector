@@ -1,4 +1,5 @@
 """Test plugin that loads correctly."""
+
 import semantic_version
 
 from plugin.base_plugin import BasePlugin
