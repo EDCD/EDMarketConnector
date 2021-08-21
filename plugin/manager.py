@@ -5,7 +5,7 @@ import importlib
 import pathlib
 import sys
 from fnmatch import fnmatch
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 if TYPE_CHECKING:
     from types import ModuleType
