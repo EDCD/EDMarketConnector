@@ -2,13 +2,22 @@
 import time
 from typing import Any, Dict, Optional
 
-PLUGIN_STARTUP_UI_EVENT = 'core.setup_ui'
-PLUGIN_PREFERENCES_EVENT = 'core.setup_preferences_ui'
-PLUGIN_PREFERENCES_CLOSED_EVENT = 'core.preferences_closed'
-PLUGIN_JOURNAL_ENTRY_EVENT = 'core.journal_entry'
-PLUGIN_DASHBOARD_ENTRY_EVENT = 'core.dashboard_entry'
-PLUGIN_CAPI_DATA_EVENT = 'core.capi_data'
-PLUGIN_EDMC_SHUTTING_DOWN = 'core.shutdown'
+
+class EDMCPluginEvents:
+    """Events EDMC currently uses to communicate with plugins."""
+
+    STARTUP_UI = 'core.setup_ui'
+    JOURNAL_ENTRY = 'core.journal_entry'
+    DASHBOARD_ENTRY = 'core.dashboard_entry'
+    CAPI_DATA = 'core.capi_data'
+    EDMC_SHUTTING_DOWN = 'core.shutdown'
+
+    PREFERENCES = 'core.setup_preferences_ui'
+    PREFERNCES_CMDR_CHANGED = 'core.preferences_cmdr_changed'
+    PREFERENCES_CLOSED = 'core.preferences_closed'
+
+    def __init__(self) -> None:
+        raise NotImplementedError('This is not to be instantiated.')
 
 
 class BaseEvent:
@@ -19,7 +28,7 @@ class BaseEvent:
     with your event, use one of the subclasses below.
     """
 
-    def __init__(self, name: str, event_time: float = None) -> None:
+    def __init__(self, name: str, event_time: Optional[float] = None) -> None:
         self.name = name
         if event_time is None:
             event_time = time.time()
