@@ -113,8 +113,10 @@ the index is not within `len(target)`. If the index is exactly `len(target)`,
 `append` is used.
 
 You can set values other than strings, but you are limited to what json itself
-supports, and the translation thereof to python. In general this means:
-`int`, `float`, `string`, `bool`, and `None` (json `null`) values may be set.
+supports, and the translation thereof to python. In general this means that only
+JSON primitives and their python equivalents
+(`int`, `float`, `string`, `bool`, and `None` (json `null`)), and
+json compound types (`object -- {}` and `array -- []`) may be set.
 
 ### Testing
 
