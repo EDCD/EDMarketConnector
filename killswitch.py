@@ -47,6 +47,7 @@ class SingleKill(NamedTuple):
         Note that this MODIFIES DATA IN PLACE.
 
         :param target: data to apply a rule to
+        :raises: Any and all exceptions _deep_apply and _apply can raise.
         """
         for key, value in (self.set_fields if self .set_fields is not None else {}).items():
             _deep_apply(target, key, value)
@@ -69,6 +70,7 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
     :param to_set: the data to set, if any, defaults to None
     :param delete: whether or not to delete the key or index, defaults to False
     :raises ValueError: when an unexpected target type is passed
+    :raises IndexError: when an invalid index is set or deleted
     """
     if isinstance(target, MutableMapping):
         if delete:
@@ -106,6 +108,8 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
     :param target: the dict to modify
     :param to_set: the data to set, defaults to None
     :param delete: whether or not to delete the key rather than set it
+    :raises IndexError: when an invalid index is traversed into
+    :raises KeyError: when an invalid key is traversed into
     """
     current = target
     key: str = ""
