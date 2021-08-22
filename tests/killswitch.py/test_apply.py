@@ -81,8 +81,6 @@ def test_get_int(input: str, expected: Optional[int]) -> None:
         ({'multilevel.keys': {'with.dots': False}}, 'multilevel.keys.with.dots',
          '', True, {'multilevel.keys': {'with.dots': True}}),
         ({'dotted.key.one.level': False}, 'dotted.key.one.level', '', True, {'dotted.key.one.level': True}),
-        ({'dotted.key.one.level': {"oops.i.lied": False}}, 'dotted.key.one.level.oops.i.lied',
-         '', True, {'dotted.key.one.level': {"oops.i.lied": True}}),
     ],
 )
 def test_deep_get(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, result: UPDATABLE_DATA) -> None:
