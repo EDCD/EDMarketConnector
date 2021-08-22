@@ -31,8 +31,8 @@ killswitch was added. EDMC will show this to the user
 | -----------------: | :--------------: | :-------------------------------------------------------------------------------------------- |
 |          `reason`* |      `str`       | The reason that this killswitch was added                                                     |
 |       `set_fields` | `Dict[str, Any]` | A map of key -> contents to update (or overwrite) existing data with                          |
-|    `redact_fields` |   `List[str]`    | A list of fields to redact. This is equivalent to setting the fields to the string "REDACTED" |
-|    `delete_fields` |   `List[str]`    | A list of fields in the matching event to be removed, if they exist.                          |
+|    `redact_fields` |   `List[str]`    | A list of traversal paths to redact. This is the same as using set with a value of "REDACTED" |
+|    `delete_fields` |   `List[str]`    | A list of traversal paths in the matching event to be removed, if they exist.                 |
 
 The order listed above is the precedence for actions. i.e. All set fields are
 set, then all redact fields are redacted then all delete fields are deleted.
@@ -70,6 +70,52 @@ An example follows:
 - `plugins.some_plugin.some_thing` will never be allowed to continue
   (as all fields are blank)
 
+Indexing of lists (and any other `Sequence`) is done with numbers as normal.
+Negative numbers do work to reference the end of sequences.
+
+### Traversal paths
+
+`set_fields`, `delete_fields`, and `redact_fields` all accept a single traversal
+path to target particular fields.
+
+When following paths, there are some caveats one should know.
+
+- If a field (for example `a.b`) exists in the data dict
+  (ie, `{'a.b': True}`) it will be the thing accessed by a killswitch that
+  includes `a.b` at the current "level". This means that if both a key `a.b`
+  and a nested key exist with the same name (`{'a.b': 0, 'a': { 'b': 1 }}`),
+  the former is always referenced. No backtracking takes place to attempt to
+  resolve conflicts, even if the dotted field name is not at the end of a key.
+
+- Traversal can and will error, especially if you attempt to pass though keys
+  that do not exist (eg past the end of a `Sequence` or a key that does not
+  exist in a `Mapping`).
+
+- If any exception occurs during your traversal, **the entire killswitch is**
+  **assumed to be faulty, and will be treated as a permanent killswitch**
+
+### Individual action rules
+
+All actions (as noted above) can fail during traversal to their targets. If this
+happens, the entire killswitch is assumed to be a permanent one and execution
+stops.
+
+#### Deletes
+
+For both `MutableMapping` and `MutableSequence` targets, deletes never fail.
+If a key doesn't exist it simply is a no-op.
+
+#### Sets
+
+Sets always succeed for `MutableMapping` objects, either creating new keys
+or updating existing ones. For `MutableSequence`s, however, a set can fail if
+the index is not within `len(target)`. If the index is exactly `len(target)`,
+`append` is used.
+
+You can set values other than strings, but you are limited to what json itself
+supports, and the translation thereof to python. In general this means:
+`int`, `float`, `string`, `bool`, and `None` (json `null`) values may be set.
+
 ### Testing
 
 Killswitch files can be tested using the script in `scripts/killswitch_test.py`.
@@ -86,7 +132,7 @@ and ranges (`<1.0.0`, `>=2.0.0`)
 ## Plugin support
 
 Plugins may use the killswitch system simply by hosting their own version of the
-killswitch file, and fetching it using 
+killswitch file, and fetching it using
 `killswitch.get_kill_switches(target='https://example.com/myplugin_killswitches.json')`.
 The returned object can be used to query the kill switch set, see the docstrings
 for more information on specifying versions.
@@ -125,7 +171,7 @@ would not be in a form that could be easily understood (except to blank it)
 
 ## File location
 
-The main killswitch file is kept in the `releases` branch on the EDMC github
-repo. The file should NEVER be committed to any other repos. In the case that
-the killswitch file is found in other repos, the one in releases should always
-be taken as correct regardless of others.
+The main killswitch file (`killswitches_v2.json`) is kept in the `releases`
+branch on the EDMC github repo. The file should NEVER be committed to any other
+repos. In the case that the killswitch file is found in other repos, the one in
+releases should always be taken as correct regardless of others.
