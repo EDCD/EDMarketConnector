@@ -306,12 +306,12 @@ class PreferencesDialog(tk.Toplevel):
         self.PADY = 2  # close spacing
 
         # Set up different tabs
-        self.__setup_output_tab(notebook)
-        self.__setup_plugin_tabs(notebook)
+        self.__setup_appearance_tab(notebook)
         self.__setup_config_tab(notebook)
         self.__setup_privacy_tab(notebook)
-        self.__setup_appearance_tab(notebook)
+        self.__setup_output_tab(notebook)
         self.__setup_plugin_tab(notebook)
+        self.__setup_plugin_tabs(notebook)
 
         if platform == 'darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
