@@ -388,6 +388,7 @@ from l10n import Translations
 from monitor import monitor
 from plugin.exceptions import LegacyPluginNeedsMigrating
 from plugin.manager import PluginManager
+from plugin import event
 from protocol import protocolhandler
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -745,7 +746,7 @@ class AppWindow(object):
 
         :param frame: the frame under which plugins should create their widgets.
         """
-        res = self.plugin_manager.fire_event(event.BaseDataEvent(event.PLUGIN_STARTUP_UI_EVENT, frame))
+        res = self.plugin_manager.fire_event(event.BaseDataEvent(event.EDMCPluginEvents.STARTUP_UI, frame))
 
         for plugin_name, results in res.items():
             results = cast(List[Optional[tk.Widget]], results)
@@ -1721,7 +1722,7 @@ class AppWindow(object):
         # won't still be running in a manner that might rely on something
         # we'd otherwise have already stopped.
         logger.info('Notifying plugins to stop...')
-        self.plugin_manager.fire_event(plugin.event.BaseEvent(plugin.event.PLUGIN_EDMC_SHUTTING_DOWN))
+        self.plugin_manager.fire_str_event(plugin.event.EDMCPluginEvents.EDMC_SHUTTING_DOWN)
 
         # Handling of application hotkeys now so the user can't possible cause
         # an issue via triggering one.
