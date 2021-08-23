@@ -9,6 +9,7 @@ protocol used for the callback.
 import base64
 import collections
 import csv
+import datetime
 import hashlib
 import json
 import numbers
@@ -64,7 +65,10 @@ commodity_map: Dict = {}
 class CAPIData(UserDict):
     """CAPI Response."""
 
-    def __init__(self, data: Union[str, Dict[str, Any], 'CAPIData', None] = None, source_endpoint: str = None) -> None:
+    def __init__(
+            self,
+            data: Union[str, Dict[str, Any], 'CAPIData', None] = None, source_endpoint: str = None
+    ) -> None:
         if data is None:
             super().__init__()
         elif isinstance(data, str):
@@ -119,6 +123,38 @@ class CAPIData(UserDict):
 
             # Set a safe value
             self.data['lastStarport']['ships'] = {'shipyard_list': {}, 'unavailable_list': []}
+
+
+class CAPIDataRawEndpoint:
+    """Last received CAPI response for a specific endpoint."""
+
+    def __init__(self, raw_data: str, query_time: datetime.datetime):
+        self.query_time = query_time
+        self.raw_data = raw_data
+        # TODO: Maybe requests.response status ?
+
+
+class CAPIDataRaw:
+    """The last obtained raw CAPI response for each end point."""
+
+    raw_data: Dict[str, CAPIDataRawEndpoint] = {}
+
+    def record_endpoint(
+            self, endpoint: str,
+            raw_data: str,
+            query_time: datetime.datetime = datetime.datetime.utcnow()
+    ):
+        """Record the latest raw data for the given endpoint."""
+        self.raw_data[endpoint] = CAPIDataRawEndpoint(raw_data, query_time)
+
+    def __str__(self):
+        """Return a more readable string form of the data."""
+        capi_data_str = ''
+        for e in self.raw_data.keys():
+            capi_data_str += f'"{e}":\n{{\n\t"query_time": {self.raw_data[e].query_time},\n\t' \
+                             f'"raw_data": {self.raw_data[e].raw_data}\n}}\n\n'
+
+        return capi_data_str
 
 
 def listify(thing: Union[List, Dict]) -> List:
@@ -542,6 +578,7 @@ class Session(object):
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
 
+        self.capi_raw_data = CAPIDataRaw()
         logger.info('Starting CAPI queries thread...')
         self.capi_response_queue: Queue
         self.capi_query_queue: Queue = Queue()
@@ -668,7 +705,7 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.info('CAPI worker thread starting')
 
-        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:
+        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
             """
             Perform a *single* CAPI endpoint query within the thread worker.
 
@@ -681,7 +718,9 @@ class Session(object):
                 r = self.session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
-                capi_data = CAPIData(r.json(), capi_endpoint)
+                capi_json = r.json()
+                capi_data = CAPIData(capi_json, capi_endpoint)
+                self.capi_raw_data.record_endpoint(capi_endpoint, r.content.decode(encoding='utf-8'))
 
             except requests.ConnectionError as e:
                 logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {capi_endpoint})')
