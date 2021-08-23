@@ -45,7 +45,10 @@ def match_exists(match: str) -> tuple[bool, str]:
         if known_split == split_match:
             return True, ""
 
-        matched_fields = sum(len(k) for k, s in zip(known_split, split_match) if k == s or k[0] == '$')
+        matched_fields = sum(1 for k, s in zip(known_split, split_match) if k == s or k[0] == '$')
+        if matched_fields == len(known_split):
+            return True, ''
+
         if highest_match < matched_fields:
             matched_fields = highest_match
             closest = list(known_split)

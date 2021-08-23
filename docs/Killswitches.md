@@ -177,3 +177,64 @@ The main killswitch file (`killswitches_v2.json`) is kept in the `releases`
 branch on the EDMC github repo. The file should NEVER be committed to any other
 repos. In the case that the killswitch file is found in other repos, the one in
 releases should always be taken as correct regardless of others.
+
+## In depth example
+
+In a hypothetical situation where we have released version 1.0.0 with a bug that
+means `FSDJump` events are not correctly stripped of extraneous data, such as
+the user specific `HomeSystem` field in the `Factions` object.
+
+The simplest way to go about this is to remove the field whenever the event is
+passed to `eddn.py`s `journal_entry` function.
+
+`journal_entry` checks against both `plugins.eddn.journal` and
+`plugins.eddn.journal.event.<eventname>`. As we just want to modify a single
+events handling, we can use the latter form.
+
+The killswitch definition is as follows (this is just for this hypothetical,
+it is not a full valid file, see below)
+
+```json
+{
+  "plugins.eddn.journal.event.FSDJump": {
+    "reason": "EDMC Does not correctly strip the user specific HomeSystem field from Factions",
+    "delete_fields": ["Factions.HomeSystem"]
+  }
+}
+```
+
+This can be slotted into a full killswitch (using a modified version of the
+example at the top of this file)
+
+```json
+{
+    "version": 2,
+    "last_updated": "23 August 2021",
+    "kill_switches": [{
+        "version": "1.0.0",
+        "kills": {
+          "plugins.eddn.journal.event.FSDJump": {
+            "reason": "EDMC 1.0.0 Does not correctly strip the user specific HomeSystem field from Factions",
+            "delete_fields": ["Factions.HomeSystem"]
+          }
+        }
+    }]
+}
+Running the above example though `killswitch_test.py` returns:
+
+```plaintext
+Kills matching version mask 1.0.0
+        - plugins.eddn.journal.event.FSDJump
+                Reason specified is: 'EDMC Does not correctly strip the user specific HomeSystem field from Factions'
+
+                The folowing changes are required for plugins.eddn.journal.event.FSDJump execution to continue
+                Deletes 1 fields:
+                        - Factions.HomeSystem
+```
+
+Telling us that we have not made any typos, and that our killswitch matches the
+expected version, and does the expected actions.
+
+Now that we're sure that everything is right, we can place this in the correct
+location (see above for paths). Once there, EDMC instances will begin to behave
+as expected, filtering out the field during EDDN processing.
