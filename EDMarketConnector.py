@@ -933,12 +933,12 @@ class AppWindow(object):
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
-        querytime = int(time())
+        query_time = int(time())
         logger.trace_if('capi.worker', 'Requesting full station data')
         companion.session.station(
-            querytime=querytime, retrying=retrying, play_sound=play_sound
+            query_time=query_time, retrying=retrying, play_sound=play_sound
         )
-        config.set('querytime', querytime)
+        config.set('querytime', query_time)
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """Handle the resulting data from a CAPI query."""
@@ -1030,7 +1030,7 @@ class AppWindow(object):
                                        f" AND {last_station!r} != {monitor.station!r}")
                         raise companion.ServerLagging()
 
-                self.capi_query_holdoff_time = capi_response.querytime + companion.capi_query_cooldown
+                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
             elif not monitor.state['OnFoot'] and capi_response.capi_data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
@@ -1096,7 +1096,7 @@ class AppWindow(object):
                     err = 'Error: Exporting Market data'
                     play_bad = True
 
-                self.capi_query_holdoff_time = capi_response.querytime + companion.capi_query_cooldown
+                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
         except queue.Empty:
             logger.error('There was no response in the queue!')
@@ -1139,7 +1139,7 @@ class AppWindow(object):
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.querytime))
+            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
