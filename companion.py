@@ -473,13 +473,24 @@ class Auth(object):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
-class CAPIRequest():
+class EDMCCAPIRequest():
     """Encapsulates a request for CAPI data."""
-    ...
+
+    endpoint: str  # The CAPI query to perform.
+    querytime: int  # When this query is considered to have started (time_t).
+    play_sound: bool  # Whether to play good/bad sounds for success/failure.
+    auto_update: bool  # Whether this was automatically triggered.
+
+    def __init__(self, endpoint: str, querytime: int, play_sound: bool = False, auto_update: bool = False):
+        self.endpoint = endpoint
+        self.querytime = querytime
+        self.play_sound = play_sound
+        self.auto_update = auto_update
 
 
-class CAPIResponse():
+class EDMCCAPIResponse():
     """Encapsulates a response from CAPI quer(y|ies)."""
+
     ...
 
 
@@ -792,14 +803,15 @@ class Session(object):
             querytime: int
             play_sound: bool
             auto_update: bool
-            endpoint, querytime, play_sound, auto_update = self.capi_query_queue.get()
-            if not endpoint:
+            # endpoint, querytime, play_sound, auto_update = self.capi_query_queue.get()
+            query = self.capi_query_queue.get()
+            if not query.endpoint:
                 logger.info('Empty queue message, exiting...')
                 break
 
-            logger.trace_if('capi.worker', f'Processing query: {endpoint}')
+            logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
             data: CAPIData
-            if endpoint == self._CAPI_PATH_STATION:
+            if query.endpoint == self._CAPI_PATH_STATION:
                 try:
                     data = capi_station_queries()
 
@@ -810,15 +822,15 @@ class Session(object):
                                 message=e.args,
                                 exception=e
                             ),
-                            querytime,
-                            play_sound,
-                            auto_update
+                            query.querytime,
+                            query.play_sound,
+                            query.auto_update
                         )
                     )
 
                 else:
                     self.capi_response_queue.put(
-                        (data, querytime, play_sound, auto_update)
+                        (data, query.querytime, query.play_sound, query.auto_update)
                     )
 
             else:
@@ -832,15 +844,15 @@ class Session(object):
                                 message=e.args,
                                 exception=e
                             ),
-                            querytime,
-                            play_sound,
-                            auto_update
+                            query.querytime,
+                            query.play_sound,
+                            query.auto_update
                         )
                     )
 
                 else:
                     self.capi_response_queue.put(
-                        (data, querytime, play_sound, auto_update)
+                        (data, query.querytime, query.play_sound, query.auto_update)
                     )
 
             self.tk_master.event_generate('<<CAPIResponse>>')
@@ -876,7 +888,12 @@ class Session(object):
             raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
 
         self.capi_query_queue.put(
-            (endpoint, querytime, play_sound, auto_update)
+            EDMCCAPIRequest(
+                endpoint=endpoint,
+                querytime=querytime,
+                play_sound=play_sound,
+                auto_update=auto_update
+            )
         )
 
     def profile(self, querytime: int = int(time.time()), play_sound: bool = False, auto_update: bool = False) -> None:
@@ -899,7 +916,12 @@ class Session(object):
         """
         # Ask the thread worker to perform all three queries
         self.capi_query_queue.put(
-            (self._CAPI_PATH_STATION, querytime, play_sound, auto_update)
+            EDMCCAPIRequest(
+                endpoint=self._CAPI_PATH_STATION,
+                querytime=querytime,
+                play_sound=play_sound,
+                auto_update=auto_update
+            )
         )
     ######################################################################
 
