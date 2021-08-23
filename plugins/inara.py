@@ -5,6 +5,7 @@ import threading
 import time
 import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
+from dataclasses import dataclass
 from operator import itemgetter
 from threading import Lock, Thread
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
@@ -47,7 +48,8 @@ class Credentials(NamedTuple):
 EVENT_DATA = Union[Mapping[str, Any], Sequence[Mapping[str, Any]]]
 
 
-class Event(NamedTuple):
+@dataclass
+class Event:
     """Event represents an event for the Inara API."""
 
     name: str
@@ -334,16 +336,21 @@ def journal_entry(  # noqa: C901, CCR001
 
     :return: str - empty if no error, else error string.
     """
-    if (ks := killswitch.get_disabled('plugins.inara.journal')).disabled:
-        logger.warning(f'Inara support has been disabled via killswitch: {ks.reason}')
+    should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
+    if should_return:
         plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
+        logger.trace('returning due to killswitch match')
         return ''
 
-    elif (ks := killswitch.get_disabled(f'plugins.inara.journal.event.{entry["event"]}')).disabled:
-        logger.warning(f'event {entry["event"]} processing has been disabled via killswitch: {ks.reason}')
+    should_return, new_entry = killswitch.check_killswitch(
+        f'plugins.inara.journal.event.{entry["event"]}', new_entry, logger
+    )
+    if should_return:
+        logger.trace('returning due to killswitch match')
         # this can and WILL break state, but if we're concerned about it sending bad data, we'd disable globally anyway
         return ''
 
+    entry = new_entry
     this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
@@ -1461,6 +1468,21 @@ def new_add_event(
         this.events[key].append(Event(name, timestamp, data))
 
 
+def clean_event_list(event_list: List[Event]) -> List[Event]:
+    """Check for killswitched events and remove or modify them as requested."""
+    out = []
+
+    for e in event_list:
+        bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{e.name}', e.data, logger)
+        if bad:
+            continue
+
+        e.data = new_event
+        out.append(e)
+
+    return out
+
+
 def new_worker():
     """
     Handle sending events to the Inara API.
@@ -1475,6 +1497,7 @@ def new_worker():
             continue
 
         for creds, event_list in events.items():
+            event_list = clean_event_list(event_list)
             if not event_list:
                 continue
 
@@ -1490,6 +1513,7 @@ def new_worker():
                     {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
                 ]
             }
+
             logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
             logger.trace_if('plugin.inara.events', f'Events:\n{json.dumps(data)}\n')
 

@@ -168,9 +168,12 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID.
         :param msg: the payload to send.
         """
-        if (res := killswitch.get_disabled('plugins.eddn.send')).disabled:
-            logger.warning(f"eddn.send has been disabled via killswitch. Returning. ({res.reason})")
+        should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', msg)
+        if should_return:
+            logger.warning('eddn.send has been disabled via killswitch. Returning.')
             return
+
+        msg = new_data
 
         uploader_id = cmdr
 
@@ -787,14 +790,17 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `dict` - Current `monitor.state` data.
     :return: `str` - Error message, or `None` if no errors.
     """
-    if (ks := killswitch.get_disabled("plugins.eddn.journal")).disabled:
-        logger.warning(f'EDDN journal handler has been disabled via killswitch: {ks.reason}')
+
+    should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
+    if should_return:
         plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
         return None
 
-    elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event.{entry["event"]}')).disabled:
-        logger.warning(f'Handling of event {entry["event"]} disabled via killswitch: {ks.reason}')
+    should_return, new_data = killswitch.check_killswitch(f'plugins.eddn.journal.event.{entry["event"]}', new_data)
+    if should_return:
         return None
+
+    entry = new_data
 
     # Recursively filter '*_Localised' keys from dict
     def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
