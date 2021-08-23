@@ -803,11 +803,15 @@ class Session(object):
             querytime: int
             play_sound: bool
             auto_update: bool
-            # endpoint, querytime, play_sound, auto_update = self.capi_query_queue.get()
             query = self.capi_query_queue.get()
-            if not query.endpoint:
-                logger.info('Empty queue message, exiting...')
-                break
+            if not isinstance(query, EDMCCAPIRequest):
+                if query is not None:
+                    logger.error("Item from queue wasn't an EDMCCAPIRequest")
+                    break
+
+                else:
+                    logger.info('Empty queue message, exiting...')
+                    break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
             data: CAPIData
