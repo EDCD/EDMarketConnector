@@ -403,6 +403,10 @@ class PluginManager:
 
         return out
 
+    def fire_str_event(self, event_name: str, time: Optional[float] = None) -> Dict[str, List[Any]]:
+        """Construct a BaseEvent from the given string and time and fire it."""
+        return self.fire_event(BaseEvent(event_name, event_time=time))
+
     def fire_targeted_event(self, target: Union[LoadedPlugin, str], event: BaseEvent) -> list[Any]:
         """Fire an event just for a particular plugin."""
         if isinstance(target, str):
