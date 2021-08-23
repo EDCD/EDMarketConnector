@@ -473,33 +473,52 @@ class Auth(object):
         return base64.urlsafe_b64encode(text).decode().replace('=', '')
 
 
-class EDMCCAPIRequest():
+class EDMCCAPIReturn:
+    """Base class for Request, Failure or Response."""
+
+    def __init__(
+        self, querytime: int, retrying: bool = False,
+        play_sound: bool = False, auto_update: bool = False
+    ):
+        self.querytime: int = querytime  # When this query is considered to have started (time_t).
+        self.retrying: bool = retrying  # Whether this is already a retry.
+        self.play_sound: bool = play_sound  # Whether to play good/bad sounds for success/failure.
+        self.auto_update: bool = auto_update  # Whether this was automatically triggered.
+
+
+class EDMCCAPIRequest(EDMCCAPIReturn):
     """Encapsulates a request for CAPI data."""
 
-    endpoint: str  # The CAPI query to perform.
-    querytime: int  # When this query is considered to have started (time_t).
-    play_sound: bool  # Whether to play good/bad sounds for success/failure.
-    auto_update: bool  # Whether this was automatically triggered.
-
-    def __init__(self, endpoint: str, querytime: int, play_sound: bool = False, auto_update: bool = False):
-        self.endpoint = endpoint
-        self.querytime = querytime
-        self.play_sound = play_sound
-        self.auto_update = auto_update
+    def __init__(
+        self, endpoint: str,
+        querytime: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+    ):
+        super().__init__(querytime=querytime, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        self.endpoint: str = endpoint  # The CAPI query to perform.
 
 
-class EDMCCAPIResponse():
+class EDMCCAPIResponse(EDMCCAPIReturn):
     """Encapsulates a response from CAPI quer(y|ies)."""
 
-    ...
+    def __init__(
+            self, capi_data: CAPIData,
+            querytime: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+    ):
+        super().__init__(querytime=querytime, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        self.capi_data: CAPIData = capi_data  # Frontier CAPI response, possibly augmented (station query)
 
 
-class CAPIFailedRequest():
+class CAPIFailedRequest(EDMCCAPIReturn):
     """CAPI failed query error class."""
 
-    def __init__(self, message, exception=None):
-        self.message = message
-        self.exception = exception
+    def __init__(
+            self, message: str,
+            querytime: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False,
+            exception=None
+    ):
+        super().__init__(querytime=querytime, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        self.message: str = message  # User-friendly reason for failure.
+        self.exception: int = exception  # Exception that recipient should raise.
 
 
 class Session(object):
@@ -701,6 +720,7 @@ class Session(object):
 
             if r.url.startswith(FRONTIER_AUTH_SERVER):
                 logger.info('Redirected back to Auth Server')
+                self.dump(r)
                 raise CredentialsError('Redirected back to Auth Server')
 
             elif 500 <= r.status_code < 600:
@@ -814,49 +834,59 @@ class Session(object):
                     break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
-            data: CAPIData
+            capi_data: CAPIData
             if query.endpoint == self._CAPI_PATH_STATION:
                 try:
-                    data = capi_station_queries()
+                    capi_data = capi_station_queries()
 
                 except Exception as e:
                     self.capi_response_queue.put(
                         (
                             CAPIFailedRequest(
                                 message=e.args,
-                                exception=e
+                                exception=e,
+                                querytime=query.querytime,
+                                play_sound=query.play_sound,
+                                auto_update=query.auto_update
                             ),
-                            query.querytime,
-                            query.play_sound,
-                            query.auto_update
                         )
                     )
 
                 else:
                     self.capi_response_queue.put(
-                        (data, query.querytime, query.play_sound, query.auto_update)
+                        EDMCCAPIResponse(
+                            capi_data=capi_data,
+                            querytime=query.querytime,
+                            play_sound=query.play_sound,
+                            auto_update=query.auto_update
+                        )
                     )
 
             else:
                 try:
-                    data = capi_single_query(self.FRONTIER_CAPI_PATH_PROFILE)
+                    capi_data = capi_single_query(self.FRONTIER_CAPI_PATH_PROFILE)
 
                 except Exception as e:
                     self.capi_response_queue.put(
                         (
                             CAPIFailedRequest(
                                 message=e.args,
-                                exception=e
+                                exception=e,
+                                querytime=query.querytime,
+                                play_sound=query.play_sound,
+                                auto_update=query.auto_update
                             ),
-                            query.querytime,
-                            query.play_sound,
-                            query.auto_update
                         )
                     )
 
                 else:
                     self.capi_response_queue.put(
-                        (data, query.querytime, query.play_sound, query.auto_update)
+                        EDMCCAPIResponse(
+                            capi_data=capi_data,
+                            querytime=query.querytime,
+                            play_sound=query.play_sound,
+                            auto_update=query.auto_update
+                        )
                     )
 
             self.tk_master.event_generate('<<CAPIResponse>>')
@@ -867,15 +897,17 @@ class Session(object):
         """Ask the CAPI query thread to finish."""
         self.capi_query_queue.put(None)
 
-    def query(self, endpoint: str, querytime: int, play_sound: bool = False, auto_update: bool = False) -> None:
+    def query(
+            self, endpoint: str,
+            querytime: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+    ) -> None:
         """
         Perform a query against the specified CAPI endpoint.
 
         :param querytime: When this query was initiated.
+        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
-        :param endpoint: The CAPI endpoint to query, might be a pseudo-value.
         :param auto_update: Whether this request was triggered automatically.
-        :return:
         """
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
@@ -894,27 +926,40 @@ class Session(object):
         self.capi_query_queue.put(
             EDMCCAPIRequest(
                 endpoint=endpoint,
+                retrying=retrying,
                 querytime=querytime,
                 play_sound=play_sound,
                 auto_update=auto_update
             )
         )
 
-    def profile(self, querytime: int = int(time.time()), play_sound: bool = False, auto_update: bool = False) -> None:
+    def profile(
+            self,
+            querytime: int = int(time.time()), retrying: bool = False,
+            play_sound: bool = False, auto_update: bool = False
+    ) -> None:
         """
         Perform general CAPI /profile endpoint query.
 
         :param querytime: When this query was initiated.
+        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
-        self.query(self.FRONTIER_CAPI_PATH_PROFILE, querytime=querytime, play_sound=play_sound, auto_update=auto_update)
+        self.query(
+            self.FRONTIER_CAPI_PATH_PROFILE, querytime=querytime, retrying=retrying,
+            play_sound=play_sound, auto_update=auto_update
+        )
 
-    def station(self, querytime: int, play_sound: bool = False, auto_update: bool = False) -> None:
+    def station(
+            self,
+            querytime: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+    ) -> None:
         """
         Perform CAPI quer(y|ies) for station data.
 
         :param querytime: When this query was initiated.
+        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -923,6 +968,7 @@ class Session(object):
             EDMCCAPIRequest(
                 endpoint=self._CAPI_PATH_STATION,
                 querytime=querytime,
+                retrying=retrying,
                 play_sound=play_sound,
                 auto_update=auto_update
             )
