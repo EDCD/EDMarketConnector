@@ -149,10 +149,13 @@ class CAPIDataRaw:
 
     def __str__(self):
         """Return a more readable string form of the data."""
-        capi_data_str = ''
+        capi_data_str = '{'
         for e in self.raw_data.keys():
-            capi_data_str += f'"{e}":\n{{\n\t"query_time": {self.raw_data[e].query_time},\n\t' \
-                             f'"raw_data": {self.raw_data[e].raw_data}\n}}\n\n'
+            capi_data_str += f'"{e}":\n{{\n\t"query_time": "{self.raw_data[e].query_time}",\n\t' \
+                             f'"raw_data": {self.raw_data[e].raw_data}\n}},\n\n'
+
+        capi_data_str = capi_data_str.removesuffix(',\n\n')
+        capi_data_str += '\n\n}'
 
         return capi_data_str
 

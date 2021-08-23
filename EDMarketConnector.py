@@ -4,7 +4,6 @@
 
 import argparse
 import html
-import json
 import locale
 import pathlib
 import queue
@@ -1558,47 +1557,30 @@ class AppWindow(object):
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
-        """Save newly acquired CAPI data in the configured file."""
-        # LANG: Status - Attempting to retrieve data from Frontier CAPI to save to file
-        self.status['text'] = _('Fetching data...')
-        self.w.update_idletasks()
+    def save_raw(self) -> None:
+        """
+        Save any CAPI data already acquired to a file.
 
-        try:
-            data: CAPIData = companion.session.station()
-            self.status['text'] = ''
-            default_extension: str = ''
+        This specifically does *not* cause new queries to be performed, as the
+        purpose is to aid in diagnosing any issues that occurred during 'normal'
+        queries.
+        """
+        default_extension: str = ''
 
-            if platform == 'darwin':
-                default_extension = '.json'
+        if platform == 'darwin':
+            default_extension = '.json'
 
-            last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
-            last_starport: str = ''
-
-            if data['commander'].get('docked'):
-                last_starport = '.' + data.get('lastStarport', {}).get('name', 'Unknown')
-
-            timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            f = tkinter.filedialog.asksaveasfilename(
-                parent=self.w,
-                defaultextension=default_extension,
-                filetypes=[('JSON', '.json'), ('All Files', '*')],
-                initialdir=config.get_str('outdir'),
-                initialfile=f'{last_system}{last_starport}.{timestamp}'
-            )
-            if f:
-                with open(f, 'wb') as h:
-                    h.write(json.dumps(dict(data),
-                                       ensure_ascii=False,
-                                       indent=2,
-                                       sort_keys=True,
-                                       separators=(',', ': ')).encode('utf-8'))
-        except companion.ServerError as e:
-            self.status['text'] = str(e)
-
-        except Exception as e:
-            logger.debug('"other" exception', exc_info=e)
-            self.status['text'] = str(e)
+        timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+        f = tkinter.filedialog.asksaveasfilename(
+            parent=self.w,
+            defaultextension=default_extension,
+            filetypes=[('JSON', '.json'), ('All Files', '*')],
+            initialdir=config.get_str('outdir'),
+            initialfile=f'{monitor.system}{monitor.station}.{timestamp}'
+        )
+        if f:
+            with open(f, 'wb') as h:
+                h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
     # def exit_tray(self, systray: 'SysTrayIcon') -> None:
     #     """Tray icon is shutting down."""
