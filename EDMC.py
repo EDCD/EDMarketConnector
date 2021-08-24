@@ -341,7 +341,7 @@ sys.path: {sys.path}'''
         # stuff we can do when not docked
         if args.d:
             logger.debug(f'Writing raw JSON data to "{args.d}"')
-            out = json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+            out = json.dumps(dict(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
             with open(args.d, 'wb') as f:
                 f.write(out.encode("utf-8"))
 
