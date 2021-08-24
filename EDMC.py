@@ -441,9 +441,9 @@ sys.path: {sys.path}'''
             try:
                 eddn_sender = eddn.EDDN(None)
                 logger.debug('Sending Market, Outfitting and Shipyard data to EDDN...')
-                eddn_sender.export_commodities(data, monitor.is_beta)
-                eddn_sender.export_outfitting(data, monitor.is_beta)
-                eddn_sender.export_shipyard(data, monitor.is_beta)
+                eddn_sender.export_commodities(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_outfitting(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_shipyard(data, monitor.is_beta, monitor.state['Odyssey'])
 
             except Exception:
                 logger.exception('Failed to send data to EDDN')
