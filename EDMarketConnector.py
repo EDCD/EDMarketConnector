@@ -909,6 +909,8 @@ class AppWindow(object):
                 or not monitor.system or monitor.mode == 'CQC'
         ):
             logger.trace_if('capi.worker', 'CQC detected, aborting query')
+            # LANG: CAPI queries aborted because player is in CQC (Arena)
+            self.status['text'] = _('CQC detected, aborting CAPI query')
             return  # In CQC or on crew - do nothing
 
         if companion.session.state == companion.Session.STATE_AUTH:
