@@ -375,6 +375,7 @@ SHIPYARD_HTML_TEMPLATE = """
 class AppWindow(object):
     """Define the main application window."""
 
+    _CAPI_RESPONSE_TK_EVENT_NAME = '<<CAPIResponse>>'
     # Tkinter Event types
     EVENT_KEYPRESS = 2
     EVENT_BUTTON = 4
@@ -655,7 +656,7 @@ class AppWindow(object):
         self.w.bind('<Return>', self.capi_request_data)
         self.w.bind('<KP_Enter>', self.capi_request_data)
         self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
-        self.w.bind_all('<<CAPIResponse>>', self.capi_handle_response)
+        self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar

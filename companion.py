@@ -135,7 +135,7 @@ class CAPIDataRawEndpoint:
 
 
 class CAPIDataRaw:
-    """The last obtained raw CAPI response for each end point."""
+    """The last obtained raw CAPI response for each endpoint."""
 
     raw_data: Dict[str, CAPIDataRawEndpoint] = {}
 
@@ -516,9 +516,10 @@ class EDMCCAPIReturn:
     """Base class for Request, Failure or Response."""
 
     def __init__(
-        self, query_time: int, retrying: bool = False,
-        play_sound: bool = False, auto_update: bool = False
+        self, query_time: int, tk_response_event: Optional[str] = None,
+        retrying: bool = False, play_sound: bool = False, auto_update: bool = False
     ):
+        self.tk_response_event = tk_response_event  # Name of tk event to generate when response queued.
         self.query_time: int = query_time  # When this query is considered to have started (time_t).
         self.retrying: bool = retrying  # Whether this is already a retry.
         self.play_sound: bool = play_sound  # Whether to play good/bad sounds for success/failure.
@@ -529,10 +530,14 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
     """Encapsulates a request for CAPI data."""
 
     def __init__(
-        self, endpoint: str,
-        query_time: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+        self, endpoint: str, query_time: int,
+        tk_response_event: Optional[str] = None, retrying: bool = False,
+        play_sound: bool = False, auto_update: bool = False
     ):
-        super().__init__(query_time=query_time, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        super().__init__(
+            query_time=query_time, tk_response_event=tk_response_event, retrying=retrying,
+            play_sound=play_sound, auto_update=auto_update
+        )
         self.endpoint: str = endpoint  # The CAPI query to perform.
 
 
@@ -927,7 +932,10 @@ class Session(object):
                         )
                     )
 
-            self.tk_master.event_generate('<<CAPIResponse>>')
+            # If the query came from EDMC.(py|exe) there's no tk to send an
+            # event too, so assume it will be polling there response queue.
+            if query.tk_response_event is not None:
+                self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
 
@@ -936,12 +944,15 @@ class Session(object):
         self.capi_query_queue.put(None)
 
     def query(
-            self, endpoint: str,
-            query_time: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+            self, endpoint: str, query_time: int,
+            tk_response_event: Optional[str] = None, retrying: bool = False,
+            play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform a query against the specified CAPI endpoint.
 
+        :param endpoint: The CAPI endpoint to query.
+        :param tk_response_event: Name of tk event to generate when response queued.
         :param query_time: When this query was initiated.
         :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
@@ -950,7 +961,10 @@ class Session(object):
         logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
         if self.state == Session.STATE_INIT:
             if self.login():
-                self.query(endpoint, query_time, play_sound=play_sound, auto_update=auto_update)
+                self.query(
+                    endpoint, query_time, tk_response_event=tk_response_event, play_sound=play_sound,
+                    auto_update=auto_update
+                )
                 return
 
         elif self.state == Session.STATE_AUTH:
@@ -964,6 +978,7 @@ class Session(object):
         self.capi_query_queue.put(
             EDMCCAPIRequest(
                 endpoint=endpoint,
+                tk_response_event=tk_response_event,
                 retrying=retrying,
                 query_time=query_time,
                 play_sound=play_sound,
@@ -973,30 +988,34 @@ class Session(object):
 
     def profile(
             self,
-            query_time: int = int(time.time()), retrying: bool = False,
+            query_time: int = int(time.time()),
+            tk_response_event: Optional[str] = None, retrying: bool = False,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform general CAPI /profile endpoint query.
 
         :param query_time: When this query was initiated.
+        :param tk_response_event: Name of tk event to generate when response queued.
         :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
         self.query(
-            self.FRONTIER_CAPI_PATH_PROFILE, query_time=query_time, retrying=retrying,
+            self.FRONTIER_CAPI_PATH_PROFILE, query_time=query_time,
+            tk_response_event=tk_response_event, retrying=retrying,
             play_sound=play_sound, auto_update=auto_update
         )
 
     def station(
-            self,
-            query_time: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+            self, query_time: int, tk_response_event: Optional[str] = None,
+            retrying: bool = False, play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform CAPI quer(y|ies) for station data.
 
         :param query_time: When this query was initiated.
+        :param tk_response_event: Name of tk event to generate when response queued.
         :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
@@ -1005,6 +1024,7 @@ class Session(object):
         self.capi_query_queue.put(
             EDMCCAPIRequest(
                 endpoint=self._CAPI_PATH_STATION,
+                tk_response_event=tk_response_event,
                 query_time=query_time,
                 retrying=retrying,
                 play_sound=play_sound,

@@ -281,6 +281,7 @@ class StatsDialog():
         self.parent.update_idletasks()
 
         try:
+            # TODO: This should use cached data
             data = companion.session.profile()
 
         except companion.ServerError as e:
