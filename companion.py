@@ -587,7 +587,7 @@ class Session(object):
         self.tk_master: Optional[tk.Tk] = None
 
         self.capi_raw_data = CAPIDataRaw()
-        logger.info('Starting CAPI queries thread...')
+        logger.debug('Starting CAPI queries thread...')
         self.capi_response_queue: Queue
         self.capi_query_queue: Queue = Queue()
         self.capi_query_thread = threading.Thread(
@@ -596,7 +596,7 @@ class Session(object):
             name='CAPI worker'
         )
         self.capi_query_thread.start()
-        logger.info('Done')
+        logger.debug('Done')
 
     def set_capi_response_queue(self, capi_response_queue: Queue) -> None:
         """Set a reference to the CAPI response data queue."""
@@ -711,7 +711,7 @@ class Session(object):
     ######################################################################
     def capi_query_worker(self):  # noqa: C901, CCR001
         """Worker thread that performs actual CAPI queries."""
-        logger.info('CAPI worker thread starting')
+        logger.debug('CAPI worker thread starting')
 
         def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
             """

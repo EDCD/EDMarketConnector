@@ -6,9 +6,11 @@ import argparse
 import json
 import locale
 import os
+import queue
 import re
 import sys
 from os.path import getmtime, join
+from queue import Queue
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -270,9 +272,40 @@ sys.path: {sys.path}'''
 
                 companion.session.login(monitor.cmdr, monitor.is_beta)
 
+            # Set up the response queue
+            capi_response_queue: Queue = Queue()
+            companion.session.set_capi_response_queue(capi_response_queue)
+
+            # Initiate CAPI queries
             querytime = int(time())
-            data = companion.session.station()
-            config.set('querytime', querytime)
+            companion.session.station(query_time=querytime)
+
+            # Wait for the response
+            _capi_request_timeout = 60
+            try:
+                capi_response = capi_response_queue.get(block=True, timeout=_capi_request_timeout)
+
+            except queue.Empty:
+                logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
+                sys.exit(EXIT_SERVER)
+
+            else:
+                if isinstance(capi_response, companion.CAPIFailedRequest):
+                    logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
+                    if capi_response.exception:
+                        raise capi_response.exception
+
+                    else:
+                        raise ValueError(capi_response.message)
+
+                logger.trace_if('capi.worker', 'Answer is not a Failure')
+                if not isinstance(capi_response, companion.EDMCCAPIResponse):
+                    msg = f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}"
+                    logger.error(msg)
+                    raise ValueError(msg)
+
+                data = capi_response.capi_data
+                config.set('querytime', querytime)
 
         # Validation
         if not deep_get(data, 'commander', 'name', default='').strip():
