@@ -125,6 +125,14 @@ class CAPIData(UserDict):
             self.data['lastStarport']['ships'] = {'shipyard_list': {}, 'unavailable_list': []}
 
 
+class CAPIDataEncoder(json.JSONEncoder):
+    """Allow for json dumping via specified encoder."""
+
+    def default(self, o):
+        """Tell JSON encoder that we're actually just a dict."""
+        return o.__dict__
+
+
 class CAPIDataRawEndpoint:
     """Last received CAPI response for a specific endpoint."""
 
@@ -1099,7 +1107,7 @@ class Session(object):
 
             timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
             with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
-                h.write(json.dumps(dict(data),
+                h.write(json.dumps(data, cls=CAPIDataEncoder,
                                    ensure_ascii=False,
                                    indent=2,
                                    sort_keys=True,
