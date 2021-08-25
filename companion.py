@@ -648,6 +648,8 @@ class Session(object):
             raise CredentialsError('cannot login without a valid Client ID')
 
         # TODO: WTF is the intent behind this logic ?
+        #       Perhaps to do with not even trying to auth if we're not sure if
+        #       it's beta, but that's moot for *auth* since oAuth2.
         if not cmdr or is_beta is None:
             # Use existing credentials
             if not self.credentials:
