@@ -756,7 +756,7 @@ class Session(object):
                 )
 
             except requests.ConnectionError as e:
-                logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {capi_endpoint})')
+                logger.warning(f'Request {capi_endpoint}: {e}')
                 raise ServerConnectionError(f'Unable to connect to endpoint: {capi_endpoint}') from e
 
             except (requests.HTTPError, ValueError) as e:
