@@ -289,23 +289,23 @@ sys.path: {sys.path}'''
                 logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
                 sys.exit(EXIT_SERVER)
 
-            else:
-                if isinstance(capi_response, companion.CAPIFailedRequest):
-                    logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
-                    if capi_response.exception:
-                        raise capi_response.exception
+            # noinspection DuplicatedCode
+            if isinstance(capi_response, companion.CAPIFailedRequest):
+                logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
+                if capi_response.exception:
+                    raise capi_response.exception
 
-                    else:
-                        raise ValueError(capi_response.message)
+                else:
+                    raise ValueError(capi_response.message)
 
-                logger.trace_if('capi.worker', 'Answer is not a Failure')
-                if not isinstance(capi_response, companion.EDMCCAPIResponse):
-                    msg = f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}"
-                    logger.error(msg)
-                    raise ValueError(msg)
+            logger.trace_if('capi.worker', 'Answer is not a Failure')
+            if not isinstance(capi_response, companion.EDMCCAPIResponse):
+                msg = f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}"
+                logger.error(msg)
+                raise ValueError(msg)
 
-                data = capi_response.capi_data
-                config.set('querytime', querytime)
+            data = capi_response.capi_data
+            config.set('querytime', querytime)
 
         # Validation
         if not deep_get(data, 'commander', 'name', default='').strip():
