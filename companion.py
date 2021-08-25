@@ -597,12 +597,12 @@ class Session(object):
         self.capi_raw_data = CAPIDataRaw()  # Cache of raw replies from CAPI service
         # Queue that holds requests for CAPI queries, the items should always
         # be EDMCCAPIRequest objects.
-        self.capi_query_queue: Queue = Queue()
+        self.capi_query_queue: Queue[Optional[EDMCCAPIRequest]] = Queue()
         # This queue is used to pass the result, possibly a failure, of CAPI
         # queries back to the requesting code (technically anything checking
         # this queue, but it should be either EDMarketConnector.AppWindow or
         # EDMC.py).  Items may be EDMCCAPIResponse or EDMCCAPIFailedRequest.
-        self.capi_response_queue: Queue = Queue()
+        self.capi_response_queue: Queue[Union[EDMCCAPIResponse, EDMCCAPIFailedRequest]] = Queue()
         logger.debug('Starting CAPI queries thread...')
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
