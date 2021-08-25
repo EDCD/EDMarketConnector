@@ -996,7 +996,7 @@ class Session(object):
 
     def profile(
             self,
-            query_time: int = int(time.time()),
+            query_time: int = 0,
             tk_response_event: Optional[str] = None, retrying: bool = False,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
@@ -1009,6 +1009,9 @@ class Session(object):
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
+        if query_time == 0:
+            query_time = int(time.time())
+
         self.query(
             self.FRONTIER_CAPI_PATH_PROFILE, query_time=query_time,
             tk_response_event=tk_response_event, retrying=retrying,
