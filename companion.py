@@ -762,10 +762,13 @@ class Session(object):
             except (requests.HTTPError, ValueError) as e:
                 logger.exception('Frontier CAPI Auth: GET ')
                 self.dump(r)
+                # TODO: Does this *necessarily* mean we need to call close() ?
+                #       Maybe the **CAPI** had a transitory issue and auth is fine.
                 self.close()
 
                 if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
                     logger.error('Frontier CAPI Auth: query failed after refresh')
+                    # TODO: Again, this might be an auth issue, but maybe not.
                     self.invalidate()
                     self.retrying = False
                     # TODO: This must NOT happen here, we need to signal back to the requesting
