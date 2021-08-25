@@ -903,6 +903,7 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
+            self.retrying = query.retrying
             capi_data: CAPIData
             if query.endpoint == self._CAPI_PATH_STATION:
                 try:
