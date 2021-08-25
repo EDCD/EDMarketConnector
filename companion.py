@@ -167,6 +167,14 @@ class CAPIDataRaw:
 
         return capi_data_str
 
+    def __iter__(self):
+        """Make this iterable on its raw_data dict."""
+        yield from self.raw_data
+
+    def __getitem__(self, item):
+        """Make the raw_data dict's items get'able."""
+        return self.raw_data.get(item)
+
 
 def listify(thing: Union[List, Dict]) -> List:
     """
