@@ -936,11 +936,11 @@ class AppWindow(object):
 
         query_time = int(time())
         logger.trace_if('capi.worker', 'Requesting full station data')
+        config.set('querytime', query_time)
         companion.session.station(
             query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
             retrying=retrying, play_sound=play_sound
         )
-        config.set('querytime', query_time)
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """Handle the resulting data from a CAPI query."""
