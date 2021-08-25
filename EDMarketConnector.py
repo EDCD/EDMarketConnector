@@ -14,7 +14,6 @@ import webbrowser
 from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
-from queue import Queue
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Optional, Tuple, Union
@@ -386,7 +385,7 @@ class AppWindow(object):
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
-        self.capi_response_queue: Queue = Queue()
+        self.capi_response_queue: queue.Queue = queue.Queue()
         companion.session.set_capi_response_queue(self.capi_response_queue)
 
         self.w = master
