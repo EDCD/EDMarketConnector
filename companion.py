@@ -150,7 +150,7 @@ class CAPIDataRaw:
     def record_endpoint(
             self, endpoint: str,
             raw_data: str,
-            query_time: datetime.datetime = datetime.datetime.utcnow()
+            query_time: datetime.datetime
     ):
         """Record the latest raw data for the given endpoint."""
         self.raw_data[endpoint] = CAPIDataRawEndpoint(raw_data, query_time)
@@ -740,7 +740,10 @@ class Session(object):
                 # May also fail here if token expired since response is empty
                 capi_json = r.json()
                 capi_data = CAPIData(capi_json, capi_endpoint)
-                self.capi_raw_data.record_endpoint(capi_endpoint, r.content.decode(encoding='utf-8'))
+                self.capi_raw_data.record_endpoint(
+                    capi_endpoint, r.content.decode(encoding='utf-8'),
+                    datetime.datetime.utcnow()
+                )
 
             except requests.ConnectionError as e:
                 logger.warning(f'Unable to resolve name for CAPI: {e} (for request: {capi_endpoint})')
