@@ -290,7 +290,7 @@ sys.path: {sys.path}'''
                 sys.exit(EXIT_SERVER)
 
             # noinspection DuplicatedCode
-            if isinstance(capi_response, companion.CAPIFailedRequest):
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
                 if capi_response.exception:
                     raise capi_response.exception

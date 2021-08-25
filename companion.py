@@ -560,7 +560,7 @@ class EDMCCAPIResponse(EDMCCAPIReturn):
         self.capi_data: CAPIData = capi_data  # Frontier CAPI response, possibly augmented (station query)
 
 
-class CAPIFailedRequest(EDMCCAPIReturn):
+class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     """CAPI failed query error class."""
 
     def __init__(
@@ -594,10 +594,17 @@ class Session(object):
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
 
-        self.capi_raw_data = CAPIDataRaw()
-        logger.debug('Starting CAPI queries thread...')
-        self.capi_response_queue: Queue
+        self.capi_raw_data = CAPIDataRaw()  # Cache of raw replies from CAPI service
+        # Queue that holds requests for CAPI queries, the items should always
+        # be EDMCCAPIRequest objects.
         self.capi_query_queue: Queue = Queue()
+        # This queue is used to pass the result, possibly a failure, of CAPI
+        # queries back to the requesting code (technically anything checking
+        # this queue, but it should be either EDMarketConnector.AppWindow or
+        # EDMC.py).  Items may be EDMCCAPIResponse or EDMCCAPIFailedRequest.
+        # NB: This is created by the caller and set using self.set_capi_response_queue().
+        self.capi_response_queue: Queue
+        logger.debug('Starting CAPI queries thread...')
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
             daemon=True,
@@ -893,7 +900,7 @@ class Session(object):
                 except Exception as e:
                     self.capi_response_queue.put(
                         (
-                            CAPIFailedRequest(
+                            EDMCCAPIFailedRequest(
                                 message=e.args,
                                 exception=e,
                                 query_time=query.query_time,
@@ -920,7 +927,7 @@ class Session(object):
                 except Exception as e:
                     self.capi_response_queue.put(
                         (
-                            CAPIFailedRequest(
+                            EDMCCAPIFailedRequest(
                                 message=e.args,
                                 exception=e,
                                 query_time=query.query_time,

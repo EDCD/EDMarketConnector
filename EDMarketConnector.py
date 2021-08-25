@@ -947,11 +947,11 @@ class AppWindow(object):
         play_bad: bool = False
         err: Optional[str] = None
 
-        capi_response: Union[companion.CAPIFailedRequest, companion.EDMCCAPIResponse]
+        capi_response: Union[companion.EDMCCAPIFailedRequest, companion.EDMCCAPIResponse]
         try:
             logger.trace_if('capi.worker', 'Pulling answer off queue')
             capi_response = self.capi_response_queue.get(block=False)
-            if isinstance(capi_response, companion.CAPIFailedRequest):
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
                 if capi_response.exception:
                     raise capi_response.exception
