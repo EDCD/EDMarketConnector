@@ -925,14 +925,12 @@ class Session(object):
 
                 except Exception as e:
                     self.capi_response_queue.put(
-                        (
-                            EDMCCAPIFailedRequest(
-                                message=e.args,
-                                exception=e,
-                                query_time=query.query_time,
-                                play_sound=query.play_sound,
-                                auto_update=query.auto_update
-                            ),
+                        EDMCCAPIFailedRequest(
+                            message=e.args,
+                            exception=e,
+                            query_time=query.query_time,
+                            play_sound=query.play_sound,
+                            auto_update=query.auto_update
                         )
                     )
 
