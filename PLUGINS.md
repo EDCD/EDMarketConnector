@@ -326,9 +326,9 @@ should treat it as a variable.
 **Do NOT use**:
 
 ```python
-   from config import shutting_down
+   from config import config
 
-    if shutting_down():
+    if config.shutting_down():
        # During shutdown
 ```
 
@@ -338,9 +338,9 @@ this context you're testing if the function exists, and that is always True.
 So instead use:
 
 ```python
-   from config import shutting_down
+   from config import config
 
-    if shutting_down:
+    if config.shutting_down:
         # During shutdown
 ```
 
