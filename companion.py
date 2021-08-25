@@ -629,7 +629,7 @@ class Session(object):
         self.session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
-    def login(self, cmdr: str = None, is_beta: Union[None, bool] = None) -> bool:
+    def login(self, cmdr: str = None, is_beta: Optional[bool] = None) -> bool:
         """
         Attempt oAuth2 login.
 
@@ -830,8 +830,10 @@ class Session(object):
                 logger.error("No lastStarport in data!")
                 return station_data
 
-            if ((last_starport_name := last_starport.get('name')) is None
-                    or last_starport_name == ''):
+            if (
+                (last_starport_name := last_starport.get('name')) is None
+                or last_starport_name == ''
+            ):
                 # This could well be valid if you've been out exploring for a long
                 # time.
                 logger.warning("No lastStarport name!")
