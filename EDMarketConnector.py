@@ -1670,7 +1670,7 @@ class AppWindow(object):
 
     def oniconify(self, event=None) -> None:
         """Handle minimization of the application."""
-        self.w.overrideredirect(0)  # Can't iconize while overrideredirect
+        self.w.overrideredirect(False)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
         self.w.wait_visibility()  # Need main window to be re-created before returning
