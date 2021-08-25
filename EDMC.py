@@ -10,7 +10,6 @@ import queue
 import re
 import sys
 from os.path import getmtime, join
-from queue import Queue
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -272,10 +271,6 @@ sys.path: {sys.path}'''
 
                 companion.session.login(monitor.cmdr, monitor.is_beta)
 
-            # Set up the response queue
-            capi_response_queue: Queue = Queue()
-            companion.session.set_capi_response_queue(capi_response_queue)
-
             # Initiate CAPI queries
             querytime = int(time())
             companion.session.station(query_time=querytime)
@@ -283,7 +278,9 @@ sys.path: {sys.path}'''
             # Wait for the response
             _capi_request_timeout = 60
             try:
-                capi_response = capi_response_queue.get(block=True, timeout=_capi_request_timeout)
+                capi_response = companion.session.capi_response_queue.get(
+                    block=True, timeout=_capi_request_timeout
+                )
 
             except queue.Empty:
                 logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')

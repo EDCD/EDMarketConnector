@@ -602,8 +602,7 @@ class Session(object):
         # queries back to the requesting code (technically anything checking
         # this queue, but it should be either EDMarketConnector.AppWindow or
         # EDMC.py).  Items may be EDMCCAPIResponse or EDMCCAPIFailedRequest.
-        # NB: This is created by the caller and set using self.set_capi_response_queue().
-        self.capi_response_queue: Queue
+        self.capi_response_queue: Queue = Queue()
         logger.debug('Starting CAPI queries thread...')
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
@@ -612,10 +611,6 @@ class Session(object):
         )
         self.capi_query_thread.start()
         logger.debug('Done')
-
-    def set_capi_response_queue(self, capi_response_queue: Queue) -> None:
-        """Set a reference to the CAPI response data queue."""
-        self.capi_response_queue = capi_response_queue
 
     def set_tk_master(self, master: tk.Tk) -> None:
         """Set a reference to main UI Tk root window."""

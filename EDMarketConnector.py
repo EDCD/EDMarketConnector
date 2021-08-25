@@ -385,8 +385,6 @@ class AppWindow(object):
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
-        self.capi_response_queue: queue.Queue = queue.Queue()
-        companion.session.set_capi_response_queue(self.capi_response_queue)
 
         self.w = master
         self.w.title(applongname)
@@ -950,7 +948,7 @@ class AppWindow(object):
         capi_response: Union[companion.EDMCCAPIFailedRequest, companion.EDMCCAPIResponse]
         try:
             logger.trace_if('capi.worker', 'Pulling answer off queue')
-            capi_response = self.capi_response_queue.get(block=False)
+            capi_response = companion.session.capi_response_queue.get(block=False)
             if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
                 if capi_response.exception:
