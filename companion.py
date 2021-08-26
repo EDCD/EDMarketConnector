@@ -734,7 +734,7 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.debug('CAPI worker thread starting')
 
-        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
+        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:
             """
             Perform a *single* CAPI endpoint query within the thread worker.
 
@@ -787,12 +787,6 @@ class Session(object):
                 logger.debug('Attempting GET', exc_info=e)
                 # LANG: Frontier CAPI data retrieval failed
                 raise ServerError(f'{_("Frontier CAPI query failure")}: {capi_endpoint}') from e
-
-            # TODO: I don't think this happens any more, it's just a 401 status as above
-            if r.url.startswith(FRONTIER_AUTH_SERVER):
-                logger.info('Redirected back to Auth Server')
-                self.dump(r)
-                raise CredentialsError('Redirected back to Auth Server')
 
             self.retrying = False
 
