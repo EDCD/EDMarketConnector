@@ -766,21 +766,18 @@ class Session(object):
                     # TODO: Translation ?
                     raise CredentialsError('Frontier CAPI said Auth required') from e
 
-                if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
-                    self.retrying = False
-                    raise CredentialsError('query failed after refresh') from e
+                if r.status_code == 418:  # "I'm a teapot" - used to signal maintenance
+                    # TODO: Translation ?
+                    raise ServerError("Frontier CAPI down for maintenance") from e
+
+                # TODO: Let caller decide on this
+                # if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
+                #     self.retrying = False
+                #     raise CredentialsError('query failed after refresh') from e
 
                 # TODO: Better to return error and have upstream re-try auth ?
-                elif self.login():  # Maybe our token expired. Re-authorize in any case
-                    logger.debug('Initial query failed, but login() just worked, trying again...')
-                    self.retrying = True
-                    # TODO: This, or raise (custom?) exception for upstream to do it?
-                    return capi_single_query(capi_endpoint)
-
-                else:
-                    self.retrying = False
-                    logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
-                    raise CredentialsError('HTTP error or invalid JSON') from e
+                logger.exception('Frontier CAPI: Misc. Error')
+                raise ServerError('Frontier CAPI: Misc. Error') from e
 
             except ValueError as e:
                 logger.exception(f'decoding CAPI response content:\n{r.content.decode(encoding="utf-8")}\n')
