@@ -788,11 +788,13 @@ class Session(object):
                 # LANG: Frontier CAPI data retrieval failed
                 raise ServerError(f'{_("Frontier CAPI query failure")}: {capi_endpoint}') from e
 
+            # TODO: I don't think this happens any more, it's just a 401 status as above
             if r.url.startswith(FRONTIER_AUTH_SERVER):
                 logger.info('Redirected back to Auth Server')
                 self.dump(r)
                 raise CredentialsError('Redirected back to Auth Server')
 
+            # TODO: Shouldn't this be covered by raise_for_status() above ?
             elif 500 <= r.status_code < 600:
                 # Server error. Typically 500 "Internal Server Error" if server is down
                 logger.debug('500 status back from CAPI')
