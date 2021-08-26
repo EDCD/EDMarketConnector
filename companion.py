@@ -533,11 +533,10 @@ class EDMCCAPIReturn:
 
     def __init__(
         self, query_time: int, tk_response_event: Optional[str] = None,
-        retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+        play_sound: bool = False, auto_update: bool = False
     ):
         self.tk_response_event = tk_response_event  # Name of tk event to generate when response queued.
         self.query_time: int = query_time  # When this query is considered to have started (time_t).
-        self.retrying: bool = retrying  # Whether this is already a retry.
         self.play_sound: bool = play_sound  # Whether to play good/bad sounds for success/failure.
         self.auto_update: bool = auto_update  # Whether this was automatically triggered.
 
@@ -549,11 +548,11 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
 
     def __init__(
         self, endpoint: str, query_time: int,
-        tk_response_event: Optional[str] = None, retrying: bool = False,
+        tk_response_event: Optional[str] = None,
         play_sound: bool = False, auto_update: bool = False
     ):
         super().__init__(
-            query_time=query_time, tk_response_event=tk_response_event, retrying=retrying,
+            query_time=query_time, tk_response_event=tk_response_event,
             play_sound=play_sound, auto_update=auto_update
         )
         self.endpoint: str = endpoint  # The CAPI query to perform.
@@ -564,9 +563,9 @@ class EDMCCAPIResponse(EDMCCAPIReturn):
 
     def __init__(
             self, capi_data: CAPIData,
-            query_time: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+            query_time: int, play_sound: bool = False, auto_update: bool = False
     ):
-        super().__init__(query_time=query_time, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.capi_data: CAPIData = capi_data  # Frontier CAPI response, possibly augmented (station query)
 
 
@@ -575,10 +574,10 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
 
     def __init__(
             self, message: str,
-            query_time: int, retrying: bool = False, play_sound: bool = False, auto_update: bool = False,
+            query_time: int, play_sound: bool = False, auto_update: bool = False,
             exception=None
     ):
-        super().__init__(query_time=query_time, retrying=retrying, play_sound=play_sound, auto_update=auto_update)
+        super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.message: str = message  # User-friendly reason for failure.
         self.exception: int = exception  # Exception that recipient should raise.
 
@@ -759,21 +758,16 @@ class Session(object):
                 logger.warning(f'Request {capi_endpoint}: {e}')
                 raise ServerConnectionError(f'Unable to connect to endpoint: {capi_endpoint}') from e
 
-            except (requests.HTTPError, ValueError) as e:
-                logger.exception('Frontier CAPI Auth: GET ')
+            except requests.HTTPError as e:  # In response to raise_for_status()
+                logger.exception(f'Frontier CAPI Auth: GET {capi_endpoint}')
                 self.dump(r)
-                # TODO: Does this *necessarily* mean we need to call close() ?
-                #       Maybe the **CAPI** had a transitory issue and auth is fine.
-                self.close()
+
+                if r.status_code == 401:  # CAPI doesn't think we're Auth'd
+                    # TODO: Translation ?
+                    raise CredentialsError('Frontier CAPI said Auth required') from e
 
                 if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
-                    logger.error('Frontier CAPI Auth: query failed after refresh')
-                    # TODO: Again, this might be an auth issue, but maybe not.
-                    self.invalidate()
                     self.retrying = False
-                    # TODO: This must NOT happen here, we need to signal back to the requesting
-                    #       code that it needs to sort out auth.
-                    self.login()
                     raise CredentialsError('query failed after refresh') from e
 
                 # TODO: Better to return error and have upstream re-try auth ?
@@ -787,6 +781,11 @@ class Session(object):
                     self.retrying = False
                     logger.error('Frontier CAPI Auth: HTTP error or invalid JSON')
                     raise CredentialsError('HTTP error or invalid JSON') from e
+
+            except ValueError as e:
+                logger.exception(f'decoding CAPI response content:\n{r.content.decode(encoding="utf-8")}\n')
+                # TODO: What now ?
+                raise ServerError("Couldn't JSON decode CAPI response") from e
 
             except Exception as e:
                 logger.debug('Attempting GET', exc_info=e)
@@ -906,7 +905,6 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
-            self.retrying = query.retrying
             capi_data: CAPIData
             if query.endpoint == self._CAPI_PATH_STATION:
                 try:
@@ -976,7 +974,7 @@ class Session(object):
 
     def query(
             self, endpoint: str, query_time: int,
-            tk_response_event: Optional[str] = None, retrying: bool = False,
+            tk_response_event: Optional[str] = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
@@ -985,7 +983,6 @@ class Session(object):
         :param endpoint: The CAPI endpoint to query.
         :param tk_response_event: Name of tk event to generate when response queued.
         :param query_time: When this query was initiated.
-        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -1010,7 +1007,6 @@ class Session(object):
             EDMCCAPIRequest(
                 endpoint=endpoint,
                 tk_response_event=tk_response_event,
-                retrying=retrying,
                 query_time=query_time,
                 play_sound=play_sound,
                 auto_update=auto_update
@@ -1020,7 +1016,7 @@ class Session(object):
     def profile(
             self,
             query_time: int = 0,
-            tk_response_event: Optional[str] = None, retrying: bool = False,
+            tk_response_event: Optional[str] = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
@@ -1028,7 +1024,6 @@ class Session(object):
 
         :param query_time: When this query was initiated.
         :param tk_response_event: Name of tk event to generate when response queued.
-        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -1037,20 +1032,19 @@ class Session(object):
 
         self.query(
             self.FRONTIER_CAPI_PATH_PROFILE, query_time=query_time,
-            tk_response_event=tk_response_event, retrying=retrying,
+            tk_response_event=tk_response_event,
             play_sound=play_sound, auto_update=auto_update
         )
 
     def station(
             self, query_time: int, tk_response_event: Optional[str] = None,
-            retrying: bool = False, play_sound: bool = False, auto_update: bool = False
+            play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform CAPI quer(y|ies) for station data.
 
         :param query_time: When this query was initiated.
         :param tk_response_event: Name of tk event to generate when response queued.
-        :param retrying: Whether this is a retry.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -1060,7 +1054,6 @@ class Session(object):
                 endpoint=self._CAPI_PATH_STATION,
                 tk_response_event=tk_response_event,
                 query_time=query_time,
-                retrying=retrying,
                 play_sound=play_sound,
                 auto_update=auto_update
             )

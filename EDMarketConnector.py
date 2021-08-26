@@ -891,12 +891,14 @@ class AppWindow(object):
 
         return True
 
-    def capi_request_data(self, event=None, retrying: bool = False):
+    def capi_request_data(self, event=None) -> None:
         """
         Perform CAPI data retrieval and associated actions.
 
         This can be triggered by hitting the main UI 'Update' button,
         automatically on docking, or due to a retry.
+
+        :param event: Tk generated event details.
         """
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
@@ -916,7 +918,7 @@ class AppWindow(object):
             self.login()
             return
 
-        if not retrying:
+        if not companion.session.retrying:
             if time() < self.capi_query_holdoff_time:  # Was invoked by key while in cooldown
                 if play_sound and (self.capi_query_holdoff_time - time()) < companion.capi_query_cooldown * 0.75:
                     self.status['text'] = ''
@@ -937,7 +939,7 @@ class AppWindow(object):
         config.set('querytime', query_time)
         companion.session.station(
             query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
-            retrying=retrying, play_sound=play_sound
+            play_sound=play_sound
         )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
@@ -1112,13 +1114,14 @@ class AppWindow(object):
         # Companion API problem
         except companion.ServerLagging as e:
             err = str(e)
-            if capi_response.retrying:
+            if companion.session.retrying:
                 self.status['text'] = err
                 play_bad = True
 
             else:
                 # Retry once if Companion server is unresponsive
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event, True))
+                companion.session.retrying = True
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event))
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
