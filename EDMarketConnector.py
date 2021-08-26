@@ -1105,6 +1105,9 @@ class AppWindow(object):
             # TODO: Set status text
             return
 
+        except companion.ServerConnectionError:
+            self.status['text'] = _('Frontier CAPI server error')
+
         except companion.CredentialsError:
             # Redirected back to Auth server - force full re-authentication
             companion.session.invalidate()
