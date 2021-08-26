@@ -770,12 +770,6 @@ class Session(object):
                     # TODO: Translation ?
                     raise ServerError("Frontier CAPI down for maintenance") from e
 
-                # TODO: Let caller decide on this
-                # if self.retrying:  # Refresh just succeeded but this query failed! Force full re-authentication
-                #     self.retrying = False
-                #     raise CredentialsError('query failed after refresh') from e
-
-                # TODO: Better to return error and have upstream re-try auth ?
                 logger.exception('Frontier CAPI: Misc. Error')
                 raise ServerError('Frontier CAPI: Misc. Error') from e
 
@@ -787,8 +781,6 @@ class Session(object):
                 logger.debug('Attempting GET', exc_info=e)
                 # LANG: Frontier CAPI data retrieval failed
                 raise ServerError(f'{_("Frontier CAPI query failure")}: {capi_endpoint}') from e
-
-            self.retrying = False
 
             if capi_endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in capi_data:
                 logger.error('No commander in returned data')
