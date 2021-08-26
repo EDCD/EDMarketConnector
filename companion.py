@@ -794,14 +794,6 @@ class Session(object):
                 self.dump(r)
                 raise CredentialsError('Redirected back to Auth Server')
 
-            # TODO: Shouldn't this be covered by raise_for_status() above ?
-            elif 500 <= r.status_code < 600:
-                # Server error. Typically 500 "Internal Server Error" if server is down
-                logger.debug('500 status back from CAPI')
-                self.dump(r)
-                # LANG: Frontier CAPI data retrieval failed with 5XX code
-                raise ServerError(f'{_("Frontier CAPI server error")}: {r.status_code}')
-
             self.retrying = False
 
             if capi_endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in capi_data:
