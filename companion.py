@@ -763,12 +763,13 @@ class Session(object):
                 self.dump(r)
 
                 if r.status_code == 401:  # CAPI doesn't think we're Auth'd
-                    # TODO: Translation ?
+                    # No need for translation, we'll go straight into trying new Auth
+                    # and thus any message would be overwritten.
                     raise CredentialsError('Frontier CAPI said Auth required') from e
 
                 if r.status_code == 418:  # "I'm a teapot" - used to signal maintenance
-                    # TODO: Translation ?
-                    raise ServerError("Frontier CAPI down for maintenance") from e
+                    # LANG: Frontier CAPI returned 418, meaning down for maintenance
+                    raise ServerError(_("Frontier CAPI down for maintenance")) from e
 
                 logger.exception('Frontier CAPI: Misc. Error')
                 raise ServerError('Frontier CAPI: Misc. Error') from e
@@ -790,8 +791,6 @@ class Session(object):
                     '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])  # type: ignore
                 )
 
-            # TODO: Store a copy of this if it was /profile, e.g. for use by
-            #       stats.py
             return capi_data
 
         def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
