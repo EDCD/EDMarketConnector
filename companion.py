@@ -781,8 +781,7 @@ class Session(object):
 
             except ValueError as e:
                 logger.exception(f'decoding CAPI response content:\n{r.content.decode(encoding="utf-8")}\n')
-                # TODO: What now ?
-                raise ServerError("Couldn't JSON decode CAPI response") from e
+                raise ServerError("Frontier CAPI response: couldn't decode JSON") from e
 
             except Exception as e:
                 logger.debug('Attempting GET', exc_info=e)
