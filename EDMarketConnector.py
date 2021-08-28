@@ -1113,10 +1113,9 @@ class AppWindow(object):
 
         except companion.CredentialsError:
             companion.session.retrying = False
-            # TODO: Might need to .invalidate() here to avoid "already auth'd"
             companion.session.invalidate()
             companion.session.login()
-            return
+            return  # We need to give Auth time to complete, so can't set a timed retry
 
         # Companion API problem
         except companion.ServerLagging as e:
