@@ -295,15 +295,15 @@ class Auth(object):
 
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
-        self.session = requests.Session()
-        self.session.headers['User-Agent'] = USER_AGENT
+        self.requests_session = requests.Session()
+        self.requests_session.headers['User-Agent'] = USER_AGENT
         self.verifier: Union[bytes, None] = None
         self.state: Union[str, None] = None
 
     def __del__(self) -> None:
         """Ensure our Session is closed if we're being deleted."""
-        if self.session:
-            self.session.close()
+        if self.requests_session:
+            self.requests_session.close()
 
     def refresh(self) -> Optional[str]:
         """
@@ -334,7 +334,7 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
-                r = self.session.post(
+                r = self.requests_session.post(
                     FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
                     data=data,
                     timeout=auth_timeout
@@ -422,7 +422,7 @@ class Auth(object):
             # requests_log.setLevel(logging.DEBUG)
             # requests_log.propagate = True
 
-            r = self.session.post(
+            r = self.requests_session.post(
                 FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
                 data=request_data,
                 timeout=auth_timeout
@@ -430,7 +430,7 @@ class Auth(object):
             data_token = r.json()
             if r.status_code == requests.codes.ok:
                 # Now we need to /decode the token to check the customer_id against FID
-                r = self.session.get(
+                r = self.requests_session.get(
                     FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_DECODE,
                     headers={
                         'Authorization': f'Bearer {data_token.get("access_token", "")}',
