@@ -734,7 +734,7 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.debug('CAPI worker thread starting')
 
-        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:
+        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
             """
             Perform a *single* CAPI endpoint query within the thread worker.
 
@@ -744,7 +744,9 @@ class Session(object):
             """
             capi_data: CAPIData
             try:
+                logger.trace_if('capi.worker', 'Sending HTTP request...')
                 r = self.session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
+                logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
                 capi_json = r.json()
@@ -871,6 +873,7 @@ class Session(object):
 
         while True:
             query = self.capi_request_queue.get()
+            logger.trace_if('capi.worker', 'De-queued request')
             if not isinstance(query, EDMCCAPIRequest):
                 logger.error("Item from queue wasn't an EDMCCAPIRequest")
                 break
@@ -934,6 +937,7 @@ class Session(object):
             # If the query came from EDMC.(py|exe) there's no tk to send an
             # event too, so assume it will be polling there response queue.
             if query.tk_response_event is not None:
+                logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
                 self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
@@ -1024,6 +1028,7 @@ class Session(object):
         :param auto_update: Whether this request was triggered automatically.
         """
         # Ask the thread worker to perform all three queries
+        logger.trace_if('capi.worker', 'Enqueueing request')
         self.capi_request_queue.put(
             EDMCCAPIRequest(
                 endpoint=self._CAPI_PATH_STATION,

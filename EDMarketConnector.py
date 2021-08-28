@@ -900,6 +900,7 @@ class AppWindow(object):
 
         :param event: Tk generated event details.
         """
+        logger.trace_if('capi.worker', 'Begin')
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
 
@@ -937,6 +938,7 @@ class AppWindow(object):
         query_time = int(time())
         logger.trace_if('capi.worker', 'Requesting full station data')
         config.set('querytime', query_time)
+        logger.trace_if('capi.worker', 'Calling companion.session.station')
         companion.session.station(
             query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
             play_sound=play_sound
@@ -944,6 +946,7 @@ class AppWindow(object):
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """Handle the resulting data from a CAPI query."""
+        logger.trace_if('capi.worker', 'Handling response')
         play_bad: bool = False
         err: Optional[str] = None
 
@@ -1151,9 +1154,11 @@ class AppWindow(object):
         # Update Odyssey Suit data
         companion.session.suit_update(capi_response.capi_data)
 
+        logger.trace_if('capi.worker', 'Updating suit and cooldown...')
         self.update_suit_text()
         self.suit_show_if_set()
         self.cooldown()
+        logger.trace_if('capi.worker', '...done')
 
     def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
