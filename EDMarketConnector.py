@@ -964,7 +964,7 @@ class AppWindow(object):
 
             logger.trace_if('capi.worker', 'Answer is not a Failure')
             if not isinstance(capi_response, companion.EDMCCAPIResponse):
-                msg = f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}"
+                msg = f'Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}'
                 logger.error(msg)
                 raise ValueError(msg)
 
