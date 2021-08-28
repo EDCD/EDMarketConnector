@@ -598,7 +598,7 @@ class Session(object):
         self.state = Session.STATE_INIT
         self.server: Optional[str] = None
         self.credentials: Optional[Dict[str, Any]] = None
-        self.session: Optional[requests.Session] = None
+        self.requests_session: Optional[requests.Session] = None
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
@@ -631,9 +631,9 @@ class Session(object):
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
-        self.session = requests.Session()
-        self.session.headers['Authorization'] = f'Bearer {access_token}'
-        self.session.headers['User-Agent'] = USER_AGENT
+        self.requests_session = requests.Session()
+        self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
+        self.requests_session.headers['User-Agent'] = USER_AGENT
         self.state = Session.STATE_OK
 
     def login(self, cmdr: str = None, is_beta: Optional[bool] = None) -> bool:
@@ -710,14 +710,14 @@ class Session(object):
     def close(self) -> None:
         """Close Frontier authorization session."""
         self.state = Session.STATE_INIT
-        if self.session:
+        if self.requests_session:
             try:
-                self.session.close()
+                self.requests_session.close()
 
             except Exception as e:
                 logger.debug('Frontier Auth: closing', exc_info=e)
 
-        self.session = None
+        self.requests_session = None
 
     def invalidate(self) -> None:
         """Invalidate Frontier authorization credentials."""
@@ -745,7 +745,7 @@ class Session(object):
             capi_data: CAPIData
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
-                r = self.session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
+                r = self.requests_session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
