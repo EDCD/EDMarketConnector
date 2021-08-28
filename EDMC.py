@@ -271,6 +271,7 @@ sys.path: {sys.path}'''
 
                 companion.session.login(monitor.cmdr, monitor.is_beta)
 
+            ###################################################################
             # Initiate CAPI queries
             querytime = int(time())
             companion.session.station(query_time=querytime)
@@ -286,6 +287,8 @@ sys.path: {sys.path}'''
                 logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
                 sys.exit(EXIT_SERVER)
 
+            ###################################################################
+
             # noinspection DuplicatedCode
             if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
                 logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
@@ -297,9 +300,7 @@ sys.path: {sys.path}'''
 
             logger.trace_if('capi.worker', 'Answer is not a Failure')
             if not isinstance(capi_response, companion.EDMCCAPIResponse):
-                msg = f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}"
-                logger.error(msg)
-                raise ValueError(msg)
+                raise ValueError(f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}")
 
             data = capi_response.capi_data
             config.set('querytime', querytime)
@@ -309,10 +310,10 @@ sys.path: {sys.path}'''
             logger.error("No data['command']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
-        elif not deep_get(data, 'lastSystem', 'name') or \
-                data['commander'].get('docked') and not \
-                deep_get(data, 'lastStarport', 'name'):  # Only care if docked
-
+        elif (
+            not deep_get(data, 'lastSystem', 'name') or
+            data['commander'].get('docked') and not deep_get(data, 'lastStarport', 'name')
+        ):  # Only care if docked
             logger.error("No data['lastSystem']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
@@ -324,16 +325,15 @@ sys.path: {sys.path}'''
             pass  # Skip further validation
 
         elif data['commander']['name'] != monitor.cmdr:
-            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')  # noqa: E501
-            sys.exit(EXIT_CREDENTIALS)
+            raise companion.CmdrError()
 
-        elif data['lastSystem']['name'] != monitor.system or \
-                ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or \
-                data['ship']['id'] != monitor.state['ShipID'] or \
-                data['ship']['name'].lower() != monitor.state['ShipType']:
-
-            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')  # noqa: E501
-            sys.exit(EXIT_LAGGING)
+        elif (
+            data['lastSystem']['name'] != monitor.system or
+            ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
+            data['ship']['id'] != monitor.state['ShipID'] or
+            data['ship']['name'].lower() != monitor.state['ShipType']
+        ):
+            raise companion.ServerLagging()
 
         # stuff we can do when not docked
         if args.d:
@@ -446,12 +446,35 @@ sys.path: {sys.path}'''
                 logger.exception('Failed to send data to EDDN')
 
     except companion.ServerError:
-        logger.error('Frontier CAPI Server returned an error')
+        logger.exception('Frontier CAPI Server returned an error')
+        sys.exit(EXIT_SERVER)
+
+    except companion.ServerConnectionError:
+        logger.exception('Exception while contacting server')
         sys.exit(EXIT_SERVER)
 
     except companion.CredentialsError:
         logger.error('Frontier CAPI Server: Invalid Credentials')
         sys.exit(EXIT_CREDENTIALS)
+
+    # Companion API problem
+    except companion.ServerLagging:
+        logger.error(
+            'Mismatch(es) between CAPI and Journal for at least one of: '
+            'StarSystem, Last Star Port, Ship ID or Ship Name/Type'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except companion.CmdrError:  # Companion API return doesn't match Journal
+        logger.error(
+            f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match '
+            f'"{monitor.cmdr}" from Journal'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except Exception:
+        logger.exception('"other" exception')
+        sys.exit(EXIT_SERVER)
 
 
 if __name__ == '__main__':
