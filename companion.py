@@ -173,7 +173,7 @@ class CAPIDataRaw:
 
     def __getitem__(self, item):
         """Make the raw_data dict's items get'able."""
-        return self.raw_data.get(item)
+        return self.raw_data.__getitem__(item)
 
 
 def listify(thing: Union[List, Dict]) -> List:
