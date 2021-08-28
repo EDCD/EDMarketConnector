@@ -1113,6 +1113,7 @@ class AppWindow(object):
 
         except companion.CredentialsError:
             companion.session.retrying = False
+            # TODO: Might need to .invalidate() here to avoid "already auth'd"
             companion.session.login()
 
         # Companion API problem

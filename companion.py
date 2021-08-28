@@ -749,6 +749,8 @@ class Session(object):
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
+                # r.status_code = 401
+                # raise requests.HTTPError
                 capi_json = r.json()
                 capi_data = CAPIData(capi_json, capi_endpoint)
                 self.capi_raw_data.record_endpoint(
