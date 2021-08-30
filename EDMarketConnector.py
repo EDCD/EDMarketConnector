@@ -904,14 +904,35 @@ class AppWindow(object):
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
 
-        if (
-                not monitor.cmdr or not monitor.mode or monitor.state['Captain']
-                or not monitor.system or monitor.mode == 'CQC'
-        ):
-            logger.trace_if('capi.worker', 'CQC detected, aborting query')
+        if not monitor.cmdr:
+            logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
+            # LANG: CAPI queries aborted because Cmdr name is unknown
+            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            return
+
+        if not monitor.mode:
+            logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
+            # LANG: CAPI queries aborted because game mode unknown
+            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            return
+
+        if not monitor.system:
+            logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
+            # LANG: CAPI queries aborted because current star system name unknown
+            self.status['text'] = _('CAPI query aborted: Current system unknown')
+            return
+
+        if monitor.state['Captain']:
+            logger.trace_if('capi.worker', 'Aborting Query: In multi-crew')
+            # LANG: CAPI queries aborted because player is in multi-crew on other Cmdr's ship
+            self.status['text'] = _('CAPI query aborted: In other-ship multi-crew')
+            return
+
+        if monitor.mode == 'CQC':
+            logger.trace_if('capi.worker', 'Aborting Query: In CQC')
             # LANG: CAPI queries aborted because player is in CQC (Arena)
-            self.status['text'] = _('CQC detected, aborting CAPI query')
-            return  # In CQC or on crew - do nothing
+            self.status['text'] = _('CAPI query aborted: CQC (Arena) detected')
+            return
 
         if companion.session.state == companion.Session.STATE_AUTH:
             logger.trace_if('capi.worker', 'Auth in progress? Aborting query')
