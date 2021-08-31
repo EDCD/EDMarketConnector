@@ -49,7 +49,7 @@ else:
 # CAPIData = NewType('CAPIData', Dict)
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
-capi_default_timeout = 10
+capi_default_requests_timeout = 10
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
@@ -734,7 +734,9 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.debug('CAPI worker thread starting')
 
-        def capi_single_query(capi_endpoint: str, timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
+        def capi_single_query(  # noqa: CCR001
+            capi_endpoint: str, timeout: int = capi_default_requests_timeout
+        ) -> CAPIData:
             """
             Perform a *single* CAPI endpoint query within the thread worker.
 
@@ -797,7 +799,7 @@ class Session(object):
 
             return capi_data
 
-        def capi_station_queries(timeout: int = capi_default_timeout) -> CAPIData:  # noqa: CCR001
+        def capi_station_queries(timeout: int = capi_default_requests_timeout) -> CAPIData:  # noqa: CCR001
             """
             Perform all 'station' queries for the caller.
 
