@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.9.6.
+* We now test against, and package with, Python 3.9.7.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
