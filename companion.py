@@ -747,6 +747,9 @@ class Session(object):
             capi_data: CAPIData
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
+                if conf_module.capi_pretend_down:
+                    raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
+
                 r = self.requests_session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
@@ -931,70 +934,6 @@ class Session(object):
                 endpoint=EDMCCAPIRequest.REQUEST_WORKER_SHUTDOWN,
                 query_time=int(time.time())
             )
-        )
-
-    def query(
-            self, endpoint: str, query_time: int,
-            tk_response_event: Optional[str] = None,
-            play_sound: bool = False, auto_update: bool = False
-    ) -> None:
-        """
-        Perform a query against the specified CAPI endpoint.
-
-        :param endpoint: The CAPI endpoint to query.
-        :param tk_response_event: Name of tk event to generate when response queued.
-        :param query_time: When this query was initiated.
-        :param play_sound: Whether the app should play a sound on error.
-        :param auto_update: Whether this request was triggered automatically.
-        """
-        logger.trace_if('capi.query', f'Performing query for endpoint "{endpoint}"')
-        if self.state == Session.STATE_INIT:
-            if self.login():
-                self.query(
-                    endpoint, query_time, tk_response_event=tk_response_event, play_sound=play_sound,
-                    auto_update=auto_update
-                )
-                return
-
-        elif self.state == Session.STATE_AUTH:
-            logger.error('cannot make a query when unauthorized')
-            raise CredentialsError('cannot make a query when unauthorized')
-
-        logger.trace_if('capi.query', 'Trying...')
-        if conf_module.capi_pretend_down:
-            raise ServerConnectionError(f'Pretending CAPI down: {endpoint}')
-
-        self.capi_request_queue.put(
-            EDMCCAPIRequest(
-                endpoint=endpoint,
-                tk_response_event=tk_response_event,
-                query_time=query_time,
-                play_sound=play_sound,
-                auto_update=auto_update
-            )
-        )
-
-    def profile(
-            self,
-            query_time: int = 0,
-            tk_response_event: Optional[str] = None,
-            play_sound: bool = False, auto_update: bool = False
-    ) -> None:
-        """
-        Perform general CAPI /profile endpoint query.
-
-        :param query_time: When this query was initiated.
-        :param tk_response_event: Name of tk event to generate when response queued.
-        :param play_sound: Whether the app should play a sound on error.
-        :param auto_update: Whether this request was triggered automatically.
-        """
-        if query_time == 0:
-            query_time = int(time.time())
-
-        self.query(
-            self.FRONTIER_CAPI_PATH_PROFILE, query_time=query_time,
-            tk_response_event=tk_response_event,
-            play_sound=play_sound, auto_update=auto_update
         )
 
     def station(

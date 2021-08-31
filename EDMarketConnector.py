@@ -1106,6 +1106,8 @@ class AppWindow(object):
                                 self.suit['text'] = f'{suitname} ({loadout_name})'
 
                 self.suit_show_if_set()
+                # Update Odyssey Suit data
+                companion.session.suit_update(capi_response.capi_data)
 
                 if capi_response.capi_data['commander'].get('credits') is not None:
                     monitor.state['Credits'] = capi_response.capi_data['commander']['credits']
@@ -1173,9 +1175,6 @@ class AppWindow(object):
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
-
-        # Update Odyssey Suit data
-        companion.session.suit_update(capi_response.capi_data)
 
         logger.trace_if('capi.worker', 'Updating suit and cooldown...')
         self.update_suit_text()
