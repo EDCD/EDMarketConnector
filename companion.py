@@ -888,55 +888,33 @@ class Session(object):
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
             capi_data: CAPIData
-            if query.endpoint == self._CAPI_PATH_STATION:
-                try:
+            try:
+                if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries()
 
-                except Exception as e:
-                    self.capi_response_queue.put(
-                        EDMCCAPIFailedRequest(
-                            message=str(e.args),
-                            exception=e,
-                            query_time=query.query_time,
-                            play_sound=query.play_sound,
-                            auto_update=query.auto_update
-                        )
-                    )
-
                 else:
-                    self.capi_response_queue.put(
-                        EDMCCAPIResponse(
-                            capi_data=capi_data,
-                            query_time=query.query_time,
-                            play_sound=query.play_sound,
-                            auto_update=query.auto_update
-                        )
-                    )
-
-            else:
-                try:
                     capi_data = capi_single_query(self.FRONTIER_CAPI_PATH_PROFILE)
 
-                except Exception as e:
-                    self.capi_response_queue.put(
-                        EDMCCAPIFailedRequest(
-                            message=e.args,
-                            exception=e,
-                            query_time=query.query_time,
-                            play_sound=query.play_sound,
-                            auto_update=query.auto_update
-                        )
+            except Exception as e:
+                self.capi_response_queue.put(
+                    EDMCCAPIFailedRequest(
+                        message=str(e.args),
+                        exception=e,
+                        query_time=query.query_time,
+                        play_sound=query.play_sound,
+                        auto_update=query.auto_update
                     )
+                )
 
-                else:
-                    self.capi_response_queue.put(
-                        EDMCCAPIResponse(
-                            capi_data=capi_data,
-                            query_time=query.query_time,
-                            play_sound=query.play_sound,
-                            auto_update=query.auto_update
-                        )
+            else:
+                self.capi_response_queue.put(
+                    EDMCCAPIResponse(
+                        capi_data=capi_data,
+                        query_time=query.query_time,
+                        play_sound=query.play_sound,
+                        auto_update=query.auto_update
                     )
+                )
 
             # If the query came from EDMC.(py|exe) there's no tk to send an
             # event too, so assume it will be polling there response queue.
