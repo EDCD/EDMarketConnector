@@ -4,9 +4,9 @@
 
 import argparse
 import html
-import json
 import locale
 import pathlib
+import queue
 import re
 import sys
 # import threading
@@ -16,7 +16,7 @@ from os import chdir, environ
 from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -374,6 +374,7 @@ SHIPYARD_HTML_TEMPLATE = """
 class AppWindow(object):
     """Define the main application window."""
 
+    _CAPI_RESPONSE_TK_EVENT_NAME = '<<CAPIResponse>>'
     # Tkinter Event types
     EVENT_KEYPRESS = 2
     EVENT_BUTTON = 4
@@ -383,12 +384,15 @@ class AppWindow(object):
 
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
-        self.holdofftime = config.get_int('querytime', default=0) + companion.holdoff
+        self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
 
         self.w = master
         self.w.title(applongname)
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
+
+        # companion needs to be able to send <<CAPIResponse>> events
+        companion.session.set_tk_master(self.w)
 
         self.prefsdialog = None
 
@@ -485,8 +489,8 @@ class AppWindow(object):
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
                                  {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.status.grid(columnspan=2, sticky=tk.EW)
-        self.button.bind('<Button-1>', self.getandsend)
-        theme.button_bind(self.theme_button, self.getandsend)
+        self.button.bind('<Button-1>', self.capi_request_data)
+        theme.button_bind(self.theme_button, self.capi_request_data)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
@@ -646,9 +650,10 @@ class AppWindow(object):
         self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
         self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
         self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
-        self.w.bind('<Return>', self.getandsend)
-        self.w.bind('<KP_Enter>', self.getandsend)
-        self.w.bind_all('<<Invoke>>', self.getandsend)  # Hotkey monitoring
+        self.w.bind('<Return>', self.capi_request_data)
+        self.w.bind('<KP_Enter>', self.capi_request_data)
+        self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
+        self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
@@ -886,32 +891,58 @@ class AppWindow(object):
 
         return True
 
-    def getandsend(self, event=None, retrying: bool = False):  # noqa: C901, CCR001
+    def capi_request_data(self, event=None) -> None:
         """
         Perform CAPI data retrieval and associated actions.
 
         This can be triggered by hitting the main UI 'Update' button,
         automatically on docking, or due to a retry.
+
+        :param event: Tk generated event details.
         """
+        logger.trace_if('capi.worker', 'Begin')
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
-        play_bad = False
-        err: Optional[str] = None
 
-        if (
-                not monitor.cmdr or not monitor.mode or monitor.state['Captain']
-                or not monitor.system or monitor.mode == 'CQC'
-        ):
-            return  # In CQC or on crew - do nothing
+        if not monitor.cmdr:
+            logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
+            # LANG: CAPI queries aborted because Cmdr name is unknown
+            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            return
+
+        if not monitor.mode:
+            logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
+            # LANG: CAPI queries aborted because game mode unknown
+            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            return
+
+        if not monitor.system:
+            logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
+            # LANG: CAPI queries aborted because current star system name unknown
+            self.status['text'] = _('CAPI query aborted: Current system unknown')
+            return
+
+        if monitor.state['Captain']:
+            logger.trace_if('capi.worker', 'Aborting Query: In multi-crew')
+            # LANG: CAPI queries aborted because player is in multi-crew on other Cmdr's ship
+            self.status['text'] = _('CAPI query aborted: In other-ship multi-crew')
+            return
+
+        if monitor.mode == 'CQC':
+            logger.trace_if('capi.worker', 'Aborting Query: In CQC')
+            # LANG: CAPI queries aborted because player is in CQC (Arena)
+            self.status['text'] = _('CAPI query aborted: CQC (Arena) detected')
+            return
 
         if companion.session.state == companion.Session.STATE_AUTH:
+            logger.trace_if('capi.worker', 'Auth in progress? Aborting query')
             # Attempt another Auth
             self.login()
             return
 
-        if not retrying:
-            if time() < self.holdofftime:  # Was invoked by key while in cooldown
-                if play_sound and (self.holdofftime - time()) < companion.holdoff * 0.75:
+        if not companion.session.retrying:
+            if time() < self.capi_query_holdoff_time:  # Was invoked by key while in cooldown
+                if play_sound and (self.capi_query_holdoff_time - time()) < companion.capi_query_cooldown * 0.75:
                     self.status['text'] = ''
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
 
@@ -925,56 +956,91 @@ class AppWindow(object):
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
+        query_time = int(time())
+        logger.trace_if('capi.worker', 'Requesting full station data')
+        config.set('querytime', query_time)
+        logger.trace_if('capi.worker', 'Calling companion.session.station')
+        companion.session.station(
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
+            play_sound=play_sound
+        )
+
+    def capi_handle_response(self, event=None):  # noqa: C901, CCR001
+        """Handle the resulting data from a CAPI query."""
+        logger.trace_if('capi.worker', 'Handling response')
+        play_bad: bool = False
+        err: Optional[str] = None
+
+        capi_response: Union[companion.EDMCCAPIFailedRequest, companion.EDMCCAPIResponse]
         try:
-            querytime = int(time())
-            data = companion.session.station()
-            config.set('querytime', querytime)
+            logger.trace_if('capi.worker', 'Pulling answer off queue')
+            capi_response = companion.session.capi_response_queue.get(block=False)
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
+                logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
+                if capi_response.exception:
+                    raise capi_response.exception
+
+                else:
+                    raise ValueError(capi_response.message)
+
+            logger.trace_if('capi.worker', 'Answer is not a Failure')
+            if not isinstance(capi_response, companion.EDMCCAPIResponse):
+                msg = f'Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}'
+                logger.error(msg)
+                raise ValueError(msg)
 
             # Validation
-            if 'commander' not in data:
+            if 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
                 err = self.status['text'] = _('CAPI: No commander data returned')
 
-            elif not data.get('commander', {}).get('name'):
+            elif not capi_response.capi_data.get('commander', {}).get('name'):
                 # LANG: We didn't have the commander name when we should have
                 err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
 
-            elif (not data.get('lastSystem', {}).get('name')
-                  or (data['commander'].get('docked')
-                      and not data.get('lastStarport', {}).get('name'))):
+            elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
+                  or (capi_response.capi_data['commander'].get('docked')
+                      and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
                 # LANG: We don't know where the commander is, when we should
                 err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
 
-            elif not data.get('ship', {}).get('name') or not data.get('ship', {}).get('modules'):
+            elif (
+                    not capi_response.capi_data.get('ship', {}).get('name')
+                    or not capi_response.capi_data.get('ship', {}).get('modules')
+            ):
                 # LANG: We don't know what ship the commander is in, when we should
                 err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
 
-            elif monitor.cmdr and data['commander']['name'] != monitor.cmdr:
+            elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
+                logger.trace_if('capi.worker', 'Raising CmdrError()')
                 raise companion.CmdrError()
 
-            elif auto_update and not monitor.state['OnFoot'] and not data['commander'].get('docked'):
+            elif (
+                    capi_response.auto_update and not monitor.state['OnFoot']
+                    and not capi_response.capi_data['commander'].get('docked')
+            ):
                 # auto update is only when just docked
-                logger.warning(f"{auto_update!r} and not {monitor.state['OnFoot']!r} and "
-                               f"not {data['commander'].get('docked')!r}")
+                logger.warning(f"{capi_response.auto_update!r} and not {monitor.state['OnFoot']!r} and "
+                               f"not {capi_response.capi_data['commander'].get('docked')!r}")
                 raise companion.ServerLagging()
 
-            elif data['lastSystem']['name'] != monitor.system:
+            elif capi_response.capi_data['lastSystem']['name'] != monitor.system:
                 # CAPI system must match last journal one
-                logger.warning(f"{data['lastSystem']['name']!r} != {monitor.system!r}")
+                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != {monitor.system!r}")
                 raise companion.ServerLagging()
 
-            elif data['lastStarport']['name'] != monitor.station:
+            elif capi_response.capi_data['lastStarport']['name'] != monitor.station:
                 if monitor.state['OnFoot'] and monitor.station:
-                    logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
+                    logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != {monitor.station!r}) AND "
                                    f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
                     raise companion.ServerLagging()
 
                 else:
                     last_station = None
-                    if data['commander']['docked']:
-                        last_station = data['lastStarport']['name']
+                    if capi_response.capi_data['commander']['docked']:
+                        last_station = capi_response.capi_data['lastStarport']['name']
 
                     if monitor.station is None:
                         # Likely (re-)Embarked on ship docked at an EDO settlement.
@@ -986,32 +1052,40 @@ class AppWindow(object):
 
                     if last_station != monitor.station:
                         # CAPI lastStarport must match
-                        logger.warning(f"({data['lastStarport']['name']!r} != {monitor.station!r}) AND "
-                                       f"{last_station!r} != {monitor.station!r}")
+                        logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != {monitor.station!r})"
+                                       f" AND {last_station!r} != {monitor.station!r}")
                         raise companion.ServerLagging()
 
-                self.holdofftime = querytime + companion.holdoff
+                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
-            elif not monitor.state['OnFoot'] and data['ship']['id'] != monitor.state['ShipID']:
+            elif not monitor.state['OnFoot'] and capi_response.capi_data['ship']['id'] != monitor.state['ShipID']:
                 # CAPI ship must match
                 logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                               f"{data['ship']['id']!r} != {monitor.state['ShipID']!r}")
+                               f"{capi_response.capi_data['ship']['id']!r} != {monitor.state['ShipID']!r}")
                 raise companion.ServerLagging()
 
-            elif not monitor.state['OnFoot'] and data['ship']['name'].lower() != monitor.state['ShipType']:
+            elif (
+                    not monitor.state['OnFoot']
+                    and capi_response.capi_data['ship']['name'].lower() != monitor.state['ShipType']
+            ):
                 # CAPI ship type must match
                 logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                               f"{data['ship']['name'].lower()!r} != {monitor.state['ShipType']!r}")
+                               f"{capi_response.capi_data['ship']['name'].lower()!r} != "
+                               f"{monitor.state['ShipType']!r}")
                 raise companion.ServerLagging()
 
             else:
+                # TODO: Change to depend on its own CL arg
                 if __debug__:  # Recording
-                    companion.session.dump_capi_data(data)
+                    companion.session.dump_capi_data(capi_response.capi_data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = ship_name_map.get(data['ship']['name'].lower(), data['ship']['name'])
-                    monitor.state['ShipID'] = data['ship']['id']
-                    monitor.state['ShipType'] = data['ship']['name'].lower()
+                    self.ship['text'] = ship_name_map.get(
+                        capi_response.capi_data['ship']['name'].lower(),
+                        capi_response.capi_data['ship']['name']
+                    )
+                    monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
+                    monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
                     if not monitor.state['Modules']:
                         self.ship.configure(state=tk.DISABLED)
@@ -1021,45 +1095,62 @@ class AppWindow(object):
                     self.ship.configure(state=True)
 
                 if monitor.state.get('SuitCurrent') is not None:
-                    if (loadout := data.get('loadout')) is not None:
+                    if (loadout := capi_response.capi_data.get('loadout')) is not None:
                         if (suit := loadout.get('suit')) is not None:
                             if (suitname := suit.get('edmcName')) is not None:
                                 # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
                                 loadout_name = index_possibly_sparse_list(
-                                    data['loadouts'], loadout['loadoutSlotId']
+                                    capi_response.capi_data['loadouts'], loadout['loadoutSlotId']
                                 )['name']
 
                                 self.suit['text'] = f'{suitname} ({loadout_name})'
 
                 self.suit_show_if_set()
+                # Update Odyssey Suit data
+                companion.session.suit_update(capi_response.capi_data)
 
-                if data['commander'].get('credits') is not None:
-                    monitor.state['Credits'] = data['commander']['credits']
-                    monitor.state['Loan'] = data['commander'].get('debt', 0)
+                if capi_response.capi_data['commander'].get('credits') is not None:
+                    monitor.state['Credits'] = capi_response.capi_data['commander']['credits']
+                    monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
-                err = plug.notify_newdata(data, monitor.is_beta)
+                err = plug.notify_newdata(capi_response.capi_data, monitor.is_beta)
                 self.status['text'] = err and err or ''
                 if err:
                     play_bad = True
 
                 # Export market data
-                if not self.export_market_data(data):
+                if not self.export_market_data(capi_response.capi_data):
                     err = 'Error: Exporting Market data'
                     play_bad = True
 
-                self.holdofftime = querytime + companion.holdoff
+                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
+
+        except queue.Empty:
+            logger.error('There was no response in the queue!')
+            # TODO: Set status text
+            return
+
+        except companion.ServerConnectionError:
+            self.status['text'] = _('Frontier CAPI server error')
+
+        except companion.CredentialsError:
+            companion.session.retrying = False
+            companion.session.invalidate()
+            companion.session.login()
+            return  # We need to give Auth time to complete, so can't set a timed retry
 
         # Companion API problem
         except companion.ServerLagging as e:
             err = str(e)
-            if retrying:
+            if companion.session.retrying:
                 self.status['text'] = err
                 play_bad = True
 
             else:
                 # Retry once if Companion server is unresponsive
-                self.w.after(int(SERVER_RETRY * 1000), lambda: self.getandsend(event, True))
+                companion.session.retrying = True
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event))
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
@@ -1080,14 +1171,16 @@ class AppWindow(object):
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(querytime))
+            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
 
-        if play_sound and play_bad:
+        if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
 
+        logger.trace_if('capi.worker', 'Updating suit and cooldown...')
         self.update_suit_text()
         self.suit_show_if_set()
         self.cooldown()
+        logger.trace_if('capi.worker', '...done')
 
     def journal_event(self, event):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
@@ -1222,7 +1315,7 @@ class AppWindow(object):
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
-                if not dashboard.start(self.w, monitor.started):
+                if not dashboard.start_frontier_auth(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
 
             # Export loadout
@@ -1264,7 +1357,7 @@ class AppWindow(object):
                         auto_update = True
 
             if auto_update:
-                self.w.after(int(SERVER_RETRY * 1000), self.getandsend)
+                self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
@@ -1363,10 +1456,12 @@ class AppWindow(object):
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
-        if time() < self.holdofftime:
+        if time() < self.capi_query_holdoff_time:
             # Update button in main window
             self.button['text'] = self.theme_button['text'] \
-                = _('cooldown {SS}s').format(SS=int(self.holdofftime - time()))  # LANG: Cooldown on 'Update' button
+                = _('cooldown {SS}s').format(  # LANG: Cooldown on 'Update' button
+                    SS=int(self.capi_query_holdoff_time - time())
+            )
             self.w.after(1000, self.cooldown)
 
         else:
@@ -1494,47 +1589,32 @@ class AppWindow(object):
             self.destroy()
             self.__class__.showing = False
 
-    def save_raw(self) -> None:  # noqa: CCR001 # Not easily broken up.
-        """Save newly acquired CAPI data in the configured file."""
-        # LANG: Status - Attempting to retrieve data from Frontier CAPI to save to file
-        self.status['text'] = _('Fetching data...')
-        self.w.update_idletasks()
+    def save_raw(self) -> None:
+        """
+        Save any CAPI data already acquired to a file.
 
-        try:
-            data: CAPIData = companion.session.station()
-            self.status['text'] = ''
-            default_extension: str = ''
+        This specifically does *not* cause new queries to be performed, as the
+        purpose is to aid in diagnosing any issues that occurred during 'normal'
+        queries.
+        """
+        default_extension: str = ''
 
-            if platform == 'darwin':
-                default_extension = '.json'
+        if platform == 'darwin':
+            default_extension = '.json'
 
-            last_system: str = data.get("lastSystem", {}).get("name", "Unknown")
-            last_starport: str = ''
+        timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+        f = tkinter.filedialog.asksaveasfilename(
+            parent=self.w,
+            defaultextension=default_extension,
+            filetypes=[('JSON', '.json'), ('All Files', '*')],
+            initialdir=config.get_str('outdir'),
+            initialfile=f'{monitor.system}{monitor.station}.{timestamp}'
+        )
+        if not f:
+            return
 
-            if data['commander'].get('docked'):
-                last_starport = '.' + data.get('lastStarport', {}).get('name', 'Unknown')
-
-            timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
-            f = tkinter.filedialog.asksaveasfilename(
-                parent=self.w,
-                defaultextension=default_extension,
-                filetypes=[('JSON', '.json'), ('All Files', '*')],
-                initialdir=config.get_str('outdir'),
-                initialfile=f'{last_system}{last_starport}.{timestamp}'
-            )
-            if f:
-                with open(f, 'wb') as h:
-                    h.write(json.dumps(dict(data),
-                                       ensure_ascii=False,
-                                       indent=2,
-                                       sort_keys=True,
-                                       separators=(',', ': ')).encode('utf-8'))
-        except companion.ServerError as e:
-            self.status['text'] = str(e)
-
-        except Exception as e:
-            logger.debug('"other" exception', exc_info=e)
-            self.status['text'] = str(e)
+        with open(f, 'wb') as h:
+            h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
     # def exit_tray(self, systray: 'SysTrayIcon') -> None:
     #     """Tray icon is shutting down."""
@@ -1577,6 +1657,10 @@ class AppWindow(object):
         logger.info('Unregistering hotkey manager...')
         hotkeymgr.unregister()
 
+        # Now the CAPI query thread
+        logger.info('Closing CAPI query thread...')
+        companion.session.capi_query_close_worker()
+
         # Now the main programmatic input methods
         logger.info('Closing dashboard...')
         dashboard.close()
@@ -1617,7 +1701,7 @@ class AppWindow(object):
 
     def oniconify(self, event=None) -> None:
         """Handle minimization of the application."""
-        self.w.overrideredirect(0)  # Can't iconize while overrideredirect
+        self.w.overrideredirect(False)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
         self.w.wait_visibility()  # Need main window to be re-created before returning

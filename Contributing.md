@@ -247,10 +247,10 @@ from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 
 TARGET_URL = 'https://www.edsm.net/api-journal-v1'
 if 'edsm' in debug_senders:
-    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
+  TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
 
 ...
-    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
+r = this.requests_session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
 ```
 
    Be sure to set a URL path in the `TARGET_URL` that denotes where the data

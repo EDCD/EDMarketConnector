@@ -310,6 +310,7 @@ Msg:\n{msg}'''
 
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
+        :param is_odyssey: whether the account shows as having Odyssey expansion.
         """
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
@@ -790,7 +791,6 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `dict` - Current `monitor.state` data.
     :return: `str` - Error message, or `None` if no errors.
     """
-
     should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
     if should_return:
         plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN

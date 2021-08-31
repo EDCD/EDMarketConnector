@@ -13,7 +13,10 @@ import util_ships
 
 def export(data, filename=None):
 
-    string = json.dumps(companion.ship(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))	# pretty print
+    string = json.dumps(
+        companion.ship(data), cls=companion.CAPIDataEncoder,
+        ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': ')
+    )  # pretty print
 
     if filename:
         with open(filename, 'wt') as h:

@@ -1,5 +1,6 @@
 """CMDR Status information."""
 import csv
+import json
 import tkinter
 import tkinter as tk
 from sys import platform
@@ -275,45 +276,41 @@ class StatsDialog():
         if not monitor.cmdr:
             return
 
-        # LANG: Fetching data from Frontier CAPI in order to display on File > Status
-        self.status['text'] = _('Fetching data...')
-        self.parent.update_idletasks()
-
-        try:
-            data = companion.session.profile()
-
-        except companion.ServerError as e:
-            self.status['text'] = str(e)
+        # TODO: This needs to use cached data
+        if companion.session.FRONTIER_CAPI_PATH_PROFILE not in companion.session.capi_raw_data:
+            logger.info('No cached data, aborting...')
             return
 
-        except Exception as e:
-            logger.exception("error while attempting to show status")
-            self.status['text'] = str(e)
-            return
+        capi_data = json.loads(
+            companion.session.capi_raw_data[companion.session.FRONTIER_CAPI_PATH_PROFILE].raw_data
+        )
 
-        if not data.get('commander') or not data['commander'].get('name', '').strip():
+        if not capi_data.get('commander') or not capi_data['commander'].get('name', '').strip():
             # Shouldn't happen
             # LANG: Unknown commander
             self.status['text'] = _("Who are you?!")
 
         elif (
-            not data.get('lastSystem')
-            or not data['lastSystem'].get('name', '').strip()
-            or not data.get('lastStarport')
-            or not data['lastStarport'].get('name', '').strip()
+            not capi_data.get('lastSystem')
+            or not capi_data['lastSystem'].get('name', '').strip()
+            or not capi_data.get('lastStarport')
+            or not capi_data['lastStarport'].get('name', '').strip()
         ):
             # Shouldn't happen
             # LANG: Unknown location
             self.status['text'] = _("Where are you?!")
 
-        elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name', '').strip():
+        elif (
+            not capi_data.get('ship') or not capi_data['ship'].get('modules')
+            or not capi_data['ship'].get('name', '').strip()
+        ):
             # Shouldn't happen
             # LANG: Unknown ship
             self.status['text'] = _("What are you flying?!")
 
         else:
             self.status['text'] = ''
-            StatsResults(self.parent, data)
+            StatsResults(self.parent, capi_data)
 
 
 class StatsResults(tk.Toplevel):
