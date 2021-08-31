@@ -48,8 +48,8 @@ else:
 # Define custom type for the dicts that hold CAPI data
 # CAPIData = NewType('CAPIData', Dict)
 
-capi_query_cooldown = 60  # be nice
-capi_default_timeout = 10  # requests timeout
+capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
+capi_default_timeout = 10
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
