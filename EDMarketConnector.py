@@ -1611,9 +1611,11 @@ class AppWindow(object):
             initialdir=config.get_str('outdir'),
             initialfile=f'{monitor.system}{monitor.station}.{timestamp}'
         )
-        if f:
-            with open(f, 'wb') as h:
-                h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
+        if not f:
+            return
+
+        with open(f, 'wb') as h:
+            h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
     # def exit_tray(self, systray: 'SysTrayIcon') -> None:
     #     """Tray icon is shutting down."""
