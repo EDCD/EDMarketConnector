@@ -1315,7 +1315,7 @@ class AppWindow(object):
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
-                if not dashboard.start_frontier_auth(self.w, monitor.started):
+                if not dashboard.start(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
 
             # Export loadout
