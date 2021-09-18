@@ -116,7 +116,7 @@ def git_shorthash_from_head() -> str:
         out, err = git_cmd.communicate()
 
     except Exception as e:
-        logger.error(f"Couldn't run git command for short hash: {e!r}")
+        logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
         shorthash = out.decode().rstrip('\n')
