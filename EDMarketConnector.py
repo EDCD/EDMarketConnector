@@ -151,6 +151,11 @@ if __name__ == '__main__':  # noqa: C901
         help='Force to raise ServerError on any CAPI query',
         action='store_true'
     )
+
+    parser.add_argument(
+        '--eddn-url',
+        help='Specify an alternate EDDN upload URL',
+    )
     ###########################################################################
 
     args = parser.parse_args()
@@ -175,6 +180,9 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
+
+    if args.eddn_url:
+        config.set_eddn_url(args.eddn_url)
 
     if args.force_edmc_protocol:
         if sys.platform == 'win32':
