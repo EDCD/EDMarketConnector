@@ -377,7 +377,7 @@ from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
-from protocol import protocolhandler
+import protocol
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -689,7 +689,7 @@ class AppWindow(object):
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
-        self.w.after_idle(lambda: protocolhandler.start(self.w))
+        self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
 
         # Load updater after UI creation (for WinSparkle)
         import update
@@ -1698,7 +1698,7 @@ class AppWindow(object):
 
         # Frontier auth/CAPI handling
         logger.info('Closing protocol handler...')
-        protocolhandler.close()
+        protocol.protocolhandler.close()
 
         logger.info('Closing Frontier CAPI sessions...')
         companion.session.close()
@@ -1899,6 +1899,9 @@ sys.path: {sys.path}'''
     if args.forget_frontier_auth:
         logger.info("Dropping all fdev tokens as --forget-frontier-auth was passed")
         companion.Auth.invalidate(None)
+
+    # Create protocol handler
+    protocol.protocolhandler = protocol.get_handler_impl()()
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
