@@ -88,14 +88,9 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 class EDDN:
     """EDDN Data export."""
 
-    DEBUG = 'eddn' in debug_senders
-    SERVER = 'https://eddn.edcd.io:4430'
-    if DEBUG:
-        SERVER = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}'
-
-    UPLOAD = f'{SERVER}/upload/'
-    if DEBUG:
-        UPLOAD = f'{SERVER}/eddn'
+    DEFAULT_URL = 'https://eddn.edcd.io:4430/upload'
+    if 'eddn' in debug_senders:
+        DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
@@ -108,6 +103,12 @@ class EDDN:
         self.session = requests.Session()
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
+
+        if config.eddn_url is not None:
+            self.eddn_url = config.eddn_url
+
+        else:
+            self.eddn_url = self.DEFAULT_URL
 
     def load_journal_replay(self) -> bool:
         """
@@ -187,7 +188,7 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        r = self.session.post(self.eddn_url, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list

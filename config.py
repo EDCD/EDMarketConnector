@@ -207,6 +207,7 @@ class AbstractConfig(abc.ABC):
     __in_shutdown = False  # Is the application currently shutting down ?
     __auth_force_localserver = False  # Should we use localhost for auth callback ?
     __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
+    __eddn_url = None  # Non-default EDDN URL
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -249,6 +250,19 @@ class AbstractConfig(abc.ABC):
         :return: bool - True if we should use localhost web server.
         """
         return self.__auth_force_edmc_protocol
+
+    def set_eddn_url(self, eddn_url: str):
+        """Set the specified eddn URL."""
+        self.__eddn_url = eddn_url
+
+    @property
+    def eddn_url(self) -> Optional[str]:
+        """
+        Provide the custom EDDN URL.
+
+        :return: str - Custom EDDN URL to use.
+        """
+        return self.__eddn_url
 
     @property
     def app_dir(self) -> str:
