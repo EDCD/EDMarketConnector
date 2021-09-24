@@ -599,21 +599,16 @@ Msg:\n{msg}'''
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_entry(self, cmdr, entry, msg):
         """
         Update EDDN with an event from the journal.
 
         Additionally if additional lines are cached, it may send those as well.
 
-        :param cmdr: the commander under which this upload is made
-        :param is_beta: whether or not we are in beta mode
-        :param entry: the journal entry to send
+        :param cmdr: Commander name as passed in through `journal_entry()`.
+        :param entry: The full journal event dictionary (due to checks in this function).
+        :param msg: The EDDN message body to be sent.
         """
-        msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
-            'message': entry
-        }
-
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
@@ -632,6 +627,62 @@ Msg:\n{msg}'''
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''
+
+    def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+        """
+        Send an EDDN event on the journal schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+
+    def export_journal_fssdiscoveryscan(
+            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSDiscoveryScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        entry.pop('Progress')
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        entry['SystemName'] = system
+
+        if this.systemaddress is None:
+            logger.warning("this.systemaddress is None, can't add SystemAddress")
+            return "this.systemaddress is None, can't add SystemAddress"
+
+        entry['SystemAddress'] = this.systemaddress
+
+        if not this.coordinates:
+            logger.warning("this.coordinates is None, can't add StarPos")
+            return "this.coordinates is None, can't add StarPos"
+
+        entry['StarPos'] = list(this.coordinates)
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
 
     def canonicalise(self, item: str) -> str:
         """
@@ -773,6 +824,31 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
+# Recursively filter '*_Localised' keys from dict
+def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Remove any dict keys with names ending `_Localised` from a dict.
+
+    :param d: Dict to filter keys of.
+    :return: The filtered dict.
+    """
+    filtered: OrderedDictT[str, Any] = OrderedDict()
+    for k, v in d.items():
+        if k.endswith('_Localised'):
+            pass
+
+        elif hasattr(v, 'items'):  # dict -> recurse
+            filtered[k] = filter_localised(v)
+
+        elif isinstance(v, list):  # list of dicts -> recurse
+            filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+
+        else:
+            filtered[k] = v
+
+    return filtered
+
+
 def journal_entry(  # noqa: C901, CCR001
         cmdr: str,
         is_beta: bool,
@@ -803,24 +879,6 @@ def journal_entry(  # noqa: C901, CCR001
 
     entry = new_data
 
-    # Recursively filter '*_Localised' keys from dict
-    def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
-        filtered: OrderedDictT[str, Any] = OrderedDict()
-        for k, v in d.items():
-            if k.endswith('_Localised'):
-                pass
-
-            elif hasattr(v, 'items'):  # dict -> recurse
-                filtered[k] = filter_localised(v)
-
-            elif isinstance(v, list):  # list of dicts -> recurse
-                filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
-
-            else:
-                filtered[k] = v
-
-        return filtered
-
     this.on_foot = state['OnFoot']
 
     # Note if we're under Odyssey
@@ -848,6 +906,11 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
         this.planet = None
+
+    if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
+        # Events with their own EDDN schema
+        if entry['event'].lower() == 'fssdiscoveryscan':
+            this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
     # Send interesting events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
@@ -914,7 +977,7 @@ def journal_entry(  # noqa: C901, CCR001
             entry['SystemAddress'] = this.systemaddress
 
         try:
-            this.eddn.export_journal_entry(cmdr, is_beta, filter_localised(entry))
+            this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)
