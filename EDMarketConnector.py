@@ -70,6 +70,28 @@ if __name__ == '__main__':  # noqa: C901
                     "such as EDSM, Inara.cz and EDDB."
     )
 
+    ###########################################################################
+    # Permanent config changes
+    ###########################################################################
+    parser.add_argument(
+        '--reset-ui',
+        help='reset UI theme and transparency to defaults',
+        action='store_true'
+    )
+    ###########################################################################
+
+    ###########################################################################
+    # User 'utility' args
+    ###########################################################################
+    parser.add_argument('--suppress-dupe-process-popup',
+                        help='Suppress the popup from when the application detects another instance already running',
+                        action='store_true'
+                        )
+    ###########################################################################
+
+    ###########################################################################
+    # Adjust logging
+    ###########################################################################
     parser.add_argument(
         '--trace',
         help='Set the Debug logging loglevel to TRACE',
@@ -89,26 +111,19 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
-        '--reset-ui',
-        help='reset UI theme and transparency to defaults',
-        action='store_true'
+        '--debug-sender',
+        help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
+        action='append',
     )
+    ###########################################################################
 
+    ###########################################################################
+    # Frontier Auth
+    ###########################################################################
     parser.add_argument(
         '--forget-frontier-auth',
         help='resets all authentication tokens',
         action='store_true'
-    )
-
-    parser.add_argument('--suppress-dupe-process-popup',
-                        help='Suppress the popup from when the application detects another instance already running',
-                        action='store_true'
-                        )
-
-    parser.add_argument(
-        '--debug-sender',
-        help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
-        action='append',
     )
 
     auth_options = parser.add_mutually_exclusive_group(required=False)
@@ -126,12 +141,17 @@ if __name__ == '__main__':  # noqa: C901
                         help='Callback from Frontier Auth',
                         nargs='*'
                         )
+    ###########################################################################
 
+    ###########################################################################
+    # Developer 'utility' args
+    ###########################################################################
     parser.add_argument(
         '--capi-pretend-down',
         help='Force to raise ServerError on any CAPI query',
         action='store_true'
     )
+    ###########################################################################
 
     args = parser.parse_args()
 
