@@ -365,7 +365,6 @@ import tkinter.messagebox
 from tkinter import ttk
 
 import commodity
-import companion
 import plug
 import prefs
 import stats
@@ -1901,6 +1900,7 @@ sys.path: {sys.path}'''
 
     # HACK: n/a | 2021-11-24: --force-localserver-auth does not work if companion is imported early -cont.
     # HACK: n/a | 2021-11-24: as we modify config before this is used.
+    import companion
     from companion import CAPIData, index_possibly_sparse_list
 
     # TODO: unittests in place of these
