@@ -1893,15 +1893,15 @@ sys.path: {sys.path}'''
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
 
-    # Do this after locale silliness, just in case
-    if args.forget_frontier_auth:
-        logger.info("Dropping all fdev tokens as --forget-frontier-auth was passed")
-        companion.Auth.invalidate(None)
-
     # HACK: n/a | 2021-11-24: --force-localserver-auth does not work if companion is imported early -cont.
     # HACK: n/a | 2021-11-24: as we modify config before this is used.
     import companion
     from companion import CAPIData, index_possibly_sparse_list
+
+    # Do this after locale silliness, just in case
+    if args.forget_frontier_auth:
+        logger.info("Dropping all fdev tokens as --forget-frontier-auth was passed")
+        companion.Auth.invalidate(None)
 
     # TODO: unittests in place of these
     # logger.debug('Test from __main__')
