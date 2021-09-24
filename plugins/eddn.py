@@ -661,6 +661,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
+        # TODO: See if any of this can be factored out into helper functions.
         entry['SystemName'] = system
 
         if this.systemaddress is None:
@@ -910,7 +911,7 @@ def journal_entry(  # noqa: C901, CCR001
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
         # Events with their own EDDN schema
         if entry['event'].lower() == 'fssdiscoveryscan':
-            this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
+            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
     # Send interesting events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
