@@ -654,9 +654,9 @@ Msg:\n{msg}'''
         :param systemname_field_name: Name of journal key for system name.
         :return: The augmented version of entry.
         """
-        # If 'SystemName' is there, it's directly from a journal event.
-        # If that's not there *and* 'StarSystem' isn't either, then we add the latter.
-        if entry.get('SystemName') is None and entry.get('StarSystem') is None:
+        # If 'SystemName' or 'System' is there, it's directly from a journal event.
+        # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
+        if entry.get('SystemName') is None and entry.get('System') is None and entry.get('StarSystem') is None:
             entry['StarSystem'] = system_name
 
         if entry.get('SystemAddress') is None:
@@ -710,12 +710,13 @@ Msg:\n{msg}'''
         return None
 
     def export_journal_navbeaconscan(
-            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_name: str, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an NavBeaconScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_name: Name of the current system.
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -728,7 +729,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system)
+        ret = this.eddn.entry_augment_system_data(entry, system_name)
         if isinstance(ret, str):
             return ret
 
@@ -737,6 +738,61 @@ Msg:\n{msg}'''
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_codexentry(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a CodexEntry to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T12:29:39Z",
+        #   "event":"CodexEntry",
+        #   "EntryID":1400414,
+        #   "Name":"$Codex_Ent_Gas_Vents_SilicateVapourGeysers_Name;",
+        #   "Name_Localised":"Silicate Vapour Gas Vent",
+        #   "SubCategory":"$Codex_SubCategory_Geology_and_Anomalies;",
+        #   "SubCategory_Localised":"Geology and anomalies",
+        #   "Category":"$Codex_Category_Biology;",
+        #   "Category_Localised":"Biological and Geological",
+        #   "Region":"$Codex_RegionName_18;",
+        #   "Region_Localised":"Inner Orion Spur",
+        #   "System":"Bestia",
+        #   "SystemAddress":147916327267,
+        #   "Latitude":23.197777, "Longitude":51.803349,
+        #   "IsNewEntry":true,
+        #   "VoucherAmount":50000
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        # Keys specific to this event
+        for k in ('IsNewEntry', 'NewTraitsDiscovered'):
+            if entry.get(k) is not None:
+                del entry[k]
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, entry['System'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -973,6 +1029,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         if entry['event'].lower() == 'navbeaconscan':
             return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+
+        if entry['event'].lower() == 'codexentry':
+            return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
