@@ -846,6 +846,62 @@ Msg:\n{msg}'''
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_journal_navroute(
+            self, cmdr: str, is_beta: bool, entry: Dict[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a NavRoute to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #    "timestamp":"2021-09-24T14:33:15Z",
+        #    "event":"NavRoute",
+        #    "Route":[
+        #       {
+        #         "StarSystem":"Ross 332",
+        #         "SystemAddress":3657198211778,
+        #         "StarPos":[-43.62500,-23.15625,-74.12500],
+        #         "StarClass":"K"
+        #       },
+        #       {
+        #          "StarSystem":"BD+44 1040",
+        #          "SystemAddress":2832564490946,
+        #          "StarPos":[-31.56250,1.84375,-92.37500],
+        #          "StarClass":"K"
+        #       },
+        #       {
+        #         "StarSystem":"Aonga",
+        #         "SystemAddress":6680855188162,
+        #         "StarPos":[-34.46875,9.53125,-90.87500],
+        #         "StarClass":"M"
+        #       }
+        #    ]
+        #  }
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # This will reject with the Odyssey flag present
+        if entry.get('odyssey') is not None:
+            del entry['odyssey']
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # None
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1082,6 +1138,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         if entry['event'].lower() == 'scanbarycentre':
             return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'navroute':
+            return this.eddn.export_journal_navroute(cmdr, is_beta, dict(entry))
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
