@@ -799,6 +799,53 @@ Msg:\n{msg}'''
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_journal_scanbarycentre(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a ScanBaryCentre to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T11:55:03Z",
+        #   "event":"ScanBaryCentre",
+        #   "StarSystem":"Khruvani",
+        #   "SystemAddress":13864557159793,
+        #   "BodyID":21,
+        #   "SemiMajorAxis":863683605194.091797,
+        #   "Eccentricity":0.001446,
+        #   "OrbitalInclination":-0.230714,
+        #   "Periapsis":214.828581,
+        #   "OrbitalPeriod":658474677.801132,
+        #   "AscendingNode":21.188568,
+        #   "MeanAnomaly":208.765388
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/scanbarycentre/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1032,6 +1079,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         if entry['event'].lower() == 'codexentry':
             return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'scanbarycentre':
+            return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
