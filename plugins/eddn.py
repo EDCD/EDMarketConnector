@@ -266,6 +266,9 @@ Msg:\n{msg}'''
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
 
+            # TODO: Something here needs to handle, e.g. HTTP 400, and take the message
+            #       in question out of replaylog, else we'll keep retrying a bad message
+            #       forever.
             except requests.exceptions.HTTPError as e:
                 status['text'] = self.http_error_to_log(e)
 
