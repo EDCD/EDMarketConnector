@@ -12,7 +12,7 @@ from os.path import join
 from platform import system
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import TextIO, Tuple
+from typing import TextIO, Tuple, Union
 
 import requests
 
@@ -642,6 +642,36 @@ Msg:\n{msg}'''
         }
         this.eddn.export_journal_entry(cmdr, entry, msg)
 
+    def entry_augment_system_data(self, entry: Dict[str, Any], system_name: str) -> Union[str, Mapping[str, Any]]:
+        """
+        Augment a journal entry with necessary system data.
+
+        :param entry: The journal entry to be augmented.
+        :param system_name: Name of current star system.
+        :param systemname_field_name: Name of journal key for system name.
+        :return: The augmented version of entry.
+        """
+        # If 'SystemName' is there, it's directly from a journal event.
+        # If that's not there *and* 'StarSystem' isn't either, then we add the latter.
+        if entry.get('SystemName') is None and entry.get('StarSystem') is None:
+            entry['StarSystem'] = system_name
+
+        if entry.get('SystemAddress') is None:
+            if this.systemaddress is None:
+                logger.warning("this.systemaddress is None, can't add SystemAddress")
+                return "this.systemaddress is None, can't add SystemAddress"
+
+            entry['SystemAddress'] = this.systemaddress
+
+        if entry.get('StarPos') is None:
+            if not this.coordinates:
+                logger.warning("this.coordinates is None, can't add StarPos")
+                return "this.coordinates is None, can't add StarPos"
+
+            entry['StarPos'] = list(this.coordinates)
+
+        return entry
+
     def export_journal_fssdiscoveryscan(
             self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
@@ -661,24 +691,49 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
-        # TODO: See if any of this can be factored out into helper functions.
-        entry['SystemName'] = system
+        ret = this.eddn.entry_augment_system_data(entry, system)
+        if isinstance(ret, str):
+            return ret
 
-        if this.systemaddress is None:
-            logger.warning("this.systemaddress is None, can't add SystemAddress")
-            return "this.systemaddress is None, can't add SystemAddress"
-
-        entry['SystemAddress'] = this.systemaddress
-
-        if not this.coordinates:
-            logger.warning("this.coordinates is None, can't add StarPos")
-            return "this.coordinates is None, can't add StarPos"
-
-        entry['StarPos'] = list(this.coordinates)
+        entry = ret
         #######################################################################
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_navbeaconscan(
+            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an NavBeaconScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # { "timestamp":"2021-09-24T13:57:24Z", "event":"NavBeaconScan", "SystemAddress":670417626481, "NumBodies":18 }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, system)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -908,12 +963,15 @@ def journal_entry(  # noqa: C901, CCR001
     elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
         this.planet = None
 
+    # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
-        # Events with their own EDDN schema
         if entry['event'].lower() == 'fssdiscoveryscan':
             return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
-    # Send interesting events to EDDN, but not when on a crew
+        if entry['event'].lower() == 'navbeaconscan':
+            return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+
+    # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
             ('StarPos' in entry or this.coordinates)):
