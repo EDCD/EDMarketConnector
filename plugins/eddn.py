@@ -656,17 +656,17 @@ Msg:\n{msg}'''
         """
         # If 'SystemName' or 'System' is there, it's directly from a journal event.
         # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
-        if entry.get('SystemName') is None and entry.get('System') is None and entry.get('StarSystem') is None:
+        if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
             entry['StarSystem'] = system_name
 
-        if entry.get('SystemAddress') is None:
+        if 'SystemAddress' not in entry:
             if this.systemaddress is None:
                 logger.warning("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
 
-        if entry.get('StarPos') is None:
+        if 'StarPos' not in entry:
             if not this.coordinates:
                 logger.warning("this.coordinates is None, can't add StarPos")
                 return "this.coordinates is None, can't add StarPos"
@@ -777,7 +777,7 @@ Msg:\n{msg}'''
         entry = filter_localised(entry)
         # Keys specific to this event
         for k in ('IsNewEntry', 'NewTraitsDiscovered'):
-            if entry.get(k) is not None:
+            if k in entry:
                 del entry[k]
         #######################################################################
 
@@ -884,7 +884,7 @@ Msg:\n{msg}'''
         # Elisions
         #######################################################################
         # WORKAROUND WIP EDDN schema | 2021-09-27: This will reject with the Odyssey flag present
-        if entry.get('odyssey') is not None:
+        if 'odyssey' in entry:
             del entry['odyssey']
         #######################################################################
 
