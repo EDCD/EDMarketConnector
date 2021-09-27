@@ -602,7 +602,7 @@ Msg:\n{msg}'''
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr, entry, msg):
+    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
         """
         Update EDDN with an event from the journal.
 
