@@ -883,7 +883,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Elisions
         #######################################################################
-        # This will reject with the Odyssey flag present
+        # WORKAROUND WIP EDDN schema | 2021-09-27: This will reject with the Odyssey flag present
         if entry.get('odyssey') is not None:
             del entry['odyssey']
         #######################################################################
