@@ -847,7 +847,7 @@ Msg:\n{msg}'''
         return None
 
     def export_journal_navroute(
-            self, cmdr: str, is_beta: bool, entry: Dict[str, Any]
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send a NavRoute to EDDN on the correct schema.
@@ -1140,7 +1140,7 @@ def journal_entry(  # noqa: C901, CCR001
             return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
 
         if entry['event'].lower() == 'navroute':
-            return this.eddn.export_journal_navroute(cmdr, is_beta, dict(entry))
+            return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
