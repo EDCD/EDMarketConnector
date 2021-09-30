@@ -91,19 +91,21 @@ Event names here are globbed, and thus you can hook onto all events in a given n
 and all events fired with the name `*`.
 
 all non-special `core` events are as follows:
-| Event Name      | Expected Signature              | Description                                                     |
-| :-------------- | :------------------------------ | --------------------------------------------------------------- |
-| `journal_event` | `(event.JournalEvent) -> None`  | Event fired when a new journal event is seen                    |
-| `cmdr_data`     | `(event.BaseDataEvent) -> None` | Event fired when new data comes in from CAPI TODO: `capi_data`? |
+| Event Name          | Expected Signature        | Description                                                   |
+| :------------------ | :------------------------ | ------------------------------------------------------------- |
+| `journal_event`     | `(JournalEvent) -> None`  | Event fired when a new journal event is seen                  |
+| `capi_data`         | `(CAPIDataEvent) -> None` | Event fired when new data comes in from CAPI                  |
+| `cqc_journal_event` | `(JournalEvent) -> None`  | Event fired when a new journal event is seen and we're in CQC |
+TODO: cqc maybe become journal_event.cqc?
 
 TODO: finish this
 
 Some `core` events are special, and will work directly with your plugin rather than being global, they are
 documented below
 
-| Event Name       | Expected Signature                         | Description                                                                  |
-| :--------------- | :----------------------------------------- | ---------------------------------------------------------------------------- |
-| `core.plugin_ui` | `(tkinter.Tk) -> Optional[tkinter.Widget]` | Sets up plugins UI (Note that the old style tuple pair is NOT supported) [1] |
+| Event Name       | Expected Signature                                        | Description                                                                  |
+| :--------------- | :-------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `core.plugin_ui` | `(BaseDataEvent[tkinter.Tk]) -> Optional[tkinter.Widget]` | Sets up plugins UI (Note that the old style tuple pair is NOT supported) [1] |
 
 [1]: As an implementation detail, this is fired globally on startup, to simplify getting plugin UIs for all plugins
 
@@ -112,7 +114,8 @@ documented below
 Events are fired either by using `PluginManager.fire_event` or `PluginManager.fire_targeted_event`. For both, the event
 ends up in `LoadedPlugin.fire_event`, which then does the dirty work of finding all of the callbacks that match the
 given event name. `LoadedPlugin.fire_event` returns a list of results, which are the return values from each callback,
-assuming the callback did not return `None`.
+assuming the callback did not return `None`. If an exception was thrown by a callback,
+the Exception object will be placed in the list, if requested by the appropriate option
 
 Thus it is always safe to assume that `PluginManager.fire_event` returned a dict of at worst `string -> empty list`, or
 for `fire_targeted_event`, an empty list on its own. 
