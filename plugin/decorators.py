@@ -1,5 +1,6 @@
 """Decorators for marking plugins and callbacks."""
 from __future__ import annotations
+from plugin.event import BaseDataEvent
 
 from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Optional, Type, TypeVar, Union, overload
 
@@ -63,8 +64,8 @@ if TYPE_CHECKING:
     from prefs import BasePreferencesEvent
 
     _UI_SETUP = Union[
-        Callable[[Any, tk.Frame], Optional[tk.Widget]],
-        Callable[[tk.Frame], Optional[tk.Widget]],
+        Callable[[Any, BaseDataEvent], Optional[tk.Widget]],
+        Callable[[BaseDataEvent], Optional[tk.Widget]],
     ]
 
     _JOURNAL_FUNC = Union[
