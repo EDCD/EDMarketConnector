@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib
+import itertools
 import pathlib
 import sys
 from fnmatch import fnmatch
@@ -58,7 +59,7 @@ class LoadedPlugin:
         """Get the plugin logger represented by this LoadedPlugin."""
         return self.plugin.log
 
-    def _fire_event_funcs(self, event: BaseEvent, funcs: list[Callable]) -> list[Any]:
+    def _fire_event_funcs(self, event: BaseEvent, funcs: list[Callable], keep_exceptions: bool) -> list[Any]:
         out = []
         for func in funcs:
             try:
@@ -68,11 +69,12 @@ class LoadedPlugin:
 
             except Exception as e:
                 self.log.exception(f'Caught an exception while firing event {event.name!r} on func {func}')
-                out.append(e)
+                if keep_exceptions:
+                    out.append(e)
 
         return out
 
-    def fire_event(self, event: BaseEvent) -> list[Any]:
+    def fire_event(self, event: BaseEvent, keep_exceptions: bool = False) -> list[Any]:
         """
         Call all event callbacks that match the given event.
 
@@ -87,7 +89,7 @@ class LoadedPlugin:
             for f in filter(lambda f: f in called, funcs):
                 self.log.warn(f'Refusing to call func {f} on {self} repeatedly for event {event.name}')
 
-            results.extend(self._fire_event_funcs(event, [f for f in funcs if f not in called]))
+            results.extend(self._fire_event_funcs(event, [f for f in funcs if f not in called], keep_exceptions))
             called = called.union(funcs)
 
         return results
@@ -391,12 +393,12 @@ class PluginManager:
 
         del self.plugins[name]
 
-    def fire_event(self, event: BaseEvent) -> Dict[str, List[Any]]:
+    def fire_event(self, event: BaseEvent, keep_exceptions: bool = False) -> Dict[str, List[Any]]:
         """Call all callbacks listening for the given event."""
         out: Dict[str, Any] = {}
         for name, p in self.plugins.items():
-            self.log.trace(f'Firing event {event.name} for plugin {name}')
-            res = p.fire_event(event)
+            self.log.trace(f'Firing event {event.name} for plugin {name} (keeping exceptions: {keep_exceptions})')
+            res = p.fire_event(event, keep_exceptions=keep_exceptions)
             if name in out:
                 self.log.warning(f'Two plugins with the same name?????? {out[name]=} {name=} {res=}')
 
@@ -404,9 +406,9 @@ class PluginManager:
 
         return out
 
-    def fire_str_event(self, event_name: str, time: Optional[float] = None) -> Dict[str, List[Any]]:
+    def fire_str_event(self, event_name: str, time: Optional[float] = None, keep_exceptions: bool = False) -> Dict[str, List[Any]]:
         """Construct a BaseEvent from the given string and time and fire it."""
-        return self.fire_event(BaseEvent(event_name, event_time=time))
+        return self.fire_event(BaseEvent(event_name, event_time=time), keep_exceptions=keep_exceptions)
 
     def fire_targeted_event(self, target: Union[LoadedPlugin, str], event: BaseEvent) -> list[Any]:
         """Fire an event just for a particular plugin."""
@@ -442,3 +444,23 @@ class PluginManager:
     def is_valid_plugin_directory(p: pathlib.Path) -> bool:
         """Return whether or not the given path is a valid plugin directory."""
         return p.is_dir() and p.exists() and not (p.name.startswith('.') or p.name.startswith('_'))
+
+
+def string_fire_results(results: Dict[str, List[Any]]) -> str:
+    """
+    Return a string representing the given results list.
+
+    Utility method for EDMarketConnector.py and others to extract
+    exception infomation to present to users.
+
+    :param results: a list as returned from fire_event
+    :return: a string with information about thrown exceptions, if any
+    """
+    exceptions = [e for e in itertools.chain(*results.values()) if isinstance(e, Exception)]
+    if len(exceptions) == 0:
+        return ''
+
+    if len(exceptions) == 1:
+        return str(exceptions)[0]
+
+    return f'{len(exceptions)} Exceptions thrown during hook processing'
