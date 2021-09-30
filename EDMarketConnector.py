@@ -388,7 +388,7 @@ from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from plugin.exceptions import LegacyPluginNeedsMigrating
-from plugin.manager import PluginManager
+from plugin.manager import PluginManager, string_fire_results
 from plugin import event
 from protocol import protocolhandler
 from theme import theme
@@ -450,8 +450,6 @@ class AppWindow(object):
 
         self.plugin_manager = PluginManager()
         self._load_all_plugins()
-
-        # plug.load_plugins(master)
 
         if platform != 'darwin':
             if platform == 'win32':
@@ -751,6 +749,7 @@ class AppWindow(object):
 
         for plugin_name, results in res.items():
             results = cast(List[Optional[tk.Widget]], results)
+            results = [r for r in results if not isinstance(r, Exception)]
 
             # result = cast(Union[None, Tuple[tk.Widget, tk.Widget], tk.Widget, Any], result)
             if len(results) == 0:
@@ -1186,14 +1185,15 @@ class AppWindow(object):
                     monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
-                err = plug.notify_newdata(capi_response.capi_data, monitor.is_beta)
-                self.status['text'] = err and err or ''
-                if err:
-                    play_bad = True
+                results = self.plugin_manager.fire_event(
+                    plugin.event.CAPIDataEvent('core.capi_data', capi_response.capi_data)
+                )
+                err = string_fire_results(results)
+                self.status['text'] = err
 
                 # Export market data
                 if not self.export_market_data(capi_response.capi_data):
-                    err = 'Error: Exporting Market data'
+                    err = 'Error: Exporting Market data'  # TODO: err not used?
                     play_bad = True
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
@@ -1367,7 +1367,13 @@ class AppWindow(object):
                 self.login()
 
             if monitor.mode == 'CQC' and entry['event']:
-                err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
+                if monitor.cmdr is None:
+                    logger.warning('Commander was None when firing CQC journal event. This may make things weird!')
+                err = string_fire_results(self.plugin_manager.fire_event(plugin.event.JournalEvent(
+                    plugin.event.EDMCPluginEvents.CQC_JOURNAL_ENTRY,
+                    entry, str(monitor.cmdr), monitor.is_beta, monitor.system, monitor.station, monitor.state
+                )))
+
                 if err:
                     self.status['text'] = err
                     if not config.get_int('hotkey_mute'):
@@ -1396,12 +1402,12 @@ class AppWindow(object):
                     and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            err = plug.notify_journal_entry(monitor.cmdr,
-                                            monitor.is_beta,
-                                            monitor.system,
-                                            monitor.station,
-                                            entry,
-                                            monitor.state)
+            err = string_fire_results(self.plugin_manager.fire_event(plugin.event.JournalEvent(
+                plugin.event.EDMCPluginEvents.JOURNAL_ENTRY,
+                entry, str(monitor.cmdr), monitor.is_beta, monitor.system,
+                monitor.station, monitor.state
+            )))
+
             if err:
                 self.status['text'] = err
                 if not config.get_int('hotkey_mute'):
@@ -1478,7 +1484,10 @@ class AppWindow(object):
 
         entry = dashboard.status
         # Currently we don't do anything with these events
-        err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+        err = string_fire_results(self.plugin_manager.fire_event(plugin.event.DictDataEvent(
+            plugin.event.EDMCPluginEvents.DASHBOARD_ENTRY,
+            entry
+        )))
         if err:
             self.status['text'] = err
             if not config.get_int('hotkey_mute'):
