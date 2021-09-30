@@ -66,8 +66,9 @@ class LoadedPlugin:
                 if res is not None:
                     out.append(res)
 
-            except Exception:
+            except Exception as e:
                 self.log.exception(f'Caught an exception while firing event {event.name!r} on func {func}')
+                out.append(e)
 
         return out
 
