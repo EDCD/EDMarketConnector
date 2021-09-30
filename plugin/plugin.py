@@ -9,12 +9,13 @@ file imports many different chunks of EDMC that are not needed for testing of th
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Optional, final
+from typing import TYPE_CHECKING, Any, Optional, final
 
 import config
 import constants
 import killswitch
 import l10n
+import monitor  # TODO: This SHOULD be fine, at the time we're loaded
 from plugin.base_plugin import BasePlugin
 from theme import _Theme, theme
 
@@ -95,3 +96,27 @@ class EDMCPlugin(BasePlugin):
     def edmc_copyright(self) -> str:
         """Return the current EDMC Copyright statement."""
         return config.copyright
+
+    @property
+    @final
+    def is_beta(self) -> bool:
+        """Return whether or not the running ED instance is a prerelease."""
+        return monitor.monitor.is_beta
+
+    @property
+    @final
+    def system(self) -> str | None:
+        """Return the current system, if any."""
+        return monitor.monitor.system
+
+    @property
+    @final
+    def station(self) -> str | None:
+        """Return the current station, if any."""
+        return monitor.monitor.station
+
+    @property
+    @final
+    def state(self) -> dict[str, Any]:
+        """Return the currently tracked state, if any."""
+        return monitor.monitor.state
