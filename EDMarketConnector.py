@@ -8,6 +8,7 @@ import locale
 import pathlib
 import re
 import sys
+import queue
 # import threading
 import webbrowser
 from builtins import object, str
