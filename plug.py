@@ -22,10 +22,10 @@
 # PLUGINS_not_py3 = []
 
 # # For asynchronous error display
-# last_error = {
-#     'msg':  None,
-#     'root': None,
-# }
+last_error = {
+    'msg':  None,
+    'root': None,
+}
 
 
 # class Plugin(object):
@@ -338,18 +338,18 @@
 #     return error
 
 
-# def show_error(err):
-#     """
-#     Display an error message in the status line of the main window.
+def show_error(err):
+    """
+    Display an error message in the status line of the main window.
 
-#     Will be NOP during shutdown to avoid Tk hang.
-#     :param err:
-#     .. versionadded:: 2.3.7
-#     """
-#     if config.shutting_down:
-#         logger.info(f'Called during shutdown: "{str(err)}"')
-#         return
+    Will be NOP during shutdown to avoid Tk hang.
+    :param err:
+    .. versionadded:: 2.3.7
+    """
+    if config.shutting_down:
+        logger.info(f'Called during shutdown: "{str(err)}"')
+        return
 
-#     if err and last_error['root']:
-#         last_error['msg'] = str(err)
-#         last_error['root'].event_generate('<<PluginError>>', when="tail")
+    if err and last_error['root']:
+        last_error['msg'] = str(err)
+        last_error['root'].event_generate('<<PluginError>>', when="tail")
