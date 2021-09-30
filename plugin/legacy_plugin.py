@@ -5,12 +5,13 @@ from __future__ import annotations
 import inspect
 import pathlib
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, TypeVar, Union, cast
 
 import semantic_version
 
 from plugin import decorators, event
 from plugin.base_plugin import BasePlugin
+from plugin.plugin import EDMCPlugin
 from plugin.exceptions import LegacyPluginHasNoStart3, LegacyPluginNeedsMigrating
 from plugin.plugin_info import PluginInfo
 
@@ -42,14 +43,14 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
     'edsm.notify_system': 'edsm_notify_system',
 }
 
-
-LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
+LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[[Any, 'MigratedPlugin'], Tuple[Any, ...]]] = {
     # All of these callables should accept an event.BaseEvent or a subclass thereof
-    event.EDMCPluginEvents.STARTUP_UI: lambda e: (e.data,),
-    event.EDMCPluginEvents.PREFERENCES: lambda e: (e.notebook, e.commander, e.is_beta),
+    event.EDMCPluginEvents.STARTUP_UI: lambda e, s: (e.data,),
+    event.EDMCPluginEvents.PREFERENCES: lambda e, s: (e.notebook, s.commander, s.is_beta),
+    event.EDMCPluginEvents.PREFERENCES_CLOSED: lambda e, s: (s.commander, s.is_beta),
     # 'core.setup_preferences_ui': 'plugin_prefs',
     # 'core.preferences_closed': 'prefs_changed',
-    event.EDMCPluginEvents.JOURNAL_ENTRY: lambda e: (e.commander, e.is_beta, e.system, e.station, e.data, e.state),
+    event.EDMCPluginEvents.JOURNAL_ENTRY: lambda e, s: (s.commander, s.is_beta, s.system, s.station, e.data, s.state),
     # 'core.dashboard_entry': 'dashboard_entry',
     # 'core.commander_data': 'cmdr_data',
 
@@ -59,7 +60,7 @@ LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[..., Tuple[Any, ...]]] = {
 }
 
 
-class MigratedPlugin(BasePlugin):
+class MigratedPlugin(EDMCPlugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
 
     OSTR = Optional[str]
@@ -97,7 +98,7 @@ class MigratedPlugin(BasePlugin):
                 continue
 
             target_name = f"_SYNTHETIC_CALLBACK_{old_callback}"
-            breakout = LEGACY_CALLBACK_BREAKOUT_LUT.get(new_hook, lambda e: ())
+            breakout = LEGACY_CALLBACK_BREAKOUT_LUT.get(new_hook, lambda e, self: ())
 
             wrapped = self.generic_callback_handler(callback, breakout)
             setattr(self, target_name, decorators.hook(new_hook)(wrapped))
@@ -149,8 +150,7 @@ class MigratedPlugin(BasePlugin):
                 f'{len(sig.parameters)}; {sig.parameters}'
             )
 
-    @staticmethod
-    def generic_callback_handler(f: Callable, breakout: Callable[..., Tuple[Any, ...]]):
+    def generic_callback_handler(self, f: Callable, breakout: Callable[[event.BaseEvent, MigratedPlugin], Tuple[Any, ...]]):
         """
         Wrap the given callback with the given event breakout.
 
@@ -160,20 +160,23 @@ class MigratedPlugin(BasePlugin):
         :param breakout: The breakout method
         """
         def wrapper(e: event.BaseEvent):
-            return f(*breakout(e))
+            return f(*breakout(e, self))
 
         setattr(wrapper, "original_func", f)
         return wrapper
 
     @decorators.hook(event.EDMCPluginEvents.STARTUP_UI)
-    def ui_wrapper(self, frame: tk.Frame) -> Optional[tk.Widget]:
+    def ui_wrapper(self, data_event: event.BaseDataEvent) -> Optional[tk.Widget]:
         """Wrap the legacy UI system with the new system that always expects a single widget."""
         import tkinter as tk  # Importing this here to make most subclasses of this not HAVE to have this sitting here
-        if (f := getattr(self.module, 'plugin_app')) is None:
+        frame: tk.Frame = data_event.data
+        if (f := getattr(self.module, 'plugin_app', None)) is None:
             return None
         out_frame = tk.Frame(frame)
-        f = cast(_LEGACY_UI_FUNC, f)
+        f = cast('_LEGACY_UI_FUNC', f)
         res = f(out_frame)
+        if res is None:
+            return None
 
         if isinstance(res, tk.Widget):
             return out_frame
