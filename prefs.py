@@ -1338,7 +1338,7 @@ class PreferencesDialog(tk.Toplevel):
         if self.callback:
             self.callback()
 
-        plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
+        self.plugin_manager.fire_str_event(event.EDMCPluginEvents.PREFERENCES_CLOSED)
 
         self._destroy()
 
