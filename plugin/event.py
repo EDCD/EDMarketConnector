@@ -1,14 +1,18 @@
 """Events for use with manager.pys event system."""
+from __future__ import annotations
 import time
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generic, Mapping, Optional, TypeVar
+if TYPE_CHECKING:
+    from companion import CAPIData
 
 
 class EDMCPluginEvents:
     """Events EDMC currently uses to communicate with plugins."""
 
     STARTUP_UI = 'core.setup_ui'
-    JOURNAL_ENTRY = 'core.journal_entry'
-    DASHBOARD_ENTRY = 'core.dashboard_entry'
+    JOURNAL_ENTRY = 'core.journal_event'
+    CQC_JOURNAL_ENTRY = 'core.cqc_journal_event'
+    DASHBOARD_ENTRY = 'core.dashboard_event'
     CAPI_DATA = 'core.capi_data'
     EDMC_SHUTTING_DOWN = 'core.shutdown'
 
@@ -36,50 +40,43 @@ class BaseEvent:
         self.time = event_time
 
 
-class BaseDataEvent(BaseEvent):
+T = TypeVar('T')
+
+
+class BaseDataEvent(BaseEvent, Generic[T]):
     """
     Base Data carrying event class.
 
     Same as BaseEvent but carries some data as well.
     """
 
-    def __init__(self, name: str, data: Any = None, event_time: float = None) -> None:
+    def __init__(self, name: str, data: T, event_time: float = None) -> None:
         super().__init__(name, event_time=event_time)
-        self.data = data
+        self.data: T = data
 
 
-class DictDataEvent(BaseDataEvent):
-    """Same as a data event, but promises data is a dict."""
-
-    def __init__(self, name: str, data: dict[Any, Any], event_time: float = None) -> None:
-        super().__init__(name, data=data, event_time=event_time)
-        self.data: dict[Any, Any] = data
-
-        self.get = self.data.get
-
-    def __getitem__(self, name: str) -> Any:
-        return self.data[name]
-
-
-class JournalEvent(DictDataEvent):
+class JournalEvent(BaseDataEvent[Mapping[str, Any]]):
     """Journal event."""
 
     def __init__(
-        self, name: str, data: Dict[str, Any], cmdr: str, is_beta: bool,
+        self, name: str, data: Mapping[str, Any], cmdr: str, is_beta: bool,
         system: Optional[str], station: Optional[str], state: Dict[str, Any], event_time: float = None
     ) -> None:
 
-        self.data: dict[str, Any]  # Override the definition in BaseDataEvent to be more specific
         super().__init__(name, data=data, event_time=event_time)
         self.commander = cmdr
-        self.is_beta = is_beta
-        self.system = system
-        self.station = station
-        self.state = state
-
-        self.get = self.data.get  # Ease of use wrapper
+        self.get = data.get
 
     @property
     def event_name(self) -> str:
         """Get the event name for the current event."""
         return self.data['event']
+
+
+CAPIDataEvent = BaseDataEvent['CAPIData']
+
+
+class DashboardEvent(BaseDataEvent[Mapping[str, Any]]):
+    def __init__(self, name: str, commander: str, data: Mapping[Any, Any], event_time: float = None) -> None:
+        super().__init__(name, data, event_time=event_time)
+        self.commander = commander
