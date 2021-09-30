@@ -105,6 +105,12 @@ class EDMCPlugin(BasePlugin):
 
     @property
     @final
+    def commander(self) -> str | None:
+        """Return the current system, if any."""
+        return monitor.monitor.cmdr
+
+    @property
+    @final
     def system(self) -> str | None:
         """Return the current system, if any."""
         return monitor.monitor.system
