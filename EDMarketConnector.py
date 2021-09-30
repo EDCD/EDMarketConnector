@@ -1494,7 +1494,7 @@ class AppWindow(object):
 
         entry = dashboard.status
         # Currently we don't do anything with these events
-        err = string_fire_results(self.plugin_manager.fire_event(plugin.event.DictDataEvent(
+        err = string_fire_results(self.plugin_manager.fire_event(plugin.event.BaseDataEvent(
             plugin.event.EDMCPluginEvents.DASHBOARD_ENTRY,
             entry
         )))
