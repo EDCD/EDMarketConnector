@@ -88,7 +88,7 @@ HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 class EDDN:
     """EDDN Data export."""
 
-    DEFAULT_URL = 'https://eddn.edcd.io:4430/upload'
+    DEFAULT_URL = 'https://eddn.edcd.io:4430/upload/'
     if 'eddn' in debug_senders:
         DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
