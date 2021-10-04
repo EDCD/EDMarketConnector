@@ -25,6 +25,16 @@ if TYPE_CHECKING:
     from EDMCLogging import LoggerMixin
     from plugin.manager import PluginManager
 
+# the import of things like monitor is intentionally *NOT* using a `from` import
+# this is because internally, we might modify or replace monitor at some point.
+# and if a from import was used here, the resolution would break.
+# additionally, due to the way we work with plugins and hooks, the value should
+# always be correct, assuming you're *not* accessing them from a thread. If you
+# ARE accessing them from a thread, the GIL promises that they wont be modified
+# at the same time you work with them (from a internal-to-python data race
+# perspective.) However, it *may* still change during your processing.
+# Caveat Emptor. If you want to be sure its safe, store a copy of the result
+
 
 class EDMCPlugin(BasePlugin):
     """Elite Dangerous Market Connector plugin base."""
