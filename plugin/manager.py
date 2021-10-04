@@ -107,7 +107,7 @@ class PluginManager:
         self.log.info("starting new plugin management engine")
         self.plugins: Dict[str, LoadedPlugin] = {}
         self.failed_loading: Dict[pathlib.Path, Exception] = {}  # path -> reason
-        # TODO: plugins that were skipped because they started with _ or .
+        self.disabled_plugins: List[pathlib.Path] = []
         # self._plugins_previously_loaded: Set[str] = set()
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
@@ -238,6 +238,24 @@ class PluginManager:
                 raise
 
         return plugin, module
+
+    def load_all_plugins_in(self, plugin_dir: pathlib.Path) -> List[LoadedPlugin]:
+        """
+        Load all plugins in the given path.
+
+        As a side effect, this also notes what plugins are disabled.
+
+        :param plugin_dir: The directory in which to search for plugins.
+        :return: All the plugins loaded by this call.
+        """
+        if not plugin_dir.exists():
+            return []
+
+        possible_plugins = self.find_potential_plugins(plugin_dir)
+        to_load = list(filter(self.is_valid_plugin_directory, possible_plugins))
+        self.disabled_plugins = sorted(set(possible_plugins) ^ set(to_load))
+
+        return [x for x in self.load_plugins(to_load) if x is not None]
 
     def load_plugins(
         self, paths: Sequence[pathlib.Path], autoresolve_sys_path=True
