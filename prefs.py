@@ -950,7 +950,6 @@ class PreferencesDialog(tk.Toplevel):
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
         ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
 
-        # enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         enabled_plugins = list(self.plugin_manager.plugins.values())
         legacy_plugins = self.plugin_manager.legacy_plugins
         if len(enabled_plugins) > 0:
@@ -1021,6 +1020,22 @@ class PreferencesDialog(tk.Toplevel):
                 url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
                 underline=True
             ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
+
+        if len(self.plugin_manager.disabled_plugins) > 0:
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
+            )
+
+            nb.Label(
+                plugins_frame,
+                # LANG: Label on list of user-disabled plugins
+                text=_('Disabled Plugins')+':'  # List of plugins in settings
+            ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
+
+            for bad_path in self.plugin_manager.disabled_plugins:
+                nb.Label(plugins_frame, text=str(bad_path)).grid(
+                    columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
+                )
 
         # disabled = [] # TODO
 
