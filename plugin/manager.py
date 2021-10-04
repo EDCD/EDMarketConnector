@@ -117,7 +117,6 @@ class PluginManager:
         :param path: The path to search at
         :return: All plugins found
         """
-        # TODO: ignore ones ending in .disabled, either here or lower down
         return list(filter(lambda f: f.is_dir(), path.iterdir()))
 
     @staticmethod
@@ -147,14 +146,15 @@ class PluginManager:
         :return: The LoadedPlugin, or None / an exception.
         """
         self.log.info(f"attempting to load plugin(s) at path {path} ({path.absolute()})")
+        second_parent = path.parent.parent.absolute()
 
         # TODO: This probably pollutes sys.path more than needed. Either this should take a relative_to arg to pass
         # TODO: to resolve_path_to_plugin, or, we should somehow indicate what the base plugin path is to this function
-        if autoresolve_sys_path and str(path.parent.absolute()) not in sys.path:
-            sys.path.append(str(path.parent.absolute()))
+        if autoresolve_sys_path and str(second_parent) not in sys.path:
+            sys.path.append(str(second_parent))
 
         try:
-            resolved = self.resolve_path_to_plugin(path, relative_to=path.parent.absolute())
+            resolved = self.resolve_path_to_plugin(path, relative_to=second_parent)
             self.log.trace(f"Resolved plugin path to import path {resolved}")
             module = importlib.import_module(resolved)
 
@@ -352,8 +352,11 @@ class PluginManager:
 
         # TODO: set up the plugin path in sys.path? Note that this probably has special behaviour if an __init__ is
         # TODO: present
+        parent = path.parent.parent  # step up two; plugin dir
+        if str(parent) not in sys.path:
+            sys.path.append(str(parent))
 
-        resolved = self.resolve_path_to_plugin(target)[:-3]  # strip off .py
+        resolved = self.resolve_path_to_plugin(target, parent)[:-3]  # strip off .py
 
         try:
             module = importlib.import_module(resolved)
