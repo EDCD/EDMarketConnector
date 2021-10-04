@@ -732,12 +732,8 @@ class AppWindow(object):
         self.toggle_suit_row(visible=False)
 
     def _load_all_plugins(self) -> None:
-        internal_to_load_paths: List[pathlib.Path] = [
-            p for p in config.internal_plugin_dir_path.iterdir() if self.plugin_manager.is_valid_plugin_directory(p)
-        ]
-
-        self.plugin_manager.load_plugins(internal_to_load_paths, autoresolve_sys_path=False)
-        # TODO: Load non-internal plugins
+        self.plugin_manager.load_all_plugins_in(config.internal_plugin_dir_path)
+        self.plugin_manager.load_all_plugins_in(config.plugin_dir_path)
 
     def setup_plugin_uis(self, frame: tk.Frame) -> None:
         """
