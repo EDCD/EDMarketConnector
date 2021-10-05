@@ -12,17 +12,18 @@
 # from typing import Optional
 
 # import myNotebook as nb  # noqa: N813
-# from config import config
-# from EDMCLogging import get_main_logger
+from typing import Dict, Optional
+from config import config
+from EDMCLogging import get_main_logger
 
-# logger = get_main_logger()
+logger = get_main_logger()
 
 # # List of loaded Plugins
 # PLUGINS = []
 # PLUGINS_not_py3 = []
 
 # # For asynchronous error display
-last_error = {
+last_error: Dict[str, Optional[str]] = {
     'msg':  None,
     'root': None,
 }
