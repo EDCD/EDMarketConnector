@@ -122,7 +122,24 @@ assuming the callback did not return `None`. If an exception was thrown by a cal
 the Exception object will be placed in the list, if requested by the appropriate option
 
 Thus it is always safe to assume that `PluginManager.fire_event` returned a dict of at worst `string -> empty list`, or
-for `fire_targeted_event`, an empty list on its own. 
+for `fire_targeted_event`, an empty list on its own.
+
+
+### Providers
+
+The currently recognised providers of the core are as follows.
+
+Names stored as variables can be found in `plugin.providers`, and using these names are preferred to literals where
+possible.
+
+| Provider            | Expected Signature                              | Return Description                                          |
+| :------------------ | :---------------------------------------------- | ----------------------------------------------------------- |
+| `core.shipyard_url` | `(ship_name: str, loadout: LoadoutDict) -> str` | URL to an online shipyard                                   |
+| `core.system_url`   | `(system_name: str | None) -> str`              | URL to an online information dump of the current system     |
+| `core.station_url`  | `(station_name: str | None) -> str`             | URL to an online information dump about the current station |
+
+TODO: Possibly for system/station provide the current *ID*s of the system/station and allow plugins to use monitor
+if they actually need the names?
 
 ## TODO
 
