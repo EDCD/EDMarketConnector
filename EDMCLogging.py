@@ -484,37 +484,12 @@ class EDMCContextFilter(logging.Filter):
         file_name = pathlib.Path(frame_info.filename).expanduser()
         plugin_dir = pathlib.Path(config.plugin_dir_path).expanduser()
         internal_plugin_dir = pathlib.Path(config.internal_plugin_dir_path).expanduser()
-        # Find the first parent called 'plugins'
-        plugin_top = file_name
-        while plugin_top and plugin_top.name != '':
-            if plugin_top.parent.name == 'plugins':
-                break
+        if internal_plugin_dir in file_name.parents:
+            # its an internal plugin
+            return f'plugins.{".".join(file_name.relative_to(internal_plugin_dir).parent.parts)}'
 
-            plugin_top = plugin_top.parent
-
-        # Check we didn't walk up to the root/anchor
-        if plugin_top.name != '':
-            # Check we're still inside config.plugin_dir
-            if plugin_top.parent == plugin_dir:
-                # In case of deeper callers we need a range of the file_name
-                pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-                module_name = f'<plugins>.{name_path}.{module_name}'
-
-            # Check we're still inside the installation folder.
-            elif file_name.parent == internal_plugin_dir:
-                # Is this a deeper caller ?
-                pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-
-                # Pre-pend 'plugins.<plugin folder>.' to module
-                if name_path == '':
-                    # No sub-folder involved so module_name is sufficient
-                    module_name = f'plugins.{module_name}'
-
-                else:
-                    # Sub-folder(s) involved, so include them
-                    module_name = f'plugins.{name_path}.{module_name}'
+        elif plugin_dir in file_name.parents:
+            return f'<plugin>.{".".join(file_name.relative_to(plugin_dir).parent.parts)}'
 
         return module_name
 
