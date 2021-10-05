@@ -254,6 +254,9 @@ class PluginManager:
         possible_plugins = self.find_potential_plugins(plugin_dir)
         to_load = list(filter(self.is_valid_plugin_directory, possible_plugins))
         self.disabled_plugins = sorted(set(possible_plugins) ^ set(to_load))
+        self.log.info(
+            f'Loading {len(to_load)} plugins in directory {plugin_dir} ({len(self.disabled_plugins)} disabled)'
+        )
 
         return [x for x in self.load_plugins(to_load) if x is not None]
 
@@ -274,6 +277,11 @@ class PluginManager:
         for path in paths:
             try:
                 res = self.load_plugin(path)
+                if res is not None:
+                    self.log.info(f'Loaded {res.info.name} from {path}')
+
+                else:
+                    self.log.warning(f'Failed to load plugin at {path}')
 
             except PluginLoadingException:
                 res = None
