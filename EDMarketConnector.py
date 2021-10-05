@@ -389,6 +389,7 @@ from l10n import Translations
 from monitor import monitor
 from plugin.exceptions import LegacyPluginNeedsMigrating
 from plugin.manager import PluginManager, string_fire_results
+from plugin.provider import EDMCProviders
 from plugin import event
 from protocol import protocolhandler
 from theme import theme
@@ -1513,22 +1514,26 @@ class AppWindow(object):
             logger.warning('No ship loadout, aborting.')
             return ''
 
-        if not bool(config.get_int("use_alt_shipyard_open")):
-            return plug.invoke(config.get_str('shipyard_provider'),
-                               'EDSY',
-                               'shipyard_url',
-                               loadout,
-                               monitor.is_beta)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SHIPYARD)
+        provider_name = config.get_str('shipyard_provider', default='EDSY')
+        provide_func = providers.get(provider_name)
+        if provide_func is None:
+            logger.warning('unable to locate selected shipyard url provider. defaulting to edsy')
+            provide_func = providers['EDSY']
+            provider_name = 'EDSY'
+
+        target = provide_func(shipname, loadout)
+
+        if not config.get_bool("use_alt_shipyard_open", default=False):
+            return target
 
         # Avoid file length limits if possible
-        provider = config.get_str('shipyard_provider', default='EDSY')
-        target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
         file_name = join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
             print(SHIPYARD_HTML_TEMPLATE.format(
                 link=html.escape(str(target)),
-                provider_name=html.escape(str(provider)),
+                provider_name=html.escape(provider_name),
                 ship_name=html.escape(str(shipname))
             ), file=f)
 
@@ -1536,11 +1541,21 @@ class AppWindow(object):
 
     def system_url(self, system: str) -> str:
         """Despatch a system URL to the configured handler."""
-        return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SYSTEM)
+        if (selected := config.get_str('system_provider')) in providers:
+            return providers[selected](monitor.system)
+
+        logger.warning('Unable to locate selected provider for system urls, defaulting to edsm')
+        return providers['EDSM'](monitor.system)
 
     def station_url(self, station: str) -> str:
         """Despatch a station URL to the configured handler."""
-        return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.STATION)
+        if (selected := config.get_str('station_provider')) in providers:
+            return providers[selected](monitor.system)
+
+        logger.warning('Unable to locate selected provider for station urls, defaulting to eddb')
+        return providers['eddb'](monitor.system)
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
