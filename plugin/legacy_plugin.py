@@ -5,15 +5,15 @@ from __future__ import annotations
 import inspect
 import pathlib
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import semantic_version
 
 from plugin import decorators, event
-from plugin.base_plugin import BasePlugin
-from plugin.plugin import EDMCPlugin
 from plugin.exceptions import LegacyPluginHasNoStart3, LegacyPluginNeedsMigrating
+from plugin.plugin import EDMCPlugin
 from plugin.plugin_info import PluginInfo
+from plugin.provider import EDMCProviders
 
 if TYPE_CHECKING:
     import tkinter as tk  # see implementation of STARTUP_UI_EVENT below
@@ -59,6 +59,16 @@ LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[[Any, 'MigratedPlugin'], Tuple[
     # 'edsm.notify_system': 'edsm_notify_system',
 }
 
+LEGACY_PROVIDER_LUT: Dict[str, str] = {
+    EDMCProviders.SYSTEM: 'system_url',
+    EDMCProviders.STATION: 'station_url',
+    EDMCProviders.SHIPYARD: 'shipyard_url'
+}
+
+LEGACY_PROVIDER_CONVERT_LUT: Dict[str, Callable[..., Tuple[Tuple[Any, ...], Dict[Any, Any]]]] = {
+    EDMCProviders.SHIPYARD: lambda ship_name, loadout, /, self: ((loadout, self.is_beta), {})
+}  # converting args from old to new
+
 
 class MigratedPlugin(EDMCPlugin):
     """MigratedPlugin is a wrapper for old-style plugins."""
@@ -85,6 +95,7 @@ class MigratedPlugin(EDMCPlugin):
 
         # We have a start3, lets see what else we have and get ready to prepare hooks for them
         self.setup_callbacks()
+        self.setup_providers()
 
     def setup_callbacks(self) -> None:
         """
@@ -102,6 +113,20 @@ class MigratedPlugin(EDMCPlugin):
 
             wrapped = self.generic_callback_handler(callback, breakout)
             setattr(self, target_name, decorators.hook(new_hook)(wrapped))
+
+    def setup_providers(self) -> None:
+        """Set up shimmed providers for any providers the legacy plugin may have."""
+        for new_name, old_name in LEGACY_PROVIDER_LUT.items():
+            callback: Optional[Callable] = getattr(self.module, old_name, None)
+            if callback is None:
+                continue
+
+            def default_wrapper(*args, **kwargs):
+                return args, kwargs
+
+            convert = LEGACY_PROVIDER_CONVERT_LUT.get(new_name, default_wrapper)
+            wrapped = self.generic_provider_handler(callback, convert)
+            setattr(self, f'_SYNTHETIC_PROVIDER_{old_name}', decorators.provider(new_name)(wrapped))
 
     def load(self) -> PluginInfo:
         """
@@ -163,6 +188,15 @@ class MigratedPlugin(EDMCPlugin):
             return f(*breakout(e, self))
 
         setattr(wrapper, "original_func", f)
+        return wrapper
+
+    def generic_provider_handler(self, f: Callable, convert: Callable):
+        def wrapper(*args, **kwargs):
+            new_args, new_kwargs = convert(*args, self=self, **kwargs)
+            return f(*new_args, **new_kwargs)
+
+        setattr(wrapper, 'original_func', f)
+
         return wrapper
 
     @decorators.hook(event.EDMCPluginEvents.STARTUP_UI)
