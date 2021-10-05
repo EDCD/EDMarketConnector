@@ -1198,7 +1198,7 @@ class AppWindow(object):
 
                 # stuff we can do when not docked
                 results = self.plugin_manager.fire_event(
-                    plugin.event.CAPIDataEvent('core.capi_data', capi_response.capi_data)
+                    plugin.event.CAPIDataEvent(plugin.event.EDMCPluginEvents.CAPI_DATA, capi_response.capi_data)
                 )
                 err = string_fire_results(results)
                 self.status['text'] = err
