@@ -1,9 +1,8 @@
 """Events for use with manager.pys event system."""
 from __future__ import annotations
+
 import time
 from typing import TYPE_CHECKING, Any, Dict, Generic, Mapping, Optional, TypeVar
-if TYPE_CHECKING:
-    from companion import CAPIData
 
 
 class EDMCPluginEvents:
