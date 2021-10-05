@@ -71,6 +71,10 @@ an event object out into the argument format that the methods expect.
 Finally, the function is wrapped with an event handler on the `MigratedPlugin` instance,
 which will breakout the event it is passed, pass the breakout to the legacy function, and return the result from the legacy function back to the event source.
 
+#### Shimming providers
+
+Providers (like what was called shipyard_url etc) are shimmed in a similar way to events above.
+
 ### Post instantiation of class
 
 After a plugin class is instantiated, two things happen:
