@@ -733,8 +733,12 @@ class AppWindow(object):
         self.toggle_suit_row(visible=False)
 
     def _load_all_plugins(self) -> None:
+        logger.info('Loading plugins...')
+        logger.info('Loading internal plugins')
         self.plugin_manager.load_all_plugins_in(config.internal_plugin_dir_path)
+        logger.info('Internal plugin loading complete, loading third party plugins...')
         self.plugin_manager.load_all_plugins_in(config.plugin_dir_path)
+        logger.info('Plugin loading complete')
 
     def setup_plugin_uis(self, frame: tk.Frame) -> None:
         """
