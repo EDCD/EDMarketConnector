@@ -457,6 +457,15 @@ class PluginManager:
 
         return out
 
+    def get_providers_dict(self, name: str) -> dict[str, Callable]:
+        """
+        Return a dictionary of plugin name -> provider function for all loaded plugins.
+
+        :param name: The provider name to search for
+        :return: A dictionary of plugin name -> provider function
+        """
+        return {plug_name: plug.providers[name] for plug_name, plug in self.plugins.items() if plug.provides(name)}
+
     @property
     def legacy_plugins(self) -> List[LoadedPlugin]:
         """Return a list of LoadedPlugin instances that are MigratedPlugins."""
