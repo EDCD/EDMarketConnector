@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     ]
 
 LEGACY_CALLBACK_LUT: Dict[str, str] = {
-    event.EDMCPluginEvents.STARTUP_UI: 'plugin_app',
+    # event.EDMCPluginEvents.STARTUP_UI: 'plugin_app',
     event.EDMCPluginEvents.PREFERENCES: 'plugin_prefs',
     event.EDMCPluginEvents.PREFERENCES_CLOSED: 'prefs_changed',
     event.EDMCPluginEvents.JOURNAL_ENTRY: 'journal_entry',
@@ -45,7 +45,7 @@ LEGACY_CALLBACK_LUT: Dict[str, str] = {
 
 LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[[Any, 'MigratedPlugin'], Tuple[Any, ...]]] = {
     # All of these callables should accept an event.BaseEvent or a subclass thereof
-    event.EDMCPluginEvents.STARTUP_UI: lambda e, s: (e.data,),
+    # event.EDMCPluginEvents.STARTUP_UI: lambda e, s: (e.data,),
     event.EDMCPluginEvents.PREFERENCES: lambda e, s: (e.notebook, s.commander, s.is_beta),
     event.EDMCPluginEvents.PREFERENCES_CLOSED: lambda e, s: (s.commander, s.is_beta),
     # 'core.setup_preferences_ui': 'plugin_prefs',
@@ -206,6 +206,7 @@ class MigratedPlugin(EDMCPlugin):
         frame: tk.Frame = data_event.data
         if (f := getattr(self.module, 'plugin_app', None)) is None:
             return None
+
         out_frame = tk.Frame(frame)
         f = cast('_LEGACY_UI_FUNC', f)
         res = f(out_frame)
