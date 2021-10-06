@@ -68,7 +68,8 @@ class LoadedPlugin:
                     out.append(res)
 
             except Exception as e:
-                self.log.exception(f'Caught an exception while firing event {event.name!r} on func {func}')
+                self.log.exception(
+                    f'Caught an exception while firing event {event.name!r} for plugin {self.info.name} (on func {func})')
                 if keep_exceptions:
                     out.append(e)
 
@@ -364,15 +365,17 @@ class PluginManager:
         if str(parent) not in sys.path:
             sys.path.append(str(parent))
 
+        if str(path) not in sys.path:
+            sys.path.append(str(path))
+
         resolved = self.resolve_path_to_plugin(target, parent)[:-3]  # strip off .py
 
+        logger = get_plugin_logger(path.parts[-1])
         try:
             module = importlib.import_module(resolved)
         except Exception as e:
             # Something went wrong _but_ the file _DOES_ exist.
             raise PluginLoadingException(f'Exception while loading {resolved}: {e}') from e
-
-        logger = get_plugin_logger(path.parts[-1])
 
         self.log.trace(f'Begin migration of legacy plugin at {path}')
 
