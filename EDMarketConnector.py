@@ -771,6 +771,10 @@ class AppWindow(object):
             tk.Frame(frame, highlightthickness=1).grid(sticky=tk.EW)
             tk.Label(frame, text=f'{plugin_name} Plugin').grid(sticky=tk.EW)
             for result in filtered_results:
+                if result is wrapper_frame:
+                    # dont grid wrapper multiple times
+                    continue
+
                 result.grid(sticky=tk.EW)
 
             wrapper_frame.grid(sticky=tk.EW)
