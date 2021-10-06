@@ -346,7 +346,7 @@ class PluginManager:
 
         return loaded
 
-    def load_legacy_plugin(self, path: pathlib.Path) -> PLUGIN_MODULE_PAIR:
+    def load_legacy_plugin(self, path: pathlib.Path, autoresolve_sys_path=True) -> PLUGIN_MODULE_PAIR:
         """
         Load a legacy (load.py and plugin_start3()) plugin from the given path.
 
@@ -362,11 +362,12 @@ class PluginManager:
         # TODO: set up the plugin path in sys.path? Note that this probably has special behaviour if an __init__ is
         # TODO: present
         parent = path.parent.parent  # step up two; plugin dir
-        if str(parent) not in sys.path:
-            sys.path.append(str(parent))
+        if autoresolve_sys_path:
+            if str(parent) not in sys.path:
+                sys.path.append(str(parent))
 
-        if str(path) not in sys.path:
-            sys.path.append(str(path))
+            if str(path) not in sys.path:
+                sys.path.append(str(path))
 
         resolved = self.resolve_path_to_plugin(target, parent)[:-3]  # strip off .py
 
