@@ -6,9 +6,9 @@ import argparse
 import html
 import locale
 import pathlib
+import queue
 import re
 import sys
-import queue
 # import threading
 import webbrowser
 from builtins import object, str
@@ -17,6 +17,8 @@ from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, List, Optional, Tuple, cast
+
+import plug
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -387,10 +389,10 @@ from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
+from plugin import event
 from plugin.exceptions import LegacyPluginNeedsMigrating
 from plugin.manager import PluginManager, string_fire_results
 from plugin.provider import EDMCProviders
-from plugin import event
 from protocol import protocolhandler
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -450,6 +452,7 @@ class AppWindow(object):
         #     self.systray.start()
 
         self.plugin_manager = PluginManager()
+        plug._manager = self.plugin_manager
         self._load_all_plugins()
 
         if platform != 'darwin':
