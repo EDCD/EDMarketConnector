@@ -87,6 +87,8 @@ def test_load(plugin_manager: PluginManager, context: ContextManager, path: path
 def test_legacy_load(plugin_manager: PluginManager):
     """Test that legacy loading system correctly loads a plugin, and creates synthetic hooks for it."""
     target = legacy_good_path / 'all_callbacks'
+    import sys
+    sys.path.append(str(target))
     loaded = plugin_manager.load_plugin(target)
     assert loaded is not None
 
@@ -102,7 +104,7 @@ def test_legacy_load(plugin_manager: PluginManager):
     # has the callback been decorated with hook()?
     assert hasattr(hook, CALLBACK_MARKER)
     # have all of the functions created automatically as part of callbacks been found by the callback search code?
-    assert len(loaded.callbacks) == len(LEGACY_CALLBACK_LUT)
+    assert len(loaded.callbacks) == (len(LEGACY_CALLBACK_LUT) + 1)
 
 
 def test_double_load(plugin_manager: PluginManager) -> None:
