@@ -207,14 +207,13 @@ class MigratedPlugin(EDMCPlugin):
         if (f := getattr(self.module, 'plugin_app', None)) is None:
             return None
 
-        out_frame = tk.Frame(frame)
         f = cast('_LEGACY_UI_FUNC', f)
-        res = f(out_frame)
+        res = f(frame)
         if res is None:
             return None
 
         if isinstance(res, tk.Widget):
-            return out_frame
+            return res
 
         elif (
             isinstance(res, tuple)
