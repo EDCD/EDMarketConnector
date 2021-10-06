@@ -228,7 +228,7 @@ class PluginManager:
             )
 
             try:
-                plugin, module = self.load_legacy_plugin(path)
+                plugin, module = self.load_legacy_plugin(path, autoresolve_sys_path=autoresolve_sys_path)
 
             except PluginLoadingException as e:
                 self.log.exception(f'Unable to load legacy plugin at {path}: {e}')
