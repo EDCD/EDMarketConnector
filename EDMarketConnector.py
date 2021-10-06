@@ -512,7 +512,13 @@ class AppWindow(object):
         self.station.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
 
-        self.setup_plugin_uis(frame)
+        plugin_ui_wrapper_frame = tk.Frame(frame)
+        # plugin_ui_wrapper_frame.columnconfigure(0, weight=1)
+        plugin_ui_wrapper_frame['bg'] = 'red'
+
+        self.setup_plugin_uis(plugin_ui_wrapper_frame)
+        plugin_ui_wrapper_frame.grid(row=ui_row, columnspan=2)
+        ui_row += 1
 
         # for plugin in plug.PLUGINS:
         #     appitem = plugin.get_app(frame)
@@ -749,26 +755,25 @@ class AppWindow(object):
 
         :param frame: the frame under which plugins should create their widgets.
         """
-        res = self.plugin_manager.fire_event(event.BaseDataEvent(event.EDMCPluginEvents.STARTUP_UI, frame))
-
-        for plugin_name, results in res.items():
-            results = cast(List[Optional[tk.Widget]], results)
-            results = [r for r in results if not isinstance(r, Exception)]
-
-            # result = cast(Union[None, Tuple[tk.Widget, tk.Widget], tk.Widget, Any], result)
-            if len(results) == 0:
+        # Each plugin gets its own wrapper frame. screw that up and it shouldnt go any further
+        for plugin_name in self.plugin_manager.plugins:
+            wrapper_frame = tk.Frame(frame)
+            # Make column zero (the only one *we* at this level have) take up all space. No I dont know why we need this
+            wrapper_frame.columnconfigure(0, weight=1)
+            res = self.plugin_manager.fire_targeted_event(
+                plugin_name, event.BaseDataEvent(event.EDMCPluginEvents.STARTUP_UI, wrapper_frame)
+            )
+            filtered_results: list[tk.Widget] = [r for r in res if r is not None]
+            if len(filtered_results) == 0:
                 logger.trace(f'{plugin_name!r} has no startup UI elements')
                 continue
 
-            # Separator for plugin line
-            tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)
-            logger.trace(
-                f'{plugin_name} has {f"{len(results)} " if len(results) > 1 else ""}startup UI elements. adding...'
-            )
+            tk.Frame(frame, highlightthickness=1).grid(sticky=tk.EW)
+            tk.Label(frame, text=f'{plugin_name} Plugin').grid(sticky=tk.EW)
+            for result in filtered_results:
+                result.grid(sticky=tk.EW)
 
-            # WORKAROUND 19-08-2021 | mypy workaround -- filter() does not correctly re-type to FilterObj[tk.Widget]
-            for result in cast(List[tk.Widget], filter(lambda r: r is not None, results)):
-                result.grid(columnspan=2, sticky=tk.EW)
+            wrapper_frame.grid(sticky=tk.EW)
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
