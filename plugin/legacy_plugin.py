@@ -226,7 +226,7 @@ class MigratedPlugin(EDMCPlugin):
             res[0].grid(column=0, row=0)
             res[1].grid(column=1, row=0)
 
-            return out_frame
+            return frame
 
         self.log.warning(
             f'plugin_app returned something unexpected: {type(res)=}, {res=}! Assuming its unsafe and bailing on its UI'
