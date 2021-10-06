@@ -69,7 +69,10 @@ class LoadedPlugin:
 
             except Exception as e:
                 self.log.exception(
-                    f'Caught an exception while firing event {event.name!r} for plugin {self.info.name} (on func {func})')
+                    f'Caught an exception while firing event {event.name!r} '
+                    f'for plugin {self.info.name} (on func {func})'
+                )
+
                 if keep_exceptions:
                     out.append(e)
 
@@ -439,7 +442,9 @@ class PluginManager:
 
         return out
 
-    def fire_str_event(self, event_name: str, time: Optional[float] = None, keep_exceptions: bool = False) -> Dict[str, List[Any]]:
+    def fire_str_event(
+        self, event_name: str, time: Optional[float] = None, keep_exceptions: bool = False
+    ) -> Dict[str, List[Any]]:
         """Construct a BaseEvent from the given string and time and fire it."""
         return self.fire_event(BaseEvent(event_name, event_time=time), keep_exceptions=keep_exceptions)
 
