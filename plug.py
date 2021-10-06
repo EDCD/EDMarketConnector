@@ -1,3 +1,12 @@
+from __future__ import annotations
+
+import warnings
+# import myNotebook as nb  # noqa: N813
+from typing import TYPE_CHECKING, Dict, Optional
+
+from config import config
+from EDMCLogging import get_main_logger
+
 # """
 # Plugin hooks for EDMC - Ian Norton, Jonathan Harris
 # """
@@ -11,10 +20,9 @@
 # from builtins import object, str
 # from typing import Optional
 
-# import myNotebook as nb  # noqa: N813
-from typing import Dict, Optional
-from config import config
-from EDMCLogging import get_main_logger
+
+if TYPE_CHECKING:
+    from plugin.manager import LoadedPlugin, PluginManager
 
 logger = get_main_logger()
 
@@ -28,6 +36,21 @@ last_error: Dict[str, Optional[str]] = {
     'root': None,
 }
 
+_OLD_PROVIDER_LUT = {
+    'inara_notify_ship': 'inara.notify_ship',
+    'inara_notify_location': 'inara.notify_location',
+}
+
+_manager: Optional[PluginManager] = None
+
+
+def provides(name: str) -> list[LoadedPlugin]:
+    warnings.warn('plug.py is in general deprecated. Please update to newer plugin systems', DeprecationWarning)
+    if _manager is None:
+        raise ValueError('Unexpected None Manager')
+
+    return _manager.get_providers(_OLD_PROVIDER_LUT.get(name, name))
+    ...
 
 # class Plugin(object):
 
