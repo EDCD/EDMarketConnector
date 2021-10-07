@@ -6,6 +6,8 @@ from plugin.manager import LoadedPlugin, PluginManager
 
 from .conftest import good_path
 
+# spell-checker: words uncore
+
 
 def test_fire_event(plugin_manager: PluginManager) -> None:
     """Test that firing an event works correctly from the manager."""

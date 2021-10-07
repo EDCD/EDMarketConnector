@@ -4,6 +4,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any, Dict, Generic, Mapping, Optional, TypeVar
 
+if TYPE_CHECKING:
+    from companion import CAPIData
+
 
 class EDMCPluginEvents:
     """Events EDMC currently uses to communicate with plugins."""
@@ -72,10 +75,12 @@ class JournalEvent(BaseDataEvent[Mapping[str, Any]]):
         return self.data['event']
 
 
-CAPIDataEvent = BaseDataEvent['CAPIData']
+CAPIDataEvent = BaseDataEvent[CAPIData]
 
 
 class DashboardEvent(BaseDataEvent[Mapping[str, Any]]):
+    """Dashboard file changed."""
+
     def __init__(self, name: str, commander: str, data: Mapping[Any, Any], event_time: float = None) -> None:
         super().__init__(name, data, event_time=event_time)
         self.commander = commander

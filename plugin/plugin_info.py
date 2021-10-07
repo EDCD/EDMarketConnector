@@ -18,7 +18,7 @@ class PluginInfo:
     # TODO: implement update checking and optional downloading
     update_url: Optional[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-init to convert a string self.version to a Version."""
         if isinstance(self.version, str):
             self.version = semantic_version.Version.coerce(self.version)
