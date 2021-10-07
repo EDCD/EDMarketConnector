@@ -1,11 +1,12 @@
 """Decorators for marking plugins and callbacks."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Type, TypeVar, Union, overload
 
 from EDMCLogging import get_main_logger
 from plugin.base_plugin import BasePlugin
-from plugin.event import BaseDataEvent
+from plugin.event import BaseDataEvent, BaseEvent
+from prefs import PreferencesEvent
 
 logger = get_main_logger()
 
@@ -59,34 +60,52 @@ if TYPE_CHECKING:
     # I would put all this in a stub file but it seems mypy continues to vex me.
     import tkinter as tk
 
+    from companion import CAPIData
     from plugin.event import JournalEvent
-    from prefs import BasePreferencesEvent
 
     # TODO: The rest of these
-    _UI_SETUP = Union[
-        Callable[[Any, BaseDataEvent], Optional[tk.Widget]],
-        Callable[[BaseDataEvent], Optional[tk.Widget]],
+    _TKW = TypeVar('_TKW', bound=tk.Widget)
+    OWidget = Optional[_TKW]
+    # _ANY_PREFS_EVENT
+    _STARTUP_UI = Union[Callable[[Any, BaseDataEvent], OWidget], Callable[[BaseDataEvent], OWidget]]
+    _JOURNAL_FUNC = Union[Callable[[JournalEvent], None], Callable[[Any, JournalEvent], None]]
+
+    _PLUGIN_PREFS_FUNC = Union[
+        Callable[[PreferencesEvent], OWidget],
+        Callable[[Any, PreferencesEvent], OWidget],
     ]
 
-    _JOURNAL_FUNC = Union[
-        Callable[[JournalEvent], None],
-        Callable[[Any, JournalEvent], None]
-    ]
+    _NOTIFY_FUNC = Union[Callable[[Any, BaseEvent], None], Callable[[BaseEvent], None]]
 
-    _PLUGIN_PREFS_FUNC = TypeVar('_PLUGIN_PREFS_FUNC', bound=Union[
-        Callable[[BasePreferencesEvent], None],
-        Callable[[Any, BasePreferencesEvent], None],
-    ])
+    _BDE_DSA = BaseDataEvent[Dict[str, Any]]
+    _DASHBOARD_FUNC = Union[Callable[[Any, _BDE_DSA], None], Callable[[_BDE_DSA], None]]
+    _CAPI_ENTRY = Union[Callable[[Any, BaseDataEvent[CAPIData]], None], Callable[[BaseDataEvent[CAPIData]], None]]
+    _SHUTTING_DOWN_FUNC = _NOTIFY_FUNC
+    _PREFS_CMDR_CHANGED = _NOTIFY_FUNC
+    _PREFS_CLOSED = _NOTIFY_FUNC
 
 
+# These overloads cover all of the core events. The Literals for name *MUST* be kept in-sync with those
+# found in event.EDMCPluginEvents, otherwise it *fails silently*.
+# Unfortunately there is no way to use the annotations from that class.
 @overload
-def hook(name: Literal['core.setup_ui']) -> Callable[[_UI_SETUP], _UI_SETUP]: ...
-
-
+def hook(name: Literal['core.setup_ui']) -> Callable[[_STARTUP_UI], _STARTUP_UI]: ...
 @overload
 def hook(name: Literal['core.journal_event']) -> Callable[[_JOURNAL_FUNC], _JOURNAL_FUNC]: ...
-
-
+@overload
+def hook(name: Literal['core.cqc_journal_event']) -> Callable[[_JOURNAL_FUNC], _JOURNAL_FUNC]: ...
+@overload
+def hook(name: Literal['core.dashboard_event']) -> Callable[[_DASHBOARD_FUNC], _DASHBOARD_FUNC]: ...
+@overload
+def hook(name: Literal['core.capi_data']) -> Callable[[_CAPI_ENTRY], _CAPI_ENTRY]: ...
+@overload
+def hook(name: Literal['core.shutdown']) -> Callable[[_SHUTTING_DOWN_FUNC], _SHUTTING_DOWN_FUNC]: ...
+@overload
+def hook(name: Literal['core.setup_preferences_ui']) -> Callable[[_PLUGIN_PREFS_FUNC], _PLUGIN_PREFS_FUNC]: ...
+@overload
+def hook(name: Literal['core.preferences_cmdr_changed']) -> Callable[[_PREFS_CMDR_CHANGED], _PREFS_CMDR_CHANGED]: ...
+@overload
+def hook(name: Literal['core.preferences_closed']) -> Callable[[_PREFS_CLOSED], _PREFS_CLOSED]: ...
 @overload
 def hook(name: str) -> Callable[[_F], _F]: ...
 
