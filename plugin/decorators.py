@@ -1,12 +1,11 @@
 """Decorators for marking plugins and callbacks."""
 from __future__ import annotations
-from plugin.event import BaseDataEvent
 
-from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Optional, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
 
 from EDMCLogging import get_main_logger
 from plugin.base_plugin import BasePlugin
-
+from plugin.event import BaseDataEvent
 
 logger = get_main_logger()
 
@@ -63,6 +62,7 @@ if TYPE_CHECKING:
     from plugin.event import JournalEvent
     from prefs import BasePreferencesEvent
 
+    # TODO: The rest of these
     _UI_SETUP = Union[
         Callable[[Any, BaseDataEvent], Optional[tk.Widget]],
         Callable[[BaseDataEvent], Optional[tk.Widget]],

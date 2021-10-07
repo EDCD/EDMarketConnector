@@ -18,6 +18,8 @@ from .conftest import bad_path, good_path, legacy_bad_path, legacy_good_path, le
 if TYPE_CHECKING:
     from plugin.manager import PluginManager
 
+# spell-checker: words uncore
+
 
 def _idfn(test_data) -> str:
     if not isinstance(test_data, pathlib.Path):

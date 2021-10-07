@@ -175,7 +175,9 @@ class MigratedPlugin(EDMCPlugin):
                 f'{len(sig.parameters)}; {sig.parameters}'
             )
 
-    def generic_callback_handler(self, f: Callable, breakout: Callable[[event.BaseEvent, MigratedPlugin], Tuple[Any, ...]]):
+    def generic_callback_handler(
+        self, f: Callable, breakout: Callable[[event.BaseEvent, MigratedPlugin], Tuple[Any, ...]]
+    ):
         """
         Wrap the given callback with the given event breakout.
 
@@ -191,6 +193,7 @@ class MigratedPlugin(EDMCPlugin):
         return wrapper
 
     def generic_provider_handler(self, f: Callable, convert: Callable):
+        """Wrap the given provider callback in the given callable."""
         def wrapper(*args, **kwargs):
             new_args, new_kwargs = convert(*args, self=self, **kwargs)
             return f(*new_args, **new_kwargs)
