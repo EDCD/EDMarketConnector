@@ -75,7 +75,7 @@ class JournalEvent(BaseDataEvent[Mapping[str, Any]]):
         return self.data['event']
 
 
-CAPIDataEvent = BaseDataEvent[CAPIData]
+CAPIDataEvent = BaseDataEvent['CAPIData']
 
 
 class DashboardEvent(BaseDataEvent[Mapping[str, Any]]):
