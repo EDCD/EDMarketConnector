@@ -51,7 +51,7 @@ LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[[Any, 'MigratedPlugin'], Tuple[
     # 'core.setup_preferences_ui': 'plugin_prefs',
     # 'core.preferences_closed': 'prefs_changed',
     event.EDMCPluginEvents.JOURNAL_ENTRY: lambda e, s: (s.commander, s.is_beta, s.system, s.station, e.data, s.state),
-    # 'core.dashboard_entry': 'dashboard_entry',
+    event.EDMCPluginEvents.DASHBOARD_ENTRY: lambda e, s: (s.commander, s.is_beta, e.data),
     event.EDMCPluginEvents.CAPI_DATA: lambda e, s: (e.data, s.is_beta),
 
     # 'inara.notify_ship': 'inara_notify_ship',
