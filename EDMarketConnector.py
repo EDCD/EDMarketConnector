@@ -514,10 +514,11 @@ class AppWindow(object):
 
         plugin_ui_wrapper_frame = tk.Frame(frame)
         # plugin_ui_wrapper_frame.columnconfigure(0, weight=1)
-        plugin_ui_wrapper_frame['bg'] = 'red'
+        plugin_ui_wrapper_frame['bg'] = 'red'  # TODO: Remove
 
         self.setup_plugin_uis(plugin_ui_wrapper_frame)
-        plugin_ui_wrapper_frame.grid(row=ui_row, columnspan=2)
+        plugin_ui_wrapper_frame.grid(row=ui_row, columnspan=2, sticky=tk.EW)
+        plugin_ui_wrapper_frame.columnconfigure(0, weight=1)
         ui_row += 1
 
         # for plugin in plug.PLUGINS:
