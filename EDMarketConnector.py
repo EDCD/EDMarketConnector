@@ -155,6 +155,12 @@ if __name__ == '__main__':  # noqa: C901
         '--eddn-url',
         help='Specify an alternate EDDN upload URL',
     )
+
+    parser.add_argument(
+        '--eddn-tracking-ui',
+        help='Have EDDN plugin show what it is tracking',
+        action='store_true',
+    )
     ###########################################################################
 
     args = parser.parse_args()
