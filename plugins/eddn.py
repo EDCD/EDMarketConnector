@@ -799,8 +799,13 @@ Msg:\n{msg}'''
         entry = ret
 
         # Body Name and ID, if available
+        # We only trust the Status.json value
         if this.status_body_name is not None:
             entry['BodyName'] = this.status_body_name
+            # And thus only set BodyID, which will be from journal events, if
+            # the Journal-sourced Body Name matches
+            if this.status_body_name == this.body_name:
+                entry['BodyID'] = this.body_id
         #######################################################################
 
         msg = {
