@@ -53,6 +53,8 @@ class This:
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
         self.planet: Optional[str] = None
+        # Track Status.json data
+        self.status_bodyname: Optional[str] = None
 
         # Avoid duplicates
         self.marketId: Optional[str] = None
@@ -1337,3 +1339,18 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
         logger.error(f'ships type is {type(ships)}')
 
     return economies_colony or modules_horizons or ship_horizons
+
+
+def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
+    """
+    Process Status.json data to track things like current Body.
+
+    :param cmdr: Current Commander name.
+    :param is_beta: Whether non-live game version was detected.
+    :param entry: The latest Status.json data.
+    """
+    if 'BodyName' in entry:
+        this.status_bodyname = entry['BodyName']
+
+    else:
+        this.status_bodyname = None
