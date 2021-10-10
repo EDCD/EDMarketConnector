@@ -647,7 +647,11 @@ Msg:\n{msg}'''
         }
         this.eddn.export_journal_entry(cmdr, entry, msg)
 
-    def entry_augment_system_data(self, entry: Dict[str, Any], system_name: str) -> Union[str, Mapping[str, Any]]:
+    def entry_augment_system_data(
+            self,
+            entry: MutableMapping[str, Any],
+            system_name: str
+    ) -> Union[str, MutableMapping[str, Any]]:
         """
         Augment a journal entry with necessary system data.
 
@@ -747,7 +751,7 @@ Msg:\n{msg}'''
         return None
 
     def export_journal_codexentry(
-            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send a CodexEntry to EDDN on the correct schema.
@@ -786,11 +790,16 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
+        # General 'system' augmentations
         ret = this.eddn.entry_augment_system_data(entry, entry['System'])
         if isinstance(ret, str):
             return ret
 
         entry = ret
+
+        # Body Name and ID, if available
+        if this.status_bodyname is not None:
+            entry['BodyName'] = this.status_bodyname
         #######################################################################
 
         msg = {
