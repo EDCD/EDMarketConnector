@@ -79,6 +79,12 @@ class This:
         self.eddn_delay: tk.IntVar
         self.eddn_delay_button: nb.Checkbutton
 
+        # Tracking UI
+        self.ui: Optional[tk.Frame] = None
+        self.ui_j_body_name: Optional[tk.Label] = None
+        self.ui_j_body_id: Optional[tk.Label] = None
+        self.ui_s_body_name: Optional[tk.Label] = None
+
 
 this = This()
 
@@ -942,7 +948,7 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     """
     Set up any plugin-specific UI.
 
@@ -953,6 +959,7 @@ def plugin_app(parent: tk.Tk) -> None:
           necessary.
 
     :param parent: tkinter parent frame.
+    :return: Optional tk.Frame, if the tracking UI is active.
     """
     this.parent = parent
     this.eddn = EDDN(parent)
@@ -960,6 +967,32 @@ def plugin_app(parent: tk.Tk) -> None:
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
         this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
+
+    if config.eddn_tracking_ui:
+        this.ui = tk.Frame(parent)
+
+        row = this.ui.grid_size()[1]
+        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
+        journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_name = tk.Label(this.ui, text='<>')
+        this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
+        journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_id = tk.Label(this.ui, text='<>')
+        this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
+        status_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_s_body_name = tk.Label(this.ui, text='<>')
+        this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        return this.ui
+
+    return None
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:

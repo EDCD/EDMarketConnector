@@ -189,6 +189,9 @@ if __name__ == '__main__':  # noqa: C901
     if args.eddn_url:
         config.set_eddn_url(args.eddn_url)
 
+    if args.eddn_tracking_ui:
+        config.set_eddn_tracking_ui()
+
     if args.force_edmc_protocol:
         if sys.platform == 'win32':
             config.set_auth_force_edmc_protocol()
