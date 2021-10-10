@@ -52,7 +52,7 @@ class This:
         # Track location to add to Journal events
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
-        self.planet: Optional[str] = None
+        self.bodyname: Optional[str] = None
         # Track Status.json data
         self.status_bodyname: Optional[str] = None
 
@@ -1108,10 +1108,10 @@ def journal_entry(  # noqa: C901, CCR001
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            this.bodyname = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
 
         elif entry['event'] == 'FSDJump':
-            this.planet = None
+            this.bodyname = None
 
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
@@ -1122,10 +1122,10 @@ def journal_entry(  # noqa: C901, CCR001
         this.systemaddress = entry.get('SystemAddress')  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
-        this.planet = entry['Body']
+        this.bodyname = entry['Body']
 
     elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
-        this.planet = None
+        this.bodyname = None
 
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
@@ -1176,8 +1176,8 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if entry['event'] == 'Docked' and this.planet:
-            entry['Body'] = this.planet
+        if entry['event'] == 'Docked' and this.bodyname:
+            entry['Body'] = this.bodyname
             entry['BodyType'] = 'Planet'
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
