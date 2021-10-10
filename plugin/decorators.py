@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Type, 
 from EDMCLogging import get_main_logger
 from plugin.base_plugin import BasePlugin
 from plugin.event import BaseDataEvent, BaseEvent
-from prefs import PreferencesEvent
 
 logger = get_main_logger()
 
@@ -62,6 +61,7 @@ if TYPE_CHECKING:
 
     from companion import CAPIData
     from plugin.event import JournalEvent
+    from prefs import PreferencesEvent
 
     # TODO: The rest of these
     _TKW = TypeVar('_TKW', bound=tk.Widget)
