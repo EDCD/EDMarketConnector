@@ -35,7 +35,7 @@ pytest==6.2.5
 pytest-cov==3.0.0  # Pytest code coverage support
 coverage[toml]==6.0.1 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 # For manipulating folder permissions and the like.
-pywin32==301; sys_platform == 'win32'
+pywin32==302; sys_platform == 'win32'
 
 
 # All of the normal requirements
