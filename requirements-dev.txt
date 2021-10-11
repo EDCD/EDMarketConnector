@@ -3,7 +3,7 @@
 wheel
 
 # Static analysis tools
-flake8==3.9.2
+flake8==4.0.1
 flake8-annotations-coverage==0.0.5
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.7.0
