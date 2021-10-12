@@ -80,10 +80,10 @@ class This:
         self.eddn_delay_button: nb.Checkbutton
 
         # Tracking UI
-        self.ui: Optional[tk.Frame] = None
-        self.ui_j_body_name: Optional[tk.Label] = None
-        self.ui_j_body_id: Optional[tk.Label] = None
-        self.ui_s_body_name: Optional[tk.Label] = None
+        self.ui: tk.Frame
+        self.ui_j_body_name: tk.Label
+        self.ui_j_body_id: tk.Label
+        self.ui_s_body_name: tk.Label
 
 
 this = This()
@@ -805,13 +805,14 @@ Msg:\n{msg}'''
         entry = ret
 
         # Body Name and ID, if available
-        # We only trust the Status.json value
-        if this.status_body_name is not None:
+        # Status.json BodyName is set as soon as the Orbital Cruise/Glide HUD
+        # activates.
+        # Journal ApproachBody only occurs once inside Orbital Cruise altitude.
+        # So we check that both are set, and match, then use the Status.json
+        # value.
+        if this.status_body_name is not None and this.status_body_name == this.body_name:
             entry['BodyName'] = this.status_body_name
-            # And thus only set BodyID, which will be from journal events, if
-            # the Journal-sourced Body Name matches
-            if this.status_body_name == this.body_name:
-                entry['BodyID'] = this.body_id
+            entry['BodyID'] = this.body_id
         #######################################################################
 
         msg = {
@@ -974,25 +975,45 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         row = this.ui.grid_size()[1]
         journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_name = tk.Label(this.ui, text='<>')
+        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
         journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_id = tk.Label(this.ui, text='<>')
+        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
         status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_s_body_name = tk.Label(this.ui, text='<>')
+        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
         return this.ui
 
     return None
+
+
+def tracking_ui_update() -> None:
+    """Update the Tracking UI with current data."""
+    if this.body_name is None:
+        this.ui_j_body_name['text'] = '≪None≫'
+    else:
+        this.ui_j_body_name['text'] = this.body_name
+
+    if this.body_id is None:
+        this.ui_j_body_id['text'] = '≪None≫'
+    else:
+        this.ui_j_body_id['text'] = str(this.body_id)
+
+    if this.status_body_name is None:
+        this.ui_s_body_name['text'] = '≪None≫'
+    else:
+        this.ui_s_body_name['text'] = this.status_body_name
+
+    this.ui.update_idletasks()
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
@@ -1165,6 +1186,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif entry['event'] == 'FSDJump':
             this.body_name = None
+            this.body_id = None
 
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
@@ -1176,9 +1198,21 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif entry['event'] == 'ApproachBody':
         this.body_name = entry['Body']
+        this.body_id = entry.get('BodyID')
 
-    elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
+    elif entry['event'] == 'LeaveBody':
+        # NB: **NOT** SupercruiseEntry, because we won't get a fresh
+        #     ApproachBody if we don't leave Orbital Cruise and land again.
+        # *This* is triggered when you go above Orbital Cruise altitude.
+        # Status.json BodyName clears when the OC/Glide HUD is deactivated.
         this.body_name = None
+        this.body_id = None
+
+    elif entry['event'] == 'Music':
+        if entry['MusicTrack'] == 'MainMenu':
+            this.body_name = None
+            this.body_id = None
+            this.status_body_name = None
 
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
@@ -1307,6 +1341,8 @@ def journal_entry(  # noqa: C901, CCR001
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
+    tracking_ui_update()
+
     return None
 
 
@@ -1407,3 +1443,5 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
 
     else:
         this.status_body_name = None
+
+    tracking_ui_update()
