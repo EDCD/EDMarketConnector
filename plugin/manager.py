@@ -59,6 +59,10 @@ class LoadedPlugin:
         """Get the plugin logger represented by this LoadedPlugin."""
         return self.plugin.log
 
+    @property
+    def is_legacy(self) -> bool:
+        return isinstance(self.plugin, MigratedPlugin)
+
     def _fire_event_funcs(self, event: BaseEvent, funcs: list[Callable], keep_exceptions: bool) -> list[Any]:
         out = []
         for func in funcs:
