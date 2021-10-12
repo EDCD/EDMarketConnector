@@ -64,3 +64,6 @@ class BasePlugin(abc.ABC):
     def __str__(self) -> str:
         """Return BasePlugin represented as a string."""
         return f'Plugin at {self.path} on {self._manager} '
+
+    def __repr__(self) -> str:
+        return f'BasePlugin({self._manager!r}, {self.path!r})'
