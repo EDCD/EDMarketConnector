@@ -59,14 +59,15 @@ class EDMCPlugin(BasePlugin):
         return l10n.Translations.translate(s, context=context)
 
     @final
-    def show_error(self, msg: str) -> None:
+    def show_status_msg(self, msg: str) -> None:
         """
-        Show an error on the UI and log it.
+        Show a message on the main UI status bar.
+
+        This relies on crossing a few times. It may not be instant. But it will not block plugin code.
 
         :param msg: The message to show
         """
-        self.log.error(msg)
-        raise NotImplementedError
+        self._manager.status_msg_queue.put(msg)
 
     # Properties for accessing various bits of EDMC data
 

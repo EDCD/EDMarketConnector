@@ -6,6 +6,7 @@ import itertools
 import pathlib
 import sys
 from fnmatch import fnmatch
+from queue import Queue
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 if TYPE_CHECKING:
@@ -117,6 +118,8 @@ class PluginManager:
         self.failed_loading: Dict[pathlib.Path, Exception] = {}  # path -> reason
         self.disabled_plugins: List[pathlib.Path] = []
         # self._plugins_previously_loaded: Set[str] = set()
+
+        self.status_msg_queue: Queue[str] = Queue(-1)
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
         """
