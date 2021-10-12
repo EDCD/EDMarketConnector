@@ -40,10 +40,11 @@ class BasePlugin(abc.ABC):
 
     def unload(self) -> None:
         """Unload this plugin."""
-        ...
+        raise NotImplementedError
 
     def reload(self) -> None:
         """Reload this plugin."""
+        raise NotImplementedError
 
     def _find_marked_funcs(self, marker) -> Dict[str, List[Callable]]:
         out: Dict[str, List[Callable]] = defaultdict(list)
