@@ -804,15 +804,13 @@ Msg:\n{msg}'''
 
         entry = ret
 
-        # Body Name and ID, if available
-        # Status.json BodyName is set as soon as the Orbital Cruise/Glide HUD
-        # activates.
-        # Journal ApproachBody only occurs once inside Orbital Cruise altitude.
-        # So we check that both are set, and match, then use the Status.json
-        # value.
-        if this.status_body_name is not None and this.status_body_name == this.body_name:
+        # Set BodyName if it's available from Status.json
+        if this.status_body_name is not None:
             entry['BodyName'] = this.status_body_name
-            entry['BodyID'] = this.body_id
+            # Only set BodyID if journal BodyName matches the Status.json one.
+            # This avoids binary body issues.
+            if this.status_body_name == this.body_name:
+                entry['BodyID'] = this.body_id
         #######################################################################
 
         msg = {
