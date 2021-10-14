@@ -1,32 +1,20 @@
+"""EDMC Legacy plugin stubs."""
 from __future__ import annotations
 
 import warnings
-# import myNotebook as nb  # noqa: N813
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from config import config
 from EDMCLogging import get_main_logger
-
-# """
-# Plugin hooks for EDMC - Ian Norton, Jonathan Harris
-# """
-# import copy
-# import importlib
-# import logging
-# import operator
-# import os
-# import sys
-# import tkinter as tk
-# from builtins import object, str
-# from typing import Optional
-
+from plugin.manager import LoadedPlugin, PluginManager
 
 if TYPE_CHECKING:
-    from plugin.manager import LoadedPlugin, PluginManager
     from tkinter import Tk
     from typing import TypedDict
 
     class LastError(TypedDict):
+        """LastError TypedDict."""
+
         msg: str | None
         root: Tk
         ...
