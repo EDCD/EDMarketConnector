@@ -9,7 +9,7 @@ flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.7.0
 flake8-docstrings==1.6.0
 isort==5.9.3
-flake8-isort==4.0.0
+flake8-isort==4.1.1
 flake8-json==21.7.0
 flake8-noqa==1.2.0
 flake8-polyfill==1.0.2
