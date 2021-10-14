@@ -72,7 +72,7 @@ def provides(name: str) -> list[str]:
 
         # only do this for legacy plugins. new-style plugins should register
         # stuff as providers, even for old-style access.
-        if getattr(plugin.module, name):
+        if hasattr(plugin.module, name):
             providers.append(plugin)
 
     return [p.info.name for p in providers]
