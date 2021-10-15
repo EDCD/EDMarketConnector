@@ -996,19 +996,16 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
 
 def tracking_ui_update() -> None:
     """Update the Tracking UI with current data."""
-    if this.body_name is None:
-        this.ui_j_body_name['text'] = '≪None≫'
-    else:
+    this.ui_j_body_name['text'] = '≪None≫'
+    if this.body_name is not None:
         this.ui_j_body_name['text'] = this.body_name
 
-    if this.body_id is None:
-        this.ui_j_body_id['text'] = '≪None≫'
-    else:
+    this.ui_j_body_id['text'] = '≪None≫'
+    if this.body_id is not None:
         this.ui_j_body_id['text'] = str(this.body_id)
 
-    if this.status_body_name is None:
-        this.ui_s_body_name['text'] = '≪None≫'
-    else:
+    this.ui_s_body_name['text'] = '≪None≫'
+    if this.status_body_name is not None:
         this.ui_s_body_name['text'] = this.status_body_name
 
     this.ui.update_idletasks()
