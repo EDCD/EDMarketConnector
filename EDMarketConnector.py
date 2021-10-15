@@ -9,14 +9,14 @@ import pathlib
 import queue
 import re
 import sys
-# import threading
+import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, cast
 
 import plug
 
@@ -450,8 +450,9 @@ class AppWindow(object):
         #     # Method associated with on_quit is called whenever the systray is closing
         #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
         #     self.systray.start()
-
+        self.status_msg_queue: queue.Queue[str] = queue.Queue()
         self.plugin_manager = PluginManager()
+        threading.Thread(name='edmc-statusmsg', target=self.status_msg_thread, daemon=True).start()
         plug._manager = self.plugin_manager
         self._load_all_plugins()
 
@@ -714,7 +715,7 @@ class AppWindow(object):
         self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
-        self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
+        self.w.bind_all('<<edmc_status_msg>>', self.show_status_msg)  # Statusbar
         self.w.bind_all('<<CompanionAuthEvent>>', self.auth)  # cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
 
@@ -1507,13 +1508,40 @@ class AppWindow(object):
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def plugin_error(self, event=None) -> None:
-        """Display asynchronous error from plugin."""
-        if plug.last_error.get('msg'):
-            self.status['text'] = plug.last_error['msg']
+    def status_msg_thread(self):
+        """Monitor the plugin managers status message queue."""
+        logger.info('starting statusmsg thread')
+        while True:
+            msg = self.plugin_manager.status_msg_queue.get()
+            self.status_msg_queue.put(msg)
+
+            while True:
+                try:
+                    next = self.plugin_manager.status_msg_queue.get_nowait()
+                    self.status_msg_queue.put(next)
+                except queue.Empty:
+                    break
+
+            self.w.event_generate('<<edmc_status_msg>>', data=msg, when='tail')
+            self.status_msg_queue.join()  # wait until everythings been processed
+
+    def show_status_msg(self, event: tk.Event):
+        """Show all status messages in the queue."""
+        while True:
+            try:
+                msg = self.status_msg_queue.get_nowait()
+            except queue.Empty:
+                return
+
+            if not msg:
+                continue
+
+            self.status['text'] = msg
             self.w.update_idletasks()
-            if not config.get_int('hotkey_mute'):
+            if not config.get_bool('hotkey_mute'):
                 hotkeymgr.play_bad()
+
+            self.status_msg_queue.task_done()
 
     def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""

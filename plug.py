@@ -130,6 +130,8 @@ def show_error(err):
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
 
-    if err and last_error['root']:
-        last_error['msg'] = str(err)
-        last_error['root'].event_generate('<<PluginError>>', when="tail")
+    if _manager is None:
+        raise ValueError('Unexpected None Manager')
+
+    _manager.status_msg_queue.put(str(err))
+    logger.error(err)
