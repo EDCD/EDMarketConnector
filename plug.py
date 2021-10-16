@@ -105,6 +105,7 @@ def invoke(plugin: LoadedPlugin | str, fallback: str, func_name: str, *args, **k
     :param func_name: The name of the function to call (this may be translated to a provider name).
     :return: The return of the function, if any.
     """
+    warnings.warn('plug.py is in general deprecated. Please update to newer plugin systems', DeprecationWarning)
     if _manager is None:
         raise ValueError('Unexpected None Manager')
 
@@ -126,6 +127,7 @@ def show_error(err):
     :param err:
     .. versionadded:: 2.3.7
     """
+    warnings.warn('plug.py is in general deprecated. Please update to newer plugin systems', DeprecationWarning)
     if config.shutting_down:
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
