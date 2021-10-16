@@ -117,7 +117,7 @@ class EDMCPlugin(BasePlugin):
     @property
     @final
     def commander(self) -> str | None:
-        """Return the current system, if any."""
+        """Return the current commander, if any."""
         return monitor.monitor.cmdr
 
     @property
@@ -128,9 +128,27 @@ class EDMCPlugin(BasePlugin):
 
     @property
     @final
+    def system_address(self) -> int | None:
+        """Return the current system address, if any."""
+        return monitor.monitor.systemaddress
+
+    @property
+    @final
+    def system_population(self) -> int | None:
+        """Return the current system population, if known."""
+        return monitor.monitor.systempopulation
+
+    @property
+    @final
     def station(self) -> str | None:
         """Return the current station, if any."""
         return monitor.monitor.station
+
+    @property
+    @final
+    def station_marketid(self) -> int | None:
+        """Return the current marketid for the current station, if any."""
+        return monitor.monitor.station_marketid
 
     @property
     @final
