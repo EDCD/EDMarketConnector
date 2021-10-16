@@ -1612,10 +1612,10 @@ class AppWindow(object):
         """Despatch a station URL to the configured handler."""
         providers = self.plugin_manager.get_providers_dict(EDMCProviders.STATION_URL)
         if (selected := config.get_str('station_provider')) in providers:
-            return providers[selected](monitor.system)
+            return providers[selected]()
 
         logger.warning('Unable to locate selected provider for station urls, defaulting to eddb')
-        return providers['eddb'](monitor.system)
+        return providers['eddb']()
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
