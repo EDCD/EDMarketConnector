@@ -135,8 +135,8 @@ possible.
 | Provider            | Expected Signature                              | Return Description                                          |
 | :------------------ | :---------------------------------------------- | ----------------------------------------------------------- |
 | `core.shipyard_url` | `(ship_name: str, loadout: LoadoutDict) -> str` | URL to an online shipyard                                   |
-| `core.system_url`   | `(system_name: str | None) -> str`              | URL to an online information dump of the current system     |
-| `core.station_url`  | `(station_name: str | None) -> str`             | URL to an online information dump about the current station |
+| `core.system_url`   | `() -> str`                                     | URL to an online information dump of the current system     |
+| `core.station_url`  | `() -> str`                                     | URL to an online information dump about the current station |
 
 TODO: Possibly for system/station provide the current *ID*s of the system/station and allow plugins to use monitor
 if they actually need the names?
