@@ -781,6 +781,29 @@ class AppWindow(object):
 
             wrapper_frame.grid(sticky=tk.EW)
 
+    def _provider_or_default(self, name: str, preferred: str, default: str) -> Any:
+        providers = self.plugin_manager.get_providers_dict(name)
+        if len(providers) == 0:
+            raise ValueError(f'No providers found for name {name!r}')
+
+        if preferred in providers:
+            return providers[preferred]()
+
+        return providers[default]()
+
+    def update_location_text(self):
+        """Update the current system and station text based on the results from providers."""
+        system_name = self._provider_or_default(
+            EDMCProviders.SYSTEM_TEXT, config.get_str('system_provider', default='ui_update'), 'ui_update'
+        )
+        station_name = self._provider_or_default(
+            EDMCProviders.STATION_TEXT, config.get_str('system_provider', default='ui_update'), 'ui_update'
+        )
+
+        self.system['text'] = system_name
+        self.station['text'] = station_name
+        self.w.update_idletasks()
+
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
         if not monitor.state['Odyssey']:
@@ -1428,6 +1451,8 @@ class AppWindow(object):
                 if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
+            self.update_location_text()
+
             auto_update = False
             # Only if auth callback is not pending
             if companion.session.state != companion.Session.STATE_AUTH:
@@ -1549,7 +1574,7 @@ class AppWindow(object):
             logger.warning('No ship loadout, aborting.')
             return ''
 
-        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SHIPYARD)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SHIPYARD_URL)
         provider_name = config.get_str('shipyard_provider', default='EDSY')
         provide_func = providers.get(provider_name)
         if provide_func is None:
@@ -1576,16 +1601,16 @@ class AppWindow(object):
 
     def system_url(self, system: str) -> str:
         """Despatch a system URL to the configured handler."""
-        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SYSTEM)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.SYSTEM_URL)
         if (selected := config.get_str('system_provider')) in providers:
-            return providers[selected](monitor.system)
+            return providers[selected]()
 
         logger.warning('Unable to locate selected provider for system urls, defaulting to edsm')
-        return providers['EDSM'](monitor.system)
+        return providers['EDSM']()
 
     def station_url(self, station: str) -> str:
         """Despatch a station URL to the configured handler."""
-        providers = self.plugin_manager.get_providers_dict(EDMCProviders.STATION)
+        providers = self.plugin_manager.get_providers_dict(EDMCProviders.STATION_URL)
         if (selected := config.get_str('station_provider')) in providers:
             return providers[selected](monitor.system)
 
