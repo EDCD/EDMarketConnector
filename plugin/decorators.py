@@ -123,7 +123,32 @@ def hook(name: str):  # return type explicitly left to be inferred, because magi
     return _decorate
 
 
-def provider(name: str) -> Callable[[_F], _F]:
+if TYPE_CHECKING:
+    ShipyardURLProvider = Literal['core.shipyard_url']
+    ShipyardURLReturn = Union[Callable[[str, dict[str, Any]], str], Callable[[Any, str, dict[str, Any]], str]]
+    StationURLProvider = Literal['core.station_url']
+    StationTextProvider = Literal['core.station_text']
+    SystemURLProvider = Literal['core.system_url']
+    SystemTextProvider = Literal['core.system_text']
+
+    StringCallableReturners = Union[
+        StationURLProvider, StationTextProvider,
+        SystemURLProvider, SystemTextProvider
+    ]
+    StringCallableReturn = Callable[..., str]
+    StringOverloadReturn = Callable[[StringCallableReturn], StringCallableReturn]
+    OverloadReturn = Callable[[_F], _F]
+
+
+@overload
+def provider(name: ShipyardURLProvider) -> Callable[[ShipyardURLReturn], ShipyardURLReturn]: ...
+@overload
+def provider(name: StringCallableReturners) -> StringOverloadReturn: ...
+@overload
+def provider(name: str) -> OverloadReturn:  ...
+
+
+def provider(name: str):
     """
     Create a provider callback.
 
