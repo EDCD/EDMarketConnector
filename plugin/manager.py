@@ -498,7 +498,9 @@ class PluginManager:
     @staticmethod
     def is_valid_plugin_directory(p: pathlib.Path) -> bool:
         """Return whether or not the given path is a valid plugin directory."""
-        return p.is_dir() and p.exists() and not (p.name.startswith('.') or p.name.startswith('_'))
+        return p.is_dir() and p.exists() and not (
+            p.name.startswith('.') or p.name.startswith('_') or p.name.endswith('.disabled')
+        )
 
 
 def string_fire_results(results: Dict[str, List[Any]]) -> str:
