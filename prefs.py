@@ -929,19 +929,19 @@ class PreferencesDialog(tk.Toplevel):
 
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
+        # Section heading in settings
+        # LANG: Label for location of third-party plugins folder
+        nb.Label(plugins_frame, text=_('Plugins folder') +
+                 ':').grid(padx=self.PADX, sticky=tk.W, row=row.get(), column=0)
         with row as cur_row:
-            # Section heading in settings
-            # LANG: Label for location of third-party plugins folder
-            nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, sticky=tk.W, row=cur_row)
-
-            plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row)
+            plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row, column=0)
 
             nb.Button(
                 plugins_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
                 command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
-            ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
+            ).grid(padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row, column=1)
 
         nb.Label(
             plugins_frame,
