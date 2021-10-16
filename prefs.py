@@ -1037,24 +1037,6 @@ class PreferencesDialog(tk.Toplevel):
                     columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
                 )
 
-        # disabled = [] # TODO
-
-        # disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
-        # if len(disabled_plugins):
-        #     ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-        #         columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
-        #     )
-        #     nb.Label(
-        #         plugins_frame,
-        #         # LANG: Lable on list of user-disabled plugins
-        #         text=_('Disabled Plugins')+':'  # List of plugins in settings
-        #     ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
-
-        #     for plugin in disabled_plugins:
-        #         nb.Label(plugins_frame, text=plugin.name).grid(
-        #             columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
-        #         )
-
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
 
