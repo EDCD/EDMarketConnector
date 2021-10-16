@@ -60,13 +60,15 @@ LEGACY_CALLBACK_BREAKOUT_LUT: Dict[str, Callable[[Any, 'MigratedPlugin'], Tuple[
 }
 
 LEGACY_PROVIDER_LUT: Dict[str, str] = {
-    EDMCProviders.SYSTEM: 'system_url',
-    EDMCProviders.STATION: 'station_url',
-    EDMCProviders.SHIPYARD: 'shipyard_url'
+    EDMCProviders.SYSTEM_URL: 'system_url',
+    EDMCProviders.STATION_URL: 'station_url',
+    EDMCProviders.SHIPYARD_URL: 'shipyard_url'
 }
 
 LEGACY_PROVIDER_CONVERT_LUT: Dict[str, Callable[..., Tuple[Tuple[Any, ...], Dict[Any, Any]]]] = {
-    EDMCProviders.SHIPYARD: lambda ship_name, loadout, /, self: ((loadout, self.is_beta), {})
+    EDMCProviders.SHIPYARD_URL: lambda ship_name, loadout, /, self: ((loadout, self.is_beta), {}),
+    EDMCProviders.SYSTEM_URL: lambda self: ((self.system,), {}),
+    EDMCProviders.STATION_URL: lambda self: ((self.system, self.station), {})
 }  # converting args from old to new
 
 
@@ -122,6 +124,7 @@ class MigratedPlugin(EDMCPlugin):
                 continue
 
             def default_wrapper(*args, **kwargs):
+                kwargs.pop('self', None)
                 return args, kwargs
 
             convert = LEGACY_PROVIDER_CONVERT_LUT.get(new_name, default_wrapper)
@@ -196,7 +199,11 @@ class MigratedPlugin(EDMCPlugin):
         """Wrap the given provider callback in the given callable."""
         def wrapper(*args, **kwargs):
             new_args, new_kwargs = convert(*args, self=self, **kwargs)
-            return f(*new_args, **new_kwargs)
+            try:
+                return f(*new_args, **new_kwargs)
+            except Exception:
+                self.log.warning(f'Exception thrown while calling {f} on {self}', exc_info=True)
+                raise
 
         setattr(wrapper, 'original_func', f)
 
