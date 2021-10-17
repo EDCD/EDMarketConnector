@@ -540,7 +540,8 @@ Msg:\n{msg}'''
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
                     ('commodities', commodities),
-                    ('odyssey',     entry['odyssey'])
+                    ('horizons',    this.horizons),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
