@@ -215,19 +215,15 @@ class EDDN:
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
-            if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(r.text):
-                logger.warning(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
-                               f"/{unknown_schema['schema_version']}")
-                return  # Pretend it went OK so this message isn't retried
-
-            logger.debug(
-                f'''Status from POST wasn't OK:
+            if not self.UNKNOWN_SCHEMA_RE.match(r.text):
+                logger.debug(
+                    f'''Status from POST wasn't OK:
 Status\t{r.status_code}
 URL\t{r.url}
 Headers\t{r.headers}
 Content:\n{r.text}
 Msg:\n{msg}'''
-            )
+                )
 
         r.raise_for_status()
 
@@ -289,7 +285,13 @@ Msg:\n{msg}'''
             #       in question out of replaylog, else we'll keep retrying a bad message
             #       forever.
             except requests.exceptions.HTTPError as e:
-                status['text'] = self.http_error_to_log(e)
+                if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
+                    logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
+                                 f"/{unknown_schema['schema_version']}")
+                    #  return  # Pretend it went OK so this message isn't retried
+
+                else:
+                    status['text'] = self.http_error_to_log(e)
 
             except requests.exceptions.RequestException as e:
                 logger.debug('Failed sending', exc_info=e)
