@@ -335,6 +335,10 @@ Msg:\n{msg}'''
 
         Once the send is complete, this.commodities is updated with the new data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
@@ -437,6 +441,10 @@ Msg:\n{msg}'''
 
         Once the send is complete, this.outfitting is updated with the given data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
@@ -475,6 +483,10 @@ Msg:\n{msg}'''
 
         Once the send is complete, this.shipyard is updated to the new data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
@@ -508,6 +520,10 @@ Msg:\n{msg}'''
         Update EDDN with Journal commodities data from the current station (lastStarport).
 
         As a side effect, it also updates this.commodities with the data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param cmdr: The commander to send data under
         :param is_beta: whether or not we're in beta mode
@@ -553,6 +569,10 @@ Msg:\n{msg}'''
 
         As a side effect, it also updates this.outfitting with the data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param cmdr: The commander to send data under
         :param is_beta: Whether or not we're in beta mode
         :param entry: The relevant journal entry
@@ -587,6 +607,10 @@ Msg:\n{msg}'''
 
         As a side effect, this.shipyard is updated with the data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param cmdr: the commander to send this update under
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
@@ -614,7 +638,8 @@ Msg:\n{msg}'''
         """
         Update EDDN with an event from the journal.
 
-        Additionally if additional lines are cached, it may send those as well.
+        Additionally if other lines have been saved for retry, it may send
+        those as well.
 
         :param cmdr: Commander name as passed in through `journal_entry()`.
         :param entry: The full journal event dictionary (due to checks in this function).
