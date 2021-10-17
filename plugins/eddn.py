@@ -995,7 +995,10 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
 
 
 def tracking_ui_update() -> None:
-    """Update the Tracking UI with current data."""
+    """Update the Tracking UI with current data, if required."""
+    if not config.eddn_tracking_ui:
+        return
+
     this.ui_j_body_name['text'] = '≪None≫'
     if this.body_name is not None:
         this.ui_j_body_name['text'] = this.body_name
