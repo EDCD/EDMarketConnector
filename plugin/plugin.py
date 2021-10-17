@@ -63,11 +63,9 @@ class EDMCPlugin(BasePlugin):
         """
         Show a message on the main UI status bar.
 
-        This relies on crossing a few times. It may not be instant. But it will not block plugin code.
-
         :param msg: The message to show
         """
-        self._manager.status_msg_queue.put(msg)
+        self._manager.show_status_msg(msg)
 
     # Properties for accessing various bits of EDMC data
 

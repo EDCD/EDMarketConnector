@@ -111,7 +111,7 @@ class LoadedPlugin:
 class PluginManager:
     """PluginManager is an event engine and plugin engine."""
 
-    def __init__(self) -> None:
+    def __init__(self, show_status_msg: Callable[[str], None] | None) -> None:
         self.log = get_main_logger()
         self.log.info("starting new plugin management engine")
         self.plugins: Dict[str, LoadedPlugin] = {}
@@ -119,7 +119,10 @@ class PluginManager:
         self.disabled_plugins: List[pathlib.Path] = []
         # self._plugins_previously_loaded: Set[str] = set()
 
-        self.status_msg_queue: Queue[str] = Queue(-1)
+        if show_status_msg is None:
+            self.show_status_msg = lambda s: self.log.info(s)
+        else:
+            self.show_status_msg = show_status_msg
 
     def find_potential_plugins(self, path: pathlib.Path) -> List[pathlib.Path]:
         """

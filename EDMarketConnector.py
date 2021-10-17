@@ -450,9 +450,8 @@ class AppWindow(object):
         #     # Method associated with on_quit is called whenever the systray is closing
         #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
         #     self.systray.start()
-        self.status_msg_queue: queue.Queue[str] = queue.Queue()
-        self.plugin_manager = PluginManager()
-        threading.Thread(name='edmc-statusmsg', target=self.status_msg_thread, daemon=True).start()
+        self.status_text = tk.StringVar()
+        self.plugin_manager = PluginManager(self.set_status_msg)
         plug._manager = self.plugin_manager
         self._load_all_plugins()
 
@@ -537,7 +536,7 @@ class AppWindow(object):
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status = tk.Label(frame, name='status', textvariable=self.status_text, anchor=tk.W)
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
@@ -715,7 +714,6 @@ class AppWindow(object):
         self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
         self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
-        self.w.bind_all('<<edmc_status_msg>>', self.show_status_msg)  # Statusbar
         self.w.bind_all('<<CompanionAuthEvent>>', self.auth)  # cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
 
@@ -881,7 +879,7 @@ class AppWindow(object):
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             # LANG: ED Journal file location appears to be in error
-            self.status['text'] = _('Error: Check E:D journal file location')
+            self.set_status_msg(_('Error: Check E:D journal file location'))
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
@@ -938,7 +936,7 @@ class AppWindow(object):
         """Initiate CAPI/Frontier login and set other necessary state."""
         if not self.status['text']:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
-            self.status['text'] = _('Logging in...')
+            self.set_status_msg(_('Logging in...'))
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
 
@@ -954,7 +952,7 @@ class AppWindow(object):
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 # LANG: Successfully authenticated with the Frontier website
-                self.status['text'] = _('Authentication successful')
+                self.set_status_msg(_('Authentication successful'))
 
                 if platform == 'darwin':
                     self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
@@ -965,11 +963,11 @@ class AppWindow(object):
                     self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
 
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
-            self.status['text'] = str(e)
+            self.set_status_msg(str(e))
 
         except Exception as e:
             logger.debug('Frontier CAPI Auth', exc_info=e)
-            self.status['text'] = str(e)
+            self.set_status_msg(str(e))
 
         self.cooldown()
 
@@ -985,7 +983,7 @@ class AppWindow(object):
                     # Signal as error because the user might actually be docked
                     # but the server hosting the Companion API hasn't caught up
                     # LANG: Player is not docked at a station, when we expect them to be
-                    self.status['text'] = _("You're not docked at a station!")
+                    self.set_status_msg(_("You're not docked at a station!"))
                     return False
 
             # Ignore possibly missing shipyard info
@@ -993,12 +991,12 @@ class AppWindow(object):
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
                     # LANG: Status - Either no market or no modules data for station from Frontier CAPI
-                    self.status['text'] = _("Station doesn't have anything!")
+                    self.set_status_msg(_("Station doesn't have anything!"))
 
             elif not data['lastStarport'].get('commodities'):
                 if not self.status['text']:
                     # LANG: Status - No station market data from Frontier CAPI
-                    self.status['text'] = _("Station doesn't have a market!")
+                    self.set_status_msg(_("Station doesn't have a market!"))
 
             elif config.get_int('output') & (config.OUT_MKT_CSV | config.OUT_MKT_TD):
                 # Fixup anomalies in the commodity data
@@ -1027,31 +1025,31 @@ class AppWindow(object):
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
             # LANG: CAPI queries aborted because Cmdr name is unknown
-            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            self.set_status_msg(_('CAPI query aborted: Cmdr name unknown'))
             return
 
         if not monitor.mode:
             logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
             # LANG: CAPI queries aborted because game mode unknown
-            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            self.set_status_msg(_('CAPI query aborted: Game mode unknown'))
             return
 
         if not monitor.system:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
-            self.status['text'] = _('CAPI query aborted: Current system unknown')
+            self.set_status_msg(_('CAPI query aborted: Current system unknown'))
             return
 
         if monitor.state['Captain']:
             logger.trace_if('capi.worker', 'Aborting Query: In multi-crew')
             # LANG: CAPI queries aborted because player is in multi-crew on other Cmdr's ship
-            self.status['text'] = _('CAPI query aborted: In other-ship multi-crew')
+            self.set_status_msg(_('CAPI query aborted: In other-ship multi-crew'))
             return
 
         if monitor.mode == 'CQC':
             logger.trace_if('capi.worker', 'Aborting Query: In CQC')
             # LANG: CAPI queries aborted because player is in CQC (Arena)
-            self.status['text'] = _('CAPI query aborted: CQC (Arena) detected')
+            self.set_status_msg(_('CAPI query aborted: CQC (Arena) detected'))
             return
 
         if companion.session.state == companion.Session.STATE_AUTH:
@@ -1063,7 +1061,7 @@ class AppWindow(object):
         if not companion.session.retrying:
             if time() < self.capi_query_holdoff_time:  # Was invoked by key while in cooldown
                 if play_sound and (self.capi_query_holdoff_time - time()) < companion.capi_query_cooldown * 0.75:
-                    self.status['text'] = ''
+                    self.set_status_msg('')
                     hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
 
                 return
@@ -1072,7 +1070,7 @@ class AppWindow(object):
                 hotkeymgr.play_good()
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
-            self.status['text'] = _('Fetching data...')
+            self.set_status_msg(_('Fetching data...'))
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
@@ -1113,24 +1111,28 @@ class AppWindow(object):
             if 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
-                err = self.status['text'] = _('CAPI: No commander data returned')
+                err = _('CAPI: No commander data returned')
+                self.set_status_msg(err)
 
             elif not capi_response.capi_data.get('commander', {}).get('name'):
                 # LANG: We didn't have the commander name when we should have
-                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = _("Who are you?!")  # Shouldn't happen
+                self.set_status_msg(err)
 
             elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
                   or (capi_response.capi_data['commander'].get('docked')
                       and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
                 # LANG: We don't know where the commander is, when we should
-                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                err = _("Where are you?!")  # Shouldn't happen
+                self.set_status_msg(err)
 
             elif (
                     not capi_response.capi_data.get('ship', {}).get('name')
                     or not capi_response.capi_data.get('ship', {}).get('modules')
             ):
                 # LANG: We don't know what ship the commander is in, when we should
-                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = _("What are you flying?!")  # Shouldn't happen
+                self.set_status_msg(err)
 
             elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
@@ -1238,7 +1240,7 @@ class AppWindow(object):
                     plugin.event.CAPIDataEvent(plugin.event.EDMCPluginEvents.CAPI_DATA, capi_response.capi_data)
                 )
                 err = string_fire_results(results)
-                self.status['text'] = err
+                self.set_status_msg(err)
 
                 # Export market data
                 if not self.export_market_data(capi_response.capi_data):
@@ -1253,7 +1255,7 @@ class AppWindow(object):
             return
 
         except companion.ServerConnectionError:
-            self.status['text'] = _('Frontier CAPI server error')
+            self.set_status_msg(_('Frontier CAPI server error'))
 
         except companion.CredentialsError:
             companion.session.retrying = False
@@ -1265,7 +1267,7 @@ class AppWindow(object):
         except companion.ServerLagging as e:
             err = str(e)
             if companion.session.retrying:
-                self.status['text'] = err
+                self.set_status_msg(err)
                 play_bad = True
 
             else:
@@ -1275,24 +1277,27 @@ class AppWindow(object):
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            err = self.status['text'] = str(e)
+            err = str(e)
+            self.set_status_msg(err)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except companion.ServerConnectionError as e:
             logger.warning(f'Exception while contacting server: {e}')
-            err = self.status['text'] = str(e)
+            err = str(e)
+            self.set_status_msg(err)
             play_bad = True
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
-            err = self.status['text'] = str(e)
+            err = str(e)
+            self.set_status_msg(err)
             play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
+            self.set_status_msg(strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time)))
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
@@ -1404,7 +1409,7 @@ class AppWindow(object):
                     'EngineerCraft',
                     'Synthesis',
                     'JoinACrew'):
-                self.status['text'] = ''  # Periodically clear any old error
+                self.set_status_msg('')  # Periodically clear any old error
 
             self.w.update_idletasks()
 
@@ -1423,7 +1428,7 @@ class AppWindow(object):
                 )))
 
                 if err:
-                    self.status['text'] = err
+                    self.set_status_msg(err)
                     if not config.get_int('hotkey_mute'):
                         hotkeymgr.play_bad()
 
@@ -1457,7 +1462,7 @@ class AppWindow(object):
             )))
 
             if err:
-                self.status['text'] = err
+                self.set_status_msg(err)
                 if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
@@ -1505,7 +1510,7 @@ class AppWindow(object):
         try:
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
-            self.status['text'] = _('Authentication successful')
+            self.set_status_msg(_('Authentication successful'))
             if platform == 'darwin':
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
@@ -1515,11 +1520,11 @@ class AppWindow(object):
                 self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
 
         except companion.ServerError as e:
-            self.status['text'] = str(e)
+            self.set_status_msg(str(e))
 
         except Exception as e:
             logger.debug('Frontier CAPI Auth:', exc_info=e)
-            self.status['text'] = str(e)
+            self.set_status_msg(str(e))
 
         self.cooldown()
 
@@ -1539,44 +1544,12 @@ class AppWindow(object):
             entry
         )))
         if err:
-            self.status['text'] = err
+            self.set_status_msg(err)
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def status_msg_thread(self):
-        """Monitor the plugin managers status message queue."""
-        logger.info('starting statusmsg thread')
-        while True:
-            msg = self.plugin_manager.status_msg_queue.get()
-            self.status_msg_queue.put(msg)
-
-            while True:
-                try:
-                    next = self.plugin_manager.status_msg_queue.get_nowait()
-                    self.status_msg_queue.put(next)
-                except queue.Empty:
-                    break
-
-            self.w.event_generate('<<edmc_status_msg>>', data=msg, when='tail')
-            self.status_msg_queue.join()  # wait until everythings been processed
-
-    def show_status_msg(self, event: tk.Event):
-        """Show all status messages in the queue."""
-        while True:
-            try:
-                msg = self.status_msg_queue.get_nowait()
-            except queue.Empty:
-                return
-
-            if not msg:
-                continue
-
-            self.status['text'] = msg
-            self.w.update_idletasks()
-            if not config.get_bool('hotkey_mute'):
-                hotkeymgr.play_bad()
-
-            self.status_msg_queue.task_done()
+    def set_status_msg(self, msg: str):
+        self.status_text.set(msg)
 
     def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
@@ -1811,7 +1784,7 @@ class AppWindow(object):
 
         # Let the user know we're shutting down.
         # LANG: The application is shutting down
-        self.status['text'] = _('Shutting down...')
+        self.set_status_msg(_('Shutting down...'))
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
