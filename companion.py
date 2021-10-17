@@ -29,12 +29,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 import requests
 
 import config as conf_module
+import protocol
 from config import appname, appversion, config
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
-# from protocol import protocolhandler
-import protocol
 
 logger = get_main_logger()
 
