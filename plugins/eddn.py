@@ -106,6 +106,11 @@ class EDDN:
     TIMEOUT = 10  # requests timeout
     MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
+    UNKNOWN_SCHEMA_RE = re.compile(
+        r"^FAIL: \[JsonValidationException\('Schema "
+        r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
+        r"unable to validate.',\)\]$"
+    )
 
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
@@ -209,6 +214,11 @@ class EDDN:
             ):
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
+
+            if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(r.text):
+                logger.warning(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
+                               f"/{unknown_schema['schema_version']}")
+                return  # Pretend it went OK so this message isn't retried
 
             logger.debug(
                 f'''Status from POST wasn't OK:
