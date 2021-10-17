@@ -46,6 +46,8 @@ class This:
         # Track if we're on foot
         self.on_foot = False
 
+        # Horizons ?
+        self.horizons = False
         # Running under Odyssey?
         self.odyssey = False
 
@@ -1165,8 +1167,9 @@ def journal_entry(  # noqa: C901, CCR001
 
     this.on_foot = state['OnFoot']
 
-    # Note if we're under Odyssey
-    # The only event this is already in is `LoadGame` which isn't sent to EDDN.
+    # Note if we're under Horizons and/or Odyssey
+    # The only event these are already in is `LoadGame` which isn't sent to EDDN.
+    this.horizons = entry['horizons'] = state['Horizons']
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
@@ -1392,6 +1395,22 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     :param ships: Ships available at the docked station.
     :return: bool - True if the Cmdr has Horizons access.
     """
+    # First check the Journal-sourced flag
+    # NB: This assumes game currently running, rather than "old
+    #     journal file".  `LoadGame` determines monitor.cmdr, which determines
+    #     the account used for CAPI, so it *should* match.
+    #
+    #     For this to be wrong, the user would have had to have, e.g.:
+    #
+    #       1. Logged into Cmdr in Horizons/Odyssey, then back out again.
+    #       2. Logged into Cmdr in base game, either on another machine, or
+    #          have removed the Journal file after.
+    #       3. Re-run EDMC and triggered a manual CAPI update.
+    #
+    #  This seems unlikely.
+    if this.horizons:
+        return True
+
     economies_colony = False
     modules_horizons = False
     ship_horizons = False
