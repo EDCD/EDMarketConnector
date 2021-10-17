@@ -575,7 +575,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    this.horizons),
                     ('modules',     outfitting),
-                    ('odyssey',     entry['odyssey'])
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -604,7 +604,7 @@ Msg:\n{msg}'''
                     ('marketId',    entry['MarketID']),
                     ('horizons',    this.horizons),
                     ('ships',       shipyard),
-                    ('odyssey',     entry['odyssey'])
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
