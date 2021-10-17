@@ -208,6 +208,7 @@ class AbstractConfig(abc.ABC):
     __auth_force_localserver = False  # Should we use localhost for auth callback ?
     __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
     __eddn_url = None  # Non-default EDDN URL
+    __eddn_tracking_ui = False  # Show EDDN tracking UI ?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -263,6 +264,19 @@ class AbstractConfig(abc.ABC):
         :return: str - Custom EDDN URL to use.
         """
         return self.__eddn_url
+
+    def set_eddn_tracking_ui(self):
+        """Activate EDDN tracking UI."""
+        self.__eddn_tracking_ui = True
+
+    @property
+    def eddn_tracking_ui(self) -> bool:
+        """
+        Determine if the EDDN tracking UI be shown.
+
+        :return: bool - Should tracking UI be active?
+        """
+        return self.__eddn_tracking_ui
 
     @property
     def app_dir(self) -> str:

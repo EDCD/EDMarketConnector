@@ -155,6 +155,12 @@ if __name__ == '__main__':  # noqa: C901
         '--eddn-url',
         help='Specify an alternate EDDN upload URL',
     )
+
+    parser.add_argument(
+        '--eddn-tracking-ui',
+        help='Have EDDN plugin show what it is tracking',
+        action='store_true',
+    )
     ###########################################################################
 
     args = parser.parse_args()
@@ -182,6 +188,9 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.eddn_url:
         config.set_eddn_url(args.eddn_url)
+
+    if args.eddn_tracking_ui:
+        config.set_eddn_tracking_ui()
 
     if args.force_edmc_protocol:
         if sys.platform == 'win32':

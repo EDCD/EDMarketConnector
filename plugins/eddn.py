@@ -12,7 +12,7 @@ from os.path import join
 from platform import system
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import TextIO, Tuple
+from typing import TextIO, Tuple, Union
 
 import requests
 
@@ -52,7 +52,10 @@ class This:
         # Track location to add to Journal events
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
-        self.planet: Optional[str] = None
+        self.body_name: Optional[str] = None
+        self.body_id: Optional[int] = None
+        # Track Status.json data
+        self.status_body_name: Optional[str] = None
 
         # Avoid duplicates
         self.marketId: Optional[str] = None
@@ -75,6 +78,12 @@ class This:
 
         self.eddn_delay: tk.IntVar
         self.eddn_delay_button: nb.Checkbutton
+
+        # Tracking UI
+        self.ui: tk.Frame
+        self.ui_j_body_name: tk.Label
+        self.ui_j_body_id: tk.Label
+        self.ui_s_body_name: tk.Label
 
 
 this = This()
@@ -266,6 +275,9 @@ Msg:\n{msg}'''
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
 
+            # TODO: Something here needs to handle, e.g. HTTP 400, and take the message
+            #       in question out of replaylog, else we'll keep retrying a bad message
+            #       forever.
             except requests.exceptions.HTTPError as e:
                 status['text'] = self.http_error_to_log(e)
 
@@ -599,21 +611,16 @@ Msg:\n{msg}'''
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
         """
         Update EDDN with an event from the journal.
 
         Additionally if additional lines are cached, it may send those as well.
 
-        :param cmdr: the commander under which this upload is made
-        :param is_beta: whether or not we are in beta mode
-        :param entry: the journal entry to send
+        :param cmdr: Commander name as passed in through `journal_entry()`.
+        :param entry: The full journal event dictionary (due to checks in this function).
+        :param msg: The EDDN message body to be sent.
         """
-        msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
-            'message': entry
-        }
-
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
@@ -632,6 +639,290 @@ Msg:\n{msg}'''
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''
+
+    def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+        """
+        Send an EDDN event on the journal schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+
+    def entry_augment_system_data(
+            self,
+            entry: MutableMapping[str, Any],
+            system_name: str
+    ) -> Union[str, MutableMapping[str, Any]]:
+        """
+        Augment a journal entry with necessary system data.
+
+        :param entry: The journal entry to be augmented.
+        :param system_name: Name of current star system.
+        :param systemname_field_name: Name of journal key for system name.
+        :return: The augmented version of entry.
+        """
+        # If 'SystemName' or 'System' is there, it's directly from a journal event.
+        # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
+        if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
+            entry['StarSystem'] = system_name
+
+        if 'SystemAddress' not in entry:
+            if this.systemaddress is None:
+                logger.warning("this.systemaddress is None, can't add SystemAddress")
+                return "this.systemaddress is None, can't add SystemAddress"
+
+            entry['SystemAddress'] = this.systemaddress
+
+        if 'StarPos' not in entry:
+            if not this.coordinates:
+                logger.warning("this.coordinates is None, can't add StarPos")
+                return "this.coordinates is None, can't add StarPos"
+
+            entry['StarPos'] = list(this.coordinates)
+
+        return entry
+
+    def export_journal_fssdiscoveryscan(
+            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSDiscoveryScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        entry.pop('Progress')
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, system)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_navbeaconscan(
+            self, cmdr: str, system_name: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an NavBeaconScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of the current system.
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # { "timestamp":"2021-09-24T13:57:24Z", "event":"NavBeaconScan", "SystemAddress":670417626481, "NumBodies":18 }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, system_name)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_codexentry(
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a CodexEntry to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T12:29:39Z",
+        #   "event":"CodexEntry",
+        #   "EntryID":1400414,
+        #   "Name":"$Codex_Ent_Gas_Vents_SilicateVapourGeysers_Name;",
+        #   "Name_Localised":"Silicate Vapour Gas Vent",
+        #   "SubCategory":"$Codex_SubCategory_Geology_and_Anomalies;",
+        #   "SubCategory_Localised":"Geology and anomalies",
+        #   "Category":"$Codex_Category_Biology;",
+        #   "Category_Localised":"Biological and Geological",
+        #   "Region":"$Codex_RegionName_18;",
+        #   "Region_Localised":"Inner Orion Spur",
+        #   "System":"Bestia",
+        #   "SystemAddress":147916327267,
+        #   "Latitude":23.197777, "Longitude":51.803349,
+        #   "IsNewEntry":true,
+        #   "VoucherAmount":50000
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        # Keys specific to this event
+        for k in ('IsNewEntry', 'NewTraitsDiscovered'):
+            if k in entry:
+                del entry[k]
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # General 'system' augmentations
+        ret = this.eddn.entry_augment_system_data(entry, entry['System'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+
+        # Set BodyName if it's available from Status.json
+        if this.status_body_name is not None:
+            entry['BodyName'] = this.status_body_name
+            # Only set BodyID if journal BodyName matches the Status.json one.
+            # This avoids binary body issues.
+            if this.status_body_name == this.body_name:
+                entry['BodyID'] = this.body_id
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_scanbarycentre(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a ScanBaryCentre to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T11:55:03Z",
+        #   "event":"ScanBaryCentre",
+        #   "StarSystem":"Khruvani",
+        #   "SystemAddress":13864557159793,
+        #   "BodyID":21,
+        #   "SemiMajorAxis":863683605194.091797,
+        #   "Eccentricity":0.001446,
+        #   "OrbitalInclination":-0.230714,
+        #   "Periapsis":214.828581,
+        #   "OrbitalPeriod":658474677.801132,
+        #   "AscendingNode":21.188568,
+        #   "MeanAnomaly":208.765388
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/scanbarycentre/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_navroute(
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a NavRoute to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #    "timestamp":"2021-09-24T14:33:15Z",
+        #    "event":"NavRoute",
+        #    "Route":[
+        #       {
+        #         "StarSystem":"Ross 332",
+        #         "SystemAddress":3657198211778,
+        #         "StarPos":[-43.62500,-23.15625,-74.12500],
+        #         "StarClass":"K"
+        #       },
+        #       {
+        #          "StarSystem":"BD+44 1040",
+        #          "SystemAddress":2832564490946,
+        #          "StarPos":[-31.56250,1.84375,-92.37500],
+        #          "StarClass":"K"
+        #       },
+        #       {
+        #         "StarSystem":"Aonga",
+        #         "SystemAddress":6680855188162,
+        #         "StarPos":[-34.46875,9.53125,-90.87500],
+        #         "StarClass":"M"
+        #       }
+        #    ]
+        #  }
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # WORKAROUND WIP EDDN schema | 2021-09-27: This will reject with the Odyssey flag present
+        if 'odyssey' in entry:
+            del entry['odyssey']
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # None
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
 
     def canonicalise(self, item: str) -> str:
         """
@@ -656,7 +947,7 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     """
     Set up any plugin-specific UI.
 
@@ -667,6 +958,7 @@ def plugin_app(parent: tk.Tk) -> None:
           necessary.
 
     :param parent: tkinter parent frame.
+    :return: Optional tk.Frame, if the tracking UI is active.
     """
     this.parent = parent
     this.eddn = EDDN(parent)
@@ -674,6 +966,49 @@ def plugin_app(parent: tk.Tk) -> None:
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
         this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
+
+    if config.eddn_tracking_ui:
+        this.ui = tk.Frame(parent)
+
+        row = this.ui.grid_size()[1]
+        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
+        journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
+        this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
+        journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
+        this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
+        status_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
+        this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        return this.ui
+
+    return None
+
+
+def tracking_ui_update() -> None:
+    """Update the Tracking UI with current data."""
+    this.ui_j_body_name['text'] = '≪None≫'
+    if this.body_name is not None:
+        this.ui_j_body_name['text'] = this.body_name
+
+    this.ui_j_body_id['text'] = '≪None≫'
+    if this.body_id is not None:
+        this.ui_j_body_id['text'] = str(this.body_id)
+
+    this.ui_s_body_name['text'] = '≪None≫'
+    if this.status_body_name is not None:
+        this.ui_s_body_name['text'] = this.status_body_name
+
+    this.ui.update_idletasks()
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
@@ -773,6 +1108,31 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
+# Recursively filter '*_Localised' keys from dict
+def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Remove any dict keys with names ending `_Localised` from a dict.
+
+    :param d: Dict to filter keys of.
+    :return: The filtered dict.
+    """
+    filtered: OrderedDictT[str, Any] = OrderedDict()
+    for k, v in d.items():
+        if k.endswith('_Localised'):
+            pass
+
+        elif hasattr(v, 'items'):  # dict -> recurse
+            filtered[k] = filter_localised(v)
+
+        elif isinstance(v, list):  # list of dicts -> recurse
+            filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+
+        else:
+            filtered[k] = v
+
+    return filtered
+
+
 def journal_entry(  # noqa: C901, CCR001
         cmdr: str,
         is_beta: bool,
@@ -803,24 +1163,6 @@ def journal_entry(  # noqa: C901, CCR001
 
     entry = new_data
 
-    # Recursively filter '*_Localised' keys from dict
-    def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
-        filtered: OrderedDictT[str, Any] = OrderedDict()
-        for k, v in d.items():
-            if k.endswith('_Localised'):
-                pass
-
-            elif hasattr(v, 'items'):  # dict -> recurse
-                filtered[k] = filter_localised(v)
-
-            elif isinstance(v, list):  # list of dicts -> recurse
-                filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
-
-            else:
-                filtered[k] = v
-
-        return filtered
-
     this.on_foot = state['OnFoot']
 
     # Note if we're under Odyssey
@@ -830,10 +1172,16 @@ def journal_entry(  # noqa: C901, CCR001
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            if entry.get('BodyType') == 'Planet':
+                this.body_name = entry.get('Body')
+                this.body_id = entry.get('BodyID')
+
+            else:
+                this.body_name = None
 
         elif entry['event'] == 'FSDJump':
-            this.planet = None
+            this.body_name = None
+            this.body_id = None
 
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
@@ -844,12 +1192,41 @@ def journal_entry(  # noqa: C901, CCR001
         this.systemaddress = entry.get('SystemAddress')  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
-        this.planet = entry['Body']
+        this.body_name = entry['Body']
+        this.body_id = entry.get('BodyID')
 
-    elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
-        this.planet = None
+    elif entry['event'] == 'LeaveBody':
+        # NB: **NOT** SupercruiseEntry, because we won't get a fresh
+        #     ApproachBody if we don't leave Orbital Cruise and land again.
+        # *This* is triggered when you go above Orbital Cruise altitude.
+        # Status.json BodyName clears when the OC/Glide HUD is deactivated.
+        this.body_name = None
+        this.body_id = None
 
-    # Send interesting events to EDDN, but not when on a crew
+    elif entry['event'] == 'Music':
+        if entry['MusicTrack'] == 'MainMenu':
+            this.body_name = None
+            this.body_id = None
+            this.status_body_name = None
+
+    # Events with their own EDDN schema
+    if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
+        if entry['event'].lower() == 'fssdiscoveryscan':
+            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
+
+        if entry['event'].lower() == 'navbeaconscan':
+            return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+
+        if entry['event'].lower() == 'codexentry':
+            return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'scanbarycentre':
+            return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'navroute':
+            return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+    # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
             ('StarPos' in entry or this.coordinates)):
@@ -881,8 +1258,8 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if entry['event'] == 'Docked' and this.planet:
-            entry['Body'] = this.planet
+        if entry['event'] == 'Docked' and this.body_name:
+            entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
@@ -914,7 +1291,7 @@ def journal_entry(  # noqa: C901, CCR001
             entry['SystemAddress'] = this.systemaddress
 
         try:
-            this.eddn.export_journal_entry(cmdr, is_beta, filter_localised(entry))
+            this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)
@@ -958,6 +1335,8 @@ def journal_entry(  # noqa: C901, CCR001
         except Exception as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
+
+    tracking_ui_update()
 
     return None
 
@@ -1044,3 +1423,20 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
         logger.error(f'ships type is {type(ships)}')
 
     return economies_colony or modules_horizons or ship_horizons
+
+
+def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
+    """
+    Process Status.json data to track things like current Body.
+
+    :param cmdr: Current Commander name.
+    :param is_beta: Whether non-live game version was detected.
+    :param entry: The latest Status.json data.
+    """
+    if 'BodyName' in entry:
+        this.status_body_name = entry['BodyName']
+
+    else:
+        this.status_body_name = None
+
+    tracking_ui_update()
