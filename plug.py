@@ -135,5 +135,5 @@ def show_error(err):
     if _manager is None:
         raise ValueError('Unexpected None Manager')
 
-    _manager.status_msg_queue.put(str(err))
+    _manager.show_status_msg(str(err))
     logger.error(err)
