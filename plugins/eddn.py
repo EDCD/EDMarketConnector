@@ -329,7 +329,7 @@ Msg:\n{msg}'''
             # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
             return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
@@ -337,7 +337,6 @@ Msg:\n{msg}'''
 
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
-        :param is_odyssey: whether the account shows as having Odyssey expansion.
         """
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
@@ -373,7 +372,7 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
-                ('odyssey',     is_odyssey),
+                ('odyssey',     this.odyssey),
             ])
 
             if 'economies' in data['lastStarport']:
@@ -431,7 +430,7 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -463,13 +462,13 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    this.horizons),
                     ('modules',     outfitting),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
         this.outfitting = (this.horizons, outfitting)
 
-    def export_shipyard(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
@@ -497,7 +496,7 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    this.horizons),
                     ('ships',       shipyard),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -1364,9 +1363,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
                 status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
                 status.update_idletasks()
 
-            this.eddn.export_commodities(data, is_beta, this.odyssey)
-            this.eddn.export_outfitting(data, is_beta, this.odyssey)
-            this.eddn.export_shipyard(data, is_beta, this.odyssey)
+            this.eddn.export_commodities(data, is_beta)
+            this.eddn.export_outfitting(data, is_beta)
+            this.eddn.export_shipyard(data, is_beta)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
