@@ -376,6 +376,7 @@ from tkinter import ttk
 import commodity
 import plug
 import prefs
+import protocol
 import stats
 import td
 from commodity import COMMODITY_CSV
@@ -384,7 +385,6 @@ from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
-import protocol
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
