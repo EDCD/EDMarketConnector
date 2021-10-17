@@ -1,12 +1,13 @@
 """protocol handler for cAPI authorisation."""
 
+# spell-checker: words ntdll GURL alloc wfile instantiatable pyright
 import os
 import sys
 import threading
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Type
 
 from config import config
 from constants import appname, protocolhandler_redirect
@@ -115,10 +116,10 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
 elif (config.auth_force_edmc_protocol
       or (
-              sys.platform == 'win32'
-              and getattr(sys, 'frozen', False)
-              and not is_wine
-              and not config.auth_force_localserver
+          sys.platform == 'win32'
+          and getattr(sys, 'frozen', False)
+          and not is_wine
+          and not config.auth_force_localserver
       )):
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
@@ -415,20 +416,24 @@ else:  # Linux / Run from source
             pass
 
 
-# singleton
+def get_handler_impl() -> Type[GenericProtocolHandler]:
+    """
+    Get the appropriate GenericProtocolHandler for the current system and config.
+
+    :return: An instantiatable GenericProtocolHandler
+    """
+    if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
+        return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
+
+    elif (
+        (sys.platform == 'win32' and config.auth_force_edmc_protocol)
+        or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
+    ):
+        return WindowsProtocolHandler
+
+    else:
+        return LinuxProtocolHandler
+
+
+# *late init* singleton
 protocolhandler: GenericProtocolHandler
-
-if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
-    protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
-
-elif (
-        sys.platform == 'win32'
-        and config.auth_force_edmc_protocol or (
-            getattr(sys, 'frozen', False)
-            and not is_wine
-            and not config.auth_force_localserver
-        )
-        ):
-    protocolhandler = WindowsProtocolHandler()
-else:
-    protocolhandler = LinuxProtocolHandler()

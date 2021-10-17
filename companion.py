@@ -33,7 +33,8 @@ from config import appname, appversion, config
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
-from protocol import protocolhandler
+# from protocol import protocolhandler
+import protocol
 
 logger = get_main_logger()
 
@@ -375,7 +376,7 @@ class Auth(object):
             f'&code_challenge={challenge}'
             f'&code_challenge_method=S256'
             f'&state={self.state}'
-            f'&redirect_uri={protocolhandler.redirect}'
+            f'&redirect_uri={protocol.protocolhandler.redirect}'
         )
 
         return None
@@ -412,7 +413,7 @@ class Auth(object):
                 'client_id': self.CLIENT_ID,
                 'code_verifier': self.verifier,
                 'code': data['code'][0],
-                'redirect_uri': protocolhandler.redirect,
+                'redirect_uri': protocol.protocolhandler.redirect,
             }
 
             # import http.client as http_client
@@ -698,7 +699,7 @@ class Session(object):
 
         try:
             logger.debug('Trying authorize with payload from handler')
-            self.start_frontier_auth(self.auth.authorize(protocolhandler.lastpayload))  # type: ignore
+            self.start_frontier_auth(self.auth.authorize(protocol.protocolhandler.lastpayload))  # type: ignore
             self.auth = None
 
         except Exception:
