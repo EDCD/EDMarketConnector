@@ -372,6 +372,7 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
+                ('horizons',    this.horizons),
                 ('odyssey',     this.odyssey),
             ])
 
