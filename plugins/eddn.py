@@ -46,6 +46,8 @@ class This:
         # Track if we're on foot
         self.on_foot = False
 
+        # Horizons ?
+        self.horizons = False
         # Running under Odyssey?
         self.odyssey = False
 
@@ -1165,8 +1167,9 @@ def journal_entry(  # noqa: C901, CCR001
 
     this.on_foot = state['OnFoot']
 
-    # Note if we're under Odyssey
-    # The only event this is already in is `LoadGame` which isn't sent to EDDN.
+    # Note if we're under Horizons and/or Odyssey
+    # The only event these are already in is `LoadGame` which isn't sent to EDDN.
+    this.horizons = entry['horizons'] = state['Horizons']
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
