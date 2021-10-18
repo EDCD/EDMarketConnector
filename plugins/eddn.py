@@ -342,6 +342,12 @@ Msg:\n{msg}'''
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+        modules, ships = self.safe_modules_and_ships(data)
+        horizons: bool = capi_is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            ships
+        )
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
@@ -376,7 +382,7 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
-                ('horizons',    this.horizons),
+                ('horizons',    horizons),
                 ('odyssey',     this.odyssey),
             ])
 
