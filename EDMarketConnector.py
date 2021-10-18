@@ -393,7 +393,6 @@ from plugin import event
 from plugin.exceptions import LegacyPluginNeedsMigrating
 from plugin.manager import PluginManager, string_fire_results
 from plugin.provider import EDMCProviders
-from protocol import protocolhandler
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
