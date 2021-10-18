@@ -9,16 +9,13 @@ import pathlib
 import queue
 import re
 import sys
-import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from sys import platform
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, cast
-
-import plug
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -551,7 +548,7 @@ class AppWindow(object):
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
-        self.updater: update.Updater = None
+        self.updater: 'update.Updater' = None  # type: ignore
 
         self.menubar = tk.Menu()
         if platform == 'darwin':
