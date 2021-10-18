@@ -91,7 +91,15 @@ class This:
 this = This()
 
 
-HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# This SKU is tagged on any module or ship that you must have Horizons for.
+HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# ELITE_HORIZONS_V_COBRA_MK_IV_1000` is for the Cobra Mk IV, but
+# is also available in the base game, if you have entitlement.
+# `ELITE_HORIZONS_V_GUARDIAN_FSDBOOSTER` is for the Guardian FSD Boosters,
+# which you need Horizons in order to unlock, but could be on sale even in the
+# base game due to entitlement.
+# Thus do **NOT** use either of these in addition to the PLANETARY_LANDINGS
+# one.
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
@@ -465,8 +473,8 @@ Msg:\n{msg}'''
         )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
-            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
-            m['name'] != 'Int_PlanetApproachSuite',
+            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZONS_SKU)
+                                                       and m['name'] != 'Int_PlanetApproachSuite',  # noqa: E131
             modules.values()
         )
 
@@ -1467,7 +1475,7 @@ def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_ST
         logger.error(f'economies type is {type(economies)}')
 
     if isinstance(modules, dict):
-        modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
+        modules_horizons = any(module.get('sku') == HORIZONS_SKU for module in modules.values())
 
     else:
         logger.error(f'modules type is {type(modules)}')
@@ -1475,7 +1483,7 @@ def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_ST
     if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
             if isinstance(ships.get('shipyard_list'), dict):
-                ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+                ship_horizons = any(ship.get('sku') == HORIZONS_SKU for ship in ships['shipyard_list'].values())
 
             else:
                 logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')
