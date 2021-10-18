@@ -91,7 +91,15 @@ class This:
 this = This()
 
 
-HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# This SKU is tagged on any module or ship that you must have Horizons for.
+HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# ELITE_HORIZONS_V_COBRA_MK_IV_1000` is for the Cobra Mk IV, but
+# is also available in the base game, if you have entitlement.
+# `ELITE_HORIZONS_V_GUARDIAN_FSDBOOSTER` is for the Guardian FSD Boosters,
+# which you need Horizons in order to unlock, but could be on sale even in the
+# base game due to entitlement.
+# Thus do **NOT** use either of these in addition to the PLANETARY_LANDINGS
+# one.
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
@@ -329,16 +337,25 @@ Msg:\n{msg}'''
             # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
             return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
         Once the send is complete, this.commodities is updated with the new data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
-        :param is_odyssey: whether the account shows as having Odyssey expansion.
         """
+        modules, ships = self.safe_modules_and_ships(data)
+        horizons: bool = capi_is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            ships
+        )
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
@@ -373,7 +390,8 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
-                ('odyssey',     is_odyssey),
+                ('horizons',    horizons),
+                ('odyssey',     this.odyssey),
             ])
 
             if 'economies' in data['lastStarport']:
@@ -431,11 +449,15 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.outfitting is updated with the given data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
@@ -444,15 +466,15 @@ Msg:\n{msg}'''
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
         )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
-            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
-            m['name'] != 'Int_PlanetApproachSuite',
+            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZONS_SKU)
+                                                       and m['name'] != 'Int_PlanetApproachSuite',  # noqa: E131
             modules.values()
         )
 
@@ -471,24 +493,28 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.shipyard is updated to the new data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
         modules, ships = self.safe_modules_and_ships(data)
 
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
@@ -511,7 +537,7 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -522,6 +548,10 @@ Msg:\n{msg}'''
         Update EDDN with Journal commodities data from the current station (lastStarport).
 
         As a side effect, it also updates this.commodities with the data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param cmdr: The commander to send data under
         :param is_beta: whether or not we're in beta mode
@@ -554,7 +584,8 @@ Msg:\n{msg}'''
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
                     ('commodities', commodities),
-                    ('odyssey',     entry['odyssey'])
+                    ('horizons',    this.horizons),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -565,6 +596,10 @@ Msg:\n{msg}'''
         Update EDDN with Journal oufitting data from the current station (lastStarport).
 
         As a side effect, it also updates this.outfitting with the data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param cmdr: The commander to send data under
         :param is_beta: Whether or not we're in beta mode
@@ -601,6 +636,10 @@ Msg:\n{msg}'''
 
         As a side effect, this.shipyard is updated with the data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param cmdr: the commander to send this update under
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
@@ -629,7 +668,8 @@ Msg:\n{msg}'''
         """
         Update EDDN with an event from the journal.
 
-        Additionally if additional lines are cached, it may send those as well.
+        Additionally if other lines have been saved for retry, it may send
+        those as well.
 
         :param cmdr: Commander name as passed in through `journal_entry()`.
         :param entry: The full journal event dictionary (due to checks in this function).
@@ -919,9 +959,14 @@ Msg:\n{msg}'''
         #######################################################################
         # Elisions
         #######################################################################
-        # WORKAROUND WIP EDDN schema | 2021-09-27: This will reject with the Odyssey flag present
+        # WORKAROUND WIP EDDN schema | 2021-10-17: This will reject with the Odyssey or Horizons flags present
         if 'odyssey' in entry:
             del entry['odyssey']
+
+        if 'horizons' in entry:
+            del entry['horizons']
+
+        # END WORKAROUND
         #######################################################################
 
         #######################################################################
@@ -1380,9 +1425,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
                 status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
                 status.update_idletasks()
 
-            this.eddn.export_commodities(data, is_beta, this.odyssey)
-            this.eddn.export_outfitting(data, is_beta, this.odyssey)
-            this.eddn.export_shipyard(data, is_beta, this.odyssey)
+            this.eddn.export_commodities(data, is_beta)
+            this.eddn.export_outfitting(data, is_beta)
+            this.eddn.export_shipyard(data, is_beta)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
@@ -1401,31 +1446,24 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
     """
     Indicate if the supplied data indicates a player has Horizons access.
+
+    This is to be used **only** for CAPI-sourced data and **MUST** be used
+    for CAPI data!!!
+
+    If the account has Horizons access then CAPI `/shipyard` will always see
+    the Horizons-only modules/ships.  You can**NOT** use the Journal horizons
+    flag for this!  If logged in to the base game on an account with Horizons,
+    which is all of them now, CAPI `/shipyard` will *still* return all of the
+    Horizons-only modules and ships.
 
     :param economies: Economies of where the Cmdr is docked.
     :param modules: Modules available at the docked station.
     :param ships: Ships available at the docked station.
     :return: bool - True if the Cmdr has Horizons access.
     """
-    # First check the Journal-sourced flag
-    # NB: This assumes game currently running, rather than "old
-    #     journal file".  `LoadGame` determines monitor.cmdr, which determines
-    #     the account used for CAPI, so it *should* match.
-    #
-    #     For this to be wrong, the user would have had to have, e.g.:
-    #
-    #       1. Logged into Cmdr in Horizons/Odyssey, then back out again.
-    #       2. Logged into Cmdr in base game, either on another machine, or
-    #          have removed the Journal file after.
-    #       3. Re-run EDMC and triggered a manual CAPI update.
-    #
-    #  This seems unlikely.
-    if this.horizons:
-        return True
-
     economies_colony = False
     modules_horizons = False
     ship_horizons = False
@@ -1437,7 +1475,7 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
         logger.error(f'economies type is {type(economies)}')
 
     if isinstance(modules, dict):
-        modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
+        modules_horizons = any(module.get('sku') == HORIZONS_SKU for module in modules.values())
 
     else:
         logger.error(f'modules type is {type(modules)}')
@@ -1445,7 +1483,7 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
             if isinstance(ships.get('shipyard_list'), dict):
-                ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+                ship_horizons = any(ship.get('sku') == HORIZONS_SKU for ship in ships['shipyard_list'].values())
 
             else:
                 logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')

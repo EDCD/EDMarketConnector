@@ -659,13 +659,12 @@ New in version 5.0.1:
 `Odyssey` boolean based on the presence of such a flag in the `LoadGame` 
 event.  Defaults to `False`, i.e. if no such key in the event.
 
-The previously undocumented`Horizons` boolean is similarly from `LoadGame`, 
-but blindly retrieves the value rather than having a strict default.  There's
+The previously undocumented `Horizons` boolean is similarly from `LoadGame`, 
+but blindly retrieves the value rather than having a strict default.  There'd
 be an exception if it wasn't there, and the value would be `None`.  Note that
 this is **NOT** the same as the return from
-[plugins/eddn.py:is_horizons()](./plugins/eddn.py). That function is necessary
-because CAPI data doesn't (didn't always?) have an indication of Horizons or
-not.
+[plugins/eddn.py:capi_is_horizons()](./plugins/eddn.py). That function is
+necessary because CAPI data doesn't have a simple indication of Horizons-ness.
 
 New in version 5.0.3:
 
