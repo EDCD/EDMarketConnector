@@ -452,7 +452,7 @@ Msg:\n{msg}'''
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
@@ -500,7 +500,7 @@ Msg:\n{msg}'''
         """
         modules, ships = self.safe_modules_and_ships(data)
 
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
@@ -1432,9 +1432,18 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
     """
     Indicate if the supplied data indicates a player has Horizons access.
+
+    This is to be used **only** for CAPI-sourced data and **MUST** be used
+    for CAPI data!!!
+
+    If the account has Horizons access then CAPI `/shipyard` will always see
+    the Horizons-only modules/ships.  You can**NOT** use the Journal horizons
+    flag for this!  If logged in to the base game on an account with Horizons,
+    which is all of them now, CAPI `/shipyard` will *still* return all of the
+    Horizons-only modules and ships.
 
     :param economies: Economies of where the Cmdr is docked.
     :param modules: Modules available at the docked station.
