@@ -450,6 +450,14 @@ Msg:\n{msg}'''
         """
         modules, ships = self.safe_modules_and_ships(data)
 
+        # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
+        # prison or rescue Megaships, or under Pirate Attack etc
+        horizons: bool = is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            ships
+        )
+
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
             m['name'] != 'Int_PlanetApproachSuite',
@@ -461,7 +469,7 @@ Msg:\n{msg}'''
         )
 
         # Don't send empty modules list - schema won't allow it
-        if outfitting and this.outfitting != (this.horizons, outfitting):
+        if outfitting and this.outfitting != (horizons, outfitting):
             self.send(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -469,13 +477,13 @@ Msg:\n{msg}'''
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    this.horizons),
+                    ('horizons',    horizons),
                     ('modules',     outfitting),
                     ('odyssey',     this.odyssey),
                 ]),
             })
 
-        this.outfitting = (this.horizons, outfitting)
+        this.outfitting = (horizons, outfitting)
 
     def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
@@ -492,6 +500,12 @@ Msg:\n{msg}'''
         """
         modules, ships = self.safe_modules_and_ships(data)
 
+        horizons: bool = is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            ships
+        )
+
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
@@ -499,7 +513,7 @@ Msg:\n{msg}'''
             )
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
-        if shipyard and this.shipyard != (this.horizons, shipyard):
+        if shipyard and this.shipyard != (horizons, shipyard):
             self.send(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -507,13 +521,13 @@ Msg:\n{msg}'''
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
                     ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    this.horizons),
+                    ('horizons',    horizons),
                     ('ships',       shipyard),
                     ('odyssey',     this.odyssey),
                 ]),
             })
 
-        this.shipyard = (this.horizons, shipyard)
+        this.shipyard = (horizons, shipyard)
 
     def export_journal_commodities(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
@@ -578,6 +592,7 @@ Msg:\n{msg}'''
         :param entry: The relevant journal entry
         """
         modules: List[Mapping[str, Any]] = entry.get('Items', [])
+        horizons: bool = entry.get('Horizons', False)
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
         outfitting: List[str] = sorted(
@@ -585,7 +600,7 @@ Msg:\n{msg}'''
             filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
         )
         # Don't send empty modules list - schema won't allow it
-        if outfitting and this.outfitting != (this.horizons, outfitting):
+        if outfitting and this.outfitting != (horizons, outfitting):
             self.send(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -593,13 +608,13 @@ Msg:\n{msg}'''
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
-                    ('horizons',    this.horizons),
+                    ('horizons',    horizons),
                     ('modules',     outfitting),
                     ('odyssey',     entry['odyssey'])
                 ]),
             })
 
-        this.outfitting = (this.horizons, outfitting)
+        this.outfitting = (horizons, outfitting)
 
     def export_journal_shipyard(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
@@ -616,9 +631,10 @@ Msg:\n{msg}'''
         :param entry: the relevant journal entry
         """
         ships: List[Mapping[str, Any]] = entry.get('PriceList') or []
+        horizons: bool = entry.get('Horizons', False)
         shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
-        if shipyard and this.shipyard != (this.horizons, shipyard):
+        if shipyard and this.shipyard != (horizons, shipyard):
             self.send(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -626,13 +642,13 @@ Msg:\n{msg}'''
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
-                    ('horizons',    this.horizons),
+                    ('horizons',    horizons),
                     ('ships',       shipyard),
                     ('odyssey',     entry['odyssey'])
                 ]),
             })
 
-        # this.shipyard = (this.horizons, shipyard)
+        # this.shipyard = (horizons, shipyard)
 
     def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
         """
