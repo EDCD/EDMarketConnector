@@ -10,16 +10,18 @@ from sys import platform
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union, cast
 
 import myNotebook as nb  # noqa: N813
-import plug
 from config import applongname, appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from myNotebook import Notebook
+from plugin import event
+from plugin.exceptions import LegacyPluginNeedsMigrating
+from plugin.manager import PluginManager
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -37,6 +39,24 @@ if TYPE_CHECKING:
 ###########################################################################
 
 # May be imported by plugins
+
+
+class BasePreferencesEvent(event.BaseEvent):
+    """Base event for preferences events."""
+
+    def __init__(self, name: str, commander: Optional[str], is_beta: bool, event_time: Optional[float] = None) -> None:
+        super().__init__(name, event_time=event_time)
+
+        self.commander = commander
+        self.is_beta = is_beta
+
+
+class PreferencesEvent(BasePreferencesEvent):
+    """Event to carry required data to set up plugin preferences."""
+
+    def __init__(self, notebook: nb.Notebook, commander: Optional[str], is_beta: bool) -> None:
+        super().__init__(event.EDMCPluginEvents.PREFERENCES, commander=commander, is_beta=is_beta)
+        self.notebook = notebook
 
 
 class PrefsVersion:
@@ -240,18 +260,18 @@ elif platform == 'win32':
 class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
-    def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
+    def __init__(self, parent: tk.Tk, callback: Optional[Callable], plugin_manager: PluginManager):
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
         self.callback = callback
-        if platform == 'darwin':
+        self.title(
             # LANG: File > Preferences menu entry for macOS
-            self.title(_('Preferences'))
-
-        else:
+            _('Preferences') if platform == 'darwin'
             # LANG: File > Settings (macOS)
-            self.title(_('Settings'))
+            else _('Settings')
+        )
+        self.plugin_manager = plugin_manager
 
         if parent.winfo_viewable():
             self.transient(parent)
@@ -286,12 +306,12 @@ class PreferencesDialog(tk.Toplevel):
         self.PADY = 2  # close spacing
 
         # Set up different tabs
-        self.__setup_output_tab(notebook)
-        self.__setup_plugin_tabs(notebook)
+        self.__setup_appearance_tab(notebook)
         self.__setup_config_tab(notebook)
         self.__setup_privacy_tab(notebook)
-        self.__setup_appearance_tab(notebook)
+        self.__setup_output_tab(notebook)
         self.__setup_plugin_tab(notebook)
+        self.__setup_plugin_tabs(notebook)
 
         if platform == 'darwin':
             self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
@@ -417,10 +437,23 @@ class PreferencesDialog(tk.Toplevel):
         root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
 
     def __setup_plugin_tabs(self, notebook: Notebook) -> None:
-        for plugin in plug.PLUGINS:
-            plugin_frame = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
-            if plugin_frame:
-                notebook.add(plugin_frame, text=plugin.name)
+        plugin_results = self.plugin_manager.fire_event(PreferencesEvent(notebook, monitor.cmdr, monitor.is_beta))
+        plugin_results = cast(Dict[str, List[tk.Widget]], plugin_results)
+        for plugin_name, results in plugin_results.items():
+            if len(results) == 0:
+                # Plugin either did something but didn't give us anything back, or doesn't listen to this event
+                continue
+
+            if len(results) > 1:
+                logger.warning(f'Plugin {plugin_name} returned more than one prefs page. Just using the first.')
+
+            result = results[0]
+            notebook.add(result, text=plugin_name)
+
+        # for plugin in plug.PLUGINS:
+        #     plugin_frame = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
+        #     if plugin_frame:
+        #         notebook.add(plugin_frame, text=plugin.name)
 
     def __setup_config_tab(self, notebook: Notebook) -> None:
         config_frame = nb.Frame(notebook)
@@ -572,14 +605,16 @@ class PreferencesDialog(tk.Toplevel):
 
         with row as cur_row:
             shipyard_provider = config.get_str('shipyard_provider')
+            plugins = [p.info.name for p in self.plugin_manager.get_providers('core.shipyard_url')]
             self.shipyard_provider = tk.StringVar(
-                value=str(shipyard_provider if shipyard_provider in plug.provides('shipyard_url') else 'EDSY')
+                value=str(shipyard_provider if shipyard_provider in plugins else 'EDSY')
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
             # LANG: Label for Shipyard provider selection
             nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=2*self.PADY, sticky=tk.W, row=cur_row)
             self.shipyard_button = nb.OptionMenu(
-                config_frame, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
+                config_frame, self.shipyard_provider, self.shipyard_provider.get(),
+                *plugins if len(plugins) > 0 else ['EDSY']
             )
 
             self.shipyard_button.configure(width=15)
@@ -598,8 +633,9 @@ class PreferencesDialog(tk.Toplevel):
 
         with row as cur_row:
             system_provider = config.get_str('system_provider')
+            plugins = [p.info.name for p in self.plugin_manager.get_providers('core.system_url')]
             self.system_provider = tk.StringVar(
-                value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
+                value=str(system_provider if system_provider in plugins else 'EDSM')
             )
 
             # LANG: Configuration - Label for selection of 'System' provider website
@@ -608,7 +644,7 @@ class PreferencesDialog(tk.Toplevel):
                 config_frame,
                 self.system_provider,
                 self.system_provider.get(),
-                *plug.provides('system_url')
+                *plugins if len(plugins) > 0 else ['EDSM']
             )
 
             self.system_button.configure(width=15)
@@ -616,8 +652,9 @@ class PreferencesDialog(tk.Toplevel):
 
         with row as cur_row:
             station_provider = config.get_str('station_provider')
+            plugins = [p.info.name for p in self.plugin_manager.get_providers('core.station_url')]
             self.station_provider = tk.StringVar(
-                value=str(station_provider if station_provider in plug.provides('station_url') else 'eddb')
+                value=str(station_provider if station_provider in plugins else 'eddb')
             )
 
             # LANG: Configuration - Label for selection of 'Station' provider website
@@ -626,7 +663,7 @@ class PreferencesDialog(tk.Toplevel):
                 config_frame,
                 self.station_provider,
                 self.station_provider.get(),
-                *plug.provides('station_url')
+                *plugins if len(plugins) > 0 else ['eddb']
             )
 
             self.station_button.configure(width=15)
@@ -892,19 +929,19 @@ class PreferencesDialog(tk.Toplevel):
 
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
+        # Section heading in settings
+        # LANG: Label for location of third-party plugins folder
+        nb.Label(plugins_frame, text=_('Plugins folder') +
+                 ':').grid(padx=self.PADX, sticky=tk.W, row=row.get(), column=0)
         with row as cur_row:
-            # Section heading in settings
-            # LANG: Label for location of third-party plugins folder
-            nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, sticky=tk.W, row=cur_row)
-
-            plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row)
+            plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row, column=0)
 
             nb.Button(
                 plugins_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
                 command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
-            ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
+            ).grid(padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row, column=1)
 
         nb.Label(
             plugins_frame,
@@ -913,8 +950,9 @@ class PreferencesDialog(tk.Toplevel):
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
         ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
 
-        enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
-        if len(enabled_plugins):
+        enabled_plugins = list(self.plugin_manager.plugins.values())
+        legacy_plugins = self.plugin_manager.legacy_plugins
+        if len(enabled_plugins) > 0:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW
             )
@@ -925,57 +963,84 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
-                if plugin.name == plugin.folder:
-                    label = nb.Label(plugins_frame, text=plugin.name)
+                text = ""
+                if plugin.info.name == plugin.plugin.path.name:
+                    text = plugin.info.name
 
                 else:
-                    label = nb.Label(plugins_frame, text=f'{plugin.folder} ({plugin.name})')
+                    text = f'{plugin.plugin.path} ({plugin.info.name})'
 
-                label.grid(columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
+                if plugin in legacy_plugins:
+                    text += ' (legacy)'
+
+                nb.Label(plugins_frame, text=text).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
 
         ############################################################
         # Show which plugins don't have Python 3.x support
         ############################################################
-        if len(plug.PLUGINS_not_py3):
+
+        legacy_not_py3 = [
+            p for (p, e) in self.plugin_manager.failed_loading.items() if isinstance(e, LegacyPluginNeedsMigrating)
+        ]
+
+        failed_loading_otherwise = {
+            p: e for (p, e) in self.plugin_manager.failed_loading.items() if p not in legacy_not_py3
+        }
+
+        if len(failed_loading_otherwise) > 0:
+            # Show plugins that errored on load somehow
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
+                columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
+            )
+            # LANG: Plugins - Label shown as header when there are plugins that failed to load correctly
+            nb.Label(plugins_frame, text=_('Plugins that failed to load')+':')
+            for p, e in failed_loading_otherwise.items():
+                r = row.get()
+                nb.Label(plugins_frame, text=f'{p}:').grid(
+                    columnspan=1, column=0, padx=self.PADX*2, row=r, sticky=tk.W
+                )
+                nb.Label(plugins_frame, text=str(e)).grid(
+                    columnspan=1, column=1, padx=self.PADX*2, row=r, sticky=tk.E
+                )
+
+        if len(legacy_not_py3) > 0:
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.PADY*8, sticky=tk.EW, row=row.get()
             )
             # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
             nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support:')+':').grid(padx=self.PADX, sticky=tk.W)
-
-            for plugin in plug.PLUGINS_not_py3:
-                if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
-                    nb.Label(plugins_frame, text=plugin.name).grid(columnspan=2, padx=self.PADX*2, sticky=tk.W)
+            for p in legacy_not_py3:
+                nb.Label(plugins_frame, text=f'{p.name} ({p})').grid(
+                    columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get())
 
             HyperlinkLabel(
                 # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
                 plugins_frame, text=_('Information on migrating plugins'),
                 background=nb.Label().cget('background'),
-                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
+                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-to-python-37',
                 underline=True
             ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
-        ############################################################
 
-        disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
-        if len(disabled_plugins):
+        if len(self.plugin_manager.disabled_plugins) > 0:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
             )
+
             nb.Label(
                 plugins_frame,
-                # LANG: Lable on list of user-disabled plugins
+                # LANG: Label on list of user-disabled plugins
                 text=_('Disabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
-            for plugin in disabled_plugins:
-                nb.Label(plugins_frame, text=plugin.name).grid(
+            for bad_path in self.plugin_manager.disabled_plugins:
+                nb.Label(plugins_frame, text=str(bad_path)).grid(
                     columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
                 )
 
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
 
-    def cmdrchanged(self, event=None):
+    def cmdrchanged(self):
         """
         Notify plugins of cmdr change.
 
@@ -984,7 +1049,9 @@ class PreferencesDialog(tk.Toplevel):
         if self.cmdr != monitor.cmdr or self.is_beta != monitor.is_beta:
             # Cmdr has changed - update settings
             if self.cmdr is not False:		# Don't notify on first run
-                plug.notify_prefs_cmdr_changed(monitor.cmdr, monitor.is_beta)
+                self.plugin_manager.fire_event(BasePreferencesEvent(
+                    event.EDMCPluginEvents.PREFERNCES_CMDR_CHANGED, commander=monitor.commander, is_beta=monitor.is_beta
+                ))
 
             self.cmdr = monitor.cmdr
             self.is_beta = monitor.is_beta
@@ -1268,7 +1335,7 @@ class PreferencesDialog(tk.Toplevel):
         if self.callback:
             self.callback()
 
-        plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
+        self.plugin_manager.fire_str_event(event.EDMCPluginEvents.PREFERENCES_CLOSED)
 
         self._destroy()
 
