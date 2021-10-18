@@ -136,7 +136,9 @@ possible.
 | :------------------ | :---------------------------------------------- | ----------------------------------------------------------- |
 | `core.shipyard_url` | `(ship_name: str, loadout: LoadoutDict) -> str` | URL to an online shipyard                                   |
 | `core.system_url`   | `() -> str`                                     | URL to an online information dump of the current system     |
+| `core.system_text`  | `() -> str`                                     | The text to display in the system line on the main UI       |
 | `core.station_url`  | `() -> str`                                     | URL to an online information dump about the current station |
+| `core.station_text` | `() -> str`                                     | The text to display in the station line on the main UI      |
 
 TODO: Possibly for system/station provide the current *ID*s of the system/station and allow plugins to use monitor
 if they actually need the names?
