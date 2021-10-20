@@ -1,175 +1,190 @@
 /* Language name */
 "!Language" = "English";
 
-/* companion.py: Frontier CAPI didn't respond; In files: companion.py:212; */
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:220; */
 "Error: Frontier CAPI didn't respond" = "Error: Frontier CAPI didn't respond";
 
-/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:231; */
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:239; */
 "Error: Frontier server is lagging" = "Error: Frontier server is lagging";
 
-/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:247; */
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:255; */
 "Docked but unknown station: EDO Settlement?" = "Docked but unknown station: EDO Settlement?";
 
-/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:257; */
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:265; */
 "Error: Invalid Credentials" = "Error: Invalid Credentials";
 
-/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:273; */
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:281; */
 "Error: Wrong Cmdr" = "Error: Wrong Cmdr";
 
-/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:397; companion.py:482; */
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:405; companion.py:490; */
 "Error" = "Error";
 
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:440; companion.py:445; */
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:448; companion.py:453; */
 "Error: Couldn't check token customer_id" = "Error: Couldn't check token customer_id";
 
-/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:451; */
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:459; */
 "Error: customer_id doesn't match!" = "Error: customer_id doesn't match!";
 
-/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:473; */
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:481; */
 "Error: unable to get token" = "Error: unable to get token";
 
-/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:774; */
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:781; */
+"Frontier CAPI down for maintenance" = "Frontier CAPI down for maintenance";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:793; */
 "Frontier CAPI query failure" = "Frontier CAPI query failure";
 
-/* companion.py: Frontier CAPI data retrieval failed with 5XX code; In files: companion.py:786; */
-"Frontier CAPI server error" = "Frontier CAPI server error";
-
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:485; EDMarketConnector.py:780; EDMarketConnector.py:1440; */
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:517; EDMarketConnector.py:812; EDMarketConnector.py:1504; */
 "Update" = "Update";
 
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:568; prefs.py:866; */
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:600; prefs.py:866; */
 "Always on top" = "Always on top";
 
-/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:698; */
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:730; */
 "Unknown" = "Unknown";
 
-/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:767; */
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:799; */
 "Error: Check E:D journal file location" = "Error: Check E:D journal file location";
 
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:774; edsm.py:257; stats.py:50; theme.py:227; */
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:806; edsm.py:257; stats.py:52; theme.py:227; */
 "Cmdr" = "Cmdr";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:776; EDMarketConnector.py:1199; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:808; EDMarketConnector.py:1263; */
 "Role" = "Role";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:776; EDMarketConnector.py:1209; EDMarketConnector.py:1232; stats.py:365; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:808; EDMarketConnector.py:1273; EDMarketConnector.py:1296; stats.py:367; */
 "Ship" = "Ship";
 
-/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:777; */
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:809; */
 "Suit" = "Suit";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:778; prefs.py:606; stats.py:367; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:810; prefs.py:606; stats.py:369; */
 "System" = "System";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:779; prefs.py:624; prefs.py:761; stats.py:368; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:811; prefs.py:624; prefs.py:761; stats.py:370; */
 "Station" = "Station";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:782; EDMarketConnector.py:797; EDMarketConnector.py:800; EDMarketConnector.py:1917; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:814; EDMarketConnector.py:829; EDMarketConnector.py:832; EDMarketConnector.py:1991; */
 "File" = "File";
 
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:783; EDMarketConnector.py:798; EDMarketConnector.py:801; */
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:815; EDMarketConnector.py:830; EDMarketConnector.py:833; */
 "Edit" = "Edit";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:784; */
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:816; */
 "View" = "View";
 
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:785; */
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:817; */
 "Window" = "Window";
 
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:786; EDMarketConnector.py:799; EDMarketConnector.py:802; */
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:818; EDMarketConnector.py:831; EDMarketConnector.py:834; */
 "Help" = "Help";
 
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:789; EDMarketConnector.py:815; EDMarketConnector.py:1486; */
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:821; EDMarketConnector.py:847; EDMarketConnector.py:1550; */
 "About {APP}" = "About {APP}";
 
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:791; EDMarketConnector.py:814; */
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:823; EDMarketConnector.py:846; */
 "Check for Updates..." = "Check for Updates...";
 
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:792; EDMarketConnector.py:806; */
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:824; EDMarketConnector.py:838; */
 "Save Raw Data..." = "Save Raw Data...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:793; EDMarketConnector.py:805; stats.py:362; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:825; EDMarketConnector.py:837; stats.py:364; */
 "Status" = "Status";
 
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:794; EDMarketConnector.py:812; */
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:826; EDMarketConnector.py:844; */
 "Privacy Policy" = "Privacy Policy";
 
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:795; EDMarketConnector.py:813; EDMarketConnector.py:1520; */
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:827; EDMarketConnector.py:845; EDMarketConnector.py:1584; */
 "Release Notes" = "Release Notes";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:807; EDMarketConnector.py:1918; prefs.py:254; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:839; EDMarketConnector.py:1992; prefs.py:254; */
 "Settings" = "Settings";
 
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:808; */
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:840; */
 "Exit" = "Exit";
 
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:811; */
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:843; */
 "Documentation" = "Documentation";
 
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:818; ttkHyperlinkLabel.py:42; */
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:850; ttkHyperlinkLabel.py:42; */
 "Copy" = "Copy";
 
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:824; */
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:856; */
 "Logging in..." = "Logging in...";
 
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:840; EDMarketConnector.py:1351; */
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:872; EDMarketConnector.py:1415; */
 "Authentication successful" = "Authentication successful";
 
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:871; */
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:903; */
 "You're not docked at a station!" = "You're not docked at a station!";
 
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:879; */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:911; */
 "Station doesn't have anything!" = "Station doesn't have anything!";
 
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:884; */
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:916; */
 "Station doesn't have a market!" = "Station doesn't have a market!";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:913; */
-"CQC detected, aborting CAPI query" = "CQC detected, aborting CAPI query";
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:945; */
+"CAPI query aborted: Cmdr name unknown" = "CAPI query aborted: Cmdr name unknown";
 
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:934; stats.py:280; */
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:951; */
+"CAPI query aborted: Game mode unknown" = "CAPI query aborted: Game mode unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:957; */
+"CAPI query aborted: Current system unknown" = "CAPI query aborted: Current system unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:963; */
+"CAPI query aborted: In other-ship multi-crew" = "CAPI query aborted: In other-ship multi-crew";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:969; */
+"CAPI query aborted: CQC (Arena) detected" = "CAPI query aborted: CQC (Arena) detected";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:990; */
 "Fetching data..." = "Fetching data...";
 
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:973; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1031; */
 "CAPI: No commander data returned" = "CAPI: No commander data returned";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:977; stats.py:299; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1035; stats.py:298; */
 "Who are you?!" = "Who are you?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:983; stats.py:309; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1041; stats.py:308; */
 "Where are you?!" = "Where are you?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:990; stats.py:314; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1048; stats.py:316; */
 "What are you flying?!" = "What are you flying?!";
 
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1145; */
+/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1171; */
+"Frontier CAPI server error" = "Frontier CAPI server error";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1210; */
 "Last updated at %H:%M:%S" = "Last updated at %H:%M:%S";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1174; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1238; */
 "Fighter" = "Fighter";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1175; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1239; */
 "Gunner" = "Gunner";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1176; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1240; */
 "Helm" = "Helm";
 
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1434; */
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1498; */
 "cooldown {SS}s" = "cooldown {SS}s";
 
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1546; prefs.py:305; */
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1610; prefs.py:305; */
 "OK" = "OK";
 
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1611; */
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1677; */
 "Shutting down..." = "Shutting down...";
 
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1906:1912; */
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1980:1986; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1916; prefs.py:976; */
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1990; prefs.py:976; */
 "Plugins" = "Plugins";
 
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:1927; */
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2001; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins Without Python 3.x Support";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
@@ -217,31 +232,31 @@
 /* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
 "EDDB Journal processing disabled. See Log." = "EDDB Journal processing disabled. See Log.";
 
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:225; eddn.py:630; eddn.py:982; */
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:695; eddn.py:1428; */
 "Sending data to EDDN..." = "Sending data to EDDN...";
 
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:274; eddn.py:920; eddn.py:955; eddn.py:994; */
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:312; eddn.py:1364; eddn.py:1399; eddn.py:1440; */
 "Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
 
-/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:292; */
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:330; */
 "EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN Error: EDMC is too old for EDDN. Please update.";
 
-/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:298; */
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:336; */
 "EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN Error: Validation Failed (EDMC Too Old?). See Log";
 
-/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:303; */
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:341; */
 "EDDN Error: Returned {STATUS} status code" = "EDDN Error: Returned {STATUS} status code";
 
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:710; */
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1111; */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";
 
-/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:721; */
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:1122; */
 "Send system and scan data to the Elite Dangerous Data Network" = "Send system and scan data to the Elite Dangerous Data Network";
 
-/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:732; */
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:1133; */
 "Delay sending until docked" = "Delay sending until docked";
 
-/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:796; */
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:1222; */
 "EDDN journal handler disabled. See Log." = "EDDN journal handler disabled. See Log.";
 
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:236; */
@@ -256,7 +271,7 @@
 /* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:273; inara.py:243; */
 "API Key" = "API Key";
 
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:300; prefs.py:519; prefs.py:1173; prefs.py:1206; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:300; prefs.py:519; prefs.py:1173; prefs.py:1206; stats.py:119; stats.py:138; stats.py:157; stats.py:174; */
 "None" = "None";
 
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:401; */
@@ -418,230 +433,236 @@
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:967; */
 "Disabled Plugins" = "Disabled Plugins";
 
-/* stats.py: Cmdr stats; In files: stats.py:51; */
+/* stats.py: Cmdr stats; In files: stats.py:53; */
 "Balance" = "Balance";
 
-/* stats.py: Cmdr stats; In files: stats.py:52; */
+/* stats.py: Cmdr stats; In files: stats.py:54; */
 "Loan" = "Loan";
 
-/* stats.py: Ranking; In files: stats.py:57; */
+/* stats.py: Ranking; In files: stats.py:59; */
 "Combat" = "Combat";
 
-/* stats.py: Ranking; In files: stats.py:58; */
+/* stats.py: Ranking; In files: stats.py:60; */
 "Trade" = "Trade";
 
-/* stats.py: Ranking; In files: stats.py:59; */
+/* stats.py: Ranking; In files: stats.py:61; */
 "Explorer" = "Explorer";
 
-/* stats.py: Ranking; In files: stats.py:60; */
+/* stats.py: Ranking; In files: stats.py:62; */
 "CQC" = "CQC";
 
-/* stats.py: Ranking; In files: stats.py:61; */
+/* stats.py: Ranking; In files: stats.py:63; */
 "Federation" = "Federation";
 
-/* stats.py: Ranking; In files: stats.py:62; */
+/* stats.py: Ranking; In files: stats.py:64; */
 "Empire" = "Empire";
 
-/* stats.py: Ranking; In files: stats.py:63; */
+/* stats.py: Ranking; In files: stats.py:65; */
 "Powerplay" = "Powerplay";
 
-/* stats.py: Combat rank; In files: stats.py:71; */
+/* stats.py: Combat rank; In files: stats.py:73; */
 "Harmless" = "Harmless";
 
-/* stats.py: Combat rank; In files: stats.py:72; */
+/* stats.py: Combat rank; In files: stats.py:74; */
 "Mostly Harmless" = "Mostly Harmless";
 
-/* stats.py: Combat rank; In files: stats.py:73; */
+/* stats.py: Combat rank; In files: stats.py:75; */
 "Novice" = "Novice";
 
-/* stats.py: Combat rank; In files: stats.py:74; */
+/* stats.py: Combat rank; In files: stats.py:76; */
 "Competent" = "Competent";
 
-/* stats.py: Combat rank; In files: stats.py:75; */
+/* stats.py: Combat rank; In files: stats.py:77; */
 "Expert" = "Expert";
 
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:78; stats.py:141; */
 "Master" = "Master";
 
-/* stats.py: Combat rank; In files: stats.py:77; */
+/* stats.py: Combat rank; In files: stats.py:79; */
 "Dangerous" = "Dangerous";
 
-/* stats.py: Combat rank; In files: stats.py:78; */
+/* stats.py: Combat rank; In files: stats.py:80; */
 "Deadly" = "Deadly";
 
-/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+/* stats.py: Top rank; In files: stats.py:81; stats.py:92; stats.py:103; stats.py:114; */
 "Elite" = "Elite";
 
-/* stats.py: Trade rank; In files: stats.py:82; */
+/* stats.py: Trade rank; In files: stats.py:84; */
 "Penniless" = "Penniless";
 
-/* stats.py: Trade rank; In files: stats.py:83; */
+/* stats.py: Trade rank; In files: stats.py:85; */
 "Mostly Penniless" = "Mostly Penniless";
 
-/* stats.py: Trade rank; In files: stats.py:84; */
+/* stats.py: Trade rank; In files: stats.py:86; */
 "Peddler" = "Peddler";
 
-/* stats.py: Trade rank; In files: stats.py:85; */
+/* stats.py: Trade rank; In files: stats.py:87; */
 "Dealer" = "Dealer";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Trade rank; In files: stats.py:88; */
 "Merchant" = "Merchant";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:89; */
 "Broker" = "Broker";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:90; */
 "Entrepreneur" = "Entrepreneur";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:91; */
 "Tycoon" = "Tycoon";
 
-/* stats.py: Explorer rank; In files: stats.py:93; */
+/* stats.py: Explorer rank; In files: stats.py:95; */
 "Aimless" = "Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:94; */
+/* stats.py: Explorer rank; In files: stats.py:96; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:95; */
+/* stats.py: Explorer rank; In files: stats.py:97; */
 "Scout" = "Scout";
 
-/* stats.py: Explorer rank; In files: stats.py:96; */
+/* stats.py: Explorer rank; In files: stats.py:98; */
 "Surveyor" = "Surveyor";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:99; */
 "Trailblazer" = "Trailblazer";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:100; */
 "Pathfinder" = "Pathfinder";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:101; */
 "Ranger" = "Ranger";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:102; */
 "Pioneer" = "Pioneer";
 
-/* stats.py: CQC rank; In files: stats.py:104; */
+/* stats.py: CQC rank; In files: stats.py:106; */
 "Helpless" = "Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:105; */
+/* stats.py: CQC rank; In files: stats.py:107; */
 "Mostly Helpless" = "Mostly Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:106; */
+/* stats.py: CQC rank; In files: stats.py:108; */
 "Amateur" = "Amateur";
 
-/* stats.py: CQC rank; In files: stats.py:107; */
+/* stats.py: CQC rank; In files: stats.py:109; */
 "Semi Professional" = "Semi Professional";
 
-/* stats.py: CQC rank; In files: stats.py:108; */
+/* stats.py: CQC rank; In files: stats.py:110; */
 "Professional" = "Professional";
 
-/* stats.py: CQC rank; In files: stats.py:109; */
+/* stats.py: CQC rank; In files: stats.py:111; */
 "Champion" = "Champion";
 
-/* stats.py: CQC rank; In files: stats.py:110; */
+/* stats.py: CQC rank; In files: stats.py:112; */
 "Hero" = "Hero";
 
-/* stats.py: CQC rank; In files: stats.py:111; */
+/* stats.py: CQC rank; In files: stats.py:113; */
 "Gladiator" = "Gladiator";
 
-/* stats.py: Federation rank; In files: stats.py:118; */
+/* stats.py: Federation rank; In files: stats.py:120; */
 "Recruit" = "Recruit";
 
-/* stats.py: Federation rank; In files: stats.py:119; */
+/* stats.py: Federation rank; In files: stats.py:121; */
 "Cadet" = "Cadet";
 
-/* stats.py: Federation rank; In files: stats.py:120; */
+/* stats.py: Federation rank; In files: stats.py:122; */
 "Midshipman" = "Midshipman";
 
-/* stats.py: Federation rank; In files: stats.py:121; */
+/* stats.py: Federation rank; In files: stats.py:123; */
 "Petty Officer" = "Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:122; */
+/* stats.py: Federation rank; In files: stats.py:124; */
 "Chief Petty Officer" = "Chief Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:123; */
+/* stats.py: Federation rank; In files: stats.py:125; */
 "Warrant Officer" = "Warrant Officer";
 
-/* stats.py: Federation rank; In files: stats.py:124; */
+/* stats.py: Federation rank; In files: stats.py:126; */
 "Ensign" = "Ensign";
 
-/* stats.py: Federation rank; In files: stats.py:125; */
+/* stats.py: Federation rank; In files: stats.py:127; */
 "Lieutenant" = "Lieutenant";
 
-/* stats.py: Federation rank; In files: stats.py:126; */
+/* stats.py: Federation rank; In files: stats.py:128; */
 "Lieutenant Commander" = "Lieutenant Commander";
 
-/* stats.py: Federation rank; In files: stats.py:127; */
+/* stats.py: Federation rank; In files: stats.py:129; */
 "Post Commander" = "Post Commander";
 
-/* stats.py: Federation rank; In files: stats.py:128; */
+/* stats.py: Federation rank; In files: stats.py:130; */
 "Post Captain" = "Post Captain";
 
-/* stats.py: Federation rank; In files: stats.py:129; */
+/* stats.py: Federation rank; In files: stats.py:131; */
 "Rear Admiral" = "Rear Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:130; */
+/* stats.py: Federation rank; In files: stats.py:132; */
 "Vice Admiral" = "Vice Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:131; */
+/* stats.py: Federation rank; In files: stats.py:133; */
 "Admiral" = "Admiral";
 
-/* stats.py: Empire rank; In files: stats.py:137; */
+/* stats.py: Empire rank; In files: stats.py:139; */
 "Outsider" = "Outsider";
 
-/* stats.py: Empire rank; In files: stats.py:138; */
+/* stats.py: Empire rank; In files: stats.py:140; */
 "Serf" = "Serf";
 
-/* stats.py: Empire rank; In files: stats.py:140; */
+/* stats.py: Empire rank; In files: stats.py:142; */
 "Squire" = "Squire";
 
-/* stats.py: Empire rank; In files: stats.py:141; */
+/* stats.py: Empire rank; In files: stats.py:143; */
 "Knight" = "Knight";
 
-/* stats.py: Empire rank; In files: stats.py:142; */
+/* stats.py: Empire rank; In files: stats.py:144; */
 "Lord" = "Lord";
 
-/* stats.py: Empire rank; In files: stats.py:143; */
+/* stats.py: Empire rank; In files: stats.py:145; */
 "Baron" = "Baron";
 
-/* stats.py: Empire rank; In files: stats.py:144; */
+/* stats.py: Empire rank; In files: stats.py:146; */
 "Viscount" = "Viscount";
 
-/* stats.py: Empire rank; In files: stats.py:145; */
+/* stats.py: Empire rank; In files: stats.py:147; */
 "Count" = "Count";
 
-/* stats.py: Empire rank; In files: stats.py:146; */
+/* stats.py: Empire rank; In files: stats.py:148; */
 "Earl" = "Earl";
 
-/* stats.py: Empire rank; In files: stats.py:147; */
+/* stats.py: Empire rank; In files: stats.py:149; */
 "Marquis" = "Marquis";
 
-/* stats.py: Empire rank; In files: stats.py:148; */
+/* stats.py: Empire rank; In files: stats.py:150; */
 "Duke" = "Duke";
 
-/* stats.py: Empire rank; In files: stats.py:149; */
+/* stats.py: Empire rank; In files: stats.py:151; */
 "Prince" = "Prince";
 
-/* stats.py: Empire rank; In files: stats.py:150; */
+/* stats.py: Empire rank; In files: stats.py:152; */
 "King" = "King";
 
-/* stats.py: Power rank; In files: stats.py:156; */
+/* stats.py: Power rank; In files: stats.py:158; */
 "Rating 1" = "Rating 1";
 
-/* stats.py: Power rank; In files: stats.py:157; */
+/* stats.py: Power rank; In files: stats.py:159; */
 "Rating 2" = "Rating 2";
 
-/* stats.py: Power rank; In files: stats.py:158; */
+/* stats.py: Power rank; In files: stats.py:160; */
 "Rating 3" = "Rating 3";
 
-/* stats.py: Power rank; In files: stats.py:159; */
+/* stats.py: Power rank; In files: stats.py:161; */
 "Rating 4" = "Rating 4";
 
-/* stats.py: Power rank; In files: stats.py:160; */
+/* stats.py: Power rank; In files: stats.py:162; */
 "Rating 5" = "Rating 5";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:369; */
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:280; */
+"Status: Don't yet know your Commander name" = "Status: Don't yet know your Commander name";
+
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:288; */
+"Status: No CAPI data yet" = "Status: No CAPI data yet";
+
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:371; */
 "Value" = "Value";
 
-/* stats.py: Status dialog title; In files: stats.py:378; */
+/* stats.py: Status dialog title; In files: stats.py:380; */
 "Ships" = "Ships";
