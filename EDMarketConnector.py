@@ -1072,24 +1072,13 @@ class AppWindow(object):
                                    f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
                     raise companion.ServerLagging()
 
-                else:
-                    last_station = None
-                    if capi_response.capi_data['commander']['docked']:
-                        last_station = capi_response.capi_data['lastStarport']['name']
-
-                    if monitor.station is None:
-                        # Likely (re-)Embarked on ship docked at an EDO settlement.
-                        # Both Disembark and Embark have `"Onstation": false` in Journal.
-                        # So there's nothing to tell us which settlement we're (still,
-                        # or now, if we came here in Apex and then recalled ship) docked at.
-                        logger.debug("monitor.station is None - so EDO settlement?")
-                        raise companion.NoMonitorStation()
-
-                    if last_station != monitor.station:
-                        # CAPI lastStarport must match
-                        logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != {monitor.station!r})"
-                                       f" AND {last_station!r} != {monitor.station!r}")
-                        raise companion.ServerLagging()
+                elif capi_response.capi_data['commander']['docked'] and monitor.station is None:
+                    # Likely (re-)Embarked on ship docked at an EDO settlement.
+                    # Both Disembark and Embark have `"Onstation": false` in Journal.
+                    # So there's nothing to tell us which settlement we're (still,
+                    # or now, if we came here in Apex and then recalled ship) docked at.
+                    logger.debug("docked AND monitor.station is None - so EDO settlement?")
+                    raise companion.NoMonitorStation()
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
