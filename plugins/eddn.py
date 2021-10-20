@@ -298,7 +298,10 @@ Msg:\n{msg}'''
                 if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
                     logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
                                  f"/{unknown_schema['schema_version']}")
-                    #  return  # Pretend it went OK so this message isn't retried
+                    # NB: This dropping is to cater for the time when EDDN
+                    #     doesn't *yet* support a new schema.
+                    self.replaylog.pop(0)  # Drop the message
+                    self.flush()  # Truncates the file, then writes the extant data
 
                 else:
                     status['text'] = self.http_error_to_log(e)
