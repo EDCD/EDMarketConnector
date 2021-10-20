@@ -11,6 +11,7 @@ import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
 from edmc_data import ship_name_map
+from hotkey import hotkeymgr
 from l10n import Locale
 from monitor import monitor
 
@@ -274,11 +275,17 @@ class StatsDialog():
     def showstats(self) -> None:
         """Show the status window for the current cmdr."""
         if not monitor.cmdr:
+            hotkeymgr.play_bad()
+            # LANG: Current commander unknown when trying to use 'File' > 'Status'
+            self.status['text'] = _("Status: Don't yet know your Commander name")
             return
 
         # TODO: This needs to use cached data
         if companion.session.FRONTIER_CAPI_PATH_PROFILE not in companion.session.capi_raw_data:
             logger.info('No cached data, aborting...')
+            hotkeymgr.play_bad()
+            # LANG: No Frontier CAPI data yet when trying to use 'File' > 'Status'
+            self.status['text'] = _("Status: No CAPI data yet")
             return
 
         capi_data = json.loads(
