@@ -27,6 +27,13 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.2.0 beta2
+===
+
+* Don't save, for later retry, any EDDN messages that are met with 'unknown 
+  schema' from the server.  This should alleviate any "laggy UI" problems that
+  their accumulation can cause.
+
 Pre-Release 5.2.0 beta1
 ===
 
