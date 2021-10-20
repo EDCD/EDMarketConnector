@@ -30,6 +30,17 @@ produce the Windows executables and installer.
 Pre-Release 5.2.0 beta2
 ===
 
+* Trying to use `File` > `Status` when the current commander is unknown, or
+  there is has been no CAPI data retrieval yet, will now result in the 'bad'
+  sound being played and an appropriate status line message.
+
+* Pressing the 'Update' button when in space (not docked, not on a body 
+  surface) will no longer cause a spurious "Docked but unknown station: EDO
+  Settlement?" message.
+
+Pre-Release 5.2.0 beta2
+===
+
 * Don't save, for later retry, any EDDN messages that are met with 'unknown 
   schema' from the server.  This should alleviate any "laggy UI" problems that
   their accumulation can cause.
