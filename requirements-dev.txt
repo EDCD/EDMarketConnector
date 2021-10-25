@@ -3,22 +3,22 @@
 wheel
 
 # Static analysis tools
-flake8==3.9.2
+flake8==4.0.1
 flake8-annotations-coverage==0.0.5
 flake8-cognitive-complexity==0.1.0
-flake8-comprehensions==3.5.0
+flake8-comprehensions==3.7.0
 flake8-docstrings==1.6.0
 isort==5.9.3
-flake8-isort==4.0.0
+flake8-isort==4.1.1
 flake8-json==21.7.0
-flake8-noqa==1.1.0
+flake8-noqa==1.2.0
 flake8-polyfill==1.0.2
-flake8-use-fstring==1.1
+flake8-use-fstring==1.3
 
 mypy==0.910
-pep8-naming==0.12.0
+pep8-naming==0.12.1
 safety==1.10.3
-types-requests==2.25.2
+types-requests==2.25.11
 
 # Code formatting tools
 autopep8==1.5.7
@@ -28,14 +28,14 @@ grip==4.5.2
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.10.4.0; sys_platform == 'win32'
+py2exe==0.10.4.1; sys_platform == 'win32'
 
 # Testing
-pytest==6.2.4
-pytest-cov==2.12.1  # Pytest code coverage support
-coverage[toml]==5.5 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+pytest==6.2.5
+pytest-cov==3.0.0  # Pytest code coverage support
+coverage[toml]==6.0.2 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 # For manipulating folder permissions and the like.
-pywin32==301; sys_platform == 'win32'
+pywin32==302; sys_platform == 'win32'
 
 
 # All of the normal requirements

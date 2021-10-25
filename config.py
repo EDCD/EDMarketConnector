@@ -33,7 +33,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.1.3'
+_static_appversion = '5.2.0'
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2021 EDCD'
 
@@ -45,6 +45,7 @@ debug_senders: List[str] = []
 # *all* if only interested in some things.
 trace_on: List[str] = []
 
+capi_pretend_down: bool = False
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
 if os.getenv("EDMC_NO_UI"):
@@ -116,7 +117,7 @@ def git_shorthash_from_head() -> str:
         out, err = git_cmd.communicate()
 
     except Exception as e:
-        logger.error(f"Couldn't run git command for short hash: {e!r}")
+        logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
         shorthash = out.decode().rstrip('\n')
@@ -206,6 +207,8 @@ class AbstractConfig(abc.ABC):
     __in_shutdown = False  # Is the application currently shutting down ?
     __auth_force_localserver = False  # Should we use localhost for auth callback ?
     __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
+    __eddn_url = None  # Non-default EDDN URL
+    __eddn_tracking_ui = False  # Show EDDN tracking UI ?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -248,6 +251,32 @@ class AbstractConfig(abc.ABC):
         :return: bool - True if we should use localhost web server.
         """
         return self.__auth_force_edmc_protocol
+
+    def set_eddn_url(self, eddn_url: str):
+        """Set the specified eddn URL."""
+        self.__eddn_url = eddn_url
+
+    @property
+    def eddn_url(self) -> Optional[str]:
+        """
+        Provide the custom EDDN URL.
+
+        :return: str - Custom EDDN URL to use.
+        """
+        return self.__eddn_url
+
+    def set_eddn_tracking_ui(self):
+        """Activate EDDN tracking UI."""
+        self.__eddn_tracking_ui = True
+
+    @property
+    def eddn_tracking_ui(self) -> bool:
+        """
+        Determine if the EDDN tracking UI be shown.
+
+        :return: bool - Should tracking UI be active?
+        """
+        return self.__eddn_tracking_ui
 
     @property
     def app_dir(self) -> str:

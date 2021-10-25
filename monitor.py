@@ -19,11 +19,12 @@ if TYPE_CHECKING:
     import tkinter
 
 import util_ships
-from config import config, trace_on
+from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
+STARTUP = 'journal.startup'
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -335,8 +336,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             for line in loghandle:
                 try:
-                    # if b'"event":"Location"' in line:
-                    #     logger.trace('"Location" event in the past at startup')
+                    if b'"event":"Location"' in line:
+                        logger.trace_if('journal.locations', '"Location" event in the past at startup')
 
                     self.parse_entry(line)  # Some events are of interest even in the past
 
@@ -416,22 +417,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     if b'"event":"Continue"' in line:
                         for _ in range(10):
-                            logger.trace("****")
-                        logger.trace('Found a Continue event, its being added to the list, we will finish this file up'
-                                     ' and then continue with the next')
+                            logger.trace_if('journal.continuation', "****")
+                        logger.trace_if('journal.continuation', 'Found a Continue event, its being added to the list, '
+                                        'we will finish this file up and then continue with the next')
 
                     self.event_queue.put(line)
 
                 if not self.event_queue.empty():
                     if not config.shutting_down:
-                        # logger.trace('Sending <<JournalEvent>>')
+                        logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
                         self.root.event_generate('<<JournalEvent>>', when="tail")
 
                 log_pos = loghandle.tell()
 
             if logfile != newlogfile:
                 for _ in range(10):
-                    logger.trace("****")
+                    logger.trace_if('journal.file', "****")
                 logger.info(f'New Journal File. Was "{logfile}", now "{newlogfile}"')
                 logfile = newlogfile
                 if loghandle:
@@ -463,7 +464,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     )
 
                     if not config.shutting_down:
-                        # logger.trace('Sending <<JournalEvent>>')
+                        logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
                         self.root.event_generate('<<JournalEvent>>', when="tail")
 
                     self.game_was_running = False
@@ -518,8 +519,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.live = True  # First event in 3.0
                 self.cmdr = entry['Name']
                 self.state['FID'] = entry['FID']
-                if 'startup' in trace_on:
-                    logger.trace(f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
+                logger.trace_if(STARTUP, f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'loadgame':
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
@@ -529,7 +529,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Odyssey: bool
                 self.cmdr = entry['Commander']
                 # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
-                self.mode = entry.get('GameMode')
+                if not entry.get('Ship') and not entry.get('GameMode') or entry.get('GameMode', '').lower() == 'cqc':
+                    logger.trace_if('journal.loadgame.cqc', f'loadgame to cqc: {entry}')
+                    self.mode = 'CQC'
+
+                else:
+                    self.mode = entry.get('GameMode')
+
                 self.group = entry.get('Group')
                 self.planet = None
                 self.system = None
@@ -561,8 +567,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
 
-                if 'startup' in trace_on:
-                    logger.trace(f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
+                logger.trace_if(STARTUP, f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
             elif event_type == 'newcommander':
                 self.cmdr = entry['Name']
@@ -759,8 +764,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Body'] = entry.get('Body')
                     self.state['BodyType'] = entry.get('BodyType')
 
-                    # if event_type == 'location':
-                    #     logger.trace('"Location" event')
+                    if event_type == 'location':
+                        logger.trace_if('journal.locations', '"Location" event')
 
                 elif event_type == 'fsdjump':
                     self.planet = None
@@ -1864,16 +1869,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.debug('Called whilst self.thread is None, returning')
             return None
 
-        # logger.trace('Begin')
+        logger.trace_if('journal.queue', 'Begin')
         if self.event_queue.empty() and self.game_running():
             logger.error('event_queue is empty whilst game_running, this should not happen, returning')
             return None
 
-        # logger.trace('event_queue NOT empty')
+        logger.trace_if('journal.queue', 'event_queue NOT empty')
         entry = self.parse_entry(self.event_queue.get_nowait())
 
-        # if entry['event'] == 'Location':
-        #     logger.trace('"Location" event')
+        if entry['event'] == 'Location':
+            logger.trace_if('journal.locations', '"Location" event')
 
         if not self.live and entry['event'] not in (None, 'Fileheader'):
             # Game not running locally, but Journal has been updated
@@ -1901,8 +1906,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     ('SystemAddress', self.systemaddress),
                 ])
 
-            # if entry['event'] == 'Location':
-            #     logger.trace('Appending "Location" event to event_queue')
+            if entry['event'] == 'Location':
+                logger.trace_if('journal.locations', 'Appending "Location" event to event_queue')
 
             self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 

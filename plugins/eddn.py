@@ -12,7 +12,7 @@ from os.path import join
 from platform import system
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import TextIO, Tuple
+from typing import TextIO, Tuple, Union
 
 import requests
 
@@ -46,13 +46,18 @@ class This:
         # Track if we're on foot
         self.on_foot = False
 
+        # Horizons ?
+        self.horizons = False
         # Running under Odyssey?
         self.odyssey = False
 
         # Track location to add to Journal events
         self.systemaddress: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
-        self.planet: Optional[str] = None
+        self.body_name: Optional[str] = None
+        self.body_id: Optional[int] = None
+        # Track Status.json data
+        self.status_body_name: Optional[str] = None
 
         # Avoid duplicates
         self.marketId: Optional[str] = None
@@ -76,37 +81,58 @@ class This:
         self.eddn_delay: tk.IntVar
         self.eddn_delay_button: nb.Checkbutton
 
+        # Tracking UI
+        self.ui: tk.Frame
+        self.ui_j_body_name: tk.Label
+        self.ui_j_body_id: tk.Label
+        self.ui_s_body_name: tk.Label
+
 
 this = This()
 
 
-HORIZ_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# This SKU is tagged on any module or ship that you must have Horizons for.
+HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+# ELITE_HORIZONS_V_COBRA_MK_IV_1000` is for the Cobra Mk IV, but
+# is also available in the base game, if you have entitlement.
+# `ELITE_HORIZONS_V_GUARDIAN_FSDBOOSTER` is for the Guardian FSD Boosters,
+# which you need Horizons in order to unlock, but could be on sale even in the
+# base game due to entitlement.
+# Thus do **NOT** use either of these in addition to the PLANETARY_LANDINGS
+# one.
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 
 class EDDN:
     """EDDN Data export."""
-    DEBUG = 'eddn' in debug_senders
-    SERVER = 'https://eddn.edcd.io:4430'
-    if DEBUG:
-        SERVER = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}'
 
-    UPLOAD = f'{SERVER}/upload/'
-    if DEBUG:
-        UPLOAD = f'{SERVER}/eddn'
+    DEFAULT_URL = 'https://eddn.edcd.io:4430/upload/'
+    if 'eddn' in debug_senders:
+        DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
     REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
     MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
+    UNKNOWN_SCHEMA_RE = re.compile(
+        r"^FAIL: \[JsonValidationException\('Schema "
+        r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
+        r"unable to validate.',\)\]$"
+    )
 
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
         self.session = requests.Session()
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
+
+        if config.eddn_url is not None:
+            self.eddn_url = config.eddn_url
+
+        else:
+            self.eddn_url = self.DEFAULT_URL
 
     def load_journal_replay(self) -> bool:
         """
@@ -167,9 +193,12 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID.
         :param msg: the payload to send.
         """
-        if (res := killswitch.get_disabled('plugins.eddn.send')).disabled:
-            logger.warning(f"eddn.send has been disabled via killswitch. Returning. ({res.reason})")
+        should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', msg)
+        if should_return:
+            logger.warning('eddn.send has been disabled via killswitch. Returning.')
             return
+
+        msg = new_data
 
         uploader_id = cmdr
 
@@ -183,7 +212,7 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.UPLOAD, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        r = self.session.post(self.eddn_url, data=json.dumps(to_send), timeout=self.TIMEOUT)
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
@@ -193,17 +222,18 @@ class EDDN:
                     and msg['message']['commodities'] == []
                     and r.text == "FAIL: [<ValidationError: '[] is too short'>]"
             ):
-                logger.trace("EDDN is still objecting to empty commodities data")
+                logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
-            logger.debug(
-                f'''Status from POST wasn't OK:
+            if not self.UNKNOWN_SCHEMA_RE.match(r.text):
+                logger.debug(
+                    f'''Status from POST wasn't OK:
 Status\t{r.status_code}
 URL\t{r.url}
 Headers\t{r.headers}
 Content:\n{r.text}
 Msg:\n{msg}'''
-            )
+                )
 
         r.raise_for_status()
 
@@ -261,8 +291,20 @@ Msg:\n{msg}'''
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
 
+            # TODO: Something here needs to handle, e.g. HTTP 400, and take the message
+            #       in question out of replaylog, else we'll keep retrying a bad message
+            #       forever.
             except requests.exceptions.HTTPError as e:
-                status['text'] = self.http_error_to_log(e)
+                if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
+                    logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
+                                 f"/{unknown_schema['schema_version']}")
+                    # NB: This dropping is to cater for the time when EDDN
+                    #     doesn't *yet* support a new schema.
+                    self.replaylog.pop(0)  # Drop the message
+                    self.flush()  # Truncates the file, then writes the extant data
+
+                else:
+                    status['text'] = self.http_error_to_log(e)
 
             except requests.exceptions.RequestException as e:
                 logger.debug('Failed sending', exc_info=e)
@@ -298,15 +340,25 @@ Msg:\n{msg}'''
             # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
             return _('EDDN Error: Returned {STATUS} status code').format(status_code)
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool, is_odyssey: bool) -> None:  # noqa: CCR001
+    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
         Once the send is complete, this.commodities is updated with the new data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+        modules, ships = self.safe_modules_and_ships(data)
+        horizons: bool = capi_is_horizons(
+            data['lastStarport'].get('economies', {}),
+            modules,
+            ships
+        )
         commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
@@ -341,7 +393,8 @@ Msg:\n{msg}'''
                 ('stationName', data['lastStarport']['name']),
                 ('marketId',    data['lastStarport']['id']),
                 ('commodities', commodities),
-                ('odyssey',     is_odyssey),
+                ('horizons',    horizons),
+                ('odyssey',     this.odyssey),
             ])
 
             if 'economies' in data['lastStarport']:
@@ -399,11 +452,15 @@ Msg:\n{msg}'''
 
         return modules, ships
 
-    def export_outfitting(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_outfitting(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.outfitting is updated with the given data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
@@ -412,15 +469,15 @@ Msg:\n{msg}'''
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
         )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
-            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZ_SKU) and
-            m['name'] != 'Int_PlanetApproachSuite',
+            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZONS_SKU)
+                                                       and m['name'] != 'Int_PlanetApproachSuite',  # noqa: E131
             modules.values()
         )
 
@@ -439,24 +496,28 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('modules',     outfitting),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
         this.outfitting = (horizons, outfitting)
 
-    def export_shipyard(self, data: CAPIData, is_beta: bool, is_odyssey: bool) -> None:
+    def export_shipyard(self, data: CAPIData, is_beta: bool) -> None:
         """
         Update EDDN with the current (lastStarport) station's outfitting options, if any.
 
         Once the send is complete, this.shipyard is updated to the new data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
         modules, ships = self.safe_modules_and_ships(data)
 
-        horizons: bool = is_horizons(
+        horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
@@ -479,7 +540,7 @@ Msg:\n{msg}'''
                     ('marketId',    data['lastStarport']['id']),
                     ('horizons',    horizons),
                     ('ships',       shipyard),
-                    ('odyssey',     is_odyssey),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -490,6 +551,10 @@ Msg:\n{msg}'''
         Update EDDN with Journal commodities data from the current station (lastStarport).
 
         As a side effect, it also updates this.commodities with the data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param cmdr: The commander to send data under
         :param is_beta: whether or not we're in beta mode
@@ -522,7 +587,8 @@ Msg:\n{msg}'''
                     ('stationName', entry['StationName']),
                     ('marketId',    entry['MarketID']),
                     ('commodities', commodities),
-                    ('odyssey',     entry['odyssey'])
+                    ('horizons',    this.horizons),
+                    ('odyssey',     this.odyssey),
                 ]),
             })
 
@@ -533,6 +599,10 @@ Msg:\n{msg}'''
         Update EDDN with Journal oufitting data from the current station (lastStarport).
 
         As a side effect, it also updates this.outfitting with the data.
+
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
 
         :param cmdr: The commander to send data under
         :param is_beta: Whether or not we're in beta mode
@@ -569,6 +639,10 @@ Msg:\n{msg}'''
 
         As a side effect, this.shipyard is updated with the data.
 
+        NB: This does *not* go through the replaylog, unlike most of the
+        Journal-sourced data.  This kind of timely data is often rejected by
+        listeners if 'too old' anyway, so little point.
+
         :param cmdr: the commander to send this update under
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
@@ -593,21 +667,17 @@ Msg:\n{msg}'''
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
         """
         Update EDDN with an event from the journal.
 
-        Additionally if additional lines are cached, it may send those as well.
+        Additionally if other lines have been saved for retry, it may send
+        those as well.
 
-        :param cmdr: the commander under which this upload is made
-        :param is_beta: whether or not we are in beta mode
-        :param entry: the journal entry to send
+        :param cmdr: Commander name as passed in through `journal_entry()`.
+        :param entry: The full journal event dictionary (due to checks in this function).
+        :param msg: The EDDN message body to be sent.
         """
-        msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
-            'message': entry
-        }
-
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
@@ -626,6 +696,295 @@ Msg:\n{msg}'''
             self.parent.update_idletasks()
             self.send(cmdr, msg)
             self.parent.children['status']['text'] = ''
+
+    def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+        """
+        Send an EDDN event on the journal schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+
+    def entry_augment_system_data(
+            self,
+            entry: MutableMapping[str, Any],
+            system_name: str
+    ) -> Union[str, MutableMapping[str, Any]]:
+        """
+        Augment a journal entry with necessary system data.
+
+        :param entry: The journal entry to be augmented.
+        :param system_name: Name of current star system.
+        :param systemname_field_name: Name of journal key for system name.
+        :return: The augmented version of entry.
+        """
+        # If 'SystemName' or 'System' is there, it's directly from a journal event.
+        # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
+        if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
+            entry['StarSystem'] = system_name
+
+        if 'SystemAddress' not in entry:
+            if this.systemaddress is None:
+                logger.warning("this.systemaddress is None, can't add SystemAddress")
+                return "this.systemaddress is None, can't add SystemAddress"
+
+            entry['SystemAddress'] = this.systemaddress
+
+        if 'StarPos' not in entry:
+            if not this.coordinates:
+                logger.warning("this.coordinates is None, can't add StarPos")
+                return "this.coordinates is None, can't add StarPos"
+
+            entry['StarPos'] = list(this.coordinates)
+
+        return entry
+
+    def export_journal_fssdiscoveryscan(
+            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSDiscoveryScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        entry.pop('Progress')
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, system)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_navbeaconscan(
+            self, cmdr: str, system_name: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an NavBeaconScan to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of the current system.
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # { "timestamp":"2021-09-24T13:57:24Z", "event":"NavBeaconScan", "SystemAddress":670417626481, "NumBodies":18 }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, system_name)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_codexentry(
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a CodexEntry to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T12:29:39Z",
+        #   "event":"CodexEntry",
+        #   "EntryID":1400414,
+        #   "Name":"$Codex_Ent_Gas_Vents_SilicateVapourGeysers_Name;",
+        #   "Name_Localised":"Silicate Vapour Gas Vent",
+        #   "SubCategory":"$Codex_SubCategory_Geology_and_Anomalies;",
+        #   "SubCategory_Localised":"Geology and anomalies",
+        #   "Category":"$Codex_Category_Biology;",
+        #   "Category_Localised":"Biological and Geological",
+        #   "Region":"$Codex_RegionName_18;",
+        #   "Region_Localised":"Inner Orion Spur",
+        #   "System":"Bestia",
+        #   "SystemAddress":147916327267,
+        #   "Latitude":23.197777, "Longitude":51.803349,
+        #   "IsNewEntry":true,
+        #   "VoucherAmount":50000
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        # Keys specific to this event
+        for k in ('IsNewEntry', 'NewTraitsDiscovered'):
+            if k in entry:
+                del entry[k]
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # General 'system' augmentations
+        ret = this.eddn.entry_augment_system_data(entry, entry['System'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+
+        # Set BodyName if it's available from Status.json
+        if this.status_body_name is not None:
+            entry['BodyName'] = this.status_body_name
+            # Only set BodyID if journal BodyName matches the Status.json one.
+            # This avoids binary body issues.
+            if this.status_body_name == this.body_name:
+                entry['BodyID'] = this.body_id
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_scanbarycentre(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a ScanBaryCentre to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp":"2021-09-26T11:55:03Z",
+        #   "event":"ScanBaryCentre",
+        #   "StarSystem":"Khruvani",
+        #   "SystemAddress":13864557159793,
+        #   "BodyID":21,
+        #   "SemiMajorAxis":863683605194.091797,
+        #   "Eccentricity":0.001446,
+        #   "OrbitalInclination":-0.230714,
+        #   "Periapsis":214.828581,
+        #   "OrbitalPeriod":658474677.801132,
+        #   "AscendingNode":21.188568,
+        #   "MeanAnomaly":208.765388
+        # }
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/scanbarycentre/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_navroute(
+            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send a NavRoute to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #    "timestamp":"2021-09-24T14:33:15Z",
+        #    "event":"NavRoute",
+        #    "Route":[
+        #       {
+        #         "StarSystem":"Ross 332",
+        #         "SystemAddress":3657198211778,
+        #         "StarPos":[-43.62500,-23.15625,-74.12500],
+        #         "StarClass":"K"
+        #       },
+        #       {
+        #          "StarSystem":"BD+44 1040",
+        #          "SystemAddress":2832564490946,
+        #          "StarPos":[-31.56250,1.84375,-92.37500],
+        #          "StarClass":"K"
+        #       },
+        #       {
+        #         "StarSystem":"Aonga",
+        #         "SystemAddress":6680855188162,
+        #         "StarPos":[-34.46875,9.53125,-90.87500],
+        #         "StarClass":"M"
+        #       }
+        #    ]
+        #  }
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # WORKAROUND WIP EDDN schema | 2021-10-17: This will reject with the Odyssey or Horizons flags present
+        if 'odyssey' in entry:
+            del entry['odyssey']
+
+        if 'horizons' in entry:
+            del entry['horizons']
+
+        # END WORKAROUND
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # None
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
 
     def canonicalise(self, item: str) -> str:
         """
@@ -650,7 +1009,7 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     """
     Set up any plugin-specific UI.
 
@@ -661,6 +1020,7 @@ def plugin_app(parent: tk.Tk) -> None:
           necessary.
 
     :param parent: tkinter parent frame.
+    :return: Optional tk.Frame, if the tracking UI is active.
     """
     this.parent = parent
     this.eddn = EDDN(parent)
@@ -668,6 +1028,52 @@ def plugin_app(parent: tk.Tk) -> None:
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
         this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
+
+    if config.eddn_tracking_ui:
+        this.ui = tk.Frame(parent)
+
+        row = this.ui.grid_size()[1]
+        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
+        journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
+        this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
+        journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
+        this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
+        status_body_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
+        this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+
+        return this.ui
+
+    return None
+
+
+def tracking_ui_update() -> None:
+    """Update the Tracking UI with current data, if required."""
+    if not config.eddn_tracking_ui:
+        return
+
+    this.ui_j_body_name['text'] = '≪None≫'
+    if this.body_name is not None:
+        this.ui_j_body_name['text'] = this.body_name
+
+    this.ui_j_body_id['text'] = '≪None≫'
+    if this.body_id is not None:
+        this.ui_j_body_id['text'] = str(this.body_id)
+
+    this.ui_s_body_name['text'] = '≪None≫'
+    if this.status_body_name is not None:
+        this.ui_s_body_name['text'] = this.status_body_name
+
+    this.ui.update_idletasks()
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
@@ -767,6 +1173,31 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
+# Recursively filter '*_Localised' keys from dict
+def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Remove any dict keys with names ending `_Localised` from a dict.
+
+    :param d: Dict to filter keys of.
+    :return: The filtered dict.
+    """
+    filtered: OrderedDictT[str, Any] = OrderedDict()
+    for k, v in d.items():
+        if k.endswith('_Localised'):
+            pass
+
+        elif hasattr(v, 'items'):  # dict -> recurse
+            filtered[k] = filter_localised(v)
+
+        elif isinstance(v, list):  # list of dicts -> recurse
+            filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+
+        else:
+            filtered[k] = v
+
+    return filtered
+
+
 def journal_entry(  # noqa: C901, CCR001
         cmdr: str,
         is_beta: bool,
@@ -786,46 +1217,37 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `dict` - Current `monitor.state` data.
     :return: `str` - Error message, or `None` if no errors.
     """
-    if (ks := killswitch.get_disabled("plugins.eddn.journal")).disabled:
-        logger.warning(f'EDDN journal handler has been disabled via killswitch: {ks.reason}')
+    should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
+    if should_return:
         plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
         return None
 
-    elif (ks := killswitch.get_disabled(f'plugins.eddn.journal.event.{entry["event"]}')).disabled:
-        logger.warning(f'Handling of event {entry["event"]} disabled via killswitch: {ks.reason}')
+    should_return, new_data = killswitch.check_killswitch(f'plugins.eddn.journal.event.{entry["event"]}', new_data)
+    if should_return:
         return None
 
-    # Recursively filter '*_Localised' keys from dict
-    def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
-        filtered: OrderedDictT[str, Any] = OrderedDict()
-        for k, v in d.items():
-            if k.endswith('_Localised'):
-                pass
-
-            elif hasattr(v, 'items'):  # dict -> recurse
-                filtered[k] = filter_localised(v)
-
-            elif isinstance(v, list):  # list of dicts -> recurse
-                filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
-
-            else:
-                filtered[k] = v
-
-        return filtered
+    entry = new_data
 
     this.on_foot = state['OnFoot']
 
-    # Note if we're under Odyssey
-    # The only event this is already in is `LoadGame` which isn't sent to EDDN.
+    # Note if we're under Horizons and/or Odyssey
+    # The only event these are already in is `LoadGame` which isn't sent to EDDN.
+    this.horizons = entry['horizons'] = state['Horizons']
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
     if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
         if entry['event'] in ('Location', 'CarrierJump'):
-            this.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+            if entry.get('BodyType') == 'Planet':
+                this.body_name = entry.get('Body')
+                this.body_id = entry.get('BodyID')
+
+            else:
+                this.body_name = None
 
         elif entry['event'] == 'FSDJump':
-            this.planet = None
+            this.body_name = None
+            this.body_id = None
 
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
@@ -836,12 +1258,41 @@ def journal_entry(  # noqa: C901, CCR001
         this.systemaddress = entry.get('SystemAddress')  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
-        this.planet = entry['Body']
+        this.body_name = entry['Body']
+        this.body_id = entry.get('BodyID')
 
-    elif entry['event'] in ('LeaveBody', 'SupercruiseEntry'):
-        this.planet = None
+    elif entry['event'] == 'LeaveBody':
+        # NB: **NOT** SupercruiseEntry, because we won't get a fresh
+        #     ApproachBody if we don't leave Orbital Cruise and land again.
+        # *This* is triggered when you go above Orbital Cruise altitude.
+        # Status.json BodyName clears when the OC/Glide HUD is deactivated.
+        this.body_name = None
+        this.body_id = None
 
-    # Send interesting events to EDDN, but not when on a crew
+    elif entry['event'] == 'Music':
+        if entry['MusicTrack'] == 'MainMenu':
+            this.body_name = None
+            this.body_id = None
+            this.status_body_name = None
+
+    # Events with their own EDDN schema
+    if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
+        if entry['event'].lower() == 'fssdiscoveryscan':
+            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
+
+        if entry['event'].lower() == 'navbeaconscan':
+            return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+
+        if entry['event'].lower() == 'codexentry':
+            return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'scanbarycentre':
+            return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
+
+        if entry['event'].lower() == 'navroute':
+            return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+    # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
         (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
             ('StarPos' in entry or this.coordinates)):
@@ -873,8 +1324,8 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if entry['event'] == 'Docked' and this.planet:
-            entry['Body'] = this.planet
+        if entry['event'] == 'Docked' and this.body_name:
+            entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
@@ -906,7 +1357,7 @@ def journal_entry(  # noqa: C901, CCR001
             entry['SystemAddress'] = this.systemaddress
 
         try:
-            this.eddn.export_journal_entry(cmdr, is_beta, filter_localised(entry))
+            this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed in export_journal_entry', exc_info=e)
@@ -951,6 +1402,8 @@ def journal_entry(  # noqa: C901, CCR001
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
+    tracking_ui_update()
+
     return None
 
 
@@ -975,9 +1428,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
                 status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
                 status.update_idletasks()
 
-            this.eddn.export_commodities(data, is_beta, this.odyssey)
-            this.eddn.export_outfitting(data, is_beta, this.odyssey)
-            this.eddn.export_shipyard(data, is_beta, this.odyssey)
+            this.eddn.export_commodities(data, is_beta)
+            this.eddn.export_outfitting(data, is_beta)
+            this.eddn.export_shipyard(data, is_beta)
             if not old_status:
                 status['text'] = ''
                 status.update_idletasks()
@@ -996,9 +1449,18 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
     """
     Indicate if the supplied data indicates a player has Horizons access.
+
+    This is to be used **only** for CAPI-sourced data and **MUST** be used
+    for CAPI data!!!
+
+    If the account has Horizons access then CAPI `/shipyard` will always see
+    the Horizons-only modules/ships.  You can**NOT** use the Journal horizons
+    flag for this!  If logged in to the base game on an account with Horizons,
+    which is all of them now, CAPI `/shipyard` will *still* return all of the
+    Horizons-only modules and ships.
 
     :param economies: Economies of where the Cmdr is docked.
     :param modules: Modules available at the docked station.
@@ -1016,7 +1478,7 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
         logger.error(f'economies type is {type(economies)}')
 
     if isinstance(modules, dict):
-        modules_horizons = any(module.get('sku') == HORIZ_SKU for module in modules.values())
+        modules_horizons = any(module.get('sku') == HORIZONS_SKU for module in modules.values())
 
     else:
         logger.error(f'modules type is {type(modules)}')
@@ -1024,7 +1486,7 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
     if isinstance(ships, dict):
         if ships.get('shipyard_list') is not None:
             if isinstance(ships.get('shipyard_list'), dict):
-                ship_horizons = any(ship.get('sku') == HORIZ_SKU for ship in ships['shipyard_list'].values())
+                ship_horizons = any(ship.get('sku') == HORIZONS_SKU for ship in ships['shipyard_list'].values())
 
             else:
                 logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')
@@ -1036,3 +1498,20 @@ def is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
         logger.error(f'ships type is {type(ships)}')
 
     return economies_colony or modules_horizons or ship_horizons
+
+
+def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
+    """
+    Process Status.json data to track things like current Body.
+
+    :param cmdr: Current Commander name.
+    :param is_beta: Whether non-live game version was detected.
+    :param entry: The latest Status.json data.
+    """
+    if 'BodyName' in entry:
+        this.status_body_name = entry['BodyName']
+
+    else:
+        this.status_body_name = None
+
+    tracking_ui_update()

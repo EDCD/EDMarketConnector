@@ -1,12 +1,13 @@
 """protocol handler for cAPI authorisation."""
 
+# spell-checker: words ntdll GURL alloc wfile instantiatable pyright
 import os
 import sys
 import threading
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Type
 
 from config import config
 from constants import appname, protocolhandler_redirect
@@ -48,7 +49,7 @@ class GenericProtocolHandler:
         """Generate an auth event."""
         self.lastpayload = url
 
-        logger.trace(f'Payload: {self.lastpayload}')
+        logger.trace_if('frontier-auth', f'Payload: {self.lastpayload}')
         if not config.shutting_down:
             logger.debug('event_generate("<<CompanionAuthEvent>>")')
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
@@ -115,10 +116,10 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
 elif (config.auth_force_edmc_protocol
       or (
-              sys.platform == 'win32'
-              and getattr(sys, 'frozen', False)
-              and not is_wine
-              and not config.auth_force_localserver
+          sys.platform == 'win32'
+          and getattr(sys, 'frozen', False)
+          and not is_wine
+          and not config.auth_force_localserver
       )):
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
@@ -298,7 +299,7 @@ elif (config.auth_force_edmc_protocol
             msg = MSG()
             # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
             while GetMessageW(byref(msg), None, 0, 0) != 0:
-                logger.trace(f'DDE message of type: {msg.message}')
+                logger.trace_if('frontier-auth.windows', f'DDE message of type: {msg.message}')
                 if msg.message == WM_DDE_EXECUTE:
                     # GlobalLock does some sort of "please dont move this?"
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
@@ -306,7 +307,7 @@ elif (config.auth_force_edmc_protocol
                     GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
 
                     if args.lower().startswith('open("') and args.endswith('")'):
-                        logger.trace(f'args are: {args}')
+                        logger.trace_if('frontier-auth.windows', f'args are: {args}')
                         url = urllib.parse.unquote(args[6:-2]).strip()
                         if url.startswith(self.redirect):
                             logger.debug(f'Message starts with {self.redirect}')
@@ -384,7 +385,7 @@ else:  # Linux / Run from source
 
         def parse(self) -> bool:
             """Parse a request."""
-            logger.trace(f'Got message on path: {self.path}')
+            logger.trace_if('frontier-auth.http', f'Got message on path: {self.path}')
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
@@ -415,20 +416,24 @@ else:  # Linux / Run from source
             pass
 
 
-# singleton
+def get_handler_impl() -> Type[GenericProtocolHandler]:
+    """
+    Get the appropriate GenericProtocolHandler for the current system and config.
+
+    :return: An instantiatable GenericProtocolHandler
+    """
+    if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
+        return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
+
+    elif (
+        (sys.platform == 'win32' and config.auth_force_edmc_protocol)
+        or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
+    ):
+        return WindowsProtocolHandler
+
+    else:
+        return LinuxProtocolHandler
+
+
+# *late init* singleton
 protocolhandler: GenericProtocolHandler
-
-if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
-    protocolhandler = DarwinProtocolHandler()  # pyright: reportUnboundVariable=false
-
-elif (
-        sys.platform == 'win32'
-        and config.auth_force_edmc_protocol or (
-            getattr(sys, 'frozen', False)
-            and not is_wine
-            and not config.auth_force_localserver
-        )
-        ):
-    protocolhandler = WindowsProtocolHandler()
-else:
-    protocolhandler = LinuxProtocolHandler()
