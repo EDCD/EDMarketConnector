@@ -27,30 +27,10 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.2.0 beta2
+Release 5.2.0
 ===
 
-* Trying to use `File` > `Status` when the current commander is unknown, or
-  there is has been no CAPI data retrieval yet, will now result in the 'bad'
-  sound being played and an appropriate status line message.
-
-* Pressing the 'Update' button when in space (not docked, not on a body 
-  surface) will no longer cause a spurious "Docked but unknown station: EDO
-  Settlement?" message.
-
-Pre-Release 5.2.0 beta2
-===
-
-* Don't save, for later retry, any EDDN messages that are met with 'unknown 
-  schema' from the server.  This should alleviate any "laggy UI" problems that
-  their accumulation can cause.
-
-Pre-Release 5.2.0 beta1
-===
-
-* Now built using Python 3.9.7.
-
-* `Update` button is disabled if CQC/Arena is detected.
+* The 'Update' button is disabled if CQC/Arena is detected.
 
 * Frontier CAPI queries now run in their own thread.  There should be no
   change in functionality for users.   This affects both EDMarketConnector 
@@ -59,6 +39,10 @@ Pre-Release 5.2.0 beta1
 * `File` > `Status` will now use cached CAPI data, rather than causing a fresh
   query.  **Currently if data has not yet been cached nothing will happen when
   trying to use this**.
+
+* Trying to use `File` > `Status` when the current commander is unknown, or
+  there is has been no CAPI data retrieval yet, will now result in the 'bad'
+  sound being played and an appropriate status line message.
 
 * `File` > `Save Raw Data` also now uses the cached CAPI data, rather than 
   causing a fresh query.  This will write an empty JSON `{}` if no data is
@@ -77,8 +61,7 @@ Pre-Release 5.2.0 beta1
   logical groups for `--help` output.
 
 * Support added for several new EDDN schemas relating to specific Journal 
-  events.  Until the live EDDN server is updated (planned for 2021-10-21) you
-  will see minor error logging when this fails due to 'unknown schema'.
+  events.  The live EDDN server has been updated to support these.
 
   Schema support added for:
   - `codexentry/1`
@@ -87,8 +70,15 @@ Pre-Release 5.2.0 beta1
   - `navroute/1`
   - `scanbarycentre/1`
 
+* If a message to EDDN gets an 'unknown schema' response it will **NOT** be
+  saved in the replaylog for later retries, instead being discarded.
+
 Bug Fixes
 ---
+
+* Pressing the 'Update' button when in space (not docked, not on a body
+  surface) will no longer cause a spurious "Docked but unknown station: EDO
+  Settlement?" message.
 
 * A bug preventing `--force-localserver-auth` from working has been fixed.
   
@@ -97,6 +87,8 @@ Bug Fixes
 
 Developers
 ---
+
+* Now built using Python 3.9.7.
 
 * New `journal_entry_cqc()` function for plugins to receive journal events
   *specifically and **only** when the player is in CQC/Arena*.  This allows 
@@ -122,8 +114,9 @@ Developers
   command-line argument.  This needs to be the *full* 'upload' URL, i.e. for
   the live instance this is `https://eddn.edcd.io:4430/upload/`.
 
-* New command-line argument `--eddn-tracking-ui` to track the EDDN handling 
-  code's idea of the current Journal and Status.json Body(Name|ID).
+* New command-line argument `--eddn-tracking-ui` to track the EDDN plugin's
+  idea of the current BodyName and BodyID, from both the Journal and 
+  Status.json.
 
 ---
 
