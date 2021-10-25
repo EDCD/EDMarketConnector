@@ -21,7 +21,7 @@ safety==1.10.3
 types-requests==2.25.11
 
 # Code formatting tools
-autopep8==1.5.7
+autopep8==1.6.0
 
 # HTML changelogs
 grip==4.5.2
