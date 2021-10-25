@@ -6,6 +6,7 @@ import argparse
 import json
 import locale
 import os
+import queue
 import re
 import sys
 from os.path import getmtime, join
@@ -123,10 +124,25 @@ def main():  # noqa: C901, CCR001
                                     help='Set the logging loglevel to one of: '
                                          'CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE',
                                     )
-        group_loglevel.add_argument('--trace',
-                                    help='Set the Debug logging loglevel to TRACE',
-                                    action='store_true',
-                                    )
+
+        parser.add_argument(
+            '--trace',
+            help='Set the Debug logging loglevel to TRACE',
+            action='store_true',
+        )
+
+        parser.add_argument(
+            '--trace-on',
+            help='Mark the selected trace logging as active. "*" or "all" is equivalent to --trace-all',
+            action='append',
+        )
+
+        parser.add_argument(
+            "--trace-all",
+            help='Force trace level logging, with all possible --trace-on values active.',
+            action='store_true'
+        )
+
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -150,8 +166,18 @@ def main():  # noqa: C901, CCR001
 
             return
 
-        if args.trace:
-            edmclogger.set_channels_loglevel(logging.TRACE)
+        level_to_set: Optional[int] = None
+        if args.trace or args.trace_on:
+            level_to_set = logging.TRACE  # type: ignore # it exists
+            logger.info('Setting TRACE level debugging due to either --trace or a --trace-on')
+
+        if args.trace_all or (args.trace_on and ('*' in args.trace_on or 'all' in args.trace_on)):
+            level_to_set = logging.TRACE_ALL  # type: ignore # it exists
+            logger.info('Setting TRACE_ALL level debugging due to either --trace-all or a --trace-on *|all')
+
+        if level_to_set is not None:
+            logger.setLevel(level_to_set)
+            edmclogger.set_channels_loglevel(level_to_set)
 
         elif args.loglevel:
             if args.loglevel not in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'):
@@ -166,6 +192,12 @@ exec_prefix: {sys.exec_prefix}
 executable: {sys.executable}
 sys.path: {sys.path}'''
                      )
+        if args.trace_on and len(args.trace_on) > 0:
+            import config as conf_module
+
+            conf_module.trace_on = [x.casefold() for x in args.trace_on]  # duplicate the list just in case
+            for d in conf_module.trace_on:
+                logger.info(f'marked {d} for TRACE')
 
         log_locale('Initial Locale')
 
@@ -188,15 +220,15 @@ sys.path: {sys.path}'''
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                logdir = config.get_str('journaldir', default=config.default_journal_dir)
-                if not logdir:
-                    logdir = config.default_journal_dir
+                monitor.currentdir = config.get_str('journaldir', default=config.default_journal_dir)
+                if not monitor.currentdir:
+                    monitor.currentdir = config.default_journal_dir
 
-                logger.debug(f'logdir = "{logdir}"')
-                logfiles = sorted((x for x in os.listdir(logdir) if JOURNAL_RE.search(x)),
+                logger.debug(f'logdir = "{monitor.currentdir}"')
+                logfiles = sorted((x for x in os.listdir(monitor.currentdir) if JOURNAL_RE.search(x)),
                                   key=lambda x: x.split('.')[1:])
 
-                logfile = join(logdir, logfiles[-1])
+                logfile = join(monitor.currentdir, logfiles[-1])
 
                 logger.debug(f'Using logfile "{logfile}"')
                 with open(logfile, 'r', encoding='utf-8') as loghandle:
@@ -239,8 +271,38 @@ sys.path: {sys.path}'''
 
                 companion.session.login(monitor.cmdr, monitor.is_beta)
 
+            ###################################################################
+            # Initiate CAPI queries
             querytime = int(time())
-            data = companion.session.station()
+            companion.session.station(query_time=querytime)
+
+            # Wait for the response
+            _capi_request_timeout = 60
+            try:
+                capi_response = companion.session.capi_response_queue.get(
+                    block=True, timeout=_capi_request_timeout
+                )
+
+            except queue.Empty:
+                logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
+                sys.exit(EXIT_SERVER)
+
+            ###################################################################
+
+            # noinspection DuplicatedCode
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
+                logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
+                if capi_response.exception:
+                    raise capi_response.exception
+
+                else:
+                    raise ValueError(capi_response.message)
+
+            logger.trace_if('capi.worker', 'Answer is not a Failure')
+            if not isinstance(capi_response, companion.EDMCCAPIResponse):
+                raise ValueError(f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}")
+
+            data = capi_response.capi_data
             config.set('querytime', querytime)
 
         # Validation
@@ -248,10 +310,10 @@ sys.path: {sys.path}'''
             logger.error("No data['command']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
-        elif not deep_get(data, 'lastSystem', 'name') or \
-                data['commander'].get('docked') and not \
-                deep_get(data, 'lastStarport', 'name'):  # Only care if docked
-
+        elif (
+            not deep_get(data, 'lastSystem', 'name') or
+            data['commander'].get('docked') and not deep_get(data, 'lastStarport', 'name')
+        ):  # Only care if docked
             logger.error("No data['lastSystem']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
@@ -263,21 +325,20 @@ sys.path: {sys.path}'''
             pass  # Skip further validation
 
         elif data['commander']['name'] != monitor.cmdr:
-            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')  # noqa: E501
-            sys.exit(EXIT_CREDENTIALS)
+            raise companion.CmdrError()
 
-        elif data['lastSystem']['name'] != monitor.system or \
-                ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or \
-                data['ship']['id'] != monitor.state['ShipID'] or \
-                data['ship']['name'].lower() != monitor.state['ShipType']:
-
-            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')  # noqa: E501
-            sys.exit(EXIT_LAGGING)
+        elif (
+            data['lastSystem']['name'] != monitor.system or
+            ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
+            data['ship']['id'] != monitor.state['ShipID'] or
+            data['ship']['name'].lower() != monitor.state['ShipType']
+        ):
+            raise companion.ServerLagging()
 
         # stuff we can do when not docked
         if args.d:
             logger.debug(f'Writing raw JSON data to "{args.d}"')
-            out = json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+            out = json.dumps(dict(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
             with open(args.d, 'wb') as f:
                 f.write(out.encode("utf-8"))
 
@@ -377,20 +438,43 @@ sys.path: {sys.path}'''
             try:
                 eddn_sender = eddn.EDDN(None)
                 logger.debug('Sending Market, Outfitting and Shipyard data to EDDN...')
-                eddn_sender.export_commodities(data, monitor.is_beta)
-                eddn_sender.export_outfitting(data, monitor.is_beta)
-                eddn_sender.export_shipyard(data, monitor.is_beta)
+                eddn_sender.export_commodities(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_outfitting(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_shipyard(data, monitor.is_beta, monitor.state['Odyssey'])
 
             except Exception:
                 logger.exception('Failed to send data to EDDN')
 
     except companion.ServerError:
-        logger.error('Frontier CAPI Server returned an error')
+        logger.exception('Frontier CAPI Server returned an error')
+        sys.exit(EXIT_SERVER)
+
+    except companion.ServerConnectionError:
+        logger.exception('Exception while contacting server')
         sys.exit(EXIT_SERVER)
 
     except companion.CredentialsError:
         logger.error('Frontier CAPI Server: Invalid Credentials')
         sys.exit(EXIT_CREDENTIALS)
+
+    # Companion API problem
+    except companion.ServerLagging:
+        logger.error(
+            'Mismatch(es) between CAPI and Journal for at least one of: '
+            'StarSystem, Last Star Port, Ship ID or Ship Name/Type'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except companion.CmdrError:  # Companion API return doesn't match Journal
+        logger.error(
+            f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match '
+            f'"{monitor.cmdr}" from Journal'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except Exception:
+        logger.exception('"other" exception')
+        sys.exit(EXIT_SERVER)
 
 
 if __name__ == '__main__':

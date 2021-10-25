@@ -1,7 +1,15 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
 
-* We now test against, and package with, Python 3.9.6.
+Copyrights
+===
+Please see the [docs/Licenses](docs/Licenses/) directory for copies of any
+licenses for software we use with EDMarketConnector, either at runtime, or to
+produce the Windows executables and installer.
+
+---
+
+* We now test against, and package with, Python 3.9.7.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -16,6 +24,101 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.2.0
+===
+
+* The 'Update' button is disabled if CQC/Arena is detected.
+
+* Frontier CAPI queries now run in their own thread.  There should be no
+  change in functionality for users.   This affects both EDMarketConnector 
+  (GUI) and EDMC (command-line).
+
+* `File` > `Status` will now use cached CAPI data, rather than causing a fresh
+  query.  **Currently if data has not yet been cached nothing will happen when
+  trying to use this**.
+
+* Trying to use `File` > `Status` when the current commander is unknown, or
+  there is has been no CAPI data retrieval yet, will now result in the 'bad'
+  sound being played and an appropriate status line message.
+
+* `File` > `Save Raw Data` also now uses the cached CAPI data, rather than 
+  causing a fresh query.  This will write an empty JSON `{}` if no data is
+  yet available.
+ 
+* New [docs/Licenses/](docs/Licenses/) directory containing all relevant 
+  third-party licenses for the software this application uses.
+
+* `Settings` > `Output` > `File Location` 'Browse' button will now always be
+  available, even if no output options are active.
+
+* The 'no git installed' logging when running from source is now at INFO 
+  level, not ERROR.  This will look less scary.
+
+* EDMarketConnetor command-line arguments have been re-ordered into
+  logical groups for `--help` output.
+
+* Support added for several new EDDN schemas relating to specific Journal 
+  events.  The live EDDN server has been updated to support these.
+
+  Schema support added for:
+  - `codexentry/1`
+  - `fssdiscoveryscan/1`
+  - `navbeaconscan/1`
+  - `navroute/1`
+  - `scanbarycentre/1`
+
+* If a message to EDDN gets an 'unknown schema' response it will **NOT** be
+  saved in the replaylog for later retries, instead being discarded.
+
+Bug Fixes
+---
+
+* Pressing the 'Update' button when in space (not docked, not on a body
+  surface) will no longer cause a spurious "Docked but unknown station: EDO
+  Settlement?" message.
+
+* A bug preventing `--force-localserver-auth` from working has been fixed.
+  
+* `horizons` and `odyssey` flags should now always be set properly on *all*
+  EDDN messages.  The `horizons` flag was missing from some.
+
+Developers
+---
+
+* Now built using Python 3.9.7.
+
+* New `journal_entry_cqc()` function for plugins to receive journal events
+  *specifically and **only** when the player is in CQC/Arena*.  This allows 
+  for tracking things that happen in CQC/Arena without polluting 
+  `journal_entry()`.  See [PLUGINS.md](PLUGINS.md) for details.
+
+* Command-line argument `--trace-all` to force all possible `--trace-on` to be
+  active.
+
+* Contributing.md has been updated for how to properly use `trace_on()`.
+
+* EDMC.(py,exe) now also makes use of `--trace-on`.
+
+* EDMarketConnector now has `--capi-pretend-down` to act as if the CAPI
+  server is down.
+
+* Killswitches now have support for removing key/values entirely, or forcing
+  the value.  See [docs/Killswitches.md](docs/Killswitches.md) for details.
+
+* `state['Odyssey']` added, set from `LoadGame` journal event.
+
+* You can now test against a different EDDN server using `--eddn-url` 
+  command-line argument.  This needs to be the *full* 'upload' URL, i.e. for
+  the live instance this is `https://eddn.edcd.io:4430/upload/`.
+
+* New command-line argument `--eddn-tracking-ui` to track the EDDN plugin's
+  idea of the current BodyName and BodyID, from both the Journal and 
+  Status.json.
+
+---
 
 Release 5.1.3
 ===

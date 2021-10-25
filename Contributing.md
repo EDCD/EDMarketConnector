@@ -247,10 +247,10 @@ from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 
 TARGET_URL = 'https://www.edsm.net/api-journal-v1'
 if 'edsm' in debug_senders:
-    TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
+  TARGET_URL = f'http://{DEBUG_WEBSERVER_HOST}:{DEBUG_WEBSERVER_PORT}/edsm'
 
 ...
-    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
+r = this.requests_session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
 ```
 
    Be sure to set a URL path in the `TARGET_URL` that denotes where the data
@@ -408,21 +408,31 @@ In addition to that we utilise one of the user-defined levels as:
   command-line argument and `.bat` file for users to enable it.  It cannot be
   selected from Settings in the UI.
 
-  As well as just using bare `logger.trace(...)` you can also gate it to only
-  log if asked to at invocation time by utilising the `--trace-on ...` 
-  command-line argument.  e.g.
- `EDMarketConnector.py --trace --trace-on edsm-cmdr-events`.  Note how you
-  still need to include `--trace`. The code to check and log would be like:
+  **Do not use a bare `logger.trace(...)` call** unless you're 100% certain 
+  it's only temporary **and will be removed before any code merge**.  In 
+  that case you would utilise `EDMarketConnector.py --trace` to see the output.
+
+  Instead, you should gate any TRACE logging using the `trace_if()` helper 
+  method provided on `logger`:
 
     ```python
-    from config import trace_on
+      logger.trace_if('journal.event.scan', 'my-log-message')
+    ```
+
+  The string used to identify this tracing should be related to the 
+  **function of the code**, not the particular file, or class, that it is in.
+  This is so that the same string can be used to trace code that spans more 
+  than one file, class, or other scope.
   
-    if 'edsm-cmdr-events' in trace_on:
-        logger.trace(f'De-queued ({cmdr=}, {entry["event"]=})')
-  ```
+  This would then be triggered by running EDMarketConnector with the 
+  appropriate command-line arguments:
+
+      EDMarketConnector.py --trace-on journal.event.scan
   
-  This way you can set up TRACE logging that won't spam just because of 
-  `--trace` being used.
+  Note that you do **not** also need to specify `--trace`, that's implied.
+  
+  This way you can set up TRACE logging that won't spam just because `--trace`
+  is used.
 
 ---
 
