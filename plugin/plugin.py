@@ -22,6 +22,7 @@ from theme import _Theme, theme
 if TYPE_CHECKING:
     import semantic_version
 
+    from config import AbstractConfig
     from EDMCLogging import LoggerMixin
     from plugin.manager import PluginManager
 
@@ -153,3 +154,9 @@ class EDMCPlugin(BasePlugin):
     def state(self) -> dict[str, Any]:
         """Return the currently tracked state, if any."""
         return monitor.monitor.state
+
+    @property
+    @final
+    def config(self) -> AbstractConfig:
+        """Return the currently in use config."""
+        return config.config
