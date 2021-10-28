@@ -140,13 +140,11 @@ possible.
 | `core.station_url`  | `() -> str`                                     | URL to an online information dump about the current station |
 | `core.station_text` | `() -> str`                                     | The text to display in the station line on the main UI      |
 
-TODO: Possibly for system/station provide the current *ID*s of the system/station and allow plugins to use monitor
-if they actually need the names?
 
 ## TODO
+
+- system|station img to add an image to display alongside name, if any
 
 - Legacy plugins need `_` to be pushed into their global namespace
 - Further tests for unloading that work with unload callbacks, and a test to ensure legacy plugins explode correctly
   when unloaded
-- Integrate into EDMC
-  - Replacement for legacy functions that are deprecationwarning-ed to hell
