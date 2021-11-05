@@ -265,6 +265,15 @@ class CredentialsError(Exception):
             self.args = (_('Error: Invalid Credentials'),)
 
 
+class CredentialsRequireRefresh(Exception):
+    """Exception Class for CAPI credentials requiring refresh."""
+
+    def __init__(self, *args) -> None:
+        self.args = args
+        if not args:
+            self.args = ('CAPI: Requires refresh of Access Token',)
+
+
 class CmdrError(Exception):
     """Exception Class for CAPI Commander error.
 
@@ -772,6 +781,7 @@ class Session(object):
                 self.dump(r)
 
                 if r.status_code == 401:  # CAPI doesn't think we're Auth'd
+                    # TODO: This needs to try a REFRESH, not a full re-auth
                     # No need for translation, we'll go straight into trying new Auth
                     # and thus any message would be overwritten.
                     raise CredentialsError('Frontier CAPI said Auth required') from e

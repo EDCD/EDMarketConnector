@@ -1159,6 +1159,13 @@ class AppWindow(object):
             # LANG: Frontier CAPI server error when fetching data
             self.status['text'] = _('Frontier CAPI server error')
 
+        except companion.CredentialsRequireRefresh:
+            # LANG: Frontier CAPI Access Token expired, trying to get a new one
+            self.status['text'] = _('CAPI: Refreshing access token...')
+            if companion.session.login():
+                logger.debug('Initial query failed, but login() just worked, trying again...')
+                companion.session.retrying = True
+
         except companion.CredentialsError:
             companion.session.retrying = False
             companion.session.invalidate()
