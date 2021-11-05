@@ -784,7 +784,7 @@ class Session(object):
                     # TODO: This needs to try a REFRESH, not a full re-auth
                     # No need for translation, we'll go straight into trying new Auth
                     # and thus any message would be overwritten.
-                    raise CredentialsError('Frontier CAPI said Auth required') from e
+                    raise CredentialsRequireRefresh('Frontier CAPI said "unauthorized"') from e
 
                 if r.status_code == 418:  # "I'm a teapot" - used to signal maintenance
                     # LANG: Frontier CAPI returned 418, meaning down for maintenance

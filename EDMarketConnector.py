@@ -1165,6 +1165,8 @@ class AppWindow(object):
             if companion.session.login():
                 logger.debug('Initial query failed, but login() just worked, trying again...')
                 companion.session.retrying = True
+                self.w.after(int(SERVER_RETRY * 1000), lambda: self.capi_request_data(event))
+                return  # early exit to avoid starting cooldown count
 
         except companion.CredentialsError:
             companion.session.retrying = False
