@@ -46,6 +46,7 @@ debug_senders: List[str] = []
 trace_on: List[str] = []
 
 capi_pretend_down: bool = False
+capi_debug_access_token: Optional[str]
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
 if os.getenv("EDMC_NO_UI"):

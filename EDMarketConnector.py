@@ -152,6 +152,12 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        '--capi-use-debug-access-token',
+        help='Load a debug Access Token from disk (from config.app_dir_pathapp_dir_path / access_token.txt)',
+        action='store_true'
+    )
+
+    parser.add_argument(
         '--eddn-url',
         help='Specify an alternate EDDN upload URL',
     )
@@ -169,6 +175,11 @@ if __name__ == '__main__':  # noqa: C901
         import config as conf_module
         logger.info('Pretending CAPI is down')
         conf_module.capi_pretend_down = True
+
+    if args.capi_use_debug_access_token:
+        import config as conf_module
+        with open(conf_module.config.app_dir_path / 'access_token.txt', 'r') as at:
+            conf_module.capi_debug_access_token = at.readline().strip()
 
     level_to_set: Optional[int] = None
     if args.trace or args.trace_on:

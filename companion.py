@@ -759,7 +759,13 @@ class Session(object):
                 if conf_module.capi_pretend_down:
                     raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
 
+                if conf_module.capi_debug_access_token is not None:
+                    self.requests_session.headers['Authorization'] = f'Bearer {conf_module.capi_debug_access_token}'  # type: ignore # noqa: E501
+                    # This is one-shot
+                    conf_module.capi_debug_access_token = None
+
                 r = self.requests_session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
+
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
