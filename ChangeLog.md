@@ -27,6 +27,16 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.2.1-rc1
+===
+
+This release primarily addresses the issue of the program asking for 
+Frontier authorization much too often.
+
+* Actually utilise the Frontier Refresh Token when the CAPI response is 
+  "Unauthorized".  The re-factoring of this code to make CAPI queries 
+  threaded inadvertently prevented this.
+
 Release 5.2.0
 ===
 
