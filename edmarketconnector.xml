@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.2.0</title>
+			<title>Release 5.2.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -56,6 +56,15 @@ Python 3.7 series.</p>
 in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
+</ul>
+
+<h2>Release 5.2.1</h2>
+<p>This release primarily addresses the issue of the program asking for
+Frontier authorization much too often.</p>
+<ul>
+<li>Actually utilise the Frontier Refresh Token when the CAPI response is
+"Unauthorized".  The re-factoring of this code to make CAPI queries
+threaded inadvertently prevented this.</li>
 </ul>
 
 <h2>Release 5.2.0</h2>
@@ -1025,11 +1034,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.0/EDMarketConnector_win_5.2.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.1/EDMarketConnector_win_5.2.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.2.0"
-				length="10248192"
+				sparkle:version="5.2.1"
+				length="10256384"
 				type="application/octet-stream"
 			/>
 		</item>
