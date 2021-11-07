@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.9.7.
+* We now test against, and package with, Python 3.9.8.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -26,6 +26,12 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+
+Developers
+---
+
+* Now built using Python 3.9.8.
+
 
 Release 5.2.1
 ===
