@@ -27,13 +27,7 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.2.1-rc2
-===
-
-This fixes a code error that prevented caused some new debug code to cause 
-CAPI queries to fail.
-
-Pre-Release 5.2.1-rc1
+Release 5.2.1
 ===
 
 This release primarily addresses the issue of the program asking for 
