@@ -265,6 +265,15 @@ class CredentialsError(Exception):
             self.args = (_('Error: Invalid Credentials'),)
 
 
+class CredentialsRequireRefresh(Exception):
+    """Exception Class for CAPI credentials requiring refresh."""
+
+    def __init__(self, *args) -> None:
+        self.args = args
+        if not args:
+            self.args = ('CAPI: Requires refresh of Access Token',)
+
+
 class CmdrError(Exception):
     """Exception Class for CAPI Commander error.
 
@@ -750,7 +759,13 @@ class Session(object):
                 if conf_module.capi_pretend_down:
                     raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
 
+                if conf_module.capi_debug_access_token is not None:
+                    self.requests_session.headers['Authorization'] = f'Bearer {conf_module.capi_debug_access_token}'  # type: ignore # noqa: E501
+                    # This is one-shot
+                    conf_module.capi_debug_access_token = None
+
                 r = self.requests_session.get(self.server + capi_endpoint, timeout=timeout)  # type: ignore
+
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
                 # May also fail here if token expired since response is empty
@@ -772,9 +787,10 @@ class Session(object):
                 self.dump(r)
 
                 if r.status_code == 401:  # CAPI doesn't think we're Auth'd
+                    # TODO: This needs to try a REFRESH, not a full re-auth
                     # No need for translation, we'll go straight into trying new Auth
                     # and thus any message would be overwritten.
-                    raise CredentialsError('Frontier CAPI said Auth required') from e
+                    raise CredentialsRequireRefresh('Frontier CAPI said "unauthorized"') from e
 
                 if r.status_code == 418:  # "I'm a teapot" - used to signal maintenance
                     # LANG: Frontier CAPI returned 418, meaning down for maintenance

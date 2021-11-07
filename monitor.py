@@ -1210,6 +1210,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         }
 
                     except KeyError:
+                        # TODO: Log the exception details too, for some clue about *which* key
                         logger.error(f"LoadoutEquipModule: {entry}")
 
             elif event_type == 'loadoutremovemodule':
