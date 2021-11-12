@@ -434,6 +434,7 @@ class AppWindow(object):
 
         self.w = master
         self.w.title(applongname)
+        self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
@@ -613,6 +614,10 @@ class AppWindow(object):
                                                  command=self.ontop_changed)  # Appearance setting
                 self.menubar.add_cascade(menu=self.system_menu)
             self.w.bind('<Control-c>', self.copy)
+
+            # Bind to the Default theme minimise button
+            self.w.bind("<Unmap>", self.default_iconify)
+
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
             theme.register(self.menubar)  # menus and children aren't automatically registered
             theme.register(self.file_menu)
@@ -1746,15 +1751,19 @@ class AppWindow(object):
         """Handle end of window dragging."""
         self.drag_offset = (None, None)
 
+    def default_iconify(self, event=None) -> None:
+        """Handle the Windows default theme 'minimise' button."""
+        # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
+        if config.get_bool('minimize_system_tray'):
+            # This gets called for more than the root widget, so only react to that
+            if str(event.widget) == '.':
+                self.w.withdraw()
+
     def oniconify(self, event=None) -> None:
-        """Handle minimization of the application."""
+        """Handle the minimize button on non-Default theme main window."""
         self.w.overrideredirect(False)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
-
-        # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
-        if config.get_bool('minimize_system_tray'):
-            self.w.withdraw()
 
         self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None  # So theme will be re-applied on map
