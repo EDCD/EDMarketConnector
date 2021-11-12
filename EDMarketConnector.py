@@ -1754,7 +1754,7 @@ class AppWindow(object):
     def default_iconify(self, event=None) -> None:
         """Handle the Windows default theme 'minimise' button."""
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
-        if config.get_bool('minimize_system_tray'):
+        if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
@@ -1764,7 +1764,6 @@ class AppWindow(object):
         self.w.overrideredirect(False)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
-
         self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None  # So theme will be re-applied on map
 
