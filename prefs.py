@@ -60,17 +60,17 @@ class PrefsVersion:
     def __init__(self):
         return
 
-    def stringToSerial(self, version_str: str) -> int:  # noqa: N802 # used in plugins
+    def stringToSerial(self, versionStr: str) -> int:  # noqa: N802, N803 # used in plugins
         """
         Convert a version string into a preferences version serial number.
 
         If the version string isn't known returns the 'current' (latest) serial number.
 
-        :param version_str:
+        :param versionStr:
         :return int:
         """
-        if version_str in self.versions:
-            return self.versions[version_str]
+        if versionStr in self.versions:
+            return self.versions[versionStr]
 
         return self.versions['current']
 
