@@ -251,7 +251,7 @@
 "EDDN Error: Returned {STATUS} status code" = "EDDN Error: Returned {STATUS} status code";
 
 /* eddn.py: No 'Route' found in NavRoute.json file; In files: eddn.py:970; */
-"No "Route" array in NavRoute.json contents" = "No "Route" array in NavRoute.json contents";
+"No 'Route' array in NavRoute.json contents" = "No 'Route' array in NavRoute.json contents";
 
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1121; */
 "Send station data to the Elite Dangerous Data Network" = "Send station data to the Elite Dangerous Data Network";

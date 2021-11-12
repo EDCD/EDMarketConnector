@@ -967,7 +967,7 @@ Msg:\n{msg}'''
         if 'Route' not in entry:
             logger.warning(f"NavRoute didn't contain a Route array!\n{entry!r}")
             # LANG: No 'Route' found in NavRoute.json file
-            return _('No "Route" array in NavRoute.json contents')
+            return _("No 'Route' array in NavRoute.json contents")
 
         #######################################################################
         # Elisions
