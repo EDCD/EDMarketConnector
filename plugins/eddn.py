@@ -291,15 +291,18 @@ Msg:\n{msg}'''
                 if not len(self.replaylog) % self.REPLAYFLUSH:
                     self.flush()
 
-            # TODO: Something here needs to handle, e.g. HTTP 400, and take the message
-            #       in question out of replaylog, else we'll keep retrying a bad message
-            #       forever.
             except requests.exceptions.HTTPError as e:
                 if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
                     logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
                                  f"/{unknown_schema['schema_version']}")
                     # NB: This dropping is to cater for the time when EDDN
                     #     doesn't *yet* support a new schema.
+                    self.replaylog.pop(0)  # Drop the message
+                    self.flush()  # Truncates the file, then writes the extant data
+
+                elif e.response.status_code == 400:
+                    # EDDN straight up says no, so drop the message
+                    logger.debug(f"EDDN responded '400' to the message, dropping:\n{msg!r}")
                     self.replaylog.pop(0)  # Drop the message
                     self.flush()  # Truncates the file, then writes the extant data
 
@@ -338,7 +341,7 @@ Msg:\n{msg}'''
         else:
             logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
             # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
-            return _('EDDN Error: Returned {STATUS} status code').format(status_code)
+            return _('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
@@ -959,6 +962,13 @@ Msg:\n{msg}'''
         #       }
         #    ]
         #  }
+
+        # Sanity check - Ref Issue 1342
+        if 'Route' not in entry:
+            logger.warning(f"NavRoute didn't contain a Route array!\n{entry!r}")
+            # LANG: No 'Route' found in NavRoute.json file
+            return _("No 'Route' array in NavRoute.json contents")
+
         #######################################################################
         # Elisions
         #######################################################################
