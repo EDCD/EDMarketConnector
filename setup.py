@@ -197,7 +197,6 @@ elif sys.platform == 'win32':
                 '_markerlib',
                 'optparse',
                 'PIL',
-                'pkg_resources',
                 'simplejson',
                 'unittest'
             ],
