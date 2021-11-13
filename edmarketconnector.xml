@@ -36,14 +36,14 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.2.1</title>
+			<title>Release 5.2.2</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <ul>
 <li>
-<p>We now test against, and package with, Python 3.9.7.</p>
+<p>We now test against, and package with, Python 3.9.8.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.<br>
 This is due to
 <a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.9.x itself not supporting Windows 7</a>.
@@ -57,6 +57,54 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+
+
+<h2>Release 5.2.2</h2>
+<p>This release adds one new feature and addresses some bugs.  We've also
+updated to using Python 3.9.8.</p>
+<ul>
+<li>
+<p>Windows now has "minimize to system tray" support.</p>
+<ul>
+<li>The system tray icon will always be present.</li>
+<li>There is a new option on the Settings &gt; Appearance tab -
+<code>Minimize to system tray</code>.</li>
+<li>When this new option is active, minimizing the application will <em>also</em>
+hide the taskbar icon.</li>
+<li>When the new option is not active, the application will minimize to the
+taskbar as normal.</li>
+</ul>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixex" class="anchor" href="#bug-fixex" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixex</h2>
+<ul>
+<li>
+<p>If a CAPI query failed in such a way that no <code>requests.Response</code> object
+was made available we attempted to blindly dump the non-existent object.<br>
+We now check that it actually exists, and log the specifics of the exception.</p>
+</li>
+<li>
+<p>A user experienced the game writing a NavRoute.json file without a
+<code>Route</code> array, which caused the application to attempt sending a badly formed
+<code>navroute</code> message to EDDN.  That message was then remembered and constantly
+retried.</p>
+<ul>
+<li>
+<p>We now sanity check the NavRoute.json contents to be sure there <em>is</em> a
+<code>Route</code> array, even if it is empty.  If it's not present no attempt
+to send the EDDN message will be made.</p>
+<p>If this scenario occurs the user will see a status line message <code>No  'Route' array in NavRoute.json contents</code>.</p>
+</li>
+<li>
+<p>For any EDDN message that receives a 400 status back we will drop it
+from the replay log.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
 
 <h2>Release 5.2.1</h2>
 <p>This release primarily addresses the issue of the program asking for
@@ -1034,11 +1082,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.1/EDMarketConnector_win_5.2.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.2/EDMarketConnector_win_5.2.2.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.2.1"
-				length="10256384"
+				sparkle:version="5.2.2"
+				length="10457088"
 				type="application/octet-stream"
 			/>
 		</item>
