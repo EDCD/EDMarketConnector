@@ -5,7 +5,7 @@ import contextlib
 import logging
 import tkinter as tk
 import webbrowser
-from os.path import exists, expanduser, expandvars, join, normpath
+from os.path import expanduser, expandvars, join, normpath
 from sys import platform
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
@@ -60,7 +60,7 @@ class PrefsVersion:
     def __init__(self):
         return
 
-    def stringToSerial(self, versionStr: str) -> int:  # noqa: N802 # used in plugins
+    def stringToSerial(self, versionStr: str) -> int:  # noqa: N802, N803 # used in plugins
         """
         Convert a version string into a preferences version serial number.
 
@@ -83,7 +83,6 @@ class PrefsVersion:
         :raises ValueError: on serial number after the current latest
         :return: bool indicating the answer
         """
-
         # config.get('PrefsVersion') is the version preferences we last saved for
         pv = config.get_int('PrefsVersion')
         # If no PrefsVersion yet exists then return oldTest
@@ -202,6 +201,8 @@ elif platform == 'win32':
     BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
 
     class BROWSEINFO(ctypes.Structure):
+        """Windows file browser fields."""
+
         _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR),
                     ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
@@ -326,7 +327,7 @@ class PreferencesDialog(tk.Toplevel):
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),
+                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
                 0x10000, None, position
             ):
                 self.geometry(f"+{position.left}+{position.top}")
@@ -422,7 +423,7 @@ class PreferencesDialog(tk.Toplevel):
             if plugin_frame:
                 notebook.add(plugin_frame, text=plugin.name)
 
-    def __setup_config_tab(self, notebook: Notebook) -> None:
+    def __setup_config_tab(self, notebook: Notebook) -> None:  # noqa: CCR001
         config_frame = nb.Frame(notebook)
         config_frame.columnconfigure(1, weight=1)
         row = AutoInc(start=1)
@@ -700,7 +701,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: The system default language choice in Settings > Appearance
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-        # self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
+        self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
@@ -798,7 +799,7 @@ class PreferencesDialog(tk.Toplevel):
             self.ui_scale.set(config.get_int('ui_scale'))
             self.uiscale_bar = tk.Scale(
                 appearance_frame,
-                variable=self.ui_scale,  # TODO: intvar, but annotated as DoubleVar
+                variable=self.ui_scale,  # type: ignore # TODO: intvar, but annotated as DoubleVar
                 orient=tk.HORIZONTAL,
                 length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
                 from_=0,
@@ -869,20 +870,20 @@ class PreferencesDialog(tk.Toplevel):
         )
         self.ontop_button.grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
-        # if platform == 'win32':
-        #     nb.Checkbutton(
-        #         appearance_frame,
-        #         text=_('Minimize to system tray'),
-        #         variable=self.minimize_system_tray,
-        #         command=self.themevarchanged
-        #     ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
+        if platform == 'win32':
+            nb.Checkbutton(
+                appearance_frame,
+                text=_('Minimize to system tray'),
+                variable=self.minimize_system_tray,
+                command=self.themevarchanged
+            ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
         # LANG: Label for Settings > Appearance tab
         notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
 
-    def __setup_plugin_tab(self, notebook: Notebook) -> None:
+    def __setup_plugin_tab(self, notebook: Notebook) -> None:  # noqa: CCR001
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
@@ -993,6 +994,7 @@ class PreferencesDialog(tk.Toplevel):
         self.cmdrchanged_alarm = self.after(1000, self.cmdrchanged)
 
     def tabchanged(self, event: tk.Event) -> None:
+        """Handle preferences active tab changing."""
         self.outvarchanged()
         if platform == 'darwin':
             # Hack to recompute size so that buttons show up under Mojave
@@ -1004,11 +1006,9 @@ class PreferencesDialog(tk.Toplevel):
             temp.destroy()
 
     def outvarchanged(self, event: Optional[tk.Event] = None) -> None:
+        """Handle Output tab variable changes."""
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
-
-        logdir = self.logdir.get()
-        logvalid = exists(logdir) if logdir else False
 
         self.out_label['state'] = tk.NORMAL
         self.out_csv_button['state'] = tk.NORMAL
@@ -1029,13 +1029,13 @@ class PreferencesDialog(tk.Toplevel):
         from sys import platform as sys_platform
         directory = None
         if sys_platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
-            def browsecallback(hwnd, uMsg, lParam, lpData):
+            def browsecallback(hwnd, uMsg, lParam, lpData):  # noqa: N803 # Windows API convention
                 # set initial folder
                 if uMsg == BFFM_INITIALIZED and lpData:
                     ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData)
                 return 0
 
-            browseInfo = BROWSEINFO()
+            browseInfo = BROWSEINFO()  # noqa: N806 # Windows convention
             browseInfo.lpszTitle = title
             browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI
             browseInfo.lpfn = BrowseCallbackProc(browsecallback)
@@ -1079,7 +1079,7 @@ class PreferencesDialog(tk.Toplevel):
             display = []
             components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
-            pidsRes = ctypes.c_int()
+            pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
             for i in range(start, len(components)):
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
@@ -1258,7 +1258,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('ui_scale', self.ui_scale.get())
         config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
-        # config.set('minimize_system_tray', self.minimize_system_tray.get())
+        config.set('minimize_system_tray', self.minimize_system_tray.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
@@ -1283,6 +1283,7 @@ class PreferencesDialog(tk.Toplevel):
 
     if platform == 'darwin':
         def enableshortcuts(self) -> None:
+            """Set up macOS preferences shortcut."""
             self.apply()
             # popup System Preferences dialog
             try:

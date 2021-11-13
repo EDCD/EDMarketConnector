@@ -343,6 +343,7 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
+                r: Optional[requests.Response] = None
                 r = self.requests_session.post(
                     FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
                     data=data,
@@ -360,9 +361,10 @@ class Auth(object):
                     logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
                     self.dump(r)
 
-            except (ValueError, requests.RequestException, ):
-                logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
-                self.dump(r)
+            except (ValueError, requests.RequestException, ) as e:
+                logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"\n{e!r}")
+                if r is not None:
+                    self.dump(r)
 
         else:
             logger.error(f"Frontier CAPI Auth: No token for \"{self.cmdr}\"")

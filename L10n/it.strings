@@ -7,145 +7,145 @@
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:265; */
 "Error: Invalid Credentials" = "Errore: Credenziali non valide";
 
-/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:281; */
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:290; */
 "Error: Wrong Cmdr" = "Errore: Cmdr sbagliato";
 
-/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:405; companion.py:490; */
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:416; companion.py:501; */
 "Error" = "Errore";
 
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:517; EDMarketConnector.py:812; EDMarketConnector.py:1504; */
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:528; EDMarketConnector.py:823; EDMarketConnector.py:1515; */
 "Update" = "Recupera";
 
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:600; prefs.py:866; */
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:611; prefs.py:866; */
 "Always on top" = "Sempre in primo piano";
 
-/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:730; */
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:741; */
 "Unknown" = "Sconosciuto";
 
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:806; edsm.py:257; stats.py:52; theme.py:227; */
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:817; edsm.py:257; stats.py:52; theme.py:227; */
 "Cmdr" = "Cmdr";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:808; EDMarketConnector.py:1263; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:819; EDMarketConnector.py:1274; */
 "Role" = "Ruolo";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:808; EDMarketConnector.py:1273; EDMarketConnector.py:1296; stats.py:367; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:819; EDMarketConnector.py:1284; EDMarketConnector.py:1307; stats.py:367; */
 "Ship" = "Nave";
 
-/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:809; */
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:820; */
 "Suit" = "Tuta";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:810; prefs.py:606; stats.py:369; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:821; prefs.py:606; stats.py:369; */
 "System" = "Sistema";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:811; prefs.py:624; prefs.py:761; stats.py:370; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:822; prefs.py:624; prefs.py:761; stats.py:370; */
 "Station" = "Stazione";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:814; EDMarketConnector.py:829; EDMarketConnector.py:832; EDMarketConnector.py:1991; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:825; EDMarketConnector.py:840; EDMarketConnector.py:843; EDMarketConnector.py:2002; */
 "File" = "File";
 
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:815; EDMarketConnector.py:830; EDMarketConnector.py:833; */
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:826; EDMarketConnector.py:841; EDMarketConnector.py:844; */
 "Edit" = "Appunti";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:816; */
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:827; */
 "View" = "Vista";
 
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:817; */
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:828; */
 "Window" = "Finestra";
 
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:818; EDMarketConnector.py:831; EDMarketConnector.py:834; */
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:829; EDMarketConnector.py:842; EDMarketConnector.py:845; */
 "Help" = "Guida";
 
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:821; EDMarketConnector.py:847; EDMarketConnector.py:1550; */
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:832; EDMarketConnector.py:858; EDMarketConnector.py:1561; */
 "About {APP}" = "Informazioni su {APP}";
 
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:823; EDMarketConnector.py:846; */
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:834; EDMarketConnector.py:857; */
 "Check for Updates..." = "Controlla aggiornamenti...";
 
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:824; EDMarketConnector.py:838; */
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:835; EDMarketConnector.py:849; */
 "Save Raw Data..." = "Salva i Dati Grezzi...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:825; EDMarketConnector.py:837; stats.py:364; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:836; EDMarketConnector.py:848; stats.py:364; */
 "Status" = "Status";
 
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:826; EDMarketConnector.py:844; */
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:837; EDMarketConnector.py:855; */
 "Privacy Policy" = "Informativa sulla privacy";
 
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:827; EDMarketConnector.py:845; EDMarketConnector.py:1584; */
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:838; EDMarketConnector.py:856; EDMarketConnector.py:1595; */
 "Release Notes" = "Note di rilascio";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:839; EDMarketConnector.py:1992; prefs.py:254; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:850; EDMarketConnector.py:2003; prefs.py:254; */
 "Settings" = "Impostazioni";
 
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:840; */
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:851; */
 "Exit" = "Esci";
 
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:843; */
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:854; */
 "Documentation" = "Documentazione";
 
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:850; ttkHyperlinkLabel.py:42; */
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:861; ttkHyperlinkLabel.py:42; */
 "Copy" = "Copia";
 
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:856; */
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:867; */
 "Logging in..." = "Mi sto loggando...";
 
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:872; EDMarketConnector.py:1415; */
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:883; EDMarketConnector.py:1426; */
 "Authentication successful" = "Autenticazione riuscita";
 
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:903; */
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:914; */
 "You're not docked at a station!" = "Non sei parcheggiato in nessuna stazione !";
 
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:911; */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:922; */
 "Station doesn't have anything!" = "La Stazione non ha niente !";
 
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:916; */
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:927; */
 "Station doesn't have a market!" = "La Stazione non ha un Market !";
 
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:990; */
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1001; */
 "Fetching data..." = "Sto raccogliendo i dati...";
 
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1031; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1042; */
 "CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1035; stats.py:298; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1046; stats.py:298; */
 "Who are you?!" = "Chi sei ?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1041; stats.py:308; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1052; stats.py:308; */
 "Where are you?!" = "Dove sei finito ?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1048; stats.py:316; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1059; stats.py:316; */
 "What are you flying?!" = "Stai volando ?!";
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1171; */
 "Frontier CAPI server error" = "Errore nel server Frontier CAPI";
 
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1210; */
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1221; */
 "Last updated at %H:%M:%S" = "Ultimo aggiornamento alle %H:%M:%S";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1238; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1249; */
 "Fighter" = "Cacciatore";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1239; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1250; */
 "Gunner" = "Artigliere";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1240; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1251; */
 "Helm" = "Timoniere";
 
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1498; */
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1509; */
 "cooldown {SS}s" = "disponibile tra {SS} secondi";
 
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1610; prefs.py:305; */
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1621; prefs.py:305; */
 "OK" = "OK";
 
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1677; */
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1688; */
 "Shutting down..." = "Spegnimento...";
 
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1980:1986; */
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1991:1997; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x. Per favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
 
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1990; prefs.py:976; */
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2001; prefs.py:976; */
 "Plugins" = "Plugins";
 
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2001; */
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2012; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins senza Supporto Python 3.x";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
@@ -187,19 +187,19 @@
 /* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
 "EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Guarda il Log.";
 
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:695; eddn.py:1428; */
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:698; eddn.py:1438; */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
 
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:312; eddn.py:1364; eddn.py:1399; eddn.py:1440; */
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:315; eddn.py:1374; eddn.py:1409; eddn.py:1450; */
 "Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
 
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1111; */
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1121; */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
 
-/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:1122; */
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:1132; */
 "Send system and scan data to the Elite Dangerous Data Network" = "Manda il sistema e i dati scansionati a EDDN";
 
-/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:1133; */
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:1143; */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
 
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:236; */

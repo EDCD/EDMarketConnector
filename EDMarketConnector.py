@@ -9,7 +9,7 @@ import pathlib
 import queue
 import re
 import sys
-# import threading
+import threading
 import webbrowser
 from builtins import object, str
 from os import chdir, environ
@@ -371,7 +371,7 @@ if __name__ == '__main__':  # noqa: C901
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
     import update
-    # from infi.systray import SysTrayIcon
+    from infi.systray import SysTrayIcon
     # isort: on
 
     def _(x: str) -> str:
@@ -434,6 +434,7 @@ class AppWindow(object):
 
         self.w = master
         self.w.title(applongname)
+        self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
 
@@ -442,16 +443,16 @@ class AppWindow(object):
 
         self.prefsdialog = None
 
-        # if platform == 'win32':
-        #     from infi.systray import SysTrayIcon
+        if platform == 'win32':
+            from infi.systray import SysTrayIcon
 
-        #     def open_window(systray: 'SysTrayIcon') -> None:
-        #         self.w.deiconify()
+            def open_window(systray: 'SysTrayIcon') -> None:
+                self.w.deiconify()
 
-        #     menu_options = (("Open", None, open_window),)
-        #     # Method associated with on_quit is called whenever the systray is closing
-        #     self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
-        #     self.systray.start()
+            menu_options = (("Open", None, open_window),)
+            # Method associated with on_quit is called whenever the systray is closing
+            self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
+            self.systray.start()
 
         plug.load_plugins(master)
 
@@ -613,6 +614,10 @@ class AppWindow(object):
                                                  command=self.ontop_changed)  # Appearance setting
                 self.menubar.add_cascade(menu=self.system_menu)
             self.w.bind('<Control-c>', self.copy)
+
+            # Bind to the Default theme minimise button
+            self.w.bind("<Unmap>", self.default_iconify)
+
             self.w.protocol("WM_DELETE_WINDOW", self.onexit)
             theme.register(self.menubar)  # menus and children aren't automatically registered
             theme.register(self.file_menu)
@@ -1663,18 +1668,18 @@ class AppWindow(object):
         with open(f, 'wb') as h:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
-    # def exit_tray(self, systray: 'SysTrayIcon') -> None:
-    #     """Tray icon is shutting down."""
-    #     exit_thread = threading.Thread(target=self.onexit)
-    #     exit_thread.setDaemon(True)
-    #     exit_thread.start()
+    def exit_tray(self, systray: 'SysTrayIcon') -> None:
+        """Tray icon is shutting down."""
+        exit_thread = threading.Thread(target=self.onexit)
+        exit_thread.setDaemon(True)
+        exit_thread.start()
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
-        # if platform == 'win32':
-        #     shutdown_thread = threading.Thread(target=self.systray.shutdown)
-        #     shutdown_thread.setDaemon(True)
-        #     shutdown_thread.start()
+        if platform == 'win32':
+            shutdown_thread = threading.Thread(target=self.systray.shutdown)
+            shutdown_thread.setDaemon(True)
+            shutdown_thread.start()
 
         config.set_shutdown()  # Signal we're in shutdown now.
 
@@ -1746,8 +1751,16 @@ class AppWindow(object):
         """Handle end of window dragging."""
         self.drag_offset = (None, None)
 
+    def default_iconify(self, event=None) -> None:
+        """Handle the Windows default theme 'minimise' button."""
+        # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
+        if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
+            # This gets called for more than the root widget, so only react to that
+            if str(event.widget) == '.':
+                self.w.withdraw()
+
     def oniconify(self, event=None) -> None:
-        """Handle minimization of the application."""
+        """Handle the minimize button on non-Default theme main window."""
         self.w.overrideredirect(False)  # Can't iconize while overrideredirect
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
