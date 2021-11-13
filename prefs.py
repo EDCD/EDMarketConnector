@@ -873,6 +873,7 @@ class PreferencesDialog(tk.Toplevel):
         if platform == 'win32':
             nb.Checkbutton(
                 appearance_frame,
+                # LANG: Appearance option for Windows "minimize to system tray"
                 text=_('Minimize to system tray'),
                 variable=self.minimize_system_tray,
                 command=self.themevarchanged
