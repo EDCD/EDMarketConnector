@@ -33,6 +33,46 @@ Developers
 * Now built using Python 3.9.8.
 
 
+Release 5.2.2
+===
+
+This release adds one new feature and addresses some bugs.  We've also 
+updated to using Python 3.9.8.
+
+* Windows now has "minimize to system tray" support.
+
+    - The system tray icon will always be present.
+    - There is a new option on the Settings > Appearance tab - 
+     `Minimize to system tray`.
+    - When this new option is active, minimizing the application will *also* 
+      hide the taskbar icon.
+    - When the new option is not active, the application will minimize to the 
+      taskbar as normal.
+
+Bug Fixex
+---
+
+* If a CAPI query failed in such a way that no `requests.Response` object 
+  was made available we attempted to blindly dump the non-existent object.  
+  We now check that it actually exists, and log the specifics of the exception.
+
+* A user experienced the game writing a NavRoute.json file without a 
+  `Route` array, which caused the application to attempt sending a badly formed
+  `navroute` message to EDDN.  That message was then remembered and constantly 
+  retried.
+
+    - We now sanity check the NavRoute.json contents to be sure there *is* a
+      `Route` array, even if it is empty.  If it's not present no attempt 
+      to send the EDDN message will be made.
+      
+      If this scenario occurs the user will see a status line message `No 
+      'Route' array in NavRoute.json contents`.
+
+    - For any EDDN message that receives a 400 status back we will drop it 
+      from the replay log.
+
+---
+
 Release 5.2.1
 ===
 
