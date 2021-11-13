@@ -13,178 +13,178 @@
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:265; */
 "Error: Invalid Credentials" = "오류: 잘못된 자격 증명";
 
-/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:281; */
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:290; */
 "Error: Wrong Cmdr" = "오류: 잘못된 커맨더";
 
-/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:405; companion.py:490; */
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:416; companion.py:501; */
 "Error" = "오류";
 
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:448; companion.py:453; */
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:459; companion.py:464; */
 "Error: Couldn't check token customer_id" = "오류: customer_id 토큰을 확인할 수 없었음";
 
-/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:459; */
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:470; */
 "Error: customer_id doesn't match!" = "오류: customer_id가 일치하지 않습니다!";
 
-/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:481; */
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:492; */
 "Error: unable to get token" = "오류: 토큰을 받지 못함";
 
-/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:781; */
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:799; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI 점검으로 접속 불가";
 
-/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:793; */
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:811; */
 "Frontier CAPI query failure" = "Frontier CAPI 쿼리 실패";
 
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:517; EDMarketConnector.py:812; EDMarketConnector.py:1504; */
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:528; EDMarketConnector.py:823; EDMarketConnector.py:1515; */
 "Update" = "새로 고침";
 
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:600; prefs.py:866; */
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:611; prefs.py:866; */
 "Always on top" = "항상 위에 보이기";
 
-/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:730; */
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:741; */
 "Unknown" = "알 수 없음";
 
-/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:799; */
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:810; */
 "Error: Check E:D journal file location" = "오류: E:D 저널 파일의 위치를 확인하십시오";
 
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:806; edsm.py:257; stats.py:52; theme.py:227; */
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:817; edsm.py:257; stats.py:52; theme.py:227; */
 "Cmdr" = "커맨더";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:808; EDMarketConnector.py:1263; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:819; EDMarketConnector.py:1274; */
 "Role" = "Role";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:808; EDMarketConnector.py:1273; EDMarketConnector.py:1296; stats.py:367; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:819; EDMarketConnector.py:1284; EDMarketConnector.py:1307; stats.py:367; */
 "Ship" = "함선";
 
-/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:809; */
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:820; */
 "Suit" = "슈트";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:810; prefs.py:606; stats.py:369; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:821; prefs.py:606; stats.py:369; */
 "System" = "성계";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:811; prefs.py:624; prefs.py:761; stats.py:370; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:822; prefs.py:624; prefs.py:761; stats.py:370; */
 "Station" = "스테이션";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:814; EDMarketConnector.py:829; EDMarketConnector.py:832; EDMarketConnector.py:1991; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:825; EDMarketConnector.py:840; EDMarketConnector.py:843; EDMarketConnector.py:2002; */
 "File" = "파일";
 
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:815; EDMarketConnector.py:830; EDMarketConnector.py:833; */
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:826; EDMarketConnector.py:841; EDMarketConnector.py:844; */
 "Edit" = "편집";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:816; */
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:827; */
 "View" = "보기";
 
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:817; */
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:828; */
 "Window" = "창";
 
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:818; EDMarketConnector.py:831; EDMarketConnector.py:834; */
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:829; EDMarketConnector.py:842; EDMarketConnector.py:845; */
 "Help" = "도움말";
 
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:821; EDMarketConnector.py:847; EDMarketConnector.py:1550; */
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:832; EDMarketConnector.py:858; EDMarketConnector.py:1561; */
 "About {APP}" = "{APP} 정보";
 
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:823; EDMarketConnector.py:846; */
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:834; EDMarketConnector.py:857; */
 "Check for Updates..." = "업데이트 확인하기...";
 
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:824; EDMarketConnector.py:838; */
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:835; EDMarketConnector.py:849; */
 "Save Raw Data..." = "Raw 데이터 저장하기...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:825; EDMarketConnector.py:837; stats.py:364; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:836; EDMarketConnector.py:848; stats.py:364; */
 "Status" = "상태";
 
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:826; EDMarketConnector.py:844; */
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:837; EDMarketConnector.py:855; */
 "Privacy Policy" = "개인정보처리방침";
 
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:827; EDMarketConnector.py:845; EDMarketConnector.py:1584; */
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:838; EDMarketConnector.py:856; EDMarketConnector.py:1595; */
 "Release Notes" = "릴리즈 노트";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:839; EDMarketConnector.py:1992; prefs.py:254; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:850; EDMarketConnector.py:2003; prefs.py:254; */
 "Settings" = "설정";
 
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:840; */
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:851; */
 "Exit" = "종료";
 
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:843; */
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:854; */
 "Documentation" = "문서 자료";
 
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:850; ttkHyperlinkLabel.py:42; */
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:861; ttkHyperlinkLabel.py:42; */
 "Copy" = "복사";
 
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:856; */
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:867; */
 "Logging in..." = "로그인하는 중...";
 
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:872; EDMarketConnector.py:1415; */
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:883; EDMarketConnector.py:1426; */
 "Authentication successful" = "인증 성공";
 
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:903; */
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:914; */
 "You're not docked at a station!" = "스테이션에 도킹되어 있지 않습니다!";
 
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:911; */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:922; */
 "Station doesn't have anything!" = "스테이션에 아무것도 없습니다!";
 
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:916; */
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:927; */
 "Station doesn't have a market!" = "스테이션에 마켓이 없습니다!";
 
-/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:945; */
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:956; */
 "CAPI query aborted: Cmdr name unknown" = "CAPI 쿼리 중단: 커맨더 이름 알 수 없음";
 
-/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:951; */
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:962; */
 "CAPI query aborted: Game mode unknown" = "CAPI 쿼리 중단: 게임 모드 알 수 없음";
 
-/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:957; */
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:968; */
 "CAPI query aborted: Current system unknown" = "CAPI 쿼리 중단: 현재 성계 알 수 없음";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:963; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:974; */
 "CAPI query aborted: In other-ship multi-crew" = "CAPI 쿼리 중단: 다른 함선의 멀티크루로 참여중";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:969; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:980; */
 "CAPI query aborted: CQC (Arena) detected" = "CAPI 쿼리 중단: CQC(아레나) 감지됨";
 
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:990; */
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1001; */
 "Fetching data..." = "데이터 가져오는 중...";
 
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1031; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1042; */
 "CAPI: No commander data returned" = "CAPI: 커맨더 정보가 반환되지 않음";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1035; stats.py:298; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1046; stats.py:298; */
 "Who are you?!" = "당신은 누구시죠?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1041; stats.py:308; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1052; stats.py:308; */
 "Where are you?!" = "어디 계신거죠?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1048; stats.py:316; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1059; stats.py:316; */
 "What are you flying?!" = "지금 어떤 함선을 몰고 계신 건가요?!";
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1171; */
 "Frontier CAPI server error" = "Frontier CAPI 서버 오류";
 
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1210; */
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1221; */
 "Last updated at %H:%M:%S" = "마지막 업데이트: %H:%M:%S";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1238; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1249; */
 "Fighter" = "Fighter";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1239; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1250; */
 "Gunner" = "Gunner";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1240; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1251; */
 "Helm" = "Helm";
 
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1498; */
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1509; */
 "cooldown {SS}s" = "쿨다운 {SS}s";
 
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1610; prefs.py:305; */
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1621; prefs.py:305; */
 "OK" = "OK";
 
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1677; */
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1688; */
 "Shutting down..." = "종료하는 중...";
 
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1980:1986; */
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1991:1997; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "활성화된 플러그인 중 1개 이상이 Python 3.x를 지원하지 않습니다. '{FILE}' > '{SETTINGS}' 에서 '{PLUGINS}' 탭에 들어가 활성화되어있는 플러그인 목록을 확인하십시오. 플러그인들 중 새 버전이 나온 것이 있는지도 확인해보시고, 만약 3.x를 지원하지도, 새 버전도 없다면 해당 플러그인의 개발자에게 코드를 수정하기를 문의하십시오.\n\n플러그인을 비활성화하려면 '{DISABLED}'를 폴더명 뒤에 추가하면 됩니다.";
 
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1990; prefs.py:976; */
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2001; prefs.py:976; */
 "Plugins" = "플러그인";
 
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2001; */
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2012; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Python 3.x을 지원하지 않는 플러그인";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
@@ -232,31 +232,31 @@
 /* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:100; */
 "EDDB Journal processing disabled. See Log." = "EDDB 저널 처리 비활성화됨. 로그 참고 바람.";
 
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:695; eddn.py:1428; */
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:698; eddn.py:1438; */
 "Sending data to EDDN..." = "EDDN에 정보 전송하는 중...";
 
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:312; eddn.py:1364; eddn.py:1399; eddn.py:1440; */
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:315; eddn.py:1374; eddn.py:1409; eddn.py:1450; */
 "Error: Can't connect to EDDN" = "오류: EDDN에 연결할 수 없음";
 
-/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:330; */
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:333; */
 "EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN 오류: EDDN에 접속하기에 EDMC의 버전이 너무 오래되었습니다. 업데이트하시기 바랍니다.";
 
-/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:336; */
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:339; */
 "EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN 오류: 인증 실패 (EDMC가 너무 오래되었을 수 있음). 로그 참고";
 
-/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:341; */
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:344; */
 "EDDN Error: Returned {STATUS} status code" = "EDDN 오류: 상태 코드 {STATUS}가 반환됨";
 
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1111; */
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1121; */
 "Send station data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 스테이션 정보 전송하기";
 
-/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:1122; */
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:1132; */
 "Send system and scan data to the Elite Dangerous Data Network" = "Elite Dangerous Data Network에 시스템 및 스캔 정보 전송하기";
 
-/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:1133; */
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:1143; */
 "Delay sending until docked" = "도킹시까지 서버에 정보 전송을 미루기";
 
-/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:1222; */
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:1232; */
 "EDDN journal handler disabled. See Log." = "EDDN 저널 처리 비활성화됨. 로그 참고 바람.";
 
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:236; */
