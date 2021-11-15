@@ -28,7 +28,7 @@ grip==4.5.2
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.10.4.1; sys_platform == 'win32'
+py2exe==0.11.0.0; sys_platform == 'win32'
 
 # Testing
 pytest==6.2.5
