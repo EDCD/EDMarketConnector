@@ -1014,9 +1014,19 @@ well as the `__pycache__` directory.
 
 ## Packaging extra modules
 EDMarketConnector's Windows installs only package a minimal set of modules.
-All of the 'stdlib' of Python is provided, plus any modules the core
-application code uses and a small number of additional modules for the
-use of plugins.  See
+
+Any modules the core application code uses will naturally be packaged, and
+we explicitly include a small number of additional modules for the use of
+plugins.
+
+Whilst we would like to make all of the `stdlib` of Python available it is 
+not automatically packaged into our releases by py2exe.  We hope to address 
+this in the 5.3 release series.  In the meantime, if there's anything 
+missing that you'd like to use, please ask.  Yes, this very much means you 
+need to test your plugins against a Windows installation of the application 
+to be sure it will work.
+
+See
 [Plugins:Available imports](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports)
 for a list.
 
