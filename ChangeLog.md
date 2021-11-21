@@ -30,7 +30,7 @@ produce the Windows executables and installer.
 Pre-Release 5.2.3-beta1
 ===
 
-This releases fixes one bug.
+This release fixes one bug.
 
 * Odyssey changed the order of some Journal events.  This caused our logic 
   for tracking the following to break, and thus not report them ever to Inara:
