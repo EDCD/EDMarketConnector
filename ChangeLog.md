@@ -27,11 +27,28 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.2.3-beta1
+===
+
+This releases fixes one bug.
+
+* Odyssey changed the order of some Journal events.  This caused our logic 
+  for tracking the following to break, and thus not report them ever to Inara:
+
+    - Ship Combat, Trade and Exploration ranks.
+    - On-foot Combat and Exobiologist ranks.
+    - Engineer unlocks and progress.
+    - Reputations with Major Factions (Superpowers).
+  
+  This is now fixed and the current state of all of these will be correctly 
+  reported to Inara if you have API access for it configured.
+
 Developers
 ---
 
 * Now built using Python 3.9.9.
 
+---
 
 Release 5.2.2
 ===
@@ -70,8 +87,6 @@ Bug Fixex
 
     - For any EDDN message that receives a 400 status back we will drop it 
       from the replay log.
-
----
 
 Release 5.2.1
 ===
