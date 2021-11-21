@@ -554,10 +554,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     'Horizons':   entry['Horizons'],  # From 3.0
                     'Odyssey':    entry.get('Odyssey', False),  # From 4.0 Odyssey
                     'Loan':       entry['Loan'],
-                    'Engineers':  {},
-                    'Rank':       {},
-                    'Reputation': {},
-                    'Statistics': {},
+                    # For Odyssey, by 4.0.0.100, and at least from Horizons 3.8.0.201 the order of events changed
+                    # to LoadGame being after some 'status' events.
+                    # 'Engineers':  {},  # 'EngineerProgress' event now before 'LoadGame'
+                    # 'Rank':       {},  # 'Rank'/'Progress' events now before 'LoadGame'
+                    # 'Reputation': {},  # 'Reputation' event now before 'LoadGame'
+                    'Statistics': {},  # Still after 'LoadGame' in 4.0.0.903
                     'Role':       None,
                     'Taxi':       None,
                     'Dropship':   None,
