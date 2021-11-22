@@ -34,160 +34,160 @@
 /* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:811; */
 "Frontier CAPI query failure" = "Frontier CAPI neuspješan upit";
 
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:528; EDMarketConnector.py:823; EDMarketConnector.py:1515; */
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:529; EDMarketConnector.py:828; EDMarketConnector.py:1520; */
 "Update" = "Osvježi";
 
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:611; prefs.py:866; */
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:612; prefs.py:867; */
 "Always on top" = "Uvijek na vrhu";
 
-/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:741; */
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:746; */
 "Unknown" = "Nepoznato";
 
-/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:810; */
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:815; */
 "Error: Check E:D journal file location" = "Greška: Provjerite lokaciju E:D journal fajla";
 
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:817; edsm.py:257; stats.py:52; theme.py:227; */
+/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:822; edsm.py:257; stats.py:52; theme.py:227; */
 "Cmdr" = "Cmdr";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:819; EDMarketConnector.py:1274; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
 "Role" = "Uloga";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:819; EDMarketConnector.py:1284; EDMarketConnector.py:1307; stats.py:367; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:367; */
 "Ship" = "Brod";
 
-/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:820; */
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:825; */
 "Suit" = "Odijelo";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:821; prefs.py:606; stats.py:369; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:369; */
 "System" = "Sistem";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:822; prefs.py:624; prefs.py:761; stats.py:370; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:370; */
 "Station" = "Stanica";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:825; EDMarketConnector.py:840; EDMarketConnector.py:843; EDMarketConnector.py:2002; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2015; */
 "File" = "Fajl";
 
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:826; EDMarketConnector.py:841; EDMarketConnector.py:844; */
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:831; EDMarketConnector.py:846; EDMarketConnector.py:849; */
 "Edit" = "Uredi";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:827; */
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:832; */
 "View" = "Pogled";
 
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:828; */
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:833; */
 "Window" = "Prozor";
 
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:829; EDMarketConnector.py:842; EDMarketConnector.py:845; */
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:834; EDMarketConnector.py:847; EDMarketConnector.py:850; */
 "Help" = "Pomoć";
 
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:832; EDMarketConnector.py:858; EDMarketConnector.py:1561; */
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:837; EDMarketConnector.py:863; EDMarketConnector.py:1566; */
 "About {APP}" = "O {APP}";
 
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:834; EDMarketConnector.py:857; */
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:839; EDMarketConnector.py:862; */
 "Check for Updates..." = "Provjeri nadogradnje...";
 
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:835; EDMarketConnector.py:849; */
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
 "Save Raw Data..." = "Snimi sirove podatke...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:836; EDMarketConnector.py:848; stats.py:364; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:364; */
 "Status" = "Status";
 
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:837; EDMarketConnector.py:855; */
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
 "Privacy Policy" = "Politika privatnosti";
 
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:838; EDMarketConnector.py:856; EDMarketConnector.py:1595; */
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:843; EDMarketConnector.py:861; EDMarketConnector.py:1600; */
 "Release Notes" = "Informacije o verziji";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:850; EDMarketConnector.py:2003; prefs.py:254; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2016; prefs.py:255; */
 "Settings" = "Podešavanja";
 
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:851; */
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:856; */
 "Exit" = "Izlaz";
 
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:854; */
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:859; */
 "Documentation" = "Dokumentacija";
 
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:861; ttkHyperlinkLabel.py:42; */
+/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:866; ttkHyperlinkLabel.py:42; */
 "Copy" = "Kopiraj";
 
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:867; */
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:872; */
 "Logging in..." = "Prijavljivanje...";
 
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:883; EDMarketConnector.py:1426; */
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:888; EDMarketConnector.py:1431; */
 "Authentication successful" = "Autentifikacija uspješna";
 
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:914; */
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:919; */
 "You're not docked at a station!" = "Niste pristali na stanicu";
 
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:922; */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:927; */
 "Station doesn't have anything!" = "Stanica nema ništa!";
 
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:927; */
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:932; */
 "Station doesn't have a market!" = "Stanica nema market!";
 
-/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:956; */
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:961; */
 "CAPI query aborted: Cmdr name unknown" = "CAPI upit prekinut: nepoznato ime komandanta";
 
-/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:962; */
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:967; */
 "CAPI query aborted: Game mode unknown" = "CAPI upit prekinut: nepoznat režim igre";
 
-/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:968; */
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:973; */
 "CAPI query aborted: Current system unknown" = "CAPI upit prekinut: nepoznat trenutni sistem";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:974; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:979; */
 "CAPI query aborted: In other-ship multi-crew" = "CAPI upit prekinut: u višečlanoj posadi drugog broda";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:980; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:985; */
 "CAPI query aborted: CQC (Arena) detected" = "CAPI upit prekinut: detektovana CQC (Arena)";
 
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1001; */
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
 "Fetching data..." = "Preuzimanje podataka...";
 
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1042; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1047; */
 "CAPI: No commander data returned" = "CAPI: Nema podataka o komandantu";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1046; stats.py:298; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:298; */
 "Who are you?!" = "Ko ste vi?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1052; stats.py:308; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:308; */
 "Where are you?!" = "Gdje se nalazite?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1059; stats.py:316; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:316; */
 "What are you flying?!" = "U čemu letite?!";
 
-/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1171; */
+/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1176; */
 "Frontier CAPI server error" = "Frontier CAPI serverska greška";
 
-/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1177; */
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1182; */
 "CAPI: Refreshing access token..." = "CAPI: osvježavanje pristupnog tokena...";
 
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1221; */
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1226; */
 "Last updated at %H:%M:%S" = "Posljednji put osvježeno %H:%M:%S";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1249; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1254; */
 "Fighter" = "Fighter";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1250; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1255; */
 "Gunner" = "Gunner";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1251; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1256; */
 "Helm" = "Helm";
 
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1509; */
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1514; */
 "cooldown {SS}s" = "pauza {SS}s";
 
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1621; prefs.py:305; */
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1626; prefs.py:306; */
 "OK" = "OK";
 
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1688; */
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1693; */
 "Shutting down..." = "Zatvaranje programa...";
 
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1991:1997; */
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2004:2010; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Provjerite da li postoji nadograđena verzija ili obavijesite autora da treba da promijeni kod za Python 3.x.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
 
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2001; prefs.py:976; */
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2014; prefs.py:978; */
 "Plugins" = "Dodaci (plugins)";
 
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2012; */
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2025; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Dodaci (plugins) bez Python 3.x podrške";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
@@ -202,7 +202,7 @@
 /* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:232; */
 "Ignore" = "Ignoriši";
 
-/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:467; prefs.py:701; prefs.py:734; */
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:468; prefs.py:702; prefs.py:735; */
 "Default" = "Standardna";
 
 /* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:52; coriolis.py:55; coriolis.py:101; coriolis.py:117; coriolis.py:123; */
@@ -277,7 +277,7 @@
 /* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:273; inara.py:243; */
 "API Key" = "API ključ";
 
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:300; prefs.py:519; prefs.py:1173; prefs.py:1206; stats.py:119; stats.py:138; stats.py:157; stats.py:174; */
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:300; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:119; stats.py:138; stats.py:157; stats.py:174; */
 "None" = "Nije definisano";
 
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:401; */
@@ -301,142 +301,145 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1580; inara.py:1593; */
 "Error: Inara {MSG}" = "Greška: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:251; */
 "Preferences" = "Podešavanja";
 
-/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:347; */
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:348; */
 "Please choose what data to save" = "Izaberite koji podaci se snimaju";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:353; */
+/* prefs.py: Settings > Output option; In files: prefs.py:354; */
 "Market data in CSV format file" = "Fajl sa market podacima u CSV formatu";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:362; */
+/* prefs.py: Settings > Output option; In files: prefs.py:363; */
 "Market data in Trade Dangerous format file" = "Fajl sa market podacima u Trade Dangerous formatu";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:372; */
+/* prefs.py: Settings > Output option; In files: prefs.py:373; */
 "Ship loadout" = "Brodska oprema";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:382; */
+/* prefs.py: Settings > Output option; In files: prefs.py:383; */
 "Automatically update on docking" = "Automatsko slanje nakon pristajanja";
 
-/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:391; prefs.py:410; */
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:392; prefs.py:411; */
 "File location" = "Lokacija fajlova";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:399; prefs.py:449; */
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:400; prefs.py:450; */
 "Change..." = "Promijeni...";
 
-/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:402; prefs.py:452; */
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:403; prefs.py:453; */
 "Browse..." = "Potraži...";
 
-/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:417; */
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:418; */
 "Output" = "Izvoz";
 
-/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:443; prefs.py:458; */
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:444; prefs.py:459; */
 "E:D journal file location" = "Lokacija E:D journal fajlova";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:483; */
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:484; */
 "Keyboard shortcut" = "Prečica";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:485; */
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:486; */
 "Hotkey" = "Prečica";
 
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:494; */
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:495; */
 "Re-start {APP} to use shortcuts" = "Restartujte {APP} da bi ste koristili prečice";
 
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:503; */
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:504; */
 "{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi prečice";
 
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:508; */
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:509; */
 "Open System Preferences" = "Otvori sistemska podešavanja";
 
-/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:530; */
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:531; */
 "Only when Elite: Dangerous is the active app" = "Samo kada je Elite: Dangerous aktivna aplikacija";
 
-/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:541; */
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:542; */
 "Play sound" = "Zvučni efekat";
 
-/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:556; */
+/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:557; */
 "Disable Automatic Application Updates Check when in-game" = "Isključi automatsku provjeru nadogradnji za vrijeme igranja";
 
-/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:569; */
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:570; */
 "Preferred websites" = "Preferirani web sajtovi";
 
-/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:580; */
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:581; */
 "Shipyard" = "Brodogradilište";
 
-/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:592; */
+/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:593; */
 "Use alternate URL method" = "Koristi alternativni URL metod";
 
-/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:645; */
+/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:646; */
 "Log Level" = "Log nivo";
 
-/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:673; */
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:674; */
 "Configuration" = "Konfiguracija";
 
-/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:682; */
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:683; */
 "Main UI privacy options" = "Podešavanja privatnosti glavnog prozora";
 
-/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:687; */
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:688; */
 "Hide private group name in UI" = "Ne prikazuj naziv privatne grupe";
 
-/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:691; */
+/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:692; */
 "Hide multi-crew captain name" = "Ne prikazuj ime kapetana u višečlanoj posadi";
 
-/* prefs.py: Preferences privacy tab title; In files: prefs.py:695; */
+/* prefs.py: Preferences privacy tab title; In files: prefs.py:696; */
 "Privacy" = "Privatnost";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:708; */
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:709; */
 "Normal text" = "Normalan tekst";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:710; */
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:711; */
 "Highlighted text" = "Označeni tekst";
 
-/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:719; */
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:720; */
 "Language" = "Jezik";
 
-/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:729; */
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:730; */
 "Theme" = "Tema";
 
-/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:740; */
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:741; */
 "Dark" = "Tamna";
 
-/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:747; */
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:748; */
 "Transparent" = "Prozirna";
 
-/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:793; */
+/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:794; */
 "UI Scale Percentage" = "Procenat UI skaliranja";
 
-/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:814; */
+/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:815; */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 je standardna vrijednost{CR}Potreban je restart{CR}za primjenu podešavanja!";
 
-/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:824; */
+/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:825; */
 "Main window transparency" = "Prozirnost glavnog prozora";
 
-/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:844:847; */
+/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:845:848; */
 "100 means fully opaque.{CR}Window is updated in real time" = "100 znači potpuno neprozirno.{CR}Prozor se osvježava u realnom vremenu";
 
-/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:883; */
+/* prefs.py: Appearance option for Windows "minimize to system tray"; In files: prefs.py:877; */
+"Minimize to system tray" = "Minimiziranje u system tray";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:885; */
 "Appearance" = "Izgled";
 
-/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:898; */
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:900; */
 "Plugins folder" = "Folder za dodatke (plugins)";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:905; */
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:907; */
 "Open" = "Otvori";
 
-/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:913; */
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:915; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Savjet: Možete da deaktivirate dodatak (plugin){CR}dodavanjem '{EXT}' na ime njegovog foldera";
 
-/* prefs.py: Label on list of enabled plugins; In files: prefs.py:924; */
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:926; */
 "Enabled Plugins" = "Aktivirani dodaci (plugins)";
 
-/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:944; */
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:946; */
 "Plugins Without Python 3.x Support:" = "Dodaci (plugins) bez Python 3.x podrške:";
 
-/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:952; */
+/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:954; */
 "Information on migrating plugins" = "Informacije o migraciji dodataka (plugins)";
 
-/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:967; */
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:969; */
 "Disabled Plugins" = "Deaktivirani dodaci (plugins)";
 
 /* stats.py: Cmdr stats; In files: stats.py:53; */
