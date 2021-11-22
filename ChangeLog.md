@@ -27,10 +27,10 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.2.3-beta1
+Release 5.2.3
 ===
 
-This release fixes one bug.
+This release fixes one bug and fixes some example code.
 
 * Odyssey changed the order of some Journal events.  This caused our logic 
   for tracking the following to break, and thus not report them ever to Inara:
@@ -47,6 +47,13 @@ Developers
 ---
 
 * Now built using Python 3.9.9.
+
+* Updated [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#packaging-extra-modules)
+  to state that we don't actually include *all* of Python's standard library.
+
+* The [click_counter](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/click_counter)
+  example plugin code has been corrected to both actually work fully, and pass
+  our linting.
 
 ---
 
