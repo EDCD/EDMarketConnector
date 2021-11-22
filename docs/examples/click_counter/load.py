@@ -77,7 +77,9 @@ class ClickCounter:
         :param cmdr: The current ED Commander
         :param is_beta: Whether or not EDMC is currently marked as in beta mode
         """
-        config.set('click_counter_count', self.click_count.get())  # type: ignore
+        # You need to cast to `int` here to store *as* an `int`, so that
+        # `config.get_int()` will work for re-loading the value.
+        config.set('click_counter_count', int(self.click_count.get()))  # type: ignore
 
     def setup_main_ui(self, parent: tk.Frame) -> tk.Frame:
         """
