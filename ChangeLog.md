@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.9.8.
+* We now test against, and package with, Python 3.9.9.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -27,11 +27,35 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.2.3
+===
+
+This release fixes one bug and fixes some example code.
+
+* Odyssey changed the order of some Journal events.  This caused our logic 
+  for tracking the following to break, and thus not report them ever to Inara:
+
+    - Ship Combat, Trade and Exploration ranks.
+    - On-foot Combat and Exobiologist ranks.
+    - Engineer unlocks and progress.
+    - Reputations with Major Factions (Superpowers).
+  
+  This is now fixed and the current state of all of these will be correctly 
+  reported to Inara if you have API access for it configured.
+
 Developers
 ---
 
-* Now built using Python 3.9.8.
+* Now built using Python 3.9.9.
 
+* Updated [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#packaging-extra-modules)
+  to state that we don't actually include *all* of Python's standard library.
+
+* The [click_counter](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/click_counter)
+  example plugin code has been corrected to both actually work fully, and pass
+  our linting.
+
+---
 
 Release 5.2.2
 ===
@@ -70,8 +94,6 @@ Bug Fixex
 
     - For any EDDN message that receives a 400 status back we will drop it 
       from the replay log.
-
----
 
 Release 5.2.1
 ===

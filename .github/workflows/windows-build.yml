@@ -17,9 +17,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.4.0
-      - uses: actions/setup-python@v2.2.2
+      - uses: actions/setup-python@v2.3.0
         with:
-          python-version: "3.9.8"
+          python-version: "3.9.9"
           architecture: "x86"
 
       - name: Install python tools
