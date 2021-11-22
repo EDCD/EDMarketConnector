@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.2.2</title>
+			<title>Release 5.2.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -58,6 +58,38 @@ currently used version in a given branch.</p>
 </li>
 </ul>
 
+<h2>Release 5.2.3</h2>
+<p>This release fixes one bug and fixes some example code.</p>
+<ul>
+<li>
+<p>Odyssey changed the order of some Journal events.  This caused our logic
+for tracking the following to break, and thus not report them ever to Inara:</p>
+<ul>
+<li>Ship Combat, Trade and Exploration ranks.</li>
+<li>On-foot Combat and Exobiologist ranks.</li>
+<li>Engineer unlocks and progress.</li>
+<li>Reputations with Major Factions (Superpowers).</li>
+</ul>
+<p>This is now fixed and the current state of all of these will be correctly
+reported to Inara if you have API access for it configured.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>
+<p>Now built using Python 3.9.9.</p>
+</li>
+<li>
+<p>Updated <a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#packaging-extra-modules">PLUGINS.md</a>
+to state that we don't actually include <em>all</em> of Python's standard library.</p>
+</li>
+<li>
+<p>The <a href="https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/click_counter">click_counter</a>
+example plugin code has been corrected to both actually work fully, and pass
+our linting.</p>
+</li>
+</ul>
 
 
 <h2>Release 5.2.2</h2>
@@ -1082,11 +1114,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.2/EDMarketConnector_win_5.2.2.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.3/EDMarketConnector_win_5.2.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.2.2"
-				length="10457088"
+				sparkle:version="5.2.3"
+				length="10530816"
 				type="application/octet-stream"
 			/>
 		</item>
