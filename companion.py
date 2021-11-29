@@ -30,7 +30,7 @@ import requests
 
 import config as conf_module
 import protocol
-from config import appname, appversion, config
+from config import config, user_agent
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
@@ -54,7 +54,6 @@ auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
 FRONTIER_AUTH_SERVER = 'https://auth.frontierstore.net'
-USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
@@ -305,7 +304,7 @@ class Auth(object):
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
         self.requests_session = requests.Session()
-        self.requests_session.headers['User-Agent'] = USER_AGENT
+        self.requests_session.headers['User-Agent'] = user_agent
         self.verifier: Union[bytes, None] = None
         self.state: Union[str, None] = None
 
@@ -644,7 +643,7 @@ class Session(object):
         logger.debug('Starting session')
         self.requests_session = requests.Session()
         self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
-        self.requests_session.headers['User-Agent'] = USER_AGENT
+        self.requests_session.headers['User-Agent'] = user_agent
         self.state = Session.STATE_OK
 
     def login(self, cmdr: str = None, is_beta: Optional[bool] = None) -> bool:

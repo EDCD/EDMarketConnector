@@ -164,6 +164,9 @@ def appversion() -> semantic_version.Version:
     return _cached_version
 
 
+user_agent = f'EDCD-{appname}-{appversion()}'
+
+
 def appversion_nobuild() -> semantic_version.Version:
     """
     Determine app version without *any* build meta data.
