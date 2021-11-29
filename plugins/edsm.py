@@ -23,7 +23,7 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config, debug_senders
+from config import applongname, appname, appversion, config, debug_senders
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -37,6 +37,8 @@ logger = get_main_logger()
 EDSM_POLL = 0.1
 _TIMEOUT = 20
 DISCARDED_EVENTS_SLEEP = 10
+# Custom user agent
+USER_AGENT = f'EDCD-{appname}-{appversion()}'
 
 # trace-if events
 CMDR_EVENTS = 'plugin.edsm.cmdr-events'
@@ -49,6 +51,7 @@ class This:
         self.shutting_down = False  # Plugin is shutting down.
 
         self.session: requests.Session = requests.Session()
+        self.session.headers['User-Agent'] = USER_AGENT
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
         self.discarded_events: Set[str] = []  # List discarded events from EDSM
         self.lastlookup: requests.Response  # Result of last system lookup
