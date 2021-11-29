@@ -21,7 +21,7 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appversion_nobuild, config, debug_senders
+from config import applongname, appname, appversion, appversion_nobuild, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from myNotebook import Frame
@@ -101,6 +101,9 @@ HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 # Thus do **NOT** use either of these in addition to the PLANETARY_LANDINGS
 # one.
 
+# Custom user agent, to be clear in EDDN logs
+USER_AGENT = f'EDCD-{appname}-{appversion()}'
+
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 
@@ -125,6 +128,7 @@ class EDDN:
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
         self.session = requests.Session()
+        self.session.headers['User-Agent'] = USER_AGENT
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
 
