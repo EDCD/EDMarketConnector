@@ -21,7 +21,7 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appversion_nobuild, config, debug_senders
+from config import applongname, appversion_nobuild, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from myNotebook import Frame
@@ -125,6 +125,7 @@ class EDDN:
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
         self.session = requests.Session()
+        self.session.headers['User-Agent'] = user_agent
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
 
