@@ -113,9 +113,6 @@
 						<File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
 						<Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)" Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR" Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
 					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\_asyncio.pyd" />
-					</Component>
 					<Component Guid="{842DC919-EC3D-48EF-A6B3-9A81608E0FB9}">
 						<File KeyPath="yes" Source="SourceDir\_bz2.pyd" />
 					</Component>
@@ -135,12 +132,6 @@
 						<File KeyPath="yes" Source="SourceDir\_lzma.pyd" />
 					</Component>
 					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\_multiprocessing.pyd" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\_overlapped.pyd" />
-					</Component>
-					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\_queue.pyd" />
 					</Component>
 					<Component Guid="{52019FB5-952D-4BA4-A6E0-F3E214F14923}">
@@ -151,9 +142,6 @@
 					</Component>
 					<Component Guid="{2EA8F0B6-A104-4D31-99F0-3535ACDC26A9}">
 						<File KeyPath="yes" Source="SourceDir\_ssl.pyd" />
-					</Component>
-					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\_testcapi.pyd" />
 					</Component>
 					<Component Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
 						<File KeyPath="yes" Source="SourceDir\_tkinter.pyd" />
@@ -562,20 +550,16 @@
 			<ComponentRef Id="RegistryEntries" />
 			<ComponentRef Id="MainExecutable" />
 			<ComponentRef Id="gitversion" />
-			<ComponentRef Id="_asyncio.pyd" />
 			<ComponentRef Id="_bz2.pyd" />
 			<ComponentRef Id="_ctypes.pyd" />
 			<ComponentRef Id="_decimal.pyd" />
 			<ComponentRef Id="_elementtree.pyd" />
 			<ComponentRef Id="_hashlib.pyd" />
 			<ComponentRef Id="_lzma.pyd" />
-			<ComponentRef Id="_multiprocessing.pyd" />
-			<ComponentRef Id="_overlapped.pyd" />
 			<ComponentRef Id="_queue.pyd" />
 			<ComponentRef Id="_socket.pyd" />
 			<ComponentRef Id="_sqlite3.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
-			<ComponentRef Id="_testcapi.pyd" />
 			<ComponentRef Id="_tkinter.pyd" />
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="ChangeLog.md" />
@@ -604,7 +588,7 @@
 			<ComponentRef Id="pt_BR.strings" />
 			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
-			<ComponentRef Id="python39.dll" />
+			<ComponentRef Id="python310.dll" />
 			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
