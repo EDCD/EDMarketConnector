@@ -198,7 +198,7 @@
 						<File KeyPath="yes" Source="SourceDir\pyexpat.pyd" />
 					</Component>
 					<Component Guid="*">
-						<File KeyPath="yes" Source="SourceDir\python39.dll" />
+						<File KeyPath="yes" Source="SourceDir\python310.dll" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />

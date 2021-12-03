@@ -24,7 +24,7 @@ from config import (
 )
 from constants import GITVERSION_FILE
 
-if sys.version_info[0:2] != (3, 9):
+if sys.version_info[0:2] != (3, 10):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
 ###########################################################################
