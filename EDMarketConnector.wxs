@@ -146,6 +146,12 @@
 					<Component Guid="{D2F0CDD2-E934-419F-BC99-445E8FD3AF24}">
 						<File KeyPath="yes" Source="SourceDir\_tkinter.pyd" />
 					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_uuid.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\_win32sysloader.pyd" />
+					</Component>
 					<Component Guid="{62DF41B7-0BE8-48F3-BB22-90E9201A6D8C}">
 						<File KeyPath="yes" Source="SourceDir\cacert.pem" />
 					</Component>
@@ -189,6 +195,12 @@
 						<File KeyPath="yes" Source="SourceDir\python310.dll" />
 					</Component>
 					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\pythoncom310.dll" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\pywintypes310.dll" />
+					</Component>
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\rare_commodity.csv" />
 					</Component>
 					<Component Guid="{9DBAB544-E815-40A5-866A-391B68919344}">
@@ -214,6 +226,15 @@
 					</Component>
 					<Component Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
 						<File KeyPath="yes" Source="SourceDir\unicodedata.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\win32api.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\win32com.shell.shell.pyd" />
+					</Component>
+					<Component Guid="*">
+						<File KeyPath="yes" Source="SourceDir\win32evtlog.pyd" />
 					</Component>
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\winsound.pyd" />
@@ -561,6 +582,8 @@
 			<ComponentRef Id="_sqlite3.pyd" />
 			<ComponentRef Id="_ssl.pyd" />
 			<ComponentRef Id="_tkinter.pyd" />
+			<ComponentRef Id="_uuid.pyd" />
+			<ComponentRef Id="_win32sysloader.pyd" />
 			<ComponentRef Id="cacert.pem" />
 			<ComponentRef Id="ChangeLog.md" />
 			<ComponentRef Id="commodity.csv" />
@@ -589,6 +612,8 @@
 			<ComponentRef Id="pt_PT.strings" />
 			<ComponentRef Id="pyexpat.pyd" />
 			<ComponentRef Id="python310.dll" />
+			<ComponentRef Id="pythoncom310.dll" />
+			<ComponentRef Id="pywintypes310.dll" />
 			<ComponentRef Id="rare_commodity.csv" />
 			<ComponentRef Id="ru.strings" />
 			<ComponentRef Id="select.pyd" />
@@ -604,6 +629,9 @@
 			<ComponentRef Id="tk86t.dll" />
 			<ComponentRef Id="uk.strings" />
 			<ComponentRef Id="unicodedata.pyd" />
+			<ComponentRef Id="win32api.pyd" />
+			<ComponentRef Id="win32com.shell.shell.pyd" />
+			<ComponentRef Id="win32evtlog.pyd" />
 			<ComponentRef Id="winsound.pyd" />
 			<ComponentRef Id="WinSparkle.dll" />
 			<ComponentRef Id="EDMarketConnector_TRACE.bat" />
