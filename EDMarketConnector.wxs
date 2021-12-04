@@ -218,10 +218,10 @@
 					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\sqlite3.dll" />
 					</Component>
-					<Component Guid="{30EEAD30-A43B-4A31-A209-450A8AD17AC2}">
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\tcl86t.dll" />
 					</Component>
-					<Component Guid="{CE5A6F3A-8F6B-4C16-BCDC-F1BB89C9F1AF}">
+					<Component Guid="*">
 						<File KeyPath="yes" Source="SourceDir\tk86t.dll" />
 					</Component>
 					<Component Guid="{E8E3701A-8AA1-4D46-A56D-7AF08D6AFCD4}">
