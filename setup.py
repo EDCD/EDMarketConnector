@@ -9,6 +9,7 @@ Script to build to .exe and .msi package.
 
 import codecs
 import os
+import pathlib
 import platform
 import re
 import shutil
@@ -17,6 +18,8 @@ from distutils.core import setup
 from os.path import exists, isdir, join
 from tempfile import gettempdir
 from typing import Any, Generator, Set
+
+from lxml import etree
 
 from config import (
     appcmdname, applongname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head, update_feed,
@@ -283,6 +286,66 @@ if sys.platform == 'darwin':
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
+    header_file = pathlib.Path('wix/header.wxs')
+    components_file = pathlib.Path('wix/components.wxs')
+    components_transformed_file = pathlib.Path(r'wix/components_transformed.wxs')
+
+    header_tree = etree.parse(header_file)
+    # Use heat.exe to generate the Component for all files inside dist.win32
+    os.system(rf'"{WIXPATH}\heat.exe" dir {dist_dir}\ -ag -sfrag -srid -suid -out {components_file}')
+
+    component_tree = etree.parse(components_file)
+    #   1. Change the element:
+    #
+    #       <Directory Id="dist.win32" Name="dist.win32">
+    #
+    #     to:
+    #
+    #       <Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
+    win32 = component_tree.find('.//{*}Directory[@Id="dist.win32"][@Name="dist.win32"]')
+    if not win32:
+        raise ValueError(f'{components_file}: Expected Directory with Id="dist.win32"')
+
+    win32.set('Id', 'INSTALLDIR')
+    win32.set('Name', '$(var.PRODUCTNAME)')
+    #   2. Change:
+    #
+    #       <Component Id="EDMarketConnector.exe" Guid="*">
+    #           <File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
+    #       </Component>
+    #
+    #     to:
+    #
+    # 		<Component Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
+    # 		    <File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
+    # 		    <Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)"
+    # 		        Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR"
+    #  		        Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
+    # 		</Component>
+    main_executable = win32.find('.//{*}Component[@Id="EDMarketConnector.exe"]')
+    if not main_executable:
+        raise ValueError(f'{components_file}: Expected Component with Id="EDMarketConnector.exe"')
+
+    main_executable.set('Id', 'MainExecutable')
+    main_executable.set('Guid', '{D33BB66E-9664-4AB6-A044-3004B50A09B0}')
+    shortcut = etree.SubElement(
+        main_executable,
+        'Shortcut',
+        nsmap=main_executable.nsmap,
+        attrib={
+            'Id': 'MainExeShortcut',
+            'Directory': 'ProgramMenuFolder',
+            'Name': '$(var.PRODUCTLONGNAME)',
+            'Description': 'Downloads station data from Elite: Dangerous',
+            'WorkingDirectory': 'INSTALLDIR',
+            'Icon': 'EDMarketConnector.exe',
+            'IconIndex': '0',
+            'Advertise': 'yes'
+        }
+    )
+
+    # Append the Feature/ComponentRef listing to match
+    # Concatenate our header, this middle, and our footer.
     os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
 
     if not exists(f'{dist_dir}/{appname}.wixobj'):
