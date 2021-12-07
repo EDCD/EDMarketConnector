@@ -288,12 +288,12 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     template_file = pathlib.Path('wix/template.wxs')
     components_file = pathlib.Path('wix/components.wxs')
-    components_transformed_file = pathlib.Path(r'wix/components_transformed.wxs')
+    final_wxs_file = pathlib.Path('wix/final.wxs')
 
     # Use heat.exe to generate the Component for all files inside dist.win32
     os.system(rf'"{WIXPATH}\heat.exe" dir {dist_dir}\ -ag -sfrag -srid -suid -out {components_file}')
 
-    component_tree = etree.parse(components_file)
+    component_tree = etree.parse(str(components_file))
     #   1. Change the element:
     #
     #       <Directory Id="dist.win32" Name="dist.win32">
@@ -301,12 +301,12 @@ elif sys.platform == 'win32':
     #     to:
     #
     #       <Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
-    win32 = component_tree.find('.//{*}Directory[@Id="dist.win32"][@Name="dist.win32"]')
-    if not win32:
+    directory_win32 = component_tree.find('.//{*}Directory[@Id="dist.win32"][@Name="dist.win32"]')
+    if directory_win32 is None:
         raise ValueError(f'{components_file}: Expected Directory with Id="dist.win32"')
 
-    win32.set('Id', 'INSTALLDIR')
-    win32.set('Name', '$(var.PRODUCTNAME)')
+    directory_win32.set('Id', 'INSTALLDIR')
+    directory_win32.set('Name', '$(var.PRODUCTNAME)')
     #   2. Change:
     #
     #       <Component Id="EDMarketConnector.exe" Guid="*">
@@ -321,8 +321,8 @@ elif sys.platform == 'win32':
     # 		        Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR"
     #  		        Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
     # 		</Component>
-    main_executable = win32.find('.//{*}Component[@Id="EDMarketConnector.exe"]')
-    if not main_executable:
+    main_executable = directory_win32.find('.//{*}Component[@Id="EDMarketConnector.exe"]')
+    if main_executable is None:
         raise ValueError(f'{components_file}: Expected Component with Id="EDMarketConnector.exe"')
 
     main_executable.set('Id', 'MainExecutable')
@@ -342,11 +342,22 @@ elif sys.platform == 'win32':
             'Advertise': 'yes'
         }
     )
+    # Now insert the appropriate parts as a child of the ProgramFilesFolder part
+    # of the template.
+    template_tree = etree.parse(str(template_file))
+    program_files_folder = template_tree.find('.//{*}Directory[@Id="ProgramFilesFolder"]')
+    if program_files_folder is None:
+        raise ValueError(f'{template_file}: Expected Directory with Id="ProgramFilesFolder"')
 
+    program_files_folder.insert(0, directory_win32)
     # Append the Feature/ComponentRef listing to match
 
-    template_tree = etree.parse(template_file)
     # Insert what we now have into the template and write it out
+    template_tree.write(
+        str(final_wxs_file), encoding='utf-8',
+        pretty_print=True,
+        xml_declaration=True
+    )
 
     os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
 
