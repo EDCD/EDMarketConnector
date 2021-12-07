@@ -23,4 +23,5 @@ venv
 htmlcov/
 .ignored
 .coverage
+EDMarketConnector.wxs
 wix/components.wxs
