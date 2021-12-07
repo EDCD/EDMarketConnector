@@ -288,7 +288,7 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     template_file = pathlib.Path('wix/template.wxs')
     components_file = pathlib.Path('wix/components.wxs')
-    final_wxs_file = pathlib.Path('wix/final.wxs')
+    final_wxs_file = pathlib.Path('EDMarketConnector.wxs')
 
     # Use heat.exe to generate the Component for all files inside dist.win32
     os.system(rf'"{WIXPATH}\heat.exe" dir {dist_dir}\ -ag -sfrag -srid -suid -out {components_file}')
