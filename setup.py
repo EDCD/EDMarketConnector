@@ -212,7 +212,7 @@ elif sys.platform == 'win32':
             'WinSparkle.dll',
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
-            'Changelog.md',
+            'ChangeLog.md',
             'commodity.csv',
             'rare_commodity.csv',
             'snd_good.wav',
@@ -351,6 +351,30 @@ elif sys.platform == 'win32':
 
     program_files_folder.insert(0, directory_win32)
     # Append the Feature/ComponentRef listing to match
+    feature = template_tree.find('.//{*}Feature[@Id="Complete"][@Level="1"]')
+    if feature is None:
+        raise ValueError(f'{template_file}: Expected Feature element with Id="Complete" Level="1"')
+
+    # This isn't part of the components
+    feature.append(
+        etree.Element(
+            'ComponentRef',
+            attrib={
+                'Id': 'RegistryEntries'
+            },
+            nsmap=directory_win32.nsmap
+        )
+    )
+    for c in directory_win32.findall('.//{*}Component'):
+        feature.append(
+            etree.Element(
+                'ComponentRef',
+                attrib={
+                    'Id': c.get('Id')
+                },
+                nsmap=directory_win32.nsmap
+            )
+        )
 
     # Insert what we now have into the template and write it out
     template_tree.write(
