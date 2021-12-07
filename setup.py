@@ -383,13 +383,13 @@ elif sys.platform == 'win32':
         xml_declaration=True
     )
 
-    os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
+    os.system(rf'"{WIXPATH}\candle.exe" {appname}.wxs')
 
-    if not exists(f'{dist_dir}/{appname}.wixobj'):
-        raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
+    if not exists(f'{appname}.wixobj'):
+        raise AssertionError(f'No {appname}.wixobj: candle.exe failed?')
 
     package_filename = f'{appname}_win_{appversion_nobuild()}.msi'
-    os.system(rf'"{WIXPATH}\light.exe" -sacl -spdb -sw1076 {dist_dir}\{appname}.wixobj -out {package_filename}')
+    os.system(rf'"{WIXPATH}\light.exe" -b {dist_dir}\ -sacl -spdb -sw1076 {appname}.wixobj -out {package_filename}')
 
     if not exists(package_filename):
         raise AssertionError(f'light.exe failed, no {package_filename}')
