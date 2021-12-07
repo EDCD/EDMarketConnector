@@ -286,11 +286,10 @@ if sys.platform == 'darwin':
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
-    header_file = pathlib.Path('wix/header.wxs')
+    template_file = pathlib.Path('wix/template.wxs')
     components_file = pathlib.Path('wix/components.wxs')
     components_transformed_file = pathlib.Path(r'wix/components_transformed.wxs')
 
-    header_tree = etree.parse(header_file)
     # Use heat.exe to generate the Component for all files inside dist.win32
     os.system(rf'"{WIXPATH}\heat.exe" dir {dist_dir}\ -ag -sfrag -srid -suid -out {components_file}')
 
@@ -345,7 +344,10 @@ elif sys.platform == 'win32':
     )
 
     # Append the Feature/ComponentRef listing to match
-    # Concatenate our header, this middle, and our footer.
+
+    template_tree = etree.parse(template_file)
+    # Insert what we now have into the template and write it out
+
     os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
 
     if not exists(f'{dist_dir}/{appname}.wixobj'):
