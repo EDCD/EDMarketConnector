@@ -354,6 +354,10 @@ class _Locale:
                 ):
                     languages = wszarray_to_list(buf)
 
+        # OneSky calls "Chinese Simplified" "zh-Hans" in the name of the file,
+        # but that will be zh-CN in terms of locale.  So map zh-CN -> zh-Hans
+        languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
+
         return languages
 
 
