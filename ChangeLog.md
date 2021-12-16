@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.9.9.
+* We now test against, and package with, Python 3.10.1.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -24,6 +24,39 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+Pre-Release 5.3.0-beta1
+===
+
+This is a test release to ensure packaging with Python 3.10.1 is working 
+correctly.  There is also a small change to metadata in any remote web 
+request we make.
+
+* We now set a custom User-Agent header in all web requests, i.e. to EDDN, 
+  EDSM and the like.  This is of the form:
+
+    `EDCD-EDMarketConnector-<version>`
+
+Developers
+---
+
+We now test against, and package with Python 3.10.1.
+
+We've made no explicit changes to the Python stdlib, or other modules, we
+currently offer.  However, the newer [py2exe](https://github.com/py2exe/py2exe/)
+we now use has decided we no longer need:
+
+  - _aynscio.pyd
+  - _multiprocessing.pyd
+  - _overlapped.pyd
+
+so those are no longer included in the Windows installers.  We are looking into
+[including all of Python stdlib](https://github.com/EDCD/EDMarketConnector/issues/1327)
+so this would be resolved by that.
+
+If your plugin utilises any module/package that requires per-architecture 
+libraries then you should check it has Python 3.10 wheels available.
 
 ---
 
