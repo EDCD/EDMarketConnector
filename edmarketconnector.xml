@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.2.3</title>
+			<title>Release 5.2.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,22 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.2.4</h2>
+<p>This is a <em>very</em> minor update that simply imports the latest versions of
+data files so that some niche functionality works properly.</p>
+<ul>
+<li>
+<p>Update <code>commodity.csv</code> and <code>rare_commodity.csv</code> from the latest
+<a href="https://github.com/EDCD/FDevIDs">EDCD/FDevIDs</a> versions.  This addresses
+an issue with export of market data in Trade Dangerous format containing
+<code>OnionHeadC</code> rather than the correct name, <code>Onionhead Gamma Strain</code>, that
+Trade Dangerous is expecting.</p>
+<p>This will only have affected Trade Dangerous users who use EDMarketConnector
+as a source of market data.</p>
+</li>
+</ul>
+<hr>
 
 <h2>Release 5.2.3</h2>
 <p>This release fixes one bug and fixes some example code.</p>
@@ -1114,11 +1130,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.3/EDMarketConnector_win_5.2.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.4/EDMarketConnector_win_5.2.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.2.3"
-				length="10530816"
+				sparkle:version="5.2.4"
+				length="10555392"
 				type="application/octet-stream"
 			/>
 		</item>
