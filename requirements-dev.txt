@@ -28,7 +28,7 @@ grip==4.5.2
 
 # Packaging
 # Used to put together a WiX configuration from template/auto-gen
-lxml==4.6.4
+lxml==4.7.1
 # We only need py2exe on windows.
 py2exe==0.11.0.1; sys_platform == 'win32'
 
