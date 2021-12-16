@@ -309,7 +309,7 @@ class _Locale:
 
         return None
 
-    def preferred_languages(self) -> Iterable[str]:
+    def preferred_languages(self) -> Iterable[str]:  # noqa: CCR001
         """
         Return a list of preferred language codes.
 
@@ -320,34 +320,46 @@ class _Locale:
 
         :return: The preferred language list
         """
+        languages: Iterable[str]
         if platform == 'darwin':
-            return NSLocale.preferredLanguages()
+            languages = NSLocale.preferredLanguages()
 
         elif platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
-            return lang and [lang.replace('_', '-')] or []
+            languages = lang and [lang.replace('_', '-')] or []
 
-        def wszarray_to_list(array):
-            offset = 0
-            while offset < len(array):
-                sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                if sz:
-                    yield sz
-                    offset += len(sz)+1
+        else:
+            def wszarray_to_list(array):
+                offset = 0
+                while offset < len(array):
+                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
+                    if sz:
+                        yield sz
+                        offset += len(sz)+1
 
-                else:
-                    break
+                    else:
+                        break
 
-        num = ctypes.c_ulong()
-        size = ctypes.c_ulong(0)
-        if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value:
-            buf = ctypes.create_unicode_buffer(size.value)
+            num = ctypes.c_ulong()
+            size = ctypes.c_ulong(0)
+            languages = []
+            if GetUserPreferredUILanguages(
+                    MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
+            ) and size.value:
+                buf = ctypes.create_unicode_buffer(size.value)
 
-            if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
-                return wszarray_to_list(buf)
+                if GetUserPreferredUILanguages(
+                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
+                ):
+                    languages = wszarray_to_list(buf)
 
-        return []
+        # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
+        #    in the name of the file, but that will be zh-CN in terms of
+        #    locale.  So map zh-CN -> zh-Hans
+        languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
+
+        return languages
 
 
 # singletons

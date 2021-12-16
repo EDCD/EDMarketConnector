@@ -9,6 +9,7 @@ Script to build to .exe and .msi package.
 
 import codecs
 import os
+import pathlib
 import platform
 import re
 import shutil
@@ -17,6 +18,8 @@ from distutils.core import setup
 from os.path import exists, isdir, join
 from tempfile import gettempdir
 from typing import Any, Generator, Set
+
+from lxml import etree
 
 from config import (
     appcmdname, applongname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head, update_feed,
@@ -209,7 +212,7 @@ elif sys.platform == 'win32':
             'WinSparkle.dll',
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
-            'Changelog.md',
+            'ChangeLog.md',
             'commodity.csv',
             'rare_commodity.csv',
             'snd_good.wav',
@@ -283,13 +286,110 @@ if sys.platform == 'darwin':
         os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
 
 elif sys.platform == 'win32':
-    os.system(rf'"{WIXPATH}\candle.exe" -out {dist_dir}\ {appname}.wxs')
+    template_file = pathlib.Path('wix/template.wxs')
+    components_file = pathlib.Path('wix/components.wxs')
+    final_wxs_file = pathlib.Path('EDMarketConnector.wxs')
 
-    if not exists(f'{dist_dir}/{appname}.wixobj'):
-        raise AssertionError(f'No {dist_dir}/{appname}.wixobj: candle.exe failed?')
+    # Use heat.exe to generate the Component for all files inside dist.win32
+    os.system(rf'"{WIXPATH}\heat.exe" dir {dist_dir}\ -ag -sfrag -srid -suid -out {components_file}')
+
+    component_tree = etree.parse(str(components_file))
+    #   1. Change the element:
+    #
+    #       <Directory Id="dist.win32" Name="dist.win32">
+    #
+    #     to:
+    #
+    #       <Directory Id="INSTALLDIR" Name="$(var.PRODUCTNAME)">
+    directory_win32 = component_tree.find('.//{*}Directory[@Id="dist.win32"][@Name="dist.win32"]')
+    if directory_win32 is None:
+        raise ValueError(f'{components_file}: Expected Directory with Id="dist.win32"')
+
+    directory_win32.set('Id', 'INSTALLDIR')
+    directory_win32.set('Name', '$(var.PRODUCTNAME)')
+    #   2. Change:
+    #
+    #       <Component Id="EDMarketConnector.exe" Guid="*">
+    #           <File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
+    #       </Component>
+    #
+    #     to:
+    #
+    # 		<Component Id="MainExecutable" Guid="{D33BB66E-9664-4AB6-A044-3004B50A09B0}">
+    # 		    <File Id="EDMarketConnector.exe" KeyPath="yes" Source="SourceDir\EDMarketConnector.exe" />
+    # 		    <Shortcut Id="MainExeShortcut" Directory="ProgramMenuFolder" Name="$(var.PRODUCTLONGNAME)"
+    # 		        Description="Downloads station data from Elite: Dangerous" WorkingDirectory="INSTALLDIR"
+    #  		        Icon="EDMarketConnector.exe" IconIndex="0" Advertise="yes" />
+    # 		</Component>
+    main_executable = directory_win32.find('.//{*}Component[@Id="EDMarketConnector.exe"]')
+    if main_executable is None:
+        raise ValueError(f'{components_file}: Expected Component with Id="EDMarketConnector.exe"')
+
+    main_executable.set('Id', 'MainExecutable')
+    main_executable.set('Guid', '{D33BB66E-9664-4AB6-A044-3004B50A09B0}')
+    shortcut = etree.SubElement(
+        main_executable,
+        'Shortcut',
+        nsmap=main_executable.nsmap,
+        attrib={
+            'Id': 'MainExeShortcut',
+            'Directory': 'ProgramMenuFolder',
+            'Name': '$(var.PRODUCTLONGNAME)',
+            'Description': 'Downloads station data from Elite: Dangerous',
+            'WorkingDirectory': 'INSTALLDIR',
+            'Icon': 'EDMarketConnector.exe',
+            'IconIndex': '0',
+            'Advertise': 'yes'
+        }
+    )
+    # Now insert the appropriate parts as a child of the ProgramFilesFolder part
+    # of the template.
+    template_tree = etree.parse(str(template_file))
+    program_files_folder = template_tree.find('.//{*}Directory[@Id="ProgramFilesFolder"]')
+    if program_files_folder is None:
+        raise ValueError(f'{template_file}: Expected Directory with Id="ProgramFilesFolder"')
+
+    program_files_folder.insert(0, directory_win32)
+    # Append the Feature/ComponentRef listing to match
+    feature = template_tree.find('.//{*}Feature[@Id="Complete"][@Level="1"]')
+    if feature is None:
+        raise ValueError(f'{template_file}: Expected Feature element with Id="Complete" Level="1"')
+
+    # This isn't part of the components
+    feature.append(
+        etree.Element(
+            'ComponentRef',
+            attrib={
+                'Id': 'RegistryEntries'
+            },
+            nsmap=directory_win32.nsmap
+        )
+    )
+    for c in directory_win32.findall('.//{*}Component'):
+        feature.append(
+            etree.Element(
+                'ComponentRef',
+                attrib={
+                    'Id': c.get('Id')
+                },
+                nsmap=directory_win32.nsmap
+            )
+        )
+
+    # Insert what we now have into the template and write it out
+    template_tree.write(
+        str(final_wxs_file), encoding='utf-8',
+        pretty_print=True,
+        xml_declaration=True
+    )
+
+    os.system(rf'"{WIXPATH}\candle.exe" {appname}.wxs')
+
+    if not exists(f'{appname}.wixobj'):
+        raise AssertionError(f'No {appname}.wixobj: candle.exe failed?')
 
     package_filename = f'{appname}_win_{appversion_nobuild()}.msi'
-    os.system(rf'"{WIXPATH}\light.exe" -sacl -spdb -sw1076 {dist_dir}\{appname}.wixobj -out {package_filename}')
+    os.system(rf'"{WIXPATH}\light.exe" -b {dist_dir}\ -sacl -spdb -sw1076 {appname}.wixobj -out {package_filename}')
 
     if not exists(package_filename):
         raise AssertionError(f'light.exe failed, no {package_filename}')
