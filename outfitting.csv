@@ -1003,7 +1003,7 @@ id,symbol,category,name,mount,guidance,ship,class,rating,entitlement
 128833998,Hpt_Guardian_PlasmaLauncher_Fixed_Medium,hardpoint,Guardian Plasma Charger,Fixed,,,2,B,ELITE_HORIZONS_V_GUARDIAN_PLASMA_FIXED_MEDIUM
 128833999,Hpt_Guardian_PlasmaLauncher_Turret_Medium,hardpoint,Guardian Plasma Charger,Turreted,,,2,E,ELITE_HORIZONS_V_GUARDIAN_PLASMA_TURRET_MEDIUM
 128834000,Hpt_Guardian_ShardCannon_Fixed_Medium,hardpoint,Guardian Shard Cannon,Fixed,,,2,A,ELITE_HORIZONS_V_GUARDIAN_SHARD_FIXED_MEDIUM
-128834001,Hpt_Guardian_ShardCannon_Turret_medium,hardpoint,Guardian Shard Cannon,Turreted,,,2,D,ELITE_HORIZONS_V_GUARDIAN_SHARD_TURRET_MEDIUM
+128834001,Hpt_Guardian_ShardCannon_Turret_Medium,hardpoint,Guardian Shard Cannon,Turreted,,,2,D,ELITE_HORIZONS_V_GUARDIAN_SHARD_TURRET_MEDIUM
 128834002,Hpt_PlasmaShockCannon_Fixed_Medium,hardpoint,Shock Cannon,Fixed,,,2,D,ELITE_HORIZONS_V_PLASMASHOCK_FIXED_MEDIUM
 128834003,Hpt_PlasmaShockCannon_Gimbal_Medium,hardpoint,Shock Cannon,Gimballed,,,2,D,ELITE_HORIZONS_V_PLASMASHOCK_GIMBAL_MEDIUM
 128834004,Hpt_PlasmaShockCannon_Turret_Medium,hardpoint,Shock Cannon,Turreted,,,2,E,ELITE_HORIZONS_V_PLASMASHOCK_TURRET_MEDIUM
