@@ -27,6 +27,22 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.2.4
+===
+This is a *very* minor update that simply imports the latest versions of 
+data files so that some niche functionality works properly.
+
+* Update `commodity.csv` and `rare_commodity.csv` from the latest
+  [EDCD/FDevIDs](https://github.com/EDCD/FDevIDs) versions.  This addresses 
+  an issue with export of market data in Trade Dangerous format containing
+  `OnionHeadC` rather than the correct name, `Onionhead Gamma Strain`, that 
+  Trade Dangerous is expecting.
+
+  This will only have affected Trade Dangerous users who use EDMarketConnector 
+  as a source of market data.
+
+---
+
 Release 5.2.3
 ===
 

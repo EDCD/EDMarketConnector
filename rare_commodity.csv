@@ -126,7 +126,7 @@ id,symbol,market_id,category,name
 128671119,Advert1,3227172352,Consumer Items,Ultra-Compact Processor Prototypes
 128672121,TheHuttonMug,3228728832,Consumer Items,The Hutton Mug
 128672122,SothisCrystallineGold,128668557,Metals,Sothis Crystalline Gold
-128672316,MasterChefs,3228193280,Slavery,Master Chefs
+128672316,MasterChefs,128123640,Slavery,Master Chefs
 128672431,PersonalGifts,3223105792,Salvage,Personal Gifts
 128672432,CrystallineSpheres,128059402,Salvage,Crystalline Spheres
 128672812,OnionHeadA,3226977024,Legal Drugs,Onionhead Alpha Strain
@@ -137,3 +137,7 @@ id,symbol,market_id,category,name
 128748428,BuckyballBeerMats,128745551,Consumer Items,Buckyball Beer Mats
 128793113,HarmaSilverSeaRum,3221575424,Legal Drugs,Harma Silver Sea Rum
 128793114,PlatinumAloy,3223779840,Metals,Platinum Alloy
+128913661,Nanomedicines,3226651904,Medicines,Nanomedicines
+128922524,Duradrives,3223453184,Consumer Items,Duradrives
+128958679,ApaVietii,128958681,Legal Drugs,Apa Vietii
+129002574,ClassifiedExperimentalEquipment,128986325,Technology,Classified Experimental Equipment

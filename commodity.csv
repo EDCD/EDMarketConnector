@@ -189,12 +189,12 @@ id,symbol,category,name
 128682053,AntimatterContainmentUnit,Salvage,Antimatter Containment Unit
 128682054,SpacePioneerRelics,Salvage,Space Pioneer Relics
 128682055,FossilRemnants,Salvage,Fossil Remnants
-128732183,AncientRelic,Salvage,Ancient Relic
-128732184,AncientOrb,Salvage,Ancient Orb
-128732185,AncientCasket,Salvage,Ancient Casket
-128732186,AncientTablet,Salvage,Ancient Tablet
-128732187,AncientUrn,Salvage,Ancient Urn
-128732188,AncientTotem,Salvage,Ancient Totem
+128732183,AncientRelic,Salvage,Guardian Relic
+128732184,AncientOrb,Salvage,Guardian Orb
+128732185,AncientCasket,Salvage,Guardian Casket
+128732186,AncientTablet,Salvage,Guardian Tablet
+128732187,AncientUrn,Salvage,Guardian Urn
+128732188,AncientTotem,Salvage,Guardian Totem
 128737287,UnknownResin,Salvage,Thargoid Resin
 128737288,UnknownBiologicalMatter,Salvage,Thargoid Biological Matter
 128737289,UnknownTechnologySamples,Salvage,Thargoid Technology Samples
@@ -206,8 +206,20 @@ id,symbol,category,name
 128824468,ThargoidScoutTissueSample,Salvage,Thargoid Scout Tissue Sample
 128888499,AncientKey,Salvage,Ancient Key
 128902652,ThargoidTissueSampleType4,Salvage,Thargoid Hydra Tissue Sample
-128913661,Nanomedicines,Medicines,Nanomedicines
-128922524,Duradrives,Consumer Items,Duradrives
+128922517,M_TissueSample_Fluid,Salvage,Mollusc Fluid
+128922518,M_TissueSample_Soft,Salvage,Mollusc Soft Tissue
+128922519,M_TissueSample_Nerves,Salvage,Mollusc Brain Tissue
+128922520,S_TissueSample_Cells,Salvage,Pod Core Tissue
+128922521,S_TissueSample_Surface,Salvage,Pod Dead Tissue
+128922522,S_TissueSample_Core,Salvage,Pod Surface Tissue
+128922523,P_ParticulateSample,Salvage,Anomaly Particles
+128922781,S9_TissueSample_Shell,Salvage,Pod Tissue
+128922782,M3_TissueSample_Membrane,Salvage,Mollusc Membrane
+128922783,M3_TissueSample_Mycelium,Salvage,Mollusc Mycelium
+128922784,M3_TissueSample_Spores,Salvage,Mollusc Spores
+128922785,S6_TissueSample_Mesoglea,Salvage,Pod Mesoglea
+128922786,S6_TissueSample_Cells,Salvage,Pod Outer Tissue
+128922787,S6_TissueSample_Coenosarc,Salvage,Pod Shell Tissue
 128924325,Rhodplumsite,Minerals,Rhodplumsite
 128924326,Serendibite,Minerals,Serendibite
 128924327,Monazite,Minerals,Monazite
@@ -215,6 +227,8 @@ id,symbol,category,name
 128924329,Benitoite,Minerals,Benitoite
 128924330,Grandidierite,Minerals,Grandidierite
 128924331,Alexandrite,Minerals,Alexandrite
-128924332,Opal,Minerals,Void Opal
+128924332,Opal,Minerals,Void Opals
 128924333,RockforthFertiliser,Chemicals,Rockforth Fertiliser
 128924334,AgronomicTreatment,Chemicals,Agronomic Treatment
+128961249,Tritium,Chemicals,Tritium
+128983059,OnionHeadC,Legal Drugs,Onionhead Gamma Strain
