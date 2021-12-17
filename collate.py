@@ -5,6 +5,11 @@ Collate lists of seen commodities, modules and ships from dumps of the Companion
 Note that currently this will only work with the output files created if you
 run the main program from a working directory that has a `dump/` directory,
 which causes a file to be written per CAPI query.
+
+This script also utilise the file outfitting.csv.  As it both reads it in *and*
+writes out a new copy a local copy, in the root of the project structure, is
+used for this purpose.  If you want to utilise the FDevIDs/ version of the
+file, copy it over the local one.
 """
 
 import csv
