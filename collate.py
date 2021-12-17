@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Collate lists of seen commodities, modules and ships from dumps of the Companion API output."""
+"""
+Collate lists of seen commodities, modules and ships from dumps of the Companion API output.
+
+Note that currently this will only work with the output files created if you
+run the main program from a working directory that has a `dump/` directory,
+which causes a file to be written per CAPI query.
+"""
 
 import csv
 import json
@@ -210,6 +216,7 @@ if __name__ == "__main__":
         with open(file_name) as f:
             print(file_name)
             data = json.load(f)
+            data = data['data']
 
         if not data['commander'].get('docked'):
             print('Not docked!')
