@@ -14,14 +14,14 @@ import outfitting
 from edmc_data import companion_category_map, ship_name_map
 
 
-def __make_backup(file_name: str, suffix: str = '.bak') -> None:
+def __make_backup(file_name: pathlib.Path, suffix: str = '.bak') -> None:
     """
     Rename the given file to $file.bak, removing any existing $file.bak. Assumes $file exists on disk.
 
     :param file_name: The name of the file to make a backup of
     :param suffix: The suffix to use for backup files (default '.bak')
     """
-    backup_name = file_name + suffix
+    backup_name = file_name.parent / (file_name.name + suffix)
 
     if isfile(backup_name):
         os.unlink(backup_name)
@@ -150,7 +150,7 @@ def addships(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('ships'):
         return
 
-    shipfile = 'shipyard.csv'
+    shipfile = pathlib.Path('shipyard.csv')
     ships = {}
     fields = ('id', 'symbol', 'name')
 
