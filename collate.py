@@ -4,6 +4,7 @@
 import csv
 import json
 import os
+import pathlib
 import sys
 from os.path import isfile
 from traceback import print_exc
@@ -38,7 +39,7 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('commodities'):
         return
 
-    commodityfile = 'commodity.csv'
+    commodityfile = pathlib.Path('FDevIDs/commodity.csv')
     commodities = {}
 
     # slurp existing

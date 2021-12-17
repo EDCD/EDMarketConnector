@@ -144,8 +144,10 @@ if sys.platform == 'darwin':
                 ('plugins', x) for x in PLUGINS
             ],
             'resources': [
-                'commodity.csv',
-                'rare_commodity.csv',
+                '.gitversion',  # Contains git short hash
+                'ChangeLog.md',
+                join('FDevIDs', 'commodity.csv'),
+                join('FDevIDs', 'rare_commodity.csv'),
                 'snd_good.wav',
                 'snd_bad.wav',
                 'modules.p',
@@ -213,8 +215,8 @@ elif sys.platform == 'win32':
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
             'ChangeLog.md',
-            'commodity.csv',
-            'rare_commodity.csv',
+            join('FDevIDs', 'commodity.csv'),
+            join('FDevIDs', 'rare_commodity.csv'),
             'snd_good.wav',
             'snd_bad.wav',
             'modules.p',

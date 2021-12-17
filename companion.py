@@ -22,7 +22,6 @@ import urllib.parse
 import webbrowser
 from builtins import object, range, str
 from email.utils import parsedate
-from os.path import join
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
 
@@ -1065,7 +1064,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
-            with open(join(config.respath_path, f), 'r') as csvfile:
+            with open(config.respath_path / 'FDevIDs' / f, 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
 
                 for row in reader:
