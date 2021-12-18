@@ -144,12 +144,16 @@ if sys.platform == 'darwin':
                 ('plugins', x) for x in PLUGINS
             ],
             'resources': [
-                'commodity.csv',
-                'rare_commodity.csv',
+                '.gitversion',  # Contains git short hash
+                'ChangeLog.md',
                 'snd_good.wav',
                 'snd_bad.wav',
                 'modules.p',
                 'ships.p',
+                ('FDevIDs', [
+                    join('FDevIDs', 'commodity.csv'),
+                    join('FDevIDs', 'rare_commodity.csv'),
+                ]),
             ],
             'site_packages': False,
             'plist': {
@@ -213,8 +217,6 @@ elif sys.platform == 'win32':
             'WinSparkle.pdb',  # For debugging - don't include in package
             'EUROCAPS.TTF',
             'ChangeLog.md',
-            'commodity.csv',
-            'rare_commodity.csv',
             'snd_good.wav',
             'snd_bad.wav',
             'modules.p',
@@ -226,6 +228,10 @@ elif sys.platform == 'win32':
             'EDMarketConnector - reset-ui.bat',
         ]),
         ('L10n', [join('L10n', x) for x in os.listdir('L10n') if x.endswith('.strings')]),
+        ('FDevIDs', [
+            join('FDevIDs', 'commodity.csv'),
+            join('FDevIDs', 'rare_commodity.csv'),
+        ]),
         ('plugins', PLUGINS),
     ]
 

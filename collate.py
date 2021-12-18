@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
-"""Collate lists of seen commodities, modules and ships from dumps of the Companion API output."""
+"""
+Collate lists of seen commodities, modules and ships from dumps of the Companion API output.
+
+Note that currently this will only work with the output files created if you
+run the main program from a working directory that has a `dump/` directory,
+which causes a file to be written per CAPI query.
+
+This script also utilise the file outfitting.csv.  As it both reads it in *and*
+writes out a new copy a local copy, in the root of the project structure, is
+used for this purpose.  If you want to utilise the FDevIDs/ version of the
+file, copy it over the local one.
+"""
 
 import csv
 import json
 import os
+import pathlib
 import sys
 from os.path import isfile
 from traceback import print_exc
@@ -13,14 +25,14 @@ import outfitting
 from edmc_data import companion_category_map, ship_name_map
 
 
-def __make_backup(file_name: str, suffix: str = '.bak') -> None:
+def __make_backup(file_name: pathlib.Path, suffix: str = '.bak') -> None:
     """
     Rename the given file to $file.bak, removing any existing $file.bak. Assumes $file exists on disk.
 
     :param file_name: The name of the file to make a backup of
     :param suffix: The suffix to use for backup files (default '.bak')
     """
-    backup_name = file_name + suffix
+    backup_name = file_name.parent / (file_name.name + suffix)
 
     if isfile(backup_name):
         os.unlink(backup_name)
@@ -38,7 +50,7 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('commodities'):
         return
 
-    commodityfile = 'commodity.csv'
+    commodityfile = pathlib.Path('FDevIDs/commodity.csv')
     commodities = {}
 
     # slurp existing
@@ -149,7 +161,7 @@ def addships(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('ships'):
         return
 
-    shipfile = 'shipyard.csv'
+    shipfile = pathlib.Path('shipyard.csv')
     ships = {}
     fields = ('id', 'symbol', 'name')
 
@@ -209,6 +221,7 @@ if __name__ == "__main__":
         with open(file_name) as f:
             print(file_name)
             data = json.load(f)
+            data = data['data']
 
         if not data['commander'].get('docked'):
             print('Not docked!')
