@@ -1,5 +1,5 @@
 certifi==2021.10.8
-requests==2.26.0
+requests==2.27.0
 watchdog==2.1.6
 # Commented out because this doesn't package well with py2exe
 infi.systray==0.1.12; sys_platform == 'win32'
