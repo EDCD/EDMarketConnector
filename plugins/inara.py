@@ -737,17 +737,24 @@ def journal_entry(  # noqa: C901, CCR001
             logger.debug('Adding events', exc_info=e)
             return str(e)
 
-        # Send credits and stats to Inara on startup only - otherwise may be out of date
+        # We want to utilise some Statistics data, so don't setCommanderCredits here
         if event_name == 'LoadGame':
-            new_add_event(
-                'setCommanderCredits',
-                entry['timestamp'],
-                {'commanderCredits': state['Credits'], 'commanderLoan': state['Loan']}
-            )
-
             this.lastcredits = state['Credits']
 
         elif event_name == 'Statistics':
+            inara_data = {
+                'commanderCredits': state['Credits'],
+                'commanderLoan':    state['Loan'],
+            }
+            if entry.get('Bank_Account') is not None:
+                if entry['Bank_Account'].get('Current_Wealth') is not None:
+                    inara_data['commanderAssets'] = entry['Bank_Account']['Current_Wealth']
+
+            new_add_event(
+                'setCommanderCredits',
+                entry['timestamp'],
+                inara_data
+            )
             new_add_event('setCommanderGameStatistics', entry['timestamp'], state['Statistics'])  # may be out of date
 
         # Selling / swapping ships
