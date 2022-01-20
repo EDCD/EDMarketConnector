@@ -170,8 +170,8 @@ class Logger:
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
         # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
-        # MAGIC-CONT: *or* use `%Z` in default_time_msec (as its concatted to default_msec).
-        # MAGIC-CONT: UTC is hardcoded here because we know it always will be (see above MAGIC comment)
+        # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (formatting issues).
+        # UTC is hardcoded here because we know it always will be (see above MAGIC comment)
         self.logger_formatter.default_msec_format = '%s.%03d UTC'
 
         self.logger_channel.setFormatter(self.logger_formatter)
