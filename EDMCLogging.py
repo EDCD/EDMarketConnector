@@ -92,7 +92,7 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     **kwargs
 )
 
-# MAGIC n/a: 2022-01-20: We want logging timestamps to be in UTC, not least because the game journals log in UTC.
+# MAGIC n/a | 2022-01-20: We want logging timestamps to be in UTC, not least because the game journals log in UTC.
 # MAGIC-CONT: Note that the game client uses the ED server's idea of UTC, which can easily be different from machine
 # MAGIC-CONT: local idea of it.  So don't expect our log timestamps to perfectly match Journal ones.
 # MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
