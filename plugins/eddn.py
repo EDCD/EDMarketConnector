@@ -10,6 +10,7 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
+from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import TextIO, Tuple, Union
@@ -27,6 +28,7 @@ from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
+from util import http
 
 if sys.platform != 'win32':
     from fcntl import LOCK_EX, LOCK_NB, lockf
@@ -217,7 +219,12 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.eddn_url, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        encoded, compressed = http.gzip(json.dumps(to_send))
+        headers: None | dict[str, str] = None
+        if compressed:
+            headers = {'Content-Encoding': 'gzip'}
+
+        r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
@@ -230,15 +237,31 @@ class EDDN:
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
+            from base64 import b64encode  # we dont need this to be around until this point, which may never hit
+            if r.status_code == 413:
+                logger.debug(dedent(
+                    f"""\
+                    Got a 413 while POSTing data
+                    URL:\t{r.url}
+                    Headers:\t{r.headers}
+                    Sent Data Len:\t {len(encoded)}
+                    Content:\n{r.text}\n
+                    Msg:\n{msg}
+                    Encoded:\n{b64encode(encoded).decode(errors="replace")}
+                    """
+                ))
+
+                return  # drop the error
+
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
-                logger.debug(
+                logger.debug(dedent(
                     f'''Status from POST wasn't OK:
-Status\t{r.status_code}
-URL\t{r.url}
-Headers\t{r.headers}
-Content:\n{r.text}
-Msg:\n{msg}'''
-                )
+                        Status\t{r.status_code}
+                        URL\t{r.url}
+                        Headers\t{r.headers}
+                        Content:\n{r.text}
+                        Msg:\n{msg}'''
+                ))
 
         r.raise_for_status()
 
