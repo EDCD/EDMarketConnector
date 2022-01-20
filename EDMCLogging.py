@@ -46,6 +46,7 @@ from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
+from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
 
@@ -90,6 +91,12 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     args,
     **kwargs
 )
+
+# MAGIC n/a:  2020-01-20: make logging use UTC for times, to help make our logs congruent with journals etc.
+# MAGIC-CONT: Note that as this is the local system vs the remote system (ED servers, for journals),
+# MAGIC-CONT: times may not be perfectly in sync. (something something NTP).
+# MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
+logging.Formatter.converter = gmtime
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
@@ -162,7 +169,10 @@ class Logger:
 
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-        self.logger_formatter.default_msec_format = '%s.%03d'
+        # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
+        # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (formatting issues).
+        # UTC is hardcoded here because we know it always will be (see above MAGIC comment)
+        self.logger_formatter.default_msec_format = '%s.%03d UTC'
 
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
