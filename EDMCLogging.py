@@ -46,6 +46,7 @@ from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
+from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, Tuple, cast
 
@@ -90,6 +91,9 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     args,
     **kwargs
 )
+
+# make logging use UTC for times
+logging.Formatter.converter = gmtime
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
