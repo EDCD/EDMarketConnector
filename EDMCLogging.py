@@ -92,9 +92,9 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     **kwargs
 )
 
-# MAGIC n/a:  2020-01-20: make logging use UTC for times, to help make our logs congruent with journals etc.
-# MAGIC-CONT: Note that as this is the local system vs the remote system (ED servers, for journals),
-# MAGIC-CONT: times may not be perfectly in sync. (something something NTP).
+# MAGIC n/a: 2022-01-20: We want logging timestamps to be in UTC, not least because the game journals log in UTC.
+# MAGIC-CONT: Note that the game client uses the ED server's idea of UTC, which can easily be different from machine
+# MAGIC-CONT: local idea of it.  So don't expect our log timestamps to perfectly match Journal ones.
 # MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
 logging.Formatter.converter = gmtime
 
@@ -170,8 +170,9 @@ class Logger:
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
         # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
-        # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (formatting issues).
-        # UTC is hardcoded here because we know it always will be (see above MAGIC comment)
+        # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (more exceptions).
+        # MAGIC-CONT: ' UTC' is hard-coded here - we know we're using the local machine's idea of UTC/GMT because we
+        # MAGIC-CONT: cause logging.Formatter() to use `gmtime()` - see MAGIC comment in this file's top-level code.
         self.logger_formatter.default_msec_format = '%s.%03d UTC'
 
         self.logger_channel.setFormatter(self.logger_formatter)
