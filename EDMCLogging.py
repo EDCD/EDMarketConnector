@@ -166,7 +166,10 @@ class Logger:
 
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-        self.logger_formatter.default_msec_format = '%s.%03d'
+        # WORKAROUND n/a | 2022-01-20: This is concatted to the above time format, so including %Z there is broken
+        #                              As a sidenote, this will not always match with journal time etc. As that's based
+        #                              on the elite server side time
+        self.logger_formatter.default_msec_format = '%s.%03d UTC'
 
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
