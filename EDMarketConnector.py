@@ -74,7 +74,7 @@ if __name__ == '__main__':  # noqa: C901
     ###########################################################################
     parser.add_argument(
         '--reset-ui',
-        help='reset UI theme and transparency to defaults',
+        help='Reset UI theme, transparency, font, font size, ui scale, and ui geometry to default',
         action='store_true'
     )
     ###########################################################################
@@ -1865,11 +1865,11 @@ sys.path: {sys.path}'''
     if args.reset_ui:
         config.set('theme', 0)  # 'Default' theme uses ID 0
         config.set('ui_transparency', 100)  # 100 is completely opaque
-        config.delete('font')
-        config.delete('font_size')
+        config.delete('font', suppress=True)
+        config.delete('font_size', suppress=True)
 
         config.set('ui_scale', 100)  # 100% is the default here
-        config.delete('geometry')    # unset is recreated by other code
+        config.delete('geometry', suppress=True)    # unset is recreated by other code
 
         logger.info('reset theme, transparency, font, font size, ui scale, and ui geometry to default.')
 
