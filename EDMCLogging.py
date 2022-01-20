@@ -92,7 +92,9 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     **kwargs
 )
 
-# make logging use UTC for times
+# make logging use UTC for times, to help make our logs congruent with journals etc.
+# Note that as this is the local system vs the remote system (ED servers, for journals), times may not be perfectly
+# in sync. (something something NTP)
 logging.Formatter.converter = gmtime
 
 
