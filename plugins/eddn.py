@@ -168,6 +168,10 @@ class EDDN:
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
+        if self.replayfile is None:
+            logger.warning('replayfile is None!')
+            return
+
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
