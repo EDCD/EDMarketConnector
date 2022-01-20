@@ -1867,7 +1867,11 @@ sys.path: {sys.path}'''
         config.set('ui_transparency', 100)  # 100 is completely opaque
         config.delete('font')
         config.delete('font_size')
-        logger.info('reset theme, font, font size, and transparency to default.')
+
+        config.set('ui_scale', 100)  # 100% is the default here
+        config.delete('geometry')    # unset is recreated by other code
+
+        logger.info('reset theme, transparency, font, font size, ui scale, and ui geometry to default.')
 
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
