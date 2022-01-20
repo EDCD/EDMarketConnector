@@ -92,9 +92,10 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     **kwargs
 )
 
-# make logging use UTC for times, to help make our logs congruent with journals etc.
-# Note that as this is the local system vs the remote system (ED servers, for journals), times may not be perfectly
-# in sync. (something something NTP)
+# MAGIC n/a:  2020-01-20: make logging use UTC for times, to help make our logs congruent with journals etc.
+# MAGIC-CONT: Note that as this is the local system vs the remote system (ED servers, for journals),
+# MAGIC-CONT: times may not be perfectly in sync. (something something NTP).
+# MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
 logging.Formatter.converter = gmtime
 
 
@@ -168,9 +169,9 @@ class Logger:
 
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
         self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-        # WORKAROUND n/a | 2022-01-20: This is concatted to the above time format, so including %Z there is broken
-        #                              As a sidenote, this will not always match with journal time etc. As that's based
-        #                              on the elite server side time
+        # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
+        # MAGIC-CONT: *or* use `%Z` in default_time_msec (as its concatted to default_msec).
+        # MAGIC-CONT: UTC is hardcoded here because we know it always will be (see above MAGIC comment)
         self.logger_formatter.default_msec_format = '%s.%03d UTC'
 
         self.logger_channel.setFormatter(self.logger_formatter)
