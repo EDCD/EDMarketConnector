@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
-from time import gmtime, localtime, sleep, strftime, strptime, time
+from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
@@ -23,8 +23,11 @@ from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
+# spell-checker: words navroute
+
 logger = get_main_logger()
 STARTUP = 'journal.startup'
+MAX_NAVROUTE_DISCREPANCY = 5
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -111,6 +114,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systempopulation: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
+        self._navroute_retries = 0
+
         self.__init_state()
 
     def __init_state(self) -> None:
@@ -167,6 +172,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
             'Body':               None,
             'BodyType':           None,
+
+            'NavRoute':           None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -493,6 +500,26 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # Preserve property order because why not?
             entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
             entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
+
+            if self._navroute_retries > 0:
+                logger.debug(f'Navroute read retry [{self._navroute_retries}]')
+                self._navroute_retries -= 1
+                nv_res = self._parse_navroute_file()
+                if (
+                    nv_res is None
+                    or time() - mktime(strptime(nv_res['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) > MAX_NAVROUTE_DISCREPANCY
+                ):
+                    logger.debug(
+                        'Failed to parse navroute. ' + 'trying again...' if self._navroute_retries > 0 else 'Giving up'
+                    )
+
+                    if self._navroute_retries == 0:
+                        self.state['NavRoute'] = None
+
+                else:
+                    self.state['NavRoute'] = nv_res
+                    logger.debug('successfully read navroute file')
+                    self._navroute_retries = 0
 
             event_type = entry['event'].lower()
             if event_type == 'fileheader':
@@ -1306,15 +1333,25 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'navroute':
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
-                with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
-                    try:
-                        entry = json.load(rf)
+                if (nv_json := self._parse_navroute_file()) is not None:
+                    entry_time = mktime(strptime(nv_json['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                    c_time = time()
 
-                    except json.JSONDecodeError:
-                        logger.exception('Failed decoding NavRoute.json', exc_info=True)
+                    if c_time - entry_time > MAX_NAVROUTE_DISCREPANCY:
+                        logger.warning(
+                            f'Parsed NavRoute.json timestamp is off by more than '
+                            f'{MAX_NAVROUTE_DISCREPANCY} ({c_time-entry_time=}).Trying again.'
+                        )
+
+                        self._navroute_retries = 10
 
                     else:
+                        entry = nv_json
                         self.state['NavRoute'] = entry
+
+                else:
+                    logger.info('Failed to decode NavRoute.json. Trying again')
+                    self._navroute_retries = 10
 
             elif event_type == 'moduleinfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
@@ -2156,6 +2193,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             }
 
         return slots
+
+    def _parse_navroute_file(self) -> dict[str, Any] | None:
+        """Read and parse NavRoute.json."""
+        if self.currentdir is None:
+            raise ValueError('currentdir unset')
+
+        with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
+            raw = f.read()
+
+        try:
+            data = json.loads(raw)
+
+        except json.JSONDecodeError:
+            logger.exception('Failed to decode NavRoute.json', exc_info=True)
+            return None
+
+        return data
 
 
 # singleton
