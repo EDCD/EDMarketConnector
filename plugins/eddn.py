@@ -219,7 +219,16 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        encoded, compressed = http.gzip(json.dumps(to_send))
+        # About the smallest request is going to be (newlines added for brevity):
+        # {"$schemaRef":"https://eddn.edcd.io/schemas/shipyard/2","header":{"softwareName":"E:D Market
+        # Connector Windows","softwareVersion":"5.3.0-beta4extra","uploaderID":"abcdefghijklm"},"messa
+        # ge":{"systemName":"delphi","stationName":"The Oracle","marketID":128782803,"timestamp":"xxxx
+        # -xx-xxTxx:xx:xxZ","ships":[]}}
+        #
+        # Which comes to about around 307 bytes. Lets play it safe and make our minimum 0 bytes.
+        # Which compresses everything
+
+        encoded, compressed = http.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
         headers: None | dict[str, str] = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
