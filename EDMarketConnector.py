@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Entry point for the main GUI application."""
+from __future__ import annotations
 
 import argparse
 import html
@@ -14,7 +15,6 @@ import webbrowser
 from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
-from sys import platform
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Optional, Tuple, Union
 
@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Optional, Tuple, Union
 # place for things like config.py reading .gitversion
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
-    if platform == 'win32':
+    if sys.platform == 'win32':
         chdir(dirname(sys.path[0]))
         # Allow executable to be invoked from any cwd
         environ['TCL_LIBRARY'] = join(dirname(sys.path[0]), 'lib', 'tcl')
@@ -234,7 +234,7 @@ if __name__ == '__main__':  # noqa: C901
         """Handle any edmc:// auth callback, else foreground existing window."""
         logger.trace_if('frontier-auth.windows', 'Begin...')
 
-        if platform == 'win32':
+        if sys.platform == 'win32':
 
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
@@ -370,8 +370,9 @@ if __name__ == '__main__':  # noqa: C901
 # isort: off
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
-    import update
-    from infi.systray import SysTrayIcon
+
+    if sys.platform == 'win32':
+        from infi.systray import SysTrayIcon
     # isort: on
 
     def _(x: str) -> str:
@@ -443,7 +444,7 @@ class AppWindow(object):
 
         self.prefsdialog = None
 
-        if platform == 'win32':
+        if sys.platform == 'win32':
             from infi.systray import SysTrayIcon
 
             def open_window(systray: 'SysTrayIcon') -> None:
@@ -456,8 +457,8 @@ class AppWindow(object):
 
         plug.load_plugins(master)
 
-        if platform != 'darwin':
-            if platform == 'win32':
+        if sys.platform != 'darwin':
+            if sys.platform == 'win32':
                 self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
             else:
@@ -527,7 +528,7 @@ class AppWindow(object):
 
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
-        self.theme_button = tk.Label(frame, width=32 if platform == 'darwin' else 28, state=tk.DISABLED)
+        self.theme_button = tk.Label(frame, width=32 if sys.platform == 'darwin' else 28, state=tk.DISABLED)
         self.status = tk.Label(frame, name='status', anchor=tk.W)
 
         ui_row = frame.grid_size()[1]
@@ -540,14 +541,15 @@ class AppWindow(object):
         theme.button_bind(self.theme_button, self.capi_request_data)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            child.grid_configure(padx=self.PADX, pady=(
+                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
         self.updater: update.Updater = None
 
         self.menubar = tk.Menu()
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
             # http://wiki.tcl.tk/13428 and p15 of
             # https://developer.apple.com/legacy/library/documentation/Carbon/Conceptual/HandlingWindowsControls/windowscontrols.pdf
@@ -603,7 +605,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
-            if platform == 'win32':
+            if sys.platform == 'win32':
                 # Must be added after at least one "real" menu entry
                 self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
                 self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
@@ -674,11 +676,11 @@ class AppWindow(object):
         if config.get_str('geometry'):
             match = re.match(r'\+([\-\d]+)\+([\-\d]+)', config.get_str('geometry'))
             if match:
-                if platform == 'darwin':
+                if sys.platform == 'darwin':
                     # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
                     if int(match.group(2)) >= 0:
                         self.w.geometry(config.get_str('geometry'))
-                elif platform == 'win32':
+                elif sys.platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
                     import ctypes
                     from ctypes.wintypes import POINT
@@ -776,7 +778,7 @@ class AppWindow(object):
             self.suit_shown = True
 
         if not self.suit_shown:
-            if platform != 'win32':
+            if sys.platform != 'win32':
                 pady = 2
 
             else:
@@ -826,7 +828,7 @@ class AppWindow(object):
         self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
         self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title on OSX
             self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title on OSX
             self.menubar.entryconfigure(3, label=_('View'))  # LANG: 'View' menu title on OSX
@@ -873,7 +875,7 @@ class AppWindow(object):
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
 
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             self.view_menu.entryconfigure(0, state=tk.DISABLED)  # Status
             self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Save Raw Data
 
@@ -887,7 +889,7 @@ class AppWindow(object):
                 # LANG: Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
 
-                if platform == 'darwin':
+                if sys.platform == 'darwin':
                     self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                     self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
 
@@ -1211,7 +1213,7 @@ class AppWindow(object):
             companion.session.invalidate()
             self.login()
 
-        except companion.ServerConnectionError as e:
+        except companion.ServerConnectionError as e:  # TODO: unreachable (subclass of ServerLagging -- move to above)
             logger.warning(f'Exception while contacting server: {e}')
             err = self.status['text'] = str(e)
             play_bad = True
@@ -1429,7 +1431,7 @@ class AppWindow(object):
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
             self.status['text'] = _('Authentication successful')
-            if platform == 'darwin':
+            if sys.platform == 'darwin':
                 self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
 
@@ -1570,11 +1572,11 @@ class AppWindow(object):
 
             # position over parent
             # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            if platform != 'darwin' or parent.winfo_rooty() > 0:
+            if sys.platform != 'darwin' or parent.winfo_rooty() > 0:
                 self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
 
             # remove decoration
-            if platform == 'win32':
+            if sys.platform == 'win32':
                 self.attributes('-toolwindow', tk.TRUE)
 
             self.resizable(tk.FALSE, tk.FALSE)
@@ -1651,7 +1653,7 @@ class AppWindow(object):
         """
         default_extension: str = ''
 
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             default_extension = '.json'
 
         timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
@@ -1676,7 +1678,7 @@ class AppWindow(object):
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
-        if platform == 'win32':
+        if sys.platform == 'win32':
             shutdown_thread = threading.Thread(target=self.systray.shutdown)
             shutdown_thread.setDaemon(True)
             shutdown_thread.start()
@@ -1684,7 +1686,7 @@ class AppWindow(object):
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-        if platform != 'darwin' or self.w.winfo_rooty() > 0:
+        if sys.platform != 'darwin' or self.w.winfo_rooty() > 0:
             x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
             config.set('geometry', f'+{x}+{y}')
 
