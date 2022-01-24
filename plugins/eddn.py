@@ -28,7 +28,7 @@ from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
-from util import http
+from util import text
 
 if sys.platform != 'win32':
     from fcntl import LOCK_EX, LOCK_NB, lockf
@@ -171,7 +171,7 @@ class EDDN:
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
         if self.replayfile is None:
-            logger.warning('replayfile is None!')
+            logger.error('replayfile is None!')
             return
 
         self.replayfile.seek(0, SEEK_SET)
@@ -220,15 +220,14 @@ class EDDN:
         ])
 
         # About the smallest request is going to be (newlines added for brevity):
-        # {"$schemaRef":"https://eddn.edcd.io/schemas/shipyard/2","header":{"softwareName":"E:D Market
-        # Connector Windows","softwareVersion":"5.3.0-beta4extra","uploaderID":"abcdefghijklm"},"messa
-        # ge":{"systemName":"delphi","stationName":"The Oracle","marketID":128782803,"timestamp":"xxxx
-        # -xx-xxTxx:xx:xxZ","ships":[]}}
+        # {"$schemaRef":"https://eddn.edcd.io/schemas/commodity/3","header":{"softwareName":"E:D Market
+        # Connector Windows","softwareVersion":"5.3.0-beta4extra","uploaderID":"abcdefghijklm"},"messag
+        # e":{"systemName":"delphi","stationName":"The Oracle","marketId":128782803,"timestamp":"2022-0
+        # 1-26T12:00:00Z","commodities":[]}}
         #
-        # Which comes to about around 307 bytes. Lets play it safe and make our minimum 0 bytes.
-        # Which compresses everything
+        # Which comes to 315 bytes (including \n) and compresses to 244 bytes. So lets just compress everything
 
-        encoded, compressed = http.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
+        encoded, compressed = text.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
         headers: None | dict[str, str] = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
@@ -249,7 +248,7 @@ class EDDN:
             from base64 import b64encode  # we dont need this to be around until this point, which may never hit
             if r.status_code == 413:
                 logger.debug(dedent(
-                    f"""\
+                    f'''\
                     Got a 413 while POSTing data
                     URL:\t{r.url}
                     Headers:\t{r.headers}
@@ -257,7 +256,7 @@ class EDDN:
                     Content:\n{r.text}\n
                     Msg:\n{msg}
                     Encoded:\n{b64encode(encoded).decode(errors="replace")}
-                    """
+                    '''
                 ))
 
                 return  # drop the error
