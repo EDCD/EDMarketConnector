@@ -1,4 +1,4 @@
-"""Utilities for dealing with HTTP."""
+"""Utilities for dealing with text (and byte representations thereof)."""
 from __future__ import annotations
 
 from gzip import compress
