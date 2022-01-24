@@ -1,4 +1,5 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
+import gzip
 import json
 import pathlib
 import tempfile
@@ -30,7 +31,15 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 # I cant change it
         """Handle POST."""
         logger.info(f"Received a POST for {self.path!r}!")
-        data = self.rfile.read(int(self.headers['Content-Length'])).decode('utf-8', errors='replace')
+        data_raw: bytes = self.rfile.read(int(self.headers['Content-Length']))
+        data: str | bytes
+
+        if self.headers.get('Content-Encoding') == 'gzip':
+            data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
+
+        else:
+            data = data_raw.decode('utf-8', errors='replace')
+
         to_save = data
 
         target_path = self.path
@@ -64,7 +73,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         target_file = output_data_path / (safe_file_name(target_path) + '.log')
         if target_file.parent != output_data_path:
             logger.warning(f"REFUSING TO WRITE FILE THAT ISN'T IN THE RIGHT PLACE! {target_file=}")
-            logger.warning(f'DATA FOLLOWS\n{data}')
+            logger.warning(f'DATA FOLLOWS\n{data}')  # type: ignore # mypy thinks data is a byte string here
             return
 
         with output_lock, target_file.open('a') as f:
