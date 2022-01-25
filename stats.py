@@ -72,10 +72,11 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
 
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
+        # Names we show people, vs internal names
         (_('Combat'), 'combat'),                # LANG: Ranking
         (_('Trade'), 'trade'),                  # LANG: Ranking
         (_('Explorer'), 'explore'),             # LANG: Ranking
-        (_('Mercenary'), 'mercenary'),          # LANG: Ranking
+        (_('Mercenary'), 'soldier'),            # LANG: Ranking
         (_('Exobiologist'), 'exobiologist'),    # LANG: Ranking
         (_('CQC'), 'cqc'),                      # LANG: Ranking
         (_('Federation'), 'federation'),        # LANG: Ranking
@@ -86,6 +87,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
     ]
 
     RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        # These names are the fdev side name (but lower()ed)
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
         'combat': [
             _('Harmless'),                # LANG: Combat rank
@@ -118,7 +120,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Pioneer'),                 # LANG: Explorer rank
 
         ] + _ELITE_RANKS,
-        'mercenary': [
+        'soldier': [
             _('Defenceless'),               # LANG: Mercenary rank
             _('Mostly Defenceless'),        # LANG: Mercenary rank
             _('Rookie'),                    # LANG: Mercenary rank
