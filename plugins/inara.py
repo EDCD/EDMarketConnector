@@ -419,7 +419,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.station_marketid = None
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
-        current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
+        current_credentials = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
             # Dump starting state to Inara
             if (this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo')):
@@ -844,7 +844,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             if this.fleet != fleet:
                 this.fleet = fleet
-                this.filter_events(current_creds, lambda e: e.name != 'setCommanderShip')
+                this.filter_events(current_credentials, lambda e: e.name != 'setCommanderShip')
 
                 # this.events = [x for x in this.events if x['eventName'] != 'setCommanderShip']  # Remove any unsent
                 for ship in this.fleet:
@@ -857,7 +857,7 @@ def journal_entry(  # noqa: C901, CCR001
                 this.loadout = loadout
 
                 this.filter_events(
-                    current_creds,
+                    current_credentials,
                     lambda e: (
                         e.name != 'setCommanderShipLoadout'
                         or cast(dict, e.data)['shipGameID'] != cast(dict, this.loadout)['shipGameID'])
@@ -898,7 +898,7 @@ def journal_entry(  # noqa: C901, CCR001
                 # Only send on change
                 this.storedmodules = modules
                 # Remove any unsent
-                this.filter_events(current_creds, lambda e: e.name != 'setCommanderStorageModules')
+                this.filter_events(current_credentials, lambda e: e.name != 'setCommanderStorageModules')
 
                 # this.events = list(filter(lambda e: e['eventName'] != 'setCommanderStorageModules', this.events))
                 new_add_event('setCommanderStorageModules', entry['timestamp'], this.storedmodules)
@@ -1227,7 +1227,7 @@ def journal_entry(  # noqa: C901, CCR001
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
-                current_creds, lambda e: e.name not in ('setCommunityGoal', 'setCommanderCommunityGoalProgress')
+                current_credentials, lambda e: e.name not in ('setCommunityGoal', 'setCommanderCommunityGoalProgress')
             )
 
             # this.events = list(filter(
