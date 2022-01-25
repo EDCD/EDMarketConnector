@@ -40,6 +40,13 @@ if platform == 'win32':
         CalculatePopupWindowPosition = None  # type: ignore
 
 
+CR_LINES_START = 1
+CR_LINES_END = 3
+RANK_LINES_START = 3
+RANK_LINES_END = 9
+POWERPLAY_LINES_START = 9
+
+
 def status(data: Dict[str, Any]) -> List[List[str]]:
     """
     Get the current status of the cmdr referred to by data.
@@ -381,17 +388,16 @@ class StatsResults(tk.Toplevel):
         notebook = nb.Notebook(frame)
 
         page = self.addpage(notebook)
-        for thing in stats[1:3]:
+        for thing in stats[CR_LINES_START:CR_LINES_END]:
             # assumes things two and three are money
             self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
 
-        # TODO: Headers, and a bit saner of some splitting up of things here
         self.addpagespacer(page)
-        for thing in stats[3:9]:
+        for thing in stats[RANK_LINES_START:RANK_LINES_END]:
             self.addpagerow(page, thing, with_copy=True)
 
         self.addpagespacer(page)
-        for thing in stats[9:]:
+        for thing in stats[POWERPLAY_LINES_START:]:
             self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
