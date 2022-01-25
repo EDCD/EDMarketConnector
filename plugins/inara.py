@@ -1574,6 +1574,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
     :param data: the data to POST
     :return: success state
     """
+    # NB: As of 2022-01-25 Artie has stated the Inara API does *not* support compression
     r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
     r.raise_for_status()
     reply = r.json()
