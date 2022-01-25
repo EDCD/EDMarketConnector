@@ -56,15 +56,17 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
 
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
-        (_('Combat'), 'combat'),          # LANG: Ranking
-        (_('Trade'), 'trade'),            # LANG: Ranking
-        (_('Explorer'), 'explore'),       # LANG: Ranking
-        (_('CQC'), 'cqc'),                # LANG: Ranking
-        (_('Federation'), 'federation'),  # LANG: Ranking
-        (_('Empire'), 'empire'),          # LANG: Ranking
-        (_('Powerplay'), 'power'),        # LANG: Ranking
-        # ???            , 'crime'),      # LANG: Ranking
-        # ???            , 'service'),    # LANG: Ranking
+        (_('Combat'), 'combat'),                # LANG: Ranking
+        (_('Trade'), 'trade'),                  # LANG: Ranking
+        (_('Explorer'), 'explore'),             # LANG: Ranking
+        (_('Mercenary'), 'mercenary'),          # LANG: Ranking
+        (_('Exobiologist'), 'exobiologist'),    # LANG: Ranking
+        (_('CQC'), 'cqc'),                      # LANG: Ranking
+        (_('Federation'), 'federation'),        # LANG: Ranking
+        (_('Empire'), 'empire'),                # LANG: Ranking
+        (_('Powerplay'), 'power'),              # LANG: Ranking
+        # ???            , 'crime'),            # LANG: Ranking
+        # ???            , 'service'),          # LANG: Ranking
     ]
 
     RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
@@ -101,6 +103,28 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Ranger'),                  # LANG: Explorer rank
             _('Pioneer'),                 # LANG: Explorer rank
             _('Elite')                    # LANG: Top rank
+        ],
+        'mercenary': [
+            _('Defenceless'),               # LANG: Mercenary rank
+            _('Mostly Defenceless'),        # LANG: Mercenary rank
+            _('Rookie'),                    # LANG: Mercenary rank
+            _('Soldier'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Warrior'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Deadeye'),                   # LANG: Mercenary rank
+            _('Elite'),                     # LANG: Top rank
+        ],
+        'exobiologist': [
+            _('Directionless'),             # LANG: Exobiologist rank
+            _('Mostly Directionless'),      # LANG: Exobiologist rank
+            _('Compiler'),                  # LANG: Exobiologist rank
+            _('Collector'),                 # LANG: Exobiologist rank
+            _('Cataloguer'),                # LANG: Exobiologist rank
+            _('Taxonomist'),                # LANG: Exobiologist rank
+            _('Ecologist'),                 # LANG: Exobiologist rank
+            _('Geneticist'),                # LANG: Exobiologist rank
+            _('Elite'),                     # LANG: Top rank
         ],
         'cqc': [
             _('Helpless'),                # LANG: CQC rank
@@ -167,6 +191,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
     for title, thing in RANKS:
         rank = ranks.get(thing)
         names = RANK_NAMES[thing]
+        # TODO: handle Elite I-V here.
         if isinstance(rank, int):
             res.append([title, names[rank] if rank < len(names) else f'Rank {rank}'])
 
@@ -357,7 +382,13 @@ class StatsResults(tk.Toplevel):
             # assumes things two and three are money
             self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
 
-        for thing in stats[3:]:
+        # TODO: Headers, and a bit saner of some splitting up of things here
+        self.addpagespacer(page)
+        for thing in stats[3:9]:
+            self.addpagerow(page, thing, with_copy=True)
+
+        self.addpagespacer(page)
+        for thing in stats[9:]:
             self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
