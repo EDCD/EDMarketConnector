@@ -45,12 +45,6 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
             case _:
                 data = data_raw.decode('utf-8', errors='replace')
 
-        if self.headers.get('Content-Encoding') == 'gzip':
-            data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
-
-        else:
-            data = data_raw.decode('utf-8', errors='replace')
-
         to_save = data
 
         target_path = self.path
