@@ -31,7 +31,7 @@
 /* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:230; inara.py:233; load.py:230; load.py:233; edsm.py:274; inara.py:243; */
 "API Key" = "API Key";
 
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:143; stats.py:162; stats.py:181; stats.py:199; */
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:147; stats.py:166; stats.py:185; stats.py:203; */
 "None" = "None";
 
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:622; edsm.py:724; load.py:627; load.py:729; edsm.py:747; edsm.py:875; */
@@ -136,16 +136,16 @@
 /* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
 "Role" = "Role";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:398; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:402; */
 "Ship" = "Ship";
 
 /* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:825; */
 "Suit" = "Suit";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:400; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:404; */
 "System" = "System";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:401; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:405; */
 "Station" = "Station";
 
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2019; */
@@ -172,7 +172,7 @@
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
 "Save Raw Data..." = "Save Raw Data...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:395; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:399; */
 "Status" = "Status";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
@@ -223,13 +223,13 @@
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
 "Fetching data..." = "Fetching data...";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:323; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:327; */
 "Who are you?!" = "Who are you?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:333; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:337; */
 "Where are you?!" = "Where are you?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:341; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:345; */
 "What are you flying?!" = "What are you flying?!";
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1176; */
@@ -451,281 +451,297 @@
 /* stats.py: Cmdr stats; In files: stats.py:54; */
 "Loan" = "Loan";
 
-/* stats.py: Ranking; In files: stats.py:59; */
-"Combat" = "Combat";
-
-/* stats.py: Ranking; In files: stats.py:60; */
-"Trade" = "Trade";
-
-/* stats.py: Ranking; In files: stats.py:61; */
-"Explorer" = "Explorer";
-
-/* stats.py: Ranking; In files: stats.py:62; */
-"Mercenary" = "Mercenary";
-
-/* stats.py: Ranking; In files: stats.py:63; */
-"Exobiologist" = "Exobiologist";
-
-/* stats.py: Ranking; In files: stats.py:64; */
-"CQC" = "CQC";
-
-/* stats.py: Ranking; In files: stats.py:65; */
-"Federation" = "Federation";
-
-/* stats.py: Ranking; In files: stats.py:66; */
-"Empire" = "Empire";
-
-/* stats.py: Ranking; In files: stats.py:67; */
-"Powerplay" = "Powerplay";
-
-/* stats.py: Combat rank; In files: stats.py:75; */
-"Harmless" = "Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:76; */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:77; */
-"Novice" = "Novice";
-
-/* stats.py: Combat rank; In files: stats.py:78; */
-"Competent" = "Competent";
-
-/* stats.py: Combat rank; In files: stats.py:79; */
-"Expert" = "Expert";
-
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:80; stats.py:165; */
-"Master" = "Master";
-
-/* stats.py: Combat rank; In files: stats.py:81; */
-"Dangerous" = "Dangerous";
-
-/* stats.py: Combat rank; In files: stats.py:82; */
-"Deadly" = "Deadly";
-
-/* stats.py: Top rank; In files: stats.py:83; stats.py:94; stats.py:105; stats.py:116; stats.py:127; stats.py:138; */
+/* stats.py: Top rank; In files: stats.py:58; */
 "Elite" = "Elite";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Top rank +1; In files: stats.py:59; */
+"Elite I" = "Elite I";
+
+/* stats.py: Top rank +2; In files: stats.py:60; */
+"Elite II" = "Elite II";
+
+/* stats.py: Top rank +3; In files: stats.py:61; */
+"Elite III" = "Elite III";
+
+/* stats.py: Top rank +4; In files: stats.py:62; */
+"Elite IV" = "Elite IV";
+
+/* stats.py: Top rank +5; In files: stats.py:63; */
+"Elite V" = "Elite V";
+
+/* stats.py: Ranking; In files: stats.py:68; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:69; */
+"Trade" = "Trade";
+
+/* stats.py: Ranking; In files: stats.py:70; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:71; */
+"Mercenary" = "Mercenary";
+
+/* stats.py: Ranking; In files: stats.py:72; */
+"Exobiologist" = "Exobiologist";
+
+/* stats.py: Ranking; In files: stats.py:73; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:74; */
+"Federation" = "Federation";
+
+/* stats.py: Ranking; In files: stats.py:75; */
+"Empire" = "Empire";
+
+/* stats.py: Ranking; In files: stats.py:76; */
+"Powerplay" = "Powerplay";
+
+/* stats.py: Combat rank; In files: stats.py:84; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:85; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:86; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:87; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:88; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:89; stats.py:169; */
+"Master" = "Master";
+
+/* stats.py: Combat rank; In files: stats.py:90; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:91; */
+"Deadly" = "Deadly";
+
+/* stats.py: Trade rank; In files: stats.py:94; */
 "Penniless" = "Penniless";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:95; */
 "Mostly Penniless" = "Mostly Penniless";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:96; */
 "Peddler" = "Peddler";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:97; */
 "Dealer" = "Dealer";
 
-/* stats.py: Trade rank; In files: stats.py:90; */
+/* stats.py: Trade rank; In files: stats.py:98; */
 "Merchant" = "Merchant";
 
-/* stats.py: Trade rank; In files: stats.py:91; */
+/* stats.py: Trade rank; In files: stats.py:99; */
 "Broker" = "Broker";
 
-/* stats.py: Trade rank; In files: stats.py:92; */
+/* stats.py: Trade rank; In files: stats.py:100; */
 "Entrepreneur" = "Entrepreneur";
 
-/* stats.py: Trade rank; In files: stats.py:93; */
+/* stats.py: Trade rank; In files: stats.py:101; */
 "Tycoon" = "Tycoon";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:104; */
 "Aimless" = "Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:105; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:106; */
 "Scout" = "Scout";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:107; */
 "Surveyor" = "Surveyor";
 
-/* stats.py: Explorer rank; In files: stats.py:101; */
+/* stats.py: Explorer rank; In files: stats.py:108; */
 "Trailblazer" = "Trailblazer";
 
-/* stats.py: Explorer rank; In files: stats.py:102; */
+/* stats.py: Explorer rank; In files: stats.py:109; */
 "Pathfinder" = "Pathfinder";
 
-/* stats.py: Explorer rank; In files: stats.py:103; */
+/* stats.py: Explorer rank; In files: stats.py:110; */
 "Ranger" = "Ranger";
 
-/* stats.py: Explorer rank; In files: stats.py:104; */
+/* stats.py: Explorer rank; In files: stats.py:111; */
 "Pioneer" = "Pioneer";
 
-/* stats.py: Mercenary rank; In files: stats.py:108; */
+/* stats.py: Mercenary rank; In files: stats.py:115; */
 "Defenceless" = "Defenceless";
 
-/* stats.py: Mercenary rank; In files: stats.py:109; */
+/* stats.py: Mercenary rank; In files: stats.py:116; */
 "Mostly Defenceless" = "Mostly Defenceless";
 
-/* stats.py: Mercenary rank; In files: stats.py:110; */
+/* stats.py: Mercenary rank; In files: stats.py:117; */
 "Rookie" = "Rookie";
 
-/* stats.py: Mercenary rank; In files: stats.py:111; */
+/* stats.py: Mercenary rank; In files: stats.py:118; */
 "Soldier" = "Soldier";
 
-/* stats.py: Mercenary rank; In files: stats.py:112; stats.py:114; */
+/* stats.py: Mercenary rank; In files: stats.py:119; stats.py:121; */
 "Gunslinger" = "Gunslinger";
 
-/* stats.py: Mercenary rank; In files: stats.py:113; */
+/* stats.py: Mercenary rank; In files: stats.py:120; */
 "Warrior" = "Warrior";
 
-/* stats.py: Mercenary rank; In files: stats.py:115; */
+/* stats.py: Mercenary rank; In files: stats.py:122; */
 "Deadeye" = "Deadeye";
 
-/* stats.py: Exobiologist rank; In files: stats.py:119; */
+/* stats.py: Exobiologist rank; In files: stats.py:125; */
 "Directionless" = "Directionless";
 
-/* stats.py: Exobiologist rank; In files: stats.py:120; */
+/* stats.py: Exobiologist rank; In files: stats.py:126; */
 "Mostly Directionless" = "Mostly Directionless";
 
-/* stats.py: Exobiologist rank; In files: stats.py:121; */
+/* stats.py: Exobiologist rank; In files: stats.py:127; */
 "Compiler" = "Compiler";
 
-/* stats.py: Exobiologist rank; In files: stats.py:122; */
+/* stats.py: Exobiologist rank; In files: stats.py:128; */
 "Collector" = "Collector";
 
-/* stats.py: Exobiologist rank; In files: stats.py:123; */
+/* stats.py: Exobiologist rank; In files: stats.py:129; */
 "Cataloguer" = "Cataloguer";
 
-/* stats.py: Exobiologist rank; In files: stats.py:124; */
+/* stats.py: Exobiologist rank; In files: stats.py:130; */
 "Taxonomist" = "Taxonomist";
 
-/* stats.py: Exobiologist rank; In files: stats.py:125; */
+/* stats.py: Exobiologist rank; In files: stats.py:131; */
 "Ecologist" = "Ecologist";
 
-/* stats.py: Exobiologist rank; In files: stats.py:126; */
+/* stats.py: Exobiologist rank; In files: stats.py:132; */
 "Geneticist" = "Geneticist";
 
-/* stats.py: CQC rank; In files: stats.py:130; */
+/* stats.py: CQC rank; In files: stats.py:135; */
 "Helpless" = "Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:131; */
+/* stats.py: CQC rank; In files: stats.py:136; */
 "Mostly Helpless" = "Mostly Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:132; */
+/* stats.py: CQC rank; In files: stats.py:137; */
 "Amateur" = "Amateur";
 
-/* stats.py: CQC rank; In files: stats.py:133; */
+/* stats.py: CQC rank; In files: stats.py:138; */
 "Semi Professional" = "Semi Professional";
 
-/* stats.py: CQC rank; In files: stats.py:134; */
+/* stats.py: CQC rank; In files: stats.py:139; */
 "Professional" = "Professional";
 
-/* stats.py: CQC rank; In files: stats.py:135; */
+/* stats.py: CQC rank; In files: stats.py:140; */
 "Champion" = "Champion";
 
-/* stats.py: CQC rank; In files: stats.py:136; */
+/* stats.py: CQC rank; In files: stats.py:141; */
 "Hero" = "Hero";
 
-/* stats.py: CQC rank; In files: stats.py:137; */
+/* stats.py: CQC rank; In files: stats.py:142; */
 "Gladiator" = "Gladiator";
 
-/* stats.py: Federation rank; In files: stats.py:144; */
+/* stats.py: Federation rank; In files: stats.py:148; */
 "Recruit" = "Recruit";
 
-/* stats.py: Federation rank; In files: stats.py:145; */
+/* stats.py: Federation rank; In files: stats.py:149; */
 "Cadet" = "Cadet";
 
-/* stats.py: Federation rank; In files: stats.py:146; */
+/* stats.py: Federation rank; In files: stats.py:150; */
 "Midshipman" = "Midshipman";
 
-/* stats.py: Federation rank; In files: stats.py:147; */
+/* stats.py: Federation rank; In files: stats.py:151; */
 "Petty Officer" = "Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:148; */
+/* stats.py: Federation rank; In files: stats.py:152; */
 "Chief Petty Officer" = "Chief Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:149; */
+/* stats.py: Federation rank; In files: stats.py:153; */
 "Warrant Officer" = "Warrant Officer";
 
-/* stats.py: Federation rank; In files: stats.py:150; */
+/* stats.py: Federation rank; In files: stats.py:154; */
 "Ensign" = "Ensign";
 
-/* stats.py: Federation rank; In files: stats.py:151; */
+/* stats.py: Federation rank; In files: stats.py:155; */
 "Lieutenant" = "Lieutenant";
 
-/* stats.py: Federation rank; In files: stats.py:152; */
+/* stats.py: Federation rank; In files: stats.py:156; */
 "Lieutenant Commander" = "Lieutenant Commander";
 
-/* stats.py: Federation rank; In files: stats.py:153; */
+/* stats.py: Federation rank; In files: stats.py:157; */
 "Post Commander" = "Post Commander";
 
-/* stats.py: Federation rank; In files: stats.py:154; */
+/* stats.py: Federation rank; In files: stats.py:158; */
 "Post Captain" = "Post Captain";
 
-/* stats.py: Federation rank; In files: stats.py:155; */
+/* stats.py: Federation rank; In files: stats.py:159; */
 "Rear Admiral" = "Rear Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:156; */
+/* stats.py: Federation rank; In files: stats.py:160; */
 "Vice Admiral" = "Vice Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:157; */
+/* stats.py: Federation rank; In files: stats.py:161; */
 "Admiral" = "Admiral";
 
-/* stats.py: Empire rank; In files: stats.py:163; */
+/* stats.py: Empire rank; In files: stats.py:167; */
 "Outsider" = "Outsider";
 
-/* stats.py: Empire rank; In files: stats.py:164; */
+/* stats.py: Empire rank; In files: stats.py:168; */
 "Serf" = "Serf";
 
-/* stats.py: Empire rank; In files: stats.py:166; */
+/* stats.py: Empire rank; In files: stats.py:170; */
 "Squire" = "Squire";
 
-/* stats.py: Empire rank; In files: stats.py:167; */
+/* stats.py: Empire rank; In files: stats.py:171; */
 "Knight" = "Knight";
 
-/* stats.py: Empire rank; In files: stats.py:168; */
+/* stats.py: Empire rank; In files: stats.py:172; */
 "Lord" = "Lord";
 
-/* stats.py: Empire rank; In files: stats.py:169; */
+/* stats.py: Empire rank; In files: stats.py:173; */
 "Baron" = "Baron";
 
-/* stats.py: Empire rank; In files: stats.py:170; */
+/* stats.py: Empire rank; In files: stats.py:174; */
 "Viscount" = "Viscount";
 
-/* stats.py: Empire rank; In files: stats.py:171; */
+/* stats.py: Empire rank; In files: stats.py:175; */
 "Count" = "Count";
 
-/* stats.py: Empire rank; In files: stats.py:172; */
+/* stats.py: Empire rank; In files: stats.py:176; */
 "Earl" = "Earl";
 
-/* stats.py: Empire rank; In files: stats.py:173; */
+/* stats.py: Empire rank; In files: stats.py:177; */
 "Marquis" = "Marquis";
 
-/* stats.py: Empire rank; In files: stats.py:174; */
+/* stats.py: Empire rank; In files: stats.py:178; */
 "Duke" = "Duke";
 
-/* stats.py: Empire rank; In files: stats.py:175; */
+/* stats.py: Empire rank; In files: stats.py:179; */
 "Prince" = "Prince";
 
-/* stats.py: Empire rank; In files: stats.py:176; */
+/* stats.py: Empire rank; In files: stats.py:180; */
 "King" = "King";
 
-/* stats.py: Power rank; In files: stats.py:182; */
+/* stats.py: Power rank; In files: stats.py:186; */
 "Rating 1" = "Rating 1";
 
-/* stats.py: Power rank; In files: stats.py:183; */
+/* stats.py: Power rank; In files: stats.py:187; */
 "Rating 2" = "Rating 2";
 
-/* stats.py: Power rank; In files: stats.py:184; */
+/* stats.py: Power rank; In files: stats.py:188; */
 "Rating 3" = "Rating 3";
 
-/* stats.py: Power rank; In files: stats.py:185; */
+/* stats.py: Power rank; In files: stats.py:189; */
 "Rating 4" = "Rating 4";
 
-/* stats.py: Power rank; In files: stats.py:186; */
+/* stats.py: Power rank; In files: stats.py:190; */
 "Rating 5" = "Rating 5";
 
-/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:305; */
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:309; */
 "Status: Don't yet know your Commander name" = "Status: Don't yet know your Commander name";
 
-/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:313; */
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:317; */
 "Status: No CAPI data yet" = "Status: No CAPI data yet";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:402; */
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:406; */
 "Value" = "Value";
 
-/* stats.py: Status dialog title; In files: stats.py:411; */
+/* stats.py: Status dialog title; In files: stats.py:415; */
 "Ships" = "Ships";
+

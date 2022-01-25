@@ -54,6 +54,15 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
+    _ELITE_RANKS = [
+        _('Elite'),      # LANG: Top rank
+        _('Elite I'),    # LANG: Top rank +1
+        _('Elite II'),   # LANG: Top rank +2
+        _('Elite III'),  # LANG: Top rank +3
+        _('Elite IV'),   # LANG: Top rank +4
+        _('Elite V'),    # LANG: Top rank +5
+    ]
+
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
         (_('Combat'), 'combat'),                # LANG: Ranking
@@ -80,8 +89,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Master'),                  # LANG: Combat rank
             _('Dangerous'),               # LANG: Combat rank
             _('Deadly'),                  # LANG: Combat rank
-            _('Elite'),                   # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'trade': [
             _('Penniless'),               # LANG: Trade rank
             _('Mostly Penniless'),        # LANG: Trade rank
@@ -91,8 +99,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Broker'),                  # LANG: Trade rank
             _('Entrepreneur'),            # LANG: Trade rank
             _('Tycoon'),                  # LANG: Trade rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'explore': [
             _('Aimless'),                 # LANG: Explorer rank
             _('Mostly Aimless'),          # LANG: Explorer rank
@@ -102,8 +109,8 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Pathfinder'),              # LANG: Explorer rank
             _('Ranger'),                  # LANG: Explorer rank
             _('Pioneer'),                 # LANG: Explorer rank
-            _('Elite')                    # LANG: Top rank
-        ],
+
+        ] + _ELITE_RANKS,
         'mercenary': [
             _('Defenceless'),               # LANG: Mercenary rank
             _('Mostly Defenceless'),        # LANG: Mercenary rank
@@ -113,8 +120,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Warrior'),                   # LANG: Mercenary rank
             _('Gunslinger'),                # LANG: Mercenary rank
             _('Deadeye'),                   # LANG: Mercenary rank
-            _('Elite'),                     # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'exobiologist': [
             _('Directionless'),             # LANG: Exobiologist rank
             _('Mostly Directionless'),      # LANG: Exobiologist rank
@@ -124,8 +130,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Taxonomist'),                # LANG: Exobiologist rank
             _('Ecologist'),                 # LANG: Exobiologist rank
             _('Geneticist'),                # LANG: Exobiologist rank
-            _('Elite'),                     # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'cqc': [
             _('Helpless'),                # LANG: CQC rank
             _('Mostly Helpless'),         # LANG: CQC rank
@@ -135,8 +140,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Champion'),                # LANG: CQC rank
             _('Hero'),                    # LANG: CQC rank
             _('Gladiator'),               # LANG: CQC rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
 
         # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
         'federation': [
@@ -191,7 +195,6 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
     for title, thing in RANKS:
         rank = ranks.get(thing)
         names = RANK_NAMES[thing]
-        # TODO: handle Elite I-V here.
         if isinstance(rank, int):
             res.append([title, names[rank] if rank < len(names) else f'Rank {rank}'])
 
