@@ -426,16 +426,6 @@ def journal_entry(  # noqa: C901, CCR001
                 this.newuser = False
                 this.newsession = False
 
-                # Send rank info to Inara on startup
-                new_add_event(
-                    'setCommanderRankPilot',
-                    entry['timestamp'],
-                    [
-                        {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
-                        for k, v in state['Rank'].items() if v is not None
-                    ]
-                )
-
                 # Don't send the API call with no values.
                 if state['Reputation']:
                     new_add_event(
@@ -502,6 +492,18 @@ def journal_entry(  # noqa: C901, CCR001
 
                     this.loadout = make_loadout(state)
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
+
+            # Login-time Ranks
+            elif event_name == 'Rank':
+                # Send rank info to Inara on startup
+                new_add_event(
+                    'setCommanderRankPilot',
+                    entry['timestamp'],
+                    [
+                        {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
+                        for k, v in state['Rank'].items() if v is not None
+                    ]
+                )
 
             # Promotions
             elif event_name == 'Promotion':
