@@ -54,7 +54,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
-    _ELITE_RANKS = [
+    _ELITE_RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         _('Elite'),      # LANG: Top rank
         _('Elite I'),    # LANG: Top rank +1
         _('Elite II'),   # LANG: Top rank +2
