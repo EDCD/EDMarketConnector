@@ -115,6 +115,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
         self._navroute_retries = 0
+        self._navroute_orig_time: Optional[float] = None
 
         self.__init_state()
 
@@ -505,9 +506,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 logger.debug(f'Navroute read retry [{self._navroute_retries}]')
                 self._navroute_retries -= 1
                 nv_res = self._parse_navroute_file()
+                if self._navroute_orig_time is None:
+                    logger.critical('Asked to retry for navroute but also no set time to compare? This is a bug.')
+
                 if (
                     nv_res is None
-                    or time() - mktime(strptime(nv_res['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) > MAX_NAVROUTE_DISCREPANCY
+                    or self._navroute_orig_time is None
+                    or self._navroute_orig_time - self._parse_time(nv_res['timestamp']) > MAX_NAVROUTE_DISCREPANCY
                 ):
                     logger.debug(
                         'Failed to parse navroute. ' + 'trying again...' if self._navroute_retries > 0 else 'Giving up'
@@ -520,6 +525,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['NavRoute'] = nv_res
                     logger.debug('successfully read navroute file')
                     self._navroute_retries = 0
+                    self._navroute_orig_time = None
 
             event_type = entry['event'].lower()
             if event_type == 'fileheader':
@@ -1332,26 +1338,30 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Taxi'] = False
 
             elif event_type == 'navroute':
+                # assume we've failed out the gate, then pull it back if things are fine
+                self._navroute_orig_time = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._navroute_retries = 10
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
-                if (nv_json := self._parse_navroute_file()) is not None:
-                    entry_time = mktime(strptime(nv_json['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                    c_time = time()
+                if (nv_json := self._parse_navroute_file()) is not None and 'timestamp' in nv_json:
+                    file_time = mktime(strptime(nv_json['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
 
-                    if c_time - entry_time > MAX_NAVROUTE_DISCREPANCY:
+                    if self._navroute_orig_time - file_time > MAX_NAVROUTE_DISCREPANCY:
                         logger.warning(
                             f'Parsed NavRoute.json timestamp is off by more than '
-                            f'{MAX_NAVROUTE_DISCREPANCY} ({c_time-entry_time=}).Trying again.'
+                            f'{MAX_NAVROUTE_DISCREPANCY} ({self._navroute_orig_time-file_time=}).Trying again.'
                         )
 
-                        self._navroute_retries = 10
-
                     else:
+                        # TODO: rather update entry here, overwriting existing fields but leaving others?
+
+                        # everything is happy, dont retry, dont set the original time, proceed as expected.
                         entry = nv_json
                         self.state['NavRoute'] = entry
+                        self._navroute_retries = 0
+                        self._navroute_orig_time = None
 
                 else:
                     logger.info('Failed to decode NavRoute.json. Trying again')
-                    self._navroute_retries = 10
 
             elif event_type == 'moduleinfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
@@ -2194,10 +2204,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return slots
 
-    def _parse_navroute_file(self) -> dict[str, Any] | None:
+    def _parse_navroute_file(self) -> Optional[dict[str, Any]]:
         """Read and parse NavRoute.json."""
         if self.currentdir is None:
             raise ValueError('currentdir unset')
+
+        if not (pathlib.Path(self.currentdir) / 'NavRoute.json').exists():
+            return None
 
         with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
             raw = f.read()
@@ -2209,7 +2222,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             logger.exception('Failed to decode NavRoute.json', exc_info=True)
             return None
 
+        if 'timestamp' not in data:  # quick sanity check
+            return None
+
         return data
+
+    @staticmethod
+    def _parse_time(source: str) -> float:
+        return mktime(strptime(source, '%Y-%m-%dT%H:%M:%SZ'))
 
 
 # singleton
