@@ -35,15 +35,13 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         data_raw: bytes = self.rfile.read(int(self.headers['Content-Length']))
         data: str | bytes
 
-        match self.headers.get('Content-Encoding'):
-            case 'gzip':
-                data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
+        encoding = self.headers.get('Content-Encoding')
 
-            case 'deflate':
-                zlib.decompress(data_raw).decode('utf-8', errors='replace')
+        if encoding in ('gzip', 'deflate'):
+            data = zlib.decompress(data_raw).decode('utf-8', errors='replace')
 
-            case _:
-                data = data_raw.decode('utf-8', errors='replace')
+        else:
+            data = data_raw.decode('utf-8', errors='replace')
 
         to_save = data
 
