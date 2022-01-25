@@ -76,7 +76,7 @@ class This:
         self.suppress_docked = False  # Skip initial Docked event if started docked
         self.cargo: Optional[List[OrderedDictT[str, Any]]] = None
         self.materials: Optional[List[OrderedDictT[str, Any]]] = None
-        self.lastcredits: int = 0  # Send credit update soon after Startup / new game
+        self.last_credits: int = 0  # Send credit update soon after Startup / new game
         self.storedmodules: Optional[List[OrderedDictT[str, Any]]] = None
         self.loadout: Optional[OrderedDictT[str, Any]] = None
         self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
@@ -372,7 +372,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.suppress_docked = False
         this.cargo = None
         this.materials = None
-        this.lastcredits = 0
+        this.last_credits = 0
         this.storedmodules = None
         this.loadout = None
         this.fleet = None
@@ -383,8 +383,8 @@ def journal_entry(  # noqa: C901, CCR001
         this.station_marketid = None
 
     elif event_name in ('Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy'):
-        # Events that mean a significant change in credits so we should send credits after next "Update"
-        this.lastcredits = 0
+        # Events that mean a significant change in credits, so we should send credits after next "Update"
+        this.last_credits = 0
 
     elif event_name in ('ShipyardNew', 'ShipyardSwap') or (event_name == 'Location' and entry['Docked']):
         this.suppress_docked = True
@@ -739,7 +739,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # We want to utilise some Statistics data, so don't setCommanderCredits here
         if event_name == 'LoadGame':
-            this.lastcredits = state['Credits']
+            this.last_credits = state['Credits']
 
         elif event_name == 'Statistics':
             inara_data = {
@@ -1356,7 +1356,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_link.update_idletasks()
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
+        if not (CREDIT_RATIO > this.last_credits / data['commander']['credits'] > 1 / CREDIT_RATIO):
             this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
                 lambda e: e.name != 'setCommanderCredits'
@@ -1372,7 +1372,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
                 }
             )
 
-            this.lastcredits = int(data['commander']['credits'])
+            this.last_credits = int(data['commander']['credits'])
 
 
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
