@@ -40,6 +40,13 @@ if platform == 'win32':
         CalculatePopupWindowPosition = None  # type: ignore
 
 
+CR_LINES_START = 1
+CR_LINES_END = 3
+RANK_LINES_START = 3
+RANK_LINES_END = 9
+POWERPLAY_LINES_START = 9
+
+
 def status(data: Dict[str, Any]) -> List[List[str]]:
     """
     Get the current status of the cmdr referred to by data.
@@ -54,20 +61,33 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
+    _ELITE_RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        _('Elite'),      # LANG: Top rank
+        _('Elite I'),    # LANG: Top rank +1
+        _('Elite II'),   # LANG: Top rank +2
+        _('Elite III'),  # LANG: Top rank +3
+        _('Elite IV'),   # LANG: Top rank +4
+        _('Elite V'),    # LANG: Top rank +5
+    ]
+
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
-        (_('Combat'), 'combat'),          # LANG: Ranking
-        (_('Trade'), 'trade'),            # LANG: Ranking
-        (_('Explorer'), 'explore'),       # LANG: Ranking
-        (_('CQC'), 'cqc'),                # LANG: Ranking
-        (_('Federation'), 'federation'),  # LANG: Ranking
-        (_('Empire'), 'empire'),          # LANG: Ranking
-        (_('Powerplay'), 'power'),        # LANG: Ranking
-        # ???            , 'crime'),      # LANG: Ranking
-        # ???            , 'service'),    # LANG: Ranking
+        # Names we show people, vs internal names
+        (_('Combat'), 'combat'),                # LANG: Ranking
+        (_('Trade'), 'trade'),                  # LANG: Ranking
+        (_('Explorer'), 'explore'),             # LANG: Ranking
+        (_('Mercenary'), 'soldier'),            # LANG: Ranking
+        (_('Exobiologist'), 'exobiologist'),    # LANG: Ranking
+        (_('CQC'), 'cqc'),                      # LANG: Ranking
+        (_('Federation'), 'federation'),        # LANG: Ranking
+        (_('Empire'), 'empire'),                # LANG: Ranking
+        (_('Powerplay'), 'power'),              # LANG: Ranking
+        # ???            , 'crime'),            # LANG: Ranking
+        # ???            , 'service'),          # LANG: Ranking
     ]
 
     RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        # These names are the fdev side name (but lower()ed)
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
         'combat': [
             _('Harmless'),                # LANG: Combat rank
@@ -78,8 +98,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Master'),                  # LANG: Combat rank
             _('Dangerous'),               # LANG: Combat rank
             _('Deadly'),                  # LANG: Combat rank
-            _('Elite'),                   # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'trade': [
             _('Penniless'),               # LANG: Trade rank
             _('Mostly Penniless'),        # LANG: Trade rank
@@ -89,8 +108,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Broker'),                  # LANG: Trade rank
             _('Entrepreneur'),            # LANG: Trade rank
             _('Tycoon'),                  # LANG: Trade rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'explore': [
             _('Aimless'),                 # LANG: Explorer rank
             _('Mostly Aimless'),          # LANG: Explorer rank
@@ -100,8 +118,28 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Pathfinder'),              # LANG: Explorer rank
             _('Ranger'),                  # LANG: Explorer rank
             _('Pioneer'),                 # LANG: Explorer rank
-            _('Elite')                    # LANG: Top rank
-        ],
+
+        ] + _ELITE_RANKS,
+        'soldier': [
+            _('Defenceless'),               # LANG: Mercenary rank
+            _('Mostly Defenceless'),        # LANG: Mercenary rank
+            _('Rookie'),                    # LANG: Mercenary rank
+            _('Soldier'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Warrior'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Deadeye'),                   # LANG: Mercenary rank
+        ] + _ELITE_RANKS,
+        'exobiologist': [
+            _('Directionless'),             # LANG: Exobiologist rank
+            _('Mostly Directionless'),      # LANG: Exobiologist rank
+            _('Compiler'),                  # LANG: Exobiologist rank
+            _('Collector'),                 # LANG: Exobiologist rank
+            _('Cataloguer'),                # LANG: Exobiologist rank
+            _('Taxonomist'),                # LANG: Exobiologist rank
+            _('Ecologist'),                 # LANG: Exobiologist rank
+            _('Geneticist'),                # LANG: Exobiologist rank
+        ] + _ELITE_RANKS,
         'cqc': [
             _('Helpless'),                # LANG: CQC rank
             _('Mostly Helpless'),         # LANG: CQC rank
@@ -111,8 +149,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Champion'),                # LANG: CQC rank
             _('Hero'),                    # LANG: CQC rank
             _('Gladiator'),               # LANG: CQC rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
 
         # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
         'federation': [
@@ -353,11 +390,16 @@ class StatsResults(tk.Toplevel):
         notebook = nb.Notebook(frame)
 
         page = self.addpage(notebook)
-        for thing in stats[1:3]:
+        for thing in stats[CR_LINES_START:CR_LINES_END]:
             # assumes things two and three are money
             self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
 
-        for thing in stats[3:]:
+        self.addpagespacer(page)
+        for thing in stats[RANK_LINES_START:RANK_LINES_END]:
+            self.addpagerow(page, thing, with_copy=True)
+
+        self.addpagespacer(page)
+        for thing in stats[POWERPLAY_LINES_START:]:
             self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
