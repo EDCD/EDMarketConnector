@@ -4,6 +4,7 @@ import json
 import pathlib
 import tempfile
 import threading
+import zlib
 from http import server
 from typing import Any, Callable, Tuple, Union
 from urllib.parse import parse_qs
@@ -33,6 +34,16 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         logger.info(f"Received a POST for {self.path!r}!")
         data_raw: bytes = self.rfile.read(int(self.headers['Content-Length']))
         data: str | bytes
+
+        match self.headers.get('Content-Encoding'):
+            case 'gzip':
+                data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
+
+            case 'deflate':
+                zlib.decompress(data_raw).decode('utf-8', errors='replace')
+
+            case _:
+                data = data_raw.decode('utf-8', errors='replace')
 
         if self.headers.get('Content-Encoding') == 'gzip':
             data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
