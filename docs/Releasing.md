@@ -446,3 +446,5 @@ When changing the Python version (Major.Minor.Patch) used:
        pythonXX.dll file.
     3. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.
+    4. All `.github/workflows/` files will need to be citing the correct
+       version in any `uses: actions/setup-python` section.
