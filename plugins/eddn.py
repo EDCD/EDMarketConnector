@@ -245,33 +245,39 @@ class EDDN:
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
-            from base64 import b64encode  # we dont need this to be around until this point, which may never hit
             if r.status_code == 413:
-                logger.debug(dedent(
-                    f'''\
-                    Got a 413 while POSTing data
-                    URL:\t{r.url}
-                    Headers:\t{r.headers}
-                    Sent Data Len:\t {len(encoded)}
-                    Content:\n{r.text}\n
-                    Msg:\n{msg}
-                    Encoded:\n{b64encode(encoded).decode(errors="replace")}
-                    '''
-                ))
-
+                self._log_response(r, header_msg='Got a 413 while POSTing data', sent_data_len=str(len(encoded)))
                 return  # drop the error
 
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
-                logger.debug(dedent(
-                    f'''Status from POST wasn't OK:
-                        Status\t{r.status_code}
-                        URL\t{r.url}
-                        Headers\t{r.headers}
-                        Content:\n{r.text}
-                        Msg:\n{msg}'''
-                ))
+                self._log_response(r, header_msg='Status from POST wasn\'t 200 (OK)')
 
         r.raise_for_status()
+
+    def _log_response(
+        self,
+        response: requests.Response,
+        header_msg='Failed to POST to EDDN',
+        **kwargs
+    ) -> None:
+        """
+        Log a response object with optional additional data.
+
+        :param response: The response to log
+        :param header_msg: A header message to add to the log, defaults to 'Failed to POST to EDDN'
+        :param kwargs: Any other notes to add, will be added below the main data in the same format.
+        """
+        additional_data = "\n".join(
+            f'''{name.replace('_', ' ').title():<8}:\t{value}''' for name, value in kwargs.items()
+        )
+
+        logger.debug(dedent(f'''
+        {header_msg}:
+        Status  :\t{response.status_code}
+        URL     :\t{response.url}
+        Headers :\t{response.headers}
+        Content :\t{response.text}
+        '''+additional_data))
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
