@@ -76,7 +76,7 @@ class This:
         self.suppress_docked = False  # Skip initial Docked event if started docked
         self.cargo: Optional[List[OrderedDictT[str, Any]]] = None
         self.materials: Optional[List[OrderedDictT[str, Any]]] = None
-        self.lastcredits: int = 0  # Send credit update soon after Startup / new game
+        self.last_credits: int = 0  # Send credit update soon after Startup / new game
         self.storedmodules: Optional[List[OrderedDictT[str, Any]]] = None
         self.loadout: Optional[OrderedDictT[str, Any]] = None
         self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
@@ -372,7 +372,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.suppress_docked = False
         this.cargo = None
         this.materials = None
-        this.lastcredits = 0
+        this.last_credits = 0
         this.storedmodules = None
         this.loadout = None
         this.fleet = None
@@ -383,8 +383,8 @@ def journal_entry(  # noqa: C901, CCR001
         this.station_marketid = None
 
     elif event_name in ('Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy'):
-        # Events that mean a significant change in credits so we should send credits after next "Update"
-        this.lastcredits = 0
+        # Events that mean a significant change in credits, so we should send credits after next "Update"
+        this.last_credits = 0
 
     elif event_name in ('ShipyardNew', 'ShipyardSwap') or (event_name == 'Location' and entry['Docked']):
         this.suppress_docked = True
@@ -419,22 +419,12 @@ def journal_entry(  # noqa: C901, CCR001
         this.station_marketid = None
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
-        current_creds = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
+        current_credentials = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
             # Dump starting state to Inara
             if (this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo')):
                 this.newuser = False
                 this.newsession = False
-
-                # Send rank info to Inara on startup
-                new_add_event(
-                    'setCommanderRankPilot',
-                    entry['timestamp'],
-                    [
-                        {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
-                        for k, v in state['Rank'].items() if v is not None
-                    ]
-                )
 
                 # Don't send the API call with no values.
                 if state['Reputation']:
@@ -502,6 +492,18 @@ def journal_entry(  # noqa: C901, CCR001
 
                     this.loadout = make_loadout(state)
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
+
+            # Login-time Ranks
+            elif event_name == 'Rank':
+                # Send rank info to Inara on startup
+                new_add_event(
+                    'setCommanderRankPilot',
+                    entry['timestamp'],
+                    [
+                        {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
+                        for k, v in state['Rank'].items() if v is not None
+                    ]
+                )
 
             # Promotions
             elif event_name == 'Promotion':
@@ -739,7 +741,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # We want to utilise some Statistics data, so don't setCommanderCredits here
         if event_name == 'LoadGame':
-            this.lastcredits = state['Credits']
+            this.last_credits = state['Credits']
 
         elif event_name == 'Statistics':
             inara_data = {
@@ -844,7 +846,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             if this.fleet != fleet:
                 this.fleet = fleet
-                this.filter_events(current_creds, lambda e: e.name != 'setCommanderShip')
+                this.filter_events(current_credentials, lambda e: e.name != 'setCommanderShip')
 
                 # this.events = [x for x in this.events if x['eventName'] != 'setCommanderShip']  # Remove any unsent
                 for ship in this.fleet:
@@ -857,7 +859,7 @@ def journal_entry(  # noqa: C901, CCR001
                 this.loadout = loadout
 
                 this.filter_events(
-                    current_creds,
+                    current_credentials,
                     lambda e: (
                         e.name != 'setCommanderShipLoadout'
                         or cast(dict, e.data)['shipGameID'] != cast(dict, this.loadout)['shipGameID'])
@@ -898,7 +900,7 @@ def journal_entry(  # noqa: C901, CCR001
                 # Only send on change
                 this.storedmodules = modules
                 # Remove any unsent
-                this.filter_events(current_creds, lambda e: e.name != 'setCommanderStorageModules')
+                this.filter_events(current_credentials, lambda e: e.name != 'setCommanderStorageModules')
 
                 # this.events = list(filter(lambda e: e['eventName'] != 'setCommanderStorageModules', this.events))
                 new_add_event('setCommanderStorageModules', entry['timestamp'], this.storedmodules)
@@ -1227,7 +1229,7 @@ def journal_entry(  # noqa: C901, CCR001
         if event_name == 'CommunityGoal':
             # Remove any unsent
             this.filter_events(
-                current_creds, lambda e: e.name not in ('setCommunityGoal', 'setCommanderCommunityGoalProgress')
+                current_credentials, lambda e: e.name not in ('setCommunityGoal', 'setCommanderCommunityGoalProgress')
             )
 
             # this.events = list(filter(
@@ -1356,7 +1358,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_link.update_idletasks()
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if not (CREDIT_RATIO > this.lastcredits / data['commander']['credits'] > 1/CREDIT_RATIO):
+        if not (CREDIT_RATIO > this.last_credits / data['commander']['credits'] > 1 / CREDIT_RATIO):
             this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
                 lambda e: e.name != 'setCommanderCredits'
@@ -1372,7 +1374,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
                 }
             )
 
-            this.lastcredits = int(data['commander']['credits'])
+            this.last_credits = int(data['commander']['credits'])
 
 
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
