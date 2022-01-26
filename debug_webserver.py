@@ -1,5 +1,4 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
-import gzip
 import json
 import pathlib
 import tempfile
