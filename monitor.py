@@ -95,6 +95,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # If 1 or 2 a LoadGame event will happen when the game goes live.
         # If 3 we need to inject a special 'StartUp' event since consumers won't see the LoadGame event.
         self.live = False
+        # And whilst we're parsing *only to catch up on state*, we might not want to fully process some things
+        self.catching_up = False
 
         self.game_was_running = False  # For generation of the "ShutDown" event
 
@@ -342,6 +344,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             if platform == 'darwin':
                 fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
+            self.catching_up = True
             for line in loghandle:
                 try:
                     if b'"event":"Location"' in line:
@@ -352,6 +355,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 except Exception as ex:
                     logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
 
+            self.catching_up = False
             log_pos = loghandle.tell()
 
         else:
@@ -1314,7 +1318,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] += entry.get('Refund', 0)
                 self.state['Taxi'] = False
 
-            elif event_type == 'navroute':
+            elif event_type == 'navroute' and not self.catching_up:
                 # assume we've failed out the gate, then pull it back if things are fine
                 self._last_navroute_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 self._navroute_retries_remaining = 11
