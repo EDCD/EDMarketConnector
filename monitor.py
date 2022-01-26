@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
 from sys import platform
-from time import gmtime, localtime, sleep, strftime, strptime, time
+from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
@@ -23,8 +23,11 @@ from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
+# spell-checker: words navroute
+
 logger = get_main_logger()
 STARTUP = 'journal.startup'
+MAX_NAVROUTE_DISCREPANCY = 5
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -111,6 +114,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systempopulation: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
+        self._navroute_retries_remaining = 0
+        self._last_navroute_journal_timestamp: Optional[float] = None
+
         self.__init_state()
 
     def __init_state(self) -> None:
@@ -167,6 +173,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
             'Body':               None,
             'BodyType':           None,
+
+            'NavRoute':           None,
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -493,6 +501,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             # Preserve property order because why not?
             entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
             entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
+
+            self.__navroute_retry()
 
             event_type = entry['event'].lower()
             if event_type == 'fileheader':
@@ -1305,16 +1315,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Taxi'] = False
 
             elif event_type == 'navroute':
+                # assume we've failed out the gate, then pull it back if things are fine
+                self._last_navroute_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._navroute_retries_remaining = 11
+
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
-                with open(join(self.currentdir, 'NavRoute.json'), 'rb') as rf:  # type: ignore
-                    try:
-                        entry = json.load(rf)
-
-                    except json.JSONDecodeError:
-                        logger.exception('Failed decoding NavRoute.json', exc_info=True)
-
-                    else:
-                        self.state['NavRoute'] = entry
+                # rather than duplicating this, lets just call the function
+                if self.__navroute_retry():
+                    entry = self.state['NavRoute']
 
             elif event_type == 'moduleinfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
@@ -2156,6 +2164,72 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             }
 
         return slots
+
+    def _parse_navroute_file(self) -> Optional[dict[str, Any]]:
+        """Read and parse NavRoute.json."""
+        if self.currentdir is None:
+            raise ValueError('currentdir unset')
+
+        try:
+
+            with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
+                raw = f.read()
+
+        except Exception as e:
+            logger.exception(f'Could not open navroute file. Bailing: {e}')
+            return None
+
+        try:
+            data = json.loads(raw)
+
+        except json.JSONDecodeError:
+            logger.exception('Failed to decode NavRoute.json', exc_info=True)
+            return None
+
+        if 'timestamp' not in data:  # quick sanity check
+            return None
+
+        return data
+
+    @staticmethod
+    def _parse_journal_timestamp(source: str) -> float:
+        return mktime(strptime(source, '%Y-%m-%dT%H:%M:%SZ'))
+
+    def __navroute_retry(self) -> bool:
+        """Retry reading navroute files."""
+        if self._navroute_retries_remaining == 0:
+            return False
+
+        logger.info(f'Navroute read retry [{self._navroute_retries_remaining}]')
+        self._navroute_retries_remaining -= 1
+
+        if self._last_navroute_journal_timestamp is None:
+            logger.critical('Asked to retry for navroute but also no set time to compare? This is a bug.')
+            return False
+
+        if (file := self._parse_navroute_file()) is None:
+            logger.debug(
+                'Failed to parse NavRoute.json. '
+                + ('Trying again' if self._navroute_retries_remaining > 0 else 'Giving up')
+            )
+            return False
+
+        # _parse_navroute_file verifies that this exists for us
+        file_time = self._parse_journal_timestamp(file['timestamp'])
+        if abs(file_time - self._last_navroute_journal_timestamp) > MAX_NAVROUTE_DISCREPANCY:
+            logger.debug(
+                f'Time discrepancy of more than {MAX_NAVROUTE_DISCREPANCY}s --'
+                f' ({abs(file_time - self._last_navroute_journal_timestamp)}).'
+                f' {"Trying again" if self._navroute_retries_remaining > 0 else "Giving up"}.'
+            )
+            return False
+
+        # everything is good, lets set what we need to and make sure we dont try again
+        logger.info('Successfully read NavRoute file for last NavRoute event.')
+        self.state['NavRoute'] = file
+        self._navroute_retries_remaining = 0
+        self._last_navroute_journal_timestamp = None
+        return True
 
 
 # singleton
