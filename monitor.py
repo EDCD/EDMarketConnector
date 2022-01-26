@@ -114,8 +114,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systempopulation: Optional[int] = None
         self.started: Optional[int] = None  # Timestamp of the LoadGame event
 
-        self._navroute_retries = 0
-        self._navroute_orig_time: Optional[float] = None
+        self._navroute_retries_remaining = 0
+        self._last_navroute_journal_timestamp: Optional[float] = None
 
         self.__init_state()
 
@@ -1316,8 +1316,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'navroute':
                 # assume we've failed out the gate, then pull it back if things are fine
-                self._navroute_orig_time = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                self._navroute_retries = 11
+                self._last_navroute_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._navroute_retries_remaining = 11
 
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
                 # rather than duplicating this, lets just call the function
@@ -2170,9 +2170,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if self.currentdir is None:
             raise ValueError('currentdir unset')
 
-        if not (pathlib.Path(self.currentdir) / 'NavRoute.json').exists():
-            return None
-
         try:
 
             with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
@@ -2195,43 +2192,43 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return data
 
     @staticmethod
-    def _parse_time(source: str) -> float:
+    def _parse_journal_timestamp(source: str) -> float:
         return mktime(strptime(source, '%Y-%m-%dT%H:%M:%SZ'))
 
     def __navroute_retry(self) -> bool:
         """Retry reading navroute files."""
-        if self._navroute_retries == 0:
+        if self._navroute_retries_remaining == 0:
             return False
 
-        logger.info(f'Navroute read retry [{self._navroute_retries}]')
-        self._navroute_retries -= 1
+        logger.info(f'Navroute read retry [{self._navroute_retries_remaining}]')
+        self._navroute_retries_remaining -= 1
 
-        if self._navroute_orig_time is None:
+        if self._last_navroute_journal_timestamp is None:
             logger.critical('Asked to retry for navroute but also no set time to compare? This is a bug.')
             return False
 
         if (file := self._parse_navroute_file()) is None:
             logger.debug(
                 'Failed to parse NavRoute.json. '
-                + ('Trying again' if self._navroute_retries > 0 else 'Giving up')
+                + ('Trying again' if self._navroute_retries_remaining > 0 else 'Giving up')
             )
             return False
 
         # _parse_navroute_file verifies that this exists for us
-        file_time = self._parse_time(file['timestamp'])
-        if abs(file_time - self._navroute_orig_time) > MAX_NAVROUTE_DISCREPANCY:
+        file_time = self._parse_journal_timestamp(file['timestamp'])
+        if abs(file_time - self._last_navroute_journal_timestamp) > MAX_NAVROUTE_DISCREPANCY:
             logger.debug(
                 f'Time discrepancy of more than {MAX_NAVROUTE_DISCREPANCY}s --'
-                f' ({abs(file_time - self._navroute_orig_time)}).'
-                f' {"Trying again" if self._navroute_retries > 0 else "Giving up"}.'
+                f' ({abs(file_time - self._last_navroute_journal_timestamp)}).'
+                f' {"Trying again" if self._navroute_retries_remaining > 0 else "Giving up"}.'
             )
             return False
 
         # everything is good, lets set what we need to and make sure we dont try again
         logger.info('Successfully read NavRoute file for last NavRoute event.')
         self.state['NavRoute'] = file
-        self._navroute_retries = 0
-        self._navroute_orig_time = None
+        self._navroute_retries_remaining = 0
+        self._last_navroute_journal_timestamp = None
         return True
 
 
