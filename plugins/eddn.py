@@ -6,6 +6,7 @@ import pathlib
 import re
 import sys
 import tkinter as tk
+from base64 import encode
 from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
@@ -246,7 +247,15 @@ class EDDN:
                 return  # We want to silence warnings otherwise
 
             if r.status_code == 413:
-                self._log_response(r, header_msg='Got a 413 while POSTing data', sent_data_len=str(len(encoded)))
+                extra_data = {
+                    'schema_ref': msg.get('$schemaRef', 'Unset $schemaRef!'),
+                    'sent_data_len': str(len(encoded)),
+                }
+
+                if '/journal/' in extra_data['schema_ref']:
+                    extra_data['event'] = msg.get('message', {}).get('event', 'No Event Set')
+
+                self._log_response(r, header_msg='Got a 413 while POSTing data', **extra_data)
                 return  # drop the error
 
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
