@@ -27,7 +27,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 STARTUP = 'journal.startup'
-MAX_NAVROUTE_DISCREPANCY = 5
+MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
