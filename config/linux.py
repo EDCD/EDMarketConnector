@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 from configparser import ConfigParser
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from config import AbstractConfig, appname, logger
 
