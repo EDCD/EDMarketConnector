@@ -33,11 +33,10 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         """Handle POST."""
         logger.info(f"Received a POST for {self.path!r}!")
         data_raw: bytes = self.rfile.read(int(self.headers['Content-Length']))
-        data: str | bytes
 
         encoding = self.headers.get('Content-Encoding')
 
-        to_save = self.get_printable(data_raw, encoding)
+        to_save = data = self.get_printable(data_raw, encoding)
 
         target_path = self.path
         if len(target_path) > 1 and target_path[0] == '/':
@@ -134,6 +133,7 @@ def generate_inara_response(raw_data: str) -> str:
 
 
 def extract_edsm_data(data: str) -> dict[str, Any]:
+    """Extract relevant data from edsm data."""
     res = parse_qs(data)
     return {name: data[0] for name, data in res.items()}
 
