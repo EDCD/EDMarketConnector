@@ -10,6 +10,7 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
+from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import TextIO, Tuple, Union
@@ -27,6 +28,7 @@ from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
+from util import text
 
 if sys.platform != 'win32':
     from fcntl import LOCK_EX, LOCK_NB, lockf
@@ -168,6 +170,10 @@ class EDDN:
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
+        if self.replayfile is None:
+            logger.error('replayfile is None!')
+            return
+
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
@@ -213,7 +219,20 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.eddn_url, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        # About the smallest request is going to be (newlines added for brevity):
+        # {"$schemaRef":"https://eddn.edcd.io/schemas/commodity/3","header":{"softwareName":"E:D Market
+        # Connector Windows","softwareVersion":"5.3.0-beta4extra","uploaderID":"abcdefghijklm"},"messag
+        # e":{"systemName":"delphi","stationName":"The Oracle","marketId":128782803,"timestamp":"2022-0
+        # 1-26T12:00:00Z","commodities":[]}}
+        #
+        # Which comes to 315 bytes (including \n) and compresses to 244 bytes. So lets just compress everything
+
+        encoded, compressed = text.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
+        headers: None | dict[str, str] = None
+        if compressed:
+            headers = {'Content-Encoding': 'gzip'}
+
+        r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
@@ -226,17 +245,47 @@ class EDDN:
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
+            if r.status_code == 413:
+                extra_data = {
+                    'schema_ref': msg.get('$schemaRef', 'Unset $schemaRef!'),
+                    'sent_data_len': str(len(encoded)),
+                }
+
+                if '/journal/' in extra_data['schema_ref']:
+                    extra_data['event'] = msg.get('message', {}).get('event', 'No Event Set')
+
+                self._log_response(r, header_msg='Got a 413 while POSTing data', **extra_data)
+                return  # drop the error
+
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
-                logger.debug(
-                    f'''Status from POST wasn't OK:
-Status\t{r.status_code}
-URL\t{r.url}
-Headers\t{r.headers}
-Content:\n{r.text}
-Msg:\n{msg}'''
-                )
+                self._log_response(r, header_msg='Status from POST wasn\'t 200 (OK)')
 
         r.raise_for_status()
+
+    def _log_response(
+        self,
+        response: requests.Response,
+        header_msg='Failed to POST to EDDN',
+        **kwargs
+    ) -> None:
+        """
+        Log a response object with optional additional data.
+
+        :param response: The response to log
+        :param header_msg: A header message to add to the log, defaults to 'Failed to POST to EDDN'
+        :param kwargs: Any other notes to add, will be added below the main data in the same format.
+        """
+        additional_data = "\n".join(
+            f'''{name.replace('_', ' ').title():<8}:\t{value}''' for name, value in kwargs.items()
+        )
+
+        logger.debug(dedent(f'''\
+        {header_msg}:
+        Status  :\t{response.status_code}
+        URL     :\t{response.url}
+        Headers :\t{response.headers}
+        Content :\t{response.text}
+        ''')+additional_data)
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
