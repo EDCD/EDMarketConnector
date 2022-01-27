@@ -6,7 +6,6 @@ import pathlib
 import re
 import sys
 import tkinter as tk
-from base64 import encode
 from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
