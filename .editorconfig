@@ -12,7 +12,7 @@ indent_size = tab
 max_line_length = 119
 
 # Unix EOL
-end_of_line = lf
+end_of_line = crlf
 
 # UTF-8 is the only sensible option, no BOM
 charset = utf-8
