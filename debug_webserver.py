@@ -6,7 +6,7 @@ import tempfile
 import threading
 import zlib
 from http import server
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Literal, Tuple, Union
 from urllib.parse import parse_qs
 
 from config import appname
@@ -37,16 +37,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
 
         encoding = self.headers.get('Content-Encoding')
 
-        if encoding == 'gzip':
-            data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
-
-        elif encoding == 'deflate':
-            data = zlib.decompress(data_raw).decode('utf-8', errors='replace')
-
-        else:
-            data = data_raw.decode('utf-8', errors='replace')
-
-        to_save = data
+        to_save = self.get_printable(data_raw, encoding)
 
         target_path = self.path
         if len(target_path) > 1 and target_path[0] == '/':
@@ -57,7 +48,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
 
         response: Union[Callable[[str], str], str, None] = DEFAULT_RESPONSES.get(target_path)
         if callable(response):
-            response = response(data)
+            response = response(to_save)
 
         self.send_response_only(200, "OK")
         if response is not None:
@@ -84,6 +75,31 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
 
         with output_lock, target_file.open('a') as f:
             f.write(to_save + "\n\n")
+
+    @staticmethod
+    def get_printable(data: bytes, compression: Literal['deflate'] | Literal['gzip'] | str | None = None) -> str:
+        """
+        Convert an incoming data stream into a string.
+
+        :param data: The data to convert
+        :param compression: The compression to remove, defaults to None
+        :raises ValueError: If compression is unknown
+        :return: printable strings
+        """
+        ret: bytes = b''
+        if compression is None:
+            ret = data
+
+        elif compression == 'deflate':
+            ret = zlib.decompress(data)
+
+        elif compression == 'gzip':
+            ret = gzip.decompress(data)
+
+        else:
+            raise ValueError(f'Unknown encoding for data {compression!r}')
+
+        return ret.decode('utf-8', errors='replace')
 
 
 def safe_file_name(name: str):
