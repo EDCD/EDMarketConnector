@@ -279,13 +279,13 @@ class EDDN:
             f'''{name.replace('_', ' ').title():<8}:\t{value}''' for name, value in kwargs.items()
         )
 
-        logger.debug(dedent(f'''
+        logger.debug(dedent(f'''\
         {header_msg}:
         Status  :\t{response.status_code}
         URL     :\t{response.url}
         Headers :\t{response.headers}
         Content :\t{response.text}
-        '''+additional_data))
+        ''')+additional_data)
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
