@@ -1,0 +1,21 @@
+# This is the project top-level .editorconfig
+root = true
+
+# Defaults for all file types
+[*]
+# 4-space indents, no TABs
+indent_style = space
+tab_width = 4
+indent_size = tab
+
+# Hard-wrap at 120 columns
+max_line_length = 119
+
+# Unix EOL
+end_of_line = lf
+
+# UTF-8 is the only sensible option, no BOM
+charset = utf-8
+
+# All files should have a final newline
+insert_final_newline = true
