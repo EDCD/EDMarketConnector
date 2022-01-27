@@ -1,4 +1,5 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
+import gzip
 import json
 import pathlib
 import tempfile
@@ -36,7 +37,10 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
 
         encoding = self.headers.get('Content-Encoding')
 
-        if encoding in ('gzip', 'deflate'):
+        if encoding == 'gzip':
+            data = gzip.decompress(data_raw).decode('utf-8', errors='replace')
+
+        elif encoding == 'deflate':
             data = zlib.decompress(data_raw).decode('utf-8', errors='replace')
 
         else:
