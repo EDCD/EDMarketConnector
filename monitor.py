@@ -1,15 +1,18 @@
 """Monitor for new Journal files and contents of latest."""
+#                                                                             v [sic]
+# spell-checker: words onfoot unforseen relog fsdjump suitloadoutid slotid suitid loadoutid fauto Intimidator
+# spell-checker: words joinacrew quitacrew sellshiponrebuy newbal navroute npccrewpaidwage sauto
 
 import json
 import pathlib
 import queue
 import re
+import sys
 import threading
 from calendar import timegm
 from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, isdir, join
-from sys import platform
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
@@ -33,7 +36,7 @@ if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
 
-if platform == 'darwin':
+if sys.platform == 'darwin':
     from fcntl import fcntl
 
     from AppKit import NSWorkspace
@@ -41,7 +44,7 @@ if platform == 'darwin':
     from watchdog.observers import Observer
     F_GLOBAL_NOCACHE = 55
 
-elif platform == 'win32':
+elif sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
@@ -62,6 +65,10 @@ elif platform == 'win32':
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
     FileSystemEventHandler = object  # dummy
+    if TYPE_CHECKING:
+        # this isn't ever used, but this will make type checking happy
+        from watchdog.events import FileCreatedEvent
+        from watchdog.observers import Observer
 
 
 # Journal handler
@@ -225,7 +232,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = bool(config.get_str('journaldir')) and platform != 'win32'
+        polling = bool(config.get_str('journaldir')) and sys.platform != 'win32'
         if not polling and not self.observer:
             logger.debug('Not polling, no observer, starting an observer...')
             self.observer = Observer()
@@ -282,6 +289,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
             self.observed = None
+            assert self.observer is not None, 'Observer was none but it is in use?'
             self.observer.unschedule_all()
             logger.debug('Done')
 
@@ -341,7 +349,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         logfile = self.logfile
         if logfile:
             loghandle: BinaryIO = open(logfile, 'rb', 0)  # unbuffered
-            if platform == 'darwin':
+            if sys.platform == 'darwin':
                 fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
             self.catching_up = True
@@ -394,9 +402,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.event_queue.put(None)
                 self.live = False
 
+        emitter = None
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
-        emitter = self.observed and self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
+        if self.observed:
+            assert self.observer is not None, 'self.observer is None but also in use?'
+            # Note: Uses undocumented attribute
+            emitter = self.observed and self.observer._emitter_for_watch[self.observed]
 
         logger.debug('Entering loop...')
         while True:
@@ -452,7 +464,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 if logfile:
                     loghandle = open(logfile, 'rb', 0)  # unbuffered
-                    if platform == 'darwin':
+                    if sys.platform == 'darwin':
                         fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
                     log_pos = 0
@@ -699,7 +711,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # This event is logged when a player (on foot) gets into a ship or SRV
                 # Parameters:
                 #     • SRV: true if getting into SRV, false if getting into a ship
-                #     • Taxi: true when boarding a taxi transposrt ship
+                #     • Taxi: true when boarding a taxi transport ship
                 #     • Multicrew: true when boarding another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
@@ -727,7 +739,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #
                 # Parameters:
                 #     • SRV: true if getting out of SRV, false if getting out of a ship
-                #     • Taxi: true when getting out of a taxi transposrt ship
+                #     • Taxi: true when getting out of a taxi transport ship
                 #     • Multicrew: true when getting out of another player’s vessel
                 #     • ID: player’s ship ID (if players own vessel)
                 #     • StarSystem
@@ -1942,12 +1954,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         :return: bool - True if the game is running.
         """
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             for app in NSWorkspace.sharedWorkspace().runningApplications():
                 if app.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
                     return True
 
-        elif platform == 'win32':
+        elif sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802 # type: ignore
                 if h:
                     length = GetWindowTextLength(h) + 1

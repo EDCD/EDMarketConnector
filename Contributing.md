@@ -228,6 +228,7 @@ handy if you want to step through the testing code to be sure of anything.
 Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/contents.html). 
 
 ---
+
 ## Debugging network sends
 
 Rather than risk sending bad data to a remote service, even if only through
@@ -483,6 +484,20 @@ The description should cover exactly why the hack is needed, what it does, what 
 Please be verbose here, more info about weird choices is always prefered over magic that we struggle to understand in six months.
 
 Additionally, if your hack is over around 5 lines, please include a `# HACK END` or similar comment to indicate the end of the hack.
+
+# Use `sys.platform` for platform guards
+
+`mypy` (and `pylance`) understand platform guards and will show unreachable code / resolve imports correctly
+for platform specific things. However, this only works if you directly reference `sys.platform`, importantly 
+the following does not work:
+
+```py
+from sys import platform
+if platform == 'darwin':
+  ...
+```
+
+It **MUST** be `if sys.platform`.
 
 ---
 

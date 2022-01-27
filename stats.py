@@ -1,9 +1,9 @@
 """CMDR Status information."""
 import csv
 import json
+import sys
 import tkinter
 import tkinter as tk
-from sys import platform
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, NamedTuple, Optional, Sequence, cast
 
@@ -20,11 +20,9 @@ logger = EDMCLogging.get_main_logger()
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
 
-if platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
-    if TYPE_CHECKING:
-        import ctypes.windll  # type: ignore # Fake this into existing, its really a magic dll thing
 
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
@@ -372,15 +370,15 @@ class StatsResults(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if sys.platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             self.geometry(f"+{parent.winfo_rootx()}+{parent.winfo_rooty()}")
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
-        if platform == 'win32':
+        if sys.platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
 
-        elif platform == 'darwin':
+        elif sys.platform == 'darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 
@@ -421,7 +419,7 @@ class StatsResults(tk.Toplevel):
         ttk.Frame(page).grid(pady=5)         # bottom spacer
         notebook.add(page, text=_('Ships'))  # LANG: Status dialog title
 
-        if platform != 'darwin':
+        if sys.platform != 'darwin':
             buttonframe = ttk.Frame(frame)
             buttonframe.grid(padx=10, pady=(0, 10), sticky=tk.NSEW)  # type: ignore # the tuple is supported
             buttonframe.columnconfigure(0, weight=1)
@@ -433,7 +431,7 @@ class StatsResults(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if platform == 'win32' and CalculatePopupWindowPosition:
+        if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(
