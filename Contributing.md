@@ -23,6 +23,16 @@ consistent with our vision for EDMC. Fundamental changes in particular need to b
 
 ---
 
+## Text formatting
+
+The project contains an `.editorconfig` file at its root.  Please either ensure
+your editor is taking note of those settings, or cross-check its contents
+with the
+[editorconfig documentation](https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties)
+, and ensure your editor/IDE's settings match.
+
+---
+
 ## General workflow
 
 1. You will need a GitHub account.
