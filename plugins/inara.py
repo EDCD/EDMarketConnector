@@ -1363,7 +1363,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         if (
             abs(this.last_credits - data['commander']['credits']) >=
-            min(this.last_credits * CREDITS_DELTA_MIN_FRACTION, CREDITS_DELTA_MIN_ABSOLUTE)
+            min(abs(this.last_credits * CREDITS_DELTA_MIN_FRACTION), CREDITS_DELTA_MIN_ABSOLUTE)
         ):
             this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
