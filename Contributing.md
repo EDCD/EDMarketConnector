@@ -191,9 +191,10 @@ only the 'C' (Patch) component.
 Going forwards we will always use the full [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
 and 'folder style' tag names, e.g. `Release/Major.Minor.Patch`.
 
-Currently the only file that defines the version code-wise is `config.py`.
-`Changelog.md` and `edmarketconnector.xml` are another matter handled as part
-of [the release process](docs/Releasing.md#distribution).
+Currently, the only file that defines the version code-wise is
+`config/__init__.py`. `Changelog.md` and `edmarketconnector.xml` are another
+matter handled as part of
+[the release process](docs/Releasing.md#distribution).
 
 ---
 
@@ -216,12 +217,18 @@ re-introduce a bug down the line.
 We use the [`pytest`](https://docs.pytest.org/en/stable/) for unit testing.
 
 The files for a test should go in a sub-directory of `tests/` named after the
-(principal) file that contains the code they are testing.  e.g. for
-journal_lock.py the tests are in `tests/journal_lock.py/test_journal_lock.py`.
-The `test_` prefix on `test_journal_lock.py` is necessary in order for `pytest`
-to recognise the file as containing tests to be run.
+(principal) file or directory that contains the code they are testing.
+For example:
+
+- Tests for `journal_lock.py` are in
+   `tests/journal_lock.py/test_journal_lock.py`. The `test_` prefix on
+   `test_journal_lock.py` is necessary in order for `pytest` to recognise the
+   file as containing tests to be run.
+- Tests for `config/` code are located in `tests/config/test_config.py`, not
+   `tests/config.py/test_config.py`
+
 The sub-directory avoids having a mess of files in `tests`, particularly when
-there might be supporting files, e.g. `tests/config.py/_old_config.py` or files
+there might be supporting files, e.g. `tests/config/_old_config.py` or files
 containing test data.
 
 Invoking just a bare `pytest` command will run all tests.
