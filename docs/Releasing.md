@@ -439,6 +439,8 @@ When changing the Python version (Major.Minor.Patch) used:
 
    1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
    based build use the correct version.
+   2. `ChangeLog.md` - The `We now test against, and package with, Python
+       M.m.P.` line.
 
 1. Major or Minor level changes:
 
