@@ -33,7 +33,10 @@ if TYPE_CHECKING:
 
 _TIMEOUT = 20
 FAKE = ('CQC', 'Training', 'Destination')  # Fake systems that shouldn't be sent to Inara
-CREDIT_RATIO = 1.05		# Update credits if they change by 5% over the course of a session
+# We only update Credits to Inara if the delta from the last sent value is
+# greater than certain thresholds
+CREDITS_DELTA_MIN_FRACTION = 0.05  # Fractional difference threshold
+CREDITS_DELTA_MIN_ABSOLUTE = 10_000_000  # Absolute difference threshold
 
 
 # These need to be defined above This
@@ -1358,7 +1361,10 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_link.update_idletasks()
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if not (CREDIT_RATIO > this.last_credits / data['commander']['credits'] > 1 / CREDIT_RATIO):
+        if (
+            abs(this.last_credits - data['commander']['credits']) >=
+            min(this.last_credits * CREDITS_DELTA_MIN_FRACTION, CREDITS_DELTA_MIN_ABSOLUTE)
+        ):
             this.filter_events(
                 Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
                 lambda e: e.name != 'setCommanderCredits'
