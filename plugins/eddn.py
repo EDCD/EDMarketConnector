@@ -895,7 +895,7 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
-    def export_journal_codexentry(
+    def export_journal_codexentry(  # noqa: CCR001
             self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
@@ -948,12 +948,16 @@ class EDDN:
             # Only set BodyID if journal BodyName matches the Status.json one.
             # This avoids binary body issues.
             if this.status_body_name == this.body_name:
-                entry['BodyID'] = this.body_id
+                if this.body_id is not None and isinstance(this.body_id, int):
+                    entry['BodyID'] = this.body_id
+
+                else:
+                    logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
 
         for k, v in entry.items():
             if v is None or isinstance(v, str) and v == '':
-                logger.warning(f'post-processing entry contains entry["{k}"] = {v}]')
+                logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
@@ -1423,14 +1427,14 @@ def journal_entry(  # noqa: C901, CCR001
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
-                logger.warning("system is None, can't add StarSystem")
+                logger.warning("system is falsey, can't add StarSystem")
                 return "system is None, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                logger.warning("this.coordinates is None, can't add StarPos")
+                logger.warning("this.coordinates is falsey, can't add StarPos")
                 return "this.coordinates is None, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
@@ -1443,7 +1447,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
-                logger.warning("this.systemaddress is None, can't add SystemAddress")
+                logger.warning("this.systemaddress is falsey, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
@@ -1603,7 +1607,7 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
     this.status_body_name = None
     if 'BodyName' in entry:
         if not isinstance(entry['BodyName'], str):
-            logger.warning(f'BodyName was present but not a string! "{entry["BodyName"]}"')
+            logger.warning(f'BodyName was present but not a string! "{entry["BodyName"]}" ({type(entry["BodyName"])})')
 
         else:
             this.status_body_name = entry['BodyName']
