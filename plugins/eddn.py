@@ -1596,10 +1596,12 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
     :param is_beta: Whether non-live game version was detected.
     :param entry: The latest Status.json data.
     """
+    this.status_body_name = None
     if 'BodyName' in entry:
-        this.status_body_name = entry['BodyName']
+        if not isinstance(entry['BodyName'], str):
+            logger.warning(f'BodyName was present but not a string! "{entry["BodyName"]}"')
 
-    else:
-        this.status_body_name = None
+        else:
+            this.status_body_name = entry['BodyName']
 
     tracking_ui_update()
