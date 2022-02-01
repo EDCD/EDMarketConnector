@@ -943,7 +943,11 @@ class EDDN:
         entry = ret
 
         # Set BodyName if it's available from Status.json
-        if this.status_body_name is not None:
+        if this.status_body_name is None or not isinstance(this.status_body_name, str):
+            logger.warning(f'this.status_body_name was not set properly:'
+                           f' "{this.status_body_name}" ({type(this.status_body_name)})')
+
+        else:
             entry['BodyName'] = this.status_body_name
             # Only set BodyID if journal BodyName matches the Status.json one.
             # This avoids binary body issues.
