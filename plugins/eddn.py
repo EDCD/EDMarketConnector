@@ -802,12 +802,13 @@ class EDDN:
         # If 'SystemName' or 'System' is there, it's directly from a journal event.
         # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
         if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
-            if system_name is not None and system_name != '':
-                entry['StarSystem'] = system_name
+            if system_name is None or not isinstance(system_name, str) or system_name == '':
+                # Bad assumptions if this is the case
+                logger.warning(f'No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n')
+                return "passed-in system_name is empty, can't add System"
 
             else:
-                # Bad assumptions if this is the case
-                logger.error(f'No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n')
+                entry['StarSystem'] = system_name
 
         if 'SystemAddress' not in entry:
             if this.systemaddress is None:
