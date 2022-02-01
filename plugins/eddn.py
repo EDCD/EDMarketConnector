@@ -1432,14 +1432,14 @@ def journal_entry(  # noqa: C901, CCR001
         if 'StarSystem' not in entry:
             if not system:
                 logger.warning("system is falsey, can't add StarSystem")
-                return "system is None, can't add StarSystem"
+                return "system is falsey, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
                 logger.warning("this.coordinates is falsey, can't add StarPos")
-                return "this.coordinates is None, can't add StarPos"
+                return "this.coordinates is falsey, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
@@ -1452,7 +1452,7 @@ def journal_entry(  # noqa: C901, CCR001
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
                 logger.warning("this.systemaddress is falsey, can't add SystemAddress")
-                return "this.systemaddress is None, can't add SystemAddress"
+                return "this.systemaddress is falsey, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
 
