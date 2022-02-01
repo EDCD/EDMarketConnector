@@ -246,6 +246,41 @@ Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/cont
 
 ---
 
+## Imports used only in core plugins
+
+Because the 'core' plugins, as with any EDMarketConnector plugin, are only ever
+loaded dynamically, not through an explicit `import` statement, there is no
+way for `py2exe` to know about them when building the contents of the
+`dist.win32` directory.  See [docs/Releasing.md](docs/Releasing.md) for more
+information about this build process.
+
+Thus, you **MUST** check if any imports you add in `plugins/*.py` files are only
+referenced in that file (or also only in any other core plugin), and if so
+**YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
+IN ORDER TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
+INSTALLATION ON WINDOWS.**
+
+An exmaple is that as of 2022-02-01 it was noticed that `plugins/eddn.py` now
+uses `util/text.py`, and is the only code to do so.  `py2exe` does not detect
+this and thus the resulting `dist.win32/library.zip` does not contain the
+`util/` directory, let alone the `util/text.py` file.  The fix was to update
+the appropriate `packages` definition to:
+
+```python
+            'packages': [
+                'sqlite3',  # Included for plugins
+                'util',  # 2022-02-01 only imported in plugins/eddn.py
+            ],
+```
+
+Note that in this case it's in `packages` because we want the whole directory
+adding.  For a single file an extra item in `includes` would suffice.
+
+Such additions to `setup.py` should not cause any issues if subsequent project
+changes cause `py2exe` to automatically pick up the same file(s).
+
+---
+
 ## Debugging network sends
 
 Rather than risk sending bad data to a remote service, even if only through
