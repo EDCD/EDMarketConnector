@@ -192,6 +192,7 @@ elif sys.platform == 'win32':
             'optimize': 2,
             'packages': [
                 'sqlite3',  # Included for plugins
+                'util',  # 2022-02-01 only imported in plugins/eddn.py
             ],
             'includes': [
                 'dataclasses',
