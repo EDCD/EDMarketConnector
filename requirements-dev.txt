@@ -24,7 +24,7 @@ types-requests==2.27.8
 autopep8==1.6.0
 
 # HTML changelogs
-grip==4.5.2
+grip==4.6.0
 
 # Packaging
 # Used to put together a WiX configuration from template/auto-gen
