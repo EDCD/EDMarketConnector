@@ -962,6 +962,10 @@ class EDDN:
         for k, v in entry.items():
             if v is None or isinstance(v, str) and v == '':
                 logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
+                # We should drop this message and VERY LOUDLY inform the
+                # user, in the hopes they'll open a bug report with the
+                # raw Journal event that caused this.
+                return 'CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
