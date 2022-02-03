@@ -1337,7 +1337,14 @@ def journal_entry(  # noqa: C901, CCR001
         elif this.systemaddress != entry.get('SystemAddress'):
             this.coordinates = None  # Docked event doesn't include coordinates
 
-        this.systemaddress = entry.get('SystemAddress')  # type: ignore
+        if 'SystemAddress' not in entry:
+            logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
+
+        # But we'll still *use* the value, because if a 'location' event doesn't
+        # have this we've still moved and now don't know where and MUST NOT
+        # continue to use any old value.
+        # Yes, explicitly state `None` here, so it's crystal clear.
+        this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
 
     elif entry['event'] == 'ApproachBody':
         this.body_name = entry['Body']
