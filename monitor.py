@@ -1422,7 +1422,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 category = self.category(received['Category'])
                 state_category[received['Material']] += received['Quantity']
 
-            elif event_type == 'EngineerCraft' or (
+            elif event_type == 'engineercraft' or (
                 event_type == 'engineerlegacyconvert' and not entry.get('IsPreview')
             ):
 
