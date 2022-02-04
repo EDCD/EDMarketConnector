@@ -38,11 +38,15 @@ Pre-Release 5.3.0-beta7
   categories and the new 'prestige' ranks, e.g. 'Elite I'.  Closes
   [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
 
+* Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
+  the application "UI Scale" or geometry (position and size).  Closes
+  [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
+
 * We now use UTC-based timestamps in the application's log files.  Prior to
   this change it was the "local time", but without any indication of the
-  applied timezone.  Each line's timestamp has ` UTC` as a suffix now, and we
+  applied timezone.  Each line's timestamp has ` UTC` as a suffix now.  We
   are assuming that your local clock is correct *and* the timezone is set
-  correctly such that Python's `time.gmtime()` yields UTC times.
+  correctly, such that Python's `time.gmtime()` yields UTC times.
 
   This should make it easier to correlate application logfiles with in-game
   time and/or third-party service timestamps.
@@ -54,10 +58,6 @@ Pre-Release 5.3.0-beta7
    all the necessary files automatically.  Prior to this we used a manual
    process to update the installer configuration which was prone to both user
    error and neglecting to update it as necessary.
-
-* Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
-    the application "UI Scale" or geometry (position and size).  Closes
-    [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
 
 * If the application fails to load valid data from the `NavRoute.json` file
     when processing a Journal `NavRoute` event, it will attempt to retry this
@@ -183,15 +183,13 @@ Plugin Developers
     date.  This should hopefully mean we include, e.g. new ships and modules
     for loadout exports in a more timely manner.
 
+    Developers of third-party plugins should never have been using these files
+    anyway, so this shouldn't break anything for them.
+
 * We will now include in the Windows installer *all* of the files that `py2exe`
     places in the build directory.  We still do *not* yet include *all* of the
     Python 'stdlib', so open an issue on GitHub if something you need is
     missing.
-
-* Due to now using files from the FDevIDs repository the path of, e.g.
-   `commodity.csv`, in the source has changed.  You should never have been
-   using this application's copy in plugin code anyway as it's not even
-   packaged in the Windows installer.
 
 ---
 5.3.0-beta3 through 5.3.0-beta6 were used internally, no public pre-releases.
