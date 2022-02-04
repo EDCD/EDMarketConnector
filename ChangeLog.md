@@ -26,6 +26,162 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+
+Pre-Release 5.3.0-beta7
+===
+
+* We now test and build using Python 3.10.2.  We do not *yet* make use of any
+   features specific to Python 3.10 (or 3.9).  Let us restate that we
+   absolutely reserve the right to commence doing so.
+
+* All communication with remote web servers and APIs now uses the same custom
+   "User-Agent" header to make attribution to this application clear.
+* The process used to build the Windows installers should now always pick up
+   all the necessary files automatically.  Prior to this we used a manual
+   process to update the installer configuration which was prone to both user
+   error and neglecting to update it as necessary.
+* We now include [FDevIDS](https://github.com/EDCD/FDevIDs) as a
+   sub-repository, and use its files directly for keeping some game data up to
+   date.  This should hopefully mean we include, e.g. new ships and modules
+   for loadout exports in a more timely manner.
+* We now use UTC-based timestamps in the application's log files.  Prior to
+   this change it was the "local time", but without any indication of the
+   applied timezone.  Each line's timestamp has ` UTC` as a suffix now, and we
+   are assuming that your local clock is correct *and* the timezone is set
+   correctly such that Python's `time.gmtime()` yields UTC times.
+
+    This should make it easier to correlate application logfiles with in-game
+    time and/or third-party service timestamps.
+* Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
+    the application "UI Scale" or geometry (position and size).
+* Inara: Use the `<journal log>->Statistics->Bank_Account->Current_Wealth`
+    value when sending a `setCommanderCredits` message to Inara to set
+    `commanderAssets`.
+
+    This should cause Inara and EDMC to agree on the Commander's current total
+    assets credits figure, and thus prevent it bouncing between two values.
+* Inara: Send a `setCommanderRankPilot` message when the player logs in to the
+    game on-foot.  Previously you would *HAVE* to be in a ship at login time
+    for this to be sent.
+
+    Thus, you can now relog on-foot in order to update Inara with any Rank up
+    or progress since the session started.
+* "File" -> "Status" will now show the new Odyssey ranks, both the new
+    categories and the new 'prestige' ranks, e.g. 'Elite I'.
+* If the application fails to load valid data from the `NavRoute.json` file
+    when processing a Journal `NavRoute` event, it will attempt to retry this
+    operation a number of times as it processes subsequent Journal events.
+
+    This should hopefully work around a race condition where the game might
+    not have yet updated `NavRoute.json` at all, or has truncated it to empty,
+    when we first attempt this.
+
+    We will also now *NOT* attempt to load `NavRoute.json` during the startup
+    'Journal catch-up' mode, which only sets internal state.
+
+* EDDN: We now compress all outgoing messages.  This might help get some
+    particularly large `navroute` messages go through.
+
+    If any message is now rejected as 'too large' we will drop it, and thus
+    not retry it later.  The application logs will reflect this.
+
+    NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+        anyway.  The old limit was 100 KiB.
+
+* Inara: We will now send the new idea of "credits in the Commander's wallet"
+    when the delta from the last sent value is either 5% *or* at least
+    10 million.  It used to require a strict 5% difference, which meant needing
+    very large deltas if you had a large credit balance.
+
+    The intention of the 5% is so that newer/poorer commanders still get
+    updates at an acceptable frequency, with the 10 million alternative trigger
+    allowing richer commanders to also experience more frequent updates than
+    was previously the case.
+
+* EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
+    with respect to messages sent from this application some additional checks
+    and logging have been added.
+
+    **NB: After some thorough investigation it was concluded that these EDDN
+          errors were likely the result of long-delayed messages due to use of
+          the "Delay sending until docked" option.**
+
+    There should be no functional changes for users.  But if you see any of
+    the following in this application's log files **PLEASE OPEN
+    [AN ISSUE ON GITHUB](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
+    with all the requested information**, so that we can correct the relevant
+    code:
+
+    - `No system name in entry, and system_name was not set either!  entry: ...`
+    - `BodyName was present but not a string! ...`
+    - `post-processing entry contains entry ...`
+    - `this.body_id was not set properly: ...`
+    - `system is falsey, can't add StarSystem`
+    - `this.coordinates is falsey, can't add StarPos`
+    - `this.systemaddress is falsey, can't add SystemAddress`
+    - `this.status_body_name was not set properly: ...`
+  
+    You might also see any of the following in the application status text
+    (bottom of the window):
+
+    - `passed-in system_name is empty, can't add System`
+    - `CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS`
+    - `system is falsey, can't add StarSystem`
+    - `this.coordinates is falsey, can't add StarPos`
+    - `this.systemaddress is falsey, can't add SystemAddress`
+
+* Inara: You should once more see updates for any materials used in
+    Engineering.  The bug was in our more general Journal event processing
+    code, such that the state passed to the Inara plugin hadn't been updated.
+
+    Such updates should happen 'immediately', but take into account that there
+    can be a delay of up to 35 seconds for any data sent to Inara, due to how
+    we avoid breaking the "2 messages a minute" limit on the Inara API.
+
+
+
+Plugin Developers
+---
+
+* We now have an `.editorconfig` file which will instruct your editor/IDE to
+    change some settings pertaining to things like indentation and line wrap,
+    assuming your editor/IDE supports the file.
+
+    See [Contributing.md->Text formatting](Contributing.md#text-formatting).
+
+* `config.py` has been refactored into a sub-directory, with the per-OS code
+    split into separate files.  There *shouldn't* be any changes necessary to
+    how you utilise this, e.g. to determine the application version.
+
+* We will now include in the Windows installer *all* of the files that `py2exe`
+    places in the build directory.  We still do *not* yet include *all* of the
+    Python 'stdlib', so open an issue on GitHub if something you need is
+    missing.
+
+* Due to now using files from the FDevIDs repository the path of, e.g.
+   `commodity.csv`, in the source has changed.  You should never have been
+   using this application's copy in plugin code anyway as it's not even
+   packaged in the Windows installer.
+
+---
+5.3.0-beta2 through 5.3.0-beta6 were used internally, no public pre-releases.
+
+---
+
+Pre-Release 5.3.0-beta2
+===
+
+In terms of application functionality this is identical to 5.3.0-beta1. The
+only changes are related to the process of building the Windows installer.
+
+- Ensure we always package all files into the Windows installer.
+- Use a different workaround for OneSky (translations website) using "zh-Hans"
+   for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
+   in-code and documented with a comment, as opposed to some 'magic' in the
+   Windows Installer configuration that had no such documentation. It's less
+   fragile than relying on that, or developers using a script/documented
+   process to rename the file.
+
 Pre-Release 5.3.0-beta1
 ===
 
