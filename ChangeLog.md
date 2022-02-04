@@ -13,7 +13,7 @@ produce the Windows executables and installer.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
-  [Python 3.9.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  [Python 3.10.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
   The application (both EDMarketConnector.exe and EDMC.exe) will crash on
   startup due to a missing DLL.**
 
@@ -34,40 +34,31 @@ Pre-Release 5.3.0-beta7
    features specific to Python 3.10 (or 3.9).  Let us restate that we
    absolutely reserve the right to commence doing so.
 
+* "File" -> "Status" will now show the new Odyssey ranks, both the new
+  categories and the new 'prestige' ranks, e.g. 'Elite I'.  Closes
+  [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
+
+* We now use UTC-based timestamps in the application's log files.  Prior to
+  this change it was the "local time", but without any indication of the
+  applied timezone.  Each line's timestamp has ` UTC` as a suffix now, and we
+  are assuming that your local clock is correct *and* the timezone is set
+  correctly such that Python's `time.gmtime()` yields UTC times.
+
+  This should make it easier to correlate application logfiles with in-game
+  time and/or third-party service timestamps.
+
 * All communication with remote web servers and APIs now uses the same custom
    "User-Agent" header to make attribution to this application clear.
+
 * The process used to build the Windows installers should now always pick up
    all the necessary files automatically.  Prior to this we used a manual
    process to update the installer configuration which was prone to both user
    error and neglecting to update it as necessary.
-* We now include [FDevIDS](https://github.com/EDCD/FDevIDs) as a
-   sub-repository, and use its files directly for keeping some game data up to
-   date.  This should hopefully mean we include, e.g. new ships and modules
-   for loadout exports in a more timely manner.
-* We now use UTC-based timestamps in the application's log files.  Prior to
-   this change it was the "local time", but without any indication of the
-   applied timezone.  Each line's timestamp has ` UTC` as a suffix now, and we
-   are assuming that your local clock is correct *and* the timezone is set
-   correctly such that Python's `time.gmtime()` yields UTC times.
 
-    This should make it easier to correlate application logfiles with in-game
-    time and/or third-party service timestamps.
 * Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
-    the application "UI Scale" or geometry (position and size).
-* Inara: Use the `<journal log>->Statistics->Bank_Account->Current_Wealth`
-    value when sending a `setCommanderCredits` message to Inara to set
-    `commanderAssets`.
+    the application "UI Scale" or geometry (position and size).  Closes
+    [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
 
-    This should cause Inara and EDMC to agree on the Commander's current total
-    assets credits figure, and thus prevent it bouncing between two values.
-* Inara: Send a `setCommanderRankPilot` message when the player logs in to the
-    game on-foot.  Previously you would *HAVE* to be in a ship at login time
-    for this to be sent.
-
-    Thus, you can now relog on-foot in order to update Inara with any Rank up
-    or progress since the session started.
-* "File" -> "Status" will now show the new Odyssey ranks, both the new
-    categories and the new 'prestige' ranks, e.g. 'Elite I'.
 * If the application fails to load valid data from the `NavRoute.json` file
     when processing a Journal `NavRoute` event, it will attempt to retry this
     operation a number of times as it processes subsequent Journal events.
@@ -79,14 +70,24 @@ Pre-Release 5.3.0-beta7
     We will also now *NOT* attempt to load `NavRoute.json` during the startup
     'Journal catch-up' mode, which only sets internal state.
 
-* EDDN: We now compress all outgoing messages.  This might help get some
-    particularly large `navroute` messages go through.
+    Closes [#1348](https://github.com/EDCD/EDMarketConnector/issues/1155).
 
-    If any message is now rejected as 'too large' we will drop it, and thus
-    not retry it later.  The application logs will reflect this.
+* Inara: Use the `<journal log>->Statistics->Bank_Account->Current_Wealth`
+    value when sending a `setCommanderCredits` message to Inara to set
+    `commanderAssets`.
 
-    NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
-        anyway.  The old limit was 100 KiB.
+    This should cause Inara and EDMC to agree on the Commander's current total
+    assets credits figure, and thus prevent it bouncing between two values.
+
+    Closes [#1401](https://github.com/EDCD/EDMarketConnector/issues/1401).
+* Inara: Send a `setCommanderRankPilot` message when the player logs in to the
+    game on-foot.  Previously you would *HAVE* to be in a ship at login time
+    for this to be sent.
+
+    Thus, you can now relog on-foot in order to update Inara with any Rank up
+    or progress since the session started.
+
+    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
 
 * Inara: We will now send the new idea of "credits in the Commander's wallet"
     when the delta from the last sent value is either 5% *or* at least
@@ -97,6 +98,30 @@ Pre-Release 5.3.0-beta7
     updates at an acceptable frequency, with the 10 million alternative trigger
     allowing richer commanders to also experience more frequent updates than
     was previously the case.
+
+    Close [#1255](https://github.com/EDCD/EDMarketConnector/issues/1255).
+
+* Inara: You should once more see updates for any materials used in
+    Engineering.  The bug was in our more general Journal event processing
+    code pertaining to `EngineerCraft` events, such that the state passed to
+    the Inara plugin hadn't been updated.
+
+    Such updates should happen 'immediately', but take into account that there
+    can be a delay of up to 35 seconds for any data sent to Inara, due to how
+    we avoid breaking the "2 messages a minute" limit on the Inara API.
+
+    Closes [#1395](https://github.com/EDCD/EDMarketConnector/issues/1395).
+
+* EDDN: We now compress all outgoing messages.  This might help get some
+  particularly large `navroute` messages go through.
+
+  If any message is now rejected as 'too large' we will drop it, and thus
+  not retry it later.  The application logs will reflect this.
+
+  NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+  anyway.  The old limit was 100 KiB.
+
+  Closes [#1390](https://github.com/EDCD/EDMarketConnector/issues/1390).
 
 * EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
     with respect to messages sent from this application some additional checks
@@ -130,15 +155,8 @@ Pre-Release 5.3.0-beta7
     - `this.coordinates is falsey, can't add StarPos`
     - `this.systemaddress is falsey, can't add SystemAddress`
 
-* Inara: You should once more see updates for any materials used in
-    Engineering.  The bug was in our more general Journal event processing
-    code, such that the state passed to the Inara plugin hadn't been updated.
-
-    Such updates should happen 'immediately', but take into account that there
-    can be a delay of up to 35 seconds for any data sent to Inara, due to how
-    we avoid breaking the "2 messages a minute" limit on the Inara API.
-
-
+    Ref: [#1403](https://github.com/EDCD/EDMarketConnector/issues/1403)
+    [#1393](https://github.com/EDCD/EDMarketConnector/issues/1393).
 
 Plugin Developers
 ---
@@ -149,9 +167,21 @@ Plugin Developers
 
     See [Contributing.md->Text formatting](Contributing.md#text-formatting).
 
+* As noted above, prior to this version we weren't properly monitoring
+    `EngineerCraft` events.  This caused the `state` passed to plugins to not
+    contain the correct 'materials' (Raw, Manufactured, Encoded) counts.
+
 * `config.py` has been refactored into a sub-directory, with the per-OS code
     split into separate files.  There *shouldn't* be any changes necessary to
     how you utilise this, e.g. to determine the application version.
+
+    All forms of any `import` statement that worked before should have
+    unchanged functionality.
+
+* We now include [FDevIDS](https://github.com/EDCD/FDevIDs) as a
+    sub-repository, and use its files directly for keeping some game data up to
+    date.  This should hopefully mean we include, e.g. new ships and modules
+    for loadout exports in a more timely manner.
 
 * We will now include in the Windows installer *all* of the files that `py2exe`
     places in the build directory.  We still do *not* yet include *all* of the
@@ -164,7 +194,7 @@ Plugin Developers
    packaged in the Windows installer.
 
 ---
-5.3.0-beta2 through 5.3.0-beta6 were used internally, no public pre-releases.
+5.3.0-beta3 through 5.3.0-beta6 were used internally, no public pre-releases.
 
 ---
 
