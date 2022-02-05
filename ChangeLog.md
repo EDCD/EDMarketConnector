@@ -30,6 +30,18 @@ produce the Windows executables and installer.
 Pre-Release 5.3.0-beta7
 ===
 
+**NB: Due to [this issue with GitHub's Actions](https://github.com/actions/virtual-environments/issues/5023)
+we were unable to build this version on GitHub.  THE INSTALLER FOR THIS
+RELEASE WAS BUILT ON A DEVELOPER'S OWN MACHINE.  THERE IS NO REASON TO BELIEVE
+THAT THIS IN ANY WAY INCREASES THE RISK OF IT ACTUALLY CONTAINING MALWARE.**
+
+As has sadly become routine now, please read
+[our statement about malware false positives](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#installer-and-or-executables-flagged-as-malicious-viruses)
+affecting our installers and/or the files they contain.  We are as confident
+as we can be, without detailed auditing of python.org's releases and all of
+the py2exe source and releases, that there is no malware in the files we make
+available.
+
 * We now test and build using Python 3.10.2.  We do not *yet* make use of any
    features specific to Python 3.10 (or 3.9).  Let us restate that we
    absolutely reserve the right to commence doing so.
