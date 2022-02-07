@@ -14,10 +14,10 @@ jobs:
     name: Pull Request for updated submodules
     runs-on: ubuntu-latest
     env:
-      PARENT_REPOSITORY: 'edcd/edmarketconnector'
+      PARENT_REPOSITORY: 'EDCD/EDMarketConnector'
       CHECKOUT_BRANCH: 'develop'
       PR_AGAINST_BRANCH: 'develop'
-      OWNER: 'edcd'
+      OWNER: 'EDCD'
 
     steps:
       ##########################
