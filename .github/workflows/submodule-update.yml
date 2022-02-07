@@ -1,0 +1,40 @@
+---
+name: Submodule Updates
+
+on:
+  # We might want this on a schedule once this is in `main`
+  push:
+    branches: [ develop ]
+
+###############
+# Set the Job #
+###############
+jobs:
+  check_submodules:
+    name: Pull Request for updated submodules
+    runs-on: ubuntu-latest
+    env:
+      PARENT_REPOSITORY: 'edcd/edmarketconnector'
+      CHECKOUT_BRANCH: 'develop'
+      PR_AGAINST_BRANCH: 'develop'
+      OWNER: 'edcd'
+
+    steps:
+      ##########################
+      # Checkout the code base #
+      ##########################
+      - name: Checkout EDMC
+        uses: actions/checkout@v2
+
+      ####################################
+      # Run the action against code base #
+      ####################################
+      - name: Check FDevIDs submodule
+        id: run_action
+        uses: releasehub-com/github-action-create-pr-parent-submodule@v1
+        with:
+          github_token: ${{ secrets.RELEASE_HUB_SECRET }}
+          parent_repository: ${{ env.PARENT_REPOSITORY }}
+          checkout_branch: ${{ env.CHECKOUT_BRANCH}}
+          pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
+          owner: ${{ env.OWNER }}
