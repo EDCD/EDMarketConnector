@@ -7,47 +7,79 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Build EDMC
+  checkout_all:
+    name: Checkout EDMC and submodules
     runs-on: windows-2019
+
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          submodules: true
+
+  python_setup_base:
+    name: Install python base
+    runs-on: windows-2019
+    needs: checkout_all
+
+    steps:
+      - uses: actions/setup-python@v2.3.2
+        with:
+          python-version: "3.10.2"
+          architecture: "x86"
+
+  python_requirements:
+    name: Install application python requirements
+    runs-on: windows-2019
+    needs: setup_python_base
+
+    steps:
+      - name: Install python tools
+        run: |
+          pip install wheel
+          pip install -r requirements-dev.txt
+
+  winsparkle_install:
+    name: Download and unpack WinSparkle files
+    runs-on: windows-2019
+    needs: perform_checkouts
 
     defaults:
       run:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v2.4.0
-      - uses: actions/setup-python@v2.3.2
-        with:
-          submodules: true
-          python-version: "3.10.2"
-          architecture: "x86"
-
-      - name: Install python tools
-        run: |
-          pip install wheel
-          pip install -r requirements-dev.txt
-
       - name: Download winsparkle
         run: |
           Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.7.0/WinSparkle-0.7.0.zip -OutFile out.zip
           Expand-Archive out.zip
           Move-Item 'out\WinSparkle-0.7.0\Release\*' '.\'
 
+  edmc_setup_py2exe:
+    name: Invoke setup.py py2exe
+    runs-on: windows-2019
+    needs: [ perform_checkouts, setup_python_base, python_requirements, winsparkle_install ]
+
+    steps:
       - name: Build EDMC
         run: |
           python setup.py py2exe
 
+  edmc_upload_build:
+    name: Upload resulting build files
+    runs-on: windows-2019
+    needs: edmc_setup_py2exe
+
+    steps:
       - name: Upload build files
         uses: actions/upload-artifact@v2
         with:
           name: Built files
           path: EDMarketConnector_win*.msi
 
-  release:
+  edmc_release:
     name: Release new version
     runs-on: ubuntu-latest
-    needs: test
+    needs: edmc_upload_build
     if: "${{ github.event_name != 'workflow_dispatch' }}"
 
     steps:
