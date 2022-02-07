@@ -27,6 +27,14 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.3.0-beta8
+===
+
+This release is simply to check we've correctly updated the windows-build
+configuration to pull in `FDevIDs` when the build is performed on GitHub.
+
+---
+
 Pre-Release 5.3.0-beta7
 ===
 
