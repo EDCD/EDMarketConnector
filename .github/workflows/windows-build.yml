@@ -17,11 +17,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.4.0
+          submodules: recursive
+
       - uses: actions/setup-python@v2.3.2
         with:
           python-version: "3.10.2"
           architecture: "x86"
-          submodules: recursive
 
       - name: Install python tools
         run: |
