@@ -29,7 +29,7 @@ jobs:
       ####################################
       # Run the action against code base #
       ####################################
-      - name: Check FDevIDs submodule
+      - name: Check EDMC submodules
         id: run_action
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
         with:
