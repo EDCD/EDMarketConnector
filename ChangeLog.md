@@ -27,6 +27,15 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.3.0-beta10
+===
+
+* Revert `semantic_version` python module to v2.8.5, as v2.9.0 doesn't get
+    correctly included by py2exe.  This leads to application crash at startup
+    when using the Windows .exe.
+
+---
+
 Pre-Release 5.3.0-beta9
 ===
 
