@@ -519,7 +519,7 @@ def journal_entry(  # noqa: C901, CCR001
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
 
             # Login-time Ranks
-            elif event_name == 'Rank':
+            elif event_name == 'Progress':
                 # Send rank info to Inara on startup
                 new_add_event(
                     'setCommanderRankPilot',
