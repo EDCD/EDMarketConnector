@@ -518,7 +518,8 @@ def journal_entry(  # noqa: C901, CCR001
                     this.loadout = make_loadout(state)
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
 
-            # Login-time Ranks
+            # Trigger off the "only observed as being after Ranks" event so that
+            # we have both current Ranks *and* current Progress within them.
             elif event_name == 'Progress':
                 # Send rank info to Inara on startup
                 new_add_event(
