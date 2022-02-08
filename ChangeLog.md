@@ -27,6 +27,13 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.3.0-beta9
+===
+
+* Inara: Fix for always sending a Rank Progress of 0%.
+
+---
+
 Pre-Release 5.3.0-beta8
 ===
 
