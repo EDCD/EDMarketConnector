@@ -1391,16 +1391,16 @@ def journal_entry(  # noqa: C901, CCR001
         if entry['event'].lower() == 'fssdiscoveryscan':
             return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
-        if entry['event'].lower() == 'navbeaconscan':
+        elif entry['event'].lower() == 'navbeaconscan':
             return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
 
-        if entry['event'].lower() == 'codexentry':
+        elif entry['event'].lower() == 'codexentry':
             return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
 
-        if entry['event'].lower() == 'scanbarycentre':
+        elif entry['event'].lower() == 'scanbarycentre':
             return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
 
-        if entry['event'].lower() == 'navroute':
+        elif entry['event'].lower() == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
