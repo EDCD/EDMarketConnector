@@ -1090,6 +1090,46 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_journal_approachsettlement(
+        self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an ApproachSettlement to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "BodyID": 32,
+        #   "BodyName": "Ix 5 a a",
+        #   "Latitude": 17.090912,
+        #   "Longitude": 160.236679,
+        #   "MarketID": 3915738368,
+        #   "Name": "Arnold Defence Base",
+        #   "SystemAddress": 2381282543963,
+        #   "event": "ApproachSettlement",
+        #   "timestamp": "2021-10-14T12:37:54Z"
+        # }
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add StarSystem and StarPos
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/approachsettlement/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1404,6 +1444,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+        elif event_name == 'approachsettlement':
+            return this.eddn.export_journal_approachsettlement(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
