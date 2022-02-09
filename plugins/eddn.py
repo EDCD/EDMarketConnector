@@ -789,14 +789,15 @@ class EDDN:
     def entry_augment_system_data(
             self,
             entry: MutableMapping[str, Any],
-            system_name: str
+            system_name: str,
+            system_coordinates: list
     ) -> Union[str, MutableMapping[str, Any]]:
         """
         Augment a journal entry with necessary system data.
 
         :param entry: The journal entry to be augmented.
         :param system_name: Name of current star system.
-        :param systemname_field_name: Name of journal key for system name.
+        :param system_coordinates: Coordinates of current star system.
         :return: The augmented version of entry.
         """
         # If 'SystemName' or 'System' is there, it's directly from a journal event.
@@ -818,21 +819,29 @@ class EDDN:
             entry['SystemAddress'] = this.systemaddress
 
         if 'StarPos' not in entry:
-            if not this.coordinates:
-                logger.warning("this.coordinates is None, can't add StarPos")
-                return "this.coordinates is None, can't add StarPos"
+            # Prefer the passed-in, probably monitor.state version
+            if system_coordinates is not None:
+                entry['StarPos'] = system_coordinates
 
-            entry['StarPos'] = list(this.coordinates)
+            # TODO: Deprecate in-plugin tracking
+            elif this.coordinates is not None:
+                entry['StarPos'] = list(this.coordinates)
+
+            else:
+                logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
+                return 'No source for adding StarPos to approachsettlement/1 !'
 
         return entry
 
     def export_journal_fssdiscoveryscan(
-            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an FSSDiscoveryScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system: Name of current star system
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -845,7 +854,7 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system)
+        ret = this.eddn.entry_augment_system_data(entry, system, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -861,13 +870,14 @@ class EDDN:
         return None
 
     def export_journal_navbeaconscan(
-            self, cmdr: str, system_name: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an NavBeaconScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
         :param system_name: Name of the current system.
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -880,7 +890,7 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system_name)
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -896,12 +906,13 @@ class EDDN:
         return None
 
     def export_journal_codexentry(  # noqa: CCR001
-            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+            self, cmdr: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send a CodexEntry to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -936,7 +947,7 @@ class EDDN:
         # Augmentations
         #######################################################################
         # General 'system' augmentations
-        ret = this.eddn.entry_augment_system_data(entry, entry['System'])
+        ret = this.eddn.entry_augment_system_data(entry, entry['System'], system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -976,12 +987,13 @@ class EDDN:
         return None
 
     def export_journal_scanbarycentre(
-            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send a ScanBaryCentre to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -1007,7 +1019,7 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'], system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -1029,6 +1041,7 @@ class EDDN:
         Send a NavRoute to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -1091,12 +1104,14 @@ class EDDN:
         return None
 
     def export_journal_approachsettlement(
-        self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send an ApproachSettlement to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -1115,7 +1130,7 @@ class EDDN:
         # Augmentations
         #######################################################################
         # In this case should add StarSystem and StarPos
-        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -1431,22 +1446,28 @@ def journal_entry(  # noqa: C901, CCR001
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
 
         if event_name == 'fssdiscoveryscan':
-            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
+            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, state['StarPos'], is_beta, entry)
 
         elif event_name == 'navbeaconscan':
-            return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+            return this.eddn.export_journal_navbeaconscan(cmdr, system, state['StarPos'], is_beta, entry)
 
         elif event_name == 'codexentry':
-            return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
+            return this.eddn.export_journal_codexentry(cmdr, state['StarPos'], is_beta, entry)
 
         elif event_name == 'scanbarycentre':
-            return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
+            return this.eddn.export_journal_scanbarycentre(cmdr, state['StarPos'], is_beta, entry)
 
         elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
         elif event_name == 'approachsettlement':
-            return this.eddn.export_journal_approachsettlement(cmdr, is_beta, entry)
+            return this.eddn.export_journal_approachsettlement(
+                cmdr,
+                state['StarSystem'],
+                state['StarPos'],
+                is_beta,
+                entry
+            )
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and

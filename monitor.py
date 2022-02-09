@@ -180,6 +180,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'SuitLoadouts':       {},
             'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
+            'StarSystem':         None,  # Best effort name of current system.
+            'StarPos':            None,  # Best effort current system's galaxy position.
             'Body':               None,
             'BodyType':           None,
 
@@ -801,13 +803,21 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['BodyType'] = None
 
                 if 'StarPos' in entry:
-                    self.coordinates = tuple(entry['StarPos'])  # type: ignore
+                    # Plugins need this as well, so copy in state
+                    self.state['StarPos'] = self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
                 self.systemaddress = entry.get('SystemAddress')
 
                 self.systempopulation = entry.get('Population')
 
-                self.system = 'CQC' if entry['StarSystem'] == 'ProvingGround' else entry['StarSystem']
+                if entry['StarSystem'] == 'ProvingGround':
+                    to_set = 'CQC'
+
+                else:
+                    to_set = entry['StarSystem']
+
+                # EDDN plugin needs this in `state`
+                self.state['StarSystem'] = self.system = to_set
 
                 self.station = entry.get('StationName')  # May be None
                 # If on foot in-station 'Docked' is false, but we have a
