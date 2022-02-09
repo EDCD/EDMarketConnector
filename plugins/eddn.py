@@ -1331,6 +1331,7 @@ def journal_entry(  # noqa: C901, CCR001
         return None
 
     entry = new_data
+    event_name = entry['event'].lower()
 
     this.on_foot = state['OnFoot']
 
@@ -1340,8 +1341,8 @@ def journal_entry(  # noqa: C901, CCR001
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
-    if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
-        if entry['event'] in ('Location', 'CarrierJump'):
+    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
+        if event_name in ('location', 'carrierjump'):
             if entry.get('BodyType') == 'Planet':
                 this.body_name = entry.get('Body')
                 this.body_id = entry.get('BodyID')
@@ -1349,7 +1350,7 @@ def journal_entry(  # noqa: C901, CCR001
             else:
                 this.body_name = None
 
-        elif entry['event'] == 'FSDJump':
+        elif event_name == 'fsdjump':
             this.body_name = None
             this.body_id = None
 
@@ -1368,11 +1369,11 @@ def journal_entry(  # noqa: C901, CCR001
         # Yes, explicitly state `None` here, so it's crystal clear.
         this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
 
-    elif entry['event'] == 'ApproachBody':
+    elif event_name == 'approachbody':
         this.body_name = entry['Body']
         this.body_id = entry.get('BodyID')
 
-    elif entry['event'] == 'LeaveBody':
+    elif event_name == 'leavebody':
         # NB: **NOT** SupercruiseEntry, because we won't get a fresh
         #     ApproachBody if we don't leave Orbital Cruise and land again.
         # *This* is triggered when you go above Orbital Cruise altitude.
@@ -1380,7 +1381,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.body_name = None
         this.body_id = None
 
-    elif entry['event'] == 'Music':
+    elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
             this.body_name = None
             this.body_id = None
@@ -1388,24 +1389,25 @@ def journal_entry(  # noqa: C901, CCR001
 
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
-        if entry['event'].lower() == 'fssdiscoveryscan':
+
+        if event_name == 'fssdiscoveryscan':
             return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
-        elif entry['event'].lower() == 'navbeaconscan':
+        elif event_name == 'navbeaconscan':
             return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
 
-        elif entry['event'].lower() == 'codexentry':
+        elif event_name == 'codexentry':
             return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
 
-        elif entry['event'].lower() == 'scanbarycentre':
+        elif event_name == 'scanbarycentre':
             return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
 
-        elif entry['event'].lower() == 'navroute':
+        elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
-        (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
+        (event_name in ('location', 'fsdjump', 'docked', 'scan', 'saasignalsfound', 'carrierjump')) and
             ('StarPos' in entry or this.coordinates)):
 
         # strip out properties disallowed by the schema
@@ -1435,7 +1437,7 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if entry['event'] == 'Docked' and this.body_name:
+        if event_name == 'docked' and this.body_name:
             entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
@@ -1479,7 +1481,7 @@ def journal_entry(  # noqa: C901, CCR001
             return str(e)
 
     elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-            entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
+            event_name in ('market', 'outfitting', 'shipyard')):
         # Market.json, Outfitting.json or Shipyard.json to process
 
         try:
@@ -1494,16 +1496,19 @@ def journal_entry(  # noqa: C901, CCR001
             path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
 
             with path.open('rb') as f:
-                entry = json.load(f)
-                entry['odyssey'] = this.odyssey
-                if entry['event'] == 'Market':
-                    this.eddn.export_journal_commodities(cmdr, is_beta, entry)
+                # Don't assume we can definitely stomp entry & event_name here
+                entry_augment = json.load(f)
+                event_name_augment = entry_augment['event'].lower()
+                entry_augment['odyssey'] = this.odyssey
 
-                elif entry['event'] == 'Outfitting':
-                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry)
+                if event_name_augment == 'market':
+                    this.eddn.export_journal_commodities(cmdr, is_beta, entry_augment)
 
-                elif entry['event'] == 'Shipyard':
-                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry)
+                elif event_name_augment == 'outfitting':
+                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry_augment)
+
+                elif event_name_augment == 'shipyard':
+                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry_augment)
 
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
