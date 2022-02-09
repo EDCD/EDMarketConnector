@@ -834,13 +834,13 @@ class EDDN:
         return entry
 
     def export_journal_fssdiscoveryscan(
-            self, cmdr: str, system: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an FSSDiscoveryScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
-        :param system: Name of current star system
+        :param system_name: Name of current star system
         :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
@@ -854,7 +854,7 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system, system_starpos)
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -1463,7 +1463,7 @@ def journal_entry(  # noqa: C901, CCR001
         elif event_name == 'approachsettlement':
             return this.eddn.export_journal_approachsettlement(
                 cmdr,
-                state['StarSystem'],
+                system,
                 state['StarPos'],
                 is_beta,
                 entry
