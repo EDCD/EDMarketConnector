@@ -44,7 +44,7 @@ repos:
     rev: 'v0.931'
     hooks:
       - id: mypy
-        args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
+        # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>
 ### -   repo: https://github.com/FalconSocial/pre-commit-mirrors-pep257
