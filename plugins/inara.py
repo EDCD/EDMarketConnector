@@ -1384,26 +1384,8 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_link.update_idletasks()
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
-        if (
-            abs(this.last_credits - data['commander']['credits']) >=
-            min(abs(this.last_credits * CREDITS_DELTA_MIN_FRACTION), CREDITS_DELTA_MIN_ABSOLUTE)
-        ):
-            this.filter_events(
-                Credentials(this.cmdr, this.FID, str(credentials(this.cmdr))),
-                lambda e: e.name != 'setCommanderCredits'
-            )
-
-            # this.events = [x for x in this.events if x['eventName'] != 'setCommanderCredits']  # Remove any unsent
-            new_add_event(
-                'setCommanderCredits',
-                data['timestamp'],
-                {
-                    'commanderCredits': data['commander']['credits'],
-                    'commanderLoan': data['commander'].get('debt', 0),
-                }
-            )
-
-            this.last_credits = int(data['commander']['credits'])
+        # Only here to ensure the conditional is correct for future additions
+        pass
 
 
 def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
